@@ -9,6 +9,11 @@ namespace FusionRpg.Core.Battle;
 /// own element channels, and ChannelMods (trait stat mods, later equipment) overlay additively.
 /// Every value is an integer; reads go back out through CombatDerivedReader so channel semantics
 /// stay identical to the PvZ overlay.
+///
+/// <para><b>Locked separate from ActorHub</b> (decisions.md "ActorHub sole Hot compose gate",
+/// class-system 2026-08-26): battle seam is <c>ChannelMods</c>, not <see cref="IActorStatSubsystem"/>.
+/// A shared-contribution ADR is required before fusing. Equipment still shares the same atom rows
+/// via <see cref="EquipAtomSource"/> so GG-49 SourceIds on the derived/sheet side stay aligned.</para>
 /// </summary>
 public static class BattleStatComposer
 {
@@ -176,9 +181,9 @@ public static class BattleStatComposer
         // item-ideal.md, equip-runtime (module 5): equipped items' stat.derived channel mods, merged
         // the same way trait mods just did — the same producer shape, a different atom source. No
         // double-counting risk with setup.ChannelMods below: that field is the caller's own generic
-        // additive list (trait stat mods historically, "equipment later" per its own doc comment) and
-        // this is the ONE place equipment enters when SpecimenId resolves it, so a caller populating
-        // both would be double-supplying, not this composer double-applying.
+        // additive list (tests / traits / one-off mods) and this is the ONE place equipment enters
+        // when SpecimenId resolves it via EquipAtomSource, so a caller populating both would be
+        // double-supplying, not this composer double-applying.
         if (setup.SpecimenId is { } specimenId)
             foreach (var mod in equipment.ModsFor(specimenId))
                 snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);

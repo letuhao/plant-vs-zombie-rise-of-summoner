@@ -1,5 +1,393 @@
 {
   "treeId": "vigor",
+  "category": "primary",
+  "gateQuantity": "aptitude.Vigor@Commander",
+  "shapeArchetype": "late-crown",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    2,
+    2,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    6,
+    6
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.vigor-off-t1-n0",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.might"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "aptitude"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t3-n0",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 3,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.might"
+      ],
+      "budgetShareMilli": 27,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1823,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "tier"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t3-n1",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 3,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 28,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1890,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1890,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t4-n1",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 4,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 37,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t5-n1",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 5,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.might"
+      ],
+      "budgetShareMilli": 46,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3105,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t6-n1",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 6,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 55,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "aptitude"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-off-t7-n1",
+      "treeId": "vigor",
+      "branch": "Off",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-def-t3-n0",
+      "treeId": "vigor",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 27,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Nullification",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-def-t3-n1",
+      "treeId": "vigor",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 28,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-def-t4-n1",
+      "treeId": "vigor",
+      "branch": "Def",
+      "tier": 4,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 37,
+      "atoms": [],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.vigor-def-t5-n1",
+      "treeId": "vigor",
+      "branch": "Def",
+      "tier": 5,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 46,
+      "atoms": [],
+      "excludeProps": [
+        "aptitude"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1587,
   "bound": [
@@ -8,8 +396,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -21,8 +412,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1823,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -34,16 +428,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1890,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1890,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -55,16 +455,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 2498,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 2498,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -76,8 +482,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3105,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -89,16 +498,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3713,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3713,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -110,16 +525,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 4320,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 4320,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

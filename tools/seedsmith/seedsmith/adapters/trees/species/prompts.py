@@ -67,12 +67,18 @@ def build_codex_brief(context: "Mapping[str, Any]") -> str:
 
 
 FAVOUR_FIT_SYSTEM_PROMPT = (
-    "You judge whether a mechanical build-favour assignment fits a creature's own lore and "
-    "character. You are given ONE offered favour and a short list of ALTERNATES — every option "
-    "you may choose is already listed; you never invent a different favour. Answer \"offered\" if "
-    "the offered favour genuinely fits this creature. Otherwise, answer the EXACT key of the one "
-    "alternate that fits better. If none of the listed options fit this creature at all, answer "
-    "\"none\" — that is a legitimate, expected answer, never a failure to avoid."
+    "You judge whether a mechanical build-favour assignment (an aptitude + element + status "
+    "triple) can be justified for a creature. This is creative game design, not a literal lore "
+    "fact-check — a loose, reframed or metaphorical connection is enough. A shy, defensive "
+    "creature can favour an aggressive aptitude if its true strength is overwhelming force once "
+    "provoked; an earth-themed creature can favour fire if its passive channels volcanic or "
+    "geothermal heat. You are given ONE offered favour and a short list of ALTERNATES — every "
+    "option you may choose is already listed; you never invent a different favour. Answer "
+    "\"offered\" whenever the offered favour can be reasonably justified, even with some "
+    "narrative stretch — this should be your answer most of the time. Otherwise, answer the EXACT "
+    "key of the one alternate that fits at least as well. Reserve \"none\" for the rare case where "
+    "EVERY listed option is actively contradictory or absurd for this creature, not merely "
+    "imperfect — most creatures should find a real fit among the options given."
 )
 
 
@@ -107,15 +113,17 @@ def build_favour_fit_brief(context: "Mapping[str, Any]") -> str:
         lines.append(f"Traits: {', '.join(context['traits'])}")
     offered = context["offered"]
     lines.append(
-        f"OFFERED favour (answer \"offered\" if this fits): aptitude={offered['aptitude']}, "
-        f"element={offered['element']}, status={offered['status']}")
+        f"OFFERED favour (answer \"offered\" if this can be justified, even loosely): "
+        f"aptitude={offered['aptitude']}, element={offered['element']}, status={offered['status']}")
     for alt in context["alternates"]:
         lines.append(
             f"ALTERNATE {alt['key']}: aptitude={alt['aptitude']}, element={alt['element']}, "
             f"status={alt['status']}")
     lines += [
         "",
-        "Does the OFFERED favour fit this creature? If not, does one of the ALTERNATES fit "
-        "instead — name its exact key? If none of them fit, answer \"none\".",
+        "Can the OFFERED favour be reasonably justified for this creature, even with some "
+        "narrative stretch? If so, answer \"offered\" — most creatures should. If not, does one "
+        "of the ALTERNATES fit at least as well — name its exact key? Only if EVERY option is "
+        "actively contradictory or absurd, answer \"none\".",
     ]
     return "\n".join(lines)

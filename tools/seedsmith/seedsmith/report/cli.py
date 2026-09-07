@@ -104,7 +104,16 @@ def _build_numerics_context(adapter_name: str, adapter) -> "NumericsContext | No
     return NumericsContext(tuning=tuning, progression=BattleRulesetProgression.from_adapter(adapter))
 
 
-def _print_human(findings, *, stream=sys.stdout) -> None:
+def _print_human(findings, *, stream=None) -> None:
+    # `stream` used to default to `sys.stdout` directly -- an early-binding bug (the same class
+    # already fixed once this session in `generate_affixes.py`'s own `output_dir`/`id_prefix`
+    # defaults): a default evaluated at function-DEFINITION time captures whatever `sys.stdout` WAS
+    # when this module first imported, not whatever it is at call time, so
+    # `contextlib.redirect_stdout` in a test (or any caller that temporarily swaps `sys.stdout`)
+    # silently failed to capture anything printed here -- found 2026-09-07 the moment a real test
+    # first asserted on this function's own captured output instead of only an exit code.
+    if stream is None:
+        stream = sys.stdout
     if not findings:
         print("no findings", file=stream)
         return
@@ -138,11 +147,16 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return EXIT_CANNOT_RUN
 
+    from ..adapters.trees.nodegen import emit as nodegen_emit
+    from ..adapters.trees.nodegen import plan_read as nodegen_plan_read
+    from ..adapters.trees.nodegen import run as nodegen_run
     from ..adapters.trees.nodegen import verdict as tree_verdict
     from ..adapters.trees.plan import emit as plan_emit
     from ..adapters.trees.plan import tuning as plan_tuning
     from ..adapters.trees.plan.archetypes import SHIPPED_ARCHETYPES, TIER_COUNT
-    from ..metrics.passive_tree import PassiveTreePlanCtx
+    from ..adapters.trees.targets import PassiveTreeTargetsError
+    from ..adapters.trees.targets import load as load_tree_targets
+    from ..metrics.passive_tree import HiddenFileCountMetric, PassiveTreePlanCtx
 
     seed_root = (Path(args.plan_root) if getattr(args, "plan_root", None)
                 else plan_emit.REPO_ROOT / "data" / "seed")
@@ -160,13 +174,67 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
 
     plans = [json.loads(p.read_text(encoding="utf-8")) for p in plan_paths]
+
+    # Real corpus-side wiring (closes the gap a same-day J1 investigation found: this ctx never
+    # carried `targets`/`tree_plans`/`nodes_by_tree`/`outcomes_by_tree`, so `PassiveTree/
+    # UnresolvedCount` — the ONE hard gate this family promotes — always reported NOT_MEASURED
+    # here, never a real pass or fail, regardless of what the real committed corpus looked like).
+    # Every input below is real, already-committed, local data — no model call, no corpus fixture:
+    # `tree-language.ledger.json` (what was actually accepted) and `nodegen.plan_run` (the SAME
+    # function `run_language_stage` itself uses to tell "already done" from "still needed" on a
+    # resume) applied to each committed plan tells us, per tree, exactly which node ids never got
+    # an accepted record. `plan_run` cannot distinguish "genuinely stuck after retries" from "never
+    # attempted yet" — no run history survives past a live run (named, not fixed, in J9/J1's own
+    # notes) — so every ledger-absent node is reported as `"unresolved"`, matching this gate's own
+    # purpose: a node with no accepted record is a hole `tree-binder` has nothing to price, for
+    # either reason, and `check --family` is a completion check, not a mid-run progress probe.
+    try:
+        tree_targets = load_tree_targets()
+    except (PassiveTreeTargetsError, OSError):
+        tree_targets = None
+    ledger = nodegen_run.read_ledger(seed_root / "passive-tree" / "_runs" / "tree-language.ledger.json")
+    tree_plans: "list[object]" = []
+    nodes_by_tree: "dict[str, list]" = {}
+    outcomes_by_tree: "dict[str, list]" = {}
+    for plan_doc in plans:
+        tree_id = plan_doc.get("treeId")
+        if not tree_id:
+            continue
+        tree_plan = nodegen_plan_read.load_from_dict(plan_doc, source_label=f"plan:{tree_id}")
+        tree_plans.append(tree_plan)
+        run_plan = nodegen_run.plan_run(tree_plan, ledger=ledger)
+        seed_doc = nodegen_emit.read_seed_document(tree_id, seed_root=seed_root)
+        nodes_by_tree[tree_id] = list(seed_doc["nodes"]) if seed_doc else []
+        outcomes = [{"nodeId": subject_id.split(":", 1)[1], "outcome": "accepted"}
+                   for subject_id in run_plan.already_done]
+        outcomes.extend({"nodeId": subject.node_id, "outcome": "unresolved"}
+                        for subject in run_plan.subjects)
+        outcomes_by_tree[tree_id] = outcomes
+
     registry = build_registry()
+    # H5's own reason `build_registry()` never carries `HiddenFileCountMetric`/`DeepMechanismValueMetric`
+    # (see that function's own comment) is real: BOTH need externally-supplied data no generic caller
+    # has. `_cmd_check_family` is different -- it just computed a real `seed_root` above, exactly what
+    # `HiddenFileCountMetric` needs and nothing `DeepMechanismValueMetric` (CombatSim samples) can use
+    # here either way -- so THIS caller registers it locally, closing H5's own remaining acceptance gap
+    # ("populated somewhere a real run reaches") without touching the shared registry's own documented
+    # exclusion for every other caller.
+    registry.register(HiddenFileCountMetric())
     passive_tree_ctx = PassiveTreePlanCtx(
         plans=plans, archetypes=SHIPPED_ARCHETYPES, tier_count=TIER_COUNT,
         unlock_first_points=tuning_doc["unlockCost"]["firstPoints"],
         unlock_step_points=tuning_doc["unlockCost"]["stepPoints"],
         reward_spread_max_ratio_milli=tuning_doc["archetype"]["rewardSpreadMaxRatioMilli"],
-        min_terminal_width=tuning_doc["potency"]["minTerminalWidth"])
+        min_terminal_width=tuning_doc["potency"]["minTerminalWidth"],
+        targets=tree_targets, tree_plans=tuple(tree_plans),
+        nodes_by_tree=nodes_by_tree, outcomes_by_tree=outcomes_by_tree,
+        # H5's own real acceptance gap (spec-tree-review.md §7): `HiddenFileCountMetric` was fully
+        # built and tested but had ZERO real call site, `tree_seed_roots` always defaulting to `()`
+        # everywhere outside its own test. A single root here already covers every category's own
+        # seed tree via `rglob` (species's `data/seed/passive-tree/species/`,
+        # spec-species-tree.md §2.1 rule 2's own requirement, included for free the moment anything
+        # is committed under it — no second root needed).
+        tree_seed_roots=(seed_root / "passive-tree",))
     ctx = Ctx(corpus=Corpus(), adapter=resolve_adapter("stub"), passive_tree_plan=passive_tree_ctx)
     family_ids = [m.id for m in registry.all() if m.family == "PassiveTree"]
     findings = run_all(registry, ctx, metric_ids=family_ids)

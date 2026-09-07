@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.ward-harden",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Calcified Hide T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-defense",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-ward.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.ward-harden",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Calcified Hide T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-defense",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-ward.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.ward-harden",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Calcified Hide T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-defense",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-ward.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.ward-harden",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Calcified Hide T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-defense",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-ward.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.ward-harden",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Calcified Hide T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-defense",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-ward.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    }
+  ]
+}

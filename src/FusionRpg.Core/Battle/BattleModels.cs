@@ -60,7 +60,7 @@ public sealed record BattleActorSetup
     /// </summary>
     public long AttackIntervalMs { get; init; }
 
-    /// <summary>Additive derived-channel adjustments (trait stat mods, equipment later). Integer amounts only.</summary>
+    /// <summary>Additive derived-channel adjustments (tests, traits, one-offs). Equipment enters via <see cref="EquipAtomSource"/> when <c>SpecimenId</c> is set — do not also mirror equip here. Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
 
     /// <summary>Statuses applied attacker-less at battle start (test seams now, trait/attack riders later).</summary>

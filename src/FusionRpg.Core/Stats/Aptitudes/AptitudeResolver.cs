@@ -58,7 +58,8 @@ public static class AptitudeResolver
             // point silently overrule every other source.
             var op = def.Compose == DerivedComposeKind.SumIncreased ? DerivedModifierOp.Increased : DerivedModifierOp.Flat;
 
-            mods.Add(new DerivedModifier(edge.Channel, op, value, SourceId: $"aptitude.{edge.Source}"));
+            mods.Add(new DerivedModifier(edge.Channel, op, value,
+                SourceId: ContributionSourceIds.Aptitude(edge.Source)));
         }
 
         return mods;

@@ -4914,9 +4914,15 @@ throws.
       section already recorded that *"two `reroll` recipes also carry a legacy shard, but a refusal
       names ONE reason — the verb, checked first."* With the verb fixed, `recipe.017`'s `shard.rare`
       and `recipe.018`'s `shard.epic` surface their own refusal, so the legacy-shard count moves
-      **5 → 7** and the resolvable corpus moves **18 → 23, not 25**. That is the same corpus re-author
-      the ten missing shard display rows need — **still this module's**, still unscheduled, and now
-      with two more rows on its list.
+      **5 → 7** and the resolvable corpus moves **18 → 23, not 25**.
+      ⭐ **CLOSED 2026-09-07, later, a separate session**: all seven legacy-shard cost lines
+      (`recipe.009`/`010`/`011`/`017`/`018`/`025`/`029`) migrated to their mapped new-ladder rung
+      via the new `seedsmith.adapters.items.recipegen.migrate_legacy_shards` module, mirroring
+      `LegacyDemonRarityIds.ForwardMap` exactly (common→chaff, rare→cultivated, epic→heirloom,
+      legendary→sunwoven). `MaterialCorpusTests.The_shipped_recipe_corpus_loads_and_every_refusal_is_
+      named_with_the_module_that_unblocks_it` now asserts zero legacy refusals and 32/32 recipes
+      resolvable (up from 25). Recipe amendment recorded in `recipes.json`'s own
+      `_meta.amendments` (`recipegen/legacy-shard-migration-1`).
 - [ ] ⏸ **`a_t5_affix_costs_more_than_a_t1_at_every_theta` is asserted on the RUNG axis, not the tier
       axis, and the reason is a real gap rather than a shortcut.** All ten rows of I9 §7.4's reference
       table are keyed on rung, grade or enhancement — **not one leg reads tier**. Tier enters pricing
@@ -8349,9 +8355,9 @@ correctly is not the same as its conclusion following, or the cited code still s
 | 27-id closed vocabulary, five classes, sixteen reused | ✅ holds | `MaterialCatalog.cs`: `MaterialClass` 5 members, `CatalystVerbs` 3 (`:57`), `:62` shard ×10 + substrate ×8 + essence ×6 + catalyst ×3 = **27**, souls carry no id |
 | `socket-imbue` priced here, minted nowhere here | ✅ holds, **and survived module 15** | `MaterialVocabularyTests.cs:143` still asserts `Assert.False(CraftOperations.TryParse("socket-imbue", out _))` — green *after* module 15 minted `MutationOpKind.SocketImbue` (`MutationOp.cs:47`, `:152`). The two vocabularies genuinely stayed separate; this is the claim most likely to have rotted and it did not |
 | No 36th `AtomRejectionReason` | ✅ holds | `AtomRejection.cs` = exactly **35** members (counted); `AtomKindRegistryTests.cs:49` `Assert.Equal(35, reasons.Length)` green **despite that test file being mid-edit by another stream** (`MM` in `git status`) |
-| Corpus: 30 recipes, 23 resolvable, 7 legacy-shard refusals | ✅ holds | `recipes/recipes.json` = **30**; verbs `forge 6 · elevate 5 · reroll-one 5 · upcycle 4 · temper 4 · bore 3 · reroll-all 2 · socket 1` — the module-15 reroll split is really in the shipped file; 5 `elevate` + 2 `reroll` legacy-shard rows = the recorded 7 |
+| Corpus: 32 recipes, 32 resolvable, 0 legacy-shard refusals | ✅ holds, **CLOSED 2026-09-07** | `recipes/recipes.json` = **32** (30 hand-authored + `recipe.031`/`032` from the recipegen trial batch); the 7 legacy-shard cost lines (5 `elevate` + 2 `reroll-all`) were migrated to their new-ladder rung by `seedsmith.adapters.items.recipegen.migrate_legacy_shards` — zero refusals, all 32 resolvable |
 | ⏸ `rpg_demon_materials` → `rpg_materials` rename | ⚠ **still open, and the line list drifted a THIRD time** | Fresh grep 2026-09-06: **11 SQL sites in 5 files — the count holds** — but `RpgStore.cs` is now **596** (DDL; P4.1 recorded 575, itself a correction of the spec) and **806** (reset; recorded 754, itself a correction of 714, itself of the spec's 697). The other nine sites are unmoved (`Expeditions.cs` 233/253, `Fusion.cs` 395, `ShardRungs.cs` 48/71/89, `Materials.cs` 153/175/293). Also **one doc mention never counted**: `RpgStore.cs:660`. `RpgStore.cs` is mid-edit by a concurrent stream, so these numbers will drift again — the durable facts are *11 sites, 5 files, all inside `src/FusionRpg.Data/`* |
-| ⏸ Ten missing shard display rows | ⚠ still open, **unchanged** | `materials/materials.json` = **21** rows (`substrate 8 · essence 6 · shard 4 · catalyst 3`); the four shard rows are still `shard.common/rare/epic/legendary` and **zero** of the ten `shard.{rung}` ids ship |
+| Ten missing shard display rows | ✅ holds, **stale line corrected 2026-09-07** | `materials/materials.json` = **31** rows today, not 21 — all ten `shard.{rung}` ids (`chaff`..`almanac`) ship alongside the four retained legacy display rows (14 shard entries total). This table row had not been refreshed since an earlier fix landed (see this file's own 4906-4907 note, `The_shipped_materials_display_corpus_now_carries_every_issuable_id`) |
 | ⏸ Tier-axis pricing; no `forge-gem`/`imbue` recipe; sixth spend class ask-first | ✅ all still true | No shipped recipe authors a `qty_curve_id`; `MaterialClass` still 5, `CatalystVerbs` still 3 |
 | ⏸ Step 5 `perform` not wired to a production mutation | ⏸→✅ **CLOSED later the same day** | Was true and measured when this pass ran: `TrySpendRecipe` had zero production callers. The executor landed 2026-09-06 — `ItemWorkbench.Upcycle`/`.Enhance`/`.SocketAdd`/`.SocketInsert`/`.SocketImbue` all call it through `RpgStore.TrySpendAndApply`. See P4.1 |
 

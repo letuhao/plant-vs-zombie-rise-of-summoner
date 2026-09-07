@@ -368,4 +368,37 @@ public class PassiveTreeCatalogLoaderTests
 
         Assert.Contains(report.Refusals, r => r.Contains("IdMismatch"));
     }
+
+    // -- 2026-09-07 real-corpus finding: a dotted/underscored real treeId is not a false IdMismatch --
+
+    [Theory]
+    [InlineData("nerve.afflicted", "nerveafflicted")]
+    [InlineData("charm_pulse", "charmpulse")]
+    [InlineData("might", "might")]
+    public void TreeSlugFor_matches_seedsmiths_own_ids_tree_slug_for_rule(string treeId, string expectedSlug)
+    {
+        // Pinned against the SAME five real trees `ids.tree_slug_for` (seedsmith, J1) strips a dot
+        // or underscore from — both sides must agree on what "the same tree" means, or a real
+        // dotted/underscored tree's own catalog refuses to import (the exact live-boot-proof finding
+        // this test guards against regressing).
+        Assert.Equal(expectedSlug, PassiveTreeCatalogLoader.TreeSlugFor(treeId));
+    }
+
+    [Fact]
+    public void A_real_dotted_tree_id_does_not_false_positive_an_IdMismatch()
+    {
+        // The real live-boot-proof finding, 2026-09-07: `data/generated/passive-tree/nerve.afflicted
+        // .json`'s own real node ids (minted by `ids.tree_slug_for`, which strips the dot) refused
+        // to import against every one of its own 40 nodes -- `PassiveTreeCatalogLoader` compared the
+        // id's own (correctly stripped) "nerveafflicted" slug against the RAW `treeId` field
+        // ("nerve.afflicted") verbatim, before this fix normalized both sides the same way.
+        var json = ValidTreeJson().Replace("\"treeId\": \"might\"", "\"treeId\": \"nerve.afflicted\"")
+            .Replace("skill.might-off-t1-n0", "skill.nerveafflicted-off-t1-n0")
+            .Replace("skill.might-off-t2-n0", "skill.nerveafflicted-off-t2-n0");
+        var (loaded, report) = PassiveTreeCatalogLoader.Load(json, MakeTuning());
+
+        Assert.DoesNotContain(report.Refusals, r => r.Contains("IdMismatch"));
+        Assert.True(report.IsOk, string.Join("; ", report.Refusals));
+        Assert.NotNull(loaded);
+    }
 }

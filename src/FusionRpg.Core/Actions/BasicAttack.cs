@@ -116,6 +116,17 @@ public static partial class BattleEngine
         // defaults to the same `null`).
         state.CostLedger.TryPay(attacker.Setup.Key, envelope.ActionId, ActionCostTiming.OnCommit, rng: null);
 
+        // The commit-time half of the `holdsStock` precondition (spec-siege-construction.md §11 /
+        // action-program's "ActionStockCommit.TryCommit has ZERO production callers" bug): same
+        // point of no return as the cost line above, same discard-the-result posture (affordability
+        // and stock are both already gated pre-commit, by CostLedger.Check and the `holdsStock` leaf
+        // respectively — a commit-time shortfall here is the same rare TOCTOU race CostLedger.TryPay
+        // already accepts without branching on). An action with no compiled `StockDemands` — every
+        // action shipped today — never reaches the ledger at all (ActionStockCommit.TryCommit's own
+        // early-out).
+        if (state.ActionCatalog?.Get(envelope.ActionId) is { } stockAction)
+            new ActionStockCommit(state.StockLedger).TryCommit(attacker.Setup.Key, stockAction);
+
         return ApplyBasicAttack(attacker, target!, envelope, state, now, nowTick, calculator, critRng);
     }
 

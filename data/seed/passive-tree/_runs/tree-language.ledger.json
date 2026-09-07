@@ -45424,6 +45424,3478 @@
         "flavor": "The impact of a shattering blow feeds the very vessel that endured it.",
         "rationale": ""
       }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t1-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Savage Edge",
+        "nameKey": "tree.node.savage-edge",
+        "flavor": "The blade hungers for the rhythm of the fray.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t1-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.keen-edge"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Edge of Certainty",
+        "nameKey": "tree.node.edge-of-certainty",
+        "flavor": "The blade does not merely cut; it finds the exact point where resistance ceases to exist.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t1-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Abyssal Aegis",
+        "nameKey": "tree.node.abyssal-aegis",
+        "flavor": "The void thickens around the user, turning every impact into a structural reinforcement.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t1-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Abyssal Marrow",
+        "nameKey": "tree.node.abyssal-marrow",
+        "flavor": "The void does not merely occupy space; it reinforces the very structure of the vessel that contains it.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t2-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Abyssal Momentum",
+        "nameKey": "tree.node.abyssal-momentum",
+        "flavor": "The weight of the void accelerates the strike, turning momentum into pure devastation.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t2-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Star-Pointed Edge",
+        "nameKey": "tree.node.star-pointed-edge",
+        "flavor": "The tip of the blade traces a path through the heavens, leaving a trail of unerring clarity.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t2-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating",
+          "atom.shield-toughness",
+          "atom.warding"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Void-Tempered Shell",
+        "nameKey": "tree.node.void-tempered-shell",
+        "flavor": "The abyss does not merely resist impact; it absorbs the very concept of force.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t3-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Stellar Precision",
+        "nameKey": "tree.node.stellar-precision",
+        "flavor": "The rhythm of the void aligns with the strike of the blade.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t3-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Abyssal Might",
+        "nameKey": "tree.node.abyssal-might",
+        "flavor": "The weight of the void empowers the strike.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t3-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.plating"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Abyssal Bastion",
+        "nameKey": "tree.node.abyssal-bastion",
+        "flavor": "Layers of reinforced plating forged in the crushing depths of the void.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t3-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "Inert while atomTrigger is active — atomTrigger wins."
+        },
+        "name": "Stellar Siphon",
+        "nameKey": "tree.node.stellar-siphon",
+        "flavor": "The void between stars is not empty, but a reservoir of potential energy waiting to be drawn into the hull.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t4-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Star-Pulse Overdrive",
+        "nameKey": "tree.node.star-pulse-overdrive",
+        "flavor": "The rhythm of the void accelerates, spilling excess energy into the next strike.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t4-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Orbiting Carapace",
+        "nameKey": "tree.node.orbiting-carapace",
+        "flavor": "The weight of the void provides a rhythmic, defensive pulse.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t4-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "precedence",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "This applies before atomKind takes effect."
+        },
+        "name": "Star-Sunderer",
+        "nameKey": "tree.node.star-sunderer",
+        "flavor": "The weight of a dying star concentrated into a single, devastating stroke.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t5-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Singularity Lens",
+        "nameKey": "tree.node.singularity-lens",
+        "flavor": "The light of a dying star focuses through a needle's eye, turning essence into a piercing lance.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t5-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Buffer",
+        "nameKey": "tree.node.event-horizon-buffer",
+        "flavor": "The vacuum between stars provides a rhythmic pressure, cycling energy through the defensive shell.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t5-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Star-Sunderer's Echo",
+        "nameKey": "tree.node.star-sunderer-s-echo",
+        "flavor": "The weight of a dying star, concentrated into a single, devastating strike.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t5-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Abyssal Hardening",
+        "nameKey": "tree.node.abyssal-hardening",
+        "flavor": "The weight of the void settles into the marrow, turning flesh into something unyielding.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t6-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Supernova Conduit",
+        "nameKey": "tree.node.supernova-conduit",
+        "flavor": "The star's core collapses, forcing elemental energy through the narrowest of apertures.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t6-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calloused Stance",
+        "nameKey": "tree.node.calloused-stance",
+        "flavor": "The weight of the abyss settles into the marrow, turning every impact into a lesson in endurance.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t6-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Stellar Edge",
+        "nameKey": "tree.node.stellar-edge",
+        "flavor": "The light of a dying star sharpens the very concept of a cut.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t7-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Void-Fracture Lens",
+        "nameKey": "tree.node.void-fracture-lens",
+        "flavor": "The vacuum between stars is not empty; it is a pressurized lens that bends the very essence of the elements through sheer gravitational debt",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t7-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Aegis",
+        "nameKey": "tree.node.event-horizon-aegis",
+        "flavor": "The gravity of the void pulls the impact into the shell, turning momentum into a hardening weight.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t7-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Supernova Overload",
+        "nameKey": "tree.node.supernova-overload",
+        "flavor": "The star's core collapses, forcing elemental energies to breach their natural constraints.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t7-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely",
+          "occasional"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Abyssal Platework",
+        "nameKey": "tree.node.abyssal-platework",
+        "flavor": "Layers of heavy plating forged in the crushing depths of the void.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t8-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Singularity Overload",
+        "nameKey": "tree.node.singularity-overload",
+        "flavor": "The weight of a collapsing star forces the essence to spill beyond its containment.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t8-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Trigger",
+        "nameKey": "tree.node.event-horizon-trigger",
+        "flavor": "The moment of impact is no longer a point, but a sequence of cascading collapses.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t8-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Suture",
+        "nameKey": "tree.node.event-horizon-suture",
+        "flavor": "The void does not merely resist impact; it stitches the wound shut with the weight of nothingness.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t8-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Reservoir",
+        "nameKey": "tree.node.event-horizon-reservoir",
+        "flavor": "The void does not merely resist impact; it stores the momentum of the strike to fuel the next cycle of protection.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t9-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Singularity",
+        "nameKey": "tree.node.prismatic-singularity",
+        "flavor": "The light of a dying star bends through the void, refining all elements into a single, focused point of destruction.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t9-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Star-Sown Harvest",
+        "nameKey": "tree.node.star-sown-harvest",
+        "flavor": "The vacuum of the void does not merely consume; it reaps the very essence of what is lost.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t9-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recirculation",
+        "nameKey": "tree.node.kinetic-recirculation-6",
+        "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t10-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Refraction",
+        "nameKey": "tree.node.prismatic-refraction-4",
+        "flavor": "The light bends, not to escape the void, but to sharpen its edge.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t10-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recirculation",
+        "nameKey": "tree.node.kinetic-recirculation-7",
+        "flavor": "The momentum of a deflected blow feeds the next layer of protection.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t10-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Event Horizon Siphon",
+        "nameKey": "tree.node.event-horizon-siphon",
+        "flavor": "The void does not merely hold; it hungers, pulling the essence of the stars back into the shell.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t1-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Solar Flare",
+        "nameKey": "tree.node.solar-flare-5",
+        "flavor": "The sun's fury leaves nothing but ash and raw instinct in its wake.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t1-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.searing-strike"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Flare",
+        "nameKey": "tree.node.solar-flare-5",
+        "flavor": "The sun's fury leaves nothing but ash and fury in its wake.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t1-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Solar Marrow",
+        "nameKey": "tree.node.solar-marrow",
+        "flavor": "The sun's warmth seeps into the very bone, thickening the spirit against the coming dark.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t1-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Solar Aegis",
+        "nameKey": "tree.node.solar-aegis",
+        "flavor": "The sun's warmth hardens the spirit and the shell alike.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t1-n2": {
+      "record": {
+        "id": "skill.acientsunnut-def-t1-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Sun-Drenched Marrow",
+        "nameKey": "tree.node.sun-drenched-marrow",
+        "flavor": "The warmth of the ancient light seeps into the very core of the organism, thickening the blood and hardening the spirit.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t2-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Flare",
+        "nameKey": "tree.node.solar-flare-6",
+        "flavor": "The sun's heat swells the blood and sharpens the edge.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t2-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Attunement",
+        "nameKey": "tree.node.solar-attunement",
+        "flavor": "The sun's intensity demands a vessel capable of holding its boundless radiance.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t2-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Solar Marrow",
+        "nameKey": "tree.node.solar-marrow-2",
+        "flavor": "The sun's warmth seeps into the very marrow, hardening the spirit and the flesh alike.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t2-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Grit-Plated Bark",
+        "nameKey": "tree.node.grit-plated-bark",
+        "flavor": "Layers of hardened sap and stubborn resolve form a natural bastion against the coming storm.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t2-n2": {
+      "record": {
+        "id": "skill.acientsunnut-def-t2-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Solar Marrow",
+        "nameKey": "tree.node.solar-marrow-2",
+        "flavor": "The sun's warmth seeps into the very marrow, hardening the spirit and the flesh alike.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t3-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Membrane",
+        "nameKey": "tree.node.photosynthetic-membrane",
+        "flavor": "A translucent layer of solar-reactive tissue that hardens upon absorbing ambient light.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t3-n2": {
+      "record": {
+        "id": "skill.acientsunnut-off-t3-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Solar Synthesis",
+        "nameKey": "tree.node.solar-synthesis",
+        "flavor": "The sun does not merely shine; it saturates the very essence of the caster's power.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t3-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Photosynthetic Marrow",
+        "nameKey": "tree.node.photosynthetic-marrow-2",
+        "flavor": "The sun's warmth seeps into the very structure of the bone, thickening the spirit and the flesh alike.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t3-n2": {
+      "record": {
+        "id": "skill.acientsunnut-def-t3-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Rooted Resilience",
+        "nameKey": "tree.node.rooted-resilience-6",
+        "flavor": "Deeply anchored, the spirit draws strength from the very soil it treads.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t4-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit",
+          "atom.sunbloom"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Overload",
+        "nameKey": "tree.node.solar-overload",
+        "flavor": "The heat becomes a physical weight, forcing the essence to overflow its natural vessels.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t4-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Graft",
+        "nameKey": "tree.node.photosynthetic-graft",
+        "flavor": "A layer of living tissue that hardens upon impact, recycling the kinetic energy into a protective barrier.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t4-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Flare",
+        "nameKey": "tree.node.solar-flare-7",
+        "flavor": "The heat of the sun distilled into pure, aggressive momentum.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t4-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Aegis",
+        "nameKey": "tree.node.solar-aegis-2",
+        "flavor": "The sun's warmth hardens the protective layers into an impenetrable shell.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t5-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override",
+          "atom.sunbloom"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Helios Graft",
+        "nameKey": "tree.node.helios-graft",
+        "flavor": "A vascular network of pure light that converts elemental essence into solar radiance.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t5-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sunbloom"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Magnification",
+        "nameKey": "tree.node.solar-magnification",
+        "flavor": "The intensity of the light dictates the potency of the bloom.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t5-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ambered Aegis",
+        "nameKey": "tree.node.ambered-aegis",
+        "flavor": "Layers of fossilized sap thicken the spirit's protective shell.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t6-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.sunbloom"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Photosynthesis",
+        "nameKey": "tree.node.prismatic-photosynthesis",
+        "flavor": "The light does not merely strike; it permeates, shifting its very nature to match the vessel it inhabits.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t6-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge",
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Grafting",
+        "nameKey": "tree.node.photosynthetic-grafting",
+        "flavor": "The sap thickens into a protective resin, swelling the barrier between self and world.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t6-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.searing-strike"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Flare-Up",
+        "nameKey": "tree.node.solar-flare-up",
+        "flavor": "The heat of the sun is not merely felt; it is channeled through the very marrow of the world.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t6-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Reservoir",
+        "nameKey": "tree.node.photosynthetic-reservoir-4",
+        "flavor": "The sap thickens within the vessel, turning every drop of light into a fortified barrier.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t7-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.mending"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Suture",
+        "nameKey": "tree.node.photosynthetic-suture",
+        "flavor": "The sun's warmth knits flesh and fiber back into a seamless whole.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t7-n1": {
+      "record": {
+        "id": "skill.acientsunnut-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Supernova Saturation",
+        "nameKey": "tree.node.supernova-saturation",
+        "flavor": "The light becomes too heavy for the air to hold, spilling over into every available spectrum.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t7-n1": {
+      "record": {
+        "id": "skill.acientsunnut-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.warding"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Crust",
+        "nameKey": "tree.node.solar-crust",
+        "flavor": "The sun's warmth calcifies the spirit into an impenetrable shell.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t8-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.sunbloom"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Overgrowth",
+        "nameKey": "tree.node.solar-overgrowth",
+        "flavor": "The heat of the core forces the bloom to expand beyond its natural limits.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t8-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Hardened Husk",
+        "nameKey": "tree.node.hardened-husk-2",
+        "flavor": "A thick, fibrous layer that absorbs impact and feeds the core.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-def-t9-n0": {
+      "record": {
+        "id": "skill.acientsunnut-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Circulation",
+        "nameKey": "tree.node.photosynthetic-circulation",
+        "flavor": "The sap flows in rhythmic pulses, recycling the energy of every impact into a shimmering protective veil.",
+        "rationale": ""
+      }
+    },
+    "AcientSunNut:skill.acientsunnut-off-t10-n0": {
+      "record": {
+        "id": "skill.acientsunnut-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Solar Refraction",
+        "nameKey": "tree.node.solar-refraction",
+        "flavor": "Light bends through the thickest nectar, finding the gaps in the shadow.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t1-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Focused Edge",
+        "nameKey": "tree.node.focused-edge",
+        "flavor": "Precision is sharpened by the keenest of edges.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t1-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Layered Bastion",
+        "nameKey": "tree.node.layered-bastion-11",
+        "flavor": "The more layers applied, the harder the shell becomes to breach.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t2-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Savage Might",
+        "nameKey": "tree.node.savage-might-2",
+        "flavor": "The weight of the blow is matched only by the fury behind it.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t3-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-8",
+        "flavor": "The very essence of the wild swells within the strike, turning raw strength into a jagged edge.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t3-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Vicious Accuracy",
+        "nameKey": "tree.node.vicious-accuracy-2",
+        "flavor": "The precision of the strike dictates the severity of the wound.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t3-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Deep Rooted",
+        "nameKey": "tree.node.deep-rooted-9",
+        "flavor": "The more the earth claims you, the harder you are to uproot.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t3-n1": {
+      "record": {
+        "id": "skill.allpeater-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deep-rooting-11",
+        "flavor": "The soul anchors itself into the loam, making the body as unyielding as the ancient wood.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t4-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Conduit",
+        "nameKey": "tree.node.resonant-conduit-3",
+        "flavor": "The air hums with a frequency that bends the very nature of the elements.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t4-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recirculation",
+        "nameKey": "tree.node.kinetic-recirculation-8",
+        "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t4-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator-11",
+        "flavor": "The scent of blood fuels the hunger for more.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t5-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Prismatic Overload",
+        "nameKey": "tree.node.prismatic-overload-5",
+        "flavor": "The air shimmers as elemental energies refuse to remain contained within their natural boundaries.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t5-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Sealed Grafts",
+        "nameKey": "tree.node.sap-sealed-grafts",
+        "flavor": "The bark thickens where the essence pools, turning wounds into hardened amber.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t5-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Elemental Resonance",
+        "nameKey": "tree.node.elemental-resonance",
+        "flavor": "The flow of energy becomes a singular, driving force.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t6-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Lens",
+        "nameKey": "tree.node.photosynthetic-lens",
+        "flavor": "The light does not merely illuminate the target; it fuels the strike.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t6-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Osmotic Siphon",
+        "nameKey": "tree.node.osmotic-siphon-5",
+        "flavor": "The boundary between self and shell becomes a permeable membrane, drawing strength from the very energy meant to deflect it.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t6-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Serrated Sight",
+        "nameKey": "tree.node.serrated-sight",
+        "flavor": "The edge is sharpened by the clarity of the kill.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t7-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-override",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Overgrowth",
+        "nameKey": "tree.node.primal-overgrowth",
+        "flavor": "The very essence of the garden rebels, forcing the elements to overflow their natural boundaries.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t8-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Sieve",
+        "nameKey": "tree.node.prismatic-sieve",
+        "flavor": "The light refracts through the thickest petals, splitting into a spectrum of devastating force.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t8-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Accelerated Germination",
+        "nameKey": "tree.node.accelerated-germination",
+        "flavor": "The rhythm of the pulse dictates the speed of the bloom.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t9-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Unstable Catalyst",
+        "nameKey": "tree.node.unstable-catalyst",
+        "flavor": "The very essence of power refuses to be contained, bleeding into the surrounding air.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t9-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Harmonic Overload",
+        "nameKey": "tree.node.harmonic-overload",
+        "flavor": "The resonance of the elements becomes a violent, uncontrolled surge.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t9-n0": {
+      "record": {
+        "id": "skill.allpeater-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "Inert while atomAttachPoint is active — atomAttachPoint wins."
+        },
+        "name": "Vitreous Sap",
+        "nameKey": "tree.node.vitreous-sap-2",
+        "flavor": "A thick, translucent resin that hardens upon impact, cycling energy between the skin and the spirit.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t9-n1": {
+      "record": {
+        "id": "skill.allpeater-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cyclical Osmosis",
+        "nameKey": "tree.node.cyclical-osmosis",
+        "flavor": "The rhythm of the shield dictates the pace of the blood.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t9-n2": {
+      "record": {
+        "id": "skill.allpeater-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cyclical Grafting",
+        "nameKey": "tree.node.cyclical-grafting-5",
+        "flavor": "The sap flows in rhythmic pulses, reinforcing the shell even as it breaks.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t10-n0": {
+      "record": {
+        "id": "skill.allpeater-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Saturation",
+        "nameKey": "tree.node.primal-saturation",
+        "flavor": "The air grows heavy with the scent of overripe nectar, bending the very laws of elemental stability.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t10-n1": {
+      "record": {
+        "id": "skill.allpeater-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Fractured Prism",
+        "nameKey": "tree.node.fractured-prism-3",
+        "flavor": "Light breaks against the jagged edges of the petal, scattering its fury in impossible directions.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-off-t10-n2": {
+      "record": {
+        "id": "skill.allpeater-off-t10-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Rupture",
+        "nameKey": "tree.node.prismatic-rupture-2",
+        "flavor": "The barrier between essences thins, allowing the raw overflow to bypass the physical shell entirely.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t10-n1": {
+      "record": {
+        "id": "skill.allpeater-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Osmotic Pulsation",
+        "nameKey": "tree.node.osmotic-pulsation",
+        "flavor": "The rhythm of the shield becomes a heartbeat, driving the flow of energy through the vessel.",
+        "rationale": ""
+      }
+    },
+    "AllPeater:skill.allpeater-def-t10-n2": {
+      "record": {
+        "id": "skill.allpeater-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Shell",
+        "nameKey": "tree.node.resonant-shell-5",
+        "flavor": "The rhythm of the pulse dictates the strength of the barrier.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t1-n0": {
+      "record": {
+        "id": "skill.apple-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Crimson Rip",
+        "nameKey": "tree.node.crimson-rip",
+        "flavor": "The weight of the harvest is felt in the fury of the strike.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t1-n1": {
+      "record": {
+        "id": "skill.apple-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Wild Harvest",
+        "nameKey": "tree.node.wild-harvest",
+        "flavor": "The orchard yields more than just fruit when the soil is soaked in aggression.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t1-n1": {
+      "record": {
+        "id": "skill.apple-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Heartwood Core",
+        "nameKey": "tree.node.heartwood-core",
+        "flavor": "The core of the fruit hardens, turning life-sustaining sugars into a dense, protective fiber.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t2-n0": {
+      "record": {
+        "id": "skill.apple-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Crimson Sight",
+        "nameKey": "tree.node.crimson-sight",
+        "flavor": "The eye tracks the rhythm of the blade, finding the gap in the pulse.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t2-n1": {
+      "record": {
+        "id": "skill.apple-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sharpened Orchard",
+        "nameKey": "tree.node.sharpened-orchard",
+        "flavor": "The edge of a blade, honed by the weight of a falling fruit.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t2-n1": {
+      "record": {
+        "id": "skill.apple-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Pithy Shell",
+        "nameKey": "tree.node.pithy-shell",
+        "flavor": "A thick, protective layer that grows where the fruit is most vulnerable.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t3-n0": {
+      "record": {
+        "id": "skill.apple-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Orchard's Edge",
+        "nameKey": "tree.node.orchard-s-edge",
+        "flavor": "The weight of the harvest is felt in the sharpness of the blade.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t3-n1": {
+      "record": {
+        "id": "skill.apple-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Crimson Rip",
+        "nameKey": "tree.node.crimson-rip-2",
+        "flavor": "The juice of the fruit stains the blade, fueling a primal hunger.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t3-n0": {
+      "record": {
+        "id": "skill.apple-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deep-rooting-12",
+        "flavor": "The essence of the tree sinks deep into the earth, anchoring the spirit to the physical form.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t3-n1": {
+      "record": {
+        "id": "skill.apple-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thickened Rind",
+        "nameKey": "tree.node.thickened-rind-2",
+        "flavor": "Layers of bark-like skin swell to absorb the brunt of an impact.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t4-n0": {
+      "record": {
+        "id": "skill.apple-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Infused Conduit",
+        "nameKey": "tree.node.sap-infused-conduit",
+        "flavor": "The juice of the fruit carries the essence of the storm.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t4-n0": {
+      "record": {
+        "id": "skill.apple-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Filled Gaps",
+        "nameKey": "tree.node.sap-filled-gaps",
+        "flavor": "The cracks in the bark weep a thick, translucent resin that hardens instantly upon contact with air.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t4-n1": {
+      "record": {
+        "id": "skill.apple-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pomme de Guerre",
+        "nameKey": "tree.node.pomme-de-guerre",
+        "flavor": "A razor-thin slice of fruit that finds the gap in any armor.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t4-n1": {
+      "record": {
+        "id": "skill.apple-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Deep Bark",
+        "nameKey": "tree.node.deep-bark",
+        "flavor": "The skin of the tree thickens, drawing nutrients from the very earth to reinforce its core.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t5-n0": {
+      "record": {
+        "id": "skill.apple-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overripe Burst",
+        "nameKey": "tree.node.overripe-burst",
+        "flavor": "The weight of excess becomes a weapon of its own.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t5-n0": {
+      "record": {
+        "id": "skill.apple-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.mending",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Grafted Seam",
+        "nameKey": "tree.node.grafted-seam",
+        "flavor": "Where the skin meets the core, the sap begins to knit.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t6-n1": {
+      "record": {
+        "id": "skill.apple-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Feral Harvest",
+        "nameKey": "tree.node.feral-harvest",
+        "flavor": "The juice of the fruit runs thick with the scent of the hunt.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t6-n1": {
+      "record": {
+        "id": "skill.apple-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Hardened Core",
+        "nameKey": "tree.node.hardened-core",
+        "flavor": "The heart of the fruit becomes as dense as seasoned timber.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t7-n0": {
+      "record": {
+        "id": "skill.apple-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.econ-bounty",
+          "atom.tempo-yield"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bountiful Orchard",
+        "nameKey": "tree.node.bountiful-orchard",
+        "flavor": "The harvest is not merely gathered; it is multiplied by the very act of reaping.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t7-n1": {
+      "record": {
+        "id": "skill.apple-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Perennial Core",
+        "nameKey": "tree.node.perennial-core",
+        "flavor": "The heart of the orchard remains unyielding, drawing strength from every season passed.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t8-n0": {
+      "record": {
+        "id": "skill.apple-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Overripe Surge",
+        "nameKey": "tree.node.overripe-surge",
+        "flavor": "The pressure of excess energy forces a violent release of elemental potency.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t8-n1": {
+      "record": {
+        "id": "skill.apple-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Primal Sap",
+        "nameKey": "tree.node.primal-sap",
+        "flavor": "The very essence of the orchard flows through the veins of the world, turning raw energy into a focused conduit.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t8-n0": {
+      "record": {
+        "id": "skill.apple-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pithy Bulwark",
+        "nameKey": "tree.node.pithy-bulwark",
+        "flavor": "A dense, fibrous layer that absorbs the impact of the world, turning kinetic force into structural integrity.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t8-n1": {
+      "record": {
+        "id": "skill.apple-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warded",
+          "atom.warding"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pulsing Sap",
+        "nameKey": "tree.node.pulsing-sap-2",
+        "flavor": "The rhythmic pressure of lifeblood within the stem forces the protective layers to expand and contract in a protective cadence.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t9-n1": {
+      "record": {
+        "id": "skill.apple-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pruning Edge",
+        "nameKey": "tree.node.pruning-edge",
+        "flavor": "A sharp, decisive cut that channels the essence of the orchard into a singular, piercing intent.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t9-n0": {
+      "record": {
+        "id": "skill.apple-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Reservoir",
+        "nameKey": "tree.node.sap-fed-reservoir-2",
+        "flavor": "The core thickens with a rhythmic pulse, recycling the very essence of impact into a protective swell.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t9-n1": {
+      "record": {
+        "id": "skill.apple-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cider Press",
+        "nameKey": "tree.node.cider-press",
+        "flavor": "The weight of the harvest provides a foundation that refuses to break.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t10-n0": {
+      "record": {
+        "id": "skill.apple-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overripe Essence",
+        "nameKey": "tree.node.overripe-essence",
+        "flavor": "The juice runs thick and heavy, overflowing the vessel to saturate the very air.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-off-t10-n1": {
+      "record": {
+        "id": "skill.apple-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overripe Essence",
+        "nameKey": "tree.node.overripe-essence",
+        "flavor": "The fruit grows so heavy with juice that the very laws of elemental stability begin to buckle under the weight.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t10-n0": {
+      "record": {
+        "id": "skill.apple-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Reservoir",
+        "nameKey": "tree.node.sap-fed-reservoir-3",
+        "flavor": "A rhythmic pulse of life that cycles through the protective layers, reinforcing the barrier as it flows.",
+        "rationale": ""
+      }
+    },
+    "Apple:skill.apple-def-t10-n1": {
+      "record": {
+        "id": "skill.apple-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Circulatory Sap",
+        "nameKey": "tree.node.circulatory-sap-3",
+        "flavor": "The rhythmic pulse of the orchard ensures no drop of essence is wasted, cycling vitality back into the protective layers.",
+        "rationale": ""
+      }
     }
   }
 }

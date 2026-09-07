@@ -1,5 +1,113 @@
 {
   "treeId": "ice",
+  "category": "elemental",
+  "gateQuantity": "element_mastery.ice@Aspect",
+  "shapeArchetype": "gated-deep",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    6,
+    6,
+    6,
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.ice-def-t2-n0",
+      "treeId": "ice",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.warding"
+      ],
+      "budgetShareMilli": 12,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 192,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ice-def-t3-n1",
+      "treeId": "ice",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 288,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "element"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ice-def-t4-n1",
+      "treeId": "ice",
+      "branch": "Def",
+      "tier": 4,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 37,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1933,
   "bound": [
@@ -8,8 +116,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 192,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -21,8 +132,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 288,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

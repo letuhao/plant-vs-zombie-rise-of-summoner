@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.tempo-haste",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Hastened Reflexes T1",
+      "params": {
+        "channel": "attackInterval",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-haste",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Hastened Reflexes T2",
+      "params": {
+        "channel": "attackInterval",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-haste",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Hastened Reflexes T3",
+      "params": {
+        "channel": "attackInterval",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-haste",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Hastened Reflexes T4",
+      "params": {
+        "channel": "attackInterval",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-haste",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Hastened Reflexes T5",
+      "params": {
+        "channel": "attackInterval",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Stampede T1",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "more",
+        "amount": {
+          "min": 23,
+          "max": 45,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Stampede T2",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "more",
+        "amount": {
+          "min": 40,
+          "max": 80,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Stampede T3",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "more",
+        "amount": {
+          "min": 70,
+          "max": 140,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Stampede T4",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "more",
+        "amount": {
+          "min": 123,
+          "max": 245,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Stampede T5",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "more",
+        "amount": {
+          "min": 216,
+          "max": 428,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-surge",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Surging Advance T1",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-surge",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Surging Advance T2",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-surge",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Surging Advance T3",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-surge",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Surging Advance T4",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-surge",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Surging Advance T5",
+      "params": {
+        "channel": "zombieSpeed",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-wildgrowth",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Unchecked Growth T1",
+      "params": {
+        "channel": "attackInterval",
+        "op": "more",
+        "amount": {
+          "min": 23,
+          "max": 45,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-wildgrowth",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Unchecked Growth T2",
+      "params": {
+        "channel": "attackInterval",
+        "op": "more",
+        "amount": {
+          "min": 40,
+          "max": 80,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-wildgrowth",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Unchecked Growth T3",
+      "params": {
+        "channel": "attackInterval",
+        "op": "more",
+        "amount": {
+          "min": 70,
+          "max": 140,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-wildgrowth",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Unchecked Growth T4",
+      "params": {
+        "channel": "attackInterval",
+        "op": "more",
+        "amount": {
+          "min": 123,
+          "max": 245,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-wildgrowth",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Unchecked Growth T5",
+      "params": {
+        "channel": "attackInterval",
+        "op": "more",
+        "amount": {
+          "min": 216,
+          "max": 428,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-yield",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Bountiful Yield T1",
+      "params": {
+        "channel": "produceInterval",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "utility": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-yield",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Bountiful Yield T2",
+      "params": {
+        "channel": "produceInterval",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "utility": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-yield",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Bountiful Yield T3",
+      "params": {
+        "channel": "produceInterval",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "utility": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-yield",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Bountiful Yield T4",
+      "params": {
+        "channel": "produceInterval",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "utility": "1"
+      }
+    },
+    {
+      "family": "atom.tempo-yield",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Bountiful Yield T5",
+      "params": {
+        "channel": "produceInterval",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-tempo.json",
+        "generator": "E43",
+        "utility": "1"
+      }
+    }
+  ]
+}

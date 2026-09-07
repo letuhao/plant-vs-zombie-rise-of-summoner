@@ -1,45 +1,29 @@
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
 /// <summary>
-/// The consumer for a STATUS's derived-channel writes — the fourth registered
-/// <see cref="IActorStatSubsystem"/>, and the one whose absence made every mechanism node the passive
-/// tree depends on compile, bind, and change no number.
+/// Consumer for a STATUS's derived-channel writes — registered as <c>l2b.derived</c> on the Injector
+/// Hub (<c>CheatState.ActorHub</c> via <c>StatusDerivedMods.For</c>).
 ///
-/// <para><b>The gap this closes.</b> A status may author `stat.&lt;channel&gt;.&lt;op&gt;` payloads
-/// (<see cref="Status.StatusStatPayload"/>), and <see cref="Status.StatusStatPayload.IsKnownChannel"/>
-/// accepts DERIVED channels — `combat.*` and the status-family channels — alongside the 23 primary
-/// ones. But the injector upserts every one of them into the PRIMARY session bag
-/// (`EffectRuntime.cs`'s `CheatState.Stats.Upsert`), and no registered subsystem reads that bag for
-/// derived values. A status raising `combat.defense.omni` therefore resolved to nothing at all. Two
-/// shipped runtimes already produce such mods and compose nothing today for the same reason —
-/// `StanceRuntime.Raise` and `ExhaustionPolicy.Sync`.</para>
+/// <para><b>History.</b> Statuses once upserted derived channels only into the PRIMARY session bag
+/// (<c>CheatState.Stats.Upsert</c>), so a write to <c>combat.defense.omni</c> composed nothing. This
+/// subsystem is the registered reader for live L2b mods; Stance/Exhaustion and payload statuses that
+/// mint <see cref="StatusDerivedMod"/> reach Hub through it.</para>
 ///
 /// <para><b>Why a subsystem, not another sink arm.</b> Same argument
 /// <see cref="AtomDerivedSubsystem"/> makes: the lawn's derived compose already runs per resolve in
-/// <see cref="ActorHub.ResolveDerived"/>, every registered subsystem contributes and
-/// <see cref="DerivedComposer"/> folds. A second delivery path for a value the composer already owns
-/// is how five features grew private derived-write paths, exactly as actor-hub-ssot.md §6.1 predicted
-/// in writing.</para>
+/// <see cref="ActorHub.ResolveDerived"/>; a second delivery path is how private folds grew
+/// (actor-hub-ssot.md §6.1).</para>
 ///
-/// <para><b>Why a separate subsystem from <see cref="AtomDerivedSubsystem"/>.</b>
-/// <see cref="ActorHub.Register"/> replaces by <see cref="SubsystemId"/>, so registering a second
-/// <c>AtomDerivedSubsystem</c> would silently EVICT the first rather than add to it. Statuses and
-/// bound atoms are different sources with different lifetimes — a status withdraws when its instance
-/// expires — so they get their own id and their own delegate.</para>
+/// <para><b>Why separate from <see cref="AtomDerivedSubsystem"/>.</b>
+/// <see cref="ActorHub.Register"/> replaces by <see cref="SubsystemId"/> — a second atom subsystem
+/// would evict the first. Statuses and bound atoms have different lifetimes.</para>
 ///
-/// <para><b>One behaviour change, and it is deliberate</b> (spec-mechanism-wiring.md §12 q1, closed by
-/// the owner 2026-09-05). <c>ResistanceEvaluator</c> already reads the defender's
-/// <see cref="ActorDerivedSnapshot"/>, so once a status can contribute `status.resist.*`, a host
-/// carrying one rolls harder against the NEXT status applied. That is what a resist status means, and
-/// it makes application order significant. It changes no shipped content — no status in `data/seed/`
-/// authors a stat overlay — so the order-sensitivity is a constraint on future authoring, not a
-/// regression. The read terminates: resolving a host's statuses is a dictionary lookup, never a nested
-/// resolve.</para>
+/// <para><b>Resist feedback</b> (spec-mechanism-wiring.md §12 q1): <c>ResistanceEvaluator</c> reads
+/// the defender snapshot, so <c>status.resist.*</c> from a live status affects later applies. The read
+/// terminates (dictionary lookup, never nested resolve).</para>
 ///
-/// <para>Stateless and idempotent between calls, like every other arm of this seam. Instance-scoped
-/// with a per-context delegate and no static cache — D21 gives every actor its own tree state, and a
-/// static cache here would leak one scoped host's statuses into another (the `AptitudeTuningHub` race
-/// this repo has already fixed once).</para>
+/// <para>Stateless between calls. Empty/whitespace <see cref="StatusDerivedMod.SourceId"/> is skipped
+/// (GG-49 / actor-hub-ssot §8.1) — same rule as <see cref="AtomDerivedSubsystem"/>.</para>
 /// </summary>
 public sealed class StatusDerivedSubsystem : IActorStatSubsystem
 {
@@ -71,6 +55,8 @@ public sealed class StatusDerivedSubsystem : IActorStatSubsystem
         foreach (var mod in live)
         {
             if (string.IsNullOrWhiteSpace(mod.Channel)) continue;
+            // GG-49 / actor-hub-ssot §8.1: empty SourceId is a defect — skip rather than mint blank.
+            if (string.IsNullOrWhiteSpace(mod.SourceId)) continue;
             mods.Add(new DerivedModifier(mod.Channel, mod.Op, mod.Amount, SourceId: mod.SourceId));
         }
     }

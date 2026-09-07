@@ -1,5 +1,235 @@
 {
   "treeId": "ember",
+  "category": "status",
+  "gateQuantity": "status_applied.ember",
+  "shapeArchetype": "broad-and-flat",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.ember-off-t1-n0",
+      "treeId": "ember",
+      "branch": "Off",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "budgetShareMilli": 9,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "element"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-off-t2-n0",
+      "treeId": "ember",
+      "branch": "Off",
+      "tier": 2,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-off-t6-n1",
+      "treeId": "ember",
+      "branch": "Off",
+      "tier": 6,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "budgetShareMilli": 55,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "element"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-def-t1-n0",
+      "treeId": "ember",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 9,
+      "atoms": [],
+      "excludeProps": [
+        "tier"
+      ],
+      "exclusionForm": "Nullification",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-def-t6-n1",
+      "treeId": "ember",
+      "branch": "Def",
+      "tier": 6,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 55,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 880,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-def-t7-n1",
+      "treeId": "ember",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.ember-def-t9-n0",
+      "treeId": "ember",
+      "branch": "Def",
+      "tier": 9,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Mechanism",
+      "affixIds": [
+        "atom.warding"
+      ],
+      "budgetShareMilli": 82,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1312,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1708,
   "bound": [
@@ -8,8 +238,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 608,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -21,8 +254,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -34,8 +270,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3713,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -51,8 +290,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 880,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -68,8 +310,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1312,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

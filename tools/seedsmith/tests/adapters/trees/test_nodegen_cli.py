@@ -64,16 +64,43 @@ class CheckFamilyExitCodeTests(unittest.TestCase):
         never carried it, so `assert_exactly_one_hard_gate` always found zero and `--gate` correctly
         refused rather than silently passing over a contract that was never wired — H9 §6.4 rule 1:
         "an absent check is never a pass"). Both gaps are closed now: the registry carries exactly one
-        `gates=True` `PassiveTree/*` metric, so `--gate` runs for real instead of refusing —
-        today's real committed `might` plan has no generated nodes yet, so every metric needing them
-        reports `NOT_MEASURED` rather than FAIL, the same `(EXIT_CLEAN, EXIT_GAP)` shape the
-        non-gated sibling test below already accepts for the identical reason."""
+        `gates=True` `PassiveTree/*` metric, so `--gate` runs for real instead of refusing. The real
+        committed corpus (42 trees, 1677/1680 real generated nodes as of 2026-09-07) drives every
+        H4/H5 metric for real now too (a SECOND wiring gap this same day: `_cmd_check_family` built
+        `PassiveTreePlanCtx` with no `targets`/`tree_plans`/`nodes_by_tree`/`outcomes_by_tree` at
+        all, so every corpus-side metric silently reported NOT_MEASURED regardless of what was
+        actually committed) — `--gate` only ever exits on the ONE gating metric's own verdict, so
+        this stays `(EXIT_CLEAN, EXIT_GAP)` either way; the real measured value is asserted directly
+        below."""
         code, _ = _run_captured(["check", "--family", "PassiveTree", "--gate"])
         self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
 
+    def test_the_hard_gate_is_measured_for_real_not_not_measured(self) -> None:
+        """The real point of wiring `outcomes_by_tree`: `PassiveTree/UnresolvedCount` must report a
+        real share, derived from comparing each committed plan's full node set against the real
+        `tree-language.ledger.json` (`nodegen.plan_run`, the SAME resume logic a real generation run
+        already uses) — never `NOT_MEASURED`, which is what this exact command always reported before
+        this ctx-construction fix landed."""
+        code, out = _run_captured(["check", "--family", "PassiveTree", "--gate"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/UnresolvedCount", out)
+        self.assertNotIn("[NOT_MEASURED] PassiveTree/UnresolvedCount", out)
+
+    def test_hidden_file_count_runs_for_real_against_the_real_seed_root(self) -> None:
+        """H5's own remaining real acceptance gap: `HiddenFileCountMetric` was fully built and
+        tested but had zero production call site — `tree_seed_roots` always empty outside its own
+        test, so this metric never actually walked anything. `_cmd_check_family` now registers it
+        locally (never in the shared `build_registry()`, which correctly still excludes it for every
+        OTHER caller that has no seed root to give it) and wires `tree_seed_roots` to the real
+        `data/seed/passive-tree` directory it already resolved for everything else this command
+        needs. This must print a real `visitedFileCount`, never silently skip the metric."""
+        code, out = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/HiddenFileCount", out)
+        self.assertIn("seed root(s)", out)
+
     def test_without_gate_the_real_committed_plan_reports_and_exits_clean_or_gap(self) -> None:
-        """No --gate: every registered PassiveTree finding is reported (today, just
-        `PassiveTree/TreeEqualValue`, C1's own already-shipped invariant) — this must reach a real
+        """No --gate: every registered PassiveTree finding is reported — this must reach a real
         verdict rather than EXIT_CANNOT_RUN/EXIT_REFUSED, proving the family dispatch actually runs
         the metric over the real committed plan."""
         code, _ = _run_captured(["check", "--family", "PassiveTree"])

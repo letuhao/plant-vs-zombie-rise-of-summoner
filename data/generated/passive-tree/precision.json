@@ -1,5 +1,124 @@
 {
   "treeId": "precision",
+  "category": "primary",
+  "gateQuantity": "aptitude.Precision@Commander",
+  "shapeArchetype": "gated-deep",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    6,
+    6,
+    6,
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.precision-def-t1-n1",
+      "treeId": "precision",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 6,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.precision-def-t3-n2",
+      "treeId": "precision",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n2",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 19,
+      "atoms": [],
+      "excludeProps": [
+        "posture"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.precision-def-t5-n1",
+      "treeId": "precision",
+      "branch": "Def",
+      "tier": 5,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "budgetShareMilli": 46,
+      "atoms": [],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.precision-def-t7-n1",
+      "treeId": "precision",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.resilience",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1024,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "tier"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1865,
   "bound": [
@@ -20,8 +139,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1024,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

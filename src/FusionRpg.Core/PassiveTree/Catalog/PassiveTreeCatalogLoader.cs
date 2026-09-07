@@ -153,10 +153,23 @@ public static class PassiveTreeCatalogLoader
 
         // IdMismatch: an authored id that disagrees with its own coordinates is kept AS AUTHORED
         // and reported — item/seed-contract.md's existing rule for atom_id, applied here (§3.1).
+        //
+        // 2026-09-07 real-corpus finding: the id GRAMMAR (`NodeIdPattern` above) forbids `.`/`_` in
+        // the tree slug (`[a-z][a-z0-9]*`), so `seedsmith`'s own `ids.tree_slug_for` (J1, same date)
+        // already strips both when MINTING a node id for a real dotted/underscored tree id
+        // (`nerve.afflicted`, `charm_pulse`, ...) — the five real trees whose own roster id legitimately
+        // contains either character. This check compared the id's own (correctly stripped) slug
+        // against the RAW `treeId` field verbatim, so it refused every node of all five real trees the
+        // moment a real bound catalog first tried to import (`skill.charmpulse-off-t7-n1` vs
+        // `treeId: "charm_pulse"`) — found by the first real live-boot proof, not a synthetic
+        // fixture, since no test before this one ever exercised a tree id containing either
+        // character. `TreeSlugFor` mirrors `tree_slug_for`'s exact rule (strip `.`/`_` by
+        // concatenation, lowercase) so the two stay the SAME grammar rather than two, silently
+        // drifting definitions of "the same tree."
         var idBranch = match.Groups["branch"].Value;
         var idTier = int.Parse(match.Groups["tier"].Value);
         var idTreeSlug = match.Groups["tree"].Value;
-        if (!string.Equals(idTreeSlug, treeId, StringComparison.Ordinal)
+        if (!string.Equals(idTreeSlug, TreeSlugFor(treeId), StringComparison.Ordinal)
             || !string.Equals(idBranch, branch.ToString().ToLowerInvariant(), StringComparison.Ordinal)
             || idTier != tier)
         {
@@ -329,6 +342,16 @@ public static class PassiveTreeCatalogLoader
             : $"tree catalog file '{fileName}': filename version v{fileVersion} disagrees with its own " +
               $"catalogVersion={catalogVersion} (the classes.v2.json trap — spec-tree-catalog.md §4)";
     }
+
+    /// <summary>The SAME rule `seedsmith`'s own `ids.tree_slug_for` mints a node id's tree segment
+    /// with (task J1, 2026-09-07): strip every `.`/`_` by concatenation (never inserting a hyphen,
+    /// already a structural separator in the id grammar), then lowercase — real species/status ids
+    /// are PascalCase or `snake_case`/`dotted.case`, none of which the id grammar's own
+    /// `[a-z][a-z0-9]*` tree-slug class permits verbatim. Exposed (not `static` `private`) so a test
+    /// can assert this stays byte-identical to the Python side without importing Python into a C#
+    /// test run — both sides are pinned against the same five real trees instead.</summary>
+    public static string TreeSlugFor(string treeId) =>
+        new string(treeId.Where(c => c != '.' && c != '_').ToArray()).ToLowerInvariant();
 
     static bool TryGetString(JsonElement el, string prop, out string value)
     {

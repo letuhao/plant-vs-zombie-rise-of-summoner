@@ -2229,6 +2229,29 @@ public sealed partial class RpgStore : IRpgDb
         }
     }
 
+    /// <summary>Shared by the real `board.start` path and `InsertOneUnlocked`'s own orphan self-heal
+    /// (see its own comment): both cases are "a run needs to exist for this matchKey right now,"
+    /// differing only in whether real level metadata is available to stamp it with.</summary>
+    long CreateRunUnlocked(SqliteConnection db, long playerId, string matchKey, string t, string? game,
+        string? levelName, string? levelType, int? boardLevel, string? modifiersJson)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json, game)
+            VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod,$g);
+            SELECT last_insert_rowid();
+            """;
+        cmd.Parameters.AddWithValue("$g", string.IsNullOrWhiteSpace(game) ? RpgConstants.GameId : game);
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$k", matchKey);
+        cmd.Parameters.AddWithValue("$t", t);
+        cmd.Parameters.AddWithValue("$n", (object?)levelName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$lt", (object?)levelType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$bl", Db(boardLevel));
+        cmd.Parameters.AddWithValue("$mod", (object?)modifiersJson ?? DBNull.Value);
+        return (long)(cmd.ExecuteScalar() ?? 0L);
+    }
+
     void InsertOneUnlocked(SqliteConnection db, EventEnvelope e, long? explicitPlayerId = null)
     {
         var payload = e.Payload is null ? "{}" : JsonSerializer.Serialize(e.Payload, Json);
@@ -2243,30 +2266,32 @@ public sealed partial class RpgStore : IRpgDb
             // Explicit player (web ingest): never stamp current_player_id on a web run — a mid-
             // resolution player switch would mis-credit the save (audit precondition 4).
             playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = """
-                    INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json, game)
-                    VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod,$g);
-                    SELECT last_insert_rowid();
-                    """;
-                cmd.Parameters.AddWithValue("$g",
-                    string.IsNullOrWhiteSpace(e.Game) ? RpgConstants.GameId : e.Game);
-                cmd.Parameters.AddWithValue("$p", playerId);
-                cmd.Parameters.AddWithValue("$k", matchKey);
-                cmd.Parameters.AddWithValue("$t", t);
-                cmd.Parameters.AddWithValue("$n", (object?)TryString(payload, "levelName") ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("$lt", (object?)TryString(payload, "levelType") ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("$bl", Db(TryInt(payload, "boardLevel")));
-                cmd.Parameters.AddWithValue("$mod", (object?)TryObjectJson(payload, "modifiers") ?? DBNull.Value);
-                runId = (long)(cmd.ExecuteScalar() ?? 0L);
-            }
+            runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
+                levelName: TryString(payload, "levelName"), levelType: TryString(payload, "levelType"),
+                boardLevel: TryInt(payload, "boardLevel"), modifiersJson: TryObjectJson(payload, "modifiers"));
         }
         else
         {
             runId = FindRunId(db, matchKey);
             if (runId is { } rid)
                 playerId = GetRunPlayerId(db, rid) ?? explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+            else if (!string.IsNullOrWhiteSpace(matchKey))
+            {
+                // [[match-key-orphan-drops-soul-earn]] (found live 2026-09-06): `Board.Awake` can
+                // rotate `GameHooks.MatchKey` and fire a new `board.start` whose HTTP request never
+                // lands here (dropped, or superseded by the next rotation before it completes). Every
+                // subsequent event under that matchKey would otherwise be permanently orphaned —
+                // routed to `ProjectGlobal` below, which silently drops anything but `catalog.*` — no
+                // symptom on the client (game plays normally) or `/health` (stays green), only a
+                // silently-flat soul/XP balance. Self-heal by lazily creating the missing run the
+                // FIRST time this matchKey is seen anywhere but `board.start`: the lost metadata
+                // (levelName/levelType/boardLevel/modifiers, all null on this recovered row) was
+                // cosmetic; the economy wasn't. A blank/empty matchKey (a real event genuinely
+                // carrying none, e.g. a global `catalog.*` ingest) never reaches this branch at all.
+                playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+                runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
+                    levelName: null, levelType: null, boardLevel: null, modifiersJson: null);
+            }
             else
                 playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
         }

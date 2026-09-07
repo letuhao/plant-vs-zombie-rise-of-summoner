@@ -6,12 +6,14 @@ using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Power;
 
 // E43 family-expand generator (spec-family-expand.md §3.1, decided 2026-09-03 — the DemonSpeciesGen
-// --check pattern). Reads the 98 authored affix-family definitions
+// --check pattern). Reads every authored affix-family definition
 // (data/seed/items/affix-families/*.json) and the tier-bands balance surface
-// (data/seed/items/_tuning/tier-bands.v1.json), and writes one atom seed file PER SOURCE FAMILY FILE
-// under data/seed/atoms/generated/ — a directory already inside AtomImporter's SeedScanner.OwnedFolders
-// "atoms" root, so the importer sweeps the GENERATED rows and never parses a family file itself. The
-// 98 definitions stay exactly where the item program put them and never move.
+// (data/seed/items/_tuning/tier-bands.v{n}.json, LATEST version — TierBandsFile.FindLatestPath, fixed
+// 2026-09-08 after this literally hardcoded "v1.json" and silently ignored two real, already-published
+// later versions), and writes one atom seed file PER SOURCE FAMILY FILE under data/seed/atoms/generated/
+// — a directory already inside AtomImporter's SeedScanner.OwnedFolders "atoms" root, so the importer
+// sweeps the GENERATED rows and never parses a family file itself. The definitions stay exactly where
+// the item program put them and never move.
 //
 // Usage: dotnet run --project tools/FamilyExpandGen -- [--seed <dir>] [--out <dir>] [--check]
 //        --seed   default: data/seed/items, found by walking up from the working directory
@@ -45,15 +47,26 @@ if (itemsRoot is null || !Directory.Exists(itemsRoot))
 }
 
 var familiesDir = Path.Combine(itemsRoot, "affix-families");
-var tierBandsPath = Path.Combine(itemsRoot, "_tuning", "tier-bands.v1.json");
 if (!Directory.Exists(familiesDir))
 {
     Console.Error.WriteLine($"missing {familiesDir}");
     return 2;
 }
-if (!File.Exists(tierBandsPath))
+
+// Real bug fixed 2026-09-08 (atom-family-expansion, tier-bands-coverage): this used to hardcode
+// literal "tier-bands.v1.json", so `seedsmith numerics rebalance --publish` (which writes
+// tier-bands.v{n+1}.json) had zero effect on this generator -- confirmed live, two real published
+// versions (v2/v3) already existed on disk, unread by anything. TierBandsFile.FindLatestPath
+// mirrors seedsmith.numerics.tier_bands_io.load("latest")'s own resolution exactly.
+var tuningDir = Path.Combine(itemsRoot, "_tuning");
+string tierBandsPath;
+try
 {
-    Console.Error.WriteLine($"missing {tierBandsPath}");
+    tierBandsPath = TierBandsFile.FindLatestPath(tuningDir);
+}
+catch (FileNotFoundException)
+{
+    Console.Error.WriteLine($"missing tier-bands.v*.json under {tuningDir}");
     return 2;
 }
 

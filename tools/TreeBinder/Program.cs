@@ -77,12 +77,15 @@ if (planFiles.Length == 0)
 
 var nodesDir = Path.Combine(seedRoot, "nodes");
 var allNodesByTree = new Dictionary<string, List<BindInputNode>>(StringComparer.Ordinal);
+var allMetaByTree = new Dictionary<string, TreeCatalogMeta>(StringComparer.Ordinal);
 foreach (var planFile in planFiles)
 {
     var treeId = PlanReader.TreeIdFromPlanFileName(Path.GetFileNameWithoutExtension(planFile));
     var seedFile = Path.Combine(nodesDir, $"{treeId}.json");
     var seedJson = File.Exists(seedFile) ? File.ReadAllText(seedFile) : null;
-    allNodesByTree[treeId] = PlanReader.ReadPlanNodesWithSeed(File.ReadAllText(planFile), seedJson, treeTuning);
+    var planJson = File.ReadAllText(planFile);
+    allNodesByTree[treeId] = PlanReader.ReadPlanNodesWithSeed(planJson, seedJson, treeTuning);
+    allMetaByTree[treeId] = PlanReader.ReadTreeMeta(planJson);
 }
 
 if (mode == "explain")
@@ -103,7 +106,7 @@ var anyStale = false;
 foreach (var (treeId, nodes) in allNodesByTree)
 {
     var report = TreeBinderRun.BindTree(nodes, affixesById, atomsById, powerTuning);
-    var json = ReportWriter.Serialize(treeId, report);
+    var json = ReportWriter.Serialize(treeId, allMetaByTree[treeId], nodes, report);
 
     Console.WriteLine($"tree-binder: {treeId}  verdict={report.Verdict}  bound={report.Bound.Count} " +
                        $"refused={report.Refused.Count} unspentBudgetShareMilli={report.TotalUnspentBudgetShareMilli}");

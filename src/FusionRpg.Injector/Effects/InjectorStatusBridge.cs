@@ -17,12 +17,40 @@ public static class InjectorStatusBridge
 
     public static ActorDerivedSnapshot ResolveDerived(string? entityPtr, bool attackerLess)
     {
+        if (!TryBuildContext(entityPtr, attackerLess, out var ctx, out var pinned))
+            return pinned ?? ActorDerivedSnapshot.AttackerLess();
+        if (pinned is not null) return pinned;
+        return CheatState.ActorHub.ResolveDerived(ctx!);
+    }
+
+    /// <summary>Debug / proof path — same compose as <see cref="ResolveDerived"/> with GG-49 bags.</summary>
+    public static (ActorDerivedSnapshot Snapshot, DerivedContributionBag Contributions)
+        ResolveDerivedWithContributions(string? entityPtr, bool attackerLess)
+    {
+        if (!TryBuildContext(entityPtr, attackerLess, out var ctx, out var pinned))
+            return (pinned ?? ActorDerivedSnapshot.AttackerLess(), DerivedContributionBag.From(Array.Empty<DerivedModifier>()));
+        if (pinned is not null)
+            return (pinned, DerivedContributionBag.From(Array.Empty<DerivedModifier>()));
+        return CheatState.ActorHub.ResolveDerivedWithContributions(ctx!);
+    }
+
+    static bool TryBuildContext(
+        string? entityPtr,
+        bool attackerLess,
+        out StatContext? ctx,
+        out ActorDerivedSnapshot? pinnedOverride)
+    {
+        ctx = null;
+        pinnedOverride = null;
         if (attackerLess || string.IsNullOrWhiteSpace(entityPtr))
-            return ActorDerivedSnapshot.AttackerLess();
+            return false;
 
         var key = entityPtr.Trim();
         if (InjectorDerivedOverride.TryGet(key, out var pinned))
-            return pinned;
+        {
+            pinnedOverride = pinned;
+            return true;
+        }
 
         var hub = CheatState.ActorHub;
         if (!hub.Stats.TryGetBaseline(key, out var baseline)
@@ -35,7 +63,7 @@ public static class InjectorStatusBridge
         // for the other.
         var (side, typeId, elementTypes) = LawnElementResolverHost.Resolve(key);
 
-        var ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)
+        ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)
             ? hub.Stats.Contexts.ForZombie(
                 key,
                 baseline,
@@ -54,7 +82,6 @@ public static class InjectorStatusBridge
                 cheatScale: CheatState.EffectiveStats(),
                 pvzStatsMods: CheatState.PvzStatsMods,
                 elementTypes: elementTypes);
-
-        return hub.ResolveDerived(ctx);
+        return true;
     }
 }

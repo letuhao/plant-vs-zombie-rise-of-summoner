@@ -81,10 +81,63 @@ public static class PlanReader
 
             var deliberateHole = nodeEl.TryGetProperty("deliberateHole", out var dhEl) && dhEl.ValueKind == JsonValueKind.True;
 
+            // 2026-09-07: the plan's own identity fields `tree-catalog`'s `NodeRecord` needs but this
+            // module never used to carry through -- see `BindInputNode`'s own doc comment for the
+            // full finding. `branch` here is the plan's own full word ("offensive"/"defensive"),
+            // translated to the catalog's `TreeBranch` enum member (`Off`/`Def`) at the one point a
+            // translation is needed, never carried as a raw string.
+            var branchWord = nodeEl.TryGetProperty("branch", out var brEl) ? brEl.GetString() : null;
+            var branch = string.Equals(branchWord, "defensive", StringComparison.OrdinalIgnoreCase)
+                ? TreeBranch.Def : TreeBranch.Off;
+            var tier = nodeEl.TryGetProperty("tier", out var tEl) ? tEl.GetInt32() : 0;
+            var nodeKey = nodeEl.TryGetProperty("nodeKey", out var nkEl) ? nkEl.GetString() ?? "" : "";
+            var nodeClassWord = nodeEl.TryGetProperty("nodeClass", out var ncEl) ? ncEl.GetString() : null;
+            var nodeClass = string.Equals(nodeClassWord, "mechanism", StringComparison.OrdinalIgnoreCase)
+                ? NodeClass.Mechanism : NodeClass.Magnitude;
+
             result.Add(new BindInputNode(nodeId, treeTuning.TreeShareMilli, treeTuning.TreeBudgetMilli,
-                budgetShareMilli, Branches, affixIds, exclusionForm, deliberateHole));
+                budgetShareMilli, Branches, affixIds, exclusionForm, deliberateHole,
+                branch, tier, nodeKey, nodeClass));
         }
         return result;
+    }
+
+    /// <summary>The `tree-catalog` `TreeRecord` fields (spec-tree-catalog.md §2.1), read from the
+    /// SAME plan document `ReadPlanNodes` already parses — a second read, not a second file, since
+    /// `Program.cs` already has the raw plan JSON in hand at the one call site that needs both.
+    /// `nodesPerTier` is derived from the CHOSEN archetype's own `widths[]` (`archetypes[]`, keyed by
+    /// the plan's own singular `archetype` id) doubled for both branches (D10/D29: branches is
+    /// always 2) — a structural, always-known fact about the tree's SHAPE, independent of how much
+    /// of its content has been generated yet, never counted off the (possibly partial) `nodes[]`
+    /// array itself.</summary>
+    public static TreeCatalogMeta ReadTreeMeta(string planJson)
+    {
+        using var doc = JsonDocument.Parse(planJson);
+        var root = doc.RootElement;
+
+        var category = root.TryGetProperty("category", out var catEl) ? catEl.GetString() ?? "" : "";
+        var gateQuantity = root.TryGetProperty("gateQuantity", out var gqEl) ? gqEl.GetString() ?? "" : "";
+        var shapeArchetype = root.TryGetProperty("archetype", out var arEl) ? arEl.GetString() ?? "" : "";
+        var catalogVersion = root.TryGetProperty("version", out var vEl) ? vEl.GetInt32() : 0;
+
+        var widths = Array.Empty<int>();
+        if (root.TryGetProperty("archetypes", out var archsEl) && archsEl.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var archEl in archsEl.EnumerateArray())
+            {
+                if (archEl.TryGetProperty("id", out var idEl) &&
+                    string.Equals(idEl.GetString(), shapeArchetype, StringComparison.Ordinal) &&
+                    archEl.TryGetProperty("widths", out var wEl) && wEl.ValueKind == JsonValueKind.Array)
+                {
+                    widths = wEl.EnumerateArray().Select(e => e.GetInt32()).ToArray();
+                    break;
+                }
+            }
+        }
+        var nodesPerTier = widths.Select(w => w * (int)Branches).ToArray();
+
+        return new TreeCatalogMeta(category, gateQuantity, shapeArchetype, widths.Length,
+            (int)Branches, nodesPerTier, catalogVersion);
     }
 
     /// <summary>The real production path (`Program.cs`'s own CLI run): the plan read exactly as
@@ -100,16 +153,21 @@ public static class PlanReader
 
         var overrides = ReadSeedOverrides(seedJson);
         return nodes.ConvertAll(node => overrides.TryGetValue(node.NodeId, out var seed)
-            ? node with { AffixIds = seed.AffixIds, ExclusionForm = seed.ExclusionForm }
+            ? node with
+            {
+                AffixIds = seed.AffixIds, ExclusionForm = seed.ExclusionForm,
+                ExcludeProps = seed.ExcludeProps,
+            }
             : node);
     }
 
-    static Dictionary<string, (IReadOnlyList<string> AffixIds, ExclusionForm ExclusionForm)> ReadSeedOverrides(
-        string seedJson)
+    static Dictionary<string, (IReadOnlyList<string> AffixIds, ExclusionForm ExclusionForm,
+        IReadOnlyList<string> ExcludeProps)> ReadSeedOverrides(string seedJson)
     {
         using var doc = JsonDocument.Parse(seedJson);
         var nodesEl = doc.RootElement.TryGetProperty("nodes", out var n) ? n : default;
-        var result = new Dictionary<string, (IReadOnlyList<string>, ExclusionForm)>(StringComparer.Ordinal);
+        var result = new Dictionary<string,
+            (IReadOnlyList<string>, ExclusionForm, IReadOnlyList<string>)>(StringComparer.Ordinal);
         if (nodesEl.ValueKind != JsonValueKind.Array) return result;
 
         foreach (var nodeEl in nodesEl.EnumerateArray())
@@ -119,13 +177,36 @@ public static class PlanReader
                 ? aiEl.EnumerateArray().Select(e => e.GetString()!).ToList()
                 : new List<string>();
 
-            var exclusionFormStr = nodeEl.TryGetProperty("exclusion", out var exEl) &&
-                                   exEl.TryGetProperty("form", out var formEl)
+            var exclusionEl = nodeEl.TryGetProperty("exclusion", out var exEl) ? exEl : default;
+            var exclusionFormStr = exclusionEl.ValueKind == JsonValueKind.Object &&
+                                   exclusionEl.TryGetProperty("form", out var formEl)
                 ? formEl.GetString() : "None";
             Enum.TryParse<ExclusionForm>(exclusionFormStr, ignoreCase: true, out var exclusionForm);
 
-            result[nodeId] = (affixIds, exclusionForm);
+            // tree-language's own field name is `propertyKeys` (§6.3); `tree-catalog`'s `NodeRecord`
+            // calls the same content `excludeProps` (§2.2) — a rename this reader bridges, same as
+            // `exclusion.form` -> `ExclusionForm` above, never a second vocabulary.
+            var excludeProps = exclusionEl.ValueKind == JsonValueKind.Object &&
+                               exclusionEl.TryGetProperty("propertyKeys", out var pkEl) &&
+                               pkEl.ValueKind == JsonValueKind.Array
+                ? pkEl.EnumerateArray().Select(e => e.GetString()!).ToList()
+                : new List<string>();
+
+            result[nodeId] = (affixIds, exclusionForm, excludeProps);
         }
         return result;
     }
 }
+
+/// <summary>The `tree-catalog` `TreeRecord` fields this module's own plan read already has in hand
+/// (spec-tree-catalog.md §2.1) — everything a `TreeRecord` needs except `treeId` (the caller's own
+/// loop variable) and `enabled` (always `true` for a tree this run is actively binding; a retired
+/// tree is a `tree-state` concern, never something `tree-binder` decides).</summary>
+public sealed record TreeCatalogMeta(
+    string Category,
+    string GateQuantity,
+    string ShapeArchetype,
+    int Tiers,
+    int Branches,
+    IReadOnlyList<int> NodesPerTier,
+    int CatalogVersion);

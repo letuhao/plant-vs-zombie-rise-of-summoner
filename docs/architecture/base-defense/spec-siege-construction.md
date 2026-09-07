@@ -470,10 +470,23 @@ free stock), and every action with zero demands — every one shipped today — 
 zero in `Battle`/`Siege`/`Actions`/`World.Turn`), `DATA` goldens 12/12 unchanged, all 4 `BOUND` guards
 green, `NUM`/magic-numbers: zero new findings.
 
-**What is STILL genuinely un-started, now precisely two things instead of one conflated "GAME-WIDE"
-claim**: (1) the broader `action`-program fix (every OTHER action type, chiefly combat, still fires a
-`holdsStock`-gated consumable for free — see `[[action-program]]`'s own memory) remains real,
-cross-program, and correctly deferred; (2) `Assembled` still has no live `IIntentSource` decision path
+**Item (1) below CLOSED 2026-09-07, a separate session**: `BattleRunState`/`BattleEngine.Resolve` gained
+an optional `IStockLedger? stockLedger = null` (defaulting to `NoStockLedger.Instance`, the same
+"unwired means safe, not permissive" posture this file's own `ConstructionActivation.Fire` already
+established), and both real combat commit points — `BasicAttack.cs`'s `RunBasicAttackStep` (atomic
+path) and `TimelineDispatch.cs`'s `TryCommitReady` (the live dispatch path for every shipped profile
+today) — now call `ActionStockCommit.TryCommit` immediately alongside their existing
+`CostLedger.TryPay` call, discarding the result the same way (both are already gated pre-commit, by
+`CostLedger.Check` and the `holdsStock` leaf respectively, so a commit-time shortfall is the same rare
+TOCTOU race `CostLedger.TryPay` already accepts without branching on). Proven with a synthetic
+`StockDemand`-bearing skill against a fake `IStockLedger` in `ActionCostsCooldownsAdoptionTests.cs`
+(`A_holdsStock_gated_action_actually_spends_its_stock_at_commit`); the additive-discipline control
+(`An_action_with_no_stock_demands_never_touches_a_supplied_ledger`) and the no-ledger-supplied control
+(`No_stock_ledger_supplied_is_byte_identical_to_today`) both confirm every action shipped today —
+zero compiled `StockDemands` — is unaffected. `Battle`/`Actions` namespace regression: 1667/1667.
+Magic-numbers and all four boundary guards: clean.
+
+**What is STILL genuinely un-started**: `Assembled` still has no live `IIntentSource` decision path
 choosing to use it at all (`TryDeclareBuilt` is deliberately `Built`-only) and no authored item/cost to
 decide over even if one existed — both correctly deferred to content-authoring, not engineering this
 session left undone.

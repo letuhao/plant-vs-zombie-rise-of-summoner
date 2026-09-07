@@ -160,6 +160,14 @@ public static partial class BattleEngine
             // as the atomic-path call -- no authored cost today rolls a spread.
             state.CostLedger.TryPay(attacker.Setup.Key, intent.ActionId, ActionCostTiming.OnCommit, rng: null);
 
+            // The commit-time half of the `holdsStock` precondition, at this path's own point of no
+            // return, mirroring BasicAttack.cs's identical atomic-path call directly above it (same
+            // discard-the-result posture — see that file's comment for why). This IS the live dispatch
+            // path for every shipped profile today (`BattleModeProfile.cs`), so this is the call site
+            // that actually closes spec-siege-construction.md §11's "still un-started" combat half.
+            if (state.ActionCatalog?.Get(intent.ActionId) is { } stockAction)
+                new ActionStockCommit(state.StockLedger).TryCommit(attacker.Setup.Key, stockAction);
+
             trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Ready, Timeline.TurnState.Committed);
             return true;
         }

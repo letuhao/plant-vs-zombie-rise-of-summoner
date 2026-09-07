@@ -341,11 +341,12 @@ def test_build_reference_reports_against_the_real_corpus_finds_exactly_the_known
 
     assert reports.material_output.unresolved == []
 
-    legacy_unresolved = {r.value for r in reports.cost_lines.unresolved}
-    assert legacy_unresolved == {"shard.common", "shard.rare", "shard.epic", "shard.legendary"}
-    assert len(reports.cost_lines.unresolved) == 7, (
-        "recipe.009/010/011/017/018/025/029 each name exactly one legacy shard cost line — "
-        "MaterialRecipeCatalog.Load refuses all seven at real C# import time")
+    # ⭐ Corrected 2026-09-07, later the same day: the seven legacy-shard cost-line refusals this
+    # test used to pin (recipe.009/010/011/017/018/025/029) were fixed in place by
+    # `migrate_legacy_shards.apply_to_real_corpus` — see that module's own test file and
+    # `recipes.json`'s `_meta.amendments` entry `recipegen/legacy-shard-migration-1`. Zero
+    # unresolved cost lines is now the correct, permanent expectation.
+    assert reports.cost_lines.unresolved == []
 
 
 def test_plan_container_backfill_names_exactly_the_real_dangling_target():

@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
 using Xunit;
@@ -401,8 +402,9 @@ public class ContentValidationTests
         var (atoms, _) = ShippedSeed();
         Assert.NotEmpty(atoms);
 
+        var lookupPool = RealLookupPool();
         var unpriceable = atoms
-            .Select(a => (a.AtomId, Priced: CostFunction.Price(a)))
+            .Select(a => (a.AtomId, Priced: CostFunction.Price(a, lookupPool: lookupPool)))
             .Where(x => !x.Priced.Ok)
             .Select(x => $"{x.AtomId}: {x.Priced.Verdict.Reason}")
             .ToList();
@@ -447,6 +449,23 @@ public class ContentValidationTests
             dir = dir.Parent;
         }
         throw new DirectoryNotFoundException("data/seed/atoms");
+    }
+
+    /// <summary>Real bug found 2026-09-08 (atom-family-expansion): `Every_shipped_atom_can_be_priced`
+    /// called `CostFunction.Price(a)` with no `lookupPool` at all, so any pool-referencing
+    /// `stat.derived` atom was reported unpriceable by name — a wiring gap in this test's own setup
+    /// (E30's channel-pool mechanism already ships, per DESIGN-GATE.md's own "L2 shipped as E30"
+    /// correction), not a real product defect. Never visible before because no shipped atom used a
+    /// pool-reference channel until this session's `tier-bands-coverage` module unblocked several
+    /// (`evd-flinch`/`evd-harden`/`evd-seal`/`shld-breach`, all real element-variant evasion/shield
+    /// families). Loads the real, already-shipped `data/seed/channel-pools/pools.v1.json` once.</summary>
+    static Func<string, ChannelPoolRow?> RealLookupPool()
+    {
+        var path = Path.Combine(RepoRoot(), "data", "seed", "channel-pools", "pools.v1.json");
+        var rejection = ChannelPoolFile.TryParse(File.ReadAllText(path), out var pools);
+        Assert.True(rejection.IsOk, rejection.Detail);
+        var byId = pools.ToDictionary(p => p.PoolId, StringComparer.Ordinal);
+        return id => byId.TryGetValue(id, out var row) ? row : null;
     }
 
     [Fact]

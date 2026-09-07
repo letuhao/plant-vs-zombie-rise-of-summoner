@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.shld-breach",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Shield Breach T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-pen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-breach",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Shield Breach T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-pen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-breach",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Shield Breach T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-pen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-breach",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Shield Breach T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-pen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-breach",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Shield Breach T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-pen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-cycle",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Shield Cycling T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-regen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-cycle",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Shield Cycling T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-regen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-cycle",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Shield Cycling T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-regen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-cycle",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Shield Cycling T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-regen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-cycle",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Shield Cycling T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-regen",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-surge",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Shield Surge T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-capacity",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-surge",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Shield Surge T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-capacity",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-surge",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Shield Surge T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-capacity",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-surge",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Shield Surge T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-capacity",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.shld-surge",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Shield Surge T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-shield-capacity",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-shield-stat.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    }
+  ]
+}

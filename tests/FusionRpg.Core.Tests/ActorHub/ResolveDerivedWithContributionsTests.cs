@@ -58,6 +58,7 @@ public class ResolveDerivedWithContributionsTests
         Assert.True(channelValue > 0);
         var sources = contributions.ContributionsFor("combat.power.omni");
         var contribution = Assert.Single(sources);
+        Assert.Equal("aptitude.Might", contribution.SourceId);
         Assert.Equal(channelValue, contribution.Value, 6); // the one contribution accounts for the whole channel value
         Assert.Equal(DerivedModifierOp.Flat, contribution.Op); // FlatSum reads only Flat
     }

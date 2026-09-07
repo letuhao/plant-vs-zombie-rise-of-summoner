@@ -10,7 +10,9 @@ import unittest
 
 from seedsmith.adapters.trees.species.generate_favour_fit import resolve_favour_fit
 from seedsmith.adapters.trees.species.plan import FavourCell
-from seedsmith.adapters.trees.species.prompts import build_favour_fit_brief, build_favour_fit_context
+from seedsmith.adapters.trees.species.prompts import (
+    FAVOUR_FIT_SYSTEM_PROMPT, build_favour_fit_brief, build_favour_fit_context,
+)
 from seedsmith.adapters.trees.species.roster import SpeciesAnchor
 
 
@@ -48,6 +50,40 @@ class BuildFavourFitBriefTests(unittest.TestCase):
         brief = build_favour_fit_brief(context)
         self.assertIn("OFFERED", brief)
         self.assertIn("none", brief)
+
+
+class LenientCalibrationTests(unittest.TestCase):
+    """2026-09-07 real-corpus finding, guarded against regressing: a real 10-species sample against
+    the ORIGINAL wording ("genuinely fits" / "none... is a legitimate, expected answer, never a
+    failure to avoid") resolved only ~20% of real species on a single pass — an asymmetric
+    reassurance toward the negative outcome, the same defect class already found once this session
+    in `nodegen/brief.py`'s own exclusion clause. Reworded (owner's own explicit direction: "do not
+    strict, this is our game, we can make up it") to treat a loose, reframed justification as
+    sufficient and reserve `none` for actively contradictory cases only — re-tested against the
+    IDENTICAL 10-species sample and confirmed 10/10 resolved to a real cell. These tests lock in the
+    asymmetry itself (offered/alternates are the encouraged, expected answers; `none` is the rare
+    exception), not the exact prose, so a future reword stays free to vary wording as long as it
+    keeps this shape."""
+
+    def test_the_system_prompt_treats_a_real_answer_as_the_common_case_not_none(self) -> None:
+        prompt = FAVOUR_FIT_SYSTEM_PROMPT.lower()
+        self.assertIn("most", prompt)
+        self.assertIn("rare", prompt)
+        self.assertLess(prompt.index("most"), prompt.index("rare"),
+                        "the 'most creatures resolve' framing must be read before 'none' is "
+                        "narrowed to a rare exception, or the model reaches for the safe negative "
+                        "answer by default")
+
+    def test_the_system_prompt_permits_a_loose_or_reframed_justification(self) -> None:
+        prompt = FAVOUR_FIT_SYSTEM_PROMPT.lower()
+        self.assertTrue(any(word in prompt for word in ("loose", "stretch", "reframed", "metaphorical")),
+                        "the prompt must explicitly license a non-literal fit, not just a strict one")
+
+    def test_the_brief_asks_for_justification_not_a_pass_fail_lore_check(self) -> None:
+        context = build_favour_fit_context(
+            _anchor("Alpha"), FavourCell("Might", "fire", "poison"), [])
+        brief = build_favour_fit_brief(context)
+        self.assertIn("justif", brief.lower())
 
 
 class ResolveFavourFitTests(unittest.TestCase):

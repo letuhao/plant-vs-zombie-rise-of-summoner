@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
@@ -145,7 +146,8 @@ public static class GrantedDerivedAtomReader
 
             (into ??= new List<BoundDerivedAtom>()).Add(
                 new BoundDerivedAtom(channel, parsed, amount,
-                    SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
+                    SourceId: ContributionSourceIds.Grant(
+                        string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId)));
         }
     }
 
@@ -199,7 +201,8 @@ public static class GrantedDerivedAtomReader
 
                 (into ??= new List<BoundDerivedAtom>()).Add(
                     new BoundDerivedAtom(channel, parsed, amount,
-                        SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
+                        SourceId: ContributionSourceIds.Grant(
+                            string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId)));
                 matched = true;
                 break;
             }

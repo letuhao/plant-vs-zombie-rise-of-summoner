@@ -31,6 +31,23 @@
           "recipe.031",
           "recipe.032"
         ]
+      },
+      {
+        "batch": "recipegen/legacy-shard-migration-1",
+        "note": "Seven pre-existing cost lines named a retired legacy shard band id (shard.common/rare/epic/legendary), refused at real C# import time (MaterialCatalog.IsLegacyShardId / MaterialUnissuableRule via MaterialRecipeCatalog.Load -- these recipes could never be paid). Migrated via seedsmith.adapters.items.recipegen.migrate_legacy_shards, mirroring LegacyDemonRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder rung, spec-rarity-migration.md sec4 point 4): common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven. No live model call -- a mechanical id rewrite, no prompt involved, same 'hand-authored, no model' precedent recipegen's own trial-1 amendment used for its hand-authored name/flavor.",
+        "promptVersion": "n/a-mechanical-migration",
+        "model": "recipegen/legacy-shard-migration-1",
+        "authoredUtc": "2026-09-07T16:15:29Z",
+        "sourceRef": "docs/architecture/demon-seed/spec-rarity-migration.md#4",
+        "entries": [
+          "recipe.009",
+          "recipe.010",
+          "recipe.011",
+          "recipe.017",
+          "recipe.018",
+          "recipe.025",
+          "recipe.029"
+        ]
       }
     ]
   },
@@ -213,7 +230,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.common",
+          "material": "shard.chaff",
           "costBand": "standard"
         },
         {
@@ -238,7 +255,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {
@@ -263,7 +280,7 @@
           "costBand": "steep"
         },
         {
-          "material": "shard.epic",
+          "material": "shard.heirloom",
           "costBand": "steep"
         },
         {
@@ -385,7 +402,7 @@
       "frame": "any",
       "costLines": [
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {
@@ -406,7 +423,7 @@
       "frame": "any",
       "costLines": [
         {
-          "material": "shard.epic",
+          "material": "shard.heirloom",
           "costBand": "steep"
         },
         {
@@ -554,7 +571,7 @@
           "costBand": "exorbitant"
         },
         {
-          "material": "shard.legendary",
+          "material": "shard.sunwoven",
           "costBand": "exorbitant"
         },
         {
@@ -642,7 +659,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {

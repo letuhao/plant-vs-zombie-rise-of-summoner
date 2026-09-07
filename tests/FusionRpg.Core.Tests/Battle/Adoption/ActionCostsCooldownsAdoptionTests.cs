@@ -334,4 +334,87 @@ public class ActionCostsCooldownsAdoptionTests
 
         Assert.Contains(trace.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));
     }
+
+    /// <summary>Records every call so the test can assert the demand was actually taken, mirroring
+    /// <c>ActionUsabilityStockSpendTests</c>'s own in-memory fixture shape (that file proves the
+    /// USABILITY half at the leaf/evaluator level; this one proves the COMMIT half at the real
+    /// `BattleEngine.Resolve` call site, which is where the gap actually lived — see
+    /// `spec-siege-construction.md` §11 / `[[action-program]]`'s own memory of this exact bug).</summary>
+    sealed class FakeStockLedger : IStockLedger
+    {
+        public readonly List<(string ActorKey, string ActionId, IReadOnlyList<StockDemand> Demands)> Calls = new();
+
+        public StockSpendResult TrySpend(string actorKey, string actionId, IReadOnlyList<StockDemand> demands)
+        {
+            Calls.Add((actorKey, actionId, demands));
+            return StockSpendResult.Spent;
+        }
+    }
+
+    static CompiledAction StockGatedSkill(string actionId) => new(
+        ActionId: actionId, Kind: ActionKind.Skill, Rung: 1, Tags: new[] { ActionTag.Offensive },
+        Enabled: true, Revision: 0, Grantable: false, DefaultAttackEligible: false, ContainerId: "",
+        Envelope: ActionEnvelope.NoOp with { ActionId = actionId },
+        Targeting: TargetSpecCompiler.Compile(new ActionTargetSpec()),
+        MinRange: 0, MaxRange: int.MaxValue, RangeChannel: null, RequiresLineOfSight: false,
+        Condition: PredicateCompiler.Always,
+        Costs: Array.Empty<CompiledActionCost>(),
+        StockDemands: new[] { new StockDemand("stock.test-consumable", 1) },
+        Scopes: Array.Empty<ActionScopeRow>());
+
+    /// <summary>
+    /// The real bug (`ActionStockCommit.TryCommit` had ZERO production callers, confirmed by a
+    /// class-name-only grep — `spec-siege-construction.md` §11): a battle-context action compiled with
+    /// a real `StockDemand` fired through `BattleEngine.Resolve` without the supplied `IStockLedger`
+    /// ever being consulted, matching `data/tuning/consumables.v1.json`'s own live consequence for the
+    /// shipped `battle` context. Proven at the SAME two real call sites T56.2 proved for
+    /// `CostLedger.TryPay` (`TimelineDispatch.cs`'s `TryCommitReady`, the live path for every shipped
+    /// profile today per `BattleModeProfile.cs`), not a synthetic unit around `ActionStockCommit` alone
+    /// (already covered by `ActionUsabilityStockSpendTests`).
+    /// </summary>
+    [Fact]
+    public void A_holdsStock_gated_action_actually_spends_its_stock_at_commit()
+    {
+        var ledger = new FakeStockLedger();
+        var catalog = ActionCatalog.Build(new[] { StockGatedSkill("skill.consumable") });
+        var setup = EquipSquadZero("skill.consumable");
+        var trace = new BattleTrace();
+
+        BattleEngine.Resolve(setup, seed: 5501, trace: trace, actionCatalog: catalog, stockLedger: ledger);
+
+        Assert.Contains(ledger.Calls, c => c.ActorKey == "squad:0" && c.ActionId == "skill.consumable"
+            && c.Demands.Count == 1 && c.Demands[0].StockId == "stock.test-consumable" && c.Demands[0].MinQty == 1);
+    }
+
+    /// <summary>The additive-discipline proof every prior adoption in this program runs: an action with
+    /// NO `StockDemands` (every action shipped today) must never touch a supplied ledger at all — the
+    /// overwhelming majority path, and the one every existing test above already exercises without
+    /// ever supplying a `stockLedger`.</summary>
+    [Fact]
+    public void An_action_with_no_stock_demands_never_touches_a_supplied_ledger()
+    {
+        var ledger = new FakeStockLedger();
+        var catalog = ActionCatalog.Build(new[] { CostedSkill("skill.no-stock", amount: 1) });
+        var setup = EquipSquadZero("skill.no-stock");
+        var trace = new BattleTrace();
+
+        BattleEngine.Resolve(setup, seed: 5501, trace: trace, actionCatalog: catalog, stockLedger: ledger);
+
+        Assert.Empty(ledger.Calls);
+    }
+
+    /// <summary>No `stockLedger` supplied at all — every call site above this pair in the file — must
+    /// remain exactly as it is today: `BattleRunState` falls back to `NoStockLedger.Instance`
+    /// internally, never a `NullReferenceException`.</summary>
+    [Fact]
+    public void No_stock_ledger_supplied_is_byte_identical_to_today()
+    {
+        var catalog = ActionCatalog.Build(new[] { CostedSkill("skill.no-stock-ledger", amount: 1) });
+        var setup = EquipSquadZero("skill.no-stock-ledger");
+        var trace = new BattleTrace();
+
+        BattleEngine.Resolve(setup, seed: 5501, trace: trace, actionCatalog: catalog); // no stockLedger at all
+
+        Assert.Contains(trace.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));
+    }
 }

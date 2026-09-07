@@ -16,23 +16,50 @@ namespace FusionRpg.Core.Battle;
 /// <c>ProduceAndBind</c> already binds a `UniqueActor`'s items (`RpgStore.UniqueActors.cs`); this is
 /// the first read of them. Before this, <c>UniqueActor</c> bindings existed only to be written.</para>
 /// </summary>
+/// <summary>One equipped <c>stat.derived</c> atom with GG-49 role/item attribution
+/// (<see cref="ContributionSourceIds.Equip"/>).</summary>
+public readonly record struct EquippedAtomInput(string Role, string ItemRefId, AtomRow Atom);
+
 public sealed class EquipAtomSource
 {
-    readonly Func<string, IReadOnlyList<AtomRow>> _resolveEquippedAtoms;
+    readonly Func<string, IReadOnlyList<EquippedAtomInput>> _resolveEquipped;
 
-    EquipAtomSource(Func<string, IReadOnlyList<AtomRow>> resolveEquippedAtoms) => _resolveEquippedAtoms = resolveEquippedAtoms;
+    EquipAtomSource(Func<string, IReadOnlyList<EquippedAtomInput>> resolveEquipped) =>
+        _resolveEquipped = resolveEquipped;
 
     /// <summary>Nothing wired — every specimen resolves to no equipment mods. The pre-module-5 state.</summary>
-    public static readonly EquipAtomSource None = new(_ => Array.Empty<AtomRow>());
+    public static readonly EquipAtomSource None = new(_ => Array.Empty<EquippedAtomInput>());
 
     /// <summary>
-    /// Production shape: <paramref name="resolveEquippedAtoms"/> is
-    /// <c>specimenId => store.ResolveBindings(OwnerScope.UniqueActor(specimenId), ctx).AtomsByBinding</c>
-    /// flattened — the caller supplies it so this class stays free of `FusionRpg.Data` (Core does not
-    /// depend on Data), matching every other atom-source seam in this program.
+    /// Production shape with role + item attribution (<c>equip:{role}:{itemRef}</c>).
+    /// Server battle and sheet use this via <c>EquippedBoundAtoms</c>. Prefer over
+    /// <see cref="FromResolver(Func{string, IReadOnlyList{AtomRow}})"/> (legacy flatten).
     /// </summary>
-    public static EquipAtomSource FromResolver(Func<string, IReadOnlyList<AtomRow>> resolveEquippedAtoms) =>
-        new(resolveEquippedAtoms ?? throw new ArgumentNullException(nameof(resolveEquippedAtoms)));
+    public static EquipAtomSource FromEquippedResolver(Func<string, IReadOnlyList<EquippedAtomInput>> resolveEquipped) =>
+        new(resolveEquipped ?? throw new ArgumentNullException(nameof(resolveEquipped)));
+
+    /// <summary>
+    /// <b>Legacy</b> flatten shape — not the Server production path. Prefer
+    /// <see cref="FromEquippedResolver"/>. SourceId becomes <c>equip:unknown:{atomId}</c>
+    /// (still attributable, no slot fiction). Production battle uses
+    /// <c>EquippedBoundAtoms.SourceFromStore</c> → <see cref="FromEquippedResolver"/>.
+    /// </summary>
+    public static EquipAtomSource FromResolver(Func<string, IReadOnlyList<AtomRow>> resolveEquippedAtoms)
+    {
+        if (resolveEquippedAtoms is null) throw new ArgumentNullException(nameof(resolveEquippedAtoms));
+        return new(specimenId =>
+        {
+            var rows = resolveEquippedAtoms(specimenId);
+            if (rows is null || rows.Count == 0) return Array.Empty<EquippedAtomInput>();
+            var list = new List<EquippedAtomInput>(rows.Count);
+            foreach (var atom in rows)
+            {
+                var id = string.IsNullOrWhiteSpace(atom.AtomId) ? atom.FamilyId : atom.AtomId;
+                list.Add(new EquippedAtomInput("unknown", id, atom));
+            }
+            return list;
+        });
+    }
 
     /// <summary>
     /// This specimen's equipped `stat.derived` channel mods. Only `stat.derived` contributes — the
@@ -99,8 +126,9 @@ public sealed class EquipAtomSource
     /// </summary>
     IEnumerable<(string Channel, string? Op, long Amount, string SourceId)> EquippedDerived(string specimenId)
     {
-        foreach (var atom in _resolveEquippedAtoms(specimenId))
+        foreach (var input in _resolveEquipped(specimenId))
         {
+            var atom = input.Atom;
             if (!string.Equals(atom.KindId, "stat.derived", StringComparison.Ordinal)) continue;
 
             var pars = Effects.Atoms.Power.CostFunction.Read(atom.ParamsJson);
@@ -123,10 +151,9 @@ public sealed class EquipAtomSource
                 ? opEl.GetString()
                 : null;
 
-            // SourceId is what DerivedContributionBag reports as "why did my number change" — the
-            // atom's own id, so an equipped line is attributable to the exact row that produced it.
+            // GG-49: equip:{role}:{itemRef} — sheet fiction via ContributionSourceIds.FictionLabel.
             yield return (chEl.GetString()!, op, amount,
-                string.IsNullOrWhiteSpace(atom.AtomId) ? atom.FamilyId : atom.AtomId);
+                ContributionSourceIds.Equip(input.Role, input.ItemRefId));
         }
     }
 }

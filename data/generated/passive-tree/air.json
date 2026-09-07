@@ -1,5 +1,80 @@
 {
   "treeId": "air",
+  "category": "elemental",
+  "gateQuantity": "element_mastery.air@Aspect",
+  "shapeArchetype": "late-crown",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    2,
+    2,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    6,
+    6
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.air-def-t7-n1",
+      "treeId": "air",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.air-def-t10-n0",
+      "treeId": "air",
+      "branch": "Def",
+      "tier": 10,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Mechanism",
+      "affixIds": [
+        "atom.warding"
+      ],
+      "budgetShareMilli": 60,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 960,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1876,
   "bound": [
@@ -12,8 +87,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 960,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

@@ -371,4 +371,21 @@ public sealed partial class RpgStore
             binding[key] = refId;
         return binding;
     }
+
+    /// <summary>D3.15's own bank-at-clear hook (<c>RpgStore.Delve.ApplyBossFirstClearGrantUnlocked</c>)
+    /// needs "which container" resolved INSIDE its own <c>RecordClear</c> transaction — <see
+    /// cref="ReadDomains"/> is whole-table and self-locked (a second connection this hook must not open
+    /// mid-write), so this is the single-row, tx-scoped sibling, mirroring
+    /// <c>RecordedLootManifestUnlocked</c>'s identical "same query, caller's own tx" shape
+    /// (`RpgStore.Delve.cs`). Returns <c>null</c> both when the domain row itself is missing and when it
+    /// has none authored — <see cref="DomainRow.FirstClearRef"/>'s own doc comment: "`null` is a
+    /// legitimate, expected value... not a content gap to fill in later."</summary>
+    internal static string? ReadDomainFirstClearRefUnlocked(SqliteConnection db, SqliteTransaction tx, string domainId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT first_clear_ref FROM dungeon_domain WHERE domain_id = $id;";
+        cmd.Parameters.AddWithValue("$id", domainId);
+        return cmd.ExecuteScalar() is string s ? s : null;
+    }
 }

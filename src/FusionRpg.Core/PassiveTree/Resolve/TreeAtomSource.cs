@@ -71,7 +71,7 @@ public static class TreeAtomSource
                     continue; // a 'more' or unknown op on the derived side is refused at bind (B4/B2), never reached here
 
                 var amount = ResolveAmount(atom, ladder, thetaNode, fMultiplier);
-                var sourceId = $"tree.{tree.Tree.TreeId}.{node.NodeId}";
+                var sourceId = ContributionSourceIds.Tree(tree.Tree.TreeId, node.NodeId);
                 result.Add(new BoundDerivedAtom(atom.ChannelId, composerOp, amount, sourceId));
             }
         }

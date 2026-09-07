@@ -143,7 +143,7 @@ public class GrantedDerivedAtomReaderTests
         Assert.Equal("combat.power.omni", atom.Channel);
         Assert.Equal(DerivedModifierOp.Flat, atom.Op);
         Assert.Equal(120.0, atom.Amount);
-        Assert.Equal("test.effect", atom.SourceId);
+        Assert.Equal("grant:test.effect", atom.SourceId);
     }
 
     /// <summary>Both shapes on the board at once — the realistic case. Exactly the derived one is read.</summary>
@@ -159,7 +159,7 @@ public class GrantedDerivedAtomReaderTests
                 DerivedOverlay("combat.power.omni", "flat", 120.0), effectId: "derived.effect", grantId: "g-derived");
 
         var atom = Assert.Single(GrantedDerivedAtomReader.Read(store, PlantCtx()));
-        Assert.Equal("derived.effect", atom.SourceId);
+        Assert.Equal("grant:derived.effect", atom.SourceId);
     }
 
     // ── owner scopes ─────────────────────────────────────────────────────────────────────────────
@@ -307,7 +307,7 @@ public class GrantedDerivedAtomReaderTests
         var store = new FakeGrantStore().Add("match", EffectOwnerKeys.Match,
             DerivedOverlay("combat.power.omni", "flat", 10), effectId: "", grantId: "g-42");
 
-        Assert.Equal("g-42", Assert.Single(GrantedDerivedAtomReader.Read(store, PlantCtx())).SourceId);
+        Assert.Equal("grant:g-42", Assert.Single(GrantedDerivedAtomReader.Read(store, PlantCtx())).SourceId);
     }
 
     // ── never throw on the hot path ──────────────────────────────────────────────────────────────

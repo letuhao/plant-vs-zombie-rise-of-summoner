@@ -3,6 +3,306 @@
   "kind": "atom",
   "entries": [
     {
+      "family": "atom.arm-hardening",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Bastion T1",
+      "params": {
+        "channel": "defense",
+        "op": "more",
+        "amount": {
+          "min": 7,
+          "max": 15,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-hardening",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Bastion T2",
+      "params": {
+        "channel": "defense",
+        "op": "more",
+        "amount": {
+          "min": 13,
+          "max": 25,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-hardening",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Bastion T3",
+      "params": {
+        "channel": "defense",
+        "op": "more",
+        "amount": {
+          "min": 22,
+          "max": 44,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-hardening",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Bastion T4",
+      "params": {
+        "channel": "defense",
+        "op": "more",
+        "amount": {
+          "min": 39,
+          "max": 77,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-hardening",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Bastion T5",
+      "params": {
+        "channel": "defense",
+        "op": "more",
+        "amount": {
+          "min": 68,
+          "max": 136,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-riveting",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Reinforced Plating T1",
+      "params": {
+        "channel": "arm1Max",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-riveting",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Reinforced Plating T2",
+      "params": {
+        "channel": "arm1Max",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-riveting",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Reinforced Plating T3",
+      "params": {
+        "channel": "arm1Max",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-riveting",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Reinforced Plating T4",
+      "params": {
+        "channel": "arm1Max",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-riveting",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Reinforced Plating T5",
+      "params": {
+        "channel": "arm1Max",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-welding",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Reinforced Carapace T1",
+      "params": {
+        "channel": "arm2Max",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-welding",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Reinforced Carapace T2",
+      "params": {
+        "channel": "arm2Max",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-welding",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Reinforced Carapace T3",
+      "params": {
+        "channel": "arm2Max",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-welding",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Reinforced Carapace T4",
+      "params": {
+        "channel": "arm2Max",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.arm-welding",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Reinforced Carapace T5",
+      "params": {
+        "channel": "arm2Max",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
       "family": "atom.resilience",
       "tier": 1,
       "kind": "stat.modify",
@@ -18,7 +318,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -37,7 +338,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -56,7 +358,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -75,7 +378,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -94,7 +398,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -113,7 +418,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -132,7 +438,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -151,7 +458,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -170,7 +478,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -189,7 +498,8 @@
       },
       "tags": {
         "generatedFrom": "g-armour.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     }
   ]

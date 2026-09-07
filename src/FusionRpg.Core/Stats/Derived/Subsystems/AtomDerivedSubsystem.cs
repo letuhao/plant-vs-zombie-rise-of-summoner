@@ -56,6 +56,9 @@ public sealed class AtomDerivedSubsystem : IActorStatSubsystem
         foreach (var atom in bound)
         {
             if (string.IsNullOrWhiteSpace(atom.Channel)) continue;
+            // GG-49 / actor-hub-ssot §8.1: empty SourceId is a defect — skip rather than mint
+            // an unattributed contribution that InspectSplit cannot name.
+            if (string.IsNullOrWhiteSpace(atom.SourceId)) continue;
             mods.Add(new DerivedModifier(atom.Channel, atom.Op, atom.Amount, SourceId: atom.SourceId));
         }
     }

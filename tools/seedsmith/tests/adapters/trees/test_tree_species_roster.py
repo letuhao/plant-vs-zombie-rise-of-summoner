@@ -1,10 +1,12 @@
 """Tests for seedsmith.adapters.trees.species.roster (task J5, spec-species-tree.md §2.1, §4).
 
-The blind spot §2.1 names is real, not hypothetical: `zombie/_needs-review.json` still parks a
-stale `SnorkleZombie` duplicate as of 2026-09-07, invisible to any tool that skips `_`-prefixed
-files. `RealCorpusTests` below proves `load_roster()` catches it against the actual committed data,
-not just a synthetic stand-in — the rest of this file proves every individual failure shape in
-isolation, with a fixture built to have exactly that one defect.
+The blind spot §2.1 names was real, not hypothetical: `zombie/_needs-review.json` parked a stale
+`SnorkleZombie` duplicate from 2026-09-02 (when this task first caught it) until 2026-09-07 (when a
+real J9 de-risking batch run tripped over it blocking `load_roster()` for the whole real corpus, and
+it was removed as a confirmed-rejected draft). `RealCorpusTests` below now proves `load_roster()`
+loads the actual committed data cleanly — the rest of this file proves every individual failure
+shape in isolation, with a fixture built to have exactly that one defect, so the detection itself
+stays covered even though the real corpus no longer exercises it.
 """
 from __future__ import annotations
 
@@ -160,11 +162,18 @@ class MissingIndexTests(unittest.TestCase):
 
 class RealCorpusTests(unittest.TestCase):
     """Against the actual committed `data/seed/demons/species/` root -- not a synthetic stand-in.
-    If a future session resolves the `_needs-review.json` parked duplicate this names, this test's
-    own assertion will need updating to match; until then it is proving a real, currently-open
-    finding, not a hypothetical one (spec-species-tree.md §2.1's own worked example)."""
 
-    def test_the_real_corpus_still_carries_the_snorklezombie_parked_duplicate(self) -> None:
-        with self.assertRaises(roster.RosterError) as ctx:
-            roster.load_roster()
-        self.assertIn("SnorkleZombie", str(ctx.exception))
+    **Resolved 2026-09-07** (this file's own docstring anticipated exactly this update): the
+    `zombie/_needs-review.json` parked duplicate this test used to name was a single-entry,
+    self-declared REJECTED draft (`verdict: "too-low"`, `aptitudePrimary`/`posture` both
+    `"unresolved"`) -- confirmed by reading its real content directly, not assumed safe -- and was
+    removed as part of J9's own real de-risking batch run finding it blocked `load_roster()` for the
+    real corpus outright. `load_roster()` now loads the real corpus cleanly; this test proves that,
+    matching the file's own stated intent to update this exact assertion once the defect closed."""
+
+    def test_the_real_corpus_loads_cleanly_now_that_the_snorklezombie_parked_duplicate_is_removed(
+            self) -> None:
+        real_roster = roster.load_roster()
+        self.assertEqual(904, len(real_roster.species_ids))
+        self.assertIn("SnorkleZombie", real_roster.species_ids)
+        self.assertEqual("zombie/undead.json", real_roster.anchors["SnorkleZombie"].source_path)

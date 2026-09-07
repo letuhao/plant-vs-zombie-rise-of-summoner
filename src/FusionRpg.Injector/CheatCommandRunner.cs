@@ -1569,10 +1569,25 @@ public static class CheatCommandRunner
         }
 
         var key = ptr.Trim();
-        var derived = InjectorStatusBridge.ResolveDerived(key, attackerLess: false);
+        var (derived, contributions) = InjectorStatusBridge.ResolveDerivedWithContributions(key, attackerLess: false);
         var channels = derived.Channels
             .OrderBy(kv => kv.Key, StringComparer.Ordinal)
-            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            .ToDictionary(
+                kv => kv.Key,
+                kv => (object)new Dictionary<string, object>
+                {
+                    ["value"] = kv.Value,
+                    ["contributions"] = contributions.ContributionsFor(kv.Key)
+                        .Select(c => new Dictionary<string, object>
+                        {
+                            ["sourceId"] = c.SourceId,
+                            ["label"] = ContributionSourceIds.FictionLabel(c.SourceId),
+                            ["op"] = c.Op.ToString(),
+                            ["value"] = c.Value
+                        })
+                        .ToList()
+                },
+                StringComparer.Ordinal);
         DebugRuntime.Emit("debug.actor-derived", new Dictionary<string, object>
         {
             ["ptr"] = key,

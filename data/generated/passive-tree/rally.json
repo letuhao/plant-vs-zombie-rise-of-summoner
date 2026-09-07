@@ -1,5 +1,543 @@
 {
   "treeId": "rally",
+  "category": "status",
+  "gateQuantity": "status_applied.rally",
+  "shapeArchetype": "broad-and-flat",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.rally-off-t1-n0",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 9,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "aptitude"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t1-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 1,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 9,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t2-n0",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 2,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t2-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 2,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t3-n0",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 3,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 27,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1823,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1823,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t3-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 3,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 28,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1890,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1890,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "posture"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t4-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 4,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 37,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t5-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 5,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.might"
+      ],
+      "budgetShareMilli": 46,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3105,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-off-t6-n1",
+      "treeId": "rally",
+      "branch": "Off",
+      "tier": 6,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "budgetShareMilli": 55,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-def-t2-n0",
+      "treeId": "rally",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 288,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-def-t2-n1",
+      "treeId": "rally",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-def-t6-n1",
+      "treeId": "rally",
+      "branch": "Def",
+      "tier": 6,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 55,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 880,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rally-def-t7-n1",
+      "treeId": "rally",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1024,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1598,
   "bound": [
@@ -8,16 +546,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 608,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 608,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -29,16 +573,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 608,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 608,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -50,16 +600,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -71,16 +627,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1215,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -92,16 +654,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1823,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1823,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -113,16 +681,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1890,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1890,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -134,16 +708,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 2498,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 2498,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -155,8 +735,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3105,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -168,16 +751,22 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3713,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
         },
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 3713,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -189,8 +778,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 288,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -206,8 +798,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 880,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -219,8 +814,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1024,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

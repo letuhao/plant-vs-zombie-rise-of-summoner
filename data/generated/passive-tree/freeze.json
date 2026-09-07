@@ -1,5 +1,60 @@
 {
   "treeId": "freeze",
+  "category": "status",
+  "gateQuantity": "status_applied.freeze",
+  "shapeArchetype": "late-crown",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    2,
+    2,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    6,
+    6
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.freeze-def-t1-n0",
+      "treeId": "freeze",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 288,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1982,
   "bound": [
@@ -8,8 +63,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 288,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

@@ -186,7 +186,7 @@ public static class StatusStatPayload
     {
         if (instance.StatMods.Count == 0) return Array.Empty<StatModifier>();
 
-        var sourceId = "status:" + instance.InstanceId;
+        var sourceId = ContributionSourceIds.Status(instance.InstanceId);
         var result = new List<StatModifier>(instance.StatMods.Count);
 
         foreach (var mod in instance.StatMods)
@@ -214,5 +214,6 @@ public static class StatusStatPayload
     }
 
     /// <summary>What a host withdraws when the instance ends. One id, matching <see cref="ToModifiers"/>.</summary>
-    public static string SourceIdOf(StatusInstance instance) => "status:" + instance.InstanceId;
+    public static string SourceIdOf(StatusInstance instance) =>
+        ContributionSourceIds.Status(instance.InstanceId);
 }

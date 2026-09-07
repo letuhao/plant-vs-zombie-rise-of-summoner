@@ -66,6 +66,20 @@ public class StatusDerivedSubsystemTests
         Assert.DoesNotContain(ActorHubBootstrap.CreateDefault().Subsystems, s => s.SubsystemId == "l2b.derived");
     }
 
+    [Fact]
+    public void Empty_SourceId_is_skipped_never_minted_as_blank_contribution()
+    {
+        var hub = HubWith(
+            new StatusDerivedMod(Defense, DerivedModifierOp.Flat, 40, ""),
+            new StatusDerivedMod(Defense, DerivedModifierOp.Flat, 60, "   "),
+            new StatusDerivedMod(Defense, DerivedModifierOp.Flat, 70, "status:kept#1"));
+
+        var (snap, contributions) = hub.ResolveDerivedWithContributions(Ctx(hub));
+        Assert.Equal(70, snap.Get(Defense));
+        var one = Assert.Single(contributions.ContributionsFor(Defense));
+        Assert.Equal("status:kept#1", one.SourceId);
+    }
+
     /// <summary>
     /// `more` is refused, never coerced. `StatusStatPayload.Ops` allows it because it is meaningful on
     /// a PRIMARY channel; there is no `More` on the derived side (definitions.md §14). Coercing it to

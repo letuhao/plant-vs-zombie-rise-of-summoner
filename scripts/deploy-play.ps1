@@ -9,7 +9,7 @@
 #                                            # whole session because this used to be opt-in and got
 #                                            # forgotten; opt-out is the only safe default)
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
-# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1
+# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
 # + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
 # + guard-class-system.ps1 before build.
 param(
@@ -90,6 +90,10 @@ if ($LASTEXITCODE -ne 0) { throw "secondary no-Unity guard failed" }
 Write-Host "==> Funnel delta guard"
 & (Join-Path $Root "scripts\guard-funnel-delta.ps1")
 if ($LASTEXITCODE -ne 0) { throw "funnel delta guard failed" }
+
+Write-Host "==> ActorHub gate guard"
+& (Join-Path $Root "scripts\guard-actor-hub.ps1")
+if ($LASTEXITCODE -ne 0) { throw "actor-hub guard failed" }
 
 Write-Host "==> Overflow guard"
 & (Join-Path $Root "scripts\guard-overflow.ps1")

@@ -103,5 +103,42 @@ class RenderBriefTests(unittest.TestCase):
         self.assertIn("Chill Touch", text)
 
 
+class ExclusionInstructionOrderingTests(unittest.TestCase):
+    """2026-09-07 real-corpus finding, guarded against regressing: `check --family PassiveTree
+    --gate` measured 1638/1677 real committed nodes (97.7%) at exclusion form `reroute`, every one
+    with the IDENTICAL propertyKeys=['posture'], against a target of <=30 per mille — root-caused to
+    this brief's own item-3 wording opening with "Prefer `reroute`. Most nodes have none." (the
+    encouragement read first, the actual rule landing as an aside). Fixed to open with the rule
+    itself; these tests lock in that ordering rather than the exact prose, so a future genuine
+    reword stays free to vary wording as long as it keeps the rule-before-preference shape."""
+
+    def _exclusion_clause(self) -> str:
+        text = brief.render_brief(
+            node_id="skill.t-off-t1-n0", sample_index=0, tree_display_name="Might",
+            tree_reading="raw physical force", branch="offensive", tier=1, node_class="mechanism",
+            motifs=[], anti_motifs=[], permitted_affixes=_affixes(), permitted_properties=["posture"],
+        )
+        # The `exclusion` bullet is item 3 of the numbered "Choose, and nothing else" list, ending
+        # right before item 4 (`name`/`nameKey`/`flavor`) — slice it out rather than assert against
+        # the whole brief, so this test fails on THIS clause's own wording, never an unrelated edit
+        # elsewhere in the brief.
+        start = text.index("3. `exclusion`")
+        end = text.index("4. `name`")
+        return text[start:end]
+
+    def test_most_nodes_have_none_is_stated_before_any_preference_between_forms(self) -> None:
+        clause = self._exclusion_clause()
+        self.assertIn("most nodes have none", clause.lower())
+        self.assertIn("reroute", clause.lower())
+        self.assertLess(clause.lower().index("most nodes have none"),
+                        clause.lower().index("reroute"),
+                        "the 'have none' rule must be read before any form is offered as a "
+                        "preference, or the model reaches for the preferred form by default")
+
+    def test_the_clause_conditions_on_a_genuine_conflict_not_mere_availability(self) -> None:
+        clause = self._exclusion_clause().lower()
+        self.assertIn("conflict", clause)
+
+
 if __name__ == "__main__":
     unittest.main()

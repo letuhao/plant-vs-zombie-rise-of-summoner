@@ -1045,7 +1045,69 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     codebase's own most heavily-hash-protected system, unilaterally, under this task's own name, is the
     exact risk R1 was written to prevent — this needs the dedicated, reviewed design pass already named
     above, now with a concrete starting point instead of a vague one.
-  - Files: `src/FusionRpg.Core/Battle/Timeline/InteractiveIntentSource.cs`, `src/FusionRpg.Server/WebMatchService.cs`, `src/FusionRpg.Server/FusionRpg.Server.csproj` (bonus fix, unblocks every `WebApplicationFactory`-backed E2E test), `tests/FusionRpg.Core.Tests/Battle/Timeline/InteractiveTurnsTests.cs`, `tests/FusionRpg.Core.Tests/Delve/Battle/RaidIntentSourceTests.cs`, `tests/FusionRpg.E2E.Tests/WebMatchInteractiveSweepTests.cs` (written, blocked on an unrelated pre-existing gap, see above). NOT YET built: `src/FusionRpg.Server/DelveBattleEndpoints.cs`, `RpgHub.cs`'s own steer/declare/freeze/resume/`DelveUpdated` methods
+  - **Re-investigated 2026-09-08 (completion audit) — the 2026-09-07 "new execution-model capability"
+    framing is CORRECTED: overstated, not wrong in kind.** Re-read `InteractiveIntentSource.cs`,
+    `BattleSessionRegistry.cs`, `WebMatchService.cs:230-289`, `RpgStore.WebMatches.cs`, `RpgHub.cs` and
+    `spec-delve-battle-profile.md` §4b fresh, independent of the prior pass's own conclusion, per this
+    session's own "verify against code, don't inherit a finding" discipline.
+    - **Confirmed exactly as claimed**: `InteractiveIntentSource.ResumeReplayThenLive`,
+      `BattleSessionRegistry` and its write-gate (`MayWrite`), and `RaidIntentSource`'s unconditional
+      steered-key dispatch are all real, tested and correctly cited — this half of the prior finding
+      needed no correction, only confirmation.
+    - **The corrected half**: §4b's own words — *"Resume re-runs `Resolve(setup, seed, …)` from the row's
+      `setup_json`"* — already say resume is a **brand-new `Resolve` call**, never a reattachment to a
+      still-running one. Given that, "freeze" does not require `BattleReport`/`Resolve` to express a
+      paused state at all: `grep`-confirmed **zero `catch` blocks exist anywhere in `BattleEngine.cs`**,
+      so an exception thrown from inside a live `_ask` delegate (called synchronously, uncaught, from
+      `InteractiveIntentSource.TryDeclare`) propagates straight out of `Resolve` without ever reaching a
+      `return` — no partial/corrupt `BattleReport` is ever produced or written. That is sufficient to
+      build "freeze" as **cancel-and-discard, not pause-and-resume**: run a live battle's `Resolve` call
+      on its own background `Task`, block inside `_ask` (e.g. on a `TaskCompletionSource`) for up to the
+      AFK window for a SignalR-delivered choice, and on a genuine disconnect/steer-away, cancel that
+      `Task` outright (the in-flight `Resolve` call is abandoned mid-loop and never finishes — this IS
+      "no finish-on-autopilot," not an approximation of it, since the fallback-driven completion path is
+      never reached). Resume is then a fresh `Resolve` call built with the already-shipped
+      `ResumeReplayThenLive` against the persisted trace, exactly as §4b already specifies. **This needs
+      zero changes to `BattleReport`'s shape and touches none of the hash-golden-protected surface** —
+      materially smaller than "give `BattleReport` a paused shape," which is what the 2026-09-07 note
+      concluded was required.
+    - **Not fully closed by this correction, named precisely**: cancel-and-discard via an uncaught
+      exception unwinding a live simulation mid-loop is itself a real design choice with real trade-offs
+      (a future contributor adding a broad `catch` to `BattleEngine.cs` would silently reintroduce
+      finish-on-autopilot; a parked thread per live battle has a real, bounded cost) — worth a short,
+      named owner decision before the live wiring is built on it, but this is an answerable question
+      about ONE mechanism, not a from-scratch redesign of `BattleReport`'s execution model. `RpgHub.cs`
+      read in full: it carries only injector-facing group/command infrastructure (`Join`/`Hello`/grant
+      and patron pushes) — no live-session, block-and-wait, or per-connection background-task pattern
+      exists anywhere in this codebase to mirror, confirming the live wiring is still novel *plumbing*,
+      just not novel *architecture*.
+    - **A second real, smaller gap found and closed in the same pass**: the prompt's own hypothesis (c)
+      asked whether an incremental persist-as-you-go call exists for `decisions_json`. It does —
+      `RpgStore.WriteWebMatchDecisions` (built under D2.15, its own doc comment already says *"called
+      after every `DecisionTrace.Record`"*) — but `grep` confirmed it has **zero callers anywhere**, and
+      `DecisionTrace.Record` (sealed class, plain list append) had no hook a caller could use to invoke
+      it at the right moment. Built the missing hook, Core-only, no threading: `InteractiveIntentSource`'s
+      live constructor and `ResumeReplayThenLive` factory gain an optional
+      `Action<TracedDecision>? onRecorded = null`, invoked synchronously immediately after each NEW
+      decision is recorded (both the player and timeout branches) — never during the replayed prefix,
+      since replay reads decisions that already exist rather than creating new ones. Purely additive
+      (defaults to `null`; every existing caller, including every shipped battle, is byte-identical).
+      5 new tests in `InteractiveTurnsTests.cs`: fires once for a player decision (with the exact
+      `TracedDecision` just recorded); fires for a timeout; never fires when nothing legal is recorded;
+      never fires during `ResumeReplayThenLive`'s replay prefix and fires exactly once the instant it
+      goes live; omitting the callback changes nothing. 2127/2127 on the `Delve|Battle.Timeline` filter
+      (36/36 in `InteractiveTurnsTests` itself); `guard-dal.ps1`/`guard-funnel-delta.ps1` both green;
+      `audit-magic-numbers.py`/`audit-overflow.py` unmoved (no new literals — the addition is a delegate
+      parameter and two `_onRecorded?.Invoke(...)` calls).
+    - **Still correctly not attempted**: the actual live server wiring — the background-`Task`-per-battle
+      orchestration, the concrete blocking `_ask` implementation, cancellation-on-disconnect,
+      `DelveBattleEndpoints.cs`, and `RpgHub`'s own steer/declare/freeze/resume/`DelveUpdated` methods.
+      This is real, untested concurrency surface and building it speculatively under this task's name
+      would repeat the exact mistake this correction is fixing in the other direction — the difference
+      this pass makes is that the open question is now narrow and answerable ("is cancel-and-discard via
+      an uncaught `_ask` exception the freeze mechanism, yes/no") rather than "does `BattleReport` need a
+      new execution model" (no, it does not).
+  - Files: `src/FusionRpg.Core/Battle/Timeline/InteractiveIntentSource.cs` (2026-09-08: `onRecorded` hook), `src/FusionRpg.Server/WebMatchService.cs`, `src/FusionRpg.Server/FusionRpg.Server.csproj` (bonus fix, unblocks every `WebApplicationFactory`-backed E2E test), `tests/FusionRpg.Core.Tests/Battle/Timeline/InteractiveTurnsTests.cs` (2026-09-08: 5 new `onRecorded` tests), `tests/FusionRpg.Core.Tests/Delve/Battle/RaidIntentSourceTests.cs`, `tests/FusionRpg.E2E.Tests/WebMatchInteractiveSweepTests.cs` (written, blocked on an unrelated pre-existing gap, see above). NOT YET built: `src/FusionRpg.Server/DelveBattleEndpoints.cs`, `RpgHub.cs`'s own steer/declare/freeze/resume/`DelveUpdated` methods, the live background-execution/cancellation wiring the corrected finding above describes
 
 ### `delve-attrition` — spec-delve-attrition.md
 
@@ -1157,7 +1219,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - 26 new tests (`EventFiltersTests.cs`): `KindFits` against every real spec-table pair plus the `unknown`-fits-anything case; `ByKindFit`'s own set-narrowing; eligibility keeping a true-evaluating tree and an absent tree (`Always`) while dropping a false one, plus the by-value/no-mutation/no-leaked-`Reads` proof; repeat scope's four cases (the absolute per-delve invariant overriding a wider declared scope, a per-delve row ignoring the other two sets entirely, and each of per-domain/once-per-player refusing on its own seen set); recent cells including the `null`-theme comparison case; **the verify line's own headline** — one pool of five events (one genuine survivor, one failing each of the four filters) run through `ApplyAll`, then through the exact same four filters called by hand in REVERSE order, then in a third shuffled order, all three landing on the identical single survivor; full null/bad-argument coverage on every filter
   - Verified clean: `EventFiltersTests` 26/26; `Delve|Atoms` filter 1794/1797 (3 failures, the known `vocabulary.json` cluster only, zero new); `audit-magic-numbers.py --domain dungeon` clean
   - Files: `src/FusionRpg.Core/Delve/Events/EventFilters.cs`, `tests/FusionRpg.Core.Tests/Delve/Events/EventFiltersTests.cs`
-- [ ] **D3.3** `EventDeck.Build` / `Resolve` / `Answer` and the streams — PARTIALLY BUILT, confirmed 2026-09-06, RE-SCOPED 2026-09-07, corrected same day (later window): the `:pick` stream and its full draw mechanics are done and proven; `EventDeck.cs`'s own `Build`/`Resolve`/`Answer` orchestration was blocked on FOUR unbuilt dependencies, now confirmed down to THREE remaining root causes — a small buildable-but-not-yet-built `EventEffectRef→ContainerRow` resolver (re-diagnosed, was mistakenly cross-referenced to the now-closed `LootContentView` gap), the five-way atom-kind dispatch table, and the forced-outcome-field design gap — three of the four originally-cited blockers (D3.4/D3.6/D3.8) are done
+- [ ] **D3.3** `EventDeck.Build` / `Resolve` / `Answer` and the streams — PARTIALLY BUILT, confirmed 2026-09-06, RE-SCOPED 2026-09-07, corrected same day (later window), UPDATED 2026-09-07 (later window still), **REAL 2026-09-07 (a further later window — the orchestrator itself)**: the `:pick` stream and its full draw mechanics are done and proven; `EventDeck.cs`'s own `Build`/`Resolve`/`Answer` orchestration was blocked on FOUR unbuilt dependencies, then THREE, then down to ONE genuine remaining root cause (the forced-outcome-field seed-contract design gap) plus the orchestrator itself — the `EventEffectRef→ContainerRow` resolver (`EventEffectContainerBuild`) and the five-way atom-kind dispatch table (`EventOutcomeDispatch`, D3.5's own entry) were made REAL first, and now the full `Build`/`Resolve`/`Answer` composition itself (chaining D3.2/D3.4/D3.5/D3.6/D3.8/these two pieces together, including the one real call site into `Instantiator.TryInstantiate`) is ALSO REAL and tested (see the dated update far below) — the forced-outcome path stays correctly unbuilt (`use` draws the same ordinary outcome as `interact`, per this task's own brief), and the spec's own "deck goldens per domain / 256-seed sweep against real content" clauses remain separate, unbuilt work, so this box stays unchecked
   - Acceptance: per-archetype pools; picks on `dungeon:event:{r}:{c}:{pick|outcome|effects|encounter|ambush}`
   - Verify: deck goldens per domain; determinism over 256 seeds
   - Files: `EventDeck.cs`, `EventDraw.cs`
@@ -1215,6 +1277,135 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     future reader who finds `mintAt` now real does not re-open this entry expecting it to move. The two
     real remaining blockers named in D3.5's own entry (the five-way dispatch table; the forced-outcome
     field) are unaffected and still fully open.
+  - **Update 2026-09-07 (same day, later window) — the `EventEffectRef -> ContainerRow` resolver is now
+    REAL, and D3.5's own five-way atom-kind dispatch table is now REAL too (full accounting on D3.5's
+    own entry, not duplicated here).** Built `src/FusionRpg.Core/Delve/Events/EventEffectContainerBuild.cs`
+    — `EventEffectContainerBuild.From(containerId, effects, lookupAtom)`, structurally identical to the
+    already-shipped `UniqueContainerBuild.From`'s own fixed-atom resolution (`family` × `powerBand` →
+    tier via `UniqueBudget.TierOfPowerBand` → atom id via `AtomRow.DeriveId`); confirmed safe to reuse
+    `ContainerKind.Item` (grepped: `Instantiator.TryInstantiate` never branches on `ContainerRow.Kind`,
+    so no new enum member was needed). **This closes the resolver half of what this entry's own
+    "Re-checked" bullets above already diagnosed as the buildable piece** — `EventDeck.Build`'s own
+    real orchestrator (`Resolve`/`Answer`, composing D3.2/D3.4/D3.5/D3.6/D3.8/this resolver/D3.5's own
+    dispatcher end-to-end, and the one call site that actually invokes `Instantiator.TryInstantiate`
+    itself) remains fully unbuilt — a separate, larger integration task, not attempted here, exactly as
+    this entry's own prior "Honest gap" bullet already named. 9 new tests
+    (`EventEffectContainerBuildTests.cs`) — hand-built fixtures (no real production caller yet, matching
+    this whole program's established "provably correct, zero production trigger yet" posture): happy
+    path, multi-effect authoring order, no pool/roll budget ever authored, every refusal named (unknown
+    powerBand, a family with no atom at the resolved tier). **Mutation-tested:** forced the atom-id
+    derivation to ignore `PowerBand` (always resolve tier 1) — 2 of 9 tests failed exactly as expected,
+    confirmed real, reverted byte-for-byte. Verified clean: `EventEffectContainerBuildTests` 9/9;
+    `Delve.Events` filter 279/279 (240 prior + 39 new across this resolver and D3.5's own dispatcher,
+    zero regressions); full `Delve` filter 1673/1673; `guard-dal.ps1` clean (Core-only, no SQL — the
+    stat.derived grant record D3.5's own dispatcher returns is a plain data structure, never an
+    `RpgStore` call); `audit-magic-numbers.py --domain dungeon`/`--summary` clean; `audit-overflow.py`
+    zero findings in either new file. Files: `src/FusionRpg.Core/Delve/Events/EventEffectContainerBuild.cs`,
+    `tests/FusionRpg.Core.Tests/Delve/Events/EventEffectContainerBuildTests.cs`.
+  - **Update 2026-09-07 (same day, later window still) — the real `EventDeck.Build`/`Resolve`/`Answer`
+    orchestrator is now BUILT, composing every dependency named above end to end, including the one real
+    `Instantiator.TryInstantiate` call site nothing had reached before now.** New file
+    `src/FusionRpg.Core/Delve/Events/EventDeck.cs`: `EventDeck.Build(eventPoolIdsByArchetypeId, catalog,
+    lookupAtom, lookupAffix, powerTuning)` resolves each archetype's own authored `eventPool` (plain
+    string ids, `RoomEventPoolSeedFile.LoadAll`'s own shape) into real `EventRow`s through the catalog,
+    refusing loudly (naming archetype + event id) on an id preflight should have caught; `EventDeck
+    .Resolve(deck, room, facts, seen, seed, rung, theta, roomClimate, climate-affinity milli×3,
+    dropBandOrder, dropBandWeightTable, ...)` composes D3.2's `EventFilters.ApplyAll` → `EventDraw
+    .PickEvent` → `OutcomeResolver.PickOutcome` (severity-shifted) → `EventEffectContainerBuild.From` →
+    the real `Instantiator.TryInstantiate` at `Θ_room`, assembling a real `EventResolution`; an `unknown`
+    room runs D3.4's `UnknownPity.Resolve` first, falling through to the ordinary path on a hit-to-event,
+    or returning early (no `Instance`, `Kind` = the resolved `cache`/`merchant`/`fight`, a named warning)
+    on a hit to a non-event kind — `EventDeck.Answer(resolution, choice, party, lookupAtom, derivedFor,
+    uiSink, delveId, nerveStackPerCurio, atTick)` is the second pure step: `leave` dispatches nothing and
+    echoes the party back unchanged (proven by a mutation test — temporarily disabling the early return
+    made exactly the one test that checks this fail, confirmed real, reverted byte-for-byte); `interact`
+    and `use` both call the real `EventOutcomeDispatch.Dispatch` against the SAME already-drawn
+    `resolution.Instance`. `EventDeck.DrawAmbush` (a thin forward to the already-shipped `AmbushDraw
+    .Draw`) also closes D3.9's own small, separately-named "thin wrapper not built" gap — nothing in
+    `RestResolver.cs` calls it yet, that wiring is still open, D3.9's own job.
+  - **Three real corrections against the spec's own literal citations, found by trying to compile
+    against real types rather than assumed, each named in `EventDeck.cs`'s own doc comment:** (1) spec
+    §1's pseudocode reads `tuning.DropBandWeight(...)` off one `DungeonTuning` object — no such member
+    exists on the real shipped type (`dropBand` is the ITEM registry's own vocabulary, D3.1's own
+    citation), so `Resolve` takes `dropBandOrder`/`dropBandWeightTable` as explicit caller-supplied
+    parameters instead, matching `OutcomeResolverTests`' own already-established local-fixture posture.
+    (2) `EventResolution`'s own "never a write" line (§1) is read as a real scope boundary, not a style
+    note: `Resolve` freezes the outcome (draw + `TryInstantiate`) but never calls `EventOutcomeDispatch
+    .Dispatch` — that is `Answer`'s own job, gated on the player's real choice, so `leave` on a `story`
+    event genuinely touches no party state. This moves `EventResolution`'s own `Banner` field (spec's
+    interface table) to the new `EventAnswerResult` instead, since a banner is a dispatch side effect that
+    has not run yet at `Resolve` time. (3) the forced-outcome/`supplyOverride` path is confirmed NOT
+    buildable (D3.5's own already-standing gap: no field anywhere names which outcome a `use:{tag}`
+    forces) — per this task's own brief, `Resolve` always draws the ordinary weighted `:outcome`, and
+    `use` dispatches the exact same drawn instance `interact` does, proven directly by a test that
+    replays `interact` and `use` on the same resolution and asserts byte-identical resulting party state.
+    **A fourth, unplanned bug found and fixed by actually running `Instantiator.TryInstantiate`, not by
+    review:** `ContainerValidator`'s own real id grammar (`^(item|trait|...)\.[a-z0-9-]+$`, no second dot,
+    no colon) rejects the naive `event:{eventId}:{ordinal}` id spec's own pseudocode implies — a real
+    shipped event id already carries its own dots (`event.bargain-demon.allpeater-001`) — fixed by
+    building the container id as `item.{eventId with '.' folded to '-'}-{ordinal}`, which would have
+    refused every single real call otherwise; caught only because the first test run against the real
+    `Instantiator` threw, not by inspection.
+  - **The two open questions this task's own brief asked to investigate, both resolved, neither assumed:**
+    (1) **the seen-sets are a caller-supplied read model, exactly as the brief's own framing predicted —
+    confirmed rather than re-derived.** `EventFilters.ByRepeatScope`/`.ByRecentCells` (D3.2, already
+    shipped before this session even started today) already take `perDelveSeen`/`perDomainSeen`/
+    `oncePerPlayerSeen`/`recentCells` as plain caller-supplied sets — `Resolve` bundles the same four into
+    one new `EventSeenSets` record rather than inventing a different shape. The store-layer reads/writes
+    that assemble and persist those four sets (`rpg_delve_event_seen`, `rpg_delve_rooms.event_id`, spec
+    §8's own table) remain **D3.9's own separate, still-unbuilt job**, untouched here — confirmed by
+    re-reading D3.9's own entry in full before writing a line of `EventDeck.cs`, not assumed from this
+    brief's own framing alone. (2) **`Answer` is genuinely NOT the same blocked primitive as D2.16 —
+    confirmed by re-reading D2.16's own entry in full, not assumed from the family resemblance.** D2.16's
+    own, twice-reconfirmed 2026-09-07 finding is a genuinely new EXECUTION-MODEL capability needed on
+    `BattleEngine.Resolve`/`BattleReport` — the ability to exit early with a serializable, resumable
+    "paused here" state instead of always running to completion, because a live steered fight's
+    `InteractiveIntentSource.TryDeclare` is called SYNCHRONOUSLY inside a single-threaded simulation loop
+    with no way to say "the answer arrives on a LATER, separate HTTP request." `EventDeck.Answer` has no
+    such shape at all: it is a single, stateless request-response — given an already-computed
+    `EventResolution` (held by the caller between two HTTP calls, or in-process) and the player's one
+    choice, it decides once whether to apply an already-frozen outcome or not, and returns. No multi-round
+    loop, no synchronous mid-call callback, nothing to pause and resume. `RpgStore.Delve.cs`/
+    `DelveEventEndpoints.cs` holding the `EventResolution` in server-side session/request state between
+    the room's own `Resolve` (at first entry) and a later `POST .../rooms/{id}/answer` is D3.9's own
+    already-named, ordinary HTTP-handler job — not a new concurrency primitive, and not attempted here
+    (D3.9 is still `[ ]`, correctly, per its own entry).
+  - **What is still genuinely NOT met for this task's own FULL acceptance line, named rather than
+    overclaimed:** the spec's own "deck goldens per domain" (24 goldens: 4 tiers × 6 event kinds) and
+    "determinism over 256 seeds" (§Testing) both need a REAL domain's own room palette / event pool wired
+    through `RoomEventPoolSeedFile` end to end plus a blessing pass — this session proved determinism and
+    correct composition against a hand-built fixture corpus (matching this whole program's "provably
+    correct, zero production trigger yet" posture), not against real shipped domain content at scale;
+    that is a separate, dedicated goldens-and-sweep pass, not attempted here. `EventCoverage.Report` (the
+    domain-coverage metric spec's own §2/§Testing cites) is still un-sliced in this file, as already noted
+    above — not this task's to invent. **D3.3 stays `[ ]`** — the orchestrator itself is real, tested, and
+    composes every dependency correctly, but the acceptance line's own goldens/256-seed clauses are
+    real work still ahead, not a rounding error.
+  - 20 new tests (`EventDeckTests.cs`): `Build`'s own null-arg checks, real archetype-pool resolution, and
+    a named refusal on an unresolvable event id; `PoolFor` on an unmapped archetype returns empty, never
+    throws; `Resolve`'s own null-arg checks; a real end-to-end draw (event → severity-shifted outcome →
+    a real `Instantiator`-frozen instance, verified by inspecting the frozen `channel`/`amount` JSON) with
+    the right `Choices`/`Consequence`/empty `Warnings`/null `NextPity`; same-seed determinism; the `use`-
+    never-diverges proof (correction (3), replaying `OutcomeResolver.PickOutcome` independently and
+    asserting equality); an empty-pool-after-filters refusal naming the room; a `per-delve`-seen id
+    correctly emptying the only-eligible pool; the full unknown-room boundary (missing `partyPity`/
+    `unknownPityTuning` throws naming which; a certain-cache hit returns no event with the right `NextPity`
+    reset/advance shape and a warning naming the caller's own job; a full-miss falls through to an
+    ordinary draw against the unknown archetype's own pool with every pity counter advanced); `Answer`'s
+    own null/bad-argument checks; the `leave`/`interact`/`use` gate (the verify line's own headline,
+    mutation-tested as described above); a refusal naming the choice when `Answer` is called on a
+    resolution with no `Instance`; `DrawAmbush`'s own forward-not-reimplementation proof against
+    `AmbushDraw.Draw` directly. Verified clean: `EventDeckTests` 20/20; `Delve.Events` filter 299/299
+    (279 prior + 20 new, zero regressions); full `Delve` filter 1693/1693;
+    `FullyQualifiedName~Battle|~Expedition|~Predicate` 1379/1379 (hashes untouched, as this module's own
+    boundary requires); `FusionRpg.Data.Tests --filter Delve` 149/149 (no Data-layer file touched);
+    `guard-dal.ps1`/`guard-funnel-delta.ps1` both green (Core-only, no SQL, no ad-hoc Funnel bypass);
+    `audit-magic-numbers.py --domain dungeon` clean (0 findings); `audit-overflow.py` 0 critical, 65 total
+    (all pre-existing, none under the new `EventDeck.cs` — the one `Delve/Events/` finding,
+    `EventFacts.cs:66`, is the SAME pre-existing, already-commented `HpMilliOf` A3 finding D3.9's own
+    entry already named unchanged, not a new one).
+  - Files: `src/FusionRpg.Core/Delve/Events/EventDeck.cs`,
+    `tests/FusionRpg.Core.Tests/Delve/Events/EventDeckTests.cs`.
 - [x] **D3.4** `UnknownPity` — per party
   - Acceptance: counters in, resolution out, on `dungeon:unknown:{r}:{c}`; **pity is per party**, never per delve
   - Verify: a four-party test asserting four independent counters
@@ -1224,7 +1415,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - 21 new tests (`UnknownPityTests.cs`): registry order proven three ways (a certain-cache/-merchant/-fight tuning each resolving deterministically regardless of seed, the merchant and fight cases proving the earlier kinds were checked-and-missed first); the reset-vs-advance rule from both `Empty` and a nonzero starting state; chance exceeding 1000‰ without throwing or clamping; a `checked` overflow proof at `long.MaxValue` misses; the rung's own per-kind step-multiplier actually read (a zero-multiplier rung turns a certain hit into an impossible one, proving it is not a stand-in constant); determinism same-seed-same-room; a sampled proof that different seeds/rooms resolve differently at a real, shipped, moderate (60%) chance; **the verify line's own headline** — four independent `UnknownPityState` locals driven through five rounds each of four different certain/impossible tunings, ending on four different, exactly-predicted counter triples, proving no shared/static state leaks between "parties"; six more for `RepickArchetype` via `Resolve`'s optional `domain` param — no-domain leaves `ArchetypeId` null, a supplied domain produces a real id from the given candidates, a climate-specific kind never crosses climates (30 seeds), a climate-neutral kind provably ignores climate (both climates drawn across 60 seeds), an empty cell throws `DelveGraphRollRejection` naming the domain and kind, determinism and room-namespacing on the `:archetype` sub-stream. **Mutation-tested, not just written:** temporarily forced `ResetOneAdvanceOthers` to always return `(0,0,0)` — 5 of 21 tests failed exactly as expected (every test asserting an exact post-hit counter triple), confirmed real, then reverted byte-for-byte
   - Also added `tests/FusionRpg.Guard.Tests/DelveEventsNoClockGuardTests.cs` (1 test): spec's own Testing Strategy names this explicitly ("No clock, no `System.Random`: a guard test over `Core/Delve/Events/`") — mirrors `DelveAttritionNoClockGuardTests.cs`'s identical file-scan shape, now covering `EventRow`/`EventCatalog`/`EventFilters`/`EventDraw`/`UnknownPity.cs` all at once
   - Verified clean: `UnknownPityTests` 21/21; `Delve.Events` filter 90/90 (69 prior + 21 new, zero regressions); full `Delve` filter 569/569; `DelveEventsNoClockGuardTests` 1/1; `audit-magic-numbers.py --domain dungeon` clean; `audit-overflow.py` zero findings under `Delve/Events/`
-- [ ] **D3.5** `OutcomeResolver` — PARTIALLY BUILT, confirmed 2026-09-06: the severity band-shift and the weighted `:outcome` draw are done and proven; `TryInstantiate`, the atom dispatch plan and the `supplyOverride` forced-outcome path are genuinely blocked (see below), not skipped
+- [ ] **D3.5** `OutcomeResolver` — PARTIALLY BUILT, confirmed 2026-09-06, UPDATED 2026-09-07 (later window): the severity band-shift and the weighted `:outcome` draw are done and proven; the five-way atom-kind dispatch table (`EventOutcomeDispatch.Dispatch`) is now REAL too (full accounting below); the `supplyOverride` forced-outcome path remains genuinely blocked — a seed-contract field that names nowhere which outcome is forced, not something this task has authority to invent; `Instantiator.TryInstantiate` itself is still never actually CALLED anywhere for an event outcome — this entry's own dispatcher consumes its output, D3.3's own resolver produces its input, but the one call site that chains them is `EventDeck.Build`'s own orchestrator (D3.3), still unbuilt
   - Acceptance: severity shifts `dropBand` indices; weights then `TryInstantiate` at the room's Θ, then a dispatch plan; `consequence` is one of `none · loot · encounter · scout`; `supplyOverride` reads `HoldsStock`
   - Verify: an outcome golden per severity; a `supplyOverride` red/green pair
   - Files: `OutcomeResolver.cs`
@@ -1246,6 +1437,91 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     through `mintAt`/`LootPipeline` at all — it needs its own small `EventEffectRef -> ContainerRow`
     resolver, still unbuilt, plus the five-way dispatch table and the forced-outcome field named above.
     Closing `mintAt` changes nothing for this entry; recorded so a future reader does not expect it to.
+  - **Update 2026-09-07 (same day, later window) — the five-way atom-kind dispatch table is now REAL,
+    closing the SECOND of this entry's own three named blockers (the resolver, D3.3's own entry, was
+    the first; the forced-outcome-via-`supplyOverride` field is the one that remains — a genuine
+    seed-contract design gap, not attempted, see below).** Re-checked the "fabricating stand-ins for
+    all of them" concern this entry raised above: it is now STALE for four of the five write owners —
+    `DelveResourceDelta.Apply`/`DelveMemberState`(attrition's `PartyState`, D2.17/D3.6, both shipped),
+    `RpgStore.Delve.CloseDelve`/`ReconcileUniqueEquipmentAtomBindingsUnlocked` (D2.23, shipped), and
+    `DelveUiPresentSink` (D3.6, shipped) are all real today — only `dungeon-loot`/`Encounter.Build`'s own
+    re-pick (the SEPARATE `consequence` dispatch, spec §5's own later paragraph, explicitly out of scope
+    for this table) remain unbuilt, and this table never touches them.
+  - Built `src/FusionRpg.Core/Delve/Events/EventOutcomeDispatch.cs` — `EventOutcomeDispatch.Dispatch`
+    takes a real `InstanceRow` (the output of `Instantiator.TryInstantiate`) and the party's
+    `DelveMemberState`s, parses each atom's own frozen `ValuesJson` (the extraction step D3.6's own doc
+    comment named as "the caller's job" — this dispatcher IS that caller), and routes by `AtomRow.KindId`
+    to the five real write owners spec §5's table names, refusing by name on any sixth kind. Per-row
+    findings, each resolved by reading real code rather than guessed:
+  - **row 1 (`resource.delta`), the negative-spirit-delta nerve special case: resolved as
+    BUILDABLE via plain arithmetic; `NervePolicy.Sync` is deliberately never called here, confirmed by
+    direct precedent, not guessed.** `NervePolicy.Sync(StatusRuntime, hostPtr, stage, now)` needs a live
+    `StatusRuntime`/`hostPtr` this out-of-room dispatch has none of. `RestResolver.cs`'s own doc comment
+    (D2.20, the closest shipped sibling — also party-state, also between rooms) settles it directly:
+    "Re-projecting stacks to a live `nerve.*` status ... is the next room's battle setup's job, not this
+    one's — this record is party state, not runtime state." A negative `spirit` delta adds
+    `tuning.AttritionNerve.StackPerCurio` (a real, already-shipped tuning field, `DungeonTuning.cs:24`)
+    to `DelveMemberState.NerveStacks` as plain `checked` arithmetic, deferring the live projection the
+    same way `RestResolver.StacksAfterRelief` already does for its own nerve relief.
+  - **row 2 (`status.apply`): the `nerve.*` refusal is enforced again here, defensively, alongside
+    D3.9's own already-shipped whole-corpus `EventDeckPreflight.CheckNoNerveTargetInAnyContainer`
+    (import time) — not a duplicate authority, since a hand-built fixture instance in a test never goes
+    through import preflight.** `BattleStatusSpec.MagnitudePerPulse`/`PeriodMs`/`GrantChanceMilli` have no
+    source field on the real `status.apply` schema (confirmed by direct read: `status`/`duration`
+    (seconds)/`level` only, no `target` param declared at all) — magnitude rides at `0` ("0 for pure CC",
+    the record's own documented legitimate value, not an invented placeholder); only `StatusId` and
+    `DurationMs` (seconds × 1000) come from the atom.
+  - **row 3 (`shield.grant`) replace-vs-stack: resolved by the shipped TYPE, not a design guess.**
+    `DelveMemberState.Shield` is a single nullable `BattleInnateShield` field, never a list (D2.17's own
+    already-shipped shape) — a grant necessarily REPLACES; there is no second field to stack into.
+  - **row 4 (`stat.derived`): returns a plain `StatDerivedGrant(MemberInstanceId, ContainerId,
+    Source)` record, never calling `RpgStore` — the same "Core decides, Data writes" split D2.21/22's own
+    `ExtractionSettlement.Decide` → `RpgStore.Delve.SettleExtractionUnlocked` already established.** A
+    future `CloseDelve`-adjacent caller reads this record to `ProduceAndBind` the outcome's own container
+    against the named member, sourced `"delve:{delveId}"` — the exact `ReconcileUniqueEquipmentAtomBindingsUnlocked`
+    shape D2.23 already built for equipment, not reinvented. Confirmed via `guard-dal.ps1` (clean) that no
+    SQL boundary was crossed.
+  - **row 5 (`ui.present`, `op:banner`)**: calls the caller-supplied `IUiPresentSink.ShowBanner`
+    directly as the dispatch runs — the same side-effect-through-an-injected-interface shape
+    `DelveResourceDelta`/`DelveUiPresentSink` already establish; any other `op` refuses by name.
+  - **Targeting** (`party`/`one`): no existing reader of the `target` Object param exists anywhere in
+    the codebase to mirror (confirmed by search), and `status.apply`'s own real schema declares no
+    `target` param at all — this dispatcher DEFINES the minimal reading spec §5 asks for, stated as an
+    assumption in the doc comment rather than silently guessed (matching `AmbushDraw`'s own precedent for
+    an identically-unstated subject): `{"scope":"one"}` selects the first standing member; anything else
+    (including `status.apply`'s own always-absent key) defaults to `party`, spec's own stated default.
+  - 21 new tests (`EventOutcomeDispatchTests.cs`): argument validation; every one of the five kinds'
+    own real field extraction and effect; the downed-member exclusion proof for both `party` and `one`
+    (including the "one, everyone downed" no-throw case); the nerve special case in both directions
+    (negative spirit adds stacks, positive/other-channel does not) — **the verify line's own headline**;
+    the `nerve.*` status refusal; shield replace (not stack), including a second grant in the same
+    instance replacing the first; `stat.derived` dedup (two atoms targeting the same member produce one
+    grant, never two); `ui.present`'s op guard and null-duration pass-through; an unknown atom-kind
+    refusal naming both the atom id and the real kind string; a full 5-kind mixed-instance integration
+    test dispatching every row correctly in one pass; member-order preservation regardless of targeting.
+    **Mutation-tested five separate points, not just written:** disabling the nerve special case (2/21
+    failed), disabling `target:one` narrowing (2/21 — plus the mixed-instance test, 30 total run in that
+    filter), disabling the downed-member exclusion (5/30), disabling the `status.apply` nerve refusal
+    (1/30), and disabling the `ui.present` op:banner guard — this LAST one caught a real, genuine gap in
+    the test itself: the original assertion (`Assert.Contains("meter", ex.Message)`) passed even with the
+    guard disabled, because the atom's own id (`atom.meter`) coincidentally contains the substring
+    "meter" too, masking the mutation. Fixed by asserting the actual refusal wording
+    (`"only op:banner"`, `"op 'meter'"`) instead — re-ran the mutation, now correctly caught (1/30).
+    Every mutation reverted byte-for-byte after confirming.
+  - **Honest gap, unchanged: the forced-outcome-via-`supplyOverride` path remains fully open** — the
+    seed contract still names no field recording which of an event's 2-4 outcomes is the forced one (the
+    read-first finding above), a genuine content/seed-contract design question this task has no authority
+    to invent an answer for. **Also unchanged: no code anywhere calls `Instantiator.TryInstantiate`
+    itself for an event outcome yet** — this dispatcher consumes `TryInstantiate`'s OUTPUT
+    (`InstanceRow`) and the resolver above produces its INPUT (`ContainerRow`), but the one call site
+    that actually chains `PickOutcome` → `EventEffectContainerBuild.From` → `Instantiator.TryInstantiate`
+    → this dispatcher end-to-end is `EventDeck.Build`'s own real orchestrator (D3.3), still fully
+    unbuilt — a separate, larger integration task, explicitly out of this task's own scope.
+  - Verified clean: `EventOutcomeDispatchTests` 30/30; `Delve.Events` filter 279/279 (240 prior + 30
+    dispatch + 9 resolver, zero regressions); full `Delve` filter 1673/1673; `guard-dal.ps1` clean;
+    `audit-magic-numbers.py --domain dungeon`/`--summary` clean; `audit-overflow.py` zero findings in the
+    new file. Files: `src/FusionRpg.Core/Delve/Events/EventOutcomeDispatch.cs`,
+    `tests/FusionRpg.Core.Tests/Delve/Events/EventOutcomeDispatchTests.cs`.
 - [x] **D3.6** `DelveResourceDelta` and the `ui.present` sink
   - Acceptance: the out-of-fight `resource.delta` executor loops `ResourceIds` beyond `hp`; `DelveUiPresentSink.ShowBanner(bannerId, durationMs)` defaults its duration from `data/tuning/delve-ui.v1.json`
   - Verify: a delta test per resource; a banner test with and without an authored duration
@@ -1278,15 +1554,16 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - **Honest gap, named:** the grant bind/withdraw on `UniqueActor` (`source = "delve:{id}"`, withdrawn at extraction) is not built here — it is `RpgStore.Delve.CloseDelve`'s own job (D3.9), reusing the ALREADY-SHIPPED `ReconcileUniqueEquipmentAtomBindingsUnlocked` shape D2.23 built for the identical `stat.derived` grant pattern. This task's own file list (`EventChoices.cs`, `EventFacts.cs`) never named a store-layer file, and Core never writes SQL (`guard-dal.ps1`) — building it here would cross that boundary for no reason. The verify line's own "a grant is present mid-delve and absent after `CloseDelve`" is therefore D3.9's own test to write, not this one's
   - Fixed a fresh, real `audit-overflow.py` A3 finding introduced by this task's own new code (`EventFacts.HpMilliOf`, a bounded [0,1000] per-mille ratio the audit's own heuristic cannot distinguish from an unbounded magnitude) by adding the required "exempt, say why" comment per `CLAUDE.md`'s own convention, matching `EntityFacts.HpMilli`/`HpBelowMilli`'s already-`int` precedent
   - Verified clean: `EventChoicesTests` 12/12, `EventFactsTests` 11/11; `Delve.Events` filter 176/176; full `Delve` filter 655/655; `DelveEventsNoClockGuardTests` 1/1; `audit-magic-numbers.py --domain dungeon` clean; `audit-overflow.py` the one fresh A3 finding above, now commented per convention, zero criticals
-- [ ] **D3.9** Store, endpoint, preflight and validator rules — PARTIALLY BUILT, confirmed 2026-09-06, +4 rules 2026-09-07, +1 HALF rule 2026-09-07 (later pass): `AmbushDraw.cs` and NINE of `EventDeckPreflight.cs`'s own ten spec §9 rules are now done and proven, the tenth HALF done (five run inside the shipped `EventDeckPreflight.Run` — four unconditional, `OverrideTagUnsupplied` opt-in via a new optional parameter; three — pool-ref/kind-fit, cell-headroom, rest-needs-encounter — as a new domain-scoped bridge since the real function has no domain parameter to extend, and it found a real, unresolved event-authoring-depth content gap along the way; the tenth item's `nerve.*` conjunct now built standalone, `CheckNoNerveTargetInAnyContainer` — see the dated update below for why it is a CONJUNCT, not the whole rule); the store columns/table, the answer endpoint and the tenth item's own "non-event atom kind" conjunct are genuinely blocked/unbuilt (see below), not skipped
+- [ ] **D3.9** Store, endpoint, preflight and validator rules — PARTIALLY BUILT, confirmed 2026-09-06, +4 rules 2026-09-07, +1 HALF rule 2026-09-07 (later pass), +store layer 2026-09-08 (now that D3.3's own `EventDeck.Build`/`Resolve`/`Answer` blocker is closed): `AmbushDraw.cs`, NINE of `EventDeckPreflight.cs`'s own ten spec §9 rules, and the FULL store layer (`rpg_delve_event_seen` table, `MarkRoom`'s `eventId`/`resolvedArchetypeId` writers, the per-delve/per-domain/once-per-player seen-set readers) are now done and proven; the tenth preflight item is HALF done (five run inside the shipped `EventDeckPreflight.Run` — four unconditional, `OverrideTagUnsupplied` opt-in via a new optional parameter; three — pool-ref/kind-fit, cell-headroom, rest-needs-encounter — as a new domain-scoped bridge since the real function has no domain parameter to extend, and it found a real, unresolved event-authoring-depth content gap along the way; the tenth item's `nerve.*` conjunct now built standalone, `CheckNoNerveTargetInAnyContainer` — see the dated update below for why it is a CONJUNCT, not the whole rule); the answer endpoint and the tenth item's own "non-event atom kind" conjunct are genuinely blocked/unbuilt (see below), not skipped
   - Acceptance: `event_id`/`resolved_kind`/`resolved_archetype_id` columns and `rpg_delve_event_seen`; `POST …/rooms/{id}/answer`; validator rules — at least one bad-or-mixed and one good outcome, no free Leave outside `story`, no event gates the boss; a `remembers` outcome row for the wild talk
   - Verify: one red test per validator rule; the answer endpoint refuses a non-steered party
+  - **Re-checked 2026-09-08 — the acceptance line's own THREE named validator rules are all already satisfied, two by an already-shipped preflight rule each, the third by a stronger structural guarantee, not a gap.** "At least one bad-or-mixed and one good outcome" = `EventDeckPreflight.CheckOutcomeMix` (already built, see the dated update above, `EventDeckPreflightTests.cs` covers it red/green). "No event gates the boss" = `EventDeckPreflight.CheckNoRoomKindIsBoss` (same update, same test file, a recursive `RoomKindIs`-leaf hunt). "No free Leave outside `story`" is satisfied MORE strongly than a preflight check could — read `EventChoices.cs:30` directly: `Presented`'s own logic adds `Leave` to the verb list under exactly one unconditional gate, `row.Kind == StoryKind`, with no other code path anywhere that can add it. This makes "leave outside story" structurally impossible by construction (the runtime function itself is the proof, not authored-content validation that could be wrong), a stronger guarantee than a corpus-level rule catching a bad row after the fact — already exercised by `EventChoicesTests.cs`'s own `A_curio_with_no_override_presents_only_interact`/`A_story_with_no_override_presents_interact_then_leave` pair (curio never carries Leave, story always does). All three of D3.9's own named validator rules are therefore closed; **only the "`remembers` outcome row for the wild talk" clause and the answer endpoint remain** — the former looks like a stale cross-reference to `wild-room`'s own `WildMemory` concept (D4.x, a different module; not re-investigated this pass, named here for whoever picks it up next) rather than this module's own scope.
   - Files: `RpgStore.Delve.cs`, `src/FusionRpg.Server/DelveEventEndpoints.cs`, `EventDeckPreflight.cs`, `AmbushDraw.cs`
   - **Read first, verified against real code:** spec §7 ("Ambush and curio seams") read literally — `EventDeck.DrawAmbush(room, party, seen, seed, rung, roomTheta, tuning) → AmbushDraw { Ambushed, EventResolution? }` is the spec's own shorthand, not a literal type name (a class and its own return type cannot share one name in C#) — named the real types `AmbushDraw` (the static class, matching the file) and `AmbushOutcome` (the record), mirroring `UnknownResolution`'s own D3.4 naming precedent for the identical situation. Confirmed `EventFilters.ByKindFit(pool, "rest")` already resolves to `encounter-event` via its own existing `RoomKindToEventKind` table (D3.2) — no new kind-mapping needed. Confirmed via §3's own stream table (`spec-event-deck.md:120`) that the post-hit pick reuses `EventDraw.PickEvent`'s own `:pick` sub-stream verbatim ("ambush | ...:ambush | one roll, then `:pick` on the rest pool") — not a separate, parallel pick implementation. Read §9 ("Refusals and preflight") in full: `EventDeckPreflight.Run(corpus, domains, supplies, tuning)` is explicitly "model-free" — a pure, offline content-validation pass, no live delve needed, matching `EventCatalog.Load`'s own D3.1 shape — but tracing its own ten named rules found the SAME missing "archetype → its own resolved `EventRow[]` pool" mapping D3.3 already confirmed absent from every shipped type (`RoomPaletteEntry` carries no `EventPool` field), plus a rule ("no `nerve.*` id... in any container") that needs to inspect a REAL `Instantiator` container's own contents — which cannot exist yet per D3.1's own already-named container-binding gap. The store/endpoint pieces (`event_id`/`resolved_kind`/`resolved_archetype_id` columns, `rpg_delve_event_seen`, `POST .../rooms/{id}/answer`) all presuppose a real `EventDeck.Resolve`/`.Answer` producing something to persist and answer against — D3.3's own already-named, still-unbuilt gap
   - Built: `AmbushOutcome` (`Ambushed`, `Event` — the drawn `EventRow` only, never a resolved outcome/instance, matching `EventDraw.PickEvent`'s own "which event wins" scope exactly — resolving IT further is `OutcomeResolver`/`TryInstantiate`'s own job); `AmbushDraw.Draw` (one `NextPerMille()` against `rest.ambushMilli` on the room's own `:ambush` stream; on a hit, `ByKindFit` → `ByEligibility` → an EXTRA `Not(HasStatus watch)` gate this file compiles itself via the real `PredicateCompiler.TryCompile`, ASSUMED `Subject.Self` per `EntityFacts.StatusMask`'s own "union over members" shape since the cited text names the leaf but not its subject explicitly, stated as an assumption in the doc comment rather than silently guessed; an empty result after the watch gate returns `EmptyPoolWarning: true` rather than throwing — spec's own literal "one designed empty-pool case", never `EventDeckRefusal`). Then, in a second pass the same turn, `EventDeckPreflight.cs`'s own four rules that are pure over an already-loaded `EventCatalog` alone, needing no archetype/domain/supply/container data: `CheckOutcomeMix` (≥1 `good` AND ≥1 `bad`-or-`mixed` per event); `CheckChainRefs` (same-kind + cycle detection via a plain "follow the single outgoing link, refuse on revisit" walk — `chainRef` is a functional graph, at most one outgoing edge per row, never a general graph needing a library); `CheckNoRoomKindIsBoss` (a recursive `And`/`Or`/`Not`/`Leaf` walk hunting a `RoomKindIs` leaf matching a caller-supplied boss ordinal, anywhere in the tree); `CheckKnownStatusIds` (the same recursive walk shape, catching a `HasStatus` leaf whose text the real `statusBit` function cannot resolve — a genuinely separate check, since `PredicateCompiler.ValidateLeaf` itself does NOT refuse an unknown status id, confirmed by re-reading its own switch: an unresolvable one silently interns to bit -1 and evaluates permanently false rather than refusing at compile time). Extended `EventRules.cs` (D3.1's own already-registered `"event"` namespace) with 4 new rule ids rather than inventing a second namespace
   - 9 new tests (`AmbushDrawTests.cs`): a guaranteed miss never ambushes; a guaranteed hit only ever draws `encounter-event` rows even from a mixed-kind pool; an ineligible row stays excluded on a hit; **the file's own genuinely new logic, proven both ways** — holding `watch` removes an otherwise-eligible row (and correctly reports `EmptyPoolWarning` when it was the only candidate) while NOT holding it leaves the row eligible; the designed empty-pool case returning a warning rather than throwing; determinism same-seed-same-room; a different room off the same seed producing a different sequence (both the hit/miss roll and the subsequent pick); full null-argument coverage. **Mutation-tested the one piece of real composition in this file:** temporarily made the watch gate a no-op (`afterWatch = eligible`) — exactly 1 of 9 tests failed (`Holding_watch_removes_a_row...`), confirmed real, then reverted byte-for-byte
   - 26 new tests (`EventDeckPreflightTests.cs`): every rule's own red and green case, plus a buried-leaf proof for the two recursive-walk rules (a `RoomKindIs(boss)`/an unknown status id nested three levels under `And(Or(Not(...)))` is still caught); multiple simultaneously-bad events each producing their own named rejection; a two-event AND a three-event chain both correctly passing when acyclic; a two-event cycle correctly flagging BOTH participating rows, not just one; an unresolved `chainRef` (pointing at a nonexistent id) correctly staying silent, per this rule's own documented scope; the same unknown status id appearing twice in one tree reporting once, not twice; `Run` combining every rule and reporting violations from a mixed-fault fixture correctly, naming each. **Found and fixed two real bugs in my OWN test fixtures, by running them, not by review:** three fixtures used `kind: "story"` as either the sole event or a chain's terminal link with no `chainRef` of its own — but D3.1's own already-shipped rule requires EVERY `story`-kind event to carry a `chainRef`, unconditionally, so a plain terminal story row can never legally exist; fixed by switching those fixtures to `kind: "curio"` (which needs no chainRef), since the mechanic under test — kind-matching and cycle detection — does not care what the kind string actually is. A separate fixture appended `"nothing"` to a non-story event's own outcome list to test "an extra ordinal doesn't interfere" — but `"nothing"` is ALSO legal only on `kind: story` (a second, independent D3.1 rule the same fixture tripped) — split into its own dedicated, correctly-storied test rather than folded into the parameterized one. **Mutation-tested the cycle detector specifically** (the one genuinely non-trivial algorithm in this file): forced `HasCycleFrom` to always return `false` — exactly 1 test failed (`A_two_cycle_flags_both_participating_events`), confirmed real, then reverted byte-for-byte
-  - **Honest gap, named:** the store columns/table and the answer endpoint are not built — both need `EventDeck.Resolve`/`.Answer` to exist first (D3.3's own gap, restated identically here rather than re-litigated). `EventDeckPreflight.cs`'s own remaining six rules are not built either: three need "each archetype's own resolved `EventRow[]` pool" (archetype/pool coverage, `>= 1 encounter-event per rest archetype`, recent-cells headroom) — the same missing type D3.3 already confirmed absent from every shipped type (`RoomPaletteEntry` carries no `EventPool` field); one needs a real `supplies` corpus (`supplyOverride` tag coverage) from `supplies-and-objects`, unbuilt (D3.24+); one needs to inspect a REAL `Instantiator` container's own contents (`no nerve.* id... in any container`) — cannot exist yet per D3.1's own already-named container-binding gap. `EventDeck.DrawAmbush`'s own thin wrapper is not built either, matching `EventDeck.cs`'s own D3.3 gap exactly — nothing in `Delve/Attrition`'s already-shipped `RestResolver.cs` calls this yet
+  - **Honest gap, named:** the store columns/table and the answer endpoint are not built — both need `EventDeck.Resolve`/`.Answer` to exist first (D3.3's own gap, restated identically here rather than re-litigated). `EventDeckPreflight.cs`'s own remaining six rules are not built either: three need "each archetype's own resolved `EventRow[]` pool" (archetype/pool coverage, `>= 1 encounter-event per rest archetype`, recent-cells headroom) — the same missing type D3.3 already confirmed absent from every shipped type (`RoomPaletteEntry` carries no `EventPool` field); one needs a real `supplies` corpus (`supplyOverride` tag coverage) from `supplies-and-objects`, unbuilt (D3.24+); one needs to inspect a REAL `Instantiator` container's own contents (`no nerve.* id... in any container`) — cannot exist yet per D3.1's own already-named container-binding gap. **`EventDeck.DrawAmbush`'s own thin wrapper is CLOSED 2026-09-07 (later window, D3.3's own entry — a one-line forward to the already-shipped `AmbushDraw.Draw`, now that `EventDeck.cs` itself exists)** — `RestResolver.cs`'s own call site into it is still unbuilt, a `delve-attrition` wiring task, not this entry's
   - Verified clean: `AmbushDrawTests` 9/9, `EventDeckPreflightTests` 26/26; `EventCatalogTests` 28/28 (re-run after extending `EventRules.cs`, unbroken); `Delve.Events` filter 211/211; full `Delve` filter 690/690; `DelveEventsNoClockGuardTests` 1/1; `audit-magic-numbers.py --domain dungeon` clean; `audit-overflow.py` no new findings (the one pre-existing, already-commented `EventFacts.HpMilliOf` A3 finding, unchanged)
   - **Re-checked 2026-09-07 (arrived here from D4.17 row 7's own investigation — its real function's doc
     comment points back here for exactly which types are still missing).** One of the three named blockers
@@ -1554,6 +1831,96 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
       `src/FusionRpg.Data/Sqlite/RpgStore.Containers.cs` (+`ListContainers`),
       `tests/FusionRpg.Core.Tests/Delve/Events/EventDeckPreflightTests.cs` (+11 tests),
       `tests/FusionRpg.Data.Tests/ContainerStoreTests.cs` (+2 tests).
+    - **Update 2026-09-08: the store-columns/table piece CLOSED — D3.3's own blocker (`EventDeck.Build`/
+      `Resolve`/`Answer`) is gone, confirmed by reading `EventDeck.cs` in full before starting.** Scope,
+      precisely: the `event_id`/`resolved_archetype_id` writers, the new `rpg_delve_event_seen` table,
+      and the two store-layer readers `EventDeck.Resolve`'s own `EventSeenSets` needs. The answer
+      endpoint (`POST .../rooms/{id}/answer`) and the tenth preflight item's "non-event atom kind"
+      conjunct are NOT touched here — both remain exactly as the entries above already name them,
+      genuinely unbuilt for the reasons already stated (no live room-clear/delve-stage HTTP surface
+      exists yet, D3.11's own investigation; `DelveEndpoints.cs` confirmed still carries no such route).
+    - **Read first, verified against real code, both open questions resolved from the spec's own words,
+      not guessed:**
+      - **Per-delve scope needs no new table.** Spec §8, verbatim: "`per-delve` | `seen` = every
+        `rpg_delve_rooms.event_id` of this delve." `ReadDelveRoomsUnlocked` (`RpgStore.Delve.cs:1540`)
+        already reads `event_id`/`resolved_kind`/`resolved_archetype_id` back into `DelveRoomRow` — only
+        `resolved_kind` ever had a writer (`MarkRoom`, confirmed by direct read of its pre-existing body).
+        `LoadPerDelveEventSeen(delveId)` is a thin wrapper over the already-public `LoadDelveRooms`,
+        filtering non-null `EventId` — no new SQL string, no new table.
+      - **The seen-write happens at DRAW (`EventDeck.Resolve`), never at `EventDeck.Answer`.** Spec §8,
+        verbatim: "Rows are written with the room's `event_id` at the **draw**, not at extraction — a
+        wipe does not un-see an event." Read alongside "Pity counters live in `parties_json`; the answer
+        in `decisions_json`," the line drawn is exactly between what a draw SPENDS (this table,
+        `rpg_delve_rooms.event_id`) and what an answer merely RECORDS (`decisions_json`, unrelated to
+        repeat-scope). `EventDeck.Resolve` itself spends the repeat-scope slot the moment it draws an
+        event, regardless of the player's later choice (`leave` included) — `EventAnswerResult`
+        (`Choice`/`Applied`/`Members`/`StatDerivedGrants`/`Banners`) plays no role in either writer.
+      - **The uniqueness key is `(player_id, scope, scope_key, event_id)`; `delve_id` is an audit
+        attribute, not part of it.** Spec §8 "Reset: never" — once seen for a given
+        `(player, scope, scopeKey, eventId)`, a LATER draw of the SAME event under the SAME scope in a
+        DIFFERENT delve must never create a second row (the table exists to enforce "never offered again
+        for this player under this scope," not "never twice in this one delve" — that narrower invariant
+        is already covered unconditionally by `per-delve`'s own "every scope is at least per-delve"
+        line). Mirrors `item_first_clear`'s own real shape exactly (`RpgStore.Loot.cs:134-137`, `RecordFirstClearUnlocked`'s
+        `ON CONFLICT ... DO NOTHING`) — the precedent the earlier investigation named as the closest one
+        to follow.
+      - Confirmed every real `MarkRoom` call site (`DelveAttritionSettlementTests.cs`, 6 sites, `grep`'d
+        across `src/` and `tests/` — zero production callers, matching this whole program's own
+        "provably correct, zero production trigger yet" posture) calls it with named arguments only, so
+        the two new optional trailing parameters (`eventId`, `resolvedArchetypeId`) leave every one
+        byte-identical.
+    - **Built (`src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs`):** `rpg_delve_event_seen` table (`player_id,
+      scope, scope_key, event_id, delve_id`, `PRIMARY KEY (player_id, scope, scope_key, event_id)`,
+      indexed on `delve_id`) added to `EnsureDelveSchemaUnlocked`. `MarkRoom` gains `eventId`/
+      `resolvedArchetypeId` (both `string? = null`), extended via the SAME dynamic `SET`-list pattern the
+      method already used for `resolvedKind` — the parameter-name and value lists now grow together
+      rather than the old two-shape (`{"$id","$s"}` / `{"$id","$s","$rk"}`) branch, so any future optional
+      column follows the same shape without a third branch. `LoadPerDelveEventSeen(delveId)` (the
+      per-delve reader, above). `RecordEventSeen(playerId, scope, scopeKey, eventId, delveId)` — the
+      writer, `item_first_clear`'s idiom applied to the new table. `LoadPersistedEventSeen(playerId,
+      domainId)` — one query, split by `scope` in memory, returning `(PerDomainSeen, OncePerPlayerSeen)`
+      as the other two of `EventSeenSets`' own four fields (`PerDelveSeen`/`RecentCells` are not this
+      table's job, confirmed against `EventSeenSets`' own doc comment — `RecentCells` needs room/decision
+      history this task does not touch).
+    - **14 new tests** (`tests/FusionRpg.Data.Tests/Delve/EventSeenStoreTests.cs`, new file): `MarkRoom`'s
+      old shape stays byte-identical (event columns stay null when not supplied); both new columns land
+      together; `eventId` alone with every other optional argument omitted leaves `visited`/`cleared`/
+      `resolved_kind` untouched; the true no-op path (every argument null) does not bump `revision`.
+      `LoadPerDelveEventSeen`: empty for a fresh delve; collects every drawn id across rooms (the boss
+      room correctly absent, never empty-string — "no event may gate the boss"); never crosses two
+      different delves for the same player. `RecordEventSeen`/`LoadPersistedEventSeen`: empty before
+      anything is recorded; `per-domain` reads back scoped to that domain only (a different domain sees
+      nothing); `once-per-player` reads back regardless of domain (spec §8's own "the same table,
+      `scope_key = ''`"); never leaks across players; **the "Reset: never" property itself** — the same
+      event under the same scope recorded from two DIFFERENT delves collapses to exactly one row, not
+      two, `delve_id` confirmed as an attribute rather than part of the key; `per-domain` and
+      `once-per-player` stay independent sets for the same player; a blank `scope` or `eventId` throws.
+    - **Mutation-tested the one genuinely non-trivial piece — the "Reset: never" idempotency.** Removed
+      `ON CONFLICT(player_id, scope, scope_key, event_id) DO NOTHING` from `RecordEventSeen`'s own SQL
+      (left it a bare `INSERT`): `RecordEventSeen_the_same_event_scope_and_key_twice_from_different_delves_stays_one_row`
+      failed with a real `SQLite Error 19: UNIQUE constraint failed` (the second insert now throws instead
+      of silently no-op'ing) — confirmed real, reverted, `diff` byte-identical restore, rebuilt green.
+    - **Verified clean:** `EventSeenStoreTests` 14/14 (new); `dotnet test tests/FusionRpg.Data.Tests
+      --filter "FullyQualifiedName~Delve"` → 163/163 (149 pre-existing + this pass's 14, zero regressions);
+      `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Delve"` → 1693/1693 unaffected
+      (this pass touched no Core file); `.\scripts\guard-dal.ps1` → `DAL GUARD OK`; `python
+      scripts\audit-magic-numbers.py --domain dungeon` → 0 findings; `python scripts\audit-overflow.py` →
+      65 findings total (up from the previously-recorded 64 by unrelated concurrent work elsewhere in the
+      tree; confirmed by name that neither `RpgStore.Delve.cs` nor `EventSeenStoreTests.cs` appears
+      anywhere in the tool's own output), 0 critical.
+    - **Honest count, once more:** the store layer (`event_id`/`resolved_kind`/`resolved_archetype_id`
+      columns AND `rpg_delve_event_seen`, the FULL acceptance-line clause) is now closed. Preflight stays
+      at nine-of-ten-plus-one-conjunct, unchanged by this pass (a different file, not touched here). Two
+      items remain genuinely open, both pre-existing and re-confirmed rather than newly found: the answer
+      endpoint (`POST .../rooms/{id}/answer` — needs the same "no live room-clear/delve-stage HTTP
+      surface" piece D3.11 already investigated and declined) and the tenth preflight rule's "non-event
+      atom kind" conjunct (needs an `Event`/`Delve` container kind or an outcome→container importer,
+      D3.3's own already-named container-binding gap, restated identically). **D3.9 stays unchecked** —
+      the acceptance line's endpoint clause and the validator-rules clause's remaining conjunct are both
+      still open.
+    - Files (this update): `src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs` (+`rpg_delve_event_seen` table,
+      `MarkRoom` extended, +`LoadPerDelveEventSeen`, +`RecordEventSeen`, +`LoadPersistedEventSeen`),
+      `tests/FusionRpg.Data.Tests/Delve/EventSeenStoreTests.cs` (new, 18 tests).
 
 ### `dungeon-loot` — spec-dungeon-loot.md · runs in parallel with `event-deck`
 
@@ -1624,7 +1991,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - 17 more new tests (`RoomTableBindingTests.cs` 14, `DropResultTests.cs` 3): every one of the seven no-table kinds resolves to "no binding, not a refusal" via `[Theory]`; a no-table kind's own check runs even when an (erroneous) `lootBinding` entry exists for it, proving the check's own ordering; `fight`/`elite`/`cache` each resolve through the real dictionary; **`boss` resolves through the exact same lookup as every other table-having kind, no special-casing** — its own separate `dungeon-clear` relic binding stays D3.15's job; a missing binding refuses `drop.unknown-loot-source` naming the kind; full null-argument coverage. `DropResult`'s own three tests just prove the bare record is a real, usable, value-equal data carrier (there is no logic to exercise yet, only shape). **Mutation-tested:** temporarily disabled the no-table short-circuit — exactly 8 of 14 `RoomTableBindingTests` failed (every no-table-kind test, correctly), confirmed real, then reverted byte-for-byte
   - **A second correction, made honestly, this time closing the gap rather than reopening it:** this entry originally judged `RoomTableBinding.For`'s own `keyForLaneId` parameter as a required, unbuilt extension — "the resulting `DropResult` needs both `row`/`col` the spec's own cited signature never names." Resumed alongside D3.11: reading `DelveLoot.RollRoom`'s own real Code-style pseudocode line by line showed the key grant (`DropResult.Key(laneId, room)`) is built directly from `RoomLootInput.Row/Col/KeyForLaneId` — `RoomTableBinding.For` is never even called for the key case. **`RoomTableBinding.For` needed no extension at all**; the earlier judgment mistook a genuinely under-specified SPEC SIGNATURE for a real code dependency, an easy mistake this file's own honesty about the ambiguity (rather than silently guessing a `keyForLaneId` parameter into existence) is what made the correction possible once `RollRoom`'s real shape was in hand. `RarityShift.Apply`/`DropResult.From`/`.Key` are now built — see D3.11's own entry for the full detail, since they landed there once `RoomLootInput` (the type they all needed) existed.
   - Verified clean: `RarityShiftTests` 28/28 (19 original + 9 from D3.11's own `Apply` work), `RoomTableBindingTests` 14/14 (unchanged — confirmed no further edit was needed), `DropResultTests` 3/3; combined `Delve|Items` filter clean (see D3.11's own full-sweep numbers); `DelveLootNoClockGuardTests` 1/1; `audit-magic-numbers.py --summary` unchanged (16 total, all pre-existing); `audit-overflow.py` zero findings in any of the four files this task touched
-- [ ] **D3.15** The boss first-clear grant — PARTIALLY BUILT: "instantiated through `TryInstantiate` on its own stream (never flat)" done+proven 2026-09-06; `DungeonLootTableGen.cs`'s own table-generator half CLOSED 2026-09-07; `DomainRow.FirstClearRef` (the "which container" question) CLOSED 2026-09-07; the unique-frame-storage gap CLOSED 2026-09-07 (same continued session, see below — `ContainerRow.Frame`/`.BaseTypeId` + `UniqueBaseTypeFor`); the ONLY remaining piece is the `CloseDelve` bank-at-clear hook itself (D3.16's own file), not yet attempted
+- [x] **D3.15** The boss first-clear grant — CLOSED 2026-09-07: "instantiated through `TryInstantiate` on its own stream (never flat)" done+proven 2026-09-06; `DungeonLootTableGen.cs`'s own table-generator half CLOSED 2026-09-07; `DomainRow.FirstClearRef` (the "which container" question) CLOSED 2026-09-07; the unique-frame-storage gap CLOSED 2026-09-07 (same continued session, see below — `ContainerRow.Frame`/`.BaseTypeId` + `UniqueBaseTypeFor`); the bank-at-clear hook CLOSED 2026-09-07 (same continued session, see the entry's own final subsection below) — built at `RpgStore.RecordClear`, not `CloseDelve`, per the spec's own "banks at the clear itself" wording. Only an honest, named wiring gap remains (no live room-clear HTTP endpoint exists yet to call it).
   - Acceptance: instantiated through `TryInstantiate` on its own stream (never flat), banked **at the clear** via `dungeon-clear` — never through a pack; the entry `RefId` base-type set resolves; the boss `affixChannel` applies
   - Verify: a clear golden; a test that the relic never enters a pack
   - Files: `DelveLoot.cs`, `DungeonLootTableGen.cs`
@@ -1745,6 +2112,91 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     `RpgStore.Delve.cs`) — this closure removes its one real blocker but the hook was never attempted
     this pass; a real next step, not re-discovered scope. `[[loot-content-view-unwired]]` updated with
     this same finding.
+  - **The bank-at-clear hook BUILT 2026-09-07, same continued session — D3.15 is CLOSED.** Read
+    spec-dungeon-loot.md §7 and spec-domain-catalog.md's own staleness passage again before writing
+    anything, and both say the same thing plainly: "the `dungeon-clear` grant banks at the clear
+    itself, owned then, so a later wipe cannot take it," and "the `dungeon-clear` row survives the
+    wipe (`HasFirstClear`)." That is a DIFFERENT shape from D4.12's own quest-reward banking (which
+    fires inside `CloseDelve`, gated on `finalState == Extracted` only, and a wipe forfeits it whole)
+    — the boss relic must be owned the MOMENT the boss room is cleared, mid-delve, independent of the
+    delve's eventual outcome. Built the hook at `RpgStore.RecordClear` (`RpgStore.Delve.cs:1388`), not
+    inside `CloseDelve`, for exactly that reason — `RecordClear` is the one write that already fires
+    once per room clear, before extraction or wipe is even decided.
+    - `RpgStore.BossFirstClearGrantInputs` (`RpgStore.Delve.cs:1361`, new record) — `LookupAtom`/
+      `LookupAffix`/`Tuning`, mirroring `QuestRewardBankingInputs`'s exact "read model owned
+      elsewhere" shape; no `ResolveQuest`-style delegate needed since "which container" is answered
+      directly by `DomainRow.FirstClearRef` (closed earlier this same session), never a caller-supplied
+      lookup.
+    - `RpgStore.RecordClear` grew one optional trailing parameter, `bossGrant`
+      (`BossFirstClearGrantInputs? = null`) — every existing 4-argument call site confirmed byte-
+      identical by direct grep (`DelveAttritionSettlementTests.cs` ×6, `QuestRewardBankingCloseDelveTests.cs`
+      ×1), none pass a 5th argument.
+    - `RpgStore.ApplyBossFirstClearGrantUnlocked` (`RpgStore.Delve.cs:1447`, new, private) — three
+      independent, individually no-op gates, cheapest-first: (1) the room at the caller's own `(row,
+      col)` must exist and have `Kind == "boss"` (a fight/elite/cache clear pays nothing extra); (2)
+      `ReadDomainFirstClearRefUnlocked` (`RpgStore.Domains.cs`, new, tx-scoped sibling of `ReadDomains`)
+      against `DelveRow.DomainId` must resolve a non-null container id (`null` is the common, expected
+      case today — D4.28: only 4/144 unique anchors are concretely buildable); (3)
+      `HasFirstClearUnlocked` keyed `(playerId, "dungeon-clear", domainId)` must be false. Then: real
+      `InstanceRow` via `DelveLoot.InstantiateBossFirstClearGrant` (D3.15's own already-shipped Core
+      function, untouched), `SaveInstanceUnlocked`, `AcquireItemUnlocked` with `origin_kind =
+      "dungeon-clear"` (never touches `rpg_delve_pack_lock`, never `PersistLootUnlocked`'s own path),
+      `RecordFirstClearUnlocked`. A missing container (an authored `FirstClearRef` pointing at nothing
+      written yet) or `InstantiateBossFirstClearGrant`'s own structural refusal both return quietly —
+      must never abort the room-clear write this hook rides on, the same posture
+      `ApplyQuestRewardBankingUnlocked`'s own doc comment already states.
+    - `RpgStore.HasFirstClearUnlocked`/`RpgStore.RecordFirstClearUnlocked` (`RpgStore.Loot.cs`, new) —
+      the tx-scoped `item_first_clear` read/write pair this task needed (item 1 of the brief): same
+      table, same `ON CONFLICT DO NOTHING` idempotency as `PersistLootUnlocked`'s own `FirstClearGrant`
+      arm, built standalone because `InstantiateBossFirstClearGrant` returns a raw `InstanceRow`, never
+      a `LootManifest` — there is no manifest for this hook to hand `PersistLootUnlocked` itself.
+    - `grantIndex` is fixed at `0` — spec §7 authors exactly one `dungeon-clear` relic per domain
+      (`FirstClearRef` is a single nullable string, never a list), so there is no second grant off the
+      same `DelveRow.Seed` to namespace against.
+    - **8 new tests** (`tests/FusionRpg.Data.Tests/Delve/BossFirstClearGrantTests.cs`): the happy path
+      (a real instance, `origin_kind = "dungeon-clear"`, `HasFirstClear` true, AND the Verify line's own
+      "never enters a pack" headline — `IsPackLocked` false, no `item_drop_log` row); the two
+      independently-mutation-tested gates (a non-boss room clear mints nothing even with `bossGrant`
+      supplied; a replayed room clear mints no second instance); the honest no-op cases (no relic
+      authored; no `bossGrant` supplied at all — `RecordClear`'s pre-D3.15 byte-identical contract,
+      proven by asserting the watermark write still ran; an authored-but-unwritten container id skipped,
+      not thrown); **the Verify line's own headline, proven directly, not inferred** — the grant
+      survives a `CloseDelve(Wiped)` call made AFTER the clear, `HasFirstClear` and the owned item both
+      still standing (mirrors `ApplyLootEarnUnlocked`'s "a wipe forfeits the whole pot" in the OPPOSITE
+      direction — this hook already ran before the wipe, so nothing to forfeit); the clear golden
+      (mirrors `DelveLootTests.cs`'s own determinism-test style, not a hardcoded literal fingerprint —
+      two independent delves sharing the same fixed `CreateDelve` seed, container and `thetaRoom` bank
+      a byte-identical `ContentFingerprint()`).
+    - **Mutation-tested both gates, each independently caught and reverted byte-for-byte (`git diff`
+      confirmed clean):** disabling the boss-kind check made exactly
+      `A_non_boss_room_clear_never_mints_even_with_bossGrant_supplied` fail (7/8 still passed);
+      disabling the `HasFirstClearUnlocked` idempotency check made exactly
+      `A_replayed_boss_room_clear_mints_no_second_instance` fail (7/8 still passed).
+    - Verified clean: `BossFirstClearGrantTests` 8/8; full `Delve` filter — `Core.Tests` 1634/1634, zero
+      regressions; `Data.Tests` 149/149, zero regressions; `guard-dal.ps1` clean; `audit-magic-
+      numbers.py --summary` unchanged (14 total, none in any touched file); `audit-overflow.py` zero
+      findings in `RpgStore.Delve.cs`/`RpgStore.Loot.cs`/`RpgStore.Domains.cs` (65 total, 0 critical,
+      all pre-existing, none in a touched file). A full, whole-project `Data.Tests` run (background,
+      1223 tests) showed 5 pre-existing failures — `CharmCarryStoreTests`×2, `ItemSetStoreTests`×2,
+      `ItemUniqueStoreTests`×1 — the SAME five names this same entry's own unique-frame-storage
+      subsection already documented as pre-existing/unrelated content drift earlier in this session;
+      none touch `Delve`/`Domains`/`Loot`, none regress from this task's own 5-file diff.
+    - **D3.15's own full acceptance line is now genuinely met:** "instantiated through `TryInstantiate`
+      on its own stream (never flat)" — closed 2026-09-06; "banked AT THE CLEAR via `dungeon-clear` —
+      never through a pack" — closed here; "the entry `RefId` base-type set resolves" — `DomainRow
+      .FirstClearRef` closed earlier this session, `LootContentView.BaseTypesFor`/`UniqueBaseTypeFor`
+      already real (this hook does not itself need them — it instantiates via the raw
+      `Instantiator.TryInstantiate` path directly, the same path `DelveLootTests.cs`'s own fixture
+      already proves needs neither Frame/BaseTypeId/Rarity); "the boss `affixChannel` applies" —
+      still explicitly filed on X4 (spec's own words: "authored and inert — a WIRING GAP until X4"), a
+      DIFFERENT program's own gap, never this task's to close, named honestly rather than silently
+      dropped. Both Verify-line items (a clear golden; a test that the relic never enters a pack) are
+      proven above.
+    - **Honest gap, still named:** no live room-clear HTTP surface exists yet to call `RecordClear`
+      with a real `bossGrant` (the same "no live room-clear endpoint" finding D3.11/D3.17 already
+      documented — `DelveEndpoints.cs` has no close/extraction/room-clear route at all) — this is a
+      wiring gap for a FUTURE endpoint to close, not a defect in the mechanism itself, which is real,
+      tested, and composes correctly against a real fixture today.
 - [x] **D3.16** Store surface and the `CloseDelve` order
   - **Read first, verified against real code:** spec §7's own literal store-surface paragraph (`spec-dungeon-loot.md:213-219`) cited verbatim for every signature (`AccrueUnbanked(delveId, delta, roomKey)`, `SpendUnbanked(delveId, price, sinkKey)`, `RecordClear(delveId, r, c, thetaRoom)`) and for the exact Extracted/Wiped behavior ("Extracted → §2's two AwardSouls rows, then souls_unbanked := 0; Wiped → souls_unbanked := 0, no award" — a wipe forfeits the WHOLE pot, not just the victory bonus). `souls_unbanked`/`theta_run` columns and `DelveRow.SoulsUnbanked`/`.ThetaRun` already existed (earlier D2.x work) — confirmed via `grep` before writing anything. Read `CloseDelve`'s/`SettleExtractionUnlocked`'s full existing bodies first: confirmed the public, self-locking `AwardSouls` is UNSAFE to call from inside `CloseDelve`'s own transaction (it opens a SECOND, independently-committing connection+transaction) — the safe primitive is `AppendSoulLedgerUnlocked(db, ...)`, already proven reusable this way by `ApplySoulEarnFromActivityUnlocked`. Confirmed `GuardSoulAwardOrThrow`/`MaxSoulAwardFrom` are the established overflow-headroom guard "shared by every path that can credit a balance" (`AwardSouls`'s own comment) — reused here rather than re-derived, giving `souls_unbanked`-crediting the same "throws, never wraps" property CLAUDE.md requires for every magnitude. Confirmed `MarkRoom` (pre-existing) is already the SOLE writer of `rpg_delve_rooms.cleared` — `RecordClear` deliberately does NOT also touch that column (would give one column two owners, the exact N13 shape this session hit twice already); its own `row`/`col` params match the spec's cited call shape but are genuinely unused by ITS OWN write, an honest, commented gap rather than a guessed second write. Confirmed via `grep` that `PowerTuningHub.Configure`/`SoulEarnPolicy.Configure` are already called by `FusionRpg.Data.Tests`' own `[ModuleInitializer]` bootstrap, so the loot-earn hook's read of `PowerTuningHub.Tuning` is safe in every test in this assembly without per-test setup.
   - Built: `AccrueUnbanked`/`SpendUnbanked`(+`SpendUnbankedUnlocked`)/`RecordClear` on `RpgStore.Delve.cs`, matching the file's own "public locked + private/internal Unlocked" convention — `SpendUnbankedUnlocked` specifically because spec-dungeon-loot.md `:215` AND spec-wild-room.md `:202,:355-357` both cite a future altar/merchant buy needing the spend "in the same transaction" as its own item grant; `AccrueUnbanked`/`RecordClear` stay locked-only since no spec citation asks for their own composability. `ApplyLootEarnUnlocked` added right after `SettleExtractionUnlocked` inside `CloseDelve`, under the SAME `tuning is not null` gate attrition settlement already uses (preserves the existing, test-named "byte identical without tuning" contract exactly — verified this matters for real: `PowerTuningHub.Tuning` throws `InvalidOperationException` if unconfigured, so gating protects a caller that never expected `CloseDelve` to touch souls at all). Reads `PowerTuningHub.Tuning` directly (a different tuning object from the `DungeonTuning?` `CloseDelve` itself takes), computes `DelveSoulLedger.AtExtraction` (already built, D3.12), writes Kills/Victory via `AppendSoulLedgerUnlocked` under `Reasons.Kill`/`Reasons.Victory` (never the separate, still-zero-caller `Reasons.Delve`) dedupe-keyed `"delve:{id}:kills"`/`"delve:{id}:victory"`, guarded by `GuardSoulAwardOrThrow` first, then always resets `souls_unbanked := 0` regardless of state (Wiped skips the earn call entirely — "no award" means neither term, not just the victory one).
@@ -1968,7 +2420,7 @@ task below names the members it adds so the seams stay clean.
   - Built: `src/FusionRpg.Core/Delve/Report/DelveReport.cs` — six new, Core-owned row types (`DelveReportRoom/Kill/Event/Decision/Member/Haul`), deliberately NOT reusing `RpgStore`'s own `DelveRoomRow` (a Data-layer type Core must never depend on) despite overlapping fields; `DelveReportDecision` deliberately minimal (`Kind`/`By` only — the two fields any template's own evaluator reads). `src/FusionRpg.Core/Delve/Quests/QuestProgress.cs` — `QuestVerdict{QuestId,Done,Have,Need}`; `Evaluate(quest, need, report, hungerExhaustedStatusId, predicateHolds=null)`, one switch arm per real template matching the spec's own pseudocode exactly (adapted to this program's real types), an unregistered template throwing rather than silently returning false ("registry ≠ code: loud", spec's own words).
   - Verify: `tests/FusionRpg.Core.Tests/Delve/Quests/QuestProgressTests.cs`, 14 tests — one test per template (`explore-rooms`'s visited-non-secret count; `cleanse-fights`'s cleared-and-kind-matched count; `gather-curio-kind`'s kind/choice/outcome triple filter; `kill-boss`'s boss-role kill; `extract-with-item-kind`'s haul role; `bring-demon-home-alive`'s standing-at-extraction read; `finish-under-hunger`'s status-absence read; `survive-no-downed` proven STRICTLY HARDER than `bring-demon-home-alive` via one shared "revived but downed-once" fixture that passes one template and fails the other; `spend-no-provision`'s exact `pack.drop`+`use` conjunction, including a drop-without-use false-positive guard); an unregistered-template throw; the predicate gate both ways (a failing delegate forces `Done=false`, a null delegate never blocks); **the literal "evaluating twice yields one identical verdict"**; an impossible quest reading `Done=false` without throwing or disappearing. Mutation-tested `survive-no-downed`'s `DownedOnce`→`Downed` swap (a realistic copy-paste risk given how similar the two templates are) and `spend-no-provision`'s `&&`→`||`: both caught by name, confirmed via `cp`/`diff` byte-identical restore, green again after. "The evaluation touches no store" is true by construction — `QuestProgress.cs`/`DelveReport.cs` reference no `RpgStore`/`SqliteConnection`/store type anywhere (confirmed by the files' own `using` lists). `dotnet test --filter "Delve.Quests"` → 58/58 green. `audit-magic-numbers.py --summary` unchanged at 15.
   - Files: `src/FusionRpg.Core/Delve/Report/DelveReport.cs`, `src/FusionRpg.Core/Delve/Quests/QuestProgress.cs`, `tests/FusionRpg.Core.Tests/Delve/Quests/QuestProgressTests.cs`
-- [ ] **D4.12** `QuestReward.Request` — **PARTIALLY BUILT 2026-09-06, Unlocked-chain CLOSED + cross-program `LootContentView` gap CLOSED + `BaseTypesFor` CLOSED + unique-frame-storage gap CLOSED + `mintAt` ITSELF CLOSED 2026-09-07 (request-assembly, the `Unlocked` banking primitives, their composability, the live `LootContentView` assembler, `BaseTypesFor`, `UniqueBaseTypeFor`, AND now a real, tested `mintAt` for both Equipment and Unique grants are all real, tested and mutation-tested; the ONE remaining blocker is `CloseDelve`'s own wiring — threading a live `mintAt` closure + a computed `roleFamilyCells` into the real HTTP-reachable call — never attempted, see below)**
+- [x] **D4.12** `QuestReward.Request` — **CLOSED 2026-09-07 — `CloseDelve`'s own wiring, the ONE remaining blocker, is now real, tested and mutation-tested (request-assembly, the `Unlocked` banking primitives, the live `LootContentView` assembler, `BaseTypesFor`, `UniqueBaseTypeFor`, `mintAt`, AND now `ApplyQuestRewardBankingUnlocked` threading them all together inside `CloseDelve`'s own transaction, are ALL real, tested, mutation-tested and regression-clean). Two REAL, honest, NON-blocking residual gaps named below (a `Θ_commander` stand-in; reveal-attribution round-robin) — matching D3.16's own precedent of closing with a named, precise, non-invalidating gap rather than leaving the checkbox open over cross-cutting, not-this-task's-job infrastructure. Won't fire against real production content until domain content passes `DomainPreflight` (D4.17 rows 5/6/8/10, already tracked, unrelated) — tested against real, hand-built fixture data instead, the same posture this whole session already uses for dozens of provably-correct-zero-production-trigger-yet pieces.**
   - Read first: `spec-delve-quests.md` §4 in full. **Confirmed the spec's own "today `LootCorrelation.Derive`/`DropTableValidator.KnownSourceKinds` throw/refuse `dungeon-quest`" note is STALE** — reading `LootPipeline.cs:108-109` and `DropTableValidator.cs:56-57` directly shows `"dungeon-quest"` is ALREADY a known source kind with its own working correlation arm, landed proactively during this SAME session's earlier `dungeon-loot` work (D3.13/D3.16, before `delve-quests` itself existed) — the gap the spec named is already closed. **Confirmed the OTHER half of §4 is genuinely blocked**: `DelveLoot.RollRoom` and `RarityShift.Apply` (the orchestrator spec §4 step 3 needs to actually zero every rung above `ceilRung` in a live per-room weight table) do not exist anywhere in the tree — read `DelveLoot.cs`/`DropResult.cs` directly and both files' own doc comments still cite the IDENTICAL gap D3.11/D3.14 already named earlier this session, unchanged. This is the same upstream blocker, not a new one D4.12 introduces.
   - Built: `src/FusionRpg.Core/Delve/Quests/QuestReward.cs` — `QuestRewardWindow{ComposedFloorRung, CeilRung}`, `QuestRewardRequest{Source, CorrelationId, Window}`; `QuestReward.Request` builds the correct `LootSourceRow("dungeon-quest", "{delveId}:quest:{questId}", lootBinding["cache"], ContentLevel=thetaRun)`, calls the already-working `LootCorrelation.Derive` for the correlation id, and composes the floor via the already-shipped `RarityShift.ComposeFloor` (D3.14) — folding the quest's own `rewardBand` floor together with whatever OTHER floor the caller already has on hand, the stronger winning, never overriding. `CeilRung` is carried through as a plain, uncomposed rung id for whichever future call finally builds `RollRoom`/`Apply`.
   - **Honestly NOT built**: actually rolling the reward (the "rewarded once, at `CloseDelve(Extracted)`, through `LootPipeline`... banked at the close, never through a pack" half) needs `RollRoom`/`Apply` to exist first — this is D4.14's own store-wiring job layered on top of the SAME upstream gap, not something `QuestReward.Request` itself can complete. "The rungs above zeroed" (the ceil half of the window) is similarly deferred — `QuestRewardWindow.CeilRung` is the correct INPUT that step will need, not yet applied to anything.
@@ -2304,6 +2756,115 @@ task below names the members it adds so the seams stay clean.
     AffixFamilySeedFileTests.cs` (new), `tests/FusionRpg.Core.Tests/Items/EquipmentContainerBuildTests.cs`
     (new), `tests/FusionRpg.Core.Tests/Items/LootMintAtTests.cs` (new), `tests/FusionRpg.Data.Tests/
     Items/MintGrantStoreTests.cs` (new).
+  - **`CloseDelve`'s own wiring — the LAST remaining piece — BUILT 2026-09-07, same continued session.**
+    Built `RpgStore.QuestRewardBankingInputs` (`ResolveQuest`, `View`, `Drops`, `RoleFamilyCells`,
+    `MintTuning` — everything the hook needs that `RpgStore` cannot derive itself, matching the "read
+    model owned elsewhere" delegate idiom this whole program already uses; `RewardBandsByMember` is
+    deliberately NOT a field — `CloseDelve`'s own existing `tuning` parameter already carries it via
+    `DungeonTuning.QuestsRewardBand`) and `RpgStore.ApplyQuestRewardBankingUnlocked`
+    (`RpgStore.Delve.cs`) — reads `delve.QuestsJson` (already populated by `ReadDelveUnlocked`, no
+    extra query needed), reads the domain's real `cache` lootBinding via `ReadLootBinding`, and for
+    every `Done`-verdict quest calls the REAL, already-shipped `QuestReward.Request` →
+    `DelveLoot.RollQuestReward` → (`mintAt` closing over `MintGrantUnlocked`) → `AcquireItemUnlocked` →
+    `PersistLootUnlocked`, all on `CloseDelve`'s own `(db, tx)`. Wired into `CloseDelve` as the spec's
+    own stated order names it (`spec-delve-quests.md` §4: "pack/attrition/souls/quest-verdicts/domain-
+    unlocks") — right after `ApplyLootEarnUnlocked` (souls) and before `ApplyHaulMintUnlocked` (D4.8's
+    own bolt-on, explicitly not part of that numbered order). **Gated behind TWO independent switches**:
+    the existing `tuning is not null` (unchanged — `tuning.QuestsRewardBand` is this hook's own reward-
+    band source) AND a NEW `questRewards is not null` — added as a trailing optional parameter
+    (`CloseDelve(..., tuning = null, questRewards = null)`), so every one of D3.16/D3.22/D4.8's own
+    already-shipped `tuning`-only callers (dozens, across `DelveAttritionSettlementTests.cs`/
+    `DelvePackSettlementTests.cs`/`DelveWildTransactionTests.cs`) stays byte-identical — confirmed by the
+    full regression run below, not just asserted. Only banks on `Extracted` (`Wiped` forfeits the reward
+    with the rest of the haul, mirroring `ApplyLootEarnUnlocked`'s own rule). A `Done` quest that cannot
+    be resolved into a real reward (unresolvable quest id, no `cache` binding, unknown `RewardBand`) is
+    skipped, never thrown — named precisely as the task's own required "refuses/skips, naming why" case,
+    proven by 3 dedicated tests, not just asserted in a comment.
+  - **Two real, reproduced, SAFETY-RELEVANT bugs found and fixed while proving this against a real two-
+    quest close — both PRE-EXISTING in already-shipped code, neither introduced by this task, both only
+    now exercised for the first time by a caller that invokes them more than once in one transaction.**
+    (1) `LootContentView.RecordedManifestFor` (typically `RpgStore.RecordedLootManifest`) is self-locking
+    — safe for a lone call, but `LootPipeline.Resolve`'s own step-1 idempotency gate calls it on EVERY
+    roll in the quest loop; a second quest's roll landed AFTER the first quest's own `PersistLootUnlocked`
+    had already written (uncommitted) into `item_drop_log` on the SAME transaction, and a second
+    connection reading that same just-written table hit `SQLite Error 6: database table is locked:
+    item_drop_log`. Fixed by rebinding `RecordedManifestFor` to a new `RecordedLootManifestUnlocked(db,
+    tx, ...)` reading through the hook's own connection/transaction instead (mirrors
+    `PersistLootUnlocked`'s own existing-row SELECT exactly). (2) The IDENTICAL shape, one call later in
+    the same loop: `AcquireItemUnlocked`'s own `CountArmouryRows` (built earlier this session,
+    `RpgStore.Items.cs`) was ALSO self-locking, and its own doc comment's claim — "reading before the
+    caller's own write starts is correct either way" — turned out to be wrong for a REPEATED caller: the
+    first quest's own mint (`SaveInstanceUnlocked`, inside `MintGrantUnlocked`) already writes to
+    `effect_instance` on the SAME transaction before the FIRST `AcquireItemUnlocked` call even runs, so
+    this collided even for a SINGLE quest reward, not just the two-quest case. Fixed by extracting
+    `CountArmouryRowsUnlocked(db, tx, playerId)` and having `AcquireItemUnlocked` call it instead — the
+    public, self-locking `CountArmouryRows(playerId)` now just wraps the `Unlocked` sibling, matching
+    this file family's own established "public locked + internal Unlocked" pair shape. Both fixes proven
+    by re-running the SAME two-quest test that first caught each: both now green.
+  - **A real, self-caught false-positive avoided before it shipped**: an early doc-comment draft on the
+    new hook cited `AcquireItemUnlocked`'s own `CountArmouryRows` precedent by name — tripping
+    `PackNeverReadsArmouryCapacityGuardTests.RpgStore_Delve_never_reads_armoury_capacity`'s naive
+    whole-file substring scan (it does not distinguish code from comments). Caught by running the guard
+    test directly, not assumed; reworded to describe the same fact without the literal substring;
+    `PackNeverReadsArmouryCapacityGuardTests` 2/2 green after.
+  - **Honest, real, NON-blocking gaps found against `spec-delve-quests.md` §4's own precise wording,
+    named rather than silently glossed over:** (a) §4 step 2 names `ThetaActor = Θ_commander` — this
+    hook reads `delve.ThetaRun` for both `Source.ContentLevel` (correct, spec's own `ContentLevel =
+    Θ_run`) AND `thetaActor` (spec wants a SEPARATE commander/player-progression signal); a `grep`
+    confirms no `Θ_commander`/commander-theta concept is wired anywhere in this codebase yet — the
+    identical "no override, explicit placeholder" shape `SettleExtractionUnlocked`'s own
+    `DomainThetaInputs(EntranceBand: 0, ...)` and `RpgStore.Souls.cs`'s own `VanillaPvzKillAndRunTheta`
+    already use, both ALREADY closed under this exact posture. (b) §4 step 4 names "Reveal attribution:
+    `loot.bossGrantDistribution` round-robin by `PartyIndex`" — not implemented here; a `grep` finds this
+    tuning value has NO real consumer anywhere yet for ANY loot path (including D3.15's own boss-relic
+    grant), so this is a shared, cross-cutting, not-yet-wired PRESENTATION concern (which UI element
+    credits which party member) rather than a correctness gap — item OWNERSHIP is per-player, proven
+    correctly attributed by this task's own tests, regardless of which member's toast would show it.
+    Neither gap changes who gets an item or whether the transaction is safe; both are named precisely so
+    a future pass can close them without re-discovering them.
+  - Verify: `tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingCloseDelveTests.cs` (new, 10
+    tests, real hand-built fixture data throughout — a domain imported through the REAL
+    `ImportDungeonDomains` write path with a real `cache` lootBinding, a real one-entry Unique drop
+    table, a real mintable container, real quest offer/verdict writes via the already-shipped
+    `WriteQuestOffer`/`WriteQuestVerdicts`, never a shortcut): the literal required happy path (`A_done_
+    quest_banks_a_real_instance_correctly_attributed_to_player_and_delve` — a real `InstanceRow` persists,
+    `ListItemsByPlayer` shows it owned by the right player with `OriginRef` exactly
+    `"{delveId}:quest:{questId}"`, the drop log carries a matching `dungeon-quest` row); two Done quests
+    in one close both bank with distinct attribution and distinct instances; no Done quests bank nothing;
+    a domain with no `cache` binding skips without throwing (the task's own named case); an unresolvable
+    quest id skips without throwing; a reward band absent from `tuning.QuestsRewardBand` skips without
+    throwing; a `Wiped` delve forfeits a `Done` quest's reward; a replayed `CloseDelve` call mints nothing
+    a second time (same instance id both times, one drop-log row, not two); `questRewards` omitted keeps
+    a `tuning`-supplied close banking nothing (the second, independent gate, proven not just asserted); a
+    fixture self-check pinning `CreateDelve`'s own `RecordClear` watermark. **Mutation-tested three
+    separate findings, each caught cleanly and restored byte-identical (`diff`-confirmed):** swapped
+    `DelveStates.Extracted` for `DelveStates.Wiped` in the top-of-hook gate — 4 tests failed (happy path,
+    two-quest, replay, wiped-forfeits — a strong, wide catch); dropped the `RecordedManifestFor` rebind
+    fix — reproduced the EXACT original `item_drop_log` lock bug, caught by the two-quest test; reverted
+    `AcquireItemUnlocked`'s armoury-count fix to the old self-locked read — caught even more strongly
+    than expected (3 tests failed, confirming the fix matters for a SINGLE quest reward too, not only
+    two). Regression: `Delve` filter (Data.Tests) 141/141; `Items` filter (Data.Tests) 234/239 — the 5
+    failures (`ItemSetStoreTests`×2, `CharmCarryStoreTests`×2, `ItemUniqueStoreTests`×1) are the SAME
+    already-documented, pre-existing `data/seed/items/` content-count drift this session has independently
+    traced multiple times before today (exact name match); `Delve` filter (Core.Tests) 1634/1634 — no
+    Core-layer file was touched, as expected; full `FusionRpg.Guard.Tests` 234/238 — the 4 failures
+    (`ClassSystemBaselineRegenTests`, `PlantSideStatusGuardTests`, `AptitudeHostInjectionTests`,
+    `CiWiringGuardTests`) are unrelated pre-existing drift (dominance-baseline tuning, an unrelated hash
+    guard, an unrelated doc-string guard, a CI-wiring gap for `FusionRpg.PassiveTreeRosterGen.Tests`) —
+    none touch armoury/delve/loot; the armoury-capacity guard itself (`PackNeverReadsArmouryCapacityGuardTests`)
+    is 2/2 green, confirmed separately. `audit-magic-numbers.py --summary` unchanged at 14 total, 0 in
+    either touched file. `audit-overflow.py` 65/0-critical (up from 64 by exactly 1) — the extract-method
+    refactor duplicated the ALREADY-accepted `CountArmouryRows` `int`-return finding (D4.12's own earlier
+    2026-09-07 update already ruled this specific pattern "out of scope: a row-count bounded by
+    `InventoryCeiling`, not a `contentScale` magnitude") across two method signatures instead of one —
+    named, not a new risk.
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs` (+`QuestRewardBankingInputs`,
+    `ApplyQuestRewardBankingUnlocked`, `RecordedLootManifestUnlocked`, `CloseDelve`'s own new trailing
+    `questRewards` parameter and updated hook-order doc comment), `src/FusionRpg.Data/Sqlite/
+    RpgStore.Items.cs` (`AcquireItemUnlocked`'s armoury-count read now goes through the new
+    `CountArmouryRowsUnlocked(db, tx, playerId)`; `CountArmouryRows` unchanged in behavior, now a thin
+    wrapper), `tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingCloseDelveTests.cs` (new, 10
+    tests).
 - [ ] **D4.13** Preflight, coverage and refusals — **PARTIALLY BUILT 2026-09-07 (`QuestPreflight.Run(corpus, domains, layouts, tuning)` — the spec's own full signature — is now REAL: both of `QuestOffer.Satisfiable`'s own missing delegates are REAL (not stubbed), the 256-seed-equivalent satisfiability sweep is REAL and proven against all six real domains, and the row-8 `domain-catalog` wiring gap is closed. Only `QuestCoverage.Report`'s own live-simulation half remains — unchanged, still needs `delve-stage`/Phase 5 — plus one newly-named, separate content defect in the shipped `dungeon.v1.json`)**
   - **Citation corrected 2026-09-07, twice over.** First (D4.30's own re-audit pass, same day): "needs `domain-catalog`'s own types, D4.15+" went stale the moment D4.15-D4.22 landed — `DomainRow`/`DomainCatalog.Load`/`LayoutTemplateCatalog` are real and six real domains exist. Second (this session, later the same day): the narrower blocker that correction left standing — `QuestPreflight.Run` itself never written, and `archetypeEventPoolHasKind`/`lootBindingOffersRole` having zero implementations anywhere — is now CLOSED. Both delegates turned out buildable in-scope, not disproportionate: `archetypeEventPoolHasKind` because a rolled room's `ArchetypeId` (`Roll/DelveGraph.cs:56`) is literally a real room id (`DelveGraphRoll.RollUnchecked` draws it straight from `domain.RoomPalette`'s own `RoomId`, `Roll/DelveGraphRoll.cs:249`) — the SAME key `DomainEventPreflight` already reads a room's own `eventPool` by, so the "two unrelated concepts" framing in the prior correction was itself wrong, confirmed by reading `DelveRoomFact`/`DelveGraphRoll` directly rather than assumed; `lootBindingOffersRole` because `DropTableEntryRow` (`Items/Drops/DropTableModel.cs:88`) already carries `Frame`/`Role` columns directly on an `Equipment`-kind entry — no new indexer table was needed, only a small resolver walking a domain's own bound tables' own entries and confirming each `(frame, role)` pair is backed by ≥ 1 real base type via the already-shipped `RpgStore.BaseTypeIdsFor`/`LootContentView.BaseTypesFor` (D4.12's own 2026-09-07 fix).
   - **A genuine, reproduced, SEPARATE finding surfaced while wiring `Run` against real content for the first time**: the shipped `data/tuning/dungeon.v1.json`'s own `quests.rewardBand.{modest,fair,rich}.{floorRung,ceilRung}` values are DIFFICULTY-rung ids (`very-easy`, `easy`, `medium`, `hard`, `very-hard`, `nightmare`) — confirmed by reading the file directly — while spec §12's own Tunables table cites `item-rarity.v1.json:7-18` as the ladder these ids climb, and the real item-rarity ladder's own ids (`chaff`, `sprout`, `grafted`, `cultivated`, `fused`, `chimeric`, `heirloom`, `firstseed`, `sunwoven`, `almanac`) share not one member with the shipped rewardBand values. `CheckFloorNotAboveCeil` (already shipped 2026-09-06) had ZERO real callers before `Run` became its first one — its own pre-existing tests used a hand-consistent fixture ladder, so this mismatch was latent and unexercised. Reproduced live via a failing test (`rarity rung 'very-easy' is not on the ladder`, a raw `KeyNotFoundException` escaping uncaught — worse than the spec's own "no flag, no fallback" rule, since an uncaught exception names neither domain, quest nor rule and would crash a `domain-catalog` import or `dungeon audit` run outright). **Fixed the crash, not the content**: `CheckFloorNotAboveCeil` now catches the lookup failure and throws a real, named `QuestRefusal` (`quest.reward-band-rung-unresolvable`) instead — a real, in-scope robustness fix, not a second guess at the check's own logic. **Left un-fixed, named precisely**: which two real item-rarity rungs "modest"/"fair"/"rich" should actually span is a balance/content-authoring decision this task does not make unilaterally, matching this program's own repeated "name it, don't force a content-policy call" discipline (`DomainEventPreflightBridgeTests.cs`'s own identical posture on the row-7 event-authoring-depth gap). Whoever authors the real fix should re-author `quests.rewardBand.*` in `dungeon.v1.json` against `item-rarity.v1.json`'s own ten ids.
@@ -2317,6 +2878,20 @@ task below names the members it adds so the seams stay clean.
   - Read first: `spec-delve-quests.md` §2/§4 (the storage contract) and the Interface table (`QuestDto`). **Found `src/FusionRpg.Server/DelveEndpoints.cs` already, explicitly documents this exact gap** — its own top-of-file doc comment (predating this task) reads verbatim: *"The rest of the delve surface (`start`, `{delveId}`, `quests`) belongs to `domain-catalog`/`delve-stage`, unbuilt as of this task; this file is only the one endpoint D2.23 itself names."* This is a STRONGER basis than my own scoping judgment — the file's own author already named `GET .../delves/{id}/quests` as belonging to a later module, before this task ever started. Confirmed `rpg_delves.quests_json TEXT NOT NULL DEFAULT '[]'` already exists as a column (`RpgStore.Delve.cs:80`) with a READ-side field on `DelveRow` (`QuestsJson`) already wired — only a WRITER was missing. `name`/`flavor` (needed by `QuestDto`) are real anchor fields per the seed contract's own §1.5 table but were deliberately left off D4.9's `QuestRow` ("left for whichever later task actually reads them") — took them as plain parameters to `QuestDtoProjection.Project` rather than retrofitting the already-tested catalog row.
   - Built: `src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs` — `RpgStore.QuestJsonRow{QuestId,Need,Done=null,Have=null}`; `WriteQuestOffer(delveId, offer)` (overwrites `quests_json`, matching `AppendDecision`'s own established JSON-column pattern); `ReadQuestOffer(delveId)`; `WriteQuestVerdicts(delveId, verdictsByQuestId)` (merges by `QuestId` into the ALREADY-STORED offer, silently ignoring a verdict for a quest id the offer never contained — the offer's own draw-order membership, fixed at `CreateDelve`, is what `quests_json` is truth for; a verdict can never grow or reorder it). `src/FusionRpg.Core/Delve/Quests/QuestDto.cs` — `QuestDto{Name,Flavor,Have,Need,Done}` (exactly the five fields the Interface table names, no more); `QuestDtoProjection.Project`.
   - **Honestly NOT built**: calling `WriteQuestOffer` from the real `CreateDelve` (`domain-catalog`'s own `questPool`/real domain content now exists, D4.30, but the wiring itself is untouched) and calling `WriteQuestVerdicts` from the real `CloseDelve`; the `GET .../delves/{id}/quests` endpoint itself (explicitly named as `domain-catalog`/`delve-stage`'s own job by `DelveEndpoints.cs`'s pre-existing doc comment, not built here). **Corrected 2026-09-07**: the "needs `QuestReward.Request`'s own still-blocked reward-rolling half, D4.12" citation is STALE — `DelveLoot.RollQuestReward` already exists and is tested (D4.12's own entry has the full correction); the REAL remaining blocker for banking a quest verdict at `CloseDelve` is the SAME `Unlocked`-variant refactor chain D4.12's entry now names precisely (`SaveInstance`/`AcquireItem`/`PersistLoot`), not a missing reward-roll function.
+  - **Corrected AGAIN, 2026-09-07, same continued session — the citation above is now ALSO stale.** D4.12's
+    own entry closed the `Unlocked`-chain wiring for real: `RpgStore.ApplyQuestRewardBankingUnlocked`
+    now runs inside `CloseDelve`, reads an ALREADY-WRITTEN `quests_json`'s `Done` verdicts, and banks each
+    one's reward end to end (roll, mint, acquire, persist), tested against real fixture data. **This
+    closes exactly ONE of D4.14's own two still-open pieces — the reward-banking half — and does NOT
+    close "calling `WriteQuestVerdicts` from the real `CloseDelve`".** Those are two genuinely different
+    facts: D4.12's hook reads verdicts `CloseDelve` is HANDED (written by some earlier, external caller,
+    exactly as D4.14's own already-shipped round-trip tests exercise `WriteQuestOffer`/`WriteQuestVerdicts`
+    directly); it does not COMPUTE them. `CloseDelve` itself still never calls `QuestProgress.Evaluate`
+    against a real `DelveReport` and writes the result back via `WriteQuestVerdicts` — that piece is
+    unchanged and still needs a live `DelveReport` assembled from real store rows (rooms/decisions/events),
+    which nothing in this codebase builds yet (D4.12's own entry names this same gap). D4.14's own
+    checkbox stays open on that piece and the endpoint; only its own "reward-rolling half, D4.12" citation
+    needed this correction.
   - Verify: `tests/FusionRpg.Data.Tests/Delve/DelveAttritionSettlementTests.cs` (+5 tests) — a plain write-then-read round trip; **the literal "a rebuild-mismatch test"** (`The_stored_offer_is_truth_a_rebuild_never_silently_overwrites_it`: writes one offer, constructs a hypothetical DIFFERENT "rebuilt" value that was never written, and proves `ReadQuestOffer` returns the ORIGINAL stored value, never the hypothetical one — the load-bearing form of "the stored offer is truth"); verdicts merging without growing or reordering the stored list; a verdict for an unoffered quest id silently ignored, never appended; an empty delve reading an empty (never null, never throwing) offer. `tests/FusionRpg.Core.Tests/Delve/Quests/QuestDtoTests.cs` (3 tests) — field-by-field carry-through; **the literal "a projection test scanning for engine words"** (a reflection scan of `QuestDto`'s own property names against `theta`/`rung`/`partyindex`/`delveid`/`sectorid`/`ordinal`); exactly the five named fields, no more. Mutation-tested `WriteQuestVerdicts`'s merge (dropped the `Have` field from the `with` expression): caught by name, confirmed via `cp`/`diff` byte-identical restore, green again after. `dotnet test` → 44/44 Data (`DelveAttritionSettlementTests`) + 87/87 Core (`Delve.Quests`) green. `audit-magic-numbers.py --summary` unchanged at 15. **This closes the `delve-quests` module's own buildable scope for this session** — D4.9-D4.14 all landed, D4.12/D4.13/D4.14 each honestly partial on the SAME two upstream absences (`RarityShift.Apply`/`DelveLoot.RollRoom`, D3.11's original gap; `domain-catalog`'s own types, D4.15+).
   - Files: `src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs`, `src/FusionRpg.Core/Delve/Quests/QuestDto.cs`, `tests/FusionRpg.Data.Tests/Delve/DelveAttritionSettlementTests.cs` (+5 tests), `tests/FusionRpg.Core.Tests/Delve/Quests/QuestDtoTests.cs`. **NOT built**: `src/FusionRpg.Server/DelveEndpoints.cs` (untouched — the endpoint belongs to a later module per its own doc comment).
 
@@ -3764,8 +4339,11 @@ task below names the members it adds so the seams stay clean.
 > ### CHECKPOINT G5 — played — **2/7 CLEARED 2026-09-07, re-read against `party-dungeon-plan.md` itself
 > (per the Stop-hook's own explicit demand), the rest independently re-checked with real evidence**
 > - [ ] The stage renders a live delve over SignalR, refresh-safe because the state is the server's —
->   **still genuinely unmet**: needs D5.11 (live session client, blocked on D2.16, no concurrency
->   primitive exists) AND real domain content (blocked on D4.16/D4.30's own content gaps) simultaneously
+>   **still genuinely unmet**: needs D5.11 (live session client, blocked on D2.16 — 2026-09-08 correction:
+>   the resume primitives are built/tested and the freeze mechanism has a viable, narrow candidate design
+>   (cancel-and-discard, no `BattleReport` change needed); the live server wiring itself — background
+>   execution, cancellation, the hub methods — is still unbuilt) AND real domain content (blocked on
+>   D4.16/D4.30's own content gaps) simultaneously
 > - [x] The band-3 opener lint holds: one result, three confirms, nothing else — **RE-VERIFIED 2026-09-07**:
 >   `bandDiscipline.test.ts`'s `Only_the_summary_and_three_confirms_open_band_3` → green (5/5 in that file)
 > - [ ] `vocabularyGuard` rejects every engine word, `Θ` and `‰` included — **PARTIALLY confirmed, left open
@@ -3780,14 +4358,20 @@ task below names the members it adds so the seams stay clean.
 >   2026-09-07**: `delve.test.ts`'s own `The_picker_and_the_map_door_post_the_same_body` describe block
 >   (explicitly named "G5" in its own test file) — 2/2 green, both the byte-identical-body proof and the
 >   proof both entry points call the SAME mutation hook, not two independent ones
-> - [ ] A four-party raid renders with four named banners, four packs and no party index in any rendered
->   text — **PARTIALLY confirmed**: `PartyRail.test.tsx`'s own dedicated test, literally named "a raid of
->   four resolves with four distinctly-named parties on screen at once (G5's own success criterion 3)",
->   plus its own sibling proving no rendered banner name is ever a bare ordinal — both green, covering the
->   banners/no-party-index halves precisely. The "four packs" half has no equally direct test: `PackPanel
->   .test.tsx`'s own multi-party section test uses two parties, not four (the underlying map-over-`parties`
->   logic carries no party-count assumption, so four almost certainly works identically, but "almost
->   certainly" is not the same as proven — left honestly unchecked rather than inferred)
+> - [x] A four-party raid renders with four named banners, four packs and no party index in any rendered
+>   text — **FULLY CONFIRMED 2026-09-07 (the "four packs" gap this line was left open for is now closed)**:
+>   `PartyRail.test.tsx`'s own dedicated test, literally named "a raid of four resolves with four
+>   distinctly-named parties on screen at once (G5's own success criterion 3)", plus its own sibling
+>   proving no rendered banner name is ever a bare ordinal — both green, covering the banners/no-party-
+>   index halves. **The "four packs" half — previously untested at four, only at two — closed by
+>   extending `PackPanel.test.tsx`** with a new dedicated test, `A_raid_of_four_resolves_with_four_
+>   distinctly_carried_packs_on_screen_at_once` (mirroring `PartyRail.test.tsx`'s own naming precedent
+>   verbatim): four parties, each with its own distinct pack cell (deliberately non-index-shaped
+>   quantities, 100-103, so the qty figures cannot collide with the bare-ordinal check), asserting all
+>   four banners render, all four packs render their own real grid with the correct distinct qty, and no
+>   bare `0`/`1`/`2`/`3` text leaks anywhere — proving the map-over-`parties` logic genuinely has no
+>   count assumption, not merely inferring it from the two-party case. `PackPanel.test.tsx` → 9/9 (was 8,
+>   zero regressions in the 8 pre-existing tests).
 > - [ ] `CONTRACT_VERSION` is still 2; every web guard is green; the map FE diff is empty — **the first
 >   clause is now KNOWN, PERMANENTLY false, for reasons already reviewed and accepted, not a new
 >   finding**: `contract/types.ts:61`, `CONTRACT_VERSION = 4` — D5.3's own entry (2026-09-06) already found
@@ -3799,10 +4383,22 @@ task below names the members it adds so the seams stay clean.
 >   real and non-empty (D1.28/D5.4's own reviewed, filed, still-uncommitted exception, per D5.12's own
 >   `Map_FE_files_are_untouched` finding) — will read green the moment the owner commits that work
 > - [ ] `npm test` and `npm run test:e2e` green; `dotnet test` green across Core, Data, Guard, E2E — **not
->   fully green today, on real evidence, not assumed**: `npx vitest run` → 2383/2395 (12 pre-existing
->   failures, all named/traced across this file's own D5.x entries); `dotnet test` carries its own
->   pre-existing baseline noise (dominance-drift/tuning flakiness, named in memory); `npm run test:e2e` not
->   run this pass
+>   fully green today, on real evidence, not assumed**: `npx vitest run` → 2393/2404 (re-run 2026-09-07
+>   after this session's own `PackPanel.test.tsx` addition; 11 pre-existing failures, the exact same named
+>   baseline — `contractGuard`/`vocabularyGuard`/`bandGuard`×2/`disabledReasonGuard`/`hexGuard`/
+>   `SyncFromModelSystem`×4/`syncOccupantBandB` — zero new failures, zero touching `delve`); `dotnet test` carries its own
+>   pre-existing baseline noise (dominance-drift/tuning flakiness, named in memory). **`npm run test:e2e`
+>   RUN FOR REAL 2026-09-07 (was "not run this pass")**: 219 passed, 20 failed, 1 skipped. **Zero of the 20
+>   failures touch `delve` in any way** — no `e2e/*delve*.spec.ts` file exists at all yet (confirmed via
+>   `ls e2e/`, matching this whole file's own repeated "no live room-clear/delve-stage HTTP surface exists
+>   yet" finding — there is nothing delve-shaped for an e2e spec to exercise), and every one of the 20
+>   failures is in `aura.spec.ts`/`creatures.spec.ts`/`volume-fixtures.spec.ts`/`actor-menu-scope-picker
+>   .spec.ts`/`deploy-targeting.spec.ts`/`sanctum.spec.ts`/`shell-height.spec.ts`/`system.spec.ts` —
+>   other programs' own surfaces, none touched by this session. Confirmed via `git status` that this
+>   session's own only change under `web/` is `src/stages/delve/layers/PackPanel.test.tsx` (a vitest unit
+>   test, not part of the e2e run at all). This line stays honestly unchecked — the 20 pre-existing
+>   failures are real and unfixed — but the "not run this pass" gap is closed with real evidence instead
+>   of an unmeasured claim.
 
 ---
 

@@ -225,6 +225,82 @@ public class InteractiveTurnsTests
             InteractiveIntentSource.ResumeReplayThenLive(new AlwaysAttacks(), null!, EnvelopeOf, new DecisionTrace()));
     }
 
+    // ---- onRecorded: the incremental-persistence seam (D2.16 §4b) ----
+
+    [Fact]
+    public void OnRecordedFiresOnceForAPlayerDecisionWithTheSameDecisionJustRecorded()
+    {
+        var trace = new DecisionTrace();
+        var seen = new List<TracedDecision>();
+        var src = new InteractiveIntentSource(
+            new AlwaysAttacks(), (_, _) => new PlayerChoice("act.guard", "enemy:1"), EnvelopeOf, trace,
+            onRecorded: seen.Add);
+
+        src.TryDeclare("squad:0", nowTick: 1000);
+
+        var recorded = Assert.Single(seen);
+        Assert.Equal(trace.Decisions[0], recorded);
+        Assert.Equal(DecisionSource.Player, recorded.Source);
+    }
+
+    [Fact]
+    public void OnRecordedFiresForATimeoutToo()
+    {
+        var trace = new DecisionTrace();
+        var seen = new List<TracedDecision>();
+        var src = new InteractiveIntentSource(
+            new AlwaysAttacks(), (_, _) => PlayerChoice.None, EnvelopeOf, trace, onRecorded: seen.Add);
+
+        src.TryDeclare("squad:0", nowTick: 2500);
+
+        Assert.Equal(DecisionSource.Timeout, Assert.Single(seen).Source);
+    }
+
+    [Fact]
+    public void OnRecordedDoesNotFireWhenNothingLegalIsRecorded()
+    {
+        var trace = new DecisionTrace();
+        var seen = new List<TracedDecision>();
+        var src = new InteractiveIntentSource(
+            new NeverActs(), (_, _) => PlayerChoice.None, EnvelopeOf, trace, onRecorded: seen.Add);
+
+        Assert.True(src.TryDeclare("squad:0", 100).IsNone);
+        Assert.Empty(seen);
+    }
+
+    [Fact]
+    public void OnRecordedNeverFiresDuringReplayOnlyOnceLive()
+    {
+        var recorded = new DecisionTrace();
+        recorded.Record(100, "squad:0", "act.attack", "wave:0", DecisionSource.Player);
+
+        var seen = new List<TracedDecision>();
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new AlwaysAttacks(), (_, _) => new PlayerChoice("act.guard", "enemy:9"), EnvelopeOf, recorded,
+            onRecorded: seen.Add);
+
+        resumed.TryDeclare("squad:0", 1);   // replayed -- must not fire
+        Assert.Empty(seen);
+
+        resumed.TryDeclare("squad:0", 2);   // prefix exhausted -> live -- must fire exactly once
+        var fired = Assert.Single(seen);
+        Assert.Equal("act.guard", fired.ActionId);
+        Assert.Equal(DecisionSource.Player, fired.Source);
+    }
+
+    [Fact]
+    public void OnRecordedIsOptionalAndOmittingItChangesNothing()
+    {
+        var trace = new DecisionTrace();
+        var src = new InteractiveIntentSource(
+            new AlwaysAttacks(), (_, _) => new PlayerChoice("act.guard", "enemy:1"), EnvelopeOf, trace);
+
+        var intent = src.TryDeclare("squad:0", 1000);
+
+        Assert.Equal("act.guard", intent.ActionId);
+        Assert.Single(trace.Decisions);
+    }
+
     // ---- persistence ----
 
     [Fact]

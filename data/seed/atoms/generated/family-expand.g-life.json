@@ -18,7 +18,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -37,7 +38,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -56,7 +58,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -75,7 +78,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -94,7 +98,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -113,7 +118,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -132,7 +138,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -151,7 +158,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -170,7 +178,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -189,7 +198,208 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-graft",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Vital Graft T1",
+      "params": {
+        "channel": "hp",
+        "op": "increased",
+        "amount": {
+          "min": 7,
+          "max": 15,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-graft",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Vital Graft T2",
+      "params": {
+        "channel": "hp",
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 25,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-graft",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Vital Graft T3",
+      "params": {
+        "channel": "hp",
+        "op": "increased",
+        "amount": {
+          "min": 22,
+          "max": 44,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-graft",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Vital Graft T4",
+      "params": {
+        "channel": "hp",
+        "op": "increased",
+        "amount": {
+          "min": 39,
+          "max": 77,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-graft",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Vital Graft T5",
+      "params": {
+        "channel": "hp",
+        "op": "increased",
+        "amount": {
+          "min": 68,
+          "max": 136,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-surge",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Vital Surge T1",
+      "params": {
+        "channel": "hp",
+        "op": "more",
+        "amount": {
+          "min": 13,
+          "max": 25,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-surge",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Vital Surge T2",
+      "params": {
+        "channel": "hp",
+        "op": "more",
+        "amount": {
+          "min": 22,
+          "max": 44,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-surge",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Vital Surge T3",
+      "params": {
+        "channel": "hp",
+        "op": "more",
+        "amount": {
+          "min": 39,
+          "max": 77,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-surge",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Vital Surge T4",
+      "params": {
+        "channel": "hp",
+        "op": "more",
+        "amount": {
+          "min": 68,
+          "max": 136,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.life-surge",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Vital Surge T5",
+      "params": {
+        "channel": "hp",
+        "op": "more",
+        "amount": {
+          "min": 120,
+          "max": 238,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -208,7 +418,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -227,7 +438,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -246,7 +458,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -265,7 +478,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -284,7 +498,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -303,7 +518,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -322,7 +538,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -341,7 +558,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -360,7 +578,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     },
     {
@@ -379,7 +598,8 @@
       },
       "tags": {
         "generatedFrom": "g-life.json",
-        "generator": "E43"
+        "generator": "E43",
+        "defensive": "1"
       }
     }
   ]

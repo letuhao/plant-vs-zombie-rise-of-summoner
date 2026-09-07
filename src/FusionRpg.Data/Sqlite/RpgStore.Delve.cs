@@ -84,7 +84,10 @@ public static class DelveStates
 
 public sealed partial class RpgStore
 {
-    /// <summary>The three delve tables (`rpg_delve_pack_lock` added D3.22). Called from
+    /// <summary>The four delve tables (`rpg_delve_pack_lock` added D3.22; `rpg_delve_event_seen` added
+    /// D3.9, spec-event-deck.md §8 / spec-delve-scope.md:326's own "ask first" approval — the
+    /// `per-domain`/`once-per-player` repeat-scope archive that "outlives the graph rows and the `once`
+    /// archive" and is never deleted, unlike every other per-delve table this schema owns). Called from
     /// <c>EnsureWorldSchemaUnlocked</c> beside <c>EnsureWorldTurnSchemaUnlocked</c> — a delve world is
     /// a <c>rpg_worlds</c> row, so its own schema setup lives beside the world program's
     /// (spec-delve-scope.md §1).</summary>
@@ -125,6 +128,16 @@ public sealed partial class RpgStore
               instance_id TEXT NOT NULL PRIMARY KEY
             );
             CREATE INDEX IF NOT EXISTS ix_rpg_delve_pack_lock_delve ON rpg_delve_pack_lock(delve_id);
+
+            CREATE TABLE IF NOT EXISTS rpg_delve_event_seen (
+              player_id INTEGER NOT NULL,
+              scope TEXT NOT NULL,
+              scope_key TEXT NOT NULL DEFAULT '',
+              event_id TEXT NOT NULL,
+              delve_id INTEGER NOT NULL,
+              PRIMARY KEY (player_id, scope, scope_key, event_id)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_delve_event_seen_delve ON rpg_delve_event_seen(delve_id);
             """);
     }
 
@@ -349,27 +362,125 @@ public sealed partial class RpgStore
     /// <summary>D4.8 (spec-wild-room.md §7): <paramref name="resolvedKind"/> lets a caller record
     /// `rpg_delve_rooms.resolved_kind` — `'cage'` is the wild-room module's own new legal value,
     /// written the same way `visited`/`cleared` already are, no schema change (the column has always
-    /// been a bare `TEXT`, never `CHECK`-constrained).</summary>
-    public void MarkRoom(long delveId, string sectorId, bool? visited = null, bool? cleared = null, string? resolvedKind = null)
+    /// been a bare `TEXT`, never `CHECK`-constrained).
+    ///
+    /// <para>D3.9 (spec-event-deck.md §8) adds <paramref name="eventId"/>/<paramref name="resolvedArchetypeId"/>
+    /// — the two remaining `rpg_delve_rooms` columns the schema has always carried (§1.13-121) but that,
+    /// until now, only `resolved_kind` had a writer for. Both are optional trailing parameters, exactly
+    /// mirroring <paramref name="resolvedKind"/>'s own shape: omitted, every existing call site (every
+    /// one in this repo passes by name) stays byte-identical, since the params are appended by name to
+    /// the dynamic `SET` list and the dynamic parameter-name/value arrays stay in lock-step regardless of
+    /// which subset is supplied. <paramref name="eventId"/> is `EventDeck.Resolve`'s own drawn
+    /// `EventResolution.EventId`, written once at the draw (spec §8, verbatim: "Rows are written with the
+    /// room's event_id at the draw, not at extraction — a wipe does not un-see an event") — this is also
+    /// the store's own contribution to `EventSeenSets.PerDelveSeen` (see <see cref="LoadPerDelveEventSeen"/>):
+    /// no separate per-delve table exists or is needed, since "seen = every rpg_delve_rooms.event_id of
+    /// this delve" is spec's own literal definition of that scope.</para></summary>
+    public void MarkRoom(long delveId, string sectorId, bool? visited = null, bool? cleared = null,
+        string? resolvedKind = null, string? eventId = null, string? resolvedArchetypeId = null)
     {
-        if (visited is null && cleared is null && resolvedKind is null) return;
+        if (visited is null && cleared is null && resolvedKind is null && eventId is null && resolvedArchetypeId is null) return;
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
             var sets = new List<string> { "revision = revision + 1" };
+            var paramNames = new List<string> { "$id", "$s" };
+            var values = new List<object?> { delveId, sectorId };
             if (visited is { } v) sets.Add($"visited = {(v ? 1 : 0)}");
             if (cleared is { } c) sets.Add($"cleared = {(c ? 1 : 0)}");
-            if (resolvedKind is not null) sets.Add("resolved_kind = $rk");
-            var paramNames = resolvedKind is not null ? new[] { "$id", "$s", "$rk" } : new[] { "$id", "$s" };
+            if (resolvedKind is not null) { sets.Add("resolved_kind = $rk"); paramNames.Add("$rk"); values.Add(resolvedKind); }
+            if (eventId is not null) { sets.Add("event_id = $ev"); paramNames.Add("$ev"); values.Add(eventId); }
+            if (resolvedArchetypeId is not null) { sets.Add("resolved_archetype_id = $ra"); paramNames.Add("$ra"); values.Add(resolvedArchetypeId); }
             using (var cmd = Prepared(db, tx,
                 $"UPDATE rpg_delve_rooms SET {string.Join(", ", sets)} WHERE delve_id = $id AND sector_id = $s;",
-                paramNames))
-            {
-                if (resolvedKind is not null) ExecuteWith(cmd, delveId, sectorId, resolvedKind);
-                else ExecuteWith(cmd, delveId, sectorId);
-            }
+                paramNames.ToArray()))
+                ExecuteWith(cmd, values.ToArray());
             tx.Commit();
+        }
+    }
+
+    /// <summary>D3.9 (spec-event-deck.md §8) — `EventSeenSets.PerDelveSeen`'s own real assembly: "seen =
+    /// every `rpg_delve_rooms.event_id` of this delve" is the spec's own literal definition, so this
+    /// reads the already-shipped column back through the already-shipped <see cref="LoadDelveRooms"/>
+    /// rather than a new table or a new SQL string — confirms, by direct schema read, that per-delve
+    /// repeat scope needs no store of its own beyond what `MarkRoom`'s new `eventId` parameter above
+    /// already writes.</summary>
+    public IReadOnlySet<string> LoadPerDelveEventSeen(long delveId)
+    {
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var room in LoadDelveRooms(delveId))
+            if (room.EventId is { Length: > 0 } id) set.Add(id);
+        return set;
+    }
+
+    /// <summary>D3.9 (spec-event-deck.md §8; spec-delve-scope.md:326's own "ask first" approval, TAKEN
+    /// 2026-09-05) — the writer for the two scopes that genuinely outlive a delve: `per-domain`
+    /// (<paramref name="scope"/> = <c>"per-domain"</c>, <paramref name="scopeKey"/> = the domain id) and
+    /// `once-per-player` (<paramref name="scope"/> = <c>"once-per-player"</c>, <paramref name="scopeKey"/>
+    /// = <c>""</c> — spec's own literal "the same table, `scope_key = ''`"). Mirrors `item_first_clear`'s
+    /// own "first write wins, never overwritten" idiom exactly (`RpgStore.Loot.cs`'s own
+    /// <c>RecordFirstClearUnlocked</c>): `ON CONFLICT ... DO NOTHING` over the natural uniqueness
+    /// `(player_id, scope, scope_key, event_id)` — spec §8 "Reset: never" means a later draw of the SAME
+    /// event under the SAME scope, in a DIFFERENT delve, must not create a second row.
+    /// <paramref name="delveId"/> is recorded as an attribute (which delve first caused this event to
+    /// become seen) rather than folded into the uniqueness key: the invariant this table exists to
+    /// enforce is "never offered again for this player under this scope," not "never twice in this
+    /// specific delve" — that narrower invariant is `per-delve`'s own job, already covered by
+    /// <see cref="LoadPerDelveEventSeen"/>, and is true unconditionally per spec's own "every scope is at
+    /// least per-delve" line regardless of what this table records.
+    ///
+    /// <para>Called once per room, at DRAW (`EventDeck.Resolve`), never at `EventDeck.Answer` — spec §8's
+    /// own words settle this exactly: "Rows are written with the room's event_id at the draw, not at
+    /// extraction... Pity counters live in `parties_json`; the answer in `decisions_json`" draws the line
+    /// between what a draw spends (this table, `rpg_delve_rooms.event_id`) and what an answer merely
+    /// records (`decisions_json`, a separate concern). The draw itself spends the repeat-scope slot
+    /// regardless of the player's later choice, `leave` included — `EventAnswerResult` plays no role
+    /// here.</para></summary>
+    public void RecordEventSeen(long playerId, string scope, string scopeKey, string eventId, long delveId)
+    {
+        if (string.IsNullOrWhiteSpace(scope)) throw new ArgumentException("scope required", nameof(scope));
+        if (string.IsNullOrWhiteSpace(eventId)) throw new ArgumentException("eventId required", nameof(eventId));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            using (var cmd = Prepared(db, tx, """
+                INSERT INTO rpg_delve_event_seen (player_id, scope, scope_key, event_id, delve_id)
+                VALUES ($p, $sc, $sk, $e, $d)
+                ON CONFLICT(player_id, scope, scope_key, event_id) DO NOTHING;
+                """, "$p", "$sc", "$sk", "$e", "$d"))
+                ExecuteWith(cmd, playerId, scope, scopeKey ?? "", eventId, delveId);
+            tx.Commit();
+        }
+    }
+
+    /// <summary>D3.9 — the read side of <see cref="RecordEventSeen"/>: the other two of
+    /// `EventSeenSets`' own four fields (<c>PerDomainSeen</c>, <c>OncePerPlayerSeen</c>; the other two,
+    /// `PerDelveSeen`/`RecentCells`, are NOT this table's job — see <see cref="LoadPerDelveEventSeen"/>'s
+    /// own doc comment). One query, split by `scope` in memory rather than two round trips, since both
+    /// sets are read together on every `EventDeck.Resolve` call the caller will make.</summary>
+    public (IReadOnlySet<string> PerDomainSeen, IReadOnlySet<string> OncePerPlayerSeen) LoadPersistedEventSeen(long playerId, string domainId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            var perDomain = new HashSet<string>(StringComparer.Ordinal);
+            var oncePerPlayer = new HashSet<string>(StringComparer.Ordinal);
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT scope, event_id FROM rpg_delve_event_seen
+                WHERE player_id = $p AND ((scope = 'per-domain' AND scope_key = $d) OR scope = 'once-per-player');
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$d", domainId ?? "");
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var target = string.Equals(r.GetString(0), "per-domain", StringComparison.Ordinal) ? perDomain : oncePerPlayer;
+                target.Add(r.GetString(1));
+            }
+            return (perDomain, oncePerPlayer);
         }
     }
 
@@ -1348,19 +1459,44 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>D3.15 (spec-dungeon-loot.md §7: "the once-domain boss relic... never enters the pack:
+    /// the `dungeon-clear` grant banks at the clear itself, owned then, so a later wipe cannot take
+    /// it") — everything <see cref="RecordClear"/>'s own optional boss-grant hook needs that this
+    /// Data-layer file cannot derive itself, mirroring <see cref="QuestRewardBankingInputs"/>'s exact
+    /// "read model owned elsewhere" shape (<c>LookupAtom</c>/<c>LookupAffix</c> are
+    /// `Instantiator.TryInstantiate`'s own delegate params, <c>Tuning</c> is the real
+    /// <c>PowerTuningHub.Tuning</c> in production). No `ResolveQuest`-shaped delegate is needed here:
+    /// "which container" is answered directly by <see cref="FusionRpg.Core.Delve.Domains.DomainRow.FirstClearRef"/>, read through
+    /// <see cref="ReadDomainFirstClearRefUnlocked"/> — a domain fact, not a caller-supplied read
+    /// model.</summary>
+    public sealed record BossFirstClearGrantInputs(
+        Func<string, FusionRpg.Core.Effects.Atoms.AtomRow?> LookupAtom,
+        Func<string, FusionRpg.Core.Effects.Atoms.AffixRow?> LookupAffix,
+        FusionRpg.Core.Power.PowerTuning Tuning);
+
     /// <summary>
     /// D3.16 (spec-dungeon-loot.md §7, `:215-216`) — the depth watermark: <c>theta_run = MAX(theta_run,
     /// thetaRoom)</c>, the seam a later contracts-on-Θ follow-up reads via <c>MAX(theta_run) WHERE
     /// state = 'Extracted'</c> (`:199`). <paramref name="row"/>/<paramref name="col"/> match the spec's
-    /// own cited call shape (<c>RecordClear(delveId, r, c, thetaRoom)</c>, `:215`) but this method's own
-    /// write needs only <paramref name="thetaRoom"/> — marking the room ITSELF cleared is
-    /// <see cref="MarkRoom"/>'s job already (the one existing writer of `rpg_delve_rooms.cleared`;
-    /// duplicating that write here would give the same column two owners). <paramref name="row"/>/
-    /// <paramref name="col"/> are accepted so a room-clear caller can pass its own `(r, c, thetaRoom)`
-    /// straight through without pre-formatting anything itself; this method does not need them for its
-    /// own write today.
+    /// own cited call shape (<c>RecordClear(delveId, r, c, thetaRoom)</c>, `:215`) — marking the room
+    /// ITSELF cleared stays <see cref="MarkRoom"/>'s job (the one existing writer of
+    /// `rpg_delve_rooms.cleared`; duplicating that write here would give the same column two owners).
+    ///
+    /// <para><b>D3.15's own bank-at-clear hook, added here rather than in <see cref="CloseDelve"/>.</b>
+    /// <paramref name="bossGrant"/> is the SAME optional-additive-parameter shape
+    /// <paramref name="row"/>/<paramref name="col"/> already establish: every existing 4-argument call
+    /// stays byte-identical (confirmed against every real call site — `DelveAttritionSettlementTests.cs`,
+    /// `QuestRewardBankingCloseDelveTests.cs` — none pass a 5th argument). Deliberately NOT gated on
+    /// `CloseDelve`'s own `finalState == Extracted`, unlike <see cref="ApplyQuestRewardBankingUnlocked"/>'s
+    /// quest rewards: spec-dungeon-loot.md §7's own words are "banks at the clear itself... so a later
+    /// wipe cannot take it" and spec-domain-catalog.md's own staleness section confirms the effect
+    /// ("the `dungeon-clear` row survives the wipe, `HasFirstClear`") — the grant must be owned the
+    /// moment the boss room is cleared, independent of the delve's eventual outcome. Internally gated
+    /// on the room actually being boss-kind (<see cref="ApplyBossFirstClearGrantUnlocked"/> reads the
+    /// room's own `Kind` via <see cref="ReadDelveRoomsUnlocked"/> before doing anything else), so a
+    /// non-boss room-clear call with <paramref name="bossGrant"/> supplied pays nothing extra.</para>
     /// </summary>
-    public DelveRow? RecordClear(long delveId, int row, int col, int thetaRoom)
+    public DelveRow? RecordClear(long delveId, int row, int col, int thetaRoom, BossFirstClearGrantInputs? bossGrant = null)
     {
         lock (_gate)
         {
@@ -1370,9 +1506,87 @@ public sealed partial class RpgStore
                 "UPDATE rpg_delves SET theta_run = MAX(theta_run, $t), revision = revision + 1 WHERE delve_id = $id;",
                 "$t", "$id"))
                 ExecuteWith(cmd, thetaRoom, delveId);
+
+            if (bossGrant is not null)
+                ApplyBossFirstClearGrantUnlocked(db, tx, delveId, row, col, thetaRoom, bossGrant, DateTime.UtcNow.ToString("o"));
+
             tx.Commit();
             return ReadDelveUnlocked(db, delveId);
         }
+    }
+
+    /// <summary>
+    /// D3.15 (spec-dungeon-loot.md §7) — instantiates and banks the once-domain boss relic in the SAME
+    /// transaction <see cref="RecordClear"/>'s own theta_run watermark commits, "never through a pack"
+    /// (spec's own words): a real `InstanceRow` via <see cref="FusionRpg.Core.Delve.Loot.DelveLoot.InstantiateBossFirstClearGrant"/>,
+    /// saved via <see cref="SaveInstanceUnlocked"/>, owned via <see cref="AcquireItemUnlocked"/> with
+    /// <c>origin_kind = "dungeon-clear"</c> — never `rpg_delve_pack_lock`, never `AcquireItem`'s own
+    /// "delve"-kind pack path (`spec-dungeon-loot.md` §7's own "Items" paragraph, a DIFFERENT sentence
+    /// from the one this hook implements).
+    ///
+    /// <para><b>Three independent, individually no-op gates, checked in the order that costs the least
+    /// for the common (non-boss) case first:</b></para>
+    /// <list type="number">
+    /// <item><b>Boss-kind.</b> The room at <paramref name="row"/>/<paramref name="col"/> must exist and
+    /// have <c>Kind == "boss"</c> (<see cref="FusionRpg.Core.Delve.Loot.RoomTableBinding"/>'s own established kind vocabulary —
+    /// `boss` is never a `ResolvedKind`-only fact the way `unknown`/`secret` are, so the authored `Kind`
+    /// column is the correct read). A fight/elite/cache clear (or any room this delve has not even
+    /// rolled) returns immediately, before any other read.</item>
+    /// <item><b>A relic is authored for this domain.</b> <see cref="ReadDomainFirstClearRefUnlocked"/>
+    /// against <see cref="DelveRow.DomainId"/> — <c>null</c> is the expected, common case today (D4.28:
+    /// only 4/144 unique anchors are concretely buildable), not a content gap to throw on.</item>
+    /// <item><b>Not already granted.</b> <see cref="HasFirstClearUnlocked"/> keyed
+    /// <c>(playerId, "dungeon-clear", domainId)</c> — the SAME idempotency key
+    /// <see cref="PersistLootUnlocked"/>'s own `FirstClearGrant` arm already establishes for the
+    /// (currently untouched, ask-first) flat `LootPipeline.cs` path, so a future reconciliation between
+    /// the two never double-grants. A replayed room-clear call (or a boss room revisited after an
+    /// already-granted relic) mints nothing a second time.</item>
+    /// </list>
+    ///
+    /// <para>The container itself missing (`GetContainer` returns `null` for an authored-but-unwritten
+    /// `FirstClearRef`) or `InstantiateBossFirstClearGrant`'s own structural refusal (an invalid
+    /// container) both return quietly rather than throwing — the SAME "a real production trigger does
+    /// not exist yet" posture <see cref="ApplyQuestRewardBankingUnlocked"/>'s own doc comment already
+    /// states, and for the identical reason: this must never abort the room-clear write it is riding
+    /// on.</para>
+    ///
+    /// <para><c>grantIndex</c> is fixed at <c>0</c> — spec §7 authors exactly one `dungeon-clear` relic
+    /// per domain (<see cref="FusionRpg.Core.Delve.Domains.DomainRow.FirstClearRef"/> is a single nullable string, never a list), so
+    /// there is no second grant off the same <see cref="DelveRow.Seed"/> to namespace against; the
+    /// stream is <c>dungeon:loot:quest:{questId}</c>'s own sibling shape one level simpler.</para>
+    /// </summary>
+    void ApplyBossFirstClearGrantUnlocked(
+        SqliteConnection db, SqliteTransaction tx, long delveId, int row, int col, int thetaRoom,
+        BossFirstClearGrantInputs bossGrant, string now)
+    {
+        var room = ReadDelveRoomsUnlocked(db, delveId).FirstOrDefault(r => r.RowIndex == row && r.ColIndex == col);
+        if (room is null || !string.Equals(room.Kind, "boss", StringComparison.Ordinal)) return;
+
+        var delve = ReadDelveUnlocked(db, delveId);
+        if (delve is null) return;
+
+        var containerId = ReadDomainFirstClearRefUnlocked(db, tx, delve.DomainId);
+        if (containerId is null) return; // no relic authored for this domain yet -- expected, not a gap
+
+        var playerId = delve.PlayerId.ToString();
+        if (HasFirstClearUnlocked(db, tx, playerId, FusionRpg.Core.Delve.Loot.DungeonSourceKinds.DungeonClear, delve.DomainId)) return;
+
+        var container = GetContainer(containerId); // self-locked, safe -- see ApplyQuestRewardBankingUnlocked
+        if (container is null) return; // authored ref points at an unwritten container -- content gap, not a crash
+
+        var catalogRevision = GetCatalogRevision();
+        var rejection = FusionRpg.Core.Delve.Loot.DelveLoot.InstantiateBossFirstClearGrant(
+            container, bossGrant.LookupAtom, bossGrant.LookupAffix, delve.Seed, grantIndex: 0, thetaRoom,
+            bossGrant.Tuning, catalogRevision, out var instance);
+        if (!rejection.IsOk || instance is null) return; // structural refusal -- must not abort the room-clear write
+
+        var instanceId = SaveInstanceUnlocked(db, tx, instance);
+        AcquireItemUnlocked(db, tx, new RpgItemRow
+        {
+            InstanceId = instanceId, PlayerId = playerId, AcquiredUtc = now,
+            OriginKind = FusionRpg.Core.Delve.Loot.DungeonSourceKinds.DungeonClear, OriginRef = delve.DomainId,
+        });
+        RecordFirstClearUnlocked(db, tx, playerId, FusionRpg.Core.Delve.Loot.DungeonSourceKinds.DungeonClear, delve.DomainId, now);
     }
 
     static bool DelveRowExistsUnlocked(SqliteConnection db, SqliteTransaction tx, long delveId)

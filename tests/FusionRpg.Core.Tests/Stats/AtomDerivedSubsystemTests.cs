@@ -110,6 +110,22 @@ public class AtomDerivedSubsystemTests
         Assert.Equal(90, one.Value);
     }
 
+    [Fact]
+    public void Empty_SourceId_is_skipped_never_minted_as_blank_contribution()
+    {
+        var hub = HubWith(_ => new[]
+        {
+            new BoundDerivedAtom(DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat, 40, ""),
+            new BoundDerivedAtom(DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat, 60, "   "),
+            new BoundDerivedAtom(DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat, 70, "aura.kept")
+        });
+
+        var (snap, contributions) = hub.ResolveDerivedWithContributions(Ctx("abc"));
+        Assert.Equal(70, snap.Get(DerivedStatChannels.CombatPowerOmni));
+        var one = Assert.Single(contributions.ContributionsFor(DerivedStatChannels.CombatPowerOmni));
+        Assert.Equal("aura.kept", one.SourceId);
+    }
+
     [Theory]
     [InlineData("flat", DerivedModifierOp.Flat)]
     [InlineData("increased", DerivedModifierOp.Increased)]

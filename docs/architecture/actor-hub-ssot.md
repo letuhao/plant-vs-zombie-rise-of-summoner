@@ -784,6 +784,24 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 - **StatusRuntime code must not ship** before Actor Hub derived resolve + `progression.power` stub channel exist
 - Do not conflate the kill-XP power scale (`RpgXpAwardMap.Award.PowerScale`; formerly `RpgXpPowerScale`, deleted T3.3) with combat `progression.power`
 
+### 8.1 Contribution SourceId grammar (GG-49 FULL) — locked 2026-09-07
+
+Every Hot derived modifier carries a non-empty SourceId minted via `ContributionSourceIds`. Empty or bare `generic` ids are defects. Sheet fiction uses `ContributionSourceIds.FictionLabel`.
+
+| Producer | SourceId | Fiction label example |
+|---|---|---|
+| Progression | `rpg.progression` | Progression |
+| Aptitude | `aptitude.{Share}` | Aptitude · Might |
+| Equip | `equip:{role}:{itemRef}` | Equip · armament-primary (item…) |
+| Tree | `tree.{treeId}.{nodeId}` | Tree · might/…/n0 |
+| Status | `status:{instanceId}` | Status · … |
+| Effect grant | `grant:{effectOrGrantId}` | Grant · … |
+| Primary bag (sheet join) | `primary:{sourceKind}\|{sourceId}` | Primary · … |
+
+Empty / whitespace SourceId is a **defect**: **every** Hot derived subsystem must refuse it — `AtomDerivedSubsystem` and `StatusDerivedSubsystem` skip rather than mint an unattributed contribution. Producers must mint via the helpers above.
+
+Compose honesty: `FlatReplace` channels ship `composeKind` on the sheet **and** `/derived` so a contribution list that does not sum to the total is explained. Contributions are **ephemeral per resolve** — never a SQLite ledger.
+
 ---
 
 ## 9. Migration from flat StatSystem

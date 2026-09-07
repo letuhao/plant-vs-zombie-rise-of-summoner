@@ -252,6 +252,14 @@ public static partial class BattleEngine
         /// resolution shape — the reason this module exists at all.</summary>
         public ActionCatalog? ActionCatalog { get; }
 
+        /// <summary>`ActionStockCommit`'s own ledger (spec-siege-construction.md §11 / action-program's
+        /// "ActionStockCommit.TryCommit has ZERO production callers" bug): defaults to
+        /// <see cref="NoStockLedger"/>, matching `ConstructionActivation.Fire`'s identical
+        /// "unwired means safe, not permissive" posture — every existing caller (no `stockLedger`
+        /// argument) is unaffected, since every action shipped today compiles zero `StockDemands`.
+        /// </summary>
+        public IStockLedger StockLedger { get; }
+
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
             IContainerEffectResolver? containerResolver = null, BoardState? board = null,
@@ -259,11 +267,12 @@ public static partial class BattleEngine
             IReadOnlyList<RunnerBinding>? runnerBindings = null,
             IReadOnlySet<string>? containersWithRunnerCoverage = null,
             Func<string, IReadOnlyList<string>>? equipEffectIdsFor = null,
-            AiTuning? aiTuning = null, Func<long, int>? roundOf = null)
+            AiTuning? aiTuning = null, IStockLedger? stockLedger = null, Func<long, int>? roundOf = null)
         {
             Trace = trace;
             _board = board;
             ActionCatalog = actionCatalog;
+            StockLedger = stockLedger ?? NoStockLedger.Instance;
 
             InitiativeRng = SeededRng.DeriveStream(seed, "initiative");
             ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit"));

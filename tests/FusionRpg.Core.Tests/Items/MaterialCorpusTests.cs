@@ -322,19 +322,21 @@ public class MaterialCorpusTests
         var verbRefusals = catalog.Refusals.Where(r => r.Rule == MaterialRecipeCatalog.OperationUnavailableRule).ToList();
         Assert.Empty(verbRefusals);
 
-        // ⛔ Defect 2 — the RETIRED band shard ids, which resolve but are never minted, so they can
-        // never be paid. Five `elevate` rows carry one, and TWO of the re-authored `reroll-all` rows
-        // (017 `shard.rare`, 018 `shard.epic`) now surface their own legacy shard, which the verb
-        // refusal was previously masking: a refusal names ONE reason, and the verb was checked first.
-        // 5 → 7 is the split landing, not a new defect. Both need the same corpus re-author the ten
-        // missing display rows need, which is module 14's own deferred item.
+        // ⭐ Defect 2 CLOSED 2026-09-07 (later the same day, a separate session) by
+        // `seedsmith.adapters.items.recipegen.migrate_legacy_shards`, run against the real corpus:
+        // the seven cost lines naming a RETIRED band shard id (five `elevate` rows plus the two
+        // `reroll-all` rows this test's own history already explains, 017/018) were rewritten to
+        // their mapped new-ladder rung, mirroring `LegacyDemonRarityIds.ForwardMap` exactly —
+        // common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven (each legacy band's
+        // LOWEST rung, so no player gains value on migration). See `recipes.json`'s own
+        // `_meta.amendments` entry `recipegen/legacy-shard-migration-1`. NOT ONE recipe is refused
+        // on a legacy shard id any more.
         var legacyRefusals = catalog.Refusals.Where(r => r.Rule == MaterialRecipeCatalog.MaterialUnissuableRule).ToList();
-        Assert.Equal(7, legacyRefusals.Count);
-        Assert.All(legacyRefusals, r => Assert.Contains("retired band shard", r.Detail));
+        Assert.Empty(legacyRefusals);
 
-        // 30 authored − 7 legacy-shard refusals = 23 resolvable, up from 18. 32 authored (2026-09-07
-        // recipegen trial batch, recipe.031/032) − 7 legacy-shard refusals = 25 resolvable.
-        Assert.Equal(25, catalog.Recipes.Count);
+        // 32 authored (2026-09-07 recipegen trial batch, recipe.031/032) − 0 legacy-shard refusals
+        // (fixed the same day) = 32 resolvable, up from 25.
+        Assert.Equal(32, catalog.Recipes.Count);
 
         // Nothing is refused for a reason the module invented: every rule is one of the five it
         // registered, all namespaced `material.*` under the ONE ContentRuleViolated code.

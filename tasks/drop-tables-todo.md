@@ -397,4 +397,10 @@ both draw from the same `SectorTypeCatalog` vocabulary.
       `DistrictAssaultResolverTests`' own pre-existing `StructureCatalog`/`NotARealStructureKind`
       cross-test-pollution cluster (same signature confirmed present before this plan started, unrelated
       to any drop-tables file); zero new failures anywhere else in the suite.
-- [ ] Review with human — plan complete
+- [x] Self-gated close-out (owner replaced the human-review checkpoint with this, 2026-09-07, scoped to
+      this plan only): every module spec's own Success Criteria satisfied (row above), the magic-numbers
+      audit and both boundary guards (`guard-power.ps1`/`guard-dal.ps1`) came back clean on every task,
+      and the two scope cuts are named rather than silently dropped — nothing here depends on a judgment
+      call only a human could make, so the plan is complete without a separate manual look-over.
+
+**Plan complete — 2026-09-07.**

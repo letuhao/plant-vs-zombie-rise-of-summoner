@@ -1,5 +1,136 @@
 {
   "treeId": "light",
+  "category": "elemental",
+  "gateQuantity": "element_mastery.light@Aspect",
+  "shapeArchetype": "gated-deep",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    6,
+    6,
+    6,
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.light-off-t3-n2",
+      "treeId": "light",
+      "branch": "Off",
+      "tier": 3,
+      "nodeKey": "n2",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "budgetShareMilli": 19,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 1283,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "element"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.light-def-t2-n1",
+      "treeId": "light",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 12,
+      "atoms": [],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.light-def-t3-n0",
+      "treeId": "light",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Mechanism",
+      "affixIds": [
+        "atom.warding"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 288,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.light-def-t7-n1",
+      "treeId": "light",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1887,
   "bound": [
@@ -8,8 +139,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 1283,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -25,8 +159,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 288,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

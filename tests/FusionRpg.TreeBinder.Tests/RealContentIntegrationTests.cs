@@ -71,9 +71,12 @@ public class RealContentIntegrationTests
 
         var report = TreeBinderRun.BindTree(nodes,
             new Dictionary<string, AffixRow>(), new Dictionary<string, AtomRow>(), powerTuning);
-        var json = ReportWriter.Serialize("might", report);
+        var meta = PlanReader.ReadTreeMeta(planJson);
+        var json = ReportWriter.Serialize("might", meta, nodes, report);
 
         using var doc = System.Text.Json.JsonDocument.Parse(json); // never throws
         Assert.Equal("Fail", doc.RootElement.GetProperty("verdict").GetString());
+        Assert.Equal("primary", doc.RootElement.GetProperty("category").GetString());
+        Assert.Empty(doc.RootElement.GetProperty("nodes").EnumerateArray()); // every node refused, none bound
     }
 }

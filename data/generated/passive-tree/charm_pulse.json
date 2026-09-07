@@ -1,5 +1,147 @@
 {
   "treeId": "charm_pulse",
+  "category": "status",
+  "gateQuantity": "status_applied.charm_pulse",
+  "shapeArchetype": "broad-and-flat",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.charmpulse-off-t7-n1",
+      "treeId": "charm_pulse",
+      "branch": "Off",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "atk",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.charmpulse-def-t1-n1",
+      "treeId": "charm_pulse",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 9,
+      "atoms": [],
+      "excludeProps": [
+        "atomTrigger"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.charmpulse-def-t3-n0",
+      "treeId": "charm_pulse",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.warding"
+      ],
+      "budgetShareMilli": 27,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 432,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.charmpulse-def-t4-n1",
+      "treeId": "charm_pulse",
+      "branch": "Def",
+      "tier": 4,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 37,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 592,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "nodeClass"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
   "verdict": "Fail",
   "totalUnspentBudgetShareMilli": 1863,
   "bound": [
@@ -8,8 +150,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "atk",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 4320,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -25,8 +170,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Flat",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 432,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"
@@ -38,8 +186,11 @@
       "atoms": [
         {
           "kindId": "stat.modify",
+          "attachPoint": "Stat",
           "channelId": "defense",
           "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
           "kMicro": 592,
           "unitClass": "GameUnits",
           "scaleAxis": "PTheta"

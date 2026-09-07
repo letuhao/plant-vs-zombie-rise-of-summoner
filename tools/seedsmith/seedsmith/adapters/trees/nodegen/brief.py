@@ -40,7 +40,7 @@ __all__ = [
     "render_brief",
 ]
 
-PROMPT_VERSION = "tree-language/1"
+PROMPT_VERSION = "tree-language/2"
 
 #: §6.2's SYSTEM block, verbatim — every negative clause here also lives in the schema (§7 gate 2 /
 #: `schema.py`'s own field descriptions), per `family_propose/prompts.py:40-44`'s rule that a
@@ -112,6 +112,24 @@ def render_brief(*, node_id: str, sample_index: int, tree_display_name: str, tre
     depth = tier_to_depth(tier, tier_count)
     affixes = permuted_affix_ids(node_id, sample_index, permitted_affixes)
     properties = permuted_property_keys(node_id, sample_index, permitted_properties)
+    # 2026-09-07 real-corpus finding (`check --family PassiveTree --gate`, run for the first time
+    # against the full 42-tree/1677-node committed corpus once the CLI finally wired real nodes into
+    # this family's own metrics): `PassiveTree/ExclusionRate` measured 1638/1677 nodes (97.7%) at
+    # form `reroute`, EVERY one with the identical propertyKeys=['posture'] and the identical
+    # template-composed printedText -- against a committed target of <=30 per mille. The exclusion
+    # object itself was legal every time (`validate_exclusion` never flagged one; a bare axis name is
+    # spec-legal per `exclusion.py`'s own resolved D14/§5 ambiguity), so this was never a schema or
+    # validation defect -- it was this brief's own wording. The old text opened item 3 with "Prefer
+    # `reroute`. Most nodes have none." -- read by the model as an instruction to reach for `reroute`
+    # by default, with "most nodes have none" landing as a mid-sentence aside rather than the actual
+    # governing rule. Reworded so the FIRST clause states the rule ("MOST NODES HAVE NONE... only if
+    # ... genuinely, concretely conflicts"), and "prefer reroute over nullification" is now clearly
+    # scoped to the "if you do use one" branch, never the default. `PROMPT_VERSION` bumped to
+    # `tree-language/2` so newly-generated content is distinguishable in provenance from the
+    # already-committed corpus above, which this fix does NOT retroactively regenerate (a corpus-wide
+    # re-roll is real machine time / model calls, the same "code fix now, run later" split this
+    # program already holds to for J1/J9's own production passes) -- named in
+    # `tasks/passive-tree-todo.md`, not silently left unrecorded.
 
     motif_line = ", ".join(motifs) if motifs else "(none named)"
     anti_line = f"\n  Avoid entirely: {', '.join(anti_motifs)}." if anti_motifs else ""
@@ -149,11 +167,14 @@ Motifs to express: {motif_line}.{anti_line}
 Choose, and nothing else:
   1. `affixIds`  — 1 to 3 from the list below. They are this node's whole effect.
   2. `affinity`  — how central each is: core | likely | occasional.
-  3. `exclusion` — only if this node's effect genuinely conflicts with a PROPERTY below.
-                   Prefer `reroute`. Most nodes have none. `nullification` is the last
-                   resort — use it only when the pair can be neither rerouted nor ordered.
-                   If you use it, say plainly which side wins in `rationale` — never in
-                   `blocked`, which is reserved for declining to answer this brief at all.
+  3. `exclusion` — MOST NODES HAVE NONE. Only set a form at all if this node's effect
+                   genuinely, concretely conflicts with one of the properties below — not
+                   because a property happens to be available to name. If (and only if) a
+                   real conflict exists, prefer `reroute` over `nullification`; the latter
+                   is the last resort, for when the pair can be neither rerouted nor
+                   ordered. If you use it, say plainly which side wins in `rationale` —
+                   never in `blocked`, which is reserved for declining to answer this brief
+                   at all.
   4. `name`, `nameKey`, `flavor`.
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.

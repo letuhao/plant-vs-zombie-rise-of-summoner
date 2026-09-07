@@ -26,6 +26,17 @@ namespace FusionRpg.Core.PassiveTree.Binding;
 /// (§7.2 item 2 — nothing is ever silently absorbed), but a flagged refusal does not by itself fail
 /// the run the way a surprise refusal does (§7.2 item 3's `FAIL, not NOT_MEASURED` is for the
 /// unflagged case — see <see cref="BinderRunReport.From"/>).</para>
+///
+/// <para><b><see cref="Branch"/>, <see cref="Tier"/>, <see cref="NodeKey"/>, <see cref="NodeClass"/>
+/// and <see cref="ExcludeProps"/> are carried through UNUSED by the pricing path too</b> (2026-09-07,
+/// found the moment a real live-boot proof first tried to import a real committed
+/// `data/generated/passive-tree/&lt;treeId&gt;.json` and discovered nothing had ever written the
+/// `tree-catalog` `TreeRecord`/`NodeRecord` shape `spec-tree-binder.md`'s own Project structure table
+/// names ("THIS is what ships") and "`tree-catalog` owns the on-disk record shape; this module writes
+/// it and never redefines it" both state unambiguously). Same reasoning as
+/// <see cref="ExclusionForm"/> above: one caller carries a node's full identity through the pipeline
+/// rather than a second, near-duplicate input shape; <see cref="TreeBinderRun"/> reads none of these
+/// five.</para>
 /// </summary>
 public sealed record BindInputNode(
     string NodeId,
@@ -35,4 +46,12 @@ public sealed record BindInputNode(
     long Branches,
     IReadOnlyList<string> AffixIds,
     ExclusionForm ExclusionForm,
-    bool DeliberateHole);
+    bool DeliberateHole,
+    TreeBranch Branch = TreeBranch.Off,
+    int Tier = 0,
+    string NodeKey = "",
+    NodeClass NodeClass = NodeClass.Magnitude,
+    IReadOnlyList<string>? ExcludeProps = null)
+{
+    public IReadOnlyList<string> ExcludeProps { get; init; } = ExcludeProps ?? Array.Empty<string>();
+}

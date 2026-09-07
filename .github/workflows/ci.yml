@@ -87,6 +87,18 @@ jobs:
           dotnet run --project tools/DemonBuildPlanGen -- --check
           if ($LASTEXITCODE -ne 0) { throw "DemonBuildPlanGen --check found the plan stale or out of band — run 'dotnet run --project tools/DemonBuildPlanGen' and commit the result" }
 
+      - name: passive-tree catalog staleness guard (H9, spec-tree-binder.md §"Commands")
+        shell: pwsh
+        run: |
+          # tools/TreeBinder commits its generated catalog (data/generated/passive-tree/**) to the
+          # repo, same DemonSpeciesGen/FamilyExpandGen --check pattern above — --check rebinds every
+          # committed plan+seed pair and fails if any generated file on disk differs. Distinct from
+          # `seedsmith trees plan --check` (the PLAN's own byte-identity check, Python side, not yet
+          # wired into this workflow either) — this is the CATALOG half, C# side, one step lower in
+          # the pipeline (tree-plan -> tree-language -> tree-binder).
+          dotnet run --project tools/TreeBinder -- --check
+          if ($LASTEXITCODE -ne 0) { throw "TreeBinder --check found the generated catalog stale — run 'dotnet run --project tools/TreeBinder -- --seed data/seed/passive-tree --out data/generated/passive-tree' and commit the result" }
+
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |
@@ -161,6 +173,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "guard-secondary-no-unity.ps1 failed — a Secondary plugin touched Unity" }
           .\scripts\guard-funnel-delta.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-funnel-delta.ps1 failed — an HP delta bypassed Funnel/FA10" }
+
+          .\scripts\guard-actor-hub.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-actor-hub.ps1 failed — actor compose bypassed ActorHub" }
           .\scripts\guard-dal.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
 

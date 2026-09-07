@@ -855,14 +855,18 @@ zero demands — every one shipped today — is provably unaffected. 4 new tests
 `Battle`/`Siege`/`Actions`/`World.Turn`), `DATA` goldens 12/12 unchanged, all 4 `BOUND` guards green,
 `NUM`/magic-numbers zero new findings. See `spec-siege-construction.md` §11's own fuller account.
 
-**What's honestly still missing, now precisely two things instead of one conflated claim**: (1) the
-broader `action`-program fix for every OTHER action type (chiefly combat) remains real, cross-program,
-and correctly deferred — see [[action-program]]'s own memory, which ALSO now records a confirmed LIVE
-consequence (a shipped `battle`-context consumable with a real `holdsStock` demand fires for free
-today, found from a second angle via `consumables.v1.json`'s own stale note, corrected in place); (2)
-`Assembled` still has no live `IIntentSource` decision path choosing to use it at all
-(`TryDeclareBuilt` is deliberately `Built`-only) and no authored item/cost to decide over even if one
-existed. Both are content-authoring/cross-program work, not engineering this session left undone.
+**Item (1) below CLOSED 2026-09-07, a separate session, cross-program**: `BasicAttack.cs`'s
+`RunBasicAttackStep` and `TimelineDispatch.cs`'s `TryCommitReady` (the live combat dispatch path for
+every shipped profile) now call `ActionStockCommit.TryCommit` at their own commit point, mirroring
+`ConstructionActivation.Fire`'s own wiring here almost exactly — `BattleEngine.Resolve` gained the
+same optional `IStockLedger? stockLedger = null`, defaulting to `NoStockLedger.Instance`. The
+game-wide `action`-program gap this entry named is now closed; see `spec-siege-construction.md` §11's
+own fuller account and `[[action-program]]`'s memory for the correction.
+
+**What's honestly still missing**: `Assembled` still has no live `IIntentSource` decision path
+choosing to use it at all (`TryDeclareBuilt` is deliberately `Built`-only) and no authored item/cost to
+decide over even if one existed. This is content-authoring/cross-program work, not engineering this
+session left undone.
 **15.6 (pre-battle/in-battle deployment sharing one validator) is
 now CLOSED**, later the same session, as a complete, evidenced non-unification — `BuildResolver.cs`'s
 real rules (ownership required, waystation-hop range, `CarriedLoam` cost) and

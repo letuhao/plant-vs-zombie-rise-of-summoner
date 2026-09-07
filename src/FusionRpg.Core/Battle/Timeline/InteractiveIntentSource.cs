@@ -35,16 +35,28 @@ public sealed class InteractiveIntentSource : IIntentSource
     readonly DecisionTrace _trace;
     readonly bool _replaying;
     readonly bool _replayThenLive;
+    readonly Action<TracedDecision>? _onRecorded;
     bool _wentLive;
 
-    /// <summary>Live: ask the player, fall back to the default action when the window elapses.</summary>
+    /// <summary>Live: ask the player, fall back to the default action when the window elapses.
+    ///
+    /// <para><paramref name="onRecorded"/> (party-dungeon D2.16, spec-delve-battle-profile.md §4b) is
+    /// the incremental-persistence seam: it fires once, synchronously, immediately after EVERY new
+    /// decision this call makes (player or timeout) — never during replay, since replay reads decisions
+    /// that already exist rather than creating new ones. The spec's own §4b already names this exact
+    /// shape as `RpgStore.WriteWebMatchDecisions`'s intended caller: "called after every
+    /// `DecisionTrace.Record`, with `DecisionTrace.ToJson()`". Optional and defaulted to <c>null</c> so
+    /// every existing caller (including every shipped battle) is byte-identical — a battle's own report
+    /// never depends on whether anyone is listening for its decisions.</para>
+    /// </summary>
     public InteractiveIntentSource(
         IIntentSource fallback,
         Func<string, long, PlayerChoice> ask,
         Func<string, ActionEnvelope?> envelopeOf,
-        DecisionTrace trace)
+        DecisionTrace trace,
+        Action<TracedDecision>? onRecorded = null)
         : this(fallback, ask ?? throw new ArgumentNullException(nameof(ask)), envelopeOf, trace,
-            replaying: false, replayThenLive: false)
+            replaying: false, replayThenLive: false, onRecorded)
     {
     }
 
@@ -53,7 +65,7 @@ public sealed class InteractiveIntentSource : IIntentSource
         IIntentSource fallback,
         Func<string, ActionEnvelope?> envelopeOf,
         DecisionTrace recorded)
-        : this(fallback, null, envelopeOf, recorded, replaying: true, replayThenLive: false)
+        : this(fallback, null, envelopeOf, recorded, replaying: true, replayThenLive: false, onRecorded: null)
     {
     }
 
@@ -63,7 +75,8 @@ public sealed class InteractiveIntentSource : IIntentSource
         Func<string, ActionEnvelope?> envelopeOf,
         DecisionTrace trace,
         bool replaying,
-        bool replayThenLive)
+        bool replayThenLive,
+        Action<TracedDecision>? onRecorded)
     {
         _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
         _ask = ask;
@@ -71,6 +84,7 @@ public sealed class InteractiveIntentSource : IIntentSource
         _trace = trace ?? throw new ArgumentNullException(nameof(trace));
         _replaying = replaying;
         _replayThenLive = replayThenLive;
+        _onRecorded = onRecorded;
     }
 
     /// <summary>
@@ -97,9 +111,10 @@ public sealed class InteractiveIntentSource : IIntentSource
         IIntentSource fallback,
         Func<string, long, PlayerChoice> ask,
         Func<string, ActionEnvelope?> envelopeOf,
-        DecisionTrace recorded)
+        DecisionTrace recorded,
+        Action<TracedDecision>? onRecorded = null)
         => new(fallback, ask ?? throw new ArgumentNullException(nameof(ask)), envelopeOf, recorded,
-            replaying: false, replayThenLive: true);
+            replaying: false, replayThenLive: true, onRecorded);
 
     public ActionIntent TryDeclare(string actorKey, long nowTick)
     {
@@ -115,6 +130,7 @@ public sealed class InteractiveIntentSource : IIntentSource
         if (!choice.IsNone && _envelopeOf(choice.ActionId) is { } envelope)
         {
             _trace.Record(nowTick, actorKey, choice.ActionId, choice.TargetKey, DecisionSource.Player);
+            _onRecorded?.Invoke(_trace.Decisions[^1]);
             return new ActionIntent(choice.ActionId, choice.TargetKey, envelope);
         }
 
@@ -124,6 +140,7 @@ public sealed class InteractiveIntentSource : IIntentSource
         if (fallback.IsNone) return ActionIntent.None;   // genuinely nothing legal — nothing to record
 
         _trace.Record(nowTick, actorKey, fallback.ActionId, fallback.TargetKey, DecisionSource.Timeout);
+        _onRecorded?.Invoke(_trace.Decisions[^1]);
         return fallback;
     }
 

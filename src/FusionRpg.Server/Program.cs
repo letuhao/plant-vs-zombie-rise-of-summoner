@@ -64,6 +64,9 @@ FusionRpg.Core.Status.StatusPolicy.Configure(
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
+FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogHub.Configure(
+    FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stat-catalog.v1.json"))));
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -723,24 +726,12 @@ if (clearedBindings > 0)
 var orphanInstances = app.Services.GetRequiredService<RpgStore>().CountOrphanInstances();
 if (orphanInstances > 0)
     Console.WriteLine($"[atoms] {orphanInstances} orphan instance(s) remain after the boot sweep");
-// `equip-atom-source-not-wired` (action-plan.md §5, found 2026-09-06, fixed 2026-09-07):
-// BattleStatComposer.Equipment defaulted to EquipAtomSource.None forever -- no production caller ever
-// called UseEquipment, so an equipped item's stat.derived atoms never reached a live battle's derived
-// stats, only tests did (EquipRuntimeTests.cs). The production resolver shape is EquipAtomSource.
-// FromResolver's own documented contract: resolve this specimen's UniqueActor-scoped bindings and
-// flatten their atoms. RuntimeId.Battle, not Lawn -- this feeds BattleStatComposer specifically.
+// `equip-atom-source-not-wired` (action-plan.md §5) + GG-49 equip SourceId (2026-09-08):
+// BattleStatComposer and UniqueActorHubCompose share EquippedBoundAtoms so battle ModsFor and
+// sheet DerivedAtomsFor mint equip:{role}:{itemRef}, never bare atom ids / equip:unknown.
 var equipStore = app.Services.GetRequiredService<RpgStore>();
 FusionRpg.Core.Battle.BattleStatComposer.UseEquipment(
-    FusionRpg.Core.Battle.EquipAtomSource.FromResolver(instanceId =>
-    {
-        var resolution = equipStore.ResolveBindings(
-            new FusionRpg.Core.Effects.Atoms.OwnerScope(FusionRpg.Core.Effects.Atoms.OwnerKind.UniqueActor, instanceId),
-            new FusionRpg.Core.Effects.Atoms.BindContext(FusionRpg.Core.Effects.Atoms.RuntimeId.Battle));
-        if (resolution.AtomsByBinding is null) return Array.Empty<FusionRpg.Core.Effects.Atoms.AtomRow>();
-        var flattened = new List<FusionRpg.Core.Effects.Atoms.AtomRow>();
-        foreach (var atoms in resolution.AtomsByBinding.Values) flattened.AddRange(atoms);
-        return flattened;
-    }));
+    EquippedBoundAtoms.SourceFromStore(equipStore));
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();

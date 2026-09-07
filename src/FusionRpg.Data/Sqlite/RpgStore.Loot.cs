@@ -336,6 +336,37 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>Same read as <see cref="HasFirstClear"/>, on the caller's own connection/transaction —
+    /// D3.15's own bank-at-clear hook (`RpgStore.Delve.ApplyBossFirstClearGrantUnlocked`) needs this
+    /// INSIDE its own transaction so the idempotency check and the write it gates land atomically,
+    /// mirroring `RecordedLootManifestUnlocked`'s identical "same query, caller's own tx" shape.</summary>
+    internal static bool HasFirstClearUnlocked(SqliteConnection db, SqliteTransaction tx, string playerId, string sourceKind, string sourceId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT 1 FROM item_first_clear WHERE player_id = $p AND source_kind = $k AND source_id = $i;";
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$k", sourceKind);
+        cmd.Parameters.AddWithValue("$i", sourceId);
+        return cmd.ExecuteScalar() is not null;
+    }
+
+    /// <summary>The same `item_first_clear` write <see cref="PersistLootUnlocked"/>'s own
+    /// `manifest.FirstClearGrant` arm makes, standalone — D3.15's own bank-at-clear hook does not
+    /// produce a <see cref="LootManifest"/> (`DelveLoot.InstantiateBossFirstClearGrant` returns a raw
+    /// `InstanceRow`, never a manifest), so it needs this write on its own rather than reusing
+    /// `PersistLootUnlocked` wholesale. Same `ON CONFLICT DO NOTHING` idempotency, same table, same
+    /// caller's-own-`(db, tx)` shape as every other `*Unlocked` writer in this family.</summary>
+    internal static void RecordFirstClearUnlocked(SqliteConnection db, SqliteTransaction tx, string playerId, string sourceKind, string sourceId, string nowUtc)
+    {
+        LootExec(db, tx, """
+            INSERT INTO item_first_clear (player_id, source_kind, source_id, granted_utc)
+            VALUES ($p, $k, $i, $t)
+            ON CONFLICT(player_id, source_kind, source_id) DO NOTHING;
+            """,
+            ("$p", playerId), ("$k", sourceKind), ("$i", sourceId), ("$t", nowUtc));
+    }
+
     /// <summary>Step 1's gate, as the store sees it: the recorded manifest for an already-resolved
     /// (player, correlation) pair, or <c>null</c>.</summary>
     public string? RecordedLootManifest(string playerId, string correlationId)

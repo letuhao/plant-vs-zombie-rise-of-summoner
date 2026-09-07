@@ -34,7 +34,12 @@ public class FamilyExpansionTests
     {
         var itemsRoot = Path.Combine(FindDataDir(), "seed", "items");
         var familiesDir = Path.Combine(itemsRoot, "affix-families");
-        var tierBands = TierBandsFile.Read(File.ReadAllText(Path.Combine(itemsRoot, "_tuning", "tier-bands.v1.json")));
+        // Real bug fixed 2026-09-08 (atom-family-expansion): this hardcoded literal "v1.json",
+        // the same defect fixed in tools/FamilyExpandGen/Program.cs — this file's own tests exist to
+        // prove FamilyExpansion against "the real, shipped corpus" (its own class doc comment), which
+        // means the real, LATEST published tuning, not a frozen v1 snapshot several versions behind
+        // what's actually committed to data/seed/atoms/generated/ today.
+        var tierBands = TierBandsFile.Read(File.ReadAllText(TierBandsFile.FindLatestPath(Path.Combine(itemsRoot, "_tuning"))));
 
         var families = new List<FamilyEntryInput>();
         foreach (var file in Directory.GetFiles(familiesDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))

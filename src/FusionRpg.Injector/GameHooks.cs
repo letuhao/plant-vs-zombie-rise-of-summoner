@@ -604,12 +604,13 @@ public static class GameHooks
         _dmgScaleActive = s.ApplyStats || hasPvz;
         if (!_dmgScaleActive) return;
         var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
-        var pf = CheatState.Stats.Resolve(CheatState.Stats.Contexts.ForPlant(
-            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods));
+        // Sole Hot gate (ADR 2026-09-07): AppliedCombat from ActorHub, never StatSystem-only.
+        var pf = CheatState.ActorHub.Resolve(CheatState.Stats.Contexts.ForPlant(
+            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods)).AppliedCombat;
         _plantDefPct = pf.DefensePercent;
         _plantDefFlat = pf.DefenseFlat;
-        var zf = CheatState.Stats.Resolve(CheatState.Stats.Contexts.ForZombie(
-            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods));
+        var zf = CheatState.ActorHub.Resolve(CheatState.Stats.Contexts.ForZombie(
+            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods)).AppliedCombat;
         _zombieDefPct = zf.DefensePercent;
         _zombieDefFlat = zf.DefenseFlat;
     }

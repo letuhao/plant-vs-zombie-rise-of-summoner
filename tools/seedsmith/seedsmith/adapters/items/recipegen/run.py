@@ -23,15 +23,18 @@ building this module (2026-09-07):**
    reports zero unresolved `container` references against the real corpus — every `container`/
    `material` outputRef in the 30 entries resolves cleanly.
 
-3. **A real, already-tracked (not this module's to fix) situation, confirmed by reading
-   `MaterialRecipeCatalog.cs` directly:** seven cost lines (`recipe.009`/`010`/`011`/`017`/`018`/
-   `025`/`029`) name one of the four LEGACY shard ids (`shard.common`/`rare`/`epic`/`legendary`).
-   `MaterialCatalog.IsLegacyShardId` is `true` for these, so `MaterialRecipeCatalog.Load` refuses
-   all seven at real C# import time (`MaterialUnissuableRule`) — matching that class's own doc
-   comment, *"Refusals ... Never empty against today's shipped corpus"* (tasks/item-todo.md P4.1).
-   `materialgen.vocab.require_issuable` already refuses a legacy id at GENERATION time (acceptance
-   #1's own gate), so this generator can never reproduce the defect; it is named here only because
-   reading it off the real corpus is what confirmed the gate is necessary, not hypothetical.
+3. **FIXED 2026-09-07, later the same day, by a sibling module:** seven cost lines
+   (`recipe.009`/`010`/`011`/`017`/`018`/`025`/`029`) named one of the four LEGACY shard ids
+   (`shard.common`/`rare`/`epic`/`legendary`). `MaterialCatalog.IsLegacyShardId` was `true` for
+   these, so `MaterialRecipeCatalog.Load` refused all seven at real C# import time
+   (`MaterialUnissuableRule`) — matching that class's own doc comment, *"Refusals ... Never empty
+   against today's shipped corpus"* (tasks/item-todo.md P4.1). `materialgen.vocab.require_issuable`
+   already refuses a legacy id at GENERATION time (acceptance #1's own gate), so this generator
+   could never reproduce the defect — but it also could never repair it, since it only mints NEW
+   recipes, never re-authors the 30 pre-existing hand-authored ones. See sibling module
+   `recipegen.migrate_legacy_shards` (detect + fix, mirroring `LegacyDemonRarityIds.ForwardMap`
+   exactly), now applied to the real corpus — `build_reference_reports()`'s `cost_lines.unresolved`
+   is `[]` today.
 """
 from __future__ import annotations
 

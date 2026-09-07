@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Items;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -137,6 +140,151 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.Contains(after!.Channels, c => c.Contributions.Any(x => x.SourceId == "aptitude.Might"));
     }
 
+    [Fact]
+    public async Task Get_sheet_returns_full_registry_channels_with_composeKind_and_fiction_labels()
+    {
+        FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogHub.Configure(
+            FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
+                File.ReadAllText(Path.Combine(RepoTuningDir(), "derived-stat-catalog.v1.json"))));
+
+        var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 3);
+        _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId),
+            AptitudeAllocation.Single(AllocationScope.Commander, "Might", 40));
+
+        var resp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/sheet");
+        if (!resp.IsSuccessStatusCode) throw new Exception(await resp.Content.ReadAsStringAsync());
+        var sheet = await resp.Content.ReadFromJsonAsync<SheetResponseDto>();
+        Assert.NotNull(sheet);
+        Assert.Equal(actor.InstanceId, sheet!.InstanceId);
+        Assert.True(sheet.Derived.Count >= 200, $"expected full registry floor, got {sheet.Derived.Count}");
+
+        var power = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.power");
+        Assert.Equal("FlatReplace", power.ComposeKind);
+        var prog = Assert.Single(power.Contributions);
+        Assert.Equal("rpg.progression", prog.SourceId);
+        Assert.Equal("Progression", prog.Label);
+
+        Assert.Contains(sheet.Derived, c =>
+            c.Contributions.Any(x => x.SourceId == "aptitude.Might" && (x.Label?.StartsWith("Aptitude", StringComparison.Ordinal) ?? false)));
+
+        Assert.NotNull(sheet.Primary);
+        // Primary bag is always projected; when contributions exist they use primary: grammar.
+        Assert.All(sheet.Primary, p => Assert.StartsWith("primary:", p.SourceId, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Get_sheet_unknownInstance_returns404()
+    {
+        var resp = await _http.GetAsync("/api/actors/not-a-real-instance/sheet");
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_derived_ships_composeKind_and_FlatReplace_honesty_on_progression_power()
+    {
+        var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 5);
+        var resp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/derived");
+        resp.EnsureSuccessStatusCode();
+        var body = await resp.Content.ReadFromJsonAsync<DerivedResponseDto>();
+        Assert.NotNull(body);
+
+        var power = Assert.Single(body!.Channels, c => c.ChannelId == "progression.power");
+        Assert.Equal("FlatReplace", power.ComposeKind);
+        Assert.NotEmpty(power.Contributions);
+        // FlatReplace: contribution sum may disagree with composed value — honesty is composeKind, not arithmetic.
+        var sum = power.Contributions.Sum(c => c.Value);
+        Assert.True(power.Value != 0 || sum != 0 || power.Contributions.Count > 0);
+        Assert.Contains(power.Contributions, c => c.SourceId == "rpg.progression" && c.Label == "Progression");
+    }
+
+    [Fact]
+    public async Task Get_sheet_and_derived_attribute_equipped_stat_derived_as_equip_role_item()
+    {
+        const string channel = DerivedStatChannels.CombatPowerOmni;
+        const long amount = 175;
+        const string itemRef = "item-hub-equip-fixture";
+        var role = ItemRoles.Id(ItemRole.ArmamentPrimary);
+
+        var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 9);
+        BindStatDerivedEquip(actor.InstanceId, channel, amount, role, itemRef);
+
+        // Multi-source FlatSum: aptitude Might also writes combat.power.omni.
+        _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId),
+            AptitudeAllocation.Single(AllocationScope.Commander, "Might", 50));
+
+        var expectedSource = ContributionSourceIds.Equip(role, itemRef);
+
+        var sheetResp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/sheet");
+        if (!sheetResp.IsSuccessStatusCode) throw new Exception(await sheetResp.Content.ReadAsStringAsync());
+        var sheet = await sheetResp.Content.ReadFromJsonAsync<SheetResponseDto>();
+        Assert.NotNull(sheet);
+        var sheetCh = Assert.Single(sheet!.Derived, c => c.ChannelId == channel);
+        Assert.Equal("FlatSum", sheetCh.ComposeKind);
+        var equipSheet = Assert.Single(sheetCh.Contributions, c => c.SourceId == expectedSource);
+        Assert.Contains("Equip", equipSheet.Label, StringComparison.Ordinal);
+        Assert.Contains(sheetCh.Contributions, c => c.SourceId == "aptitude.Might");
+        Assert.True(sheetCh.Contributions.Count >= 2);
+        // FlatSum: contribution flats account for the composed channel value.
+        Assert.Equal(sheetCh.Value, sheetCh.Contributions.Sum(c => c.Value), 3);
+
+        var derivedResp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/derived");
+        derivedResp.EnsureSuccessStatusCode();
+        var derived = await derivedResp.Content.ReadFromJsonAsync<DerivedResponseDto>();
+        Assert.NotNull(derived);
+        var derCh = Assert.Single(derived!.Channels, c => c.ChannelId == channel);
+        Assert.Equal("FlatSum", derCh.ComposeKind);
+        Assert.Contains(derCh.Contributions, c => c.SourceId == expectedSource && c.Label != null && c.Label.Contains("Equip", StringComparison.Ordinal));
+        Assert.Contains(derCh.Contributions, c => c.SourceId == "aptitude.Might");
+        Assert.Equal(derCh.Value, derCh.Contributions.Sum(c => c.Value), 3);
+    }
+
+    void BindStatDerivedEquip(string specimenId, string channel, long amount, string roleSlot, string itemRef)
+    {
+        var atomId = "atom.hub-equip-attrib.t1";
+        Assert.True(_store.UpsertAtom(new AtomRow
+        {
+            AtomId = atomId, KindId = "stat.derived",
+            FamilyId = "atom.hub-equip-attrib", Variant = "", Tier = 1, Name = "Hub Equip Attrib",
+            ParamsJson = $"{{\"channel\":\"{channel}\",\"op\":\"flat\",\"amount\":{amount}}}",
+        }).IsOk);
+
+        Assert.True(_store.UpsertContainer(new ContainerRow
+        {
+            ContainerId = "item.hub-equip-attrib", Kind = ContainerKind.Item,
+            Atoms = new[] { new ContainerAtomRow(1, atomId) },
+        }).IsOk);
+
+        var tuning = PowerTuning.Build(
+            1, 1, 80_000, 0, 20, 680, 1000, 25000, 250, 1000, 5000, 5000, 25000);
+        var owner = new OwnerScope(OwnerKind.UniqueActor, specimenId);
+        var produce = _store.ProduceAndBind(
+            _store.GetContainer("item.hub-equip-attrib")!,
+            _ => Array.Empty<string>(),
+            rollSeed: 11, thetaContent: 20, tuning, owner,
+            slot: roleSlot, priority: 0, source: "test",
+            out var producedInstanceId, out _);
+        Assert.True(produce.IsOk, produce.ToString());
+        Assert.NotNull(producedInstanceId);
+
+        _store.SaveAssignment(specimenId, ItemRole.ArmamentPrimary, "rolled", itemRef);
+    }
+
+    sealed class SheetResponseDto
+    {
+        public string InstanceId { get; set; } = "";
+        public List<SheetChannelDto> Derived { get; set; } = new();
+        public List<DerivedContributionDto> Primary { get; set; } = new();
+    }
+
+    sealed class SheetChannelDto
+    {
+        public string ChannelId { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public string ComposeKind { get; set; } = "";
+        public double Value { get; set; }
+        public List<DerivedContributionDto> Contributions { get; set; } = new();
+    }
+
     sealed class DerivedResponseDto
     {
         public string InstanceId { get; set; } = "";
@@ -147,12 +295,14 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     {
         public string ChannelId { get; set; } = "";
         public double Value { get; set; }
+        public string ComposeKind { get; set; } = "";
         public List<DerivedContributionDto> Contributions { get; set; } = new();
     }
 
     sealed class DerivedContributionDto
     {
         public string SourceId { get; set; } = "";
+        public string? Label { get; set; }
         public string Op { get; set; } = "";
         public double Value { get; set; }
     }

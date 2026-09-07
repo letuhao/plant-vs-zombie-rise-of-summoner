@@ -134,4 +134,39 @@ describe("PackPanel (D5.7, spec-delve-stage.md §7/§9 — the per-party carry g
     // this asserts on the rendered TEXT content only, which is what a player actually reads.
     expect(root.textContent ?? "").not.toMatch(/\bcells?\b/i);
   });
+
+  it("a raid of four resolves with four distinctly-carried packs on screen at once (G5's own success criterion 3, 'four named parties, four packs')", () => {
+    // Distinct, non-index-shaped quantities (100s) deliberately avoid colliding with the bare
+    // 0..3 ordinals the check below searches for — the same reason the two-party banner test above
+    // keeps its own packs empty rather than risk a legitimate qty figure masquerading as an index.
+    const fourParties = [0, 1, 2, 3].map((partyIndex) =>
+      party({
+        entityId: 501 + partyIndex,
+        partyIndex,
+        pack: known(pack({ cells: [cell({ qty: { unit: "count", value: 100 + partyIndex } })] }))
+      })
+    );
+    render(<PackPanel parties={fourParties} />);
+
+    // Every one of the four banners rendered, none collapsed or overwritten by the others.
+    expect(screen.getByText("First Banner")).toBeInTheDocument();
+    expect(screen.getByText("Second Banner")).toBeInTheDocument();
+    expect(screen.getByText("Third Banner")).toBeInTheDocument();
+    expect(screen.getByText("Fourth Banner")).toBeInTheDocument();
+
+    // Every one of the four packs rendered its own real grid, with its own distinct carried item —
+    // not just one section repeated, and not the map-over-parties logic silently dropping a party
+    // past the second (the only count this file's own prior tests ever exercised).
+    for (const p of fourParties) {
+      const key = String(p.entityId);
+      expect(screen.getByTestId(`delve-pack-carried-${key}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`delve-pack-cell-${key}-0-qty`)).toHaveTextContent(String(100 + p.partyIndex));
+    }
+
+    // No rendered text is a bare party-index ordinal (§8/GG-23, D5.6's own Party_labels_are_names_not_indices).
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
+    expect(screen.queryByText("1")).not.toBeInTheDocument();
+    expect(screen.queryByText("2")).not.toBeInTheDocument();
+    expect(screen.queryByText("3")).not.toBeInTheDocument();
+  });
 });
