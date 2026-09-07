@@ -581,9 +581,17 @@ public class UniqueTests
     ///
     /// <para>⚠ The lane's own figure is stale and is NOT asserted here: ssot-uniques.md §4.3 and
     /// spec-uniques.md both say <c>AtomKindRegistry.KindCount = 12</c>, and the shipped registry is
-    /// <b>16</b>. That is the vocabulary growing under another lane, not a defect — what matters to
+    /// <b>18</b>. That is the vocabulary growing under other lanes, not a defect — what matters to
     /// this module is that <c>damage.convert</c> (§4.3's named 13th-kind request, still blocked on a
-    /// damage applier) is not among them and that nothing here added one.</para>
+    /// damage applier) is not among them and that nothing HERE added a kind.</para>
+    ///
+    /// <para>⚠ Superseded 2026-09-07: a conversion-shaped kind now DOES exist —
+    /// <c>element.convert</c> (D56, spec-element-conversion.md, `AttachPoint.Element`) — added by
+    /// passive-tree, nothing to do with this lane's own long-blocked <c>damage.convert</c> ask. The
+    /// broad "no kind id contains 'convert'" check this test used to carry is retired along with it
+    /// (kept as the historical record above, not deleted): it was always a proxy for "damage.convert
+    /// specifically doesn't exist," and a real, reviewed, differently-scoped conversion kind landing
+    /// elsewhere is not a violation of THIS module's own "Never" list.</para>
     /// </summary>
     [Fact]
     public void This_module_adds_no_container_kind_and_no_atom_kind()
@@ -591,10 +599,11 @@ public class UniqueTests
         // 7, not 6, since party-dungeon D2.6 (spec-encounter-generator.md §6) added ContainerKind.Enemy
         // as its own reviewed seventh kind -- this test's own claim is "the UNIQUES module adds
         // neither," which still holds; the total just moved for an unrelated, reviewed reason.
-        Assert.Equal(7, Enum.GetNames<ContainerKind>().Length);
+        // 7 -> 11 (2026-09-07): container-kind-expansion (X7) added Gem/Charm/Combo/Consumable --
+        // item's own four, still none of them this module's, so the claim still holds.
+        Assert.Equal(11, Enum.GetNames<ContainerKind>().Length);
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Null(AtomKindRegistry.Get("damage.convert"));
-        Assert.DoesNotContain(AtomKindRegistry.All, k => k.KindId.Contains("convert", StringComparison.Ordinal));
     }
 
     /// <summary>

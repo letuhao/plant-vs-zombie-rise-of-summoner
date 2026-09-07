@@ -596,7 +596,8 @@ public class LootPipelineTests
 
     // ---- D4.27: the MintUnique arm — "rung = the container's own Rarity, never drawn" ----------------
 
-    static LootContentView MinimalUniqueView(string refId, Func<string, string?>? uniqueRarityFor, Func<LootGrant, LootMintResult>? mint = null)
+    static LootContentView MinimalUniqueView(string refId, Func<string, string?>? uniqueRarityFor, Func<LootGrant, LootMintResult>? mint = null,
+        Func<string, (string Frame, string BaseTypeId)?>? uniqueBaseTypeFor = null)
     {
         var entry = new DropTableEntryRow(Seq: 0, Kind: DropEntryKind.Unique, RefId: refId, Weight: 1000);
         var table = new DropTableRow(
@@ -611,7 +612,12 @@ public class LootPipelineTests
             DropVolumeCorpusTests.Ladder(),
             (_, _) => Array.Empty<string>(), // no equipment draws in this fixture
             UniqueRarityFor: uniqueRarityFor,
-            Mint: mint);
+            Mint: mint,
+            // D3.15/D4.12/D3.11: every test in this section is about RARITY/mint behaviour, not this
+            // resolver specifically -- default it to a real, always-resolving pair keyed off the SAME
+            // refId the caller already configured, so those tests keep exercising exactly what they
+            // already did. The two dedicated resolver tests below override this explicitly.
+            UniqueBaseTypeFor: uniqueBaseTypeFor ?? (r => r == refId ? ("humanoid", "test.base-type") : null));
     }
 
     [Fact]
@@ -670,5 +676,44 @@ public class LootPipelineTests
         var a = ResolveOneEquipmentGrant(view, seed: 42);
         var b = ResolveOneEquipmentGrant(view, seed: 42);
         Assert.Equal(a.RollSeed, b.RollSeed);
+    }
+
+    // ---- D3.15/D4.12/D3.11: a unique's own Frame/BaseTypeId now carry onto its LootGrant ------------
+
+    [Fact]
+    public void A_unique_draw_carries_its_resolved_frame_and_base_type_onto_the_grant()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", _ => "cultivated",
+            uniqueBaseTypeFor: r => r == "item.rot-bloom-30-002" ? ("plant", "footing.woody-stem") : null);
+        var grant = ResolveOneEquipmentGrant(view);
+
+        Assert.Equal("plant", grant.Frame);
+        Assert.Equal("footing.woody-stem", grant.BaseTypeId);
+    }
+
+    [Fact]
+    public void A_unique_draw_with_no_UniqueBaseTypeFor_resolver_refuses_naming_the_reason()
+    {
+        // `with { UniqueBaseTypeFor = null }` overrides MinimalUniqueView's own always-resolving
+        // default, proving the real "resolver not supplied at all" path -- the identical shape
+        // `A_unique_draw_with_no_UniqueRarityFor_resolver_refuses_naming_the_reason` already uses for
+        // its own resolver.
+        var view = MinimalUniqueView("item.rot-bloom-30-002", uniqueRarityFor: _ => "cultivated") with { UniqueBaseTypeFor = null };
+
+        Assert.True(LootPipeline.Resolve(Request("web-wave", "s1"), view, Tuning(), LootPityState.Empty, out var m)
+            is { IsOk: false } r && r.Detail.Contains("drop.unique-base-type-unresolved", StringComparison.Ordinal));
+        Assert.Null(m);
+    }
+
+    [Fact]
+    public void A_unique_draw_whose_base_type_resolver_cannot_place_it_refuses_naming_the_ref_id()
+    {
+        var view = MinimalUniqueView("item.does-not-exist", uniqueRarityFor: _ => "cultivated",
+            uniqueBaseTypeFor: _ => null);
+        var rejection = LootPipeline.Resolve(Request("web-wave", "s1"), view, Tuning(), LootPityState.Empty, out var m);
+        Assert.False(rejection.IsOk);
+        Assert.Contains("item.does-not-exist", rejection.Detail);
+        Assert.Contains("drop.unknown-unique", rejection.Detail, StringComparison.Ordinal);
+        Assert.Null(m);
     }
 }

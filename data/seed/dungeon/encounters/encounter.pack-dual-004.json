@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.pack-dual-004",
+  "formation": "pack",
+  "name": "Fractured Elemental Surge",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A coordinated rush of low-level elemental spirits attempting to overwhelm the party's frontline through sheer numbers.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "short",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "short",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

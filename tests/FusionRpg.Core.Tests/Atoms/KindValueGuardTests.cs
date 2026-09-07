@@ -220,10 +220,12 @@ public class KindValueGuardTests
         // ⚠ The METHOD NAME is stale and is deliberately not renamed: spec-kind-value-guard.md §6 cites
         // it verbatim, and that doc is the effect-atom lane's. 98 → 100 (`g-punisher.json`, commit
         // 5864231) → 109 (the 2026-09-06 phantom-closure pass: seven `status.apply` into
-        // `g-affliction.json`, two `stat.derived` into `g-elem-power.json`). Six of the 109 are refused,
-        // so it now reads "103 of the 109". A one-line correction is owed to that doc's §6; recorded
-        // here rather than silently renamed. NOTE this test was ALREADY red before the phantom pass —
-        // it pinned 98 against a 100-family corpus, which tasks/item-todo.md §2470 records.
+        // `g-affliction.json`, two `stat.derived` into `g-elem-power.json`) → 112 (the 2026-09-07
+        // affix-families-gen trial batch: three new families across `g-tempo.json`/`g-elem-power.json`/
+        // `g-shield-stat.json`). Seven of the 112 are refused, so it now reads "105 of the 112". A
+        // one-line correction is owed to that doc's §6; recorded here rather than silently renamed.
+        // NOTE this test was ALREADY red before the phantom pass — it pinned 98 against a 100-family
+        // corpus, which tasks/item-todo.md §2470 records.
         var knownBad = new HashSet<string>(StringComparer.Ordinal)
         {
             "atom.elpw-pierce", "atom.elpw-focus", "atom.elpw-overflow", // combat.power.pierce/.overflow — unregistered channel families
@@ -238,6 +240,15 @@ public class KindValueGuardTests
             // validator reports no MissingUnitClass for it. Same three families, two different
             // questions — not a new defect.
             "atom.affliction",
+            // Eighth, added 2026-09-07 with the affix-families-gen trial batch: `atom.elpw-surfeit`
+            // (combat.power.overflow.{variant}) is unregistered for the identical reason its sibling
+            // `elpw-*` three above are. The trial batch's other two new families resolve fine and are
+            // correctly NOT in this set: `atom.tempo-wildgrowth` (bare channel `attackInterval`) —
+            // verified directly against `StatChannels.AttackInterval` (`ModifierOp.cs:41`, E16's own
+            // real promotion of this exact channel into `PrimaryChannels`, confirmed live rather than
+            // trusted from an unrelated, now-stale doc comment elsewhere naming it "partly fiction") —
+            // and `atom.shld-absolute` (combat.shield.pen.{variant}), matching its `shld-*` siblings.
+            "atom.elpw-surfeit",
         };
 
         var dir = Path.Combine(FindDataDir(), "seed", "items", "affix-families");
@@ -272,12 +283,12 @@ public class KindValueGuardTests
             }
         }
 
-        Assert.Equal(109, seen.Count);
+        Assert.Equal(112, seen.Count);
         // 56 over the 98-family corpus (23 stat.modify + 28 stat.derived-element-expanded + 5 broken,
         // per §5.1). +2 on 2026-09-06: `atom.elemental-power` (combat.power.{variant}) and
         // `atom.affliction` (status.power). The seven new `status.apply` families bear no channel at
         // all — they author `params.status` — so they are counted in `seen` and skipped here.
-        Assert.Equal(58, channelBearing.Count);
+        Assert.Equal(61, channelBearing.Count);
         Assert.Equal(knownBad.OrderBy(x => x, StringComparer.Ordinal),
             refused.OrderBy(x => x, StringComparer.Ordinal));
         // §5.1's own text says "94 of the 98 validate" — arithmetically inconsistent with its own "5
@@ -288,8 +299,10 @@ public class KindValueGuardTests
         // against a document that contradicts its own count) — flagged as a real, small doc correction
         // owed to spec-kind-value-guard.md §6, not silently "fixed" by asserting the wrong number here.
         // 93 of 98 at the module's build; 103 of 109 after the 2026-09-06 phantom-closure pass, which
-        // added nine families and exactly one refusal (`atom.affliction`, above).
-        Assert.Equal(103, 109 - refused.Count);
+        // added nine families and exactly one refusal (`atom.affliction`, above); 105 of 112 after the
+        // 2026-09-07 affix-families-gen trial batch, which added three families and exactly one more
+        // refusal (`atom.elpw-surfeit`, above).
+        Assert.Equal(105, 112 - refused.Count);
     }
 
     static object? Substitute(JsonElement el) => el.ValueKind switch

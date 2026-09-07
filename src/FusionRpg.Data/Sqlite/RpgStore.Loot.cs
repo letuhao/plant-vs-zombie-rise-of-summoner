@@ -352,6 +352,52 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
+    /// The real, live `LootContentView` — confirmed by `grep` (party-dungeon-todo.md D4.12/D3.11/D3.3,
+    /// 2026-09-07) to have NEVER existed anywhere in `src/` for any caller of `LootPipeline.Resolve`.
+    /// Mostly composition, not new reads: `LoadLootCorpus()` (already shipped) already assembles
+    /// `Sources`/`Tables` correctly, and `HasFirstClear`/`RecordedLootManifest`/`GetContainer` already
+    /// back three of the optional delegates exactly. `Mint` is deliberately left `null` here — it is
+    /// the CALLER's own parameter on every real orchestrator (`RollRoom`/`RollQuestReward`'s own
+    /// `mintAt`), never the content view's job, matching how both already compose it themselves
+    /// (`view with { Mint = grant => mintAt(...) }`).
+    ///
+    /// <para><b>`BaseTypesFor` RESOLVED 2026-09-07, same day</b> — reads the real `item_base_type` table
+    /// (<see cref="RpgStore.BaseTypeIdsFor"/>), imported from `data/seed/items/base-types/**/*.json` via
+    /// <see cref="FusionRpg.Core.Items.Drops.BaseTypeSeedFile"/>. The earlier "no Core-side reader
+    /// either" claim was a stale grep result: `FusionRpg.Server.ItemBaseTypeCorpus` already read this
+    /// exact content (for the item-card display shape) — wrong layer for `RpgStore` to depend on, and
+    /// shaped for display keys, not a `(frame, role)` forward index, so a dedicated minimal reader was
+    /// still the right, small fix rather than a genuinely-new investigation.</para>
+    /// </summary>
+    public LootContentView BuildLiveLootContentView()
+    {
+        var corpus = LoadLootCorpus();
+        var sources = corpus.Sources.ToDictionary(s => s.Key, StringComparer.Ordinal);
+        var tables = corpus.Tables.ToDictionary(t => t.TableId, StringComparer.Ordinal);
+
+        var ladder = new List<RarityRung>();
+        foreach (var r in ListRarities().OrderBy(r => r.Ordinal))
+        {
+            var dropWeight = GetRarityBudget(r.RarityId, "drop_weight_default")
+                ?? throw new InvalidOperationException(
+                    $"rarity '{r.RarityId}' has no 'drop_weight_default' budget row -- item-rarity.v{{n}}.json import never ran");
+            ladder.Add(new RarityRung(r.RarityId, r.Ordinal, r.PrefixRolls, r.SuffixRolls, r.MinTier, r.MaxTier, dropWeight));
+        }
+
+        return new LootContentView(
+            sources, tables, ladder,
+            BaseTypesFor: BaseTypeIdsFor,
+            FirstClearAlreadyGranted: HasFirstClear,
+            RecordedManifestFor: RecordedLootManifest,
+            UniqueRarityFor: refId => GetContainer(refId)?.Rarity,
+            // D3.15/D4.12/D3.11: the same GetContainer(refId) read UniqueRarityFor already makes,
+            // reading the two fields UniqueContainerBuild.From now populates alongside Rarity. Both
+            // must be present to return a real pair -- a container written before this fix landed (or
+            // any non-unique container someone mistakenly passes here) correctly resolves to null.
+            UniqueBaseTypeFor: refId => GetContainer(refId) is { Frame: { } f, BaseTypeId: { } b } ? (f, b) : null);
+    }
+
+    /// <summary>
     /// Step 11 — <b>ONE transaction</b>: the drop log, every <c>item_generation</c> stamp, the pity
     /// update and the first-clear mark, committed together or not at all.
     ///
@@ -367,79 +413,94 @@ public sealed partial class RpgStore
         long catalogRevision, long dropTableRevision,
         IReadOnlyList<ItemGenerationRow> generations, string? nowUtc = null)
     {
-        if (manifest is null) throw new ArgumentNullException(nameof(manifest));
-        generations ??= Array.Empty<ItemGenerationRow>();
-        var t = nowUtc ?? DateTime.UtcNow.ToString("o");
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-
-            using (var existing = db.CreateCommand())
-            {
-                existing.Transaction = tx;
-                existing.CommandText = "SELECT id FROM item_drop_log WHERE player_id = $p AND correlation_id = $c;";
-                existing.Parameters.AddWithValue("$p", playerId);
-                existing.Parameters.AddWithValue("$c", manifest.CorrelationId);
-                if (existing.ExecuteScalar() is { } already)
-                {
-                    tx.Commit();
-                    return Convert.ToInt64(already);
-                }
-            }
-
-            LootExec(db, tx, """
-                INSERT INTO item_drop_log
-                  (player_id, correlation_id, source_kind, source_id, loot_seed, catalog_revision,
-                   drop_table_revision, item_level, context_json, result_json, notes, t)
-                VALUES ($p, $c, $sk, $si, $seed, $cat, $rev, $ilvl, $ctx, $res, $notes, $t);
-                """,
-                ("$p", playerId), ("$c", manifest.CorrelationId), ("$sk", sourceKind), ("$si", sourceId),
-                ("$seed", manifest.LootSeed.ToString()), ("$cat", catalogRevision), ("$rev", dropTableRevision),
-                ("$ilvl", manifest.ItemLevel), ("$ctx", manifest.ContextJson),
-                ("$res", JsonSerializer.Serialize(manifest.Grants)),
-                ("$notes", string.Join(",", manifest.Notes)), ("$t", t));
-
-            long logId;
-            using (var idCmd = db.CreateCommand())
-            {
-                idCmd.Transaction = tx;
-                idCmd.CommandText = "SELECT last_insert_rowid();";
-                logId = Convert.ToInt64(idCmd.ExecuteScalar());
-            }
-
-            foreach (var g in generations)
-                LootExec(db, tx, """
-                    INSERT INTO item_generation
-                      (instance_id, drop_log_id, base_type_id, rarity_ordinal, item_level, frame, role, affix_channel)
-                    VALUES ($iid, $log, $bt, $ord, $ilvl, $frame, $role, $chan);
-                    """,
-                    ("$iid", g.InstanceId), ("$log", logId), ("$bt", g.BaseTypeId), ("$ord", g.RarityOrdinal),
-                    ("$ilvl", g.ItemLevel), ("$frame", g.Frame), ("$role", g.Role), ("$chan", g.AffixChannel));
-
-            LootExec(db, tx, """
-                INSERT INTO item_loot_pity (player_id, items_since_heirloom, items_since_sunwoven, updated_utc)
-                VALUES ($p, $h, $s, $t)
-                ON CONFLICT(player_id) DO UPDATE SET
-                  items_since_heirloom = excluded.items_since_heirloom,
-                  items_since_sunwoven = excluded.items_since_sunwoven,
-                  updated_utc = excluded.updated_utc;
-                """,
-                ("$p", playerId), ("$h", manifest.PityOut.ItemsSinceHeirloom),
-                ("$s", manifest.PityOut.ItemsSinceSunwoven), ("$t", t));
-
-            if (manifest.FirstClearGrant is { Length: > 0 })
-                LootExec(db, tx, """
-                    INSERT INTO item_first_clear (player_id, source_kind, source_id, granted_utc)
-                    VALUES ($p, $k, $i, $t)
-                    ON CONFLICT(player_id, source_kind, source_id) DO NOTHING;
-                    """,
-                    ("$p", playerId), ("$k", sourceKind), ("$i", sourceId), ("$t", t));
-
+            var logId = PersistLootUnlocked(db, tx, playerId, manifest, sourceKind, sourceId,
+                catalogRevision, dropTableRevision, generations, nowUtc);
             tx.Commit();
             return logId;
         }
+    }
+
+    /// <summary>Same writes on the caller's connection/transaction — `delve-quests` D4.12/D4.14's own
+    /// named gap: banking a quest reward's loot must land in the SAME transaction `CloseDelve`
+    /// commits, "committed together or not at all" per this method's own Step-11 doc comment above,
+    /// now equally true when `CloseDelve` is the one holding the transaction. The early-return on an
+    /// already-recorded correlation id no longer commits itself (the caller's own commit covers it,
+    /// same as every other write here) — the idempotency guarantee is unchanged, only who commits.
+    /// See <see cref="AppendMutationOpUnlocked"/> for the established "why" this whole `*Unlocked`
+    /// family shares.</summary>
+    internal long PersistLootUnlocked(
+        SqliteConnection db, SqliteTransaction tx,
+        string playerId, LootManifest manifest, string sourceKind, string sourceId,
+        long catalogRevision, long dropTableRevision,
+        IReadOnlyList<ItemGenerationRow> generations, string? nowUtc = null)
+    {
+        if (manifest is null) throw new ArgumentNullException(nameof(manifest));
+        generations ??= Array.Empty<ItemGenerationRow>();
+        var t = nowUtc ?? DateTime.UtcNow.ToString("o");
+
+        using (var existing = db.CreateCommand())
+        {
+            existing.Transaction = tx;
+            existing.CommandText = "SELECT id FROM item_drop_log WHERE player_id = $p AND correlation_id = $c;";
+            existing.Parameters.AddWithValue("$p", playerId);
+            existing.Parameters.AddWithValue("$c", manifest.CorrelationId);
+            if (existing.ExecuteScalar() is { } already)
+                return Convert.ToInt64(already);
+        }
+
+        LootExec(db, tx, """
+            INSERT INTO item_drop_log
+              (player_id, correlation_id, source_kind, source_id, loot_seed, catalog_revision,
+               drop_table_revision, item_level, context_json, result_json, notes, t)
+            VALUES ($p, $c, $sk, $si, $seed, $cat, $rev, $ilvl, $ctx, $res, $notes, $t);
+            """,
+            ("$p", playerId), ("$c", manifest.CorrelationId), ("$sk", sourceKind), ("$si", sourceId),
+            ("$seed", manifest.LootSeed.ToString()), ("$cat", catalogRevision), ("$rev", dropTableRevision),
+            ("$ilvl", manifest.ItemLevel), ("$ctx", manifest.ContextJson),
+            ("$res", JsonSerializer.Serialize(manifest.Grants)),
+            ("$notes", string.Join(",", manifest.Notes)), ("$t", t));
+
+        long logId;
+        using (var idCmd = db.CreateCommand())
+        {
+            idCmd.Transaction = tx;
+            idCmd.CommandText = "SELECT last_insert_rowid();";
+            logId = Convert.ToInt64(idCmd.ExecuteScalar());
+        }
+
+        foreach (var g in generations)
+            LootExec(db, tx, """
+                INSERT INTO item_generation
+                  (instance_id, drop_log_id, base_type_id, rarity_ordinal, item_level, frame, role, affix_channel)
+                VALUES ($iid, $log, $bt, $ord, $ilvl, $frame, $role, $chan);
+                """,
+                ("$iid", g.InstanceId), ("$log", logId), ("$bt", g.BaseTypeId), ("$ord", g.RarityOrdinal),
+                ("$ilvl", g.ItemLevel), ("$frame", g.Frame), ("$role", g.Role), ("$chan", g.AffixChannel));
+
+        LootExec(db, tx, """
+            INSERT INTO item_loot_pity (player_id, items_since_heirloom, items_since_sunwoven, updated_utc)
+            VALUES ($p, $h, $s, $t)
+            ON CONFLICT(player_id) DO UPDATE SET
+              items_since_heirloom = excluded.items_since_heirloom,
+              items_since_sunwoven = excluded.items_since_sunwoven,
+              updated_utc = excluded.updated_utc;
+            """,
+            ("$p", playerId), ("$h", manifest.PityOut.ItemsSinceHeirloom),
+            ("$s", manifest.PityOut.ItemsSinceSunwoven), ("$t", t));
+
+        if (manifest.FirstClearGrant is { Length: > 0 })
+            LootExec(db, tx, """
+                INSERT INTO item_first_clear (player_id, source_kind, source_id, granted_utc)
+                VALUES ($p, $k, $i, $t)
+                ON CONFLICT(player_id, source_kind, source_id) DO NOTHING;
+                """,
+                ("$p", playerId), ("$k", sourceKind), ("$i", sourceId), ("$t", t));
+
+        return logId;
     }
 
     public IReadOnlyList<ItemDropLogRow> ListDropLog(string playerId, int limit = 100)

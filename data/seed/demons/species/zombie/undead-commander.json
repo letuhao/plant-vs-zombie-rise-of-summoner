@@ -21,6 +21,85 @@
       "confidence": {
         "aptitudePrimary": "high",
         "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:48:35Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead_commander",
+      "war_machine"
+    ],
+    "gameTypeId": 231,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The boss possesses massive health, instant-kill mechanics for plants, and multiple high-damage area-of-effect abilities that threaten the entire field.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "HorseBoss",
+    "targetPreference": "structure",
+    "traits": [
+      "soul_reaping",
+      "summoning_commander",
+      "high_resilience",
+      "area_of_effect_strikes"
+    ],
+    "variants": [
+      "corrupted",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "split",
         "elementPrimary": "high",
         "rarity": "high"

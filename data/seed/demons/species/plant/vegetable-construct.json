@@ -99,10 +99,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:52:25Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -124,7 +125,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "vegetable-construct"
     ],

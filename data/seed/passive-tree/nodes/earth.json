@@ -1,0 +1,1011 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The very marrow of the world seeps into the bone.",
+      "id": "skill.earth-def-t1-n0",
+      "name": "Tectonic Marrow",
+      "nameKey": "tree.node.tectonic-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, making the spirit unshakeable.",
+      "id": "skill.earth-def-t1-n1",
+      "name": "Deep Rooting",
+      "nameKey": "tree.node.deep-rooting-5",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen",
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the world settles into the cracks, filling every void with unyielding stone.",
+      "id": "skill.earth-def-t10-n0",
+      "name": "Sedimentary Layering",
+      "nameKey": "tree.node.sedimentary-layering-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layer of calcified sediment that hardens with every impact.",
+      "id": "skill.earth-def-t10-n1",
+      "name": "Lithic Integument",
+      "nameKey": "tree.node.lithic-integument",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while tier is active — tier wins.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, making the spirit unshakeable.",
+      "id": "skill.earth-def-t2-n0",
+      "name": "Deepening Roots",
+      "nameKey": "tree.node.deepening-roots",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very bedrock rises to meet the blow.",
+      "id": "skill.earth-def-t2-n1",
+      "name": "Lithic Foundation",
+      "nameKey": "tree.node.lithic-foundation",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The very marrow of the earth provides a foundation that refuses to crack.",
+      "id": "skill.earth-def-t3-n0",
+      "name": "Bedrock Constitution",
+      "nameKey": "tree.node.bedrock-constitution",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very essence of the earth flows through the bone, turning marrow into stone.",
+      "id": "skill.earth-def-t3-n1",
+      "name": "Tectonic Marrow",
+      "nameKey": "tree.node.tectonic-marrow-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "Time and pressure compress the spirit into something unyielding.",
+      "id": "skill.earth-def-t4-n0",
+      "name": "Sedimentary Layering",
+      "nameKey": "tree.node.sedimentary-layering",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of sediment compress into impenetrable stone.",
+      "id": "skill.earth-def-t4-n1",
+      "name": "Strata Reinforcement",
+      "nameKey": "tree.node.strata-reinforcement",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The earth absorbs the impact, only to thrust it back through the crust.",
+      "id": "skill.earth-def-t5-n0",
+      "name": "Tectonic Recoil",
+      "nameKey": "tree.node.tectonic-recoil",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the world settles into your very marrow, making every step an immovable decree.",
+      "id": "skill.earth-def-t5-n1",
+      "name": "Tectonic Anchoring",
+      "nameKey": "tree.node.tectonic-anchoring",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very earth rises to meet the blow, turning impact into a surging wall of stone.",
+      "id": "skill.earth-def-t6-n0",
+      "name": "Tectonic Aegis",
+      "nameKey": "tree.node.tectonic-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-welding",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Layers of sediment compress into an impenetrable barrier.",
+      "id": "skill.earth-def-t6-n1",
+      "name": "Tectonic Shell",
+      "nameKey": "tree.node.tectonic-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A viscous, earthen sap that hardens instantly upon impact, sealing wounds with stone.",
+      "id": "skill.earth-def-t7-n0",
+      "name": "Petrified Resin",
+      "nameKey": "tree.node.petrified-resin",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the world becomes a second skin, unyielding and absolute.",
+      "id": "skill.earth-def-t7-n1",
+      "name": "Lithic Bastion",
+      "nameKey": "tree.node.lithic-bastion",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the world becomes a second skin, renewing even as it breaks.",
+      "id": "skill.earth-def-t8-n0",
+      "name": "Deep Crust",
+      "nameKey": "tree.node.deep-crust",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the mountain settles into the marrow, making every movement a deliberate act of permanence.",
+      "id": "skill.earth-def-t8-n1",
+      "name": "Lithic Rooting",
+      "nameKey": "tree.node.lithic-rooting",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.mending",
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The very bedrock swells to catch the impact, holding the essence of the earth within a crystalline vessel.",
+      "id": "skill.earth-def-t9-n0",
+      "name": "Lithic Reservoir",
+      "nameKey": "tree.node.lithic-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The weight of the mountain settles into the very marrow of the stance.",
+      "id": "skill.earth-def-t9-n1",
+      "name": "Lithic Foundation",
+      "nameKey": "tree.node.lithic-foundation-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The very weight of the world descends upon your foes.",
+      "id": "skill.earth-off-t1-n0",
+      "name": "Tectonic Impact",
+      "nameKey": "tree.node.tectonic-impact",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very weight of the world bends to your command.",
+      "id": "skill.earth-off-t1-n1",
+      "name": "Tectonic Might",
+      "nameKey": "tree.node.tectonic-might",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce",
+        "atom.terraforming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The earth does not merely resist; it fractures under the weight of intent.",
+      "id": "skill.earth-off-t10-n0",
+      "name": "Fault Line",
+      "nameKey": "tree.node.fault-line-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-breach"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The earth does not merely crack; it judges the weight of those standing upon it.",
+      "id": "skill.earth-off-t10-n1",
+      "name": "Fault Line",
+      "nameKey": "tree.node.fault-line",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very foundation trembles beneath the weight of your intent.",
+      "id": "skill.earth-off-t2-n0",
+      "name": "Seismic Surge",
+      "nameKey": "tree.node.seismic-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the earth follows every strike.",
+      "id": "skill.earth-off-t2-n1",
+      "name": "Tectonic Impact",
+      "nameKey": "tree.node.tectonic-impact-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The weight of the world focuses into a single, crushing point.",
+      "id": "skill.earth-off-t3-n0",
+      "name": "Tectonic Pressure",
+      "nameKey": "tree.node.tectonic-pressure",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The earth cracks precisely where the eye commands it to fall.",
+      "id": "skill.earth-off-t3-n1",
+      "name": "Fault Line Sight",
+      "nameKey": "tree.node.fault-line-sight",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge",
+        "atom.terraforming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The very weight of the world shifts to carry your stride.",
+      "id": "skill.earth-off-t4-n0",
+      "name": "Tectonic Momentum",
+      "nameKey": "tree.node.tectonic-momentum",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very weight of the earth lends momentum to every strike.",
+      "id": "skill.earth-off-t4-n1",
+      "name": "Tectonic Surge",
+      "nameKey": "tree.node.tectonic-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.terraforming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very ground beneath your feet learns to move with your intent.",
+      "id": "skill.earth-off-t5-n0",
+      "name": "Tectonic Surge",
+      "nameKey": "tree.node.tectonic-surge-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The very weight of the earth descends with every strike.",
+      "id": "skill.earth-off-t5-n1",
+      "name": "Tectonic Impact",
+      "nameKey": "tree.node.tectonic-impact-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.terraforming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very ground becomes a conduit for excess energy, fracturing under the weight of the earth's own power.",
+      "id": "skill.earth-off-t6-n0",
+      "name": "Tectonic Overload",
+      "nameKey": "tree.node.tectonic-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the earth sharpens the eye and the edge alike.",
+      "id": "skill.earth-off-t6-n1",
+      "name": "Lithic Focus",
+      "nameKey": "tree.node.lithic-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very foundations shift to accommodate the raw power of the earth, forcing the elements to obey the weight of the stone.",
+      "id": "skill.earth-off-t7-n0",
+      "name": "Tectonic Overdrive",
+      "nameKey": "tree.node.tectonic-overdrive",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very foundation fractures under the weight of your intent.",
+      "id": "skill.earth-off-t7-n1",
+      "name": "Tectonic Fissure",
+      "nameKey": "tree.node.tectonic-fissure",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The earth does not merely shift; it strikes with the weight of the world's fury.",
+      "id": "skill.earth-off-t8-n0",
+      "name": "Tectonic Cleave",
+      "nameKey": "tree.node.tectonic-cleave",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.terraforming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very foundation vibrates in sympathy with the strike, turning the earth into a conduit for raw power.",
+      "id": "skill.earth-off-t8-n1",
+      "name": "Seismic Resonance",
+      "nameKey": "tree.node.seismic-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very vibrations of the earth harmonize with the elemental currents flowing through the striker.",
+      "id": "skill.earth-off-t9-n0",
+      "name": "Tectonic Resonance",
+      "nameKey": "tree.node.tectonic-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-override"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very marrow of the world shifts to accommodate the caster's intent.",
+      "id": "skill.earth-off-t9-n1",
+      "name": "Tectonic Transmutation",
+      "nameKey": "tree.node.tectonic-transmutation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "earth"
+}

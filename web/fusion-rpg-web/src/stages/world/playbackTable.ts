@@ -163,6 +163,14 @@ function describeCalendar(entry: PlaybackEntry): string | null {
 // Several file:file duplicates collapse to one row (the wire cannot tell them apart, and neither
 // does the player need it to) — `entity.gone`, `entity.routed`, `slot.unknown`, `structure.unknown`,
 // `lane.unknown` each fire from more than one resolver but mean the same thing to a viewer.
+//
+// **Deliberately NOT the registry for party-dungeon D1.28's `delve.none-discovered`** (checked before
+// adding it here, then reverted): `DROP_REASONS` (this table's own keys) is also
+// `blockedPlacement.ts`'s complete, closed enumeration of where a blocked MARCH renders on the map
+// canvas (road/sector/slot/marker) — `BlockedTarget.test.tsx` asserts every one of the 41 has a real
+// placement. A delve-door availability reason has no march/placement meaning at all, so it stays out
+// of this table; its `ActionCluster` row instead relies on `reasonFor.ts`'s own documented fallback
+// (loud in dev, a neutral sentence in production) for a token this table was never meant to carry.
 // ===========================================================================
 
 type DropRow = (arg: string | null) => string;

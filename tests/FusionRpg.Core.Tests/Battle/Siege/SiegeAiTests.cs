@@ -9,9 +9,10 @@ namespace FusionRpg.Core.Tests.Battle.Siege;
 
 /// <summary>
 /// base-defense `siege-ai` (spec-siege-ai.md): the pure decision mechanics (R1/R2/R5/R6) plus the
-/// `SiegeIntentSource` dispatch wrapper (§1). See `SiegeAi.cs`'s own top comment for the named,
-/// un-started gap this module leaves (a real `IBattleView`-reading AI, R3's objective-pathing fallback,
-/// decision-trace wiring, the emplacement replacement vocabulary, retarget-latency enforcement).
+/// `SiegeIntentSource` dispatch wrapper (§1). R6's own trace wiring (`AiScoring.TopThree`/
+/// `ScoreBreakdownOf`/`FormatTopThree` into `BattleTrace.AiDecision`) is covered here too — see
+/// `SiegeAi.cs`'s own top comment for the fuller account and its real correction of the spec's own
+/// `DecisionTrace.cs` citation.
 /// </summary>
 public class SiegeAiTests
 {
@@ -19,7 +20,8 @@ public class SiegeAiTests
         WeightHitChance: 70, WeightObjective: 50, WeightKill: 15, WeightLowHp: 10,
         WeightCannotCounter: 10, WeightRound: 1, WeightRisk: risk,
         StanceDefault: Stance.Guard, AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0,
-        AggressionRange: 2, MaxCandidatesScored: 32);
+        AggressionRange: 2, MaxCandidatesScored: 32,
+        ObjectiveReferenceDistanceCells: 20, ThreatRadiusCells: 4);
 
     static AiCandidate Candidate(string key, int baseTier = 0, int aggression = 0,
         int hitChanceMilli = 0, int objectiveClassMilli = 0, bool isKillingBlow = false,
@@ -200,6 +202,56 @@ public class SiegeAiTests
         Assert.Equal("b", top3[0].ActorKey);
         Assert.Equal("c", top3[1].ActorKey);
         Assert.Equal("a", top3[2].ActorKey);
+    }
+
+    [Fact]
+    public void ScoreBreakdown_total_always_equals_Score_for_the_same_candidate()
+    {
+        // The breakdown must never be a second, independently-derived total — a real risk once a
+        // trace consumer starts trusting it for "why did the AI pick this" debugging.
+        var c = Candidate("a", hitChanceMilli: 700, objectiveClassMilli: 300, isKillingBlow: true,
+            targetMissingHpMilli: 400, targetCanCounter: false, incomingThreatMilli: 50);
+        var w = Weights();
+
+        var breakdown = AiScoring.ScoreBreakdownOf(c, currentRound: 2, w);
+
+        Assert.Equal(AiScoring.Score(c, currentRound: 2, w), breakdown.Total);
+    }
+
+    [Fact]
+    public void ScoreBreakdown_names_each_individual_weighted_term()
+    {
+        var c = Candidate("a", hitChanceMilli: 700, objectiveClassMilli: 300, isKillingBlow: true,
+            targetMissingHpMilli: 400, targetCanCounter: false, incomingThreatMilli: 50);
+        var w = Weights();
+
+        var breakdown = AiScoring.ScoreBreakdownOf(c, currentRound: 2, w);
+
+        Assert.Equal(70L * 700, breakdown.HitChance);
+        Assert.Equal(50L * 300, breakdown.Objective);
+        Assert.Equal(15L * 1000, breakdown.Kill); // IsKillingBlow: true
+        Assert.Equal(10L * 400, breakdown.LowHp);
+        Assert.Equal(10L * 1000, breakdown.CannotCounter); // TargetCanCounter: false -> full credit
+        Assert.Equal(1L * 2, breakdown.Round);
+        Assert.Equal(120L * 50, breakdown.Risk);
+    }
+
+    [Fact]
+    public void FormatTopThree_names_every_ranked_candidate_and_its_total()
+    {
+        var candidates = new[]
+        {
+            Candidate("b", hitChanceMilli: 900), Candidate("a", hitChanceMilli: 100), Candidate("c", hitChanceMilli: 500),
+        };
+        var w = Weights();
+
+        var summary = AiScoring.FormatTopThree(AiScoring.TopThree(candidates, currentRound: 0, w));
+
+        Assert.Equal(
+            $"#1=b(hit=63000,obj=0,kill=0,lowhp=0,cc=10000,rnd=0,risk=0,total=73000) " +
+            $"#2=c(hit=35000,obj=0,kill=0,lowhp=0,cc=10000,rnd=0,risk=0,total=45000) " +
+            $"#3=a(hit=7000,obj=0,kill=0,lowhp=0,cc=10000,rnd=0,risk=0,total=17000)",
+            summary);
     }
 
     [Fact]

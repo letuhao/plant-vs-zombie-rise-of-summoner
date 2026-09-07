@@ -1,0 +1,17 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "A massive, jagged shard of blue ice hangs suspended from the ceiling by rusted iron chains, swaying rhythmically in a freezing draft.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Glacial Pendulum",
+  "reason": "A tripwire triggers the release of the heavy ice shard, swinging it across the narrow corridor.",
+  "roomId": "room.trap-ice-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

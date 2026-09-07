@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Fire",
@@ -28,9 +28,9 @@
   "speciesId": "Jalapeno",
   "theta": 13,
   "traitPool": [
-    "Combustive",
-    "Linear-Area-of-Effect",
-    "Thermal-Impact"
+    "fire-damage",
+    "line-of-sight-detonation",
+    "zomboni-counter"
   ],
   "variantCount": 2,
   "variants": [

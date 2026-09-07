@@ -210,8 +210,16 @@ public sealed class UniqueActorService
     /// list — and sends it as an atoms-only <c>effects.grants.apply</c> (no `grants` key: a mid-match
     /// equip/unequip never touches the player's own session Effect-bag grants, only the compiled atom
     /// push those grants travel beside at Hello).
+    ///
+    /// <para>P1.5-L (2026-09-07): also the real remaining half of a rolled item's LAWN wiring. Made
+    /// public so <see cref="ItemEquipEndpoints"/> can call it — bind/unbind was never the only
+    /// transition that changes what a bound specimen's `effect_binding` rows should say; equipping or
+    /// unequipping a rolled item on an ALREADY-bound specimen does too, and nothing fired this before.
+    /// See <see cref="RpgStore.MaterializeRolledEquipRuntime"/>, whose only production caller before
+    /// this was `WebMatchService.BuildSquad` (the Battle/expedition path) — the Lawn specimen never
+    /// had its equip bindings materialized at all.</para>
     /// </summary>
-    async Task PushAtomUnionAsync(long playerId)
+    public async Task PushAtomUnionAsync(long playerId)
     {
         AtomPushDto atoms;
         try

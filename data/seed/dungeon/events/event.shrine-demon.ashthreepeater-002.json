@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.ashthreepeater-002",
+  "flavor": "A monolithic slab of obsidian sits in the center of the chamber, its surface so smooth it seems to swallow the torchlight. There is a sense of 彻底 stillness here, a void that suggests anything placed upon this stone is not merely lost, but rendered non-existent. The air feels heavy, as if the very concept of presence is being slowly unmade.",
+  "kind": "shrine",
+  "name": "The Altar of Absolute Erasure",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "exceptional",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "exceptional",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a site of cosmic negation that offers a powerful trade-off between material wealth and existential stability.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

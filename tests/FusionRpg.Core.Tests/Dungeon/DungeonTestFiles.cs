@@ -25,4 +25,9 @@ public static class DungeonTestFiles
     public static string NerveContainerPath() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "_containers", "nerve.v1.json");
     public static string LayoutsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "layouts");
     public static string QuestsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "quests");
+    public static string EventsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "events");
+    public static string EncountersDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "encounters");
+    public static string RoomsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "rooms");
+    public static string DomainsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "domains");
+    public static string SpeciesDir() => Path.Combine(RepoRoot(), "data", "seed", "demons", "species");
 }

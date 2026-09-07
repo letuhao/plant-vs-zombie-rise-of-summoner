@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Sunlight pours through a ceiling of faceted quartz, fracturing into a thousand dancing rainbows that coat the floor in shifting, iridescent patterns.",
+  "hazardBand": "none",
+  "kind": "cache",
+  "name": "The Prism Conservatory",
+  "reason": "The room contains a collection of sun-blessed relics and crystalline artifacts resting upon pedestals of white marble.",
+  "roomId": "room.cache-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

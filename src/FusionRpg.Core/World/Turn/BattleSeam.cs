@@ -96,6 +96,11 @@ public sealed record BoardProjection
     public ulong WorldSeed { get; init; }
     public BoardEdge AttackerEdge { get; init; }
 
+    /// <summary>base-defense `siege-ai` 17.11 (decision 47): the attacker's own lane `WardLevel`
+    /// (`DistrictLayout.WardLevelFor`), 0 for every battle before this task and every attacker not
+    /// currently on a lane — additive, defaulted, byte-identical until a real caller sets it.</summary>
+    public int WardLevel { get; init; }
+
     /// <summary>
     /// base-defense `siege-resolver` (module 15): the sector's own development level, additive and
     /// defaulted to 0 (every battle kind that predates this field constructs the identical record it

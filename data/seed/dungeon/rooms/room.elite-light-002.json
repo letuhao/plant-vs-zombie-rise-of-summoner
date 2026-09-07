@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "Prismatic shafts of solid radiance pierce through high, crystalline windows, casting dancing rainbows across a long table of polished quartz. The air hums with a high, vibrating frequency that makes the teeth ache.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Prism Refectory",
+  "reason": "The concentrated light creates difficult terrain and provides cover for the elite guardians.",
+  "roomId": "room.elite-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

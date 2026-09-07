@@ -139,3 +139,48 @@ def granted_tier(cell: Cell, tuning: ComboTuning, *, all_attuned: bool = False) 
     """
     base = tuning.base_tier_for(cell.combination_kind)
     return base + (tuning.attuned_tier_bonus if all_attuned else 0)
+
+
+def assemble_entry(*, entry_id: str, name_key: str, name: str, flavor: str, shape: str,
+                   aptitudes: "tuple[str, ...]", archetype: "str | None",
+                   ingredient_families: "list[str]", grants: "list[str]",
+                   tuning: ComboTuning, host_role: "str | None" = None,
+                   host_frame: "str | None" = None) -> dict:
+    """Plan + model draft -> the final `combination` entry, matching the field ORDER
+    `sockwords.json`'s own legacy rows used (`id`, `nameKey`, `name`, `flavor`, then the shape's own
+    fields) so a diff against the retired corpus reads as content, not a generator reordering keys.
+
+    ⚠ **`grantedTier` is never the model's** — the same P1 split `granted_tier` itself documents.
+    The model chose WHICH families to grant; this function decides at what tier, from tuning alone.
+    `all_attuned` is deliberately never `True` here: whether a specific filled item's gems all
+    match one element is a RUNTIME fact about which physical gems ended up socketed, not something
+    a seed authored ahead of any socketing can know — `ComboEvaluator` (module 16, C#) is the one
+    place that fact exists, and it applies the bonus itself at match time.
+    """
+    if not entry_id.startswith(f"{CONTAINER_PREFIX}."):
+        raise IdRefused(f"entry id {entry_id!r} does not carry the {CONTAINER_PREFIX!r} prefix")
+    if not name:
+        raise IdRefused("name must be non-empty")
+    rows = ingredient_rows(ingredient_families, tuning)
+    if not grants:
+        raise IdRefused("a combination must grant at least one atom family")
+
+    entry: dict = {
+        "id": entry_id,
+        "nameKey": name_key,
+        "name": name,
+        "flavor": flavor,
+        "shape": shape,
+        "aptitudes": list(aptitudes),
+    }
+    if archetype is not None:
+        entry["archetype"] = archetype
+    if host_role is not None:
+        entry["hostRole"] = host_role
+    if host_frame is not None:
+        entry["hostFrame"] = host_frame
+    entry["minSockets"] = min_sockets(tuning)
+    entry["ingredients"] = [r.to_dict() for r in rows]
+    entry["grants"] = list(grants)
+    entry["grantedTier"] = tuning.base_tier_for(shape)
+    return entry

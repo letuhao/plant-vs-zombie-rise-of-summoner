@@ -736,7 +736,7 @@ subset. That is what makes D14's predicate `O(1)`.
 | `atomAttachPoint` | 7 | `data/seed/atoms/vocabulary.json` — **owed, §9** |
 | `atomKind` | 16 | same mirror |
 | `atomTrigger` | 13 (11 authorable) | same mirror |
-| `channelFamily` | 54 | `entries` of `data/seed/derived-stats/catalog.json`, counted at load (D52, 2026-09-06: 53 -> 54) |
+| `channelFamily` | 55 | `entries` of `data/seed/derived-stats/catalog.json`, counted at load (D52, 2026-09-06: 53 -> 54; further live growth 2026-09-07: 54 -> 55, same re-bake pattern, not a new decision) |
 | `conversionState` | 2 | `converted` \| `unconverted` (D16/R8) |
 | `exclusionForm` | 3 | `reroute` \| `precedence` \| `nullification` (D14's ladder, **all three kept — D40**) |
 

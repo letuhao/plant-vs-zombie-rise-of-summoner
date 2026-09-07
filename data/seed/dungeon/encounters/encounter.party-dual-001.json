@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.party-dual-001",
+  "formation": "party",
+  "name": "The Vanguard Phalanx",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A coordinated trio of heavy hitters designed to split the party's focus through elemental variation.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "marauder"
+  }
+}

@@ -100,7 +100,7 @@
     "captureRecoveryMilli": 1000
   },
   "ai": {
-    "_note": "base-defense siege-ai (spec-siege-ai.md), section 5.16/5.20. weight.* are XCOM's own SHIPPED values (hitChance dominates lethality 70:15 -- inverting this reads as suicidal, the most-cited 'stupid AI' complaint in the whole survey) plus Fire Emblem's cannotCounter/round terms. weight.risk=120 is a balance value, and decision 31's one-row rollback (set to 0 = cover-blind). aggressionRange=2 and maxCandidatesScored=32 are STRUCTURAL (the -2..+2 range IS the taunt/stealth/decoy vocabulary; the candidate count is a per-decision work bound), not progression ceilings.",
+    "_note": "base-defense siege-ai (spec-siege-ai.md), section 5.16/5.20. weight.* are XCOM's own SHIPPED values (hitChance dominates lethality 70:15 -- inverting this reads as suicidal, the most-cited 'stupid AI' complaint in the whole survey) plus Fire Emblem's cannotCounter/round terms. weight.risk=120 is a balance value, and decision 31's one-row rollback (set to 0 = cover-blind). aggressionRange=2 and maxCandidatesScored=32 are STRUCTURAL (the -2..+2 range IS the taunt/stealth/decoy vocabulary; the candidate count is a per-decision work bound), not progression ceilings. threatRadiusCells=4 is the only incomingThreat tunable -- there is deliberately no reference-power constant: threat is computed as a fraction of the DECIDING actor's own CombatPowerOmni (Theta-invariant), never an absolute milli value, since combat power scales with P(Theta) and a fixed reference could never have a safe default (a private per-Theta curve is exactly what the power-ladder rule forbids).",
     "weightHitChance": 70,
     "weightObjective": 50,
     "weightKill": 15,
@@ -112,6 +112,8 @@
     "autoResolveHandicapMilli": 1000,
     "retargetLatencyTicks": 0,
     "aggressionRange": 2,
-    "maxCandidatesScored": 32
+    "maxCandidatesScored": 32,
+    "objectiveReferenceDistanceCells": 20,
+    "threatRadiusCells": 4
   }
 }

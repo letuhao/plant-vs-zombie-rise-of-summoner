@@ -313,6 +313,14 @@ internal static class ContractTuningTestBootstrap
             [DemonRarity.Cultivated] = 2, [DemonRarity.Fused] = 2, [DemonRarity.Chimeric] = 2,
             [DemonRarity.Heirloom] = 2, [DemonRarity.Firstseed] = 3, [DemonRarity.Sunwoven] = 3,
             [DemonRarity.Almanac] = 3,
+        },
+        // WAVE F2.3 — mirrors RecipeCost's own (sparse, same rungs) souls values above; a pick's
+        // cost is read from its own source rarity, never the fusion output's.
+        InheritCostByRarity: new Dictionary<DemonRarity, long>
+        {
+            [DemonRarity.Cultivated] = 150,
+            [DemonRarity.Heirloom] = 400,
+            [DemonRarity.Sunwoven] = 1000,
         });
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
@@ -432,7 +440,8 @@ internal static class ContractTuningTestBootstrap
             WeightCannotCounter: 10, WeightRound: 1, WeightRisk: 120,
             StanceDefault: FusionRpg.Core.Battle.Siege.Stance.Guard,
             AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0, AggressionRange: 2,
-            MaxCandidatesScored: 32),
+            MaxCandidatesScored: 32,
+            ObjectiveReferenceDistanceCells: 20, ThreatRadiusCells: 4),
         Fog: new FusionRpg.Core.Battle.Board.FogTuning(Enabled: true, DefaultVisionRangeTiles: 6));
 
     public static readonly BattleBoardTuning DefaultBattleBoard = new(
@@ -470,8 +479,12 @@ internal static class ContractTuningTestBootstrap
             // inline fixture predates reaction-lane RL1 and this task does not reconcile that).
             ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
         },
-        // Wave E3: 0 = the shipped default, secondary contributes nothing, goldens unmoved.
-        HybridSecondaryWeightMilli: 0,
+        // Wave E3/Phase 7 F1 (2026-09-07): matches data/tuning/battle.v5.json's shipped value --
+        // secondary now carries 300/1000 of an attack's payload for any actor with a real
+        // ElementSecondary. Hand-built fixtures in this file carry no secondary element, so this
+        // change alone does not move any Core/Data/E2E golden built from them; only the real
+        // WaveCatalog-driven expedition goldens (real ElementSecondary, WaveCatalog.cs:115) can move.
+        HybridSecondaryWeightMilli: 300,
         // base-defense F2: matches data/tuning/battle.v2.json's shipped value exactly, so
         // 50 * 4000 = 200_000 reproduces the pre-F2 MaxLoopIterations constant.
         LoopGuardRoundMultiple: 4000,

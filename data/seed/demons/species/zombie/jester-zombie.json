@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:30:14Z",
+      "minorityValues": {
+        "rarity": "heirloom"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "jester-zombie",
+      "curse-bringer"
+    ],
+    "gameTypeId": 253,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "long",
+    "reason": "The ability to double curse scaling and spawn additional copies of itself via 'Great Transformation' creates an exponential threat level that exceeds a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "BlackJackboxZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "doll-box-projectile",
+      "self-detonating",
+      "curse-inflicting",
+      "summoner"
+    ],
+    "variants": [
+      "corrupted",
+      "cursed"
+    ],
+    "verdict": "too-low"
+  }
+]

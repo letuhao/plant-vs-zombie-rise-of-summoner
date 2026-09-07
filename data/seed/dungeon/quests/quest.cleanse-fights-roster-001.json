@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "few",
+  "flavor": "The local sanctum has been overrun by spectral remnants that disrupt the flow of magic. Clearing these chambers is essential to restoring the ley lines and reclaiming the temple's sanctity.",
+  "name": "The Purge of Hollow Echoes",
+  "objectiveTemplate": "cleanse-fights",
+  "prereqRefs": [],
+  "questId": "quest.cleanse-fights-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "roster",
+  "targetRef": "fight"
+}

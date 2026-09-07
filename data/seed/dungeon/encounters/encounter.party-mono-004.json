@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.party-mono-004",
+  "formation": "party",
+  "name": "The Prismatic Phalanx",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "An elite, single-element unit designed to overwhelm through specialized roles rather than numbers.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

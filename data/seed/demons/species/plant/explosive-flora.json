@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:04:56Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -48,7 +49,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "air",
     "family": [
       "explosive-flora",
       "aerial-pome"
@@ -177,10 +178,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:05:50Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -202,7 +204,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "air",
     "family": [
       "explosive-flora"
     ],
@@ -254,10 +256,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:12:48Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -279,7 +282,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "air",
     "family": [
       "explosive-flora"
     ],
@@ -331,11 +334,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:13:19Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "rarity": "grafted",
         "threatBand": "scourge"
@@ -360,7 +364,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "explosive-flora"
     ],
@@ -414,10 +418,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:13:56Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -439,7 +444,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "explosive-flora",
       "catalyst-vegetation"
@@ -493,10 +498,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:45:19Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "attackTempo": "slow"
       },
@@ -520,7 +526,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "explosive-flora"
     ],
@@ -546,6 +552,83 @@
       "normal",
       "mutated",
       "cursed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:58:23Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 16,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "long",
+    "reason": "The ability to instantly eliminate high-health Zombonis and clear entire rows with massive damage justifies a higher threat level than a mere tyrant.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Jalapeno",
+    "targetPreference": "swarm",
+    "traits": [
+      "line-of-sight-detonation",
+      "fire-damage",
+      "zomboni-counter"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
     ],
     "verdict": "too-low"
   },
@@ -805,10 +888,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:36:40Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "attackTempo": "quick"
       },
@@ -832,7 +916,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "explosive-flora"
     ],
@@ -885,10 +969,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:38:15Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "rarity": "cultivated"
       },
@@ -912,7 +997,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "explosive-flora"
     ],
@@ -964,10 +1049,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:49:55Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -989,7 +1075,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "explosive-flora"
     ],

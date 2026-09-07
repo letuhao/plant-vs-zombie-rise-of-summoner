@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.party-dual-005",
+  "formation": "party",
+  "name": "The Vanguard's Duel",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A high-stakes confrontation against a small group of specialized elites, forcing the party to split focus between a heavy frontline and precision strikers.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Force",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "marauder"
+  }
+}

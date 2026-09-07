@@ -1,73 +1,116 @@
 # Plan: `item-seedgen`
 
 Source: [item-seedgen-map.md](../docs/architecture/item-seedgen-map.md) and its 10 module specs under
-`docs/architecture/item-seedgen/`. Owner directive, 2026-09-07: base types, affix families, crafting
-recipes, sockets, materials, drop tables, and consumables must become seedsmith-generatable — no
-coding-session hand-authoring of any of them going forward. Uniques (the original 144) and the
-rare-name word list stay hand-authored, matching this repo's own existing G1 decision and genre
-convention (owner-confirmed). Every generator defaults to append + reconcile, never overwrite —
-overwrite is an explicit, separately-invoked mode.
+`docs/architecture/item-seedgen/`. **Revised 2026-09-07 (second pass)** after the owner's own
+"audit, debate and strengthen" request surfaced real dependency-graph errors in the first draft — see
+the map's own §0/§1 for exactly what changed and why, cited against real schema evidence both times.
+
+Owner directive: base types, affix families, crafting recipes, sockets, materials, drop tables, and
+consumables must become seedsmith-generatable — no coding-session hand-authoring of any of them going
+forward. Uniques (144) and rare-names stay hand-authored (owner-confirmed). Every generator defaults to
+append + reconcile, never overwrite. **Generation order must respect real content dependencies** — a
+recipe cannot target an item that doesn't exist, a set cannot bonus a piece slot nothing fills, a
+combination cannot bind a gem family or host role nothing satisfies. The resume/reconcile validator
+must be a deterministic engine that finds missing dependencies and can trigger the owning generator to
+backfill them — never guessing, never silently skipping.
+
+## ✅ All 5 checkpoints (A-E) CLOSED, 2026-09-07 — all 11 modules built and tested
+
+Checkpoint A (`generator-harness`), B (affix-families/materials/sockets/consumables/enhancement-
+milestones), C (`base-types-gen`), D (`set-charm-live-endpoint`/`recipes-gen`/`combination-write-
+unblock`) and E (`drop-tables-gen`, final) all pass. Full detail, evidence, and every real finding along
+the way: `tasks/item-seedgen-todo.md`. The 11th-corpus decision below (once genuinely open) is resolved:
+folded in as module 11 (`enhancement-milestones-gen`), owner-decided 2026-09-07.
+
+~~## ⛔ One decision needed before Phase 3 can finish: the 11th corpus~~ — **RESOLVED 2026-09-07**,
+kept below for history.
+
+`base-types-gen`'s real content hard-references `enhancement-milestones/milestones.json` — a corpus
+outside this program's original 10 modules, found on the second audit pass. Named, not resolved:
+fold it in as an 11th module, or rule it out of scope like uniques. `base-types-gen`'s own spec treats
+this reference as `unresolvable: true` until decided — it does not guess.
 
 ## Approach
 
-Ten modules, one shared foundation. `generator-harness` (module 1) generalizes `setgen`'s already-proven
-resume-ledger pattern (atomic writes, idempotent resume, per-subject-id tracking) plus one addition —
-validating an existing entry's shape before trusting a ledger hit, so reconcile catches real corruption,
-not just "was this id attempted." Every other module is a thin adapter over that harness: a brief
-schema (model picks identity/theme only), a numeric resolver (code, never the model), and an emit step
-writing through the harness.
+Ten modules (plus the flagged 11th question), one shared foundation. `generator-harness` — a `RunLedger`
+(resume/append/reconcile/overwrite, generalizing `setgen`'s proven pattern, WITH a real
+`sort_keys=True`-style canonical serialization `setgen`'s own code doesn't actually have) plus a
+`DependencyValidator` (hard-reference resolution, categorical-coverage resolution, deterministic
+backfill planning with a cascade guard and request deduplication — both added after adversarial review
+found the first draft's backfill design could loop or double-request).
 
-Two modules are not new generators — they finish existing, stalled work: `set-charm-live-endpoint`
-wires the already-correct `setgen`/`charmgen` machinery to a real model call (today only a hand-written
-replay-transport stand-in has ever run it), and `combination-write-unblock` resolves the two named
-reasons module 21's `--write` is refused outright.
+Two modules finish existing, stalled work rather than building from scratch: `set-charm-live-endpoint`
+wires the already-correct `setgen`/`charmgen` machinery to a real model call; `combination-write-unblock`
+resolves the two named reasons module 21's `--write` is refused outright.
 
-## Build order and parallelism
+## Build order and parallelism (corrected)
 
 ```
-Phase 0  T1-T4   generator-harness                          (blocks everything)
-Phase 1  T5-T10  base-types-gen · materials-gen ·
-                  set-charm-live-endpoint                    (parallel)
-Phase 2  T11-T16 affix-families-gen · sockets-gen            (parallel)
-Phase 3  T17-T22 recipes-gen · drop-tables-gen                (parallel)
-Phase 4  T23-T27 consumables-gen · combination-write-unblock  (parallel)
+Phase 1  generator-harness                                    (blocks everything)
+Phase 2  affix-families-gen · materials-gen · sockets-gen ·
+         consumables-gen                                      (parallel — none depends on
+                                                                 another item-seedgen module)
+Phase 3  base-types-gen                                        (ALONE — needs affix-families-gen
+                                                                 specifically, found on 2nd pass)
+Phase 4  set-charm-live-endpoint · recipes-gen ·
+         combination-write-unblock                             (parallel — all need base-types-gen,
+                                                                 none needs the others)
+Phase 5  drop-tables-gen                                        (ALONE, last — needs base-types-gen,
+                                                                 materials-gen, sockets-gen AND
+                                                                 consumables-gen at once)
 ```
+
+**What changed from the first draft, and why it matters:** `consumables-gen` moved from phase 4 to
+phase 2 (nothing in this program depends on it existing later — everything is the reverse: things
+depend on IT). `base-types-gen` moved from phase 2 to its own phase 3, alone, because it needs
+`affix-families-gen`'s output first. `drop-tables-gen` moved from phase 4 to a new, final phase 5,
+alone, because its real dependencies (found on audit, not assumed) are materials/sockets/consumables/
+base-types together — the single module needing the most upstream work finished first.
 
 ## Gates vs. checkpoints
 
-Only ONE genuine gate exists in this plan, and it is named exactly where it bites:
-`combination-write-unblock` may require bumping `naming.v1.json`'s frozen `registryVersion` — an
-architecture-locking change `decisions.md` governs (per this repo's own hard rule). That task is
-ask-first by construction; nothing else in this plan blocks on it, and every other module proceeds
-independently of whether/when it resolves.
+Two genuine gates, both named exactly where they bite, neither blocking anything else in this plan:
+1. The 11th-corpus decision above — blocks only `base-types-gen`'s OWN `enhanceTrack` field, not its
+   `implicit.family` field or anything else in the plan.
+2. `combination-write-unblock` may require bumping `naming.v1.json`'s frozen `registryVersion` — an
+   architecture-locking change `decisions.md` governs. Ask-first by construction.
 
-Every other reversible choice (which theme a brief targards, whether a generated entry looks "right")
-ships behind the harness's own dry-run/reconcile-report default — reviewable, not blocking.
+Every other reversible choice ships behind the harness's own dry-run/reconcile-report default.
 
 ## Checkpoints
 
-- **Checkpoint A** (after Phase 0): `generator-harness`'s five acceptance criteria all pass with real
-  tests — resume, reconcile-detects-corruption, overwrite-by-id, overwrite-all requires the literal
-  `all`, dry-run reports without writing.
-- **Checkpoint B** (after Phase 1): at least one real base-type, one real material, and one real
-  live-endpoint-generated set/charm exist, each importing cleanly through the real production consumer
-  (`AtomImporter`/`ItemSeedValidator`).
-- **Checkpoint C** (after Phase 2): a real affix family generated end to end passes `item_role_family`
-  legality; the allocated-but-unauthored `gems/2` partition has real content.
-- **Checkpoint D** (after Phase 3): a reconcile run against the real 30-entry recipe corpus, using
-  the module's own real operation vocabulary, confirms zero drift (proving reconcile would have caught
-  the 2026-09-05 hand-patch incident before it needed a hand-patch).
-- **Checkpoint E** (final, after Phase 4): a reconcile run against the real 60-entry consumable corpus
-  correctly reports the known `grantsActionId`/`cooldownKey` gap; `combination-write-unblock` either
-  ships real combination content or has a named, dated `decisions.md` entry blocking it — not a silent
-  stall.
+- **Checkpoint A** (after Phase 1): `generator-harness`'s full acceptance criteria pass, INCLUDING the
+  two added after review — a cascade-guard test (a backfilled entry's own unresolved reference is
+  caught, not silently accepted) and a dedup test (two entries naming the same gap produce one
+  backfill request) — and a determinism test that checks the actual SERIALIZED report file is
+  byte-identical across two runs, not just the in-memory result.
+- **Checkpoint B** (after Phase 2): real affix families, materials, gems, and consumables all exist and
+  reconcile cleanly; the consumables `family`-source ask-first (generator-harness's own Design section)
+  is resolved before this checkpoint closes, not deferred past it.
+- **Checkpoint C** (after Phase 3): a real generated base-type's `implicit.family` resolves against
+  Phase 2's real affix-family corpus; its `enhanceTrack[].family` is either resolved (if the 11th-corpus
+  decision landed) or explicitly, visibly `unresolvable: true` — never silently dropped.
+- **Checkpoint D** (after Phase 4): a live-generated set/charm's every member role+frame resolves
+  against Phase 3's real base-types; a forge-recipe's `outputRef` resolves against the same; a
+  combination's `hostRole`/`ingredients` resolve against Phase 3's base-types and Phase 2's gems.
+- **Checkpoint E** (final, after Phase 5): a generated drop-table entry's four reference kinds (material,
+  consumable, gem, base-type role+frame) all resolve against their real Phase 2/3 corpora. All five
+  checkpoints pass together with no silently-skipped task.
 
 ## What this plan does not cover
 
-- Uniques (144) and rare-names: intentionally excluded, hand-authored by design.
+- Uniques (144) and rare-names: hand-authored by design.
 - `MaterialClass`/`CatalystVerbs`: a fixed C# taxonomy, not content.
 - The drop-table band→row expander: a separate, non-seedsmith tool by existing ruling.
-- Running the full ~904/36/~904 set/charm/strain corpus: a separate, already-held authorization
-  decision, unaffected by `set-charm-live-endpoint` merely making a live run possible.
-- The item-runtime "Lawn" equip-wiring gap (module 5 of the `item` program, not `item-seedgen`) — tracked
-  in `tasks/item-todo.md` instead, since it is existing-program scope.
+- The item program's own "Lawn"/"Battle" equip-wiring gap (module 5, `item` program) — tracked in
+  `tasks/item-todo.md`, but see the sequencing note below: it happens BEFORE the full run.
+
+## ✅ The full ~904/36/~904 run — approved 2026-09-07, sequenced, not immediate
+
+Owner's own sequencing: **complete building everything first** (this program's 11 modules through
+Phase 5's Checkpoint E, AND the item program's own queued Lawn/Battle equip-wiring tasks), **then** run
+`classes.v1.json` v4's registry regeneration, **then** run the full set/charm/strain generative content
+pass. This is the reverse of "generate content, then worry about tooling" — the owner wants the
+generators and the runtime wiring both proven first, so the eventual full run draws from real,
+validated, dependency-correct tooling rather than repeating the ~904-piece cost against machinery still
+finding its own bugs. Do not treat this approval as authorization to run any part of it now.

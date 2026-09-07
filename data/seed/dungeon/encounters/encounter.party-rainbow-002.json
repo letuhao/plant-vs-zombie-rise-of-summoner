@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.party-rainbow-002",
+  "formation": "party",
+  "name": "The Vanguard of the Prismatic Court",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A high-tier elite encounter where individual foes possess high health pools and diverse elemental affinities to force tactical adaptation.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

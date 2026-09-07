@@ -78,7 +78,8 @@ Choose, and nothing else:
 2. `grants` — one or two atom families this combination grants, from the second list.
 3. `hostRole` / `hostFrame` — omit either to leave it open. Naming a role pins the combination to
    that chassis; only the roles listed can hold this many inserts at all.
-4. `name`, `nameKey`, `flavor`.
+4. `name`, `flavor`. (`nameKey` is not yours to pick — it is minted from this cell, the same way
+   the corpus's own id is.)
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.
 

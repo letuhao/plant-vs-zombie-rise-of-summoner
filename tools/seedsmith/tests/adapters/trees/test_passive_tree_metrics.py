@@ -6,7 +6,7 @@ Every test builds a synthetic corpus with an INJECTED defect, per the todo's own
 line ("a 166x skew, a missing deep-tier mechanism, a duplicated name across 300 trees") — this
 file is where those three fixtures live, plus one per remaining metric. `QuotaDrift`/
 `MechanismRamp`/`CellOccupancy` lean on the REAL committed `might.v1.json` plan and the REAL
-`passive-tree-targets.v1.json` (the same `plan_read.load("might")` / `tuning.load()` /
+`passive-tree-targets.v2.json` (the same `plan_read.load("might")` / `tuning.load()` /
 `quota.quota_for_plan(...)` triple `test_nodegen_quota.py`'s own H3 integration tests already use)
 so a re-derivation defect is measured against real quota arithmetic, not a hand-tuned toy.
 """
@@ -20,6 +20,8 @@ from types import SimpleNamespace
 
 from seedsmith.adapters.trees.nodegen import exclusion as nodegen_exclusion
 from seedsmith.adapters.trees.nodegen import plan_read, quota, tuning
+from seedsmith.adapters.trees.species import plan as species_plan
+from seedsmith.adapters.trees.targets import PassiveTreeTargets
 from seedsmith.metrics.model import Ctx, Loop, Severity
 from seedsmith.metrics.passive_tree import (
     ALL_PASSIVE_TREE_METRICS,
@@ -27,12 +29,15 @@ from seedsmith.metrics.passive_tree import (
     DeepMechanismValueMetric,
     ExclusionRateMetric,
     ExclusionResolvableMetric,
+    ExclusionPresentationMetric,
+    FavourDriftMetric,
     HiddenFileCountMetric,
     MechanismRampMetric,
     NameCollisionMetric,
     NearDuplicateMetric,
     PassiveTreePlanCtx,
     QuotaDriftMetric,
+    SpeciesUniquenessMetric,
     TreeEqualValueMetric,
     UnresolvedCountMetric,
     check_bound_prices_honour_budget,
@@ -378,6 +383,86 @@ class ExclusionResolvableMetricTests(unittest.TestCase):
         self.assertEqual(gaps[0].subject, "n2")
 
 
+class ExclusionPresentationMetricTests(unittest.TestCase):
+    """Task J3 (spec-tree-review.md §6.4 rule 2) — the ONE presentation-shaped unshippable
+    condition that gates, unlike ExclusionRate's own rate. `gates = True` on the class itself is
+    asserted directly; this metric is deliberately excluded from `ALL_PASSIVE_TREE_METRICS`'s own
+    generation-time registry loop (see that tuple's own comment for the real, checked reason:
+    §7.1's `assert_exactly_one_hard_gate` already owns `PassiveTree/UnresolvedCount` as the one
+    generation-time hard gate; this is a review-time verdict concept instead), so these tests
+    exercise the class directly, the same way `HiddenFileCountMetric`/`DeepMechanismValueMetric`
+    (also excluded from that tuple, for their own reason) are tested above."""
+
+    def setUp(self) -> None:
+        self.plan_stub = SimpleNamespace(tree_id="stub")
+        self.metric = ExclusionPresentationMetric()
+
+    def _ctx(self, nodes) -> Ctx:
+        return _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0,
+            tree_plans=(self.plan_stub,), nodes_by_tree={"stub": nodes}))
+
+    def test_the_metric_itself_gates(self) -> None:
+        self.assertTrue(ExclusionPresentationMetric.gates)
+
+    def test_a_none_form_node_is_not_a_member_nothing_to_present(self) -> None:
+        nodes = [{"id": "n0", "exclusion": {"form": "none", "propertyKeys": [], "printedText": ""}}]
+        findings = self.metric.run(self._ctx(nodes))
+        self.assertEqual(_gap_findings(findings), [])
+        self.assertIn("nothing to present", findings[0].message)
+
+    def test_a_correctly_composed_nullification_is_clean(self) -> None:
+        keys = ("posture:vanguard",)
+        text = nodegen_exclusion.compose_printed_text("nullification", keys, role="loser")
+        nodes = [{"id": "n0", "exclusion": {"form": "nullification", "propertyKeys": list(keys),
+                                            "printedText": text}}]
+        findings = self.metric.run(self._ctx(nodes))
+        self.assertEqual(_gap_findings(findings), [])
+
+    def test_a_well_presented_nullification_ships_never_wrongly_blocked(self) -> None:
+        # J3's own 4th acceptance bullet, stated as a test so the withdrawn D40 narrowing (treating
+        # nullification's mere existence as disqualifying) cannot creep back in: a well-presented
+        # nullification passes this gate cleanly, the same as reroute/precedence would.
+        keys = ("posture:vanguard", "conversionState:converted")
+        text = nodegen_exclusion.compose_printed_text("nullification", keys, role="loser")
+        nodes = [{"id": f"n{i}", "exclusion": {"form": "none", "propertyKeys": [], "printedText": ""}}
+                for i in range(9)]
+        nodes.append({"id": "n9", "exclusion": {"form": "nullification", "propertyKeys": list(keys),
+                                                "printedText": text}})
+        findings = self.metric.run(self._ctx(nodes))
+        self.assertEqual(_gap_findings(findings), [])
+        note = next(f for f in findings if f.severity != Severity.GAP)
+        self.assertIn("1 exclusion(s) all present", note.message)
+
+    def test_an_empty_printed_text_on_a_nullification_is_a_gap(self) -> None:
+        nodes = [{"id": "n0", "exclusion": {"form": "nullification",
+                                            "propertyKeys": ["posture:vanguard"], "printedText": ""}}]
+        findings = self.metric.run(self._ctx(nodes))
+        gaps = _gap_findings(findings)
+        self.assertEqual(1, len(gaps))
+        self.assertEqual("n0", gaps[0].subject)
+        self.assertEqual("ExclusionPresentationDefect", gaps[0].evidence["code"])
+
+    def test_a_drifted_printed_text_is_a_gap_naming_both_texts(self) -> None:
+        nodes = [{"id": "n0", "exclusion": {"form": "reroute", "propertyKeys": ["posture:vanguard"],
+                                            "printedText": "some hand-written drift"}}]
+        findings = self.metric.run(self._ctx(nodes))
+        gaps = _gap_findings(findings)
+        self.assertEqual(1, len(gaps))
+        self.assertIn("does not match the template", gaps[0].message)
+
+    def test_precedence_and_reroute_are_also_covered_not_only_nullification(self) -> None:
+        for form in ("reroute", "precedence"):
+            with self.subTest(form=form):
+                keys = ("posture:warden",)
+                text = nodegen_exclusion.compose_printed_text(form, keys, role="loser")
+                nodes = [{"id": "n0", "exclusion": {"form": form, "propertyKeys": list(keys),
+                                                    "printedText": text}}]
+                findings = self.metric.run(self._ctx(nodes))
+                self.assertEqual(_gap_findings(findings), [])
+
+
 class NearDuplicateMetricTests(unittest.TestCase):
     def setUp(self) -> None:
         self.targets = tuning.load()
@@ -488,6 +573,63 @@ class UnresolvedCountMetricTests(unittest.TestCase):
     def test_is_the_one_closed_loop_hard_gate(self) -> None:
         self.assertIs(self.metric.loop, Loop.CLOSED)
         self.assertTrue(self.metric.gates)
+
+    # -- J5 addition: the species-level mechanicalFavour population, a SECOND, independent subject
+    # under this SAME gate (spec-species-tree.md §3.1/§4) -- never a second gates=True class.
+
+    _NO_TARGETS_GIVEN = object()
+
+    def _species_ctx(self, species_favour_outcomes, targets=_NO_TARGETS_GIVEN) -> Ctx:
+        return _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0,
+            targets=self.targets if targets is self._NO_TARGETS_GIVEN else targets,
+            species_favour_outcomes=species_favour_outcomes))
+
+    def test_no_species_favour_outcomes_supplied_reports_only_affixIds_exactly_as_before(self) -> None:
+        # Every pre-J5 call site (every test above) never supplies this field -- must produce
+        # EXACTLY the same single affixIds finding as before this task touched the class.
+        findings = self.metric.run(self._ctx({"t1": [{"nodeId": "n0", "outcome": "accepted"}]}))
+        self.assertEqual(1, len(findings))
+        self.assertEqual("affixIds", findings[0].subject)
+
+    def test_a_clean_species_favour_population_is_a_note(self) -> None:
+        outcomes = [{"speciesId": f"s{i}", "outcome": "resolved"} for i in range(40)]
+        findings = self.metric.run(self._species_ctx(outcomes))
+        favour_finding = next(f for f in findings if f.subject == "mechanicalFavour")
+        self.assertEqual(Severity.NOTE, favour_finding.severity)
+        self.assertEqual(0, favour_finding.evidence["unresolved"])
+
+    def test_species_favour_unresolved_above_fifty_permille_is_a_gap(self) -> None:
+        # The exact bullet-5 proof: 6% (60‰) unresolved, above the shipped 50‰ bar, fails the run
+        # naming the rate.
+        outcomes = [{"speciesId": f"s{i}", "outcome": "unresolved" if i < 6 else "resolved"}
+                   for i in range(100)]
+        findings = self.metric.run(self._species_ctx(outcomes))
+        favour_finding = next(f for f in findings if f.subject == "mechanicalFavour")
+        self.assertEqual(Severity.GAP, favour_finding.severity)
+        self.assertEqual(60, favour_finding.evidence["sharePermille"])
+        self.assertIn("6/100", favour_finding.message)
+
+    def test_species_favour_outcomes_without_targets_is_not_measured_for_that_subject(self) -> None:
+        outcomes = [{"speciesId": "s0", "outcome": "unresolved"}]
+        findings = self.metric.run(self._species_ctx(outcomes, targets=None))
+        favour_finding = next(f for f in findings if f.subject == "mechanicalFavour")
+        self.assertEqual(Severity.NOT_MEASURED, favour_finding.severity)
+
+    def test_both_populations_are_reported_independently_in_the_same_run(self) -> None:
+        outcomes_by_tree = {"t1": [{"nodeId": "n0", "outcome": "unresolved"},
+                                   {"nodeId": "n1", "outcome": "accepted"}]}  # 500‰, a GAP
+        species_outcomes = [{"speciesId": f"s{i}", "outcome": "resolved"} for i in range(20)]  # clean
+        ctx = _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0, targets=self.targets,
+            outcomes_by_tree=outcomes_by_tree, species_favour_outcomes=species_outcomes))
+        findings = self.metric.run(ctx)
+        self.assertEqual(2, len(findings))
+        by_subject = {f.subject: f for f in findings}
+        self.assertEqual(Severity.GAP, by_subject["affixIds"].severity)
+        self.assertEqual(Severity.NOTE, by_subject["mechanicalFavour"].severity)
 
 
 class AllPassiveTreeMetricsRegistrationTests(unittest.TestCase):
@@ -834,6 +976,220 @@ class HiddenFileCountMetricTests(unittest.TestCase):
             self.assertEqual(_gap_findings(findings), [])
             note = next(f for f in findings if f.severity == Severity.NOTE)
             self.assertEqual(note.evidence["visitedFileCount"], 0)
+
+
+def _favour_targets() -> PassiveTreeTargets:
+    return PassiveTreeTargets(
+        aptitude_weight_scheme="uniform",
+        node_class_weights_milli=(500, 500), node_class_order=("mechanism", "magnitude"),
+        exclusion_form_weights_milli=(450, 450, 100),
+        exclusion_form_order=("reroute", "precedence", "nullification"),
+        legitimate_skew_rows=(), exclusion_target_share_milli=20, species_unique_affix_min=8,
+        tier2_sample_size=60, tier3_additional_sample_size=30, acceptance_ladder=(),
+        cell_occupancy_median_max=2, quota_drift_tolerance_units=1,
+        mechanism_ramp_deepest_tier_share_milli=1000, exclusion_rate_max_share_permille=30,
+        near_duplicate_rate_max_share_permille=5, unresolved_count_max_share_permille=50,
+    )
+
+
+class FavourDriftMetricTests(unittest.TestCase):
+    """Task J5 (spec-species-tree.md §3.1 step 4, §3.2/D32). Every fixture pins aptitude and status
+    to one real id for every species (`Might`/`poison`) so the test can focus its assertions on the
+    `element` axis alone — aptitude/status necessarily show their own concentration in these tiny
+    fixtures too, which is real and expected, just out of scope for what each test below checks."""
+
+    def setUp(self) -> None:
+        self.targets = _favour_targets()
+        self.metric = FavourDriftMetric()
+        self.axis_tables = species_plan.axis_weight_tables(self.targets)
+        # Real element ids, in the real roster's own declared order (`axis_weight_tables`' own
+        # dict preserves it -- built by iterating the roster tuple itself, never re-sorted).
+        self.elements = list(self.axis_tables["element"])
+
+    def _assignment(self, element: str) -> dict:
+        return {"aptitude": "Might", "element": element, "status": "poison"}
+
+    def _ctx(self, assignments, tolerance=None) -> Ctx:
+        return _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0, targets=self.targets,
+            species_favour_assignments=assignments,
+            favour_drift_tolerance_share_permille=tolerance))
+
+    def _element_finding(self, findings, element: str):
+        return next(f for f in findings if f.subject == f"element={element}")
+
+    def test_no_assignments_supplied_is_not_measured(self) -> None:
+        findings = self.metric.run(self._ctx([], tolerance=20))
+        self.assertEqual(1, len(findings))
+        self.assertEqual(Severity.NOT_MEASURED, findings[0].severity)
+
+    def test_no_targets_supplied_is_not_measured(self) -> None:
+        ctx = _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0,
+            species_favour_assignments=[self._assignment(self.elements[0])]))
+        findings = self.metric.run(ctx)
+        self.assertEqual(1, len(findings))
+        self.assertEqual(Severity.NOT_MEASURED, findings[0].severity)
+
+    def test_a_near_uniform_corpus_reports_no_gap_on_the_element_axis(self) -> None:
+        # Every real element gets an equal share -- cycling through them the same number of times
+        # each is the closest a hand-built fixture gets to "matches the re-derived target exactly."
+        n_per_element = 10
+        assignments = [self._assignment(e) for e in self.elements for _ in range(n_per_element)]
+        findings = self.metric.run(self._ctx(assignments, tolerance=5))
+        for element in self.elements:
+            finding = self._element_finding(findings, element)
+            self.assertEqual(Severity.NOTE, finding.severity,
+                             f"element={element}: {finding.message}")
+
+    def test_an_injected_element_skew_is_a_gap_overshoot(self) -> None:
+        # One element locks 100% of a small corpus -- the extreme case of the 166x defect this
+        # gate exists to catch, made unmissable rather than borderline.
+        skewed_element = self.elements[0]
+        assignments = [self._assignment(skewed_element) for _ in range(30)]
+        findings = self.metric.run(self._ctx(assignments, tolerance=20))
+        finding = self._element_finding(findings, skewed_element)
+        self.assertEqual(Severity.GAP, finding.severity)
+        self.assertGreater(finding.evidence["driftSharePermille"], 0)
+
+    def test_favour_drift_catches_undershoot_symmetrically_not_only_overshoot(self) -> None:
+        # The flip side of the same fixture: an element that NEVER appears, while the target says
+        # it should, is exactly as much a drift as one that appears too often.
+        skewed_element = self.elements[0]
+        other_elements = self.elements[1:]
+        assignments = [self._assignment(e) for e in other_elements for _ in range(10)]
+        findings = self.metric.run(self._ctx(assignments, tolerance=20))
+        finding = self._element_finding(findings, skewed_element)
+        self.assertEqual(Severity.GAP, finding.severity)
+        self.assertEqual(0, finding.evidence["observedCount"])
+        self.assertLess(finding.evidence["driftSharePermille"], 0)
+
+    def test_with_no_tolerance_supplied_nothing_is_ever_flagged_gap(self) -> None:
+        # gates=False and no real generation run exists yet to calibrate against -- every finding
+        # is reported, none is escalated, mirroring DeepMechanismValueMetric's own shipped posture.
+        skewed_element = self.elements[0]
+        assignments = [self._assignment(skewed_element) for _ in range(30)]
+        findings = self.metric.run(self._ctx(assignments, tolerance=None))
+        self.assertEqual([], _gap_findings(findings))
+        finding = self._element_finding(findings, skewed_element)
+        self.assertEqual(Severity.NOTE, finding.severity)
+
+    def test_the_metric_never_appears_in_all_passive_tree_metrics(self) -> None:
+        # Same registration posture as H5's own two metrics: a real, registrable metric, but never
+        # added to the H4-only convenience tuple a test elsewhere pins to an exact length.
+        self.assertNotIn(FavourDriftMetric, ALL_PASSIVE_TREE_METRICS)
+
+    def test_gates_is_false(self) -> None:
+        self.assertFalse(FavourDriftMetric.gates)
+
+
+def _cell(node_class="mechanism", trigger="onHit", element="fire", status="poison",
+         channel_family="atk", exclusion_form="reroute"):
+    return quota.QuotaCell(node_class=node_class, trigger=trigger, element=element, status=status,
+                           channel_family=channel_family, exclusion_form=exclusion_form)
+
+
+def _uniq_node(node_id: str, *, name="Node", flavor="Flavor.", affix_ids=("atom.a",)) -> dict:
+    return {"id": node_id, "name": name, "flavor": flavor, "affixIds": list(affix_ids)}
+
+
+class SpeciesUniquenessMetricTests(unittest.TestCase):
+    """Task J6 (spec-species-tree.md §5, §5.1). The reverse index over a fixture with two trees
+    sharing a namespace affix -- the todo's own named verification -- plus U1/U2's own equivalents."""
+
+    def setUp(self) -> None:
+        self.metric = SpeciesUniquenessMetric()
+
+    def _ctx(self, nodes_by_tree, quota_cells_by_tree=None) -> Ctx:
+        return _ctx_with(PassiveTreePlanCtx(
+            plans=[], archetypes=(), tier_count=10, unlock_first_points=0, unlock_step_points=0,
+            reward_spread_max_ratio_milli=0, min_terminal_width=0,
+            nodes_by_tree=nodes_by_tree, quota_cells_by_tree=quota_cells_by_tree or {}))
+
+    def test_no_nodes_supplied_is_not_measured(self) -> None:
+        findings = self.metric.run(self._ctx({}))
+        self.assertEqual(1, len(findings))
+        self.assertEqual(Severity.NOT_MEASURED, findings[0].severity)
+
+    def test_a_clean_two_tree_corpus_has_no_gap(self) -> None:
+        nodes_by_tree = {
+            "might": [_uniq_node("n0", name="Might Strike", flavor="A steady line.")],
+            "fortitude": [_uniq_node("n0", name="Fortitude Wall", flavor="A different line.")],
+        }
+        findings = self.metric.run(self._ctx(nodes_by_tree))
+        self.assertEqual([], _gap_findings(findings))
+
+    def test_u1_a_repeated_name_and_flavor_pair_across_two_trees_is_a_gap(self) -> None:
+        nodes_by_tree = {
+            "might": [_uniq_node("n0", name="Same Name", flavor="Same flavor.")],
+            "fortitude": [_uniq_node("n0", name="Same Name", flavor="Same flavor.")],
+        }
+        findings = self.metric.run(self._ctx(nodes_by_tree))
+        gaps = [f for f in _gap_findings(findings) if f.subject.startswith("U1:")]
+        self.assertEqual(1, len(gaps))
+        self.assertEqual({"might:n0", "fortitude:n0"}, set(gaps[0].evidence["nodeRefs"]))
+
+    def test_u1_the_same_name_with_a_different_flavor_is_not_a_collision(self) -> None:
+        nodes_by_tree = {
+            "might": [_uniq_node("n0", name="Same Name", flavor="First flavor.")],
+            "fortitude": [_uniq_node("n0", name="Same Name", flavor="Second flavor.")],
+        }
+        findings = self.metric.run(self._ctx(nodes_by_tree))
+        self.assertEqual([], [f for f in _gap_findings(findings) if f.subject.startswith("U1:")])
+
+    def test_u2_the_same_affixids_and_quotacell_fingerprint_across_two_trees_is_a_gap(self) -> None:
+        nodes_by_tree = {
+            "might": [_uniq_node("n0", affix_ids=("atom.a", "atom.b"))],
+            "fortitude": [_uniq_node("n1", affix_ids=("atom.b", "atom.a"))],  # same set, different order
+        }
+        cells = {"might": {"n0": _cell()}, "fortitude": {"n1": _cell()}}  # identical cell
+        findings = self.metric.run(self._ctx(nodes_by_tree, cells))
+        gaps = [f for f in _gap_findings(findings) if f.subject.startswith("U2:")]
+        self.assertEqual(1, len(gaps))
+        self.assertEqual({"might", "fortitude"}, set(gaps[0].evidence["treeIds"]))
+
+    def test_u2_the_same_affixids_with_a_different_quotacell_is_not_a_collision(self) -> None:
+        nodes_by_tree = {
+            "might": [_uniq_node("n0", affix_ids=("atom.a",))],
+            "fortitude": [_uniq_node("n1", affix_ids=("atom.a",))],
+        }
+        cells = {"might": {"n0": _cell(element="fire")},
+                "fortitude": {"n1": _cell(element="earth")}}
+        findings = self.metric.run(self._ctx(nodes_by_tree, cells))
+        self.assertEqual([], [f for f in _gap_findings(findings) if f.subject.startswith("U2:")])
+
+    def test_u2_a_node_with_no_observed_quota_cell_contributes_nothing_not_a_crash(self) -> None:
+        nodes_by_tree = {"might": [_uniq_node("n0", affix_ids=("atom.a",))]}
+        findings = self.metric.run(self._ctx(nodes_by_tree, quota_cells_by_tree={}))
+        self.assertEqual([], [f for f in _gap_findings(findings) if f.subject.startswith("U2:")])
+
+    def test_u3_a_species_namespace_affix_referenced_by_two_trees_is_a_gap(self) -> None:
+        # The todo's own named verification: "the reverse index over a fixture with two trees
+        # sharing a namespace affix."
+        nodes_by_tree = {
+            "SpeciesA": [_uniq_node("n0", affix_ids=("affix.species.SpeciesA.mark",))],
+            "SpeciesB": [_uniq_node("n1", affix_ids=("affix.species.SpeciesA.mark",))],
+        }
+        findings = self.metric.run(self._ctx(nodes_by_tree))
+        gaps = [f for f in _gap_findings(findings) if f.subject.startswith("U3:")]
+        self.assertEqual(1, len(gaps))
+        self.assertEqual("SpeciesA", gaps[0].evidence["owner"])
+        self.assertEqual(["SpeciesB"], gaps[0].evidence["foreignTreeIds"])
+
+    def test_u3_a_species_namespace_affix_used_only_by_its_own_tree_is_not_a_finding(self) -> None:
+        nodes_by_tree = {
+            "SpeciesA": [_uniq_node("n0", affix_ids=("affix.species.SpeciesA.mark",))],
+        }
+        findings = self.metric.run(self._ctx(nodes_by_tree))
+        self.assertEqual([], [f for f in _gap_findings(findings) if f.subject.startswith("U3:")])
+
+    def test_the_metric_never_appears_in_all_passive_tree_metrics(self) -> None:
+        self.assertNotIn(SpeciesUniquenessMetric, ALL_PASSIVE_TREE_METRICS)
+
+    def test_gates_is_false(self) -> None:
+        self.assertFalse(SpeciesUniquenessMetric.gates)
 
 
 if __name__ == "__main__":

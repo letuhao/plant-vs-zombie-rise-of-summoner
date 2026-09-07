@@ -55,13 +55,17 @@ public class RoleFamilyTableTests
     /// upward when the affix-authoring lane ships one: 98 at module 8's build (2026-09-04), 100 after
     /// `g-punisher.json` landed (2026-09-06, commit 5864231), 109 after the phantom-closure pass the
     /// same day authored the nine families real content already referenced (seven `status.apply` into
-    /// `g-affliction.json`, two `stat.derived` into `g-elem-power.json`). Bump it deliberately, with the
-    /// corpus counted rather than quoted from a stale note — a DROP is the defect this guards.
+    /// `g-affliction.json`, two `stat.derived` into `g-elem-power.json`), 112 after an
+    /// `affix-families-gen` trial batch (2026-09-07, `atom.tempo-wildgrowth`/`atom.elpw-surfeit`/
+    /// `atom.shld-absolute`) proved that pipeline end to end — those three are honestly named as
+    /// missing their own display-template pairing (module 10's, not yet authored; see
+    /// `ItemDisplayTests`). Bump it deliberately, with the corpus counted rather than quoted from a
+    /// stale note — a DROP is the defect this guards.
     /// </summary>
     [Fact]
     public void The_whole_shipped_affix_family_corpus_loads()
     {
-        Assert.Equal(109, LoadFamilies().Count);
+        Assert.Equal(112, LoadFamilies().Count);
     }
 
     [Fact]
@@ -147,19 +151,21 @@ public class RoleFamilyTableTests
     [Fact]
     public void Item_role_family_is_derived_with_no_authored_cells()
     {
-        // 731 (role, family) pairs come straight from the 109 families' own roles lists, before any
+        // 746 (role, family) pairs come straight from the 112 families' own roles lists, before any
         // override narrows it -- reproduced here against the raw corpus, not through Derive(), which
-        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 727).
+        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 742).
         // Was 656/652 over the 98-family corpus at module 8's build; `g-punisher.json`'s two families
         // added 7 roles each -> 670/666 (2026-09-06); the phantom-closure pass the same day added
         // seven `g-affliction` families at 7 roles each (49) plus two `g-elem-power` families at 6
-        // each (12) -> +61. Moves with the corpus, same rule as the count pin above.
+        // each (12) -> +61 (731/727); the 2026-09-07 `affix-families-gen` trial batch's three new
+        // families (5 roles each) -> +15 (746/742). Moves with the corpus, same rule as the count pin
+        // above.
         var families = LoadFamilies();
         var rawPairs = families.SelectMany(f => f.Roles.Select(r => (Role: r, f.FamilyId))).Distinct().Count();
-        Assert.Equal(731, rawPairs);
+        Assert.Equal(746, rawPairs);
 
         var derivedPairs = Derive().Select(c => (c.RoleId, c.FamilyId)).Distinct().Count();
-        Assert.Equal(727, derivedPairs);
+        Assert.Equal(742, derivedPairs);
     }
 
     [Fact]

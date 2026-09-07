@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.pack-rainbow-001",
+  "formation": "pack",
+  "name": "Swarming Vanguard",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A disorganized mass of elemental entities pressing forward in a chaotic wave.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "tyrant",
+    "floorRung": "pest"
+  }
+}

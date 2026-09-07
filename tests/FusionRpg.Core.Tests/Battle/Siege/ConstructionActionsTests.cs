@@ -6,6 +6,7 @@ using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Siege;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.World;
@@ -49,6 +50,46 @@ public class ConstructionActionsTests
             OwnerKey = EffectOwnerKeys.Entity(actorKey),
             PluginId = "battle",
         });
+
+    /// <summary>A synthetic action carrying a real compiled `StockDemand` — no shipped construction
+    /// action authors one yet (this file's own top doc comment), so `Fire`'s new commit-time spend
+    /// (resolved 2026-09-07) needs a hand-built fixture to exercise at all.</summary>
+    static CompiledAction SyntheticActionWithStockDemand(string stockId, long minQty) => new(
+        "action.test.synthetic", ActionKind.Skill, 1, Array.Empty<ActionTag>(), true, 1, false, false, "item.test",
+        ActionEnvelope.NoOp with { ActionId = "action.test.synthetic" },
+        new CompiledTargetSpec(true, Array.Empty<TargetSpec>()),
+        0, int.MaxValue, null, false, PredicateCompiler.Always,
+        Array.Empty<CompiledActionCost>(), Array.Empty<ActionScopeRow>(),
+        StockDemands: new[] { new StockDemand(stockId, minQty) });
+
+    /// <summary>Minimal in-memory ledger, the same all-or-nothing contract
+    /// <c>ActionUsabilityStockSpendTests.FakeStockLedger</c> already establishes for this interface.</summary>
+    sealed class FakeStockLedger : IStockLedger
+    {
+        readonly Dictionary<string, long> _held = new(StringComparer.Ordinal);
+        public FakeStockLedger Holding(string stockId, long qty) { _held[stockId] = qty; return this; }
+        public long QtyOf(string stockId) => _held.TryGetValue(stockId, out var q) ? q : 0;
+
+        public StockSpendResult TrySpend(string actorKey, string actionId, IReadOnlyList<StockDemand> demands)
+        {
+            foreach (var d in demands)
+                if (QtyOf(d.StockId) < d.MinQty) return StockSpendResult.Missing(d.StockId);
+            foreach (var d in demands)
+                _held[d.StockId] = QtyOf(d.StockId) - d.MinQty;
+            return StockSpendResult.Spent;
+        }
+    }
+
+    [Fact]
+    public void All_four_construction_actions_compile_for_live_grant_with_no_rejections()
+    {
+        var compiled = ConstructionActions.CompiledActionsForGrant;
+        Assert.Equal(4, compiled.Count);
+        Assert.Contains(compiled, a => a.ActionId == ConstructionActions.BuiltActionId);
+        Assert.Contains(compiled, a => a.ActionId == ConstructionActions.AssembledActionId);
+        Assert.Contains(compiled, a => a.ActionId == ConstructionActions.SummonedActionId);
+        Assert.Contains(compiled, a => a.ActionId == ConstructionActions.LabouredActionId);
+    }
 
     [Fact]
     public void The_four_construction_effects_compile_from_real_atoms_with_no_rejections()
@@ -136,6 +177,75 @@ public class ConstructionActionsTests
 
         var ex = Record.Exception(() => ConstructionActivation.Fire(host, builder, targetRow: 0, targetCol: 1));
         Assert.Null(ex);
+    }
+
+    // ---- Assembled's own remaining gap: the commit-time stock spend, resolved 2026-09-07 -----------
+
+    [Fact]
+    public void Firing_a_synthetic_action_with_a_real_stock_demand_spends_it_and_still_places()
+    {
+        var (host, ctx) = Setup();
+        const string builder = "entity:builder1";
+        Grant(host, builder, ConstructionActions.ContainerResolver.EffectIdsFor(ConstructionActions.AssembledContainerId).Single());
+        ctx.Board.Place(builder, new GridPos(0, 0));
+        var ledger = new FakeStockLedger().Holding("item.test.synthetic", 1);
+        var action = SyntheticActionWithStockDemand("item.test.synthetic", minQty: 1);
+
+        ConstructionActivation.Fire(host, builder, targetRow: 0, targetCol: 1, firingAction: action, stockLedger: ledger);
+
+        Assert.Single(ctx.Placed); // the effect still fired
+        Assert.Equal(0, ledger.QtyOf("item.test.synthetic")); // and the demand was actually taken
+    }
+
+    [Fact]
+    public void Firing_a_synthetic_action_with_an_unmet_stock_demand_is_a_silent_no_op()
+    {
+        var (host, ctx) = Setup();
+        const string builder = "entity:builder1";
+        Grant(host, builder, ConstructionActions.ContainerResolver.EffectIdsFor(ConstructionActions.AssembledContainerId).Single());
+        ctx.Board.Place(builder, new GridPos(0, 0));
+        var ledger = new FakeStockLedger(); // holds nothing
+        var action = SyntheticActionWithStockDemand("item.test.synthetic", minQty: 1);
+
+        ConstructionActivation.Fire(host, builder, targetRow: 0, targetCol: 1, firingAction: action, stockLedger: ledger);
+
+        Assert.Empty(ctx.Placed); // refused at commit -- never reaches Bag.OnEvent
+        Assert.Null(ctx.Board.OccupantAt(new GridPos(0, 1)));
+    }
+
+    [Fact]
+    public void Firing_with_a_firing_action_but_no_ledger_refuses_rather_than_granting_free_stock()
+    {
+        var (host, ctx) = Setup();
+        const string builder = "entity:builder1";
+        Grant(host, builder, ConstructionActions.ContainerResolver.EffectIdsFor(ConstructionActions.AssembledContainerId).Single());
+        ctx.Board.Place(builder, new GridPos(0, 0));
+        var action = SyntheticActionWithStockDemand("item.test.synthetic", minQty: 1);
+
+        // stockLedger omitted -- falls back to NoStockLedger, which REFUSES any real demand rather
+        // than silently granting it (the same "unwired means safe, not permissive" posture every
+        // other seam in this codebase has).
+        ConstructionActivation.Fire(host, builder, targetRow: 0, targetCol: 1, firingAction: action);
+
+        Assert.Empty(ctx.Placed);
+    }
+
+    [Fact]
+    public void An_action_with_no_stock_demands_is_unaffected_by_the_new_parameters()
+    {
+        // Every shipped construction action has zero StockDemands today -- proves the new commit
+        // step is a true no-op for all real content, matching the doc comment's own claim.
+        var (host, ctx) = Setup();
+        const string builder = "entity:builder1";
+        Grant(host, builder, ConstructionActions.ContainerResolver.EffectIdsFor(ConstructionActions.LabouredContainerId).Single());
+        ctx.Board.Place(builder, new GridPos(0, 0));
+        var noDemandAction = SyntheticActionWithStockDemand("unused", minQty: 0) with { StockDemands = null };
+
+        ConstructionActivation.Fire(
+            host, builder, targetRow: 0, targetCol: 1,
+            firingAction: noDemandAction, stockLedger: new FakeStockLedger()); // empty ledger, zero demands
+
+        Assert.Single(ctx.Placed);
     }
 
     [Fact]

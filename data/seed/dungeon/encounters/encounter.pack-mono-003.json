@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.pack-mono-003",
+  "formation": "pack",
+  "name": "The Swarming Monolith",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A dense, singular elemental tide that overwhelms through sheer numbers and relentless pressure.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "nuisance",
+    "floorRung": "nuisance"
+  }
+}

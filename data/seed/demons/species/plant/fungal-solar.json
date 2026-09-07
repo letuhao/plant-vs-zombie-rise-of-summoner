@@ -23,11 +23,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T13:19:57Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -49,7 +50,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-solar"
     ],
@@ -102,11 +103,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T13:27:09Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "steady",
         "rarity": "sprout"
@@ -131,7 +133,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-solar"
     ],

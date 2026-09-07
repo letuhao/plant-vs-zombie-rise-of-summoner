@@ -19,8 +19,14 @@ public static class ContainerValidator
     // all fold into this one namespace).
     static ContainerValidator() => ContentRuleNamespaces.Register("rarity");
 
+    // container-kind-expansion (X7, 2026-09-07): gem/charm/combo/consumable added. This pattern is
+    // independently hardcoded, NOT derived from ContainerKind/PrefixOf -- found missing its own four
+    // new prefixes only by running the real, already-existing "every kind has a prefix and a valid id
+    // passes" test, which the original 16-file switch-site grep did not catch (this file has no
+    // `ContainerKind.` literal for that grep to find).
     static readonly Regex ContainerIdRe =
-        new(@"^(item|trait|skill|species-passive|patron|world-buff|enemy)\.[a-z0-9-]+$", RegexOptions.Compiled);
+        new(@"^(item|trait|skill|species-passive|patron|world-buff|enemy|gem|charm|combo|consumable)\.[a-z0-9-]+$",
+            RegexOptions.Compiled);
 
     /// <summary>
     /// Validate. <paramref name="lookupAtom"/> resolves an atom id against the loaded catalog —

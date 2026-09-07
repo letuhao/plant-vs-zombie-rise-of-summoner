@@ -6,11 +6,28 @@ namespace FusionRpg.Data;
 
 /// <summary>One `dungeon_domain` row's own storage-only fields (`DomainRow`, D4.15, deliberately
 /// carries none of these — provenance/staleness are storage concerns, not catalog-validation ones,
-/// per that type's own doc comment). Read-only today: D4.16 left the import WRITE arm honestly
-/// unbuilt (no real anchor JSON exists anywhere yet to validate a parser against), so nothing
-/// populates this table in production — this read exists so D4.22's endpoint has something real to
-/// call the day content lands, proven against a manually-seeded row rather than a fabricated writer.</summary>
+/// per that type's own doc comment). Written by `ImportDungeonDomains` (D4.16, below); still empty in
+/// production today because every real domain refuses `DomainPreflight.Run` on row 6's own
+/// threat-audit gap (D4.17's own already-documented finding) — the writer itself is real and tested,
+/// not a placeholder.</summary>
 public sealed record DomainStorageRow(DomainRow Domain, string ProvenanceJson, string ValidatedJson, long Revision);
+
+/// <summary>D4.16 (spec-domain-catalog.md §3): "what THIS import proved the row against" —
+/// deliberately narrower than the spec's own full `{registryVersions, dungeonTuningHash,
+/// encounterTuningHash, catalogRevision, dropTableRevision, sampleSeeds}` citation. No tuning-content-
+/// hash or registry-version-tracking mechanism exists anywhere in this codebase yet (confirmed by
+/// `grep`, 2026-09-07) — inventing one here, unreviewed, to fill an object nobody reads yet would be
+/// worse than an honest, narrower first cut. `CatalogRevision`/`SampleSeeds` are the two fields this
+/// import CAN construct correctly today; the rest are a named, real follow-up, not silently dropped.</summary>
+public sealed record DomainValidatedFacts(long CatalogRevision, int SampleSeeds);
+
+/// <summary>What one `ImportDungeonDomains` call did, or refused to do — the domain-kind mirror of
+/// <see cref="ImportOutcome"/>, kept separate because a domain refusal is a list of
+/// <see cref="DomainRefusal"/> (Core's own type), never a <see cref="SeedError"/>.</summary>
+public sealed record DomainImportOutcome(bool Committed, IReadOnlyList<DomainRefusal> Refusals, long CatalogRevision)
+{
+    public bool IsOk => Refusals.Count == 0;
+}
 
 /// <summary>One `rpg_domain_progress.clears_json` entry — `{rungId, oath, delveId}`, spec-domain-catalog.md
 /// §5's exact shape. `RungId` also carries a tail step's own label (`rungIdOrTailLabel`, §5a) — the
@@ -29,8 +46,8 @@ public sealed partial class RpgStore
 {
     /// <summary>D4.18 (spec-domain-catalog.md §1, §5) — the three domain tables. `dungeon_domain` /
     /// `dungeon_domain_pool` land here so the schema exists ahead of the import write arm that targets
-    /// them (D4.16 left that arm honestly unbuilt — no anchor JSON exists anywhere yet to validate a
-    /// parser against); `rpg_domain_progress` is this table's own, fully wired below. Called from
+    /// them (`ImportDungeonDomains` below, D4.16, built 2026-09-07); `rpg_domain_progress` is this
+    /// table's own, fully wired below. Called from
     /// <c>EnsureWorldSchemaUnlocked</c> right after <c>EnsureDelveSchemaUnlocked</c> — a domain is what
     /// a delve is entered into, the same "schema setup lives beside the sibling it composes with"
     /// reasoning <see cref="EnsureDelveSchemaUnlocked"/>'s own doc comment states.</summary>
@@ -45,6 +62,7 @@ public sealed partial class RpgStore
               layout_template_id TEXT NOT NULL, boss_species_ref TEXT NOT NULL, retinue_family TEXT,
               entrance_hint TEXT NOT NULL,
               permadeath_from_rung TEXT,
+              first_clear_ref TEXT,
               provenance_json TEXT NOT NULL, validated_json TEXT NOT NULL,
               revision INTEGER NOT NULL DEFAULT 0
             );
@@ -184,9 +202,117 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// D4.16's own SQL-import arm (spec-domain-catalog.md §1-§3), built 2026-09-07 — the seed content
+    /// does NOT fit `AtomSeedFile`'s `{kind,entries}` batch format every other kind uses (a domain
+    /// anchor is one raw, unwrapped JSON object per file, the same shape every other dungeon kind
+    /// already uses its own direct-file reader for), so this is a dedicated writer, not a tenth
+    /// `SeedContent` case, matching this module's own spec "Structure" section (`RpgStore.Domains.cs`,
+    /// not `RpgStore.Import.cs`).
+    ///
+    /// <para><b>Validate-first, one transaction, all-or-nothing</b> — spec §1's own "one transaction
+    /// that refuses before it writes": every domain in <paramref name="domains"/> is checked through
+    /// the REAL <see cref="DomainPreflight.Run"/> chain (whatever bridges the caller has composed into
+    /// <paramref name="preflightInputs"/> — this function validates nothing itself, by construction);
+    /// ANY refusal anywhere refuses the WHOLE batch, nothing is written, matching `ImportContent`'s own
+    /// established policy for every other content kind.</para>
+    ///
+    /// <para><b>Pools are delete-then-insert</b> (`dungeon_domain_pool`, keyed `(domain_id, pool, seq)`)
+    /// — the same "recompute this row's own child rows whole" idiom `RpgStore.Import.cs`'s own element
+    /// matrix write already uses, never a diff. `pool='loot'` rows use `key`=room kind, `ref_id`=table
+    /// id (spec §1's own schema comment); `room`/`quest` rows leave `key` at its default empty string.</para>
+    /// </summary>
+    public DomainImportOutcome ImportDungeonDomains(
+        IReadOnlyList<DomainRow> domains,
+        DomainPreflightInputs preflightInputs,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> roomPaletteByDomainId,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> questPoolByDomainId,
+        IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> lootBindingByDomainId,
+        IReadOnlyDictionary<string, string> provenanceJsonByDomainId,
+        int preflightSampleSeeds,
+        bool dryRun = false)
+    {
+        if (domains is null) throw new ArgumentNullException(nameof(domains));
+        if (preflightInputs is null) throw new ArgumentNullException(nameof(preflightInputs));
+        if (roomPaletteByDomainId is null) throw new ArgumentNullException(nameof(roomPaletteByDomainId));
+        if (questPoolByDomainId is null) throw new ArgumentNullException(nameof(questPoolByDomainId));
+        if (lootBindingByDomainId is null) throw new ArgumentNullException(nameof(lootBindingByDomainId));
+        if (provenanceJsonByDomainId is null) throw new ArgumentNullException(nameof(provenanceJsonByDomainId));
+
+        lock (_gate)
+        {
+            var refusals = DomainPreflight.Run(domains, preflightInputs);
+            if (refusals.Count > 0)
+                return new DomainImportOutcome(false, refusals, GetCatalogRevision());
+
+            var catalogRevision = GetCatalogRevision();
+
+            using (var db = OpenUnlocked())
+            using (var tx = db.BeginTransaction())
+            {
+                foreach (var domain in domains)
+                {
+                    var validatedJson = JsonSerializer.Serialize(new DomainValidatedFacts(catalogRevision, preflightSampleSeeds));
+                    var provenanceJson = provenanceJsonByDomainId.TryGetValue(domain.DomainId, out var p) ? p : DomainSeedFile.EmptyProvenanceJson;
+
+                    using (var cmd = Prepared(db, tx, """
+                        INSERT INTO dungeon_domain (domain_id, name, flavor, theme, climate, danger_band, entry,
+                          layout_template_id, boss_species_ref, retinue_family, entrance_hint, permadeath_from_rung,
+                          first_clear_ref, provenance_json, validated_json, revision)
+                        VALUES ($id, $name, $flavor, $theme, $climate, $band, $entry, $layout, $boss, $retinue,
+                          $entrance, $permadeath, $fcr, $prov, $valid, 0)
+                        ON CONFLICT(domain_id) DO UPDATE SET
+                          name=excluded.name, flavor=excluded.flavor, theme=excluded.theme, climate=excluded.climate,
+                          danger_band=excluded.danger_band, entry=excluded.entry, layout_template_id=excluded.layout_template_id,
+                          boss_species_ref=excluded.boss_species_ref, retinue_family=excluded.retinue_family,
+                          entrance_hint=excluded.entrance_hint, permadeath_from_rung=excluded.permadeath_from_rung,
+                          first_clear_ref=excluded.first_clear_ref,
+                          provenance_json=excluded.provenance_json, validated_json=excluded.validated_json,
+                          revision=dungeon_domain.revision + 1;
+                        """,
+                        "$id", "$name", "$flavor", "$theme", "$climate", "$band", "$entry", "$layout",
+                        "$boss", "$retinue", "$entrance", "$permadeath", "$fcr", "$prov", "$valid"))
+                    {
+                        ExecuteWith(cmd,
+                            domain.DomainId, domain.Name, domain.Flavor, domain.Theme, domain.Climate,
+                            domain.DangerBand, domain.Entry, domain.LayoutTemplateId, domain.BossSpeciesRef,
+                            (object?)domain.RetinueFamily ?? DBNull.Value, domain.EntranceHint,
+                            (object?)domain.PermadeathFromRung ?? DBNull.Value,
+                            (object?)domain.FirstClearRef ?? DBNull.Value, provenanceJson, validatedJson);
+                    }
+
+                    ExecIn(db, tx, "DELETE FROM dungeon_domain_pool WHERE domain_id = $id;", ("$id", domain.DomainId));
+
+                    if (roomPaletteByDomainId.TryGetValue(domain.DomainId, out var rooms))
+                        WriteDomainPoolRowsUnlocked(db, tx, domain.DomainId, "room", rooms.Select(r => ("", r)));
+                    if (questPoolByDomainId.TryGetValue(domain.DomainId, out var quests))
+                        WriteDomainPoolRowsUnlocked(db, tx, domain.DomainId, "quest", quests.Select(q => ("", q)));
+                    if (lootBindingByDomainId.TryGetValue(domain.DomainId, out var loot))
+                        WriteDomainPoolRowsUnlocked(db, tx, domain.DomainId, "loot", loot.Select(kv => (kv.Key, kv.Value)));
+                }
+
+                if (!dryRun) tx.Commit();
+            }
+
+            return new DomainImportOutcome(!dryRun, Array.Empty<DomainRefusal>(), GetCatalogRevision());
+        }
+    }
+
+    static void WriteDomainPoolRowsUnlocked(SqliteConnection db, SqliteTransaction tx, string domainId, string pool, IEnumerable<(string Key, string RefId)> rows)
+    {
+        var seq = 0;
+        foreach (var (key, refId) in rows)
+        {
+            ExecIn(db, tx,
+                "INSERT INTO dungeon_domain_pool (domain_id, pool, seq, key, ref_id) VALUES ($id, $pool, $seq, $key, $ref);",
+                ("$id", domainId), ("$pool", pool), ("$seq", seq), ("$key", key), ("$ref", refId));
+            seq++;
+        }
+    }
+
     /// <summary>D4.22 — every `dungeon_domain` row, ordinal by `domainId`. Closes D4.18's own named
-    /// gap (schema-only, no read/write) now that an endpoint actually needs one; still no WRITE side
-    /// — nothing populates this table until D4.16's import arm lands.</summary>
+    /// gap (schema-only, no read/write) now that an endpoint actually needs one; the WRITE side landed
+    /// with D4.16's own `ImportDungeonDomains` above.</summary>
     public IReadOnlyList<DomainStorageRow> ReadDomains()
     {
         lock (_gate)
@@ -195,7 +321,7 @@ public sealed partial class RpgStore
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
                 SELECT domain_id, name, flavor, theme, climate, danger_band, entry, layout_template_id,
-                       boss_species_ref, retinue_family, entrance_hint, permadeath_from_rung,
+                       boss_species_ref, retinue_family, entrance_hint, permadeath_from_rung, first_clear_ref,
                        provenance_json, validated_json, revision
                 FROM dungeon_domain ORDER BY domain_id;
                 """;
@@ -206,10 +332,43 @@ public sealed partial class RpgStore
                 var domain = new DomainRow(
                     r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4),
                     r.GetString(5), r.GetString(6), r.GetString(7), r.GetString(8),
-                    r.IsDBNull(9) ? null : r.GetString(9), r.GetString(10), r.IsDBNull(11) ? null : r.GetString(11));
-                rows.Add(new DomainStorageRow(domain, r.GetString(12), r.GetString(13), r.GetInt64(14)));
+                    r.IsDBNull(9) ? null : r.GetString(9), r.GetString(10), r.IsDBNull(11) ? null : r.GetString(11),
+                    r.IsDBNull(12) ? null : r.GetString(12));
+                rows.Add(new DomainStorageRow(domain, r.GetString(13), r.GetString(14), r.GetInt64(15)));
             }
             return rows;
         }
+    }
+
+    /// <summary>The read side of `ImportDungeonDomains`'s own `dungeon_domain_pool` write (D4.16) —
+    /// genuinely missing until now (confirmed by `grep`: the table had a schema and a writer, no
+    /// reader anywhere). `key` is `""` for `room`/`quest` rows (their own `ref_id` alone is the whole
+    /// fact) and the room kind for `loot` rows (spec §1's own schema comment) — returned verbatim,
+    /// ordinal by `seq`, never re-sorted, since `seq` is itself the authored/import order.</summary>
+    public IReadOnlyList<(string Key, string RefId)> ReadDomainPool(string domainId, string pool)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT key, ref_id FROM dungeon_domain_pool WHERE domain_id = $id AND pool = $pool ORDER BY seq;";
+            cmd.Parameters.AddWithValue("$id", domainId);
+            cmd.Parameters.AddWithValue("$pool", pool);
+            using var r = cmd.ExecuteReader();
+            var rows = new List<(string, string)>();
+            while (r.Read()) rows.Add((r.GetString(0), r.GetString(1)));
+            return rows;
+        }
+    }
+
+    /// <summary>`ReadDomainPool(domainId, "loot")` reshaped into the `(room kind -&gt; drop_table id)`
+    /// map `Quests.QuestReward.Request`/row 9's own `LootBindingFor` both need — the one pool kind
+    /// whose `key` column is load-bearing rather than blank.</summary>
+    public IReadOnlyDictionary<string, string> ReadLootBinding(string domainId)
+    {
+        var binding = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (key, refId) in ReadDomainPool(domainId, "loot"))
+            binding[key] = refId;
+        return binding;
     }
 }

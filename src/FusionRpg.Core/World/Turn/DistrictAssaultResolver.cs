@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
@@ -18,13 +19,19 @@ namespace FusionRpg.Core.World.Turn;
 /// <see cref="PlaceholderBattleResolver"/> — the early return IS the feature-absence guarantee,
 /// provable by construction rather than by a golden diff.
 ///
-/// <para><b>No `IIntentSource` is ever constructed here.</b> `BattleEngine.Resolve`'s own internal
-/// fallback (`intentSource ?? new StubIntentSource(view, state.Cooldowns, ...)`, confirmed by reading
-/// `TimelineDispatch.cs`/`BasicAttack.cs`) already drives every actor with the shipped nearest-enemy
-/// stub AI the moment the caller passes no `intentSource` at all — which is exactly what "a siege
-/// resolves and is playable with no FE" (this module's own success criterion) needs. Wiring a played
-/// side through `Battle/Siege/SiegeAi.cs`'s `SiegeIntentSource` is real, deferred work for whichever
-/// module first has a live human-input channel to plug into it (`siege-stage`), not this one.</para>
+/// <para><b>No raw `IIntentSource` instance is ever constructed here — but a real, scored AI IS wired,
+/// via a different seam (2026-09-07, siege-ai, owner-authorized).</b> `BattleEngine.Resolve`'s
+/// `aiTuning: SiegeTuningPolicy.Ai` argument below opts every actor in this battle into
+/// `BattleRunState.DefaultAiIntentSource` (a real `SiegeAiIntentSource`, built internally once
+/// `BattleRunState`'s own view/`Cooldowns`/`CostLedger` exist — no external caller can construct one
+/// directly, since `IBattleView`'s only real implementor is private to `BattleEngine`).
+/// `DeclareBasicAttack`'s own fallback chain (`intentSource ?? state.DefaultAiIntentSource ?? new
+/// StubIntentSource(...)`) tries it before the crude nearest-enemy stub, for both sides — there is no
+/// human-played side in this auto-resolved path, so `SiegeIntentSource`'s own played-vs-AI dispatch
+/// wrapper isn't needed here at all. Wiring an actual PLAYED side through that wrapper remains real,
+/// deferred work for whichever module first has a live human-input channel to plug into it
+/// (`siege-stage`, the FE-Phaser piece, unrelated to whether the backend AI itself is wired) — not this
+/// one, and not what the `aiTuning` argument below is for.</para>
 ///
 /// <para><b>Two things this pass deliberately does NOT solve</b> — named once, in `tasks/base-defense-todo.md`
 /// rather than guessed through under time pressure, and restated here so the code and the task list
@@ -106,8 +113,17 @@ public sealed class DistrictAssaultResolver : IBattleResolver
         var defenderKeys = new List<string>();
         var defenderSetups = defender is null ? new List<BattleActorSetup>() : BuildAnimateSetups(defender, DefenderSide, defenderKeys);
 
-        var approachCells = OpenCellsInZone(spec, boardState, DistrictZone.Approach);
-        var coreCells = OpenCellsInZone(spec, boardState, DistrictZone.Core);
+        // 17.11 (decision 47, resolved 2026-09-07): the task's own pre-existing acceptance formula --
+        // ApproachDepth + WardLevel x ApproachDepthPerWardLevel -- applies ApproachDepth
+        // UNCONDITIONALLY, not only once WardLevel > 0 (mirrors fortressRampartBonus's own
+        // additive-to-thickness shape, just on one wedge instead of the whole ring). A genuine
+        // geometry change for every district, warded or not -- verified against golden/unit tests,
+        // not assumed byte-identical, matching this program's own established diligence for a real
+        // behavior change (15.4/15.4b's own RulesetVersion-bump precedent).
+        var wardExtraDepth = checked(SiegeTuningPolicy.District.ApproachDepth
+            + board.WardLevel * SiegeTuningPolicy.District.ApproachDepthPerWardLevel);
+        var approachCells = OpenCellsInZone(spec, boardState, DistrictZone.Approach, board.AttackerEdge, wardExtraDepth);
+        var coreCells = OpenCellsInZone(spec, boardState, DistrictZone.Core, board.AttackerEdge, wardExtraDepth);
 
         // A board too small for the forces standing on it falls back rather than throwing mid-turn --
         // the placeholder's own crude weight comparison is a better answer than an aborted turn.
@@ -136,15 +152,32 @@ public sealed class DistrictAssaultResolver : IBattleResolver
                 profile: BattleModeProfileCatalog.Resolve(BattleModeProfileCatalog.SiegeId),
                 board: boardState,
                 containerResolver: ConstructionActions.ContainerResolver,
+                // base-defense siege-ai (2026-09-07, session 5, owner-authorized): every actor in a
+                // real siege now gets SiegeAiIntentSource's scored, XCOM-style decisions instead of
+                // StubIntentSource's crude nearest-enemy fallback -- the live consumer AggressionOf and
+                // every other AiCandidate scoring input were built and proven against, but never
+                // actually reached, before this. No `intentSource:` override, so nothing here touches
+                // the OTHER wiring (TryDeclareBuilt/TryDeclareObjectiveAdvance) also tried at the same
+                // DeclareBasicAttack call site -- both remain reachable exactly as before.
+                aiTuning: SiegeTuningPolicy.Ai,
                 onEffectHostReady: host =>
                 {
                     host.ConstructionBoard = constructionBoard;
+                    // siege-ai R3 (2026-09-07): the SAME AttackerEdge already used above (line 75) to
+                    // orient DistrictLayout.Build's own GridSpec -- threaded one step further so
+                    // BattleRunState.ObjectivePositionOf can answer "which cell should I advance
+                    // toward" for a live AI with no target in reach.
+                    host.AttackerEdge = board.AttackerEdge;
                     // 15.3b (2026-09-06): the four construction effects, upserted BEFORE BindContainers
                     // runs later in this same BattleRunState constructor (onEffectHostReady fires at
                     // BattleRunState.cs:330, BindContainers at :473 -- confirmed by reading the file, not
-                    // assumed) so a builder actor's own container grant resolves correctly. No actor
-                    // holds a construction action yet -- that is `siege-ai`'s own live intent source's
-                    // job (this module's own doc comment above), not this resolver's.
+                    // assumed) so a builder actor's own container grant resolves correctly.
+                    // CORRECTED 2026-09-07 (MAJOR finding, same session): this comment used to say "no
+                    // actor holds a construction action yet -- that is siege-ai's own live intent
+                    // source's job, not this resolver's." That reasoning was wrong: `SiegeAiIntentSource`
+                    // only DECIDES among actions an actor already holds -- it has no mechanism to GRANT
+                    // held actions at all. Granting them is this resolver's own job, and
+                    // `BuildAnimateSetups` now does it (`AdditionalHeldActions`, attacker-side only).
                     if (host.Bag.Catalog is Effects.InMemoryEffectCatalog catalog)
                         foreach (var def in ConstructionActions.CompiledEffects) catalog.Upsert(def);
                 });
@@ -332,6 +365,17 @@ public sealed class DistrictAssaultResolver : IBattleResolver
                 Atk = BattleRuleset.BaseAtk(member.Level),
                 Defense = BattleRuleset.BaseDefense(member.Level),
                 AttackIntervalMs = species.AttackIntervalMs,
+                // base-defense `siege-construction`/`siege-ai` (2026-09-07, MAJOR finding this
+                // session): this setup previously never granted ANY equipped action, so no real
+                // legion member could ever hold a construction action -- `Built`/`Assembled`/etc were
+                // structurally unreachable in every real siege, not just missing content. Attacker-only
+                // -- decision 27's own framing is "a besieging LEGION" acquiring structures as it
+                // advances; a defender already holds a base with structures via PlaceStructures above,
+                // and defender-side construction during an active siege is a separate, unspecced
+                // question this fix does not also decide. Purely additive (see
+                // BattleActorSetup.AdditionalHeldActions's own doc comment) -- this member's basic
+                // attack is completely unaffected.
+                AdditionalHeldActions = side == AttackerSide ? ConstructionActions.CompiledActionsForGrant : null,
             });
         }
 
@@ -342,7 +386,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
     /// for determinism — a plain deterministic order rather than "nearest the entry edge," which is a
     /// deferred realism polish, not a correctness requirement for `Placement.PlaceActors` (any valid,
     /// deterministic cell list works).</summary>
-    static List<GridPos> OpenCellsInZone(GridSpec spec, BoardState boardState, DistrictZone zone)
+    static List<GridPos> OpenCellsInZone(
+        GridSpec spec, BoardState boardState, DistrictZone zone, BoardEdge attackerEdge, int wardExtraDepth)
     {
         var district = SiegeTuningPolicy.District;
         var cells = new List<GridPos>();
@@ -351,7 +396,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
         {
             var p = new GridPos(r, c);
             if (spec.TerrainAt(p) != CellTerrain.Open) continue;
-            if (DistrictLayout.ZoneOf(p, spec.Rows, district.CoreSideMilli, district.RampartThickness) != zone) continue;
+            if (DistrictLayout.ZoneOf(p, spec.Rows, district.CoreSideMilli, district.RampartThickness,
+                    attackerEdge, wardExtraDepth) != zone) continue;
             if (boardState.OccupantAt(p) is not null) continue;
             cells.Add(p);
         }

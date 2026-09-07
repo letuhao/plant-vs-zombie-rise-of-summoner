@@ -74,4 +74,37 @@ public class BattleTraceTests
         Assert.Equal(string.Empty, new BattleTrace().Digest);
         Assert.Empty(new BattleTrace().Phases);
     }
+
+    // ---- base-defense siege-ai R6: AiDecision ------------------------------------------------
+
+    [Fact]
+    public void AiDecisions_are_recorded_in_call_order()
+    {
+        var t = new BattleTrace();
+        t.AiDecision(0, "wave:0", "#1=target-a(total=100)");
+        t.AiDecision(1, "wave:1", "#1=target-b(total=50)");
+
+        Assert.Equal(
+            new[] { "0 wave:0 #1=target-a(total=100)", "1 wave:1 #1=target-b(total=50)" },
+            t.AiDecisions);
+    }
+
+    [Fact]
+    public void An_unrecorded_trace_has_no_ai_decisions()
+    {
+        Assert.Empty(new BattleTrace().AiDecisions);
+    }
+
+    [Fact]
+    public void AiDecisions_are_kept_out_of_the_digest()
+    {
+        // Same reason Target/Turn are separate: an observability addition must not move the
+        // fixture the byte-identity parity ladder compares.
+        var t = new BattleTrace();
+        t.Phase(1, "ai");
+        t.AiDecision(1, "wave:0", "#1=target-a(total=100)");
+
+        Assert.Equal("phase 1 ai", t.Digest);
+        Assert.Single(t.AiDecisions);
+    }
 }

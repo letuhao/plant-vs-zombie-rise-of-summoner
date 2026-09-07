@@ -319,7 +319,7 @@
       "auditVerdict": null,
       "basis": "blocked",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -327,7 +327,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:37:28Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -343,7 +343,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "blocked",
@@ -354,8 +354,8 @@
       "unclassified"
     ],
     "gameTypeId": 265,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chaff",
     "reach": "short",
     "reason": "Without any descriptive data or combat history, the creature cannot be classified as a threat and is relegated to the lowest baseline.",
@@ -467,7 +467,7 @@
       "auditVerdict": null,
       "basis": "blocked",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -475,7 +475,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:37:28Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -491,7 +491,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "blocked",
@@ -502,8 +502,8 @@
       "unclassified"
     ],
     "gameTypeId": 267,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chaff",
     "reach": "short",
     "reason": "Without any descriptive data or combat history, the creature cannot be classified as a threat and is categorized as a non-entity.",
@@ -540,7 +540,7 @@
       "auditVerdict": null,
       "basis": "blocked",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -548,7 +548,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:37:49Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -564,7 +564,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "blocked",
@@ -575,8 +575,8 @@
       "unclassified"
     ],
     "gameTypeId": 259,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chaff",
     "reach": "short",
     "reason": "Without any descriptive data or combat history, the creature cannot be assigned a higher threat level and is categorized as a baseline nuisance by default.",
@@ -909,7 +909,7 @@
       "auditVerdict": null,
       "basis": "blocked",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -917,7 +917,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:38:08Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -933,7 +933,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "blocked",
@@ -944,8 +944,8 @@
       "unclassified"
     ],
     "gameTypeId": 258,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chaff",
     "reach": "short",
     "reason": "Without any descriptive data or combat history, the creature cannot be classified as a threat and defaults to the lowest baseline.",

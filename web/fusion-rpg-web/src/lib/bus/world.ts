@@ -370,6 +370,118 @@ export type WorldTurnCommitDto = {
   currentTurn: number;
 };
 
+/**
+ * party-dungeon D1.28 (the world-map door) — the two delve endpoints the door needs, added here
+ * rather than a new `lib/bus/delve.ts`, per this task's own Files line
+ * (`tasks/party-dungeon-todo.md` D1.28: "`src/lib/bus/world.ts` (the order)"). Deliberately narrow:
+ * this is NOT the delve-stage contract (`D5.3`, Phase 5, unbuilt — "the sixteen view types and their
+ * adapters") — only the fields the door itself reads (`domainId` to post, `rungs[0]`/`raidModes[0]`
+ * as the door's own "no picker UI on the map, so use the first offered" simplification, named
+ * explicitly rather than silently) and the one shape it posts back.
+ */
+
+/** Narrow slice of `DomainOfferDto` (`Delve/Domains/DomainOfferDto.cs:24-29`) — only what the door
+ * reads. `DomainOffers.For` never puts a `theme` field on this DTO at all (confirmed by reading its
+ * own construction, `DomainOffers.cs:95-103`) — there is nothing to add here even for a future
+ * caller that wanted one; `delveDoorCapability.ts`'s own doc comment covers this in full. */
+export type DelveDomainOfferSummary = {
+  domainId: string;
+  raidModes: string[];
+  rungs: { rungId: string }[];
+};
+
+/** `GET /api/delve/domains/{playerId}` (`DelveEndpoints.cs:48`) — always returns `[]` in production
+ * today (`dungeon_domain` has no write arm yet, D4.16) but is the real, shipped, only legitimate
+ * source of a postable `domainId` anywhere in the system; never a static slot-kind table (see
+ * `delveDoorCapability.ts`'s own doc comment for why one is not built here instead). */
+export function useDelveDomainOffers(playerId: number) {
+  return useQuery({
+    queryKey: ["delve", "domains", playerId] as const,
+    queryFn: () => getJson<DelveDomainOfferSummary[]>(`/api/delve/domains/${playerId}`),
+    enabled: playerId > 0
+  });
+}
+
+/** `DelveStartHttpRequest.CarryInItem` (`DelveEndpoints.cs:158-167`) — always `[]` from the map door
+ * (R10: "no legion leaves the map," and the door has no pack UI), but typed in full so the shape
+ * matches the wire exactly rather than being narrowed to "always empty" by this file's own choice. */
+export type DelveCarryInItem = {
+  kind: string;
+  refId: string;
+  instanceId?: string | null;
+  qty: number;
+  w: number;
+  h: number;
+  grantIndex: number;
+};
+
+/** `DelveStartHttpRequest` (`FusionRpg.Server/DelveEndpoints.cs:146-168`) verbatim, camelCased —
+ * ASP.NET Core's default `System.Text.Json` binding (no `JsonNamingPolicy` override anywhere in
+ * `FusionRpg.Server`, confirmed) is camelCase, matching every other DTO already mirrored in this
+ * file. `DelveStart.cs`'s own class doc (`Delve/Domains/DelveStart.cs:7-10`) names `parentWorldId`
+ * as the ONE field that legitimately differs between a Sanctum entry (null) and a map-door entry
+ * (this world's own id) — "the SAME body" the door and D5.8's own future picker both send is a claim
+ * about shape, not about every value being equal. */
+export type DelveStartRequestBody = {
+  playerId?: number;
+  correlationId: string;
+  domainId: string;
+  parentWorldId?: string | null;
+  rungIdOrTailLabel: string;
+  oath: boolean;
+  raidMode: string;
+  memberInstanceIds: string[];
+  carryIn: DelveCarryInItem[];
+};
+
+/** `Results.Ok(new { delveId, worldId })` (`DelveEndpoints.cs:91`) — `worldId` here is the NEW
+ * delve-scoped world the start plan creates (`world-stage-map.md`'s own "a delve world row exists
+ * beside a map world"), never the map's own `worldId` the door read `parentWorldId` from; the door
+ * only navigates on `delveId` (`delveRoute`, `stages/delve/route.ts`), never this field. */
+export type DelveStartResultDto = { delveId: string; worldId: string };
+
+/**
+ * The door's own `POST /api/delve/start` body (party-dungeon D1.28) — a pure function, kept in this
+ * bus file (not `stages/world/inspector/delveDoorCapability.ts`, its first draft location) because
+ * `contractGuard.test.ts` forbids `stages/`/`layers/`/`ui/` from type-importing a wire shape directly
+ * (`contractGuard.ts:57,80` — no exception on this new path); a `stages/` caller gets this as a plain
+ * function import instead, the same way it already gets `useDelveDomainOffers` below. Unit-testable
+ * directly against `DelveStartHttpRequest` (`FusionRpg.Server/DelveEndpoints.cs:146-168`) with no
+ * `fetch`/react-query mocking needed. `parentWorldId` is the map door's own field (`DelveStart.cs:7-10`
+ * — null for a Sanctum entry, this world's id for a map-door entry); `memberInstanceIds`/`carryIn` are
+ * always empty — the map has no roster/pack picker (R10: "no legion leaves the map") — and
+ * `rungIdOrTailLabel`/`raidMode` take the first live-offered value, since the door is not the picker
+ * (D5.8 owns choosing among several).
+ */
+export function buildDelveDoorStartBody(args: {
+  offer: DelveDomainOfferSummary;
+  worldId: string;
+  playerId: number;
+  correlationId: string;
+}): DelveStartRequestBody {
+  return {
+    playerId: args.playerId,
+    correlationId: args.correlationId,
+    domainId: args.offer.domainId,
+    parentWorldId: args.worldId,
+    rungIdOrTailLabel: args.offer.rungs[0]?.rungId ?? "",
+    oath: false,
+    raidMode: args.offer.raidModes[0] ?? "",
+    memberInstanceIds: [],
+    carryIn: []
+  };
+}
+
+/** POST /api/delve/start (`DelveEndpoints.cs:50`) — the map door's own order (party-dungeon D1.28).
+ * No cache to invalidate here: opening a delve changes nothing this file's own queries read (R10 —
+ * the map's own state is untouched by the request). */
+export function useStartDelveFromWorldDoor() {
+  return useMutation({
+    mutationFn: (body: DelveStartRequestBody) =>
+      sendJson<DelveStartResultDto>("/api/delve/start", "POST", body)
+  });
+}
+
 export const worldKeys = {
   header: (playerId: number) => ["world", "header", playerId] as const,
   state: (worldId: string) => ["world", "state", worldId] as const,

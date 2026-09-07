@@ -114,4 +114,51 @@ public static class ActionContainerEffectResolverFactory
         if (host.Bag.Catalog is not InMemoryEffectCatalog catalog) return;
         foreach (var def in defs) catalog.Upsert(AtomPushCodec.ToDef(def));
     }
+
+    /// <summary>
+    /// spec-equip-runtime.md's "Amendment 2026-09-07 — the Battle half, real content": a specimen's
+    /// equipped `stat.modify` atoms (virtually all real affix/relic content — confirmed 2026-09-07 that
+    /// `EquipAtomSource`'s `stat.derived`-only composer-fold path never sees them) reach a real battle
+    /// through this SAME compile/grant pattern, additive to <see cref="Build"/> rather than folded into
+    /// it — a container id and a specimen id are different key spaces, and `Build`'s own
+    /// <c>byContainer</c> map has no meaningful entry for "this specimen's gear."
+    ///
+    /// <para><b>Filtered to `stat.modify` ONLY, deliberately.</b> `stat.derived` equip atoms already
+    /// have a real, working, separate delivery path (<see cref="Battle.EquipAtomSource"/> →
+    /// <see cref="Battle.BattleStatComposer"/>'s compose-time fold). Compiling `stat.derived` atoms
+    /// here too would double-apply them — once via the composer fold, once via this grant path — the
+    /// exact "two writers, one value" defect `spec-equip-runtime.md`'s own boundary forbids. The two
+    /// producers read disjoint atom kinds off the same binding set so neither can ever double-count
+    /// the other's contribution.</para>
+    /// </summary>
+    public static (IReadOnlyList<EffectDefDto> Defs, Func<string, IReadOnlyList<string>> EquipEffectIdsFor)
+        BuildEquip(RpgStore store, IReadOnlyList<string> specimenIds)
+    {
+        var defs = new List<EffectDefDto>();
+        var effectIdsBySpecimen = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        var revision = store.GetCatalogRevision();
+
+        foreach (var specimenId in specimenIds.Distinct(StringComparer.Ordinal))
+        {
+            var resolution = store.ResolveBindings(
+                new OwnerScope(OwnerKind.UniqueActor, specimenId), new BindContext(RuntimeId.Battle));
+            if (resolution.AtomsByBinding is null) continue;
+
+            var statModifyAtoms = resolution.AtomsByBinding.Values
+                .SelectMany(atoms => atoms)
+                .Where(atom => string.Equals(atom.KindId, "stat.modify", StringComparison.Ordinal))
+                .ToList();
+            if (statModifyAtoms.Count == 0) continue;
+
+            var compiled = AtomCompiler.Compile(statModifyAtoms, RuntimeId.Battle, revision);
+            if (compiled.Defs.Count == 0) continue;
+
+            defs.AddRange(compiled.Defs);
+            effectIdsBySpecimen[specimenId] = compiled.Defs.Select(d => d.EffectId).ToList();
+        }
+
+        return (defs, specimenId => effectIdsBySpecimen.TryGetValue(specimenId, out var ids)
+            ? ids
+            : Array.Empty<string>());
+    }
 }

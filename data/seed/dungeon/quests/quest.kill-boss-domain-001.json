@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The shadow looming over this land must be extinguished to break the cycle of suffering. Only by striking down the source of this corruption can the realm truly know peace.",
+  "name": "The Eternal Scourge",
+  "objectiveTemplate": "kill-boss",
+  "prereqRefs": [],
+  "questId": "quest.kill-boss-domain-001",
+  "repeatScope": "per-domain",
+  "rewardBand": "fair",
+  "scope": "domain",
+  "targetRef": "none"
+}

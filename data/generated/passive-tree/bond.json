@@ -1,0 +1,336 @@
+{
+  "treeId": "bond",
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1645,
+  "bound": [
+    {
+      "nodeId": "skill.bond-off-t1-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 405,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t1-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 405,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t1-n2",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 405,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t2-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 810,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 810,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t3-n2",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 1283,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t4-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 2498,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t6-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-off-t7-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-def-t1-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.bond-def-t1-n2",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.bond-def-t4-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "defense",
+          "op": "Flat",
+          "kMicro": 592,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.bond-def-t5-n1",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.bond-def-t6-n1",
+      "atoms": []
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.bond-off-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.bond-off-t2-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.bond-off-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.precision\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.bond-off-t3-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.bond-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.bond-off-t5-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.bond-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-off-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.bonding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t1-n1",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t2-n0",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-callus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-hardening\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.plating\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-hardening\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-regen\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-riveting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t7-n1",
+      "unspentBudgetShareMilli": 64,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.plating\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.bond-def-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

@@ -15,7 +15,8 @@ public sealed record FusionTuning(
     FusionCostTuning StarMergeCost, FusionCostTuning PromotionCost,
     IReadOnlyDictionary<DemonRarity, FusionCostTuning> PromotionCostByRarity,
     IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost,
-    IReadOnlyDictionary<DemonRarity, int> SlotsByRarity);
+    IReadOnlyDictionary<DemonRarity, int> SlotsByRarity,
+    IReadOnlyDictionary<DemonRarity, long> InheritCostByRarity);
 
 public sealed class FusionTuningRejection : Exception
 {
@@ -87,8 +88,22 @@ public static class FusionTuningLoader
             foreach (var rarity in DemonRarityLadder.All)
                 slotsByRarity[rarity] = Int(slotsEl, rarity.ToString().ToLowerInvariant(), "slotsByRarity");
 
+            // WAVE F2.3 (demon-standalone, 2026-09-07): a fusion pick's cost is read from the PICK'S
+            // OWN source rarity, never the fusion output's — the same rung set recipeCost covers
+            // (Cultivated and up), a different lookup key, hence its own table rather than a second
+            // read of recipeCost.
+            var inheritEl = Obj(root, "inheritCostByRarity", "$");
+            var inheritCostByRarity = new Dictionary<DemonRarity, long>();
+            foreach (var rarity in DemonRarityLadder.All)
+            {
+                if (!DemonRarityLadder.AtLeast(rarity, DemonRecipeCatalog.OutputEligibilityFloor)) continue;
+                var key = rarity.ToString().ToLowerInvariant();
+                inheritCostByRarity[rarity] = Long(inheritEl, key, "inheritCostByRarity");
+            }
+
             return new FusionTuning(schemaVersion, version, perStarPowerMilli, perStarDefenseMilli,
-                starCap, starMergeCost, promotionCost, promotionCostByRarity, recipeCost, slotsByRarity);
+                starCap, starMergeCost, promotionCost, promotionCostByRarity, recipeCost, slotsByRarity,
+                inheritCostByRarity);
         }
     }
 

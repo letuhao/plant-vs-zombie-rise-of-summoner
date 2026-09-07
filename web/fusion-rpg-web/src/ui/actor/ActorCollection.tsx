@@ -21,7 +21,7 @@ export type ActorCollectionItem = {
   /** Lightweight row when rungState absent (lawn Wave/Fielded). */
   label?: string;
   sideLabel?: string;
-  chip?: "Fielded" | "Wave";
+  chip?: "Fielded" | "Wave" | "Bound";
   hpFraction?: number;
   lockedReason?: string;
 };
@@ -303,21 +303,32 @@ function CollectionGridItem({
       <div
         data-testid={`${testId}-item-${item.key}`}
         data-selected={selected}
-        className={cn(selected && "ring-2 ring-lawn-hot")}
+        data-chip={item.chip}
+        title={item.lockedReason}
+        aria-disabled={Boolean(item.lockedReason)}
+        className={cn(
+          selected && "ring-2 ring-lawn-hot",
+          item.lockedReason && "cursor-not-allowed opacity-60"
+        )}
         onClick={() => {
+          if (item.lockedReason) return;
           logLawnInteractive("collection.select", { key: item.key, chip: item.chip });
           onSelect?.(item.key);
         }}
         onKeyDown={(e) => {
+          if (item.lockedReason) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             onSelect?.(item.key);
           }
         }}
         role="button"
-        tabIndex={0}
+        tabIndex={item.lockedReason ? -1 : 0}
       >
-        <ActorCard state={item.rungState} onInspect={() => onSelect?.(item.key)} />
+        <ActorCard state={item.rungState} onInspect={() => {
+          if (item.lockedReason) return;
+          onSelect?.(item.key);
+        }} />
       </div>
     );
   }

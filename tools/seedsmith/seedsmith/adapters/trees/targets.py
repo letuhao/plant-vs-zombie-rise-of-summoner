@@ -1,4 +1,4 @@
-"""seedsmith.adapters.trees.targets — the pure parser over `data/tuning/passive-tree-targets.v1.json`
+"""seedsmith.adapters.trees.targets — the pure parser over `data/tuning/passive-tree-targets.v2.json`
 (task A2, spec-tree-plan.md §8, spec-tree-language.md §4.3, spec-tree-review.md §6.3,
 spec-species-tree.md §3.2/§5.3).
 
@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
-TARGETS_PATH = REPO_ROOT / "data" / "tuning" / "passive-tree-targets.v1.json"
+TARGETS_PATH = REPO_ROOT / "data" / "tuning" / "passive-tree-targets.v2.json"
 
 
 class PassiveTreeTargetsError(ValueError):

@@ -1,0 +1,80 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:52:06Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "frost-touched undead"
+    ],
+    "gameTypeId": 227,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The description focuses on high damage and a specific transformation mechanic, but lacks the scale of destruction or widespread threat required for a Warden-level classification.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "IceClawZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "snow-claws",
+      "high-damage",
+      "charmed-transformation",
+      "frost-resistant"
+    ],
+    "variants": [
+      "mutated",
+      "normal"
+    ],
+    "verdict": "too-high"
+  }
+]

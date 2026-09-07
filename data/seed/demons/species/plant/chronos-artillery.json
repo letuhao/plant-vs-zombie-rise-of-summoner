@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:51:02Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "rarity": "chimeric"
       },
@@ -50,7 +51,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "chronos-artillery"
     ],

@@ -1,0 +1,17 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.bucketnutzombie-001"
+  ],
+  "flavor": "Thick, calcified roots weave through the floorboards like the ribs of a great beast, cradling a central slab of unpolished granite. A fine, rhythmic vibration hums through the soles of your boots, as if the stone itself were breathing.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Ossuary of Roots",
+  "reason": "The party must offer a piece of their history or a drop of blood to the stone to pass through the living gate.",
+  "roomId": "room.shrine-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

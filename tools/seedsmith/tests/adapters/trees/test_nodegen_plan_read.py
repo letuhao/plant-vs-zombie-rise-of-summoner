@@ -45,6 +45,35 @@ class LoadTests(unittest.TestCase):
             self.assertIsNone(node.permitted_ids)
 
 
+class LoadFromDictTests(unittest.TestCase):
+    """Task J8: the identical parse `load()` performs, for a caller (species-tree orchestration)
+    that already has the plan document in memory rather than a committed file at the generic
+    `plan/<treeId>.v1.json` path -- proves the two entrypoints share one parser, not two."""
+
+    def test_loads_an_in_memory_plan_with_no_file_at_all(self) -> None:
+        plan_doc = minimal_plan("SomeSpecies", node_count=4)
+        plan = plan_read.load_from_dict(plan_doc)
+        self.assertEqual(plan.tree_id, "SomeSpecies")
+        self.assertEqual(4, len(plan.nodes))
+
+    def test_refuses_an_empty_nodes_array_the_same_as_load_does(self) -> None:
+        plan_doc = minimal_plan("empty-species", node_count=0)
+        with self.assertRaises(plan_read.TreePlanReadError):
+            plan_read.load_from_dict(plan_doc)
+
+    def test_refuses_a_missing_property_vocabulary_the_same_as_load_does(self) -> None:
+        plan_doc = minimal_plan("no-vocab-species", node_count=2)
+        del plan_doc["propertyVocabulary"]
+        with self.assertRaises(plan_read.TreePlanReadError):
+            plan_read.load_from_dict(plan_doc)
+
+    def test_raw_round_trips_the_real_document(self) -> None:
+        plan_doc = minimal_plan("SomeSpecies", node_count=2)
+        plan_doc["favouredAptitude"] = "Might"
+        plan = plan_read.load_from_dict(plan_doc)
+        self.assertEqual("Might", plan.raw["favouredAptitude"])
+
+
 class RefusalTests(unittest.TestCase):
     def test_refuses_a_missing_plan_file(self) -> None:
         seed_root = Path(tempfile.mkdtemp())

@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "split",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:35:07Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "deployMode": "HypnoAlly"
       },
@@ -50,7 +51,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-hybrid"
     ],
@@ -260,10 +261,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:06:09Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "elementPrimary": "earth"
       },
@@ -287,7 +289,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-hybrid"
     ],
@@ -418,10 +420,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:45:28Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "rarity": "chimeric"
       },
@@ -445,7 +448,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-hybrid"
     ],

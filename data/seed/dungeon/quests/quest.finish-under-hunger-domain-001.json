@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The starving villagers need the ancient granary cleared of monsters so they can finally reclaim their winter stores. Failure means the settlement will not survive the coming frost.",
+  "name": "The Last Supper",
+  "objectiveTemplate": "finish-under-hunger",
+  "prereqRefs": [],
+  "questId": "quest.finish-under-hunger-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "domain",
+  "targetRef": "none"
+}

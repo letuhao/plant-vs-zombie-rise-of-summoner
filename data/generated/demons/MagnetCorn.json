@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Dark",
   "gameTypeId": 1209,
   "magnitudes": {
     "combat.block.shred.omni": 542,

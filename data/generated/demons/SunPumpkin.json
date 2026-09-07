@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Light",
-  "elementSecondary": null,
+  "elementSecondary": "Earth",
   "gameTypeId": 1324,
   "magnitudes": {
     "combat.block.strength.omni": 678,

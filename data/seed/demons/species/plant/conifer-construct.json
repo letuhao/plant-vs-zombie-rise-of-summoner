@@ -23,11 +23,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:22:58Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "threatBand": "raider"
       },
@@ -51,7 +52,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "conifer-construct"
     ],

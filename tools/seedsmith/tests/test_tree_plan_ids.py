@@ -15,7 +15,43 @@ from seedsmith.adapters.trees.plan.ids import (  # noqa: E402
     mint_node_keys,
     node_id,
     refuse_if_key_reused,
+    tree_slug_for,
 )
+
+
+class TreeSlugForTests(unittest.TestCase):
+    """Task J1 (dots/underscores) + task J8 (lowercase, 2026-09-07) — the real, checked-against-
+    real-data reasons both transforms exist on this ONE function, never on `tree_id` itself."""
+
+    def test_dots_and_underscores_are_stripped(self) -> None:
+        self.assertEqual("nerveafflicted", tree_slug_for("nerve.afflicted"))
+        self.assertEqual("charmpulse", tree_slug_for("charm_pulse"))
+
+    def test_an_already_lowercase_id_with_no_separators_is_unchanged(self) -> None:
+        self.assertEqual("might", tree_slug_for("might"))
+        self.assertEqual("fire", tree_slug_for("fire"))
+
+    def test_a_pascal_case_species_id_is_lowercased(self) -> None:
+        self.assertEqual("abyssswordstar", tree_slug_for("AbyssSwordStar"))
+
+    def test_the_result_always_satisfies_node_ids_own_grammar(self) -> None:
+        for tree_id in ("nerve.afflicted", "charm_pulse", "AbyssSwordStar", "SnorkleZombie", "might"):
+            # node_id() itself raises IdMintError on a bad slug -- this is the real proof, not a
+            # regex re-checked here a second way.
+            node_id(tree_slug_for(tree_id), "offensive", 1, "n0")
+
+    def test_the_real_904_species_corpus_produces_zero_slug_collisions(self) -> None:
+        import json
+        from pathlib import Path as _Path
+
+        repo_root = _Path(__file__).resolve().parents[3]
+        index_path = repo_root / "data" / "seed" / "demons" / "species" / "_index.json"
+        if not index_path.exists():
+            self.skipTest("species _index.json not present in this checkout")
+        species_ids = json.loads(index_path.read_text(encoding="utf-8")).keys()
+        slugs = [tree_slug_for(sid) for sid in species_ids]
+        self.assertEqual(len(slugs), len(set(slugs)),
+                         "two real species ids collided into the same node-id slug")
 
 
 class NodeIdGrammarTests(unittest.TestCase):

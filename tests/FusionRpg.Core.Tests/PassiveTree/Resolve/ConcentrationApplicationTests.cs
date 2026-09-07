@@ -148,7 +148,7 @@ public class TreeResolveMemoTests
                     new[]
                     {
                         new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire",
-                            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits, null),
+                            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits),
                     },
                     Array.Empty<string>(), ExclusionForm.None, null, true, null),
             });
@@ -303,7 +303,7 @@ public class ContestWinRateThetaInvarianceTests
                         // is what makes this a CONTEST read (PS-3), never P(Theta).
                         new NodeAtom("stat.derived", AttachPoint.Status, "status.resist.dot",
                             NodeAtomOp.Increased, null, null, kMicro, ScaleAxis.Theta,
-                            UnitClass.StatusPotencyPoints, null),
+                            UnitClass.StatusPotencyPoints),
                     },
                     Array.Empty<string>(), ExclusionForm.None, null, true, null),
             });

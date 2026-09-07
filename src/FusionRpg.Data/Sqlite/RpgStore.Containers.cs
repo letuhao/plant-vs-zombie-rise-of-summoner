@@ -22,6 +22,8 @@ public sealed partial class RpgStore
               container_kind TEXT NOT NULL,
               slot TEXT,
               rarity TEXT,
+              frame TEXT,
+              base_type_id TEXT,
               min_tier INTEGER,
               max_tier INTEGER,
               level_req INTEGER,
@@ -96,6 +98,8 @@ public sealed partial class RpgStore
         if (stored.Kind != incoming.Kind
             || stored.Slot != incoming.Slot
             || stored.Rarity != incoming.Rarity
+            || stored.Frame != incoming.Frame
+            || stored.BaseTypeId != incoming.BaseTypeId
             || stored.MinTier != incoming.MinTier
             || stored.MaxTier != incoming.MaxTier
             || stored.LevelReq != incoming.LevelReq
@@ -254,12 +258,13 @@ public sealed partial class RpgStore
     {
         ExecIn(db, tx, """
             INSERT INTO effect_container
-              (container_id, container_kind, slot, rarity, min_tier, max_tier, level_req,
+              (container_id, container_kind, slot, rarity, frame, base_type_id, min_tier, max_tier, level_req,
                prefix_rolls, suffix_rolls, tags_json, enabled, revision)
-            VALUES ($id, $kind, $slot, $rarity, $min, $max, $lvl, $prefix, $suffix, $tags, $enabled, 1)
+            VALUES ($id, $kind, $slot, $rarity, $frame, $baseType, $min, $max, $lvl, $prefix, $suffix, $tags, $enabled, 1)
             ON CONFLICT(container_id) DO UPDATE SET
               container_kind = excluded.container_kind, slot = excluded.slot,
-              rarity = excluded.rarity, min_tier = excluded.min_tier, max_tier = excluded.max_tier,
+              rarity = excluded.rarity, frame = excluded.frame, base_type_id = excluded.base_type_id,
+              min_tier = excluded.min_tier, max_tier = excluded.max_tier,
               level_req = excluded.level_req, prefix_rolls = excluded.prefix_rolls,
               suffix_rolls = excluded.suffix_rolls,
               tags_json = excluded.tags_json, enabled = excluded.enabled,
@@ -267,6 +272,7 @@ public sealed partial class RpgStore
             """,
             ("$id", c.ContainerId), ("$kind", KindName(c.Kind)),
             ("$slot", (object?)c.Slot ?? DBNull.Value), ("$rarity", (object?)c.Rarity ?? DBNull.Value),
+            ("$frame", (object?)c.Frame ?? DBNull.Value), ("$baseType", (object?)c.BaseTypeId ?? DBNull.Value),
             ("$min", (object?)c.MinTier ?? DBNull.Value), ("$max", (object?)c.MaxTier ?? DBNull.Value),
             ("$lvl", (object?)c.LevelReq ?? DBNull.Value), ("$prefix", c.PrefixRolls), ("$suffix", c.SuffixRolls),
             ("$tags", c.TagsJson ?? "{}"), ("$enabled", c.Enabled ? 1 : 0));
@@ -301,7 +307,7 @@ public sealed partial class RpgStore
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText = """
-                    SELECT container_id, container_kind, slot, rarity, min_tier, max_tier, level_req,
+                    SELECT container_id, container_kind, slot, rarity, frame, base_type_id, min_tier, max_tier, level_req,
                            prefix_rolls, suffix_rolls, tags_json, enabled, revision
                     FROM effect_container WHERE container_id = $id;
                     """;
@@ -315,14 +321,16 @@ public sealed partial class RpgStore
                     Kind = ParseKind(r.GetString(1)),
                     Slot = r.IsDBNull(2) ? null : r.GetString(2),
                     Rarity = r.IsDBNull(3) ? null : r.GetString(3),
-                    MinTier = r.IsDBNull(4) ? null : r.GetInt32(4),
-                    MaxTier = r.IsDBNull(5) ? null : r.GetInt32(5),
-                    LevelReq = r.IsDBNull(6) ? null : r.GetInt32(6),
-                    PrefixRolls = r.GetInt32(7),
-                    SuffixRolls = r.GetInt32(8),
-                    TagsJson = r.GetString(9),
-                    Enabled = r.GetInt32(10) != 0,
-                    Revision = r.GetInt64(11),
+                    Frame = r.IsDBNull(4) ? null : r.GetString(4),
+                    BaseTypeId = r.IsDBNull(5) ? null : r.GetString(5),
+                    MinTier = r.IsDBNull(6) ? null : r.GetInt32(6),
+                    MaxTier = r.IsDBNull(7) ? null : r.GetInt32(7),
+                    LevelReq = r.IsDBNull(8) ? null : r.GetInt32(8),
+                    PrefixRolls = r.GetInt32(9),
+                    SuffixRolls = r.GetInt32(10),
+                    TagsJson = r.GetString(11),
+                    Enabled = r.GetInt32(12) != 0,
+                    Revision = r.GetInt64(13),
                 };
             }
 
@@ -371,6 +379,31 @@ public sealed partial class RpgStore
             while (r.Read()) list.Add(r.GetString(0));
             return list;
         }
+    }
+
+    /// <summary>
+    /// Every container in the store, resolved whole (head + fixed atoms + pool). D3.9's own
+    /// whole-corpus nerve-target scan (`EventDeckPreflight.CheckNoNerveTargetInAnyContainer`) is the
+    /// first real caller — no "list every container" query existed before it, confirmed by grep: only
+    /// <see cref="ListActionContainers"/> (action-scoped) and <see cref="GetContainer"/> (single-row)
+    /// did.
+    ///
+    /// <para>Composes <see cref="ListContainerIds"/> and <see cref="GetContainer"/> rather than a new
+    /// bulk `SELECT ... FROM effect_container` — both already lock (`_gate` is a plain CLR monitor,
+    /// reentrant per-thread, so nesting is safe) and are already tested; a hand-rolled bulk query here
+    /// could drift from what `GetContainer` returns for the same id, and this is an audit/preflight
+    /// path, never a hot one, so the extra round trips cost nothing that matters.</para>
+    /// </summary>
+    public IReadOnlyList<ContainerRow> ListContainers()
+    {
+        var ids = ListContainerIds();
+        var list = new List<ContainerRow>(ids.Count);
+        foreach (var id in ids)
+        {
+            var c = GetContainer(id);
+            if (c is not null) list.Add(c);
+        }
+        return list;
     }
 
     // ---- affixes (T3.1, affix-schema) ------------------------------------------------------------

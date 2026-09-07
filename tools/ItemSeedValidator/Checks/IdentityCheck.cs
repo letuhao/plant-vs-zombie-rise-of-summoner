@@ -111,6 +111,11 @@ public static class IdentityCheck
             case SequenceShape.Fixed:
                 break;
 
+            case SequenceShape.Derived:
+                // No grammar left to check: the tail is whatever the deterministic generator (a grid
+                // cell, not an author) produced. The prefix match above is the whole review.
+                break;
+
             case SequenceShape.ThreeDigit:
                 if (!ThreeDigit.IsMatch(tail))
                 {

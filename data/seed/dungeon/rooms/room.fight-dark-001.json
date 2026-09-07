@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "A narrow corridor of weeping, black stone where the air tastes of copper and old rot. Faint, rhythmic thumping vibrates through the soles of your boots, as if the very walls possess a slow, dying heartbeat.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Sallow Vein",
+  "reason": "The party is ambushed by shadow-touched creatures emerging from the porous walls.",
+  "roomId": "room.fight-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

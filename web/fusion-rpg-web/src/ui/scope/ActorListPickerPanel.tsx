@@ -1,5 +1,5 @@
 import { ActorCollection, type ActorCollectionItem, type ActorRungState } from "@/ui/actor";
-import type { ScopePickerValue } from "./ActorMenuScopePicker";
+import type { ScopePickerValue, ScopeTargetCandidate } from "./ActorMenuScopePicker";
 
 type ListKind = "target" | "uniqueDemon";
 
@@ -8,27 +8,8 @@ function idOf(value: ScopePickerValue | null, kind: ListKind): string | null {
   return value.kind === "target" ? value.targetPtr : value.instanceId;
 }
 
-/**
- * Target / UniqueDemon list body for ActorMenuScopePicker.
- * Uses shared ActorCollection (lawn-interactive T11) — never a private ActorRow fork.
- *
- * WhoSelector shapes stay distinct: target → targetPtr, uniqueDemon → instanceId.
- * Never pass instanceId as targetPtr.
- */
-export function ActorListPickerPanel({
-  kind,
-  candidates,
-  value,
-  onChange
-}: {
-  kind: ListKind;
-  candidates: ActorRungState[];
-  value: ScopePickerValue | null;
-  onChange: (value: ScopePickerValue) => void;
-}) {
-  const selectedId = idOf(value, kind);
-
-  const items: ActorCollectionItem[] = candidates.map((state, index) => {
+function uniqueItems(candidates: ActorRungState[]): ActorCollectionItem[] {
+  return candidates.map((state, index) => {
     if (state.kind === "ready") {
       return {
         key: state.data.instanceId,
@@ -41,11 +22,64 @@ export function ActorListPickerPanel({
       };
     }
     return {
-      key: `pending-${kind}-${index}`,
+      key: `pending-uniqueDemon-${index}`,
       rungState: state,
       lockedReason: "Not ready"
     };
   });
+}
+
+function targetItems(candidates: ScopeTargetCandidate[]): ActorCollectionItem[] {
+  const items: ActorCollectionItem[] = [];
+  candidates.forEach((state, index) => {
+    if (state.kind === "ready") {
+      const ptr = state.targetPtr?.trim();
+      if (!ptr) return;
+      items.push({
+        key: ptr,
+        rungState: state.rungState,
+        label:
+          state.rungState.data.displayName.state === "known"
+            ? state.rungState.data.displayName.value
+            : ptr,
+        sideLabel: state.rungState.data.side
+      });
+      return;
+    }
+    items.push({
+      key: `pending-target-${index}`,
+      rungState: state,
+      lockedReason: "Not ready"
+    });
+  });
+  return items;
+}
+
+/**
+ * Target / UniqueDemon list body for ActorMenuScopePicker.
+ * Uses shared ActorCollection (lawn-interactive T11) — never a private ActorRow fork.
+ *
+ * WhoSelector shapes stay distinct: target → targetPtr, uniqueDemon → instanceId.
+ * Never pass instanceId as targetPtr.
+ */
+export function ActorListPickerPanel({
+  kind,
+  candidates,
+  targetCandidates,
+  value,
+  onChange
+}: {
+  kind: ListKind;
+  /** UniqueDemon candidates (instanceId identity). */
+  candidates?: ActorRungState[];
+  /** Target candidates — each ready row must carry an explicit targetPtr. */
+  targetCandidates?: ScopeTargetCandidate[];
+  value: ScopePickerValue | null;
+  onChange: (value: ScopePickerValue) => void;
+}) {
+  const selectedId = idOf(value, kind);
+  const items =
+    kind === "target" ? targetItems(targetCandidates ?? []) : uniqueItems(candidates ?? []);
 
   return (
     <div data-testid={`scope-${kind}-list`}>
@@ -55,18 +89,17 @@ export function ActorListPickerPanel({
         density="list"
         selectionKey={selectedId}
         onSelect={(key) => {
-          // Ready rows only — pending keys are not WhoSelector payloads.
-          const ready = candidates.find((c) => c.kind === "ready" && c.data.instanceId === key);
-          if (!ready || ready.kind !== "ready") return;
-          const id = ready.data.instanceId;
           if (kind === "target") {
-            // targetPtr is a board/world pointer identity — for menu demos the candidate id is the
-            // stand-in; production consumers must supply ptr-shaped candidates, never confuse with
-            // uniqueDemon instanceId when wiring Intent.
-            onChange({ kind: "target", targetPtr: id });
-          } else {
-            onChange({ kind: "uniqueDemon", instanceId: id });
+            const ready = (targetCandidates ?? []).find(
+              (c) => c.kind === "ready" && c.targetPtr.trim() === key
+            );
+            if (!ready || ready.kind !== "ready") return;
+            onChange({ kind: "target", targetPtr: ready.targetPtr.trim() });
+            return;
           }
+          const ready = (candidates ?? []).find((c) => c.kind === "ready" && c.data.instanceId === key);
+          if (!ready || ready.kind !== "ready") return;
+          onChange({ kind: "uniqueDemon", instanceId: ready.data.instanceId });
         }}
         empty={
           <p className="text-sm italic text-muted" data-testid={`scope-${kind}-empty`}>

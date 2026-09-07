@@ -23,11 +23,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:36:13Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "threatBand": "cataclysm"
       },
@@ -51,7 +52,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "fungal-summoner"
     ],
@@ -110,19 +111,8 @@
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
       "emittedUtc": "2026-09-04T14:43:40Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
       "manualCorrection": {
-        "utc": "2026-09-04T14:52:00Z",
+        "by": "battle-timeline session, owner-approved",
         "field": [
           "rarity"
         ],
@@ -144,8 +134,19 @@
             "blessed"
           ]
         },
-        "by": "battle-timeline session, owner-approved",
+        "utc": "2026-09-04T14:52:00Z",
         "why": "Caught by VariantCountBandTests within minutes of the kit-shape pass emitting it (emittedUtc 14:43:40Z) -- 4 variants against heirloom's 2..3 band. ⭐ Fixed in the OPPOSITE direction to Peashooter/SunFlower, and the reason matters: there the row's own text said 'nuisance' / 'passive resource producer', so the RARITY was too high. Here it reads 'a force multiplier that summons high-tier, uncapturable units capable of massive damage mitigation, healing' -- so the variant set is right and the rarity was too LOW. Raised to almanac rather than trimming generated content: 4 variants including 'ancient' is the exact profile of 18 of the 20 almanac rows, and that rung is otherwise the Ultimate*/Boss cohort this unit belongs to. ⚠️ 'sunwoven' (3..4) would also satisfy the band and is the conservative alternative if a reviewer thinks almanac too strong -- flagging rather than hiding the judgement call. NOTE: the corpus was still being written when this was corrected (44 files touched in the preceding 40 minutes); if the pass re-emits this row, the band guard will catch it again, which is the point of having it."
+      },
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
       }
     },
     "acquisition": [

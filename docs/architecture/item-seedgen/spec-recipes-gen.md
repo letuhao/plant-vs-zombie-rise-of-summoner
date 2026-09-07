@@ -1,7 +1,7 @@
 # Spec: `recipes-gen`
 
-**Module id:** `recipes-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 3 of 10
-**Depends on:** `generator-harness` (1), `base-types-gen` (2), `materials-gen` (2)
+**Module id:** `recipes-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 4 (parallel with `set-charm-live-endpoint`, `combination-write-unblock`)
+**Depends on:** `generator-harness`, `base-types-gen`, `materials-gen`
 
 ## Reference manifest (per `generator-harness`'s `DependencyValidator`)
 

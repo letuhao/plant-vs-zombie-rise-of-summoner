@@ -126,6 +126,15 @@ def test_next_draw_start_index_ignores_non_draw_ids():
     assert next_draw_start_index(existing) == 4
 
 
+def test_next_draw_start_index_works_unmodified_over_a_species_namespaced_id():
+    """Task J7: `next_draw_start_index` needed NO change to support `--species-id` — it reads the
+    suffix AFTER `affix-draw-`, never the prefix, so a species-namespaced id
+    (`affix.species.Alpha.affix-draw-002`) continues the sequence exactly like the shared
+    `affix.authored.*` one already does."""
+    existing = {"affix.species.Alpha.affix-draw-002": {}}
+    assert next_draw_start_index(existing) == 3
+
+
 def test_a_second_run_never_overwrites_the_first_runs_entries():
     """The actual regression this fixes: two back-to-back invocations must produce two DISTINCT
     committed entries, never the second silently replacing the first via a repeated draw-000 id —
@@ -160,6 +169,54 @@ def test_a_second_run_never_overwrites_the_first_runs_entries():
     assert len(merged) == 2
     assert merged["affix.authored.affix-draw-000"]["name"] == "First Pass"
     assert merged["affix.authored.affix-draw-001"]["name"] == "Second Pass"
+
+
+def test_id_prefix_defaults_to_the_shared_affix_authored_namespace():
+    """Every pre-J7 call site never passes `id_prefix` at all -- must keep producing exactly the
+    same `affix.authored.*` ids it always has."""
+    call, _ = _stub_call([{"name": "Plain", "refs": ["atom.a", "atom.b"]}] * 3)
+    fresh, _, _ = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b"], atom_triggers={"atom.a": False, "atom.b": False},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"}, call=call, workers=1)
+    assert set(fresh) == {"affix.authored.affix-draw-000"}
+
+
+def test_id_prefix_overrides_into_a_species_namespace():
+    """Task J7: `--species-id Alpha` derives `id_prefix="affix.species.Alpha."` -- proven here at
+    the `run_voted_draws` layer the CLI flag ultimately calls into, matching U3's own
+    `affix.species.<speciesId>.*` pattern (`metrics/passive_tree.py`, task J6)."""
+    call, _ = _stub_call([{"name": "Ember Mark", "refs": ["atom.a", "atom.b"]}] * 3)
+    fresh, unresolved, _ = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b"], atom_triggers={"atom.a": False, "atom.b": False},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"}, call=call, workers=1,
+        id_prefix="affix.species.Alpha.")
+    assert unresolved == {}
+    assert set(fresh) == {"affix.species.Alpha.affix-draw-000"}
+
+
+def test_load_existing_defaults_match_the_shared_corpus_path(tmp_path, monkeypatch):
+    import seedsmith.adapters.effects.affix.generate_affixes as ga
+    monkeypatch.setattr(ga, "OUTPUT_DIR", tmp_path)
+    (tmp_path / "all.json").write_text(json.dumps(
+        {"schemaVersion": 1, "kind": "affix", "entries": [{"id": "affix.authored.affix-draw-000"}]}),
+        encoding="utf-8")
+    assert set(ga.load_existing()) == {"affix.authored.affix-draw-000"}
+
+
+def test_load_existing_reads_a_species_specific_file_when_given_one(tmp_path):
+    from seedsmith.adapters.effects.affix.generate_affixes import load_existing
+    species_dir = tmp_path / "species"
+    species_dir.mkdir()
+    (species_dir / "Alpha.json").write_text(json.dumps(
+        {"schemaVersion": 1, "kind": "affix", "_meta": {"partition": "Alpha"},
+        "entries": [{"id": "affix.species.Alpha.affix-draw-000"}]}), encoding="utf-8")
+    existing = load_existing(species_dir, "Alpha.json")
+    assert set(existing) == {"affix.species.Alpha.affix-draw-000"}
+
+
+def test_load_existing_a_missing_species_file_is_empty_not_an_error(tmp_path):
+    from seedsmith.adapters.effects.affix.generate_affixes import load_existing
+    assert load_existing(tmp_path / "species", "Beta.json") == {}
 
 
 # ---- T7.2: name + ref bundle are voted through the REAL generate_affixes CLI path, not resolve_vote

@@ -99,10 +99,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:00:00Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "aptitudePrimary": "Bulwark"
       },
@@ -127,7 +128,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "undead",
       "biological-weapon"
@@ -181,10 +182,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:00:22Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -206,7 +208,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "undead",
       "military_construct"
@@ -339,10 +341,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:01:44Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "aptitudePrimary": "Agility",
         "attackTempo": "slow"
@@ -367,7 +370,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "undead",
       "aerial-raiders"
@@ -1208,10 +1211,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:29:01Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -1233,7 +1237,7 @@
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "undead",
       "heralds"
@@ -1364,10 +1368,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:33:29Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -1390,7 +1395,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "undead",
       "heavy infantry"
@@ -1444,10 +1449,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:34:28Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -1469,7 +1475,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "undead",
       "sports-themed"
@@ -1601,10 +1607,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:34:28Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "rarity": "cultivated"
       },
@@ -1628,7 +1635,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "undead",
       "academic"
@@ -1761,10 +1768,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:35:18Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "elementPrimary": "earth"
       },
@@ -1788,7 +1796,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "undead",
       "bungee-type"
@@ -2163,10 +2171,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:53:01Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -2188,7 +2197,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "undead",
       "pyro-reanimates"
@@ -2242,10 +2251,11 @@
         "attackTempo": "high",
         "deployMode": "split",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:01:55Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "deployMode": "HypnoAlly"
       },
@@ -2269,7 +2279,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "undead",
       "subterranean-laborer"
@@ -3273,14 +3283,14 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:46:01Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -3296,7 +3306,7 @@
     "acquisition": [
       "CaptureOnly"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "slow",
     "basis": "stated",
@@ -3308,8 +3318,8 @@
       "aquatic-reanimates"
     ],
     "gameTypeId": 17,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "sprout",
     "reach": "short",
     "reason": "Its ability to bypass projectile defenses and approach stealthily makes it a significant tactical threat rather than a mere nuisance.",
@@ -3509,10 +3519,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:20:26Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "aptitudePrimary": "Focus",
         "attackTempo": "steady"
@@ -3537,7 +3548,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "undead",
       "reanimated"
@@ -4396,10 +4407,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:33:06Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "aptitudePrimary": "Onslaught",
         "attackTempo": "quick",
@@ -4426,7 +4438,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "undead",
       "athletic-reanimates"

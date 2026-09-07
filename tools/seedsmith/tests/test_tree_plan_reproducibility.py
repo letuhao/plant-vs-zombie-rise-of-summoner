@@ -60,7 +60,7 @@ _MIRROR_RELATIVE_PATHS = (
     Path("passive-tree") / "gate-evidence.v1.json",
 )
 
-_TUNING_FILES = ("passive-tree.v1.json", "passive-tree-targets.v1.json")
+_TUNING_FILES = ("passive-tree.v1.json", "passive-tree-targets.v2.json")
 
 
 def make_scratch_seed_and_tuning() -> "tuple[Path, Path]":

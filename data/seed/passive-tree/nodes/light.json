@@ -1,0 +1,1025 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "A translucent layer of light that hardens upon impact, expanding the soul's protective boundary.",
+      "id": "skill.light-def-t1-n0",
+      "name": "Prismatic Shell",
+      "nameKey": "tree.node.prismatic-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while tier is active — tier wins.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The light does not just touch the skin; it settles deep within the bone, turning marrow into a reservoir of pure radiance.",
+      "id": "skill.light-def-t1-n1",
+      "name": "Photosynthetic Marrow",
+      "nameKey": "tree.node.photosynthetic-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The light pools within the vessel, swelling the reserves and accelerating the recovery of the protective veil.",
+      "id": "skill.light-def-t1-n2",
+      "name": "Solar Reservoir",
+      "nameKey": "tree.node.solar-reservoir",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "Light seeps into the cracks of the spirit, sealing wounds before they can bleed.",
+      "id": "skill.light-def-t10-n0",
+      "name": "Lumen Suture",
+      "nameKey": "tree.node.lumen-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "Light coalesces into a shimmering barrier, replenishing itself with every passing moment.",
+      "id": "skill.light-def-t2-n0",
+      "name": "Gilded Aegis",
+      "nameKey": "tree.node.gilded-aegis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Deeply anchored, the spirit draws strength from the very earth it treads.",
+      "id": "skill.light-def-t2-n1",
+      "name": "Rooted Resilience",
+      "nameKey": "tree.node.rooted-resilience-5",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The light pools within the vessel, swelling the capacity to hold and the speed to mend.",
+      "id": "skill.light-def-t2-n2",
+      "name": "Photosynthetic Reservoir",
+      "nameKey": "tree.node.photosynthetic-reservoir",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layered dermal structure that absorbs ambient radiance to reinforce the outer shell.",
+      "id": "skill.light-def-t3-n0",
+      "name": "Photosynthetic Carapace",
+      "nameKey": "tree.node.photosynthetic-carapace",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin drinks the light to mend the vessel.",
+      "id": "skill.light-def-t3-n1",
+      "name": "Photosynthetic Reservoir",
+      "nameKey": "tree.node.photosynthetic-reservoir-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The light pools within the vessel, swelling the capacity to hold and the speed to replenish.",
+      "id": "skill.light-def-t3-n2",
+      "name": "Photosynthetic Reservoir",
+      "nameKey": "tree.node.photosynthetic-reservoir-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "Light captured in a vessel of glass and gold, pulsing with the rhythm of the sun.",
+      "id": "skill.light-def-t4-n0",
+      "name": "Photovoltaic Capacitor",
+      "nameKey": "tree.node.photovoltaic-capacitor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The light does not just illuminate; it solidifies into a protective shell.",
+      "id": "skill.light-def-t4-n1",
+      "name": "Photosynthetic Aegis",
+      "nameKey": "tree.node.photosynthetic-aegis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A rhythmic discharge of stored radiance that reinforces the barrier's integrity.",
+      "id": "skill.light-def-t5-n0",
+      "name": "Photonic Pulse",
+      "nameKey": "tree.node.photonic-pulse",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "A shimmering layer of hardened light that thickens with every sunrise.",
+      "id": "skill.light-def-t5-n1",
+      "name": "Solaric Plating",
+      "nameKey": "tree.node.solaric-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A network of translucent capillaries that draws vitality from the very light that strikes the skin.",
+      "id": "skill.light-def-t6-n0",
+      "name": "Transfusion Veins",
+      "nameKey": "tree.node.transfusion-veins",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-toughness",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thick, translucent layer of hardened sap that absorbs ambient light to reinforce the spirit.",
+      "id": "skill.light-def-t6-n1",
+      "name": "Photosynthetic Bark",
+      "nameKey": "tree.node.photosynthetic-bark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "A dense, fibrous layer of reinforced cellulose that absorbs kinetic impact and converts it into structural stability.",
+      "id": "skill.light-def-t7-n0",
+      "name": "Photosynthetic Bastion",
+      "nameKey": "tree.node.photosynthetic-bastion",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The deeper the roots, the harder the core becomes.",
+      "id": "skill.light-def-t7-n1",
+      "name": "Deep Rooted Vitality",
+      "nameKey": "tree.node.deep-rooted-vitality-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-brace",
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin knits itself back together with the speed of a growing vine.",
+      "id": "skill.light-def-t8-n0",
+      "name": "Chlorophyll Suture",
+      "nameKey": "tree.node.chlorophyll-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Structural cellulose reinforces the dermal layer, turning light into a rigid, protective mesh.",
+      "id": "skill.light-def-t9-n0",
+      "name": "Lignin Lattice",
+      "nameKey": "tree.node.lignin-lattice",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The sun's rays sharpen the blade's intent.",
+      "id": "skill.light-off-t1-n0",
+      "name": "Luminous Edge",
+      "nameKey": "tree.node.luminous-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The brilliance of the light becomes too much for the vessel to contain, spilling raw energy into the strike.",
+      "id": "skill.light-off-t1-n1",
+      "name": "Luminous Overload",
+      "nameKey": "tree.node.luminous-overload-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A sudden burst of radiance that propels the traveler forward.",
+      "id": "skill.light-off-t1-n2",
+      "name": "Sunlight Sprint",
+      "nameKey": "tree.node.sunlight-sprint",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light does not merely strike; it consumes the very essence of the target to fuel the next burst.",
+      "id": "skill.light-off-t10-n0",
+      "name": "Solar Siphon",
+      "nameKey": "tree.node.solar-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The sun's intensity sharpens the blade and the eye alike.",
+      "id": "skill.light-off-t2-n0",
+      "name": "Solar Flare",
+      "nameKey": "tree.node.solar-flare-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The sun's intensity sharpens the edge and the eye alike.",
+      "id": "skill.light-off-t2-n1",
+      "name": "Solar Flare",
+      "nameKey": "tree.node.solar-flare-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The sun reaches its peak, sharpening every strike and every sightline.",
+      "id": "skill.light-off-t2-n2",
+      "name": "Solar Zenith",
+      "nameKey": "tree.node.solar-zenith",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "Light bends to the will of the focused mind.",
+      "id": "skill.light-off-t3-n0",
+      "name": "Refractive Lens",
+      "nameKey": "tree.node.refractive-lens",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The sun's intensity sharpens the edge and the intent alike.",
+      "id": "skill.light-off-t3-n1",
+      "name": "Solar Flare",
+      "nameKey": "tree.node.solar-flare-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "Light bends, then breaks, intensifying the surge of elemental power.",
+      "id": "skill.light-off-t3-n2",
+      "name": "Prismatic Refraction",
+      "nameKey": "tree.node.prismatic-refraction",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Light bends, not to escape the strike, but to amplify the impact.",
+      "id": "skill.light-off-t4-n0",
+      "name": "Prismatic Refraction",
+      "nameKey": "tree.node.prismatic-refraction-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The brilliance of the sun is not merely seen; it is felt as a crushing weight of pure energy.",
+      "id": "skill.light-off-t4-n1",
+      "name": "Luminous Overload",
+      "nameKey": "tree.node.luminous-overload",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-override",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "Light does not merely strike; it bypasses the physical to rewrite the essence of the target.",
+      "id": "skill.light-off-t5-n0",
+      "name": "Prismatic Fracture",
+      "nameKey": "tree.node.prismatic-fracture-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very speed of light becomes a weapon of momentum.",
+      "id": "skill.light-off-t5-n1",
+      "name": "Photonic Acceleration",
+      "nameKey": "tree.node.photonic-acceleration",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The light bends not around the target, but through it.",
+      "id": "skill.light-off-t6-n0",
+      "name": "Refractive Sight",
+      "nameKey": "tree.node.refractive-sight",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light bends, not just to illuminate, but to reshape the very essence of the elements passing through it.",
+      "id": "skill.light-off-t6-n1",
+      "name": "Prismatic Resonance",
+      "nameKey": "tree.node.prismatic-resonance-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light does not merely strike; it finds the gaps between the atoms of reality.",
+      "id": "skill.light-off-t7-n0",
+      "name": "Spectral Aperture",
+      "nameKey": "tree.node.spectral-aperture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The spectrum collapses into a single, devastating point of focus.",
+      "id": "skill.light-off-t7-n1",
+      "name": "Prismatic Convergence",
+      "nameKey": "tree.node.prismatic-convergence",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light bends, no longer merely passing through, but becoming the very essence of the strike.",
+      "id": "skill.light-off-t8-n0",
+      "name": "Chromatic Lens",
+      "nameKey": "tree.node.chromatic-lens",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Light bends, then strikes with singular intent.",
+      "id": "skill.light-off-t9-n0",
+      "name": "Refractive Prism",
+      "nameKey": "tree.node.refractive-prism",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "light"
+}

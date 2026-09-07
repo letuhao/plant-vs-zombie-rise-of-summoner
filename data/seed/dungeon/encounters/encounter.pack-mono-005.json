@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.pack-mono-005",
+  "formation": "pack",
+  "name": "Resonant Shard-Cloud",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A singular elemental essence manifesting as a chaotic swarm of vibrating fragments.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "scourge"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.allpeater-002",
+  "flavor": "A monolithic slab of obsidian stands in the center of the chamber, its surface rippling like liquid mercury. As you approach, the very geometry of the room seems to undergo a sudden 切换, the walls sliding into new, impossible angles that defy the laws of physics. A low hum vibrates through your teeth, signaling a change in the local reality's 模式.",
+  "kind": "shrine",
+  "name": "The Altar of Shifting Modes",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a reality-warping relic that offers a powerful transformation at a significant cost to their current state.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.allpeater"
+}

@@ -2,7 +2,6 @@ import { describe, expect, it, afterEach } from "vitest";
 import {
   STATUS_STRIP_MAX,
   resolveStatusHudToken,
-  statusInitials,
   tierBadgeLetter
 } from "./actorHudDisplayTokens";
 
@@ -13,11 +12,6 @@ describe("actorHudDisplayTokens", () => {
 
   it("STATUS_STRIP_MAX mirrors tuning statusStripMax", () => {
     expect(STATUS_STRIP_MAX).toBe(3);
-  });
-
-  it("statusInitials remains available as legacy helper only", () => {
-    expect(statusInitials("command")).toBe("CO");
-    expect(statusInitials("expose")).toBe("EX");
   });
 
   it("resolveStatusHudToken uses catalog when injected", () => {

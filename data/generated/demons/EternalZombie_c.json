@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 332,
+  "magnitudes": {
+    "combat.block.shred.omni": 380,
+    "combat.parry.shred.omni": 380,
+    "combat.power.omni": 253,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 2034,
+    "resource.max.stamina": 6600,
+    "resource.regen.hp": 98,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 292
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Heirloom",
+  "side": "zombie",
+  "speciesId": "EternalZombie_c",
+  "theta": 13,
+  "traitPool": [
+    "area-of-effect-death",
+    "asymmetric-mobility",
+    "high-durability",
+    "spatial-displacement"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "ancient",
+    "cursed"
+  ]
+}

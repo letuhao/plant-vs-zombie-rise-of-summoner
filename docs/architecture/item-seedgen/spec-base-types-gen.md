@@ -1,7 +1,24 @@
 # Spec: `base-types-gen`
 
-**Module id:** `base-types-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 2 of 10
-**Depends on:** `generator-harness` (1)
+**Module id:** `base-types-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 3 (alone — the only phase-3 module)
+**Depends on:** `generator-harness`, **`affix-families-gen`**, **`enhancement-milestones-gen`** (module
+11, owner-approved 2026-09-07) — ⚠ **corrected on the second audit pass**:
+a base-type's own real content hard-references an affix-family id
+(`data/seed/items/base-types/humanoid-armament-primary-a.json:33`: `"family": "atom.might"`, matching
+`affix-families-gen`'s own shipped `atom.might` id verbatim) via its `implicit.family` field. The first
+draft of this spec had these two modules running in the same parallel phase on the wrong assumption that
+neither referenced the other — `affix-families-gen` must finish first.
+
+## Reference manifest
+
+| Field | Kind | Target | Evidence |
+|---|---|---|---|
+| `implicit.family` | **Hard** | `affix-families-gen` | `humanoid-armament-primary-a.json:33` |
+| `enhanceTrack[].family` | **Hard** | `enhancement-milestones-gen` (module 11, added 2026-09-07) | `humanoid-armament-primary-a.json:48`: `"atom.enhance-edge"` = `enhancement-milestones/milestones.json:28`'s `runtimeFamily` |
+
+**Resolved 2026-09-07** — the owner folded `enhancement-milestones` in as its own module rather than
+ruling it out of scope. This module now depends on BOTH `affix-families-gen` and
+`enhancement-milestones-gen` (both Phase 2, both must finish before Phase 3's `base-types-gen` starts).
 
 ## Objective
 
@@ -28,6 +45,10 @@ hand-type a base-type entry into JSON again.
    the real `ItemSeedValidator`/`AtomImporter` pipeline with zero new refusals.
 4. The 30 role-frame taxonomy (whatever currently partitions the 740 entries) is read from its existing
    source, not re-invented — find and cite it before writing the brief schema.
+5. A generated entry's `implicit.family` resolves against `affix-families-gen`'s real corpus, and
+   `enhanceTrack[].family` resolves against `enhancement-milestones-gen`'s — `items validate --deps`
+   refuses a generated base-type naming either kind of family that doesn't exist, or (with
+   `--backfill`) triggers the right owning module to mint it first.
 
 ## Commands
 

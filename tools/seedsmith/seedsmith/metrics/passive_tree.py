@@ -47,6 +47,7 @@ from ..adapters.trees.nodegen import exclusion as nodegen_exclusion
 from ..adapters.trees.nodegen import quota as nodegen_quota
 from ..adapters.trees.plan import invariants as plan_invariants
 from ..adapters.trees.plan.archetypes import SHIPPED_ARCHETYPES, TIER_COUNT, Archetype
+from ..adapters.trees.species import plan as species_plan
 from ..adapters.trees.targets import PassiveTreeTargets
 from ..workflow.validators.field_echo import name_collision
 from .model import Ctx, Finding, Loop, Metric, Severity
@@ -154,6 +155,36 @@ class PassiveTreePlanCtx:
     #: the metric still reports a NOTE naming `visitedFileCount: 0` explicitly, so that green is
     #: never confused with "the real corpus was checked and is clean."
     tree_seed_roots: "Sequence[Path]" = ()
+
+    # -- J5 addition below (spec-species-tree.md §3.1 step 4, §3.2/D32) -- same growth discipline:
+    # both fields default empty/`None`, so every earlier construction site keeps working unmodified.
+
+    #: J5 -- one entry per species a real `species.plan.assign_favour_cells` run placed, shaped
+    #: `{"speciesId": ..., "aptitude": ..., "element": ..., "status": ...}` (duck-typed rather than
+    #: importing `species.plan.FavourAssignment` here, the same "typed loosely, read off a real
+    #: run's own output" discipline `tree_plans`/`outcomes_by_tree` already hold to above). Empty
+    #: (its default) means no emitted favour distribution was supplied -- `FavourDriftMetric`
+    #: reports `NOT_MEASURED` rather than compare against nothing.
+    species_favour_assignments: "Sequence[Mapping[str, str]]" = ()
+
+    #: J5 -- one entry per species the STAGE (spec-species-tree.md §3.1 step 3, not yet built --
+    #: "the call receives ONE cell, its alternates... and answers: does this favour fit?") attempted,
+    #: shaped `{"speciesId": ..., "outcome": "resolved" | "unresolved"}` -- the species-level sibling
+    #: of `outcomes_by_tree`'s own per-node `"outcome"` field, read by `UnresolvedCountMetric` below
+    #: as a SECOND, independent population under the SAME gate (§3.1/§4's own success criterion names
+    #: the identical 50‰ figure `gates.unresolvedCount.maxSharePermille` already ships). Empty (its
+    #: default) means no favour-resolution attempts were supplied -- every pre-J5 call site is
+    #: unaffected, proven by test.
+    species_favour_outcomes: "Sequence[Mapping[str, Any]]" = ()
+
+    #: J5 -- the reporting-only tolerance `FavourDriftMetric` flags a GAP beyond, in per-mille share
+    #: of the corpus (never a raw unit count -- the three favour axes have wildly different member
+    #: counts, 12/6/24, so a share is the only comparable unit across all three). `None` (no real
+    #: generation run exists yet to calibrate against, per §5.1's own shipped posture: "promote one
+    #: gate at a time, only after a real run has been measured") means every axis-member's drift is
+    #: still reported, just never flagged GAP -- the same "reporting threshold, not a required one"
+    #: shape `deep_mechanism_value_min_win_share_delta_milli` already holds to above.
+    favour_drift_tolerance_share_permille: "int | None" = None
 
 
 # -- H5's own arithmetic (spec-tree-review.md §4.1) -- the CONTENT-side half of TreeEqualValue,
@@ -758,6 +789,100 @@ class ExclusionResolvableMetric(Metric):
         return findings
 
 
+def presentation_defects(node_id: str, form: str, property_keys: "tuple[str, ...]",
+                         printed_text: str) -> "list[str]":
+    """§6.4 rule 2's own three-part presentation contract for a non-`none` exclusion, minus the
+    one-third `nodegen.exclusion`'s own docstring already proves holds BY CONSTRUCTION rather than
+    by a runtime check: "both name the same winner" is guaranteed the moment `printedText` equals
+    `compose_printed_text(form, property_keys, role="loser")`, since that function is pure in its
+    three arguments — any two calls with the same `(form, property_keys)` produce the identical
+    winner text, so there is no second node's data to compare against and nothing further to check
+    for that third. What remains checkable, and is checked here: (a) the rule actually prints
+    (non-empty `printedText`) and (b) what prints is the REAL template output, not drifted text —
+    together, "both sides print the rule, and name the same winner" (rule 1). Rule 2 itself ("the
+    surface renders the node INERT, not un-unlocked") is a RESOLVE-TIME/render-TIME property with
+    no seed-content shape to check here — it is `TreeResolveReport.IsInert`
+    (`ExclusionResolver.cs:60`, `node.ExclusionForm == ExclusionForm.Nullification`), already real,
+    already computed, and already covered by its own C# tests; a Python seedsmith metric over
+    static seed content has no data to re-check a resolve-time computation with, and does not
+    pretend to.
+
+    Deliberately the SAME two checks `PassiveTree/ExclusionRate` already makes per node (never
+    re-implemented, only called from a second place) — §6.4's own table splits "how many exist"
+    (reports, never gates) from "whether each one is presentable" (gates) as two DIFFERENT
+    consumers of the identical underlying fact, not two different facts.
+    """
+    defects: "list[str]" = []
+    expected = nodegen_exclusion.compose_printed_text(form, property_keys, role="loser")
+    if not printed_text:
+        defects.append(f"{node_id}: form {form!r} carries an empty printedText — D40/§5.2 rule 1 "
+                       f"requires the rule to print")
+    elif printed_text != expected:
+        defects.append(f"{node_id}: printedText does not match the template recomputed from its "
+                       f"own (form, propertyKeys) — expected {expected!r}, corpus holds "
+                       f"{printed_text!r}")
+    return defects
+
+
+class ExclusionPresentationMetric(Metric):
+    """§6.4 rule 2 — the ONE presentation-shaped condition among the nine unshippable conditions
+    that GATES (unlike `PassiveTree/ExclusionRate`'s own rate, which only reports): "An exclusion
+    fails its presentation contract... a hard finding, and it denies the lot a pass." D40's own
+    three requirements (§5.2), split: rule 1 ("both sides print the rule, and name the same
+    winner") is this metric's real, checkable job — `presentation_defects` above; rule 3 ("keys on
+    a property, never a node id") is `PassiveTree/ExclusionResolvable`'s/`ExclusionRate`'s own
+    per-response legality check, not repeated here; rule 2 ("rendered INERT, never un-unlocked") is
+    a resolve-time C# fact (`TreeResolveReport.IsInert`) this Python-side metric has no seed data to
+    re-derive and does not claim to gate on.
+
+    A `none`-form node is never a member of this metric's own population at all — "none" means no
+    conflict, so there is nothing to present (mirrors `validate_exclusion`'s identical reading).
+    """
+
+    id = "PassiveTree/ExclusionPresentation"
+    family = "PassiveTree"
+    loop = Loop.CLOSED
+    gates = True
+    needs = _NEEDS
+    covers: "tuple[str, ...]" = ()
+
+    def run(self, ctx: Ctx) -> "list[Finding]":
+        plan_ctx: PassiveTreePlanCtx = ctx.passive_tree_plan
+        if not plan_ctx.nodes_by_tree:
+            return [_not_measured(self.id, "(suite)", "no emitted nodes supplied")]
+
+        findings: "list[Finding]" = []
+        checked = 0
+        for tree_id, nodes in plan_ctx.nodes_by_tree.items():
+            for node in nodes:
+                node_id = node.get("id", "?")
+                exclusion = node.get("exclusion") or {}
+                form = str(exclusion.get("form", nodegen_exclusion.NONE_FORM))
+                if form == nodegen_exclusion.NONE_FORM:
+                    continue
+                checked += 1
+                keys = tuple(exclusion.get("propertyKeys") or ())
+                printed_text = str(exclusion.get("printedText", ""))
+                for defect in presentation_defects(node_id, form, keys, printed_text):
+                    findings.append(Finding(
+                        metric=self.id, severity=Severity.GAP, subject=node_id,
+                        message=defect,
+                        evidence={"code": "ExclusionPresentationDefect", "treeId": tree_id,
+                                 "form": form}))
+
+        if checked == 0:
+            findings.append(Finding(
+                metric=self.id, severity=Severity.NOTE, subject="(suite)",
+                message="no non-'none' exclusion in this corpus — nothing to present",
+                evidence={"presentableCount": 0}))
+        elif not findings:
+            findings.append(Finding(
+                metric=self.id, severity=Severity.NOTE, subject="(suite)",
+                message=f"{checked} exclusion(s) all present their rule correctly",
+                evidence={"presentableCount": checked}))
+        return findings
+
+
 class NearDuplicateMetric(Metric):
     """§7 gate 20 — LOCAL EXACT Jaccard (`nodegen.dedup.exact_jaccard_permille`), deliberately
     **never** the shared `SemanticDedup/NearDuplicate` MinHash estimate: `nodegen/dedup.py`'s own
@@ -909,6 +1034,13 @@ class UnresolvedCountMetric(Metric):
     later, separate promotion (`metrics/model.py`'s own rule) — this is the one gate §7.1 promotes
     up front, and `assert_exactly_one_hard_gate(registry, "PassiveTree")` is what proves it is the
     ONLY one once every metric in this file is registered together.
+
+    **J5 addition (spec-species-tree.md §3.1/§4):** a species the not-yet-built favour-lock stage
+    could not resolve to any of its three offered cells is the SAME shape of hole — silently absent
+    from a decision that must be made, not merely absent from prose — so it gates under this SAME
+    class as a second, independent `subject="mechanicalFavour"` population (`species_favour_
+    outcomes`), rather than a second `gates=True` class, which `assert_exactly_one_hard_gate` would
+    refuse. Reported only when a caller actually supplies it; every pre-J5 site is unaffected.
     """
 
     id = "PassiveTree/UnresolvedCount"
@@ -920,30 +1052,59 @@ class UnresolvedCountMetric(Metric):
 
     def run(self, ctx: Ctx) -> "list[Finding]":
         plan_ctx: PassiveTreePlanCtx = ctx.passive_tree_plan
+        findings: "list[Finding]" = []
+
         if not plan_ctx.outcomes_by_tree or plan_ctx.targets is None:
-            return [_not_measured(self.id, "(suite)", "no run outcomes/targets supplied")]
+            findings.append(_not_measured(self.id, "affixIds", "no run outcomes/targets supplied"))
+        else:
+            max_share = plan_ctx.targets.unresolved_count_max_share_permille
+            total = 0
+            unresolved = 0
+            for outcomes in plan_ctx.outcomes_by_tree.values():
+                for outcome in outcomes:
+                    total += 1
+                    if outcome.get("outcome") == "unresolved":
+                        unresolved += 1
+            if total == 0:
+                findings.append(_not_measured(self.id, "affixIds", "no subjects"))
+            else:
+                share_permille = (unresolved * 1000) // total
+                severity = Severity.NOTE if share_permille <= max_share else Severity.GAP
+                findings.append(Finding(
+                    metric=self.id, severity=severity, subject="affixIds",
+                    message=f"affixIds: {unresolved}/{total} unresolved ({share_permille}‰), target "
+                            f"<= {max_share}‰",
+                    evidence={"unresolved": unresolved, "total": total,
+                             "sharePermille": share_permille, "maxSharePermille": max_share},
+                    remedy="tree-language brief: strengthen this node class's affix-legality "
+                           "description, or its motif contrast, if unresolved votes concentrate "
+                           "there"))
 
-        max_share = plan_ctx.targets.unresolved_count_max_share_permille
-        total = 0
-        unresolved = 0
-        for outcomes in plan_ctx.outcomes_by_tree.values():
-            for outcome in outcomes:
-                total += 1
-                if outcome.get("outcome") == "unresolved":
-                    unresolved += 1
-        if total == 0:
-            return [_not_measured(self.id, "(suite)", "no subjects")]
-
-        share_permille = (unresolved * 1000) // total
-        severity = Severity.NOTE if share_permille <= max_share else Severity.GAP
-        return [Finding(
-            metric=self.id, severity=severity, subject="affixIds",
-            message=f"affixIds: {unresolved}/{total} unresolved ({share_permille}‰), target <= "
-                    f"{max_share}‰",
-            evidence={"unresolved": unresolved, "total": total, "sharePermille": share_permille,
-                     "maxSharePermille": max_share},
-            remedy="tree-language brief: strengthen this node class's affix-legality description, "
-                   "or its motif contrast, if unresolved votes concentrate there")]
+        # J5 addition (spec-species-tree.md §3.1/§4): a SECOND, independent population under the
+        # SAME gate -- a species the not-yet-built stage could not resolve to one of its three
+        # offered favours. Reported/gated only when a caller actually supplies
+        # `species_favour_outcomes`; every pre-J5 construction site (every existing test above)
+        # omits it and gets EXACTLY the single `affixIds` finding it always has, proven by test.
+        if plan_ctx.species_favour_outcomes:
+            if plan_ctx.targets is None:
+                findings.append(_not_measured(
+                    self.id, "mechanicalFavour", "no targets supplied — no threshold to gate against"))
+            else:
+                max_share = plan_ctx.targets.unresolved_count_max_share_permille
+                species_total = len(plan_ctx.species_favour_outcomes)
+                species_unresolved = sum(
+                    1 for o in plan_ctx.species_favour_outcomes if o.get("outcome") == "unresolved")
+                share_permille = (species_unresolved * 1000) // species_total
+                severity = Severity.NOTE if share_permille <= max_share else Severity.GAP
+                findings.append(Finding(
+                    metric=self.id, severity=severity, subject="mechanicalFavour",
+                    message=f"mechanicalFavour: {species_unresolved}/{species_total} species "
+                            f"unresolved ({share_permille}‰), target <= {max_share}‰",
+                    evidence={"unresolved": species_unresolved, "total": species_total,
+                             "sharePermille": share_permille, "maxSharePermille": max_share},
+                    remedy="species-tree: a species the stage could not resolve to any of its three "
+                           "offered favours — review its brief/lore, never silently default it"))
+        return findings
 
 
 #: Registration order matches §7's own gate order (15-22) — `UnresolvedCount` last, the same
@@ -960,6 +1121,20 @@ ALL_PASSIVE_TREE_METRICS: "tuple[type[Metric], ...]" = (
     QuotaDriftMetric, MechanismRampMetric, CellOccupancyMetric, ExclusionRateMetric,
     ExclusionResolvableMetric, NearDuplicateMetric, NameCollisionMetric, UnresolvedCountMetric,
 )
+# ExclusionPresentationMetric (task J3, spec-tree-review.md §6.4 rule 2) is correctly NOT included
+# here — a real, checked reason, not an oversight. This tuple feeds `report/cli.py`'s own
+# generation-time registry, which `nodegen.verdict.assert_exactly_one_hard_gate` polices under a
+# strict, doubly-tested `len(ids) != 1: raise` (§7.1: "exactly one gate is promoted to hard-fail
+# FIRST" — already `PassiveTree/UnresolvedCount`, and multiple existing tests assert this stays
+# exactly one). Registering a SECOND `gates=True` metric here would break real content generation's
+# own `--write` path immediately (confirmed by reading `assert_exactly_one_hard_gate`'s own body
+# before adding this, not assumed). §6.4's own "gates" is a REVIEW-TIME, already-generated-lot
+# shippability verdict — a different concept from §7.1's generation-time spend gate, reusing the
+# same word by analogy, not the same registry. `ExclusionPresentationMetric` belongs in J3's own
+# review-verdict machinery (the "verdict queue"/nine-unshippable-conditions computation, not yet
+# built) once it exists — this is a wiring gap tracked here, never an architectural wall
+# (CLAUDE.md's own rule), and never silently forcing a metric into a registry whose own invariant
+# it would break.
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1118,4 +1293,206 @@ class HiddenFileCountMetric(Metric):
             metric=self.id, severity=Severity.NOTE, subject="(corpus)",
             message=f"walked {visited} `_`-prefixed file(s) across {len(roots)} seed root(s)",
             evidence={"visitedFileCount": visited, "rootCount": len(roots)}))
+        return findings
+
+
+# ---------------------------------------------------------------------------------------------
+# Task J5 (spec-species-tree.md §3.1 step 4, §3.2/D32) -- the favour-lock drift gate. Same
+# registration posture as H5's own two metrics above: a real, registrable `PassiveTree/*` metric,
+# deliberately NOT added to `ALL_PASSIVE_TREE_METRICS` (that tuple is H4's own eight, frozen by a
+# test asserting its exact length) -- registered by whatever caller wants it instead.
+# ---------------------------------------------------------------------------------------------
+
+
+class FavourDriftMetric(Metric):
+    """spec-species-tree.md §3.1 step 4 / §3.2 (D32) — **re-derives each favour axis's own per-mille
+    TARGET share independently**, via `species.plan.axis_weight_tables` (never a stored "declared"
+    distribution — the same "recompute the target fresh, never trust a passed-in one" discipline
+    `QuotaDriftMetric` already applies above), and compares it against the EMITTED corpus's own
+    OBSERVED share. Symmetric, per D32's own wording and the todo's own acceptance bullet: an axis
+    member running *over* its target is exactly as much a drift as one running under it — an
+    injected skew and an injected overshoot are both real findings, never just the shortfall side.
+
+    `gates = False`, for the exact reason `DeepMechanismValueMetric` above states for itself and
+    `favour_drift_tolerance_share_permille`'s own docstring restates: no real species-corpus
+    generation run exists yet to calibrate a tolerance against (§5.1's shipped posture — promote one
+    gate at a time, only after a real run has been measured). A missing tolerance never turns this
+    metric silent: every axis member's drift is still reported as a NOTE; only the GAP escalation
+    is withheld until a caller supplies a real number (mirrors `DeepMechanismValueMetric`'s own
+    `if threshold is not None and delta < threshold` shape exactly).
+    """
+
+    id = "PassiveTree/FavourDrift"
+    family = "PassiveTree"
+    loop = Loop.CLOSED
+    gates = False
+    needs = _NEEDS
+    covers: "tuple[str, ...]" = ()
+
+    def run(self, ctx: Ctx) -> "list[Finding]":
+        plan_ctx: PassiveTreePlanCtx = ctx.passive_tree_plan
+        if plan_ctx.targets is None:
+            return [_not_measured(self.id, "(suite)", "no targets supplied — nothing to re-derive "
+                                  "the favour target against")]
+        assignments = list(plan_ctx.species_favour_assignments)
+        if not assignments:
+            return [_not_measured(self.id, "(suite)", "no species_favour_assignments supplied — "
+                                  "nothing to compare against the re-derived target")]
+
+        try:
+            axis_tables = species_plan.axis_weight_tables(plan_ctx.targets)
+        except (ValueError, KeyError, OSError) as ex:
+            return [_not_measured(self.id, "(suite)", f"could not re-derive the favour target: {ex}")]
+
+        total = len(assignments)
+        tolerance = plan_ctx.favour_drift_tolerance_share_permille
+        findings: "list[Finding]" = []
+        for axis in species_plan.AXES:
+            table = axis_tables[axis]
+            observed_counts = Counter(a[axis] for a in assignments if axis in a)
+            for member in sorted(set(table) | set(observed_counts)):
+                expected_share = table.get(member, 0)
+                observed_count = observed_counts.get(member, 0)
+                observed_share = (observed_count * 1000) // total
+                drift = observed_share - expected_share
+                subject = f"{axis}={member}"
+                evidence = {"observedCount": observed_count, "totalSpecies": total,
+                           "observedSharePermille": observed_share,
+                           "expectedSharePermille": expected_share, "driftSharePermille": drift,
+                           "toleranceSharePermille": tolerance}
+                if tolerance is not None and abs(drift) > tolerance:
+                    findings.append(Finding(
+                        metric=self.id, severity=Severity.GAP, subject=subject,
+                        message=f"{subject}: observed {observed_share}‰ of the corpus vs the "
+                                f"re-derived target {expected_share}‰ (drift {drift:+d}‰, "
+                                f"tolerance {tolerance}‰)",
+                        evidence=evidence,
+                        assertion=f"abs(observed - re-derived target) <= {tolerance}‰ for every "
+                                  f"{axis} member",
+                        remedy="species-tree: the emitted favour distribution has drifted from "
+                               "D32's declared near-uniform target — a broken quota or an "
+                               "unaccounted-for forced set, never a lore judgement"))
+                else:
+                    findings.append(Finding(
+                        metric=self.id, severity=Severity.NOTE, subject=subject,
+                        message=f"{subject}: observed {observed_share}‰ vs re-derived target "
+                                f"{expected_share}‰ (drift {drift:+d}‰)",
+                        evidence=evidence))
+        return findings
+
+
+# ---------------------------------------------------------------------------------------------
+# Task J6 (spec-species-tree.md §5, §5.1, §5.3 rules 3-5) -- D23's "nodes no other tree has"
+# promise, made checkable. Same registration posture as every other post-H4 metric in this file:
+# real, registrable, deliberately NOT added to `ALL_PASSIVE_TREE_METRICS`.
+# ---------------------------------------------------------------------------------------------
+
+
+class SpeciesUniquenessMetric(Metric):
+    """spec-species-tree.md §5 — three uniqueness strengths, ONE reverse index built over every
+    committed tree's own nodes, walked once per run:
+
+    - **U1** text uniqueness — a `(name, flavor)` pair appearing on more than one node, corpus-wide.
+      Generation-time `name_collision`/the shipped dedup (`metrics/dedup.py`) already catch this
+      INCREMENTALLY as each tree generates against `takenNames`; this is the closed-corpus,
+      all-trees-committed re-verification a review pass runs once, not a duplicate of that check —
+      the two run at different times over different populations (one tree growing vs. the whole
+      corpus at rest) and either can catch what the other's timing misses.
+    - **U2** composition uniqueness — a `(affixIds multiset, quotaCell)` fingerprint appearing in
+      more than one TREE. Needs `quota_cells_by_tree` alongside `nodes_by_tree`, since a node's own
+      committed seed record does not persist its `quotaCell` (H4's own documented wiring gap, still
+      open — a tree with no supplied quota cells simply contributes nothing to this half of the
+      index, never a crash).
+    - **U3** namespace uniqueness — any `affix.species.<speciesId>.*` id referenced by a node whose
+      OWN tree is not `speciesId` (a species tree's `tree_id` IS its `speciesId`, matching every
+      other tree category's own tree_id-is-the-roster-id convention). The one strength that
+      actually costs (§5.2) — 6,720 authored affixes at `speciesUniqueAffixMin=8` (D41) — so this
+      is the one worth a corpus-wide leak check, not just a per-tree glance.
+
+    `gates = False`: §5.1's own shipped posture — *"gates on none of them until the pilot calibrates
+    the thresholds... promote one gate at a time, only after a real run has been measured"* — the
+    identical reasoning `FavourDriftMetric`/`DeepMechanismValueMetric` above already carry. Never a
+    second `gates=True` class; `assert_exactly_one_hard_gate` would refuse it.
+    """
+
+    id = "PassiveTree/SpeciesUniqueness"
+    family = "PassiveTree"
+    loop = Loop.CLOSED
+    gates = False
+    needs = _NEEDS
+    covers: "tuple[str, ...]" = ()
+
+    def run(self, ctx: Ctx) -> "list[Finding]":
+        plan_ctx: PassiveTreePlanCtx = ctx.passive_tree_plan
+        if not plan_ctx.nodes_by_tree:
+            return [_not_measured(self.id, "(suite)",
+                                  "no nodes_by_tree supplied — nothing to build a reverse index over")]
+
+        findings: "list[Finding]" = []
+
+        # U1 -- (name, flavor) reverse index, keyed corpus-wide over every committed node.
+        text_index: "dict[tuple, set[str]]" = {}
+        for tree_id, nodes in plan_ctx.nodes_by_tree.items():
+            for node in nodes:
+                key = (node.get("name"), node.get("flavor"))
+                text_index.setdefault(key, set()).add(f"{tree_id}:{node.get('id')}")
+        for (name, flavor), node_refs in text_index.items():
+            if len(node_refs) > 1:
+                findings.append(Finding(
+                    metric=self.id, severity=Severity.GAP, subject=f"U1:{name}",
+                    message=f"name/flavor pair repeats across {len(node_refs)} node(s): "
+                            f"{sorted(node_refs)}",
+                    evidence={"nodeRefs": sorted(node_refs), "name": name, "flavor": flavor},
+                    remedy="tree-language: two nodes converged on the same sentence — reroll one, "
+                           "the closed-corpus re-check generation-time dedup cannot run itself"))
+
+        # U2 -- (affixIds, quotaCell) reverse index, corpus-wide over TREES (never over individual
+        # nodes -- the promise is "no other TREE has this composition," not "no other node").
+        composition_index: "dict[tuple, set[str]]" = {}
+        for tree_id, nodes in plan_ctx.nodes_by_tree.items():
+            cells = plan_ctx.quota_cells_by_tree.get(tree_id) or {}
+            for node in nodes:
+                cell = cells.get(node.get("id"))
+                if cell is None:
+                    continue  # no observed quota cell for this node -- contributes nothing, not a crash
+                fingerprint = (tuple(sorted(node.get("affixIds") or ())),
+                              tuple(cell.value_for(axis) for axis in nodegen_quota.AXES))
+                composition_index.setdefault(fingerprint, set()).add(tree_id)
+        for fingerprint, tree_ids in composition_index.items():
+            if len(tree_ids) > 1:
+                findings.append(Finding(
+                    metric=self.id, severity=Severity.GAP, subject=f"U2:{fingerprint[0]}",
+                    message=f"(affixIds, quotaCell) fingerprint repeats across {len(tree_ids)} "
+                            f"tree(s): {sorted(tree_ids)}",
+                    evidence={"treeIds": sorted(tree_ids), "affixIds": fingerprint[0],
+                             "quotaCell": fingerprint[1]},
+                    remedy="species-tree: two species trees converged on an identical node "
+                           "composition — U2's own promise, broken"))
+
+        # U3 -- affix.species.<speciesId>.* referenced from a tree that is not speciesId itself.
+        namespace_index: "dict[str, set[str]]" = {}
+        for tree_id, nodes in plan_ctx.nodes_by_tree.items():
+            for node in nodes:
+                for affix_id in (node.get("affixIds") or ()):
+                    if isinstance(affix_id, str) and affix_id.startswith("affix.species."):
+                        namespace_index.setdefault(affix_id, set()).add(tree_id)
+        for affix_id, tree_ids in namespace_index.items():
+            parts = affix_id.split(".")
+            owner = parts[2] if len(parts) > 2 else None
+            foreign = sorted(t for t in tree_ids if t != owner)
+            if foreign:
+                findings.append(Finding(
+                    metric=self.id, severity=Severity.GAP, subject=f"U3:{affix_id}",
+                    message=f"{affix_id} (namespace owner {owner!r}) is referenced from another "
+                            f"tree: {foreign}",
+                    evidence={"affixId": affix_id, "owner": owner, "foreignTreeIds": foreign},
+                    remedy="species-tree: a species-namespace affix leaked into another tree's own "
+                           "generation — U3's own promise, broken"))
+
+        findings.append(Finding(
+            metric=self.id, severity=Severity.NOTE, subject="(corpus)",
+            message=f"reverse index built over {len(plan_ctx.nodes_by_tree)} tree(s), "
+                    f"{sum(len(v) for v in plan_ctx.nodes_by_tree.values())} node(s)",
+            evidence={"treeCount": len(plan_ctx.nodes_by_tree),
+                     "nodeCount": sum(len(v) for v in plan_ctx.nodes_by_tree.values())}))
         return findings

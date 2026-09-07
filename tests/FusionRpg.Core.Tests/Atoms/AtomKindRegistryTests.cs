@@ -61,10 +61,12 @@ public class AtomKindRegistryTests
         // the vocabulary ahead of its consumer, but it must be quarantined (all-None, so binds are
         // rejected) and named in this set, never advertising support it does not have.
         //
-        // EMPTY since 2026-08-23: `stat.derived` was the only occupant, and E12 shipped its first
-        // consumer. An empty set is the healthy state — a kind waiting for a consumer is a promise
-        // the vocabulary has not kept yet.
-        var awaitingConsumer = Array.Empty<string>();
+        // First occupant since 2026-08-23 (`stat.derived` was the last, cleared by E12's own first
+        // consumer): `element.convert` (D56, spec-element-conversion.md) validates its own params but
+        // has no real reader yet — the combat-dispatch call site is a genuine, undecided engineering
+        // choice (spec §2b), not built here. Remove it the day a real Lawn/Battle/Sim reader lands and
+        // the matrix moves off all-None, per-runtime, exactly as `stat.derived` itself was re-opened.
+        var awaitingConsumer = new[] { "element.convert" };
 
         // Permanent modifiers are not event-driven, so they declare no trigger (definitions.md §14.2).
         // stat.modify moved out of this set 2026-08-28 (A18e) -- it is no longer PURELY permanent, it

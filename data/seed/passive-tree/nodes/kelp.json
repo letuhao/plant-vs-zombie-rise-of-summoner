@@ -1,0 +1,1003 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The internal pressure of the deep provides a structural lift to the spirit.",
+      "id": "skill.kelp-def-t1-n0",
+      "name": "Benthic Buoyancy",
+      "nameKey": "tree.node.benthic-buoyancy",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the depths returns to the source.",
+      "id": "skill.kelp-def-t10-n0",
+      "name": "Tidal Reciprocation",
+      "nameKey": "tree.node.tidal-reciprocation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The crushing weight of the depths becomes a protective embrace.",
+      "id": "skill.kelp-def-t10-n1",
+      "name": "Benthic Bulwark",
+      "nameKey": "tree.node.benthic-bulwark",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The internal pressure of the kelp forest regulates the flow of brine through the cellular walls.",
+      "id": "skill.kelp-def-t10-n2",
+      "name": "Osmotic Pressure Valve",
+      "nameKey": "tree.node.osmotic-pressure-valve",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the abyss settles into the marrow, turning bone to stone.",
+      "id": "skill.kelp-def-t2-n0",
+      "name": "Deep-Sea Siltation",
+      "nameKey": "tree.node.deep-sea-siltation",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The crushing weight of the abyss only serves to expand the vessel's capacity to hold life.",
+      "id": "skill.kelp-def-t3-n0",
+      "name": "Deep-Sea Buoyancy",
+      "nameKey": "tree.node.deep-sea-buoyancy",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the depths provides a crushing stability to the spirit.",
+      "id": "skill.kelp-def-t3-n1",
+      "name": "Submerged Bulk",
+      "nameKey": "tree.node.submerged-bulk",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The pressure of the deep forces the essence into the cracks of the shell.",
+      "id": "skill.kelp-def-t4-n0",
+      "name": "Silt-Locking",
+      "nameKey": "tree.node.silt-locking",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the ocean presses down, but the anchor holds firm.",
+      "id": "skill.kelp-def-t4-n1",
+      "name": "Deep Rooted",
+      "nameKey": "tree.node.deep-rooted-7",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "Layers of calcified kelp bind to the spirit, cycling protective energies through a reinforced shell.",
+      "id": "skill.kelp-def-t5-n0",
+      "name": "Silt-Grafted Aegis",
+      "nameKey": "tree.node.silt-grafted-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of calcified silt mimic the very predators that seek to consume it.",
+      "id": "skill.kelp-def-t5-n1",
+      "name": "Crustacean Mimicry",
+      "nameKey": "tree.node.crustacean-mimicry",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Layers of sediment and calcified brine fuse into a rigid, protective rind.",
+      "id": "skill.kelp-def-t6-n0",
+      "name": "Chitinous Silt-Layer",
+      "nameKey": "tree.node.chitinous-silt-layer",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The deep pressure compresses the marrow into a dense, life-sustaining sludge.",
+      "id": "skill.kelp-def-t6-n1",
+      "name": "Benthic Marrow",
+      "nameKey": "tree.node.benthic-marrow-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pressure of the abyss weaves itself into the very marrow of the living.",
+      "id": "skill.kelp-def-t7-n0",
+      "name": "Benthic Marrow",
+      "nameKey": "tree.node.benthic-marrow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The crushing weight of the depths provides a steady, rhythmic replenishment to the protective layers of the kelp forest.",
+      "id": "skill.kelp-def-t7-n1",
+      "name": "Benthic Reservoir",
+      "nameKey": "tree.node.benthic-reservoir",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A pressurized sac that ruptures upon impact, forcing a sudden surge of protective fluids.",
+      "id": "skill.kelp-def-t8-n0",
+      "name": "Pressure-Lock Gland",
+      "nameKey": "tree.node.pressure-lock-gland",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pressure of the depths is not a burden, but a source of constant, rhythmic replenishment.",
+      "id": "skill.kelp-def-t8-n1",
+      "name": "Osmotic Siphon",
+      "nameKey": "tree.node.osmotic-siphon-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of calcified silt bind the soft tissue into a rigid, unyielding shell.",
+      "id": "skill.kelp-def-t9-n0",
+      "name": "Lithic Kelp",
+      "nameKey": "tree.node.lithic-kelp",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "A thick, waterlogged layer that absorbs impact and refuses to tear.",
+      "id": "skill.kelp-def-t9-n1",
+      "name": "Silt-Saturated Membrane",
+      "nameKey": "tree.node.silt-saturated-membrane",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The crushing weight of the depths forces life to crystallize within the very seams of the spirit.",
+      "id": "skill.kelp-def-t9-n2",
+      "name": "Silt-Sealed Marrow",
+      "nameKey": "tree.node.silt-sealed-marrow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The violent expansion of kelp under pressure.",
+      "id": "skill.kelp-off-t1-n0",
+      "name": "Thorned Surge",
+      "nameKey": "tree.node.thorned-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The crushing weight of the depths harmonizes the elements into a singular, devastating frequency.",
+      "id": "skill.kelp-off-t10-n0",
+      "name": "Benthic Resonance",
+      "nameKey": "tree.node.benthic-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The currents do not merely pass through you; they become your very intent.",
+      "id": "skill.kelp-off-t10-n1",
+      "name": "Submerged Conduit",
+      "nameKey": "tree.node.submerged-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The currents do not merely carry the tide; they dictate its very essence.",
+      "id": "skill.kelp-off-t10-n2",
+      "name": "Tidal Transmutation",
+      "nameKey": "tree.node.tidal-transmutation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The tide rises with a jagged edge.",
+      "id": "skill.kelp-off-t2-n0",
+      "name": "Thorned Surge",
+      "nameKey": "tree.node.thorned-surge-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The ocean's weight flows through the veins of the kelp forest.",
+      "id": "skill.kelp-off-t3-n0",
+      "name": "Tidal Surge",
+      "nameKey": "tree.node.tidal-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The ocean's wrath finds purchase in every jagged edge.",
+      "id": "skill.kelp-off-t3-n1",
+      "name": "Thorned Surge",
+      "nameKey": "tree.node.thorned-surge-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.entangling",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The current pulls harder where the weeds are thickest.",
+      "id": "skill.kelp-off-t4-n0",
+      "name": "Thicketed Surge",
+      "nameKey": "tree.node.thicketed-surge",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The current pulls harder as the tide recedes.",
+      "id": "skill.kelp-off-t4-n1",
+      "name": "Tidal Momentum",
+      "nameKey": "tree.node.tidal-momentum",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The crushing weight of the depths forces essence through the narrowest gaps.",
+      "id": "skill.kelp-off-t5-n0",
+      "name": "Pressure Gradient",
+      "nameKey": "tree.node.pressure-gradient",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sunlight filtering through the surface feeds the internal currents, amplifying the elemental flow.",
+      "id": "skill.kelp-off-t5-n1",
+      "name": "Photosynthetic Resonance",
+      "nameKey": "tree.node.photosynthetic-resonance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The current accelerates, turning every strike into a rhythmic laceration.",
+      "id": "skill.kelp-off-t6-n0",
+      "name": "Surging Thresher",
+      "nameKey": "tree.node.surging-thresher",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pressure of the depths forces the elements to harmonize with the soul.",
+      "id": "skill.kelp-off-t6-n1",
+      "name": "Abyssal Resonator",
+      "nameKey": "tree.node.abyssal-resonator",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The pressure of the deep forces elemental essence through the very pores of the skin.",
+      "id": "skill.kelp-off-t7-n0",
+      "name": "Abyssal Osmosis",
+      "nameKey": "tree.node.abyssal-osmosis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The crushing weight of the depths amplifies the flow of elemental currents.",
+      "id": "skill.kelp-off-t7-n1",
+      "name": "Abyssal Resonance",
+      "nameKey": "tree.node.abyssal-resonance-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.entangling",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The tide does not merely move; it pulls the very ground beneath its weight.",
+      "id": "skill.kelp-off-t8-n0",
+      "name": "Kelp Surge",
+      "nameKey": "tree.node.kelp-surge",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The kelp does not merely grow; it erupts in a violent, elemental frenzy.",
+      "id": "skill.kelp-off-t8-n1",
+      "name": "Overgrowth Surge",
+      "nameKey": "tree.node.overgrowth-surge-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-override"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The crushing weight of the depths forces the essence through any barrier.",
+      "id": "skill.kelp-off-t9-n0",
+      "name": "Pressure Breach",
+      "nameKey": "tree.node.pressure-breach",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.tempo-wildgrowth"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The currents do not merely pass through the kelp; they become the kelp.",
+      "id": "skill.kelp-off-t9-n1",
+      "name": "Primal Osmosis",
+      "nameKey": "tree.node.primal-osmosis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the deep forces the essence through the smallest cracks.",
+      "id": "skill.kelp-off-t9-n2",
+      "name": "Benthic Pressure",
+      "nameKey": "tree.node.benthic-pressure",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "kelp"
+}

@@ -1,0 +1,17 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.ashthreepeater-001"
+  ],
+  "flavor": "A collection of delicate, translucent sculptures shaped like leaping foxes and soaring hawks stands atop pedestals of cooling basalt. The air shimmers with a dry, intense heat, and the scent of ozone lingers near the center of the chamber.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Cinder-Glass Menagerie",
+  "reason": "The room serves as a gallery for a master artisan who used elemental fire to flash-freeze molten sand into intricate, permanent shapes.",
+  "roomId": "room.curio-fire-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-001",
+  "eventPool": [],
+  "flavor": "Oxidized copper plates line the walls, weeping streaks of pale green liquid onto a floor of polished obsidian. A single, heavy bronze sarcophagus sits atop a raised dais, humming with a low, rhythmic vibration.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Verdigris Vestibule",
+  "reason": "The room features a high-density combat encounter with a single high-health target, designed to drain resources before a boss encounter.",
+  "roomId": "room.elite-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

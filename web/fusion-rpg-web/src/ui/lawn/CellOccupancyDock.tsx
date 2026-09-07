@@ -42,10 +42,19 @@ export function CellOccupancyDock({
   useEffect(() => {
     if (!open) return;
     logLawnInteractive("dock.open", { cellLabel, count: occupants.length });
-    // T13: focus lands on the dock title (then first collection row via Tab).
-    const title = document.querySelector<HTMLElement>('[data-testid="cell-occupancy-dock-title"]');
-    title?.setAttribute("tabindex", "-1");
-    title?.focus({ preventScroll: true });
+    // T13: focus first collection item when present; otherwise the dock title.
+    requestAnimationFrame(() => {
+      const firstItem = document.querySelector<HTMLElement>(
+        '[data-testid="cell-occupancy-dock"] [data-testid*="-item-"]'
+      );
+      if (firstItem) {
+        firstItem.focus({ preventScroll: true });
+        return;
+      }
+      const title = document.querySelector<HTMLElement>('[data-testid="cell-occupancy-dock-title"]');
+      title?.setAttribute("tabindex", "-1");
+      title?.focus({ preventScroll: true });
+    });
   }, [open, cellLabel, occupants.length]);
 
   const rows = useMemo(() => adaptOccupants(occupants), [occupants]);

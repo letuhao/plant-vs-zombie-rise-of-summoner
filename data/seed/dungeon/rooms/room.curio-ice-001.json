@@ -1,0 +1,17 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001"
+  ],
+  "flavor": "A massive, translucent pillar of blue ice stands in the center of the chamber, preserving a colossal, multi-winged creature mid-flight. Tiny, frozen bubbles are suspended within the frost, catching the dim light like trapped stars.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Glacial Ossuary",
+  "reason": "The room serves as a centerpiece for players to interact with a preserved prehistoric specimen, offering a moment of awe and potential lore discovery before the next encounter.",
+  "roomId": "room.curio-ice-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

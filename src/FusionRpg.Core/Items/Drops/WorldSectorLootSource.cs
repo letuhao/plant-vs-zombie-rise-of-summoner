@@ -36,8 +36,21 @@ public static class WorldSectorLootSource
     /// <summary>One of <c>DropTableValidator.KnownSourceKinds</c>, reserved since module 11.</summary>
     public const string SourceKind = "world-sector";
 
-    /// <summary>Correction 1's 1.50-yield table, shipped with no source until now.</summary>
+    /// <summary>Correction 1's 1.50-yield table — the ORIGINAL, shared table every sector type drew
+    /// from until `sector-loot-wiring` (2026-09-07) split it per type. Kept only as the historical
+    /// citation for that yield calibration; <see cref="TableIdFor"/> is what every real caller uses
+    /// now.</summary>
     public const string SectorClearTableId = "drop.world.sector-clear";
+
+    /// <summary>
+    /// `drop-tables` `sector-loot-wiring` (2026-09-07): one real table PER `SectorTypeCatalog` entry,
+    /// closing the "every sector type shares one undifferentiated pool" gap the whole drop-tables
+    /// initiative names as its own reason to exist. `sectorTypeId` is never validated against
+    /// `SectorTypeCatalog` here — this file stays free of `FusionRpg.Core.World` on purpose (its own
+    /// class doc) — an unauthored type is refused downstream, at import, by
+    /// `DropTableValidator.ValidateSource`'s existing "table not found" check.
+    /// </summary>
+    public static string TableIdFor(string sectorTypeId) => $"{SectorClearTableId}.{sectorTypeId}";
 
     /// <summary>
     /// The loot source for clearing one sector, or a rejection naming why there is none.
@@ -50,7 +63,7 @@ public static class WorldSectorLootSource
     /// defect the <c>pvz-run</c> refusal exists to avoid. Safe ground is not content to clear.</para>
     /// </summary>
     public static AtomRejection TryResolve(
-        string sectorId, int dangerBand, PowerTuning tuning, out LootSourceRow? source)
+        string sectorId, int dangerBand, string sectorTypeId, PowerTuning tuning, out LootSourceRow? source)
     {
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
         source = null;
@@ -60,6 +73,11 @@ public static class WorldSectorLootSource
                 "a world-sector loot source needs the sector's OWN id — the correlation id is derived "
                 + "from it (§4.4), and a shared id would make two sectors one loot event");
 
+        if (string.IsNullOrWhiteSpace(sectorTypeId))
+            return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                "a world-sector loot source needs the sector's own type id — the table is per-type "
+                + "since sector-loot-wiring (2026-09-07), never one shared table");
+
         var contentLevel = PowerIndexComposer.MapLevel(dangerBand, tuning);
         if (contentLevel < 1)
             return AtomRejection.ContentRule("drop.sector-band-safe",
@@ -68,7 +86,7 @@ public static class WorldSectorLootSource
                 + "refused by name rather than floored to 1, which would invent a level the decision "
                 + "does not contain");
 
-        source = new LootSourceRow(SourceKind, sectorId, SectorClearTableId, contentLevel);
+        source = new LootSourceRow(SourceKind, sectorId, TableIdFor(sectorTypeId), contentLevel);
         return AtomRejection.Ok;
     }
 }

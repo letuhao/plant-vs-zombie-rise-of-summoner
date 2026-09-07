@@ -99,15 +99,23 @@ public class DemonLawnDeployAtomPushTests : IDisposable
     [Fact]
     public void A_demon_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload()
     {
+        // P1.5-L (2026-09-07): AtomPushService.Build now rewrites a UniqueActor-scoped grant's durable
+        // instance:{id} owner key to the specimen's own live entity:{ptr} (using RpgStore's own
+        // durably-tracked LastPtr) — the injector's hot path refuses instance: outright, confirmed live
+        // against a real running server + game. A specimen that only reached Deploying (never acked
+        // with a real ptr) now correctly contributes no grant; acking it here is what proves the trait
+        // binding reaches the wire in its real, acceptable shape.
         var id = MintWithTraits(new[] { "critical-hunter" });
         var deploy = _store.TryBeginUniqueDeploy(id, "deploy-push-1");
         Assert.True(deploy.Ok, deploy.Reason);
+        var ack = _store.TryAckUniqueSpawn("deploy-push-1", "0xCRIT1");
+        Assert.True(ack.Ok, ack.Reason);
 
         var payload = _push.Build(new OwnerScope(OwnerKind.UniqueActor, id), Lawn(), matchSeed: 7);
 
         var grant = Assert.Single(payload.Grants, g => g.EffectId == CriticalHunterEffectId);
-        Assert.Equal("instance:" + id, grant.OwnerKey);
-        Assert.Equal(EffectOwnerKeys.InstanceKind, grant.OwnerKind);
+        Assert.Equal(EffectOwnerKeys.Entity("CRIT1"), grant.OwnerKey);
+        Assert.False(FusionRpg.Core.Stats.StatApplyScope.IsInstanceOwnerKey(grant.OwnerKey));
     }
 
     [Fact]

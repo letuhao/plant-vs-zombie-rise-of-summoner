@@ -46,8 +46,11 @@ public class ItemDisplayTests
     [Fact]
     public void Every_shipped_family_has_a_display_template()
     {
+        // 109 -> 112 (2026-09-07): the affix-families-gen trial batch's three new families
+        // (atom.tempo-wildgrowth, atom.elpw-surfeit, atom.shld-absolute) each got a real template
+        // authored the same day this test caught their absence (disptpl.p1-024, p2-036, p2-037).
         var templates = LoadAllTemplates();
-        Assert.Equal(109, templates.Count);
+        Assert.Equal(112, templates.Count);
 
         var templated = templates.Select(r => r.RuntimeFamily).ToHashSet(StringComparer.Ordinal);
         var familyDir = Path.Combine(RepoRoot(), "data", "seed", "items", "affix-families");

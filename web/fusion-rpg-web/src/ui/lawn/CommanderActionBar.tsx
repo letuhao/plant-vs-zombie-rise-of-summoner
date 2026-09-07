@@ -34,7 +34,7 @@ export function CommanderActionBar({
       ({
         id: `locked-${n}`,
         slot: n,
-        name: "Orders unlock with the action corpus",
+        name: "Locked",
         costLabel: "—",
         locked: true,
         lockedReason: "Orders unlock with the action corpus"
@@ -46,7 +46,7 @@ export function CommanderActionBar({
     <div
       data-testid="commander-action-bar"
       className={cn(
-        "band-hud safe-area-bottom flex flex-wrap justify-center gap-1 px-2 py-2",
+        "band-hud safe-area-bottom flex flex-wrap justify-center gap-1 px-2 py-2 sm:flex-nowrap",
         className
       )}
     >
@@ -68,7 +68,7 @@ export function CommanderActionBar({
               onArm(s);
             }}
             className={cn(
-              "flex min-w-[4.5rem] flex-col items-center rounded-md border border-border bg-panel px-2 py-1 text-xs",
+              "flex w-[calc(20%-0.25rem)] max-w-[4.75rem] flex-col items-center rounded-md border border-border bg-panel px-1 py-1 text-xs sm:w-auto sm:min-w-[4.5rem] sm:max-w-none sm:px-2",
               "min-h-[3.25rem]",
               armedId === s.id && "ring-2 ring-lawn-hot",
               s.unaffordable && "border-bad text-bad",
@@ -76,7 +76,7 @@ export function CommanderActionBar({
             )}
           >
             <span className="font-mono text-muted">{s.slot}</span>
-            <span className="max-w-[5rem] truncate font-semibold text-text">{s.name}</span>
+            <span className="max-w-full truncate px-0.5 text-center font-semibold text-text">{s.name}</span>
             <span
               className={cn("text-2xs", s.unaffordable ? "text-bad" : "text-muted")}
               data-testid={`commander-action-cost-${s.slot}`}

@@ -19,7 +19,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from ..anchor.derive import clamp_variant_count, derive_posture, derive_pure, resolve_unresolved_threat_band
+from ..anchor.derive import (
+    clamp_variant_count, derive_posture, derive_pure, load_aptitude_fallback,
+    load_rarity_power_fallback, resolve_secondary_element_from_fusion_lineage,
+    resolve_unresolved_aptitude, resolve_unresolved_rarity, resolve_unresolved_threat_band,
+)
 from ..anchor.emit import build_index, entry_for, render_index, write_family_file
 from ..anchor.prompts import PIPELINES, SpeciesLore, threat_audit_spec_for_basis
 from ..anchor.provenance import PROMPT_VERSIONS, AnchorProvenance
@@ -39,6 +43,9 @@ REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_ANCHORS_DIR = REPO_ROOT / "data" / "seed" / "demons" / "species"
 DEFAULT_RUNS_DIR = REPO_ROOT / "data" / "seed" / "demons" / "_runs"
 DEFAULT_FAMILY_ASSIGNMENTS = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+#: The fusion-recipe-generator's own committed seed (`emit.py`'s `DEFAULT_OUTPUT_RELATIVE`) —
+#: read-only here, never reimplemented or duplicated.
+DEFAULT_FUSION_RECIPES_PATH = REPO_ROOT / "data" / "generated" / "demons" / "_fusion-recipes.json"
 
 #: In-progress record — gitignored, lives beside the checkpoint (spec §3: "committed only for
 #: completed runs; in-progress records live beside the checkpoint DB and are gitignored").
@@ -451,22 +458,43 @@ def overwrite_all(
 
 
 def fix_unresolved(*, paths: RunPaths = RunPaths(), dry_run: bool = False) -> "list[dict[str, Any]]":
-    """demon-corpus-self-heal F1 (2026-09-04) — a deliberate FIX STEP, run on demand after a
-    classification pass, never automatically during `start`/`resume`/`rerun`. A human reads
-    `DemonQualityReport`'s own unresolved-rate finding, then runs this to close what has a real
-    answer: `resolve_unresolved_threat_band`'s own docstring covers exactly why `threatBand` is the
-    ONLY field this touches — `aptitudePrimary`/`rarity`/`elementPrimary` have no equivalent
-    sanctioned fallback anywhere in this repo, and stay `"unresolved"`/reported rather than guessed
-    at here. No model calls, no lock needed (this never runs concurrently with a classification
-    pass in practice, and re-running it is idempotent — a species already resolved is a no-op).
+    """demon-corpus-self-heal F1 (2026-09-04) / Phase H+I (2026-09-07, owner-directed) — a
+    deliberate FIX STEP, run on demand after a classification pass, never automatically during
+    `start`/`resume`/`rerun`. A human reads `DemonQualityReport`'s own unresolved-rate finding,
+    then runs this to close what remains. Three fields have a fallback today, of two different
+    kinds:
 
-    Every fixed entry's `_provenance.confidence["threatBand"]` is stamped
-    `"deterministic-fallback"` (never `"high"`/`"split"`) so a future reader — or this same tool's
-    own report — can always tell a sanctioned default apart from a real LLM judgment; nothing here
-    pretends a judgment happened. Returns one dict per species actually fixed (or that WOULD be
-    fixed, when `dry_run=True`): `{"speciesId", "before", "after"}`.
+    - `threatBand` — DERIVED: `resolve_unresolved_threat_band`'s own sanctioned default
+      (`demon-threat.v1.json`'s `inferredDefaultRung`).
+    - `rarity` — DERIVED: `resolve_unresolved_rarity`, reusing `threatBand` (this SAME pass's own
+      just-fixed value, so the two chain: a species with both unresolved gets threatBand defaulted
+      first, then rarity derived from it) via `demon-rarity-power-fallback.v1.json`'s
+      rank-preserving correspondence. Rarity is this game's own invented mechanism, not an
+      almanac/PvZ property — the owner's direction (2026-09-07) is that an LLM vote never
+      converging is not a reason to leave it unresolved forever when a deterministic engine can
+      close the gap; stronger species land on rarer rungs.
+    - `aptitudePrimary` — INVENTED, not derived: measured directly (F≈1.34 over species with a
+      computable power score; 10 of 11 real unresolved species have no computable score at all),
+      no real signal exists to derive from. `resolve_unresolved_aptitude` applies a single flat,
+      undisguised default from `demon-aptitude-fallback.v1.json` — on the owner's own explicit
+      direction that this is fine for a game-invented mechanism when a real derivation genuinely
+      does not exist. Never chained from another field, because nothing informs the pick.
+
+    `elementPrimary` still has no fallback of either kind and correctly stays
+    `"unresolved"`/reported (currently moot — 0/840 unresolved as of 2026-09-07). No model calls,
+    no lock needed (this never runs concurrently with a classification pass in practice, and
+    re-running it is idempotent — a species already resolved is a no-op).
+
+    Every fixed field's `_provenance.confidence[field]` is stamped `"deterministic-fallback"`
+    (never `"high"`/`"split"`) so a future reader — or this same tool's own report — can always
+    tell a sanctioned default apart from a real LLM judgment; nothing here pretends a judgment
+    happened. Returns one dict per (species, field) actually fixed (or that WOULD be fixed, when
+    `dry_run=True`): `{"speciesId", "field", "before", "after"}` — a species with more than one
+    field unresolved produces one entry per field.
     """
     threat_tuning = ThreatTuning.load()
+    rarity_fallback = load_rarity_power_fallback()
+    aptitude_default = load_aptitude_fallback()
     anchors = _load_existing_anchors(paths.anchors_dir)
     families = _load_families(paths.family_assignments)
 
@@ -478,26 +506,137 @@ def fix_unresolved(*, paths: RunPaths = RunPaths(), dry_run: bool = False) -> "l
 
     fixed: "list[dict[str, Any]]" = []
     for entry in anchors:
-        before = entry.get("threatBand")
-        after, was_deterministic = resolve_unresolved_threat_band(before, tuning=threat_tuning)
-        if not was_deterministic:
+        before_threat = entry.get("threatBand")
+        after_threat, threat_was_fixed = resolve_unresolved_threat_band(before_threat, tuning=threat_tuning)
+
+        before_rarity = entry.get("rarity")
+        after_rarity, rarity_was_fixed = resolve_unresolved_rarity(
+            before_rarity, after_threat, mapping=rarity_fallback)
+
+        before_aptitude = entry.get("aptitudePrimary")
+        after_aptitude, aptitude_was_fixed = resolve_unresolved_aptitude(
+            before_aptitude, default=aptitude_default)
+
+        if not threat_was_fixed and not rarity_was_fixed and not aptitude_was_fixed:
             continue
-        fixed.append({"speciesId": entry.get("speciesId"), "before": before, "after": after})
+
+        species_id = entry.get("speciesId")
+        updates: "dict[str, Any]" = {}
+        votes: "dict[str, Any]" = {}
+        if threat_was_fixed:
+            fixed.append({"speciesId": species_id, "field": "threatBand",
+                         "before": before_threat, "after": after_threat})
+            updates["threatBand"] = after_threat
+            votes["threatBand"] = {"confidence": "deterministic-fallback", "minority": None}
+        if rarity_was_fixed:
+            fixed.append({"speciesId": species_id, "field": "rarity",
+                         "before": before_rarity, "after": after_rarity})
+            updates["rarity"] = after_rarity
+            votes["rarity"] = {"confidence": "deterministic-fallback", "minority": None}
+        if aptitude_was_fixed:
+            fixed.append({"speciesId": species_id, "field": "aptitudePrimary",
+                         "before": before_aptitude, "after": after_aptitude})
+            updates["aptitudePrimary"] = after_aptitude
+            votes["aptitudePrimary"] = {"confidence": "deterministic-fallback", "minority": None}
+            # Same recompute `_finalize` runs at classification time (line ~758) — posture/pure
+            # are functions of aptitudePrimary and must not go stale now that it changed.
+            updates["posture"] = derive_posture(after_aptitude)
+            updates["pure"] = derive_pure(after_aptitude, entry.get("aptitudeSecondary", "none"))
+
         if dry_run:
             continue
 
-        species_id = entry.get("speciesId", "")
         row = {"speciesId": species_id, "side": entry.get("side", "unclassified")}
         # dump_hash is PRESERVED from the entry's own original classification, never re-stamped —
         # this fix never re-reads the corpus dump, so claiming a fresh dump_hash would overstate
         # what actually happened here.
         original_dump_hash = entry.get("_provenance", {}).get("dumpHash", "")
         _write_species_entry(
-            row, {"threatBand": after}, dump_hash=original_dump_hash, families=families,
+            row, updates, dump_hash=original_dump_hash, families=families,
             anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
-            votes={"threatBand": {"confidence": "deterministic-fallback", "minority": None}},
+            votes=votes,
             pipeline_attempts={},  # no pipeline ran — the old attempts record must stay untouched
             merge_from=entry)
+
+    if not dry_run and fixed:
+        _rewrite_index(paths.anchors_dir, existing_by_file)
+    return fixed
+
+
+def fix_secondary_from_fusion_lineage(
+    *, paths: RunPaths = RunPaths(), recipes_path: Path = DEFAULT_FUSION_RECIPES_PATH,
+    dry_run: bool = False,
+) -> "list[dict[str, Any]]":
+    """Owner-directed follow-up (2026-09-07) to combat-unification's F2 ("author more real
+    `ElementSecondary` content") — a deterministic pass, run on demand AFTER
+    `fusion-recipe-reconcile` has produced a committed `_fusion-recipes.json` (never before: this
+    reads that file, never reimplements the recipe-assignment logic). Reuses
+    `resolve_secondary_element_from_fusion_lineage`'s pure derivation (see its own docstring for
+    the full rationale and the owner's "not every demon needs a secondary" boundary); this
+    function is only the anchor-tree read/write orchestration, matching `fix_unresolved`'s own
+    established shape one field over.
+
+    Sized against the real 713-recipe corpus before this was built (2026-09-07): 431 of 693
+    outputs missing a secondary gain a clean, single-candidate one from this pass; 259 correctly
+    stay `"none"` (both parents already agree with the output); 3 stay `"none"` on the same
+    honesty standard (neither parent's own `elementPrimary` can be trusted as "the other element"
+    with any confidence — see the derivation function's own docstring for why).
+
+    Idempotent and safe to re-run: a species whose `elementSecondary` is no longer `"none"` (either
+    already real, or already fixed by an earlier run of this same function) is a no-op. Never
+    touches `elementPrimary`, `rarity`, or `acquisition` — the three fields `fusion-recipe-generator`
+    itself depends on — so this pass can never invalidate an already-committed recipe and the
+    demon-seed cascade's usual "regenerate downstream of an anchor edit" rule applies only as far as
+    `DemonSpeciesGen`/`DemonSpeciesImport`/`DemonBuildPlanGen`, never back to the fusion-recipe step.
+    """
+    recipes = json.loads(recipes_path.read_text(encoding="utf-8")) if recipes_path.exists() else {}
+    anchors = _load_existing_anchors(paths.anchors_dir)
+    families = _load_families(paths.family_assignments)
+
+    element_by_species_lower = {
+        entry.get("speciesId", "").lower(): entry.get("elementPrimary")
+        for entry in anchors if entry.get("speciesId")
+    }
+    recipe_by_output_lower = {
+        r["outputSpeciesId"].lower(): r for r in recipes.values()
+    }
+
+    existing_by_file: "dict[str, list[dict]]" = {}
+    for entry in anchors:
+        family = _family_for(entry.get("speciesId", ""), families, classified_family=entry.get("family"))
+        side = entry.get("side", "unclassified")
+        existing_by_file.setdefault(f"{side}/{family}.json", []).append(entry)
+
+    fixed: "list[dict[str, Any]]" = []
+    for entry in anchors:
+        species_id = entry.get("speciesId", "")
+        recipe = recipe_by_output_lower.get(species_id.lower())
+        if recipe is None:
+            continue  # not a fusion output — no lineage signal to derive from
+
+        before_secondary = entry.get("elementSecondary", "none")
+        element_primary = entry.get("elementPrimary", "none")
+        input_a_element = element_by_species_lower.get(recipe["inputSpeciesIdA"].lower())
+        input_b_element = element_by_species_lower.get(recipe["inputSpeciesIdB"].lower())
+
+        after_secondary, was_fixed = resolve_secondary_element_from_fusion_lineage(
+            before_secondary, element_primary,
+            input_a_element=input_a_element, input_b_element=input_b_element)
+        if not was_fixed:
+            continue
+
+        fixed.append({"speciesId": species_id, "field": "elementSecondary",
+                     "before": before_secondary, "after": after_secondary})
+        if dry_run:
+            continue
+
+        original_dump_hash = entry.get("_provenance", {}).get("dumpHash", "")
+        row = {"speciesId": species_id, "side": entry.get("side", "unclassified")}
+        _write_species_entry(
+            row, {"elementSecondary": after_secondary}, dump_hash=original_dump_hash,
+            families=families, anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
+            votes={"elementSecondary": {"confidence": "fusion-lineage-derived", "minority": None}},
+            pipeline_attempts={}, merge_from=entry)
 
     if not dry_run and fixed:
         _rewrite_index(paths.anchors_dir, existing_by_file)

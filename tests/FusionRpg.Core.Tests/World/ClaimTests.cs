@@ -1,3 +1,5 @@
+using FusionRpg.Core.Items.Drops;
+using FusionRpg.Core.Power;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Movement;
 using FusionRpg.Core.World.Turn;
@@ -78,6 +80,67 @@ public class ClaimTests
         Assert.Equal("dave", ember.OwnerFactionId);
         Assert.Equal(SectorPhase.Held, ember.Phase);
         Assert.Equal(result.World.CurrentTurn, ember.LastSeenTurn);
+    }
+
+    static PowerTuning Power() => PowerTuning.Build(
+        schemaVersion: 1, version: 1,
+        cMilli: 80_000, bMilli: 400, pinIndex: 20, pinValue: 680,
+        wdMilli: 1000, waMilli: 25_000, wrMilli: 250, wzMilli: 1000,
+        wmMilli: 5000, wwMilli: 5000, wfMilli: 25_000);
+
+    [Fact]
+    public void ClaimResolver_invokes_no_loot_resolver_when_none_is_supplied_byte_identical_to_today()
+    {
+        // Safe default (incremental-implementation Rule 4): every existing caller, including every
+        // other test in this file, passes no PowerTuning at all -- behavior must be untouched.
+        var world = Place(AllGuardsCleared(World(), "ember-hollow"), "e-dave-legion-1", "ember-hollow");
+        var result = TurnEngine.Step(world, new[] { Claim("dave", "e-dave-legion-1", "ember-hollow") }, seed: 1);
+
+        Assert.Equal("dave", Sector(result.World, "ember-hollow").OwnerFactionId);
+        Assert.DoesNotContain(result.Report.Entries, e => e.Detail.StartsWith("claim.loot:", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.Report.Entries, e => e.Detail.StartsWith("claim.mythic:", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_successful_claim_resolves_loot_when_a_power_tuning_is_supplied()
+    {
+        // "Inert but correct until a real production caller exists" (drop-tables ideal.md, matching
+        // the affix_channel precedent) -- ember-hollow's own danger band must resolve to a real
+        // content level for this to fire; the assertion is the SHAPE (an event exists, or the sector
+        // is safe ground and none does), not a specific table id this fixture doesn't control.
+        var world = Place(AllGuardsCleared(World(), "ember-hollow"), "e-dave-legion-1", "ember-hollow");
+        var result = TurnEngine.Step(world, new[] { Claim("dave", "e-dave-legion-1", "ember-hollow") },
+            seed: 1, powerTuning: Power());
+
+        var ember = Sector(result.World, "ember-hollow");
+        Assert.Equal("dave", ember.OwnerFactionId); // the claim itself is unaffected either way
+
+        var lootEvents = result.Report.Entries.Where(e => e.Detail.StartsWith("claim.loot:", StringComparison.Ordinal)).ToList();
+        if (ember.DangerBand < 1)
+            Assert.Empty(lootEvents); // safe ground refuses by name, never floors (WorldSectorLootSource.cs)
+        else
+            Assert.Single(lootEvents);
+    }
+
+    [Fact]
+    public void A_boss_lair_claim_can_roll_an_independent_mythic_bonus_reproducibly()
+    {
+        // The real, end-to-end usage of RateAuthoring.IndependentRateEntry/Hit the drop-tables
+        // ideal doc's own open item asked for: a rate that stays exact regardless of the normal
+        // weighted table draw, checked on its own named stream. Ember Hollow is not a boss lair in
+        // the shipped template, so this proves the MECHANISM (same seed -> same result) rather than
+        // asserting a specific hit/miss, which world-template content this test does not own would
+        // make flaky.
+        var world = Place(AllGuardsCleared(World(), "ember-hollow"), "e-dave-legion-1", "ember-hollow");
+        var firstRun = TurnEngine.Step(world, new[] { Claim("dave", "e-dave-legion-1", "ember-hollow") },
+            seed: 42, powerTuning: Power(), mythicClaimBonusRatePerMillion: 10_000);
+        var secondRun = TurnEngine.Step(world, new[] { Claim("dave", "e-dave-legion-1", "ember-hollow") },
+            seed: 42, powerTuning: Power(), mythicClaimBonusRatePerMillion: 10_000);
+
+        bool MythicFired(TurnResult r) =>
+            r.Report.Entries.Any(e => e.Detail.StartsWith("claim.mythic:", StringComparison.Ordinal));
+
+        Assert.Equal(MythicFired(firstRun), MythicFired(secondRun));
     }
 
     [Fact]

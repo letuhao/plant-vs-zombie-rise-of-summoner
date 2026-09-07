@@ -456,6 +456,43 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-torso-b-013",
+      "nameKey": "base.riveted-cuirass",
+      "name": "Riveted Cuirass",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.riveted-cuirass",
+      "flavorKey": "flavor.base.riveted-cuirass",
+      "flavor": "Overlapping plates, hand-riveted along every seam. Heavy, and it shows.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

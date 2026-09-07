@@ -23,11 +23,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:44:51Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "steady"
       },
@@ -51,7 +52,7 @@
     "basis": "inferred",
     "deployMode": "HypnoAlly",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "fungal-parasite"
     ],
@@ -103,11 +104,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:31:28Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "aptitudePrimary": "Onslaught",
         "attackTempo": "slow",
@@ -133,7 +135,7 @@
     "basis": "inferred",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-parasite",
       "mimic-spore"

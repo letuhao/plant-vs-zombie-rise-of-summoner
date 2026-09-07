@@ -104,6 +104,56 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
   });
 });
 
+/**
+ * party-dungeon D5.3 (spec-delve-stage.md §13, §14's own named test row) — "a value above
+ * `MAX_SAFE_INTEGER` renders digit for digit through `exact`". Uses a souls-shaped fixture (`count`)
+ * since that is this task's own concrete, named example (`DelveRow.SoulsUnbanked`), but the mechanism
+ * under test is generic to any `Magnitude` carrying `exact` — see `types.ts`'s own `Magnitude.exact`
+ * doc comment for the real, separate gap in how far this precision survives the live delve wire today.
+ */
+describe("formatMagnitude — Magnitude.exact (D5.3, a long figure past Number.MAX_SAFE_INTEGER)", () => {
+  it("A_long_soul_balance_renders_exactly: a value already mangled by IEEE754 still renders the true digits", () => {
+    // The true server-side long value — one past Number.MAX_SAFE_INTEGER, so an ordinary `number`
+    // cannot hold it exactly. `value` below is deliberately a WRONG, already-rounded reading (as it
+    // would arrive after a lossy JSON round-trip) to prove the renderer prefers `exact` over it, not
+    // merely that it renders correctly when the two happen to agree.
+    const trueValue = "9007199254740993"; // Number.MAX_SAFE_INTEGER + 2, not representable exactly
+    const mangled = Number(trueValue); // rounds to 9007199254740992 — provably not equal to trueValue
+    expect(String(mangled)).not.toBe(trueValue);
+
+    const rendered = formatMagnitude(mag("count", mangled, { exact: trueValue }));
+    expect(rendered).toBe("9,007,199,254,740,993");
+    expect(rendered).not.toBe(new Intl.NumberFormat("en").format(mangled));
+  });
+
+  it("renders a genuinely huge long (near Int64.MaxValue) digit for digit, grouped", () => {
+    const trueValue = "9223372036854775807"; // long.MaxValue
+    const rendered = formatMagnitude(mag("count", 0, { exact: trueValue }));
+    expect(rendered).toBe("9,223,372,036,854,775,807");
+  });
+
+  it("a negative exact figure renders with its sign, via BigInt, no Number(...) round-trip", () => {
+    const rendered = formatMagnitude(mag("gameUnits", 0, { exact: "-9223372036854775808" }));
+    expect(rendered).toBe("-9,223,372,036,854,775,808");
+  });
+
+  it("exact is respected regardless of unit class — the field wins before the unit switch runs", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 500, { op: "flat", exact: "123456789012345678" }))).toBe(
+      "123,456,789,012,345,678"
+    );
+  });
+
+  it("a Magnitude with no exact field still renders through the ordinary value path (no regression)", () => {
+    expect(formatMagnitude(mag("count", 42))).toBe("42");
+  });
+
+  it("an in-range value with exact set still prefers exact, byte for byte", () => {
+    // Even when value is already correct, exact — when present — is the one source of truth; this
+    // proves the branch is unconditional on `m.exact !== undefined`, not a magnitude-size heuristic.
+    expect(formatMagnitude(mag("count", 42, { exact: "42" }))).toBe("42");
+  });
+});
+
 describe("formatMagnitude — CJK locale fixture", () => {
   it("does not break under a CJK locale code, and groups large numbers per that locale", () => {
     // English only ships this pass (web/spec.md §10); this proves the plumbing survives a real

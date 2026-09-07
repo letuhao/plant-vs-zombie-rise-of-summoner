@@ -27,6 +27,10 @@ const WorldStage = lazy(() => import("@/stages/world/WorldStage").then((m) => ({
 // non-entry stage (spec-siege-stage.md's own "lazy-load the stage" boundary) — it will carry the
 // same Phaser weight as Lawn once `board-render` is wired in (a later `stages/siege/` task).
 const SiegeStage = lazy(() => import("@/stages/siege/SiegeStage").then((m) => ({ default: m.SiegeStage })));
+// party-dungeon's sixth-stage amendment (decisions.md, approved 2026-09-05; spec-delve-stage.md §4).
+// Lazy like every other non-entry stage. D5.1 wires the shell only — a minimal placeholder, the same
+// starting shape `SiegeStage` had after its own 21.1 — the real room graph is D5.4's later task.
+const DelveStage = lazy(() => import("@/stages/delve/DelveStage").then((m) => ({ default: m.DelveStage })));
 
 /** T12: developer tree surfaces, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
 const DEV_ROUTE_REDIRECTS: Record<string, string> = {
@@ -116,6 +120,14 @@ export function AppRoutes() {
           element={
             <Suspense fallback={<ChunkFallback testId="chunk-fallback-siege" />}>
               <SiegeStage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="delve/:delveId"
+          element={
+            <Suspense fallback={<ChunkFallback testId="chunk-fallback-delve" />}>
+              <DelveStage />
             </Suspense>
           }
         />

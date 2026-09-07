@@ -19,14 +19,15 @@
       "auditVerdict": null,
       "basis": "observed",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:45:42Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -42,18 +43,18 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "Focus",
     "attackTempo": "flurry",
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "projectile-organism"
     ],
     "gameTypeId": 1347,
-    "posture": "unresolved",
+    "posture": "Force",
     "pure": false,
     "rarity": "fused",
     "reach": "short",

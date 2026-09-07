@@ -1,10 +1,26 @@
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The seven container kinds. Closed: adding one is a reviewed change, because each implies a spec
+/// The eleven container kinds. Closed: adding one is a reviewed change, because each implies a spec
 /// that owns its authoring and its lifecycle. <see cref="Enemy"/> is party-dungeon D2.6's own
 /// reviewed addition (spec-encounter-generator.md §6) — an elite/boss affix roll, owned by
 /// `encounter-generator`, never authored outside a delve encounter.
+///
+/// <para><see cref="Gem"/>/<see cref="Charm"/>/<see cref="Combo"/>/<see cref="Consumable"/> are
+/// item's own four additions (`container-kind-expansion`, D27/X7, 2026-09-07 — the reviewed change
+/// `effect-atom/spec-container-schema.md:153`'s own "Ask first" note asks for, filed into
+/// `effect-atom-map.md` §20 on 2026-09-06). Each is authored and lifecycle-owned by an item-seedgen
+/// module already built and shipping real content under exactly these id prefixes:
+/// <see cref="Gem"/> by `sockets-gen` (`data/seed/items/gems/*.json`, real: 60 entries), never
+/// authored outside a socket insert operation; <see cref="Charm"/> by `set-charm-gen`
+/// (`data/seed/items/charms/*.json`, real: 61 entries), never authored outside the charm-carry equip
+/// slot; <see cref="Combo"/> by `strain-splice-gen`/`combogen` (`data/seed/items/combinations/*.json`),
+/// never authored outside a socket-combination match; <see cref="Consumable"/> by `consumables-gen`
+/// (`data/seed/items/consumables/*.json`, real: 63 entries), never authored outside a stock-spend
+/// action. D27 itself named a fifth value, `set` — deliberately NOT added: a set's bonus is a
+/// threshold-grant row (module 12's own table), not a container, and `set` already names a distinct,
+/// pre-existing DB concept (`item_set`); minting a second, colliding meaning would have been wrong
+/// even though D27's literal word said it.</para>
 /// </summary>
 public enum ContainerKind
 {
@@ -15,6 +31,10 @@ public enum ContainerKind
     Patron,
     WorldBuff,
     Enemy,
+    Gem,
+    Charm,
+    Combo,
+    Consumable,
 }
 
 /// <summary>One atom in a container's <b>fixed core</b> — always present, in <c>seq</c> order.</summary>
@@ -112,6 +132,22 @@ public sealed record ContainerRow
     public string? Rarity { get; init; }
 
     /// <summary>
+    /// A unique's own authored frame/base-type pair (`UniqueSeed.Frame`/`.BaseTypeId`) — carried here
+    /// for the identical reason <see cref="Rarity"/> already is: a unique's rarity/frame/base-type are
+    /// all FIXED, authored container-level attributes (never drawn), unlike an ordinary equipment
+    /// drop's own per-instance roll. `null` for every non-unique container kind (mirroring
+    /// <see cref="Rarity"/>'s own "most containers don't have one" posture). D3.15/D4.12/D3.11's own
+    /// real remaining blocker (2026-09-06/07): `UniqueContainerBuild.From` never populated either
+    /// field, so `item_generation.frame`/`.base_type_id` had no data source for any unique instance —
+    /// this pair closes that gap the same low-risk way `Rarity` already proves works for this exact
+    /// kind of attribute, not a new table.
+    /// </summary>
+    public string? Frame { get; init; }
+
+    /// <summary>See <see cref="Frame"/>.</summary>
+    public string? BaseTypeId { get; init; }
+
+    /// <summary>
     /// The tier window the pool may offer. <b>Rarity and tier are different axes</b>: tier is how
     /// strong one affix is; rarity selects how many are drawn and which tiers are allowed.
     /// </summary>
@@ -151,6 +187,10 @@ public sealed record ContainerRow
         ContainerKind.Patron => "patron",
         ContainerKind.WorldBuff => "world-buff",
         ContainerKind.Enemy => "enemy",
+        ContainerKind.Gem => "gem",
+        ContainerKind.Charm => "charm",
+        ContainerKind.Combo => "combo",
+        ContainerKind.Consumable => "consumable",
         _ => "",
     };
 }

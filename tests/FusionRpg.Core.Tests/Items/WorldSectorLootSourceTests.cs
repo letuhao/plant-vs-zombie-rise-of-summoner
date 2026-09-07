@@ -107,12 +107,12 @@ public class WorldSectorLootSourceTests
     public void A_sector_clear_resolves_a_loot_source_at_the_decided_level()
     {
         Assert.True(WorldSectorLootSource
-            .TryResolve("sector-7", dangerBand: 6, Power(), out var source).IsOk);
+            .TryResolve("sector-7", dangerBand: 6, "boss-lair", Power(), out var source).IsOk);
 
         Assert.NotNull(source);
         Assert.Equal("world-sector", source!.SourceKind);
         Assert.Equal("sector-7", source.SourceId);
-        Assert.Equal("drop.world.sector-clear", source.TableId);
+        Assert.Equal("drop.world.sector-clear.boss-lair", source.TableId);
         Assert.Equal(30, source.ContentLevel);
         Assert.Null(source.FirstClearGrant);
         Assert.Equal("world-sector:sector-7", source.Key);
@@ -121,7 +121,7 @@ public class WorldSectorLootSourceTests
     [Fact]
     public void A_safe_ground_sector_is_refused_by_name_never_floored_to_one()
     {
-        var rejection = WorldSectorLootSource.TryResolve("home", dangerBand: 0, Power(), out var source);
+        var rejection = WorldSectorLootSource.TryResolve("home", dangerBand: 0, "homeworld", Power(), out var source);
 
         Assert.False(rejection.IsOk);
         Assert.Equal(AtomRejectionReason.ContentRuleViolated, rejection.Reason);
@@ -135,7 +135,15 @@ public class WorldSectorLootSourceTests
     [Fact]
     public void A_sector_with_no_id_is_refused_because_the_correlation_id_derives_from_it()
     {
-        var rejection = WorldSectorLootSource.TryResolve("  ", dangerBand: 4, Power(), out var source);
+        var rejection = WorldSectorLootSource.TryResolve("  ", dangerBand: 4, "stable", Power(), out var source);
+        Assert.Equal(AtomRejectionReason.BadParamValue, rejection.Reason);
+        Assert.Null(source);
+    }
+
+    [Fact]
+    public void A_sector_with_no_type_id_is_refused_because_the_table_is_per_type_now()
+    {
+        var rejection = WorldSectorLootSource.TryResolve("sector-9", dangerBand: 4, "  ", Power(), out var source);
         Assert.Equal(AtomRejectionReason.BadParamValue, rejection.Reason);
         Assert.Null(source);
     }
@@ -146,8 +154,8 @@ public class WorldSectorLootSourceTests
         // ⛔ The reason the row is resolved at runtime instead of authored per sector TYPE. A static
         // seed row keyed on "boss-lair" would give both of these the same correlation id, and step 1
         // would replay the first clear for the second — minting nothing, silently.
-        Assert.True(WorldSectorLootSource.TryResolve("boss-lair-a", 6, Power(), out var a).IsOk);
-        Assert.True(WorldSectorLootSource.TryResolve("boss-lair-b", 6, Power(), out var b).IsOk);
+        Assert.True(WorldSectorLootSource.TryResolve("boss-lair-a", 6, "boss-lair", Power(), out var a).IsOk);
+        Assert.True(WorldSectorLootSource.TryResolve("boss-lair-b", 6, "boss-lair", Power(), out var b).IsOk);
 
         Assert.Equal(a!.ContentLevel, b!.ContentLevel);
         Assert.NotEqual(a.Key, b.Key);
@@ -155,6 +163,15 @@ public class WorldSectorLootSourceTests
             LootCorrelation.Derive(a.SourceKind, a.SourceId),
             LootCorrelation.Derive(b.SourceKind, b.SourceId));
         Assert.Equal("loot:sector:boss-lair-a", LootCorrelation.Derive(a.SourceKind, a.SourceId));
+    }
+
+    [Fact]
+    public void Each_real_sector_type_resolves_to_its_own_distinct_table_id()
+    {
+        var tableIds = SectorTypeCatalog.All
+            .Select(def => WorldSectorLootSource.TableIdFor(def.TypeId))
+            .ToList();
+        Assert.Equal(tableIds.Count, tableIds.Distinct(StringComparer.Ordinal).Count());
     }
 
     [Fact]
@@ -167,7 +184,7 @@ public class WorldSectorLootSourceTests
 
         foreach (var def in SectorTypeCatalog.All)
         {
-            if (WorldSectorLootSource.TryResolve($"s-{def.TypeId}", def.BaseDangerBand, Power(), out var row).IsOk)
+            if (WorldSectorLootSource.TryResolve($"s-{def.TypeId}", def.BaseDangerBand, def.TypeId, Power(), out var row).IsOk)
                 sources.Add(row!);
         }
 
@@ -178,20 +195,46 @@ public class WorldSectorLootSourceTests
         Assert.True(verdict.IsOk, verdict.ToString());
     }
 
+    [Fact]
+    public void At_least_two_real_sector_type_tables_differ_substantively_not_just_by_id()
+    {
+        // Found in review (adversarial audit of the drop-tables specs): distinct table ids alone can
+        // ship as byte-identical content under different filenames. This proves real divergence: the
+        // boss-lair table draws from a DIFFERENT shared pool (hybrid-core-BOSS, affixChannel=boss) than
+        // every non-boss type (hybrid-core-ANY, affixChannel=drop), and its bonus branch is guaranteed
+        // (no "nothing" entry) where every other type's is not.
+        var corpus = DropVolumeCorpusTests.Corpus();
+        var byId = corpus.Tables.ToDictionary(t => t.TableId, StringComparer.Ordinal);
+
+        var bossLair = byId["drop.world.sector-clear.boss-lair"];
+        var stable = byId["drop.world.sector-clear.stable"];
+
+        var bossBonusGroup = bossLair.Groups.Single(g => g.GroupKey == "sector-bonus");
+        var stableBonusGroup = stable.Groups.Single(g => g.GroupKey == "sector-bonus");
+
+        Assert.DoesNotContain(bossBonusGroup.Entries, e => e.Kind == DropEntryKind.Nothing);
+        Assert.Contains(stableBonusGroup.Entries, e => e.Kind == DropEntryKind.Nothing);
+
+        Assert.All(bossLair.Groups.SelectMany(g => g.Entries).Where(e => e.Kind == DropEntryKind.Table),
+            e => Assert.Equal(AffixChannels.Boss, e.AffixChannel));
+        Assert.All(stable.Groups.SelectMany(g => g.Entries).Where(e => e.Kind == DropEntryKind.Table),
+            e => Assert.Equal(AffixChannels.Drop, e.AffixChannel));
+    }
+
     // ---- end to end, through the twelve steps ----------------------------------------------------
 
     [Fact]
     public void A_sector_clear_drops_loot_through_the_whole_pipeline()
     {
-        var manifest = ResolveSectorClear("sector-boss-1", dangerBand: 6, seed: 0xB055);
+        var manifest = ResolveSectorClear("sector-boss-1", dangerBand: 6, "boss-lair", seed: 0xB055);
 
         Assert.Equal("loot:sector:sector-boss-1", manifest.CorrelationId);
-        Assert.Equal("drop.world.sector-clear", manifest.TableId);
+        Assert.Equal("drop.world.sector-clear.boss-lair", manifest.TableId);
         Assert.InRange(manifest.ItemLevel, 29, 31);          // mapLevel 30, ±1 jitter
         Assert.False(manifest.Replayed);
         Assert.NotEmpty(manifest.Grants);
         Assert.All(manifest.Grants, g => Assert.Equal(DropEntryKind.Equipment, g.Kind));
-        Assert.All(manifest.Grants, g => Assert.Equal(AffixChannels.Drop, g.AffixChannel));
+        Assert.All(manifest.Grants, g => Assert.Equal(AffixChannels.Boss, g.AffixChannel));
         Assert.All(manifest.Grants, g => Assert.Equal(manifest.ItemLevel, g.ItemLevel));
     }
 
@@ -199,17 +242,17 @@ public class WorldSectorLootSourceTests
     public void A_deeper_sector_drops_higher_level_items()
     {
         // The whole point of the formula: depth is expressed in the item, not in a flat table.
-        var shallow = ResolveSectorClear("sector-stable", dangerBand: 1, seed: 0x5EED);
-        var deep = ResolveSectorClear("sector-lair", dangerBand: 6, seed: 0x5EED);
+        var shallow = ResolveSectorClear("sector-stable", dangerBand: 1, "stable", seed: 0x5EED);
+        var deep = ResolveSectorClear("sector-lair", dangerBand: 6, "boss-lair", seed: 0x5EED);
 
         Assert.InRange(shallow.ItemLevel, 4, 6);
         Assert.InRange(deep.ItemLevel, 29, 31);
         Assert.True(deep.ItemLevel > shallow.ItemLevel);
     }
 
-    static LootManifest ResolveSectorClear(string sectorId, int dangerBand, ulong seed)
+    static LootManifest ResolveSectorClear(string sectorId, int dangerBand, string sectorTypeId, ulong seed)
     {
-        Assert.True(WorldSectorLootSource.TryResolve(sectorId, dangerBand, Power(), out var source).IsOk);
+        Assert.True(WorldSectorLootSource.TryResolve(sectorId, dangerBand, sectorTypeId, Power(), out var source).IsOk);
 
         var corpus = DropVolumeCorpusTests.Corpus();
         var baseTypes = DropVolumeCorpusTests.BaseTypes();

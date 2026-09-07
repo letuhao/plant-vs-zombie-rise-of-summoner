@@ -113,6 +113,7 @@ public static class DistrictAssaultPhase
             RubbleStock = sector.RubbleStock,
             IronworkStock = sector.IronworkStock,
             AttackerEdge = DistrictLayout.EntryEdgeFor(world, attacker, sector.SectorId),
+            WardLevel = DistrictLayout.WardLevelFor(world, attacker),
             Slots = sector.Slots
                 .Select(slot => new SlotProjection
                 {

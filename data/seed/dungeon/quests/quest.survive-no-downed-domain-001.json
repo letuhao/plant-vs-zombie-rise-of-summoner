@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The local warden demands proof of absolute martial dominance. To claim the title, you must emerge from the trials without a single comrade falling to the earth.",
+  "name": "The Gauntlet of Attrition",
+  "objectiveTemplate": "survive-no-downed",
+  "prereqRefs": [],
+  "questId": "quest.survive-no-downed-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "domain",
+  "targetRef": "none"
+}

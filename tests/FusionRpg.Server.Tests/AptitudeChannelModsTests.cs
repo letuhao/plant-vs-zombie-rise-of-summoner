@@ -102,7 +102,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
             FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.SimDefaults.Configure(
             FusionRpg.Core.SimTuningLoader.Parse(Read("sim.v1.json")));
         FusionRpg.Core.Demons.SummoningTuningHub.Configure(

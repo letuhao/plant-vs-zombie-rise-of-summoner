@@ -1,0 +1,17 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.ashthreepeater-001"
+  ],
+  "flavor": "A vast, circular chamber of polished white marble is dominated by a single, massive crystal suspended from the ceiling. Beams of concentrated sunlight pierce through high, narrow slits in the dome, striking the gemstone and scattering dancing, blinding rainbows across the floor.",
+  "hazardBand": "light",
+  "kind": "trap",
+  "name": "The Prism Refraction",
+  "reason": "A tripwire triggers a series of rotating mirrors, focusing the sunlight into a searing, concentrated beam that sweeps across the room.",
+  "roomId": "room.trap-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

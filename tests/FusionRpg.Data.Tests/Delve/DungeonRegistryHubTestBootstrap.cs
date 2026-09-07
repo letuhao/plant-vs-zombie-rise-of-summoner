@@ -1,15 +1,17 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core.Dungeon.Registry;
+using FusionRpg.Core.Dungeon.Tuning;
 
 namespace FusionRpg.Data.Tests.Delve;
 
 /// <summary>
-/// Configures <see cref="DungeonRegistryHub"/> once for the whole assembly from the real, shipped
-/// registry files — <see cref="FusionRpg.Core.Delve.Roll.DelveGraphRoll.Roll"/> reads
-/// <see cref="RoomKindCatalog"/>/<see cref="RaidModeCatalog"/> through this static hub even though
-/// its tuning comes in as an explicit parameter, so any Data.Tests class rolling a real graph needs
-/// this configured regardless of which test class xunit happens to run first (mirrors
-/// `FusionRpg.Core.Tests.Dungeon.DungeonHubTestBootstrap`'s shape).
+/// Configures all three Dungeon hubs once for the whole assembly from the real, shipped files, in
+/// `Program.cs`'s own boot order — registries load first, pure; `DungeonTuningHub`/`EncounterTuningHub`
+/// next, cross-checked against those registries at parse time; `DungeonRegistryHub` last — mirroring
+/// `FusionRpg.Core.Tests.Dungeon.DungeonHubTestBootstrap`'s own identical shape exactly (originally
+/// this file configured only `DungeonRegistryHub`, all `DelveGraphRoll.Roll` under this assembly ever
+/// needed; extended 2026-09-07, party-dungeon D4.30, for the first Data.Tests class that also needs
+/// `DungeonTuningHub`/`EncounterTuningHub` configured — a real, growing need, not a speculative one).
 /// </summary>
 internal static class DungeonRegistryHubTestBootstrap
 {
@@ -22,6 +24,10 @@ internal static class DungeonRegistryHubTestBootstrap
         if (dir is null) throw new DirectoryNotFoundException("could not locate repo root above " + AppContext.BaseDirectory);
 
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(dir.FullName, "data", "seed", "dungeon", "_registry"));
+        DungeonTuningHub.Configure(
+            DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", "dungeon.v1.json")), registries));
+        EncounterTuningHub.Configure(
+            EncounterTuningLoader.Parse(File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", "encounter.v1.json")), registries));
         DungeonRegistryHub.Configure(registries);
     }
 }

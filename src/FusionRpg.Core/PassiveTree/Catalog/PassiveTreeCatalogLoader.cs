@@ -34,16 +34,6 @@ public static class PassiveTreeCatalogLoader
         @"^skill\.(?<tree>[a-z][a-z0-9]*)-(?<branch>off|def)-t(?<tier>[0-9]+)-(?<key>[a-z0-9]+)$",
         RegexOptions.Compiled);
 
-    // soulCurveId is a REFERENCE into the curve table (CurveTable.cs:14-15 — "a curve reference,
-    // never a formula: a formula string is a language, and a language is a parser, a sandbox, and a
-    // security surface"), matching this repo's shipped curve id shape (data/seed/items/curves/
-    // curves.json: "curve.001" … ; data/seed/curves/README.md: "curve.hp.level", "curve.dmg.tier").
-    // A formula/expression (whitespace, arithmetic operators, a leading digit) is refused here at
-    // catalog load rather than reaching the curve table only to fail existence lookup with a
-    // confusing message.
-    static readonly Regex SoulCurveIdPattern = new(
-        @"^curve\.[a-z0-9]+(?:[._-][a-z0-9]+)*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     // R6's "classes.v2.json trap" (spec-tree-catalog.md §4): `data/seed/items/_registry/classes.v2.json`
     // carries `"registryVersion": 4` internally -- its filename and its own internal version number
     // disagree, and nothing catches it. This module refuses to ship the same trap: a committed tree
@@ -313,17 +303,8 @@ public static class PassiveTreeCatalogLoader
             refusals.Add($"node '{nodeId}': unitClass '{unitClass}' must carry scaleAxis " +
                         $"'{expectedAxis}', got '{scaleAxis}' — a silent-failure pairing (§2.4)");
 
-        var soulCurveId = el.TryGetProperty("soulCurveId", out var scEl) && scEl.ValueKind != JsonValueKind.Null
-            ? scEl.GetString() : null;
-        // D3: souls are a curve READ, never a roll or a formula. Kept as authored in the returned
-        // record either way (never rewritten) so a refusal can quote exactly what was there.
-        if (soulCurveId is not null && !SoulCurveIdPattern.IsMatch(soulCurveId))
-            refusals.Add($"node '{nodeId}': soulCurveId '{soulCurveId}' is not a curve reference " +
-                        "(expected 'curve.<id>', e.g. 'curve.might.resist') — an inline formula or " +
-                        "expression is never accepted (D3)");
-
         return new NodeAtom(kindId, attachPoint, channelId, op, trigger, whenJson, kMicro, scaleAxis,
-            unitClass, soulCurveId);
+            unitClass);
     }
 
     /// <summary>

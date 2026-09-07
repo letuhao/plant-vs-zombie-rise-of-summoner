@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.pack-dual-003",
+  "formation": "pack",
+  "name": "Swarming Phalanx",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A coordinated surge of low-tier skirmishers attempting to overwhelm the frontline through sheer numbers.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "nuisance",
+    "floorRung": "nuisance"
+  }
+}

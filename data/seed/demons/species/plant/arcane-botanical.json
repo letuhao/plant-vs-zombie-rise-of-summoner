@@ -23,10 +23,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:45:42Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "aptitudePrimary": "Precision",
         "attackTempo": "flurry",
@@ -52,7 +53,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "arcane-botanical",
       "projectile-flora"

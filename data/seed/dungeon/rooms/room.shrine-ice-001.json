@@ -1,0 +1,17 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.bucketnutzombie-001"
+  ],
+  "flavor": "A single, jagged pillar of translucent blue ice rises from the center of the frost-cracked floor, trapping a frozen, unmoving hand reaching toward the ceiling.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Permafrost Altar",
+  "reason": "The party discovers a site of ancient, frozen devotion where a relic is encased in eternal ice.",
+  "roomId": "room.shrine-ice-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

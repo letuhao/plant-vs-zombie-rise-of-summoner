@@ -147,41 +147,51 @@ public sealed partial class RpgStore
     /// </summary>
     public string SaveInstance(InstanceRow instance, string? instanceId = null, string? createdUtc = null)
     {
-        var id = string.IsNullOrWhiteSpace(instanceId) ? Guid.NewGuid().ToString("N") : instanceId!;
-        var utc = createdUtc ?? DateTime.UtcNow.ToString("O");
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-
-            ExecIn(db, tx, """
-                INSERT INTO effect_instance
-                  (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
-                   theta_content, content_scale_milli)
-                VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
-                ON CONFLICT(instance_id) DO UPDATE SET
-                  container_id = excluded.container_id, roll_seed = excluded.roll_seed,
-                  catalog_revision = excluded.catalog_revision, origin = excluded.origin,
-                  theta_content = excluded.theta_content, content_scale_milli = excluded.content_scale_milli;
-                """,
-                ("$id", id), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
-                ("$rev", instance.CatalogRevision), ("$utc", utc),
-                ("$origin", instance.Origin.ToString().ToLowerInvariant()),
-                ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
-
-            ExecIn(db, tx, "DELETE FROM effect_instance_atom WHERE instance_id = $id;", ("$id", id));
-
-            foreach (var a in instance.Atoms)
-                ExecIn(db, tx,
-                    "INSERT INTO effect_instance_atom (instance_id, seq, atom_id, values_json, power_json, identity_digest) " +
-                    "VALUES ($id, $seq, $atom, $vals, $power, $digest);",
-                    ("$id", id), ("$seq", a.Seq), ("$atom", a.AtomId), ("$vals", a.ValuesJson),
-                    ("$power", (object?)a.PowerJson ?? DBNull.Value),
-                    ("$digest", (object?)a.IdentityDigestHex ?? DBNull.Value));
-
+            var id = SaveInstanceUnlocked(db, tx, instance, instanceId, createdUtc);
             tx.Commit();
+            return id;
         }
+    }
+
+    /// <summary>Same write on the caller's connection/transaction — `delve-quests` D4.12/D4.14's own
+    /// named gap (party-dungeon-todo.md): a quest reward's minted instance must land in the SAME
+    /// transaction `RpgStore.Delve.CloseDelve` commits, never its own separate one. See
+    /// <see cref="AppendMutationOpUnlocked"/> for the established "why" this whole `*Unlocked` family
+    /// shares.</summary>
+    internal string SaveInstanceUnlocked(
+        SqliteConnection db, SqliteTransaction tx, InstanceRow instance, string? instanceId = null, string? createdUtc = null)
+    {
+        var id = string.IsNullOrWhiteSpace(instanceId) ? Guid.NewGuid().ToString("N") : instanceId!;
+        var utc = createdUtc ?? DateTime.UtcNow.ToString("O");
+
+        ExecIn(db, tx, """
+            INSERT INTO effect_instance
+              (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+               theta_content, content_scale_milli)
+            VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
+            ON CONFLICT(instance_id) DO UPDATE SET
+              container_id = excluded.container_id, roll_seed = excluded.roll_seed,
+              catalog_revision = excluded.catalog_revision, origin = excluded.origin,
+              theta_content = excluded.theta_content, content_scale_milli = excluded.content_scale_milli;
+            """,
+            ("$id", id), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
+            ("$rev", instance.CatalogRevision), ("$utc", utc),
+            ("$origin", instance.Origin.ToString().ToLowerInvariant()),
+            ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
+
+        ExecIn(db, tx, "DELETE FROM effect_instance_atom WHERE instance_id = $id;", ("$id", id));
+
+        foreach (var a in instance.Atoms)
+            ExecIn(db, tx,
+                "INSERT INTO effect_instance_atom (instance_id, seq, atom_id, values_json, power_json, identity_digest) " +
+                "VALUES ($id, $seq, $atom, $vals, $power, $digest);",
+                ("$id", id), ("$seq", a.Seq), ("$atom", a.AtomId), ("$vals", a.ValuesJson),
+                ("$power", (object?)a.PowerJson ?? DBNull.Value),
+                ("$digest", (object?)a.IdentityDigestHex ?? DBNull.Value));
 
         return id;
     }

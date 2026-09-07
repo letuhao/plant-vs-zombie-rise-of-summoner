@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:05:50Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -48,7 +49,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "explosive-botanical"
     ],
@@ -101,10 +102,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:13:55Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -126,7 +128,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "explosive-botanical"
     ],
@@ -179,10 +181,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:51:52Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "attackTempo": "slow"
       },
@@ -206,7 +209,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "explosive-botanical"
     ],
@@ -258,10 +261,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:03:00Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -283,7 +287,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "air",
     "family": [
       "explosive-botanical",
       "mutagenic-flora"
@@ -337,10 +341,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:30:05Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -362,7 +367,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "explosive-botanical"
     ],
@@ -499,10 +504,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:46:17Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "rarity": "chimeric"
       },
@@ -526,7 +532,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "explosive-botanical",
       "artillery-flora"

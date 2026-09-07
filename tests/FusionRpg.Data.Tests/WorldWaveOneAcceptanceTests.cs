@@ -240,10 +240,30 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       `DebugAssertException` — caught on the very first run against this exact test, not guessed
     //       at. Fixed with the same `EnsureColumn` pattern across all four sites named above.
     //
-    // The plan expected one re-bless. Many more were needed since — most recently entry #18 above —
+    //   19. **base-defense `siege-ai` 17.11 (decision 47), 2026-09-07** — `DistrictLayout.ZoneOf`'s
+    //       6-argument overload (17.11's own build: a warded lane's `WorldLane.WardLevel` widens the
+    //       Rampart/Approach boundary, but only on the wedge facing the attacker's entry edge) was
+    //       built and unit-tested WITHOUT moving this golden — its own closure note said so directly,
+    //       because `DistrictAssaultResolver` did not call the 6-arg overload yet at that point, only
+    //       the byte-identical 4-arg one every other caller still uses. It has SINCE been wired in
+    //       (`DistrictAssaultResolver.cs`'s own `ZoneOf` call now passes `attackerEdge`/`wardExtraDepth`)
+    //       — a genuine, deliberate, already-authorized behaviour change (decision 47), not a drift:
+    //       this scenario's own district assault now computes Approach-zone membership asymmetrically
+    //       for any lane carrying a non-zero `WardLevel`, which can shift which cells are legal for
+    //       troop placement and, from there, real combat outcomes and final `WorldSector`/`WorldSlot`
+    //       state. Confirmed NOT caused by anything else landing the same day — re-run in isolation
+    //       with `DistrictAssaultResolver`'s own new, UNRELATED `aiTuning: SiegeTuningPolicy.Ai`
+    //       argument (17.4/live-wiring, same day) temporarily disabled, and the mismatch persisted
+    //       identically, isolating this specific change as the sole cause. Verified stable across
+    //       multiple repeated runs (both truncated and full-length hash) before re-blessing — the
+    //       first observation briefly showed a second, different value while an unrelated concurrent
+    //       session was mid-edit in `Battle/BattleModels.cs`; re-checked only after that file's own
+    //       diff stopped changing between runs.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #19 above —
     // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "2e09a54e2c9079d72f377efe2683165c465e50b747ef4b0ed377b975733effbd";
+    const string GoldenFinalHash = "5a596ea4ffbbc0d3827f77d41840ba40e0530f8787649357400889beb77dd7ed";
 
     readonly string _dir;
     readonly RpgStore _store;

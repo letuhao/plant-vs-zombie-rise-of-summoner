@@ -78,7 +78,7 @@ public static class UniqueOwnerBinder
     public static bool WouldRejectOnHot(string? ownerKey) =>
         StatApplyScope.IsInstanceOwnerKey(ownerKey);
 
-    static string? ExtractInstanceId(string? ownerKey)
+    public static string? ExtractInstanceId(string? ownerKey)
     {
         var key = StatApplyScope.Normalize(ownerKey);
         if (!key.StartsWith("instance:", StringComparison.Ordinal)) return null;

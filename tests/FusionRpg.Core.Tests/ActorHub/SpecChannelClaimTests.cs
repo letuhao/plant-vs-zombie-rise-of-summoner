@@ -57,7 +57,7 @@ public class SpecChannelClaimTests
         "combat.power.pierce", "combat.power.overflow",
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
-        "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",
+        "status.v1.json", "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",
         "status.timed",
         "progression.tierPower"
     };

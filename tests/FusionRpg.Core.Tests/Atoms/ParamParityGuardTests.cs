@@ -166,6 +166,17 @@ public class ParamParityGuardTests
 
     // ---- the real check, against the live registry --------------------------------------------------
 
+    // Mirrors AtomKindRegistryTests' own `awaitingConsumer` set exactly (same kinds, same meaning: no
+    // real executor in ANY runtime yet, so nothing can have read a declared param). First occupant
+    // since this guard shipped (E28): `element.convert` (D56) validates its own params but has no real
+    // reader — the combat-dispatch call site is a genuine, undecided engineering choice (spec
+    // §2b), not forced here just to keep this guard green. A param-parity violation on a kind with NO
+    // consumer at all is not the "declared, accepted, ignored" defect this file exists to catch (that
+    // defect needs a real, wrong consumer to ignore the param) — it is the same "awaiting a consumer"
+    // state AtomKindRegistryTests already has a name for. Remove from both sets together the day a
+    // real reader lands.
+    static readonly HashSet<string> AwaitingConsumer = new(StringComparer.Ordinal) { "element.convert" };
+
     [Fact]
     public void Every_declared_param_on_every_shipped_kind_reaches_its_real_consumer_source()
     {
@@ -174,6 +185,20 @@ public class ParamParityGuardTests
         var missing = new List<string>();
         foreach (var kind in AtomKindRegistry.All)
         {
+            if (AwaitingConsumer.Contains(kind.KindId))
+            {
+                // No runtime claims support (AtomKindRegistryTests' own guard proves this), so there is
+                // structurally nothing to read this kind's params yet -- asserted here rather than
+                // silently skipped, so a kind that leaves the AwaitingConsumer set without ever gaining
+                // a ConsumerFiles entry still fails loudly below, not silently.
+                Assert.True(kind.SupportIn(RuntimeId.Lawn) == RuntimeState.None
+                    && kind.SupportIn(RuntimeId.Battle) == RuntimeState.None
+                    && kind.SupportIn(RuntimeId.Sim) == RuntimeState.None,
+                    $"{kind.KindId} is listed as AwaitingConsumer but claims real runtime support -- " +
+                    "remove it from AwaitingConsumer and add a real ConsumerFiles entry instead");
+                continue;
+            }
+
             if (!ConsumerFiles.TryGetValue(kind.KindId, out var files))
             {
                 missing.Add($"{kind.KindId}: no consumer-file mapping registered in " +

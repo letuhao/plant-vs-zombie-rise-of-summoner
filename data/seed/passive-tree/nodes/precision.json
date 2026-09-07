@@ -35,6 +35,82 @@
     },
     {
       "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens into a rigid, protective shell.",
+      "id": "skill.precision-def-t1-n1",
+      "name": "Dermal Hardening",
+      "nameKey": "tree.node.dermal-hardening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "A dense, fibrous layer that thickens with every season of survival.",
+      "id": "skill.precision-def-t1-n2",
+      "name": "Thickened Bark",
+      "nameKey": "tree.node.thickened-bark-6",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+      "id": "skill.precision-def-t10-n0",
+      "name": "Kinetic Recirculation",
+      "nameKey": "tree.node.kinetic-recirculation-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
@@ -93,7 +169,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active \u2014 tier wins.",
+        "printedText": "Inert while tier is active — tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -106,6 +182,32 @@
       "nodeKey": "n2",
       "rationale": "",
       "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden",
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A secondary layer of hardened tissue that absorbs impact before it reaches the vital organs.",
+      "id": "skill.precision-def-t3-n0",
+      "name": "Grafted Aegis",
+      "nameKey": "tree.node.grafted-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
     },
     {
       "affinity": [
@@ -154,6 +256,32 @@
       "nodeKey": "n2",
       "rationale": "",
       "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating",
+        "atom.warded"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layering organic tissue over structural plating to absorb the initial impact.",
+      "id": "skill.precision-def-t4-n0",
+      "name": "Reinforced Grafting",
+      "nameKey": "tree.node.reinforced-grafting",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [
@@ -281,6 +409,32 @@
     },
     {
       "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of impact becomes the fuel for the barrier's pulse.",
+      "id": "skill.precision-def-t7-n0",
+      "name": "Kinetic Osmosis",
+      "nameKey": "tree.node.kinetic-osmosis-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
         "likely",
         "core"
       ],
@@ -304,6 +458,56 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of impact feeds the flow of protection.",
+      "id": "skill.precision-def-t8-n0",
+      "name": "Kinetic Siphon",
+      "nameKey": "tree.node.kinetic-siphon-7",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact of a blow is not lost, but recycled into the very structure meant to withstand it.",
+      "id": "skill.precision-def-t9-n0",
+      "name": "Kinetic Osmosis",
+      "nameKey": "tree.node.kinetic-osmosis-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
     },
     {
       "affinity": [
@@ -378,6 +582,32 @@
       "nodeKey": "n2",
       "rationale": "",
       "tier": 1
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.prec-truesight",
+        "atom.prec-verdict"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The eye sees the flaw before the blade even strikes.",
+      "id": "skill.precision-off-t10-n0",
+      "name": "Focal Point",
+      "nameKey": "tree.node.focal-point-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
     },
     {
       "affinity": [
@@ -574,6 +804,32 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.prec-fixation",
+        "atom.prec-verdict"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The eye ignores the periphery to find the flaw in the marrow.",
+      "id": "skill.precision-off-t5-n0",
+      "name": "Singular Intent",
+      "nameKey": "tree.node.singular-intent-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
     },
     {
       "affinity": [

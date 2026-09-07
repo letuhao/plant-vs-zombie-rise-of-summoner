@@ -1,0 +1,17 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.bucketnutzombie-001"
+  ],
+  "flavor": "A sudden, violent vacuum pulls the air from your chest, leaving only the whistling echo of a hollow chamber and the sensation of falling upward.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Lung of the Gale",
+  "reason": "A pressure-sensitive floor plate triggers a massive bellows mechanism, creating a localized vacuum that pulls players toward a pit.",
+  "roomId": "room.trap-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

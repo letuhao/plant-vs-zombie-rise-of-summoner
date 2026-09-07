@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "finesse-pure",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "breakpoint",
+    "retinue": 0,
+    "signatureAction": "elemental-surge"
+  },
+  "elementSpread": "mono",
+  "encounterId": "encounter.boss-mono-002",
+  "formation": "boss",
+  "name": "The Singularity Core",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-density elemental nexus requiring precise positioning to avoid the retinue's focus fire.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

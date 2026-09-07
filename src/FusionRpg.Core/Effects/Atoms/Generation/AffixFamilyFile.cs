@@ -9,8 +9,10 @@ namespace FusionRpg.Core.Effects.Atoms.Generation;
 /// <see cref="AtomSeedFile"/> itself (spec-family-expand.md §3.1, decided 2026-09-03: "the definitions
 /// do not move, and the importer never sees them" — only this generator reads the folder).
 ///
-/// <para>Reads only the five columns <see cref="FamilyEntryInput"/> carries. Everything else on an
-/// entry (roles, frames, nameWords, tags, notes, variants...) is the item program's own authored
+/// <para>Reads the six columns <see cref="FamilyEntryInput"/> carries — five identity/formula columns
+/// plus the family's own authored <c>tags</c> (`family-tags-closure`, D28, 2026-09-07: item's own
+/// content, read here only so E43 can carry it through, never re-authored). Everything else on an
+/// entry (roles, frames, nameWords, notes, variants...) is still the item program's own authored
 /// surface and out of scope here — reconcile and expand only, never re-author (spec §4).</para>
 /// </summary>
 public static class AffixFamilyFile
@@ -43,7 +45,9 @@ public static class AffixFamilyFile
                     op = opEl.GetString();
             }
 
-            list.Add(new FamilyEntryInput(id, name, kindId, channel, op, powerBand, sourceFileName));
+            var tags = ReadTags(sourceFileName, id, e);
+
+            list.Add(new FamilyEntryInput(id, name, kindId, channel, op, powerBand, sourceFileName, tags));
         }
 
         return list;
@@ -51,4 +55,24 @@ public static class AffixFamilyFile
 
     static string Str(JsonElement o, string name) =>
         o.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String ? el.GetString() ?? "" : "";
+
+    /// <summary>The entry's own <c>"tags"</c> array, if present — refused (not silently dropped) if a
+    /// caller authors a non-string element, matching this file's own refusal style for a missing
+    /// <c>id</c>. Absent entirely (no <c>tags</c> key) is legal and yields empty, not a refusal — most
+    /// of the real corpus's history shipped with no tags array at all.</summary>
+    static IReadOnlyList<string> ReadTags(string sourceFileName, string id, JsonElement e)
+    {
+        if (!e.TryGetProperty("tags", out var tagsEl)) return Array.Empty<string>();
+        if (tagsEl.ValueKind != JsonValueKind.Array)
+            throw new FormatException($"{sourceFileName}: entry '{id}' has a 'tags' that is not an array");
+
+        var tags = new List<string>();
+        foreach (var t in tagsEl.EnumerateArray())
+        {
+            if (t.ValueKind != JsonValueKind.String)
+                throw new FormatException($"{sourceFileName}: entry '{id}' has a non-string tag");
+            tags.Add(t.GetString()!);
+        }
+        return tags;
+    }
 }

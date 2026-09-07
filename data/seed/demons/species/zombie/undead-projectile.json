@@ -23,10 +23,11 @@
         "attackTempo": "split",
         "deployMode": "split",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:13:56Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "attackTempo": "ponderous",
         "deployMode": "PlantAvatar",
@@ -52,7 +53,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "undead-projectile"
     ],

@@ -69,7 +69,7 @@ public static class TreeBinderRun
                 input.BudgetShareMilli, anchor, input.Branches);
 
             var atom = new NodeAtom(r.KindId, AttachPoint.Stat, r.ChannelId, op, r.Trigger,
-                r.WhenJson, kMicro, ScaleAxis.PTheta, unitClass.Value, SoulCurveId: null);
+                r.WhenJson, kMicro, ScaleAxis.PTheta, unitClass.Value);
 
             ChannelLegality.CheckBind(atom); // the LowerIsBetter / axis-agreement check -- the same
                                               // rule every other caller of this class already goes

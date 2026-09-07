@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Dust motes dance in a shaft of pale, sourceless light that illuminates a series of velvet-lined alcoves. Within them, silvered chalices and bundles of silk scrolls rest undisturbed, untouched by the rot that has claimed the corridors beyond.",
+  "hazardBand": "none",
+  "kind": "cache",
+  "name": "The Reliquary of Unspoken Vows",
+  "reason": "The party discovers a cache of non-combat loot in a climate-neutral environment.",
+  "roomId": "room.cache-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

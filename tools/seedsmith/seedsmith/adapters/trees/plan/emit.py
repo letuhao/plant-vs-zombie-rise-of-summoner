@@ -126,13 +126,28 @@ def _build_archetypes_block(tuning: dict) -> "list[dict]":
 @dataclass(frozen=True)
 class TreeSpec:
     """The inputs B1 needs to plan ONE tree — the seed this module turns into a full plan.
-    `ordinal` drives archetype assignment (append-safe, spec-tree-plan.md §3.1)."""
+    `ordinal` drives archetype assignment (append-safe, spec-tree-plan.md §3.1).
+
+    `mechanical_favour` (task J8, spec-species-tree.md §3/§4, added 2026-09-07): the ONLY field
+    here that is not derivable from `tree_id`/`category` alone. Every other category's forced axes
+    come from its own identity (`elemental_tree_spec`'s own comment: "the fire tree forces every
+    node's element axis to fire") — a species tree's `tree_id` is the SPECIES id, which is none of
+    the three quota-locked axes, so the caller (`species_tree_spec`) must supply the resolved
+    `(aptitude, element, status)` triple explicitly. `None` for every other category, by default,
+    so `might_tree_spec`/`primary_tree_spec`/`elemental_tree_spec`/`status_tree_spec` are all
+    unaffected — the same additive-field discipline `metrics.passive_tree.PassiveTreePlanCtx`
+    already uses throughout this program. A plain 3-string tuple, not `species.plan.FavourCell`:
+    this module is foundational and used by every tree category, so it must not depend on the
+    late-arriving, species-only `species` package — the opposite dependency direction from every
+    other module in this program.
+    """
     tree_id: str
     category: str  # "primary" | "elemental" | "status" | "family" | "species" (R7)
     ordinal: int
     gate_quantity: str
     gate_index_kind: str
     gate_state: str  # "carrier" | "pending" (R-G1)
+    mechanical_favour: "tuple[str, str, str] | None" = None  # (aptitude, element, status)
 
 
 def might_tree_spec(seed_root: "Path | None" = None) -> TreeSpec:
@@ -189,6 +204,118 @@ def primary_tree_spec(aptitude_id: str, seed_root: "Path | None" = None) -> Tree
         tree_id=aptitude_id.lower(), category="primary", ordinal=ordinal,
         gate_quantity=f"aptitude.{aptitude_id}@Commander", gate_index_kind=gate_index_kind,
         gate_state=gate_state,
+    )
+
+
+def elemental_tree_spec(element_id: str, seed_root: "Path | None" = None) -> TreeSpec:
+    """J1 (spec-tree-plan.md §7 table's `elemental` row, D51: 6 trees): the mechanical extension
+    `primary_tree_spec` already generalized `might_tree_spec` into once — same shape, a different
+    roster tuple and a different `gateIndexKind`/`gateQuantity` family. `element_id` is the roster's
+    OWN id (already lowercase — `data/seed/elements/roster.json`, generated from the real
+    `ElementTypeId` enum, e.g. "fire"), used as-is for both the tree id and the `<id>` inside
+    `gate_quantity` — never re-cased, since the roster mirror already IS the canonical casing the
+    real `GateQuantityId.SubjectId` parser expects.
+
+    `ordinal` is read from `roster.elements`'s own position (append-safe, spec-tree-plan.md §3.1),
+    the identical discipline `primary_tree_spec` already applies to `roster.aptitudes` — never a
+    second, hand-picked number. Raises `ValueError` (never a silent guess) if `element_id` is not in
+    the roster at all.
+    """
+    root = seed_root or (REPO_ROOT / "data" / "seed")
+    roster = load_roster(root)
+    try:
+        ordinal = roster.elements.index(element_id)
+    except ValueError:
+        raise ValueError(
+            f"{element_id!r} is not one of the {len(roster.elements)} roster elements "
+            f"{roster.elements!r} — refused, never guessed") from None
+
+    evidence = gates_mod.load_gate_evidence(root)
+    gate_index_kind = "elementMastery"
+    gate_state = gates_mod.resolve_gate_state(gate_index_kind, evidence)
+    return TreeSpec(
+        tree_id=element_id, category="elemental", ordinal=ordinal,
+        gate_quantity=f"element_mastery.{element_id}@Aspect", gate_index_kind=gate_index_kind,
+        gate_state=gate_state,
+    )
+
+
+def status_tree_spec(status_id: str, seed_root: "Path | None" = None) -> TreeSpec:
+    """J1 (spec-tree-plan.md §7 table's `status` row, D51: 24 trees, was 21): the same mechanical
+    extension as `elemental_tree_spec` above, over `roster.statuses` instead. `status_id` is the
+    roster's own id (already lowercase — `data/seed/statuses/roster.json`, generated from the real
+    `StatusCategoryRegistry`, e.g. "blight"), used as-is.
+
+    D35's own rule, unchanged here: `gate_quantity` is `status_applied.<id>` with **no `@Scope`
+    suffix** — status trees gate on their own quantity, deliberately outside `AllocationScope`,
+    never `status_applied.<id>@Commander` or any other scoped form. Raises `ValueError` if
+    `status_id` is not in the roster at all.
+    """
+    root = seed_root or (REPO_ROOT / "data" / "seed")
+    roster = load_roster(root)
+    try:
+        ordinal = roster.statuses.index(status_id)
+    except ValueError:
+        raise ValueError(
+            f"{status_id!r} is not one of the {len(roster.statuses)} roster statuses "
+            f"{roster.statuses!r} — refused, never guessed") from None
+
+    evidence = gates_mod.load_gate_evidence(root)
+    gate_index_kind = "statusApplied"
+    gate_state = gates_mod.resolve_gate_state(gate_index_kind, evidence)
+    return TreeSpec(
+        tree_id=status_id, category="status", ordinal=ordinal,
+        gate_quantity=f"status_applied.{status_id}", gate_index_kind=gate_index_kind,
+        gate_state=gate_state,
+    )
+
+
+def species_tree_spec(species_id: str, ordinal: int, mechanical_favour: "tuple[str, str, str]",
+                      seed_root: "Path | None" = None) -> TreeSpec:
+    """Task J8 (spec-species-tree.md §3, §4, §8.1): the mechanical extension `elemental_tree_spec`/
+    `status_tree_spec` already generalized `primary_tree_spec` into once more — same shape, with two
+    real differences investigated and resolved before writing this, not guessed:
+
+    1. **`ordinal` and `mechanical_favour` are CALLER-supplied, never read from a roster here.**
+       Every sibling factory above reads its OWN roster internally (`plan.vocabulary.load_roster`),
+       a sibling foundational module. The species roster (`species.roster.load_roster`) is a
+       narrow, species-only package that must never become a dependency of this foundational one
+       (used by every tree category) — the opposite direction from every other dependency in this
+       program. So the caller (the species-tree orchestration, which already sits above both
+       modules) resolves the species roster's own position and the favour lock, and hands both in.
+    2. **`gate_quantity` reuses `aptitudePoints`' own evidence row, with a real, checked caveat
+       recorded here rather than silently assumed.** §8.1's own investigation: specimen level (the
+       quantity) is live and `AllocationScope.UniqueDemon` (the scope) is declared and rate-loaded,
+       but "the caller that binds the two is ABSENT" — nothing in `src/` passes `UniqueDemon` to
+       `PointBudget.PointsFor`/`CheckScope`. `data/seed/passive-tree/gate-evidence.v1.json`'s own
+       `aptitudePoints` row cites `PointBudget.PointsFor(AllocationScope.Commander, ...)` as its
+       evidence — Commander, not UniqueDemon — so reusing that row's `"carrier"` state here is
+       REUSING evidence that does not, strictly, cover this scope. §8.1 explicitly reasons this is
+       SAFE regardless ("generating the species corpus early does not strand it... only on a
+       binding whose twin already ships") and just as explicitly assigns fixing the binding itself
+       to `tree-state`, not this module — so this function does not add a new `gateIndexKind` row
+       to the governed evidence file (that file's own hand-edit rule requires naming a real shipped
+       carrier line, and `UniqueDemon`'s does not exist yet); it reuses the existing kind, with
+       this paragraph as the disclosed reason why that is the correct scope of what J8 owns.
+
+    Raises `ValueError` if any of the favour triple's three members is empty — never a silent
+    partial lock (the same "refuse, don't guess" discipline the sibling factories already apply to
+    an unknown roster id).
+    """
+    aptitude, element, status = mechanical_favour
+    if not aptitude or not element or not status:
+        raise ValueError(
+            f"{species_id!r}: mechanical_favour {mechanical_favour!r} has an empty member — "
+            f"refused, never a partial lock")
+
+    root = seed_root or (REPO_ROOT / "data" / "seed")
+    evidence = gates_mod.load_gate_evidence(root)
+    gate_index_kind = "aptitudePoints"
+    gate_state = gates_mod.resolve_gate_state(gate_index_kind, evidence)
+    return TreeSpec(
+        tree_id=species_id, category="species", ordinal=ordinal,
+        gate_quantity=f"aptitude.{aptitude}@UniqueDemon", gate_index_kind=gate_index_kind,
+        gate_state=gate_state, mechanical_favour=mechanical_favour,
     )
 
 
@@ -270,7 +397,8 @@ def build_plan(spec: TreeSpec, tuning: dict, existing_plan: "dict | None" = None
             width = archetype.widths[t - 1]
             shares = node_budget_milli(tier_shares[t - 1], width)
             mech_count = mech_nodes_per_tier[t - 1]
-            keys = ids_mod.mint_node_keys(spec.tree_id, branch, t, width, existing_keys, next_ordinal)
+            tree_slug = ids_mod.tree_slug_for(spec.tree_id)
+            keys = ids_mod.mint_node_keys(tree_slug, branch, t, width, existing_keys, next_ordinal)
             # R3's refusal: a freshly-minted key must never collide with one already committed at a
             # DIFFERENT index in this same (branch, tier) slot — nodeKey is unique per slot, not
             # globally, so this check is scoped here rather than across the whole tree. This is the
@@ -278,7 +406,7 @@ def build_plan(spec: TreeSpec, tuning: dict, existing_plan: "dict | None" = None
             # already has "n0") could otherwise make a fresh mint for a later index reuse "n0" too.
             ids_mod.refuse_if_key_reused(keys)
             for index in range(width):
-                node_id = ids_mod.node_id(spec.tree_id, branch, t, keys[index])
+                node_id = ids_mod.node_id(tree_slug, branch, t, keys[index])
                 node_class = "mechanism" if index < mech_count else "magnitude"
                 share = shares[index]
                 if share > potency_cfg["maxNodeShareMilli"]:
@@ -331,11 +459,41 @@ def build_plan(spec: TreeSpec, tuning: dict, existing_plan: "dict | None" = None
     # ambiguity against §7.1's four-wave worked table).
     generation_wave = invariants_mod.derive_generation_wave(spec.gate_state)
 
+    # J1 (2026-09-07): `nodegen/quota.py`'s own `build_slot` has always required an elemental tree's
+    # `forced_element`/a status tree's `forced_status` (raising by name otherwise — confirmed by a real
+    # `trees generate --all --write` crash the moment a real elemental tree's plan was fed to it for
+    # the first time ever) — the tree's own id already IS the forced value (the "fire" tree forces
+    # every node's `element` axis to "fire", never a free draw across all 7 members; same shape for
+    # status), so no new TreeSpec field is needed, only reading spec.tree_id here. Read back by
+    # `_cmd_trees_generate` via `plan.raw.get("forcedElement"/"forcedStatus")` — an already-shipped
+    # contract this plan document was simply never populating.
+    #
+    # J8 (2026-09-07): a species tree's `tree_id` is the species id, not an element or status —
+    # `spec.mechanical_favour` (set only by `species_tree_spec`) supplies the two forced values
+    # directly for that one category, checked FIRST so every other category's own derivation above
+    # is completely unchanged. `favoured_aptitude` is carried as metadata alongside the two forced
+    # axes, never as a THIRD forced content axis: investigated before writing this (grepped
+    # `nodegen/vocab.py`/`nodegen/brief.py` for "aptitude" — zero hits in either), the shared
+    # affix/atom library has no aptitude-tag vocabulary to filter node content by at all, and §8's
+    # own blockers table already names this exact gap ("an atom-tag vocabulary... soft... can be
+    # enriched later without regenerating") as a deferrable, non-blocking one. Forcing a content
+    # filter that no tagging dimension supports would not fail loudly — it would silently do
+    # nothing, which is worse than not attempting it.
+    if spec.mechanical_favour is not None:
+        favoured_aptitude, forced_element, forced_status = spec.mechanical_favour
+    else:
+        favoured_aptitude = None
+        forced_element = spec.tree_id if spec.category == "elemental" else None
+        forced_status = spec.tree_id if spec.category == "status" else None
+
     plan = {
         "schemaVersion": 1,
         "version": 1,
         "treeId": spec.tree_id,
         "category": spec.category,
+        "forcedElement": forced_element,
+        "forcedStatus": forced_status,
+        **({"favouredAptitude": favoured_aptitude} if spec.category == "species" else {}),
         "archetype": archetype.id,
         "gateQuantity": spec.gate_quantity,
         "gateIndexKind": spec.gate_index_kind,
@@ -454,7 +612,7 @@ _MANIFEST_INPUT_FILES: "tuple[tuple[str, ...], ...]" = (
 
 _MANIFEST_TUNING_FILES: "tuple[tuple[str, str], ...]" = (
     ("passive-tree", "passive-tree.v1.json"),
-    ("passive-tree-targets", "passive-tree-targets.v1.json"),
+    ("passive-tree-targets", "passive-tree-targets.v2.json"),
 )
 
 

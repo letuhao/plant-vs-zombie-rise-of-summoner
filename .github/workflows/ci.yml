@@ -293,6 +293,25 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "demon roster metrics found a gated finding — see output above" }
         working-directory: tools/seedsmith
 
+      - name: Fusion-recipe seed staleness guard (demon-seed module 17/T8.3, spec-fusion-recipe-generator.md §3)
+        shell: pwsh
+        run: |
+          # Same DemonSpeciesGen/DemonBuildPlanGen --check pattern above, for the one link in this
+          # chain that did NOT have its own explicit gate until 2026-09-07: fusion-recipe-reconcile
+          # commits data/generated/demons/_fusion-recipes.json to the repo, and growing the species
+          # corpus (a new anchor, a self-heal fallback resolving a field, a tuning change) can shift
+          # which species are eligible fusion outputs/inputs without anyone touching this file by
+          # hand. Found live the hard way: demon-corpus-self-heal Phase I's aptitudePrimary fallback
+          # (11 species) silently desynced this exact committed seed (709->713 eligible outputs,
+          # 695->699 deterministic recipes) until a full test run caught it by accident. `--check`
+          # re-runs the real deterministic pass AND reuses (never re-derives) every already-resolved
+          # gap-fill pick via its own per-deficit corpusContentHash freeze, so this never needs a
+          # live model call to stay green — a real drift always has a one-line fix: re-run
+          # `python -m seedsmith.adapters.demons.fusion.reconcile` and commit the result.
+          python -m seedsmith.adapters.demons.fusion.reconcile --check
+          if ($LASTEXITCODE -ne 0) { throw "fusion-recipe seed is stale — run 'python -m seedsmith.adapters.demons.fusion.reconcile' (from tools/seedsmith) and commit the result" }
+        working-directory: tools/seedsmith
+
       - name: Demon preflight, CI mode (seed-to-concrete T1.8 — checks 1-4/7-9, no local model)
         shell: pwsh
         run: |

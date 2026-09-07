@@ -19,6 +19,40 @@ class IdMintError(ValueError):
     """A node id could not be formed or would collide with an existing one."""
 
 
+# J1 (2026-09-07): the first real ids to exercise this grammar that were never a plain aptitude name —
+# 5 of the 24 real status ids legitimately contain `_` or `.` (`charm_pulse`, `pact_mark`,
+# `nerve.afflicted`, `nerve.shaken`, `nerve.unsettled`, all confirmed live against
+# `data/seed/statuses/roster.json`) — `tree_id` itself must stay exactly the real id everywhere else
+# (gate quantities, file names, the roster lookup), so this maps ONLY the id-minting grammar's own
+# stricter, separator-free `tree_slug` onto it, never the id itself. Concatenation, not a hyphen:
+# a hyphen is already a structural separator in `skill.<treeSlug>-<branch>-t<tier>-<nodeKey>`, so
+# inserting one here would make the id ambiguous to parse back apart. Checked against all 42 real tree
+# ids (12 aptitudes + 6 elements + 24 statuses) for collisions after stripping — none.
+_SLUG_STRIP_RE = re.compile(r"[._]")
+
+
+def tree_slug_for(tree_id: str) -> str:
+    """The safe, `_SLUG_RE`-legal slug for `tree_id` inside a minted node id — never used for the
+    tree's own real identity (gate quantity, file name, roster lookup, `affix.species.<id>.*`'s own
+    namespace), only for this grammar.
+
+    Task J8 (2026-09-07): also lowercases, for the identical reason the separator-strip was added
+    2026-09-07 — the first real ids to exercise this grammar that are not already lowercase.
+    `primary_tree_spec` has always lowercased its OWN `aptitude_id` before setting `tree_id`
+    (`aptitude_id.lower()`), because every roster id it reads is PascalCase ("Might") while every
+    downstream consumer of THAT tree's `tree_id` was fine with the lowered form becoming the real
+    identity. A species tree cannot do the same: its real id ("AbyssSwordStar") must stay
+    case-exact everywhere else (the roster, gate quantities, and — checked directly — the
+    `affix.species.<speciesId>.*` namespace `SpeciesUniquenessMetric`'s own U3 pattern and J7's
+    `--species-id` flag both already key on), so the fold has to happen HERE, in the slug alone,
+    not by lowercasing `tree_id` itself the way `primary_tree_spec` safely could. Checked against
+    the real 904-species corpus before shipping this: 904 distinct ids strip+lower to 904 distinct
+    slugs — zero collisions — the same real-data verification `_SLUG_STRIP_RE`'s own 2026-09-07
+    addition already used for its 42-tree check.
+    """
+    return _SLUG_STRIP_RE.sub("", tree_id).lower()
+
+
 def branch_slug(branch: str) -> str:
     if branch not in _BRANCH_SLUGS:
         raise IdMintError(f"unknown branch '{branch}' — expected one of {sorted(_BRANCH_SLUGS)}")

@@ -1,0 +1,17 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001"
+  ],
+  "flavor": "A vast, circular chamber where the ceiling has collapsed into a perfect aperture. Shafts of solid, unyielding sunlight pierce the gloom, illuminating a mountain of bleached bones that shimmer with a pale, pearlescent luster.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Gilded Ossuary of Noon",
+  "reason": "The central curio is a collection of ancestral remains that have been transmuted into crystalline structures by concentrated solar exposure.",
+  "roomId": "room.curio-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

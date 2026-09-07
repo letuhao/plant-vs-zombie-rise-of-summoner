@@ -38,6 +38,14 @@ const ChronicleLayer = lazy(() =>
 const CommandersLayer = lazy(() =>
   import("@/layers/commanders/CommandersLayer").then((m) => ({ default: m.CommandersLayer }))
 );
+// D5.8 — the descent door's own picker (spec-delve-stage.md §4: "the descent door is a Sanctum
+// affordance … opening the picker as a band-2 layer with no rail row and no key"). Deliberately NOT
+// one of the seven `RailLayerId` chunks above: it has no rail icon and no rebindable key, so it is
+// lazy-loaded and mounted the same way every other layer here is, but opened through its own
+// independent piece of state (`delvePickerOpen` below), never through `openLayer`/`openLayerById`.
+const DelvePickerLayer = lazy(() =>
+  import("@/layers/delve/DelvePickerLayer").then((m) => ({ default: m.DelvePickerLayer }))
+);
 
 /** T20 (GG-20): every rail entry is a rebindable action, so this reads the live table instead of
  * a hardcoded key literal — `useKeybindingsVersion` below forces a re-read after any rebind. */
@@ -125,6 +133,30 @@ export function SanctumStage() {
     });
   }
 
+  // D5.8 — the descent door's own open state. A separate query param from `panel` (not a
+  // `RailEntry["id"]`, never opened via `openLayerById`) so it never grows the rail or claims a
+  // rebindable key — but still rides the URL (GG-8), matching every other layer's own "deep link
+  // restores the stage first, then the layer" contract this component's own doc comment states above.
+  const delvePickerOpen = searchParams.get("delve-picker") === "1";
+  function openDelvePicker() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("delve-picker", "1");
+      return next;
+    });
+  }
+  function closeDelvePicker() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("delve-picker");
+      return next;
+    });
+  }
+  const [delvePickerMounted, setDelvePickerMounted] = useState(() => delvePickerOpen);
+  useEffect(() => {
+    if (delvePickerOpen && !delvePickerMounted) setDelvePickerMounted(true);
+  }, [delvePickerOpen, delvePickerMounted]);
+
   const keybindingsVersion = useKeybindingsVersion();
   const layerKeys = currentBindings();
 
@@ -208,6 +240,7 @@ export function SanctumStage() {
               onOpenCommanders={() => openLayerById("commanders")}
               returnedExpeditionCount={returnedCount}
               onOpenExpeditions={() => openLayerById("expeditions")}
+              onOpenDelvePicker={openDelvePicker}
             />
           ) : null}
         </div>
@@ -270,6 +303,16 @@ export function SanctumStage() {
       {mountedLayers.has("chronicle") ? (
         <Suspense fallback={<ChunkFallback testId="chunk-fallback-chronicle" />}>
           <ChronicleLayer open={openLayer === "chronicle"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
+
+      {delvePickerMounted ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-delve-picker" />}>
+          <DelvePickerLayer
+            open={delvePickerOpen}
+            onOpenChange={(open) => !open && closeDelvePicker()}
+            playerId={playerId}
+          />
         </Suspense>
       ) : null}
     </StageHost>

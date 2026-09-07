@@ -24,6 +24,8 @@ Prefix: `effect-atom`. Module specs at `docs/architecture/effect-atom/spec-<modu
 
 **Why this is being specced now:** the [action](action-map.md) program needs a real container contract, and the owner chose to spec atoms first rather than depend on a placeholder (decision D1, 2026-08-22). That makes this program the critical path for the action architecture, and through it for the battle-timeline gate.
 
+> **The vocabulary this program owns has since been extended by two OTHER programs, per each one's own reviewed spec — not new Wave-8 modules of this one.** base-defense's `siege-construction` (decision 27, 2026-09-06) added the `Siege` attach point and `structure.place` kind; passive-tree's [`element-conversion`](passive-tree/spec-element-conversion.md) (D56, 2026-09-07) added the `Element` attach point and `element.convert` kind. Neither is listed in §13's own Wave 8 module table below (that table is this program's own closed E33–E41 batch) — `decisions.md`'s "Atom attach points" row is the live, authoritative count (9 attach points, 18 kinds as of 2026-09-07), and `effect-atom/atom-catalog-ssot.md` §2 is the per-kind detail table. Read those two, not this file's own module list, for the vocabulary's current shape.
+
 ---
 
 ## 1. What this program is, in one paragraph

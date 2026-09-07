@@ -1,7 +1,23 @@
 # Spec: `drop-tables-gen`
 
-**Module id:** `drop-tables-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 4 of 10
-**Depends on:** `generator-harness` (1), `base-types-gen` (2), `affix-families-gen` (2)
+**Module id:** `drop-tables-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 5 — last, alone
+**Depends on:** `generator-harness`, `base-types-gen`, `materials-gen`, `sockets-gen`, `consumables-gen`
+
+⚠ **Completely corrected on the second audit pass.** The first draft claimed a dependency on
+`affix-families-gen` by reasoning, not by reading the actual corpus — a real grep of every file under
+`data/seed/items/drop-tables/` finds **zero** `atom.`-prefixed references anywhere. The real
+dependencies, confirmed against `d1.json` directly, are entirely different — see the reference manifest
+below. This is why this module moved from phase 3/4 to its own final phase 5: it is the only module
+needing outputs from four other modules at once.
+
+## Reference manifest
+
+| Field | Kind | Target | Evidence |
+|---|---|---|---|
+| `role`+`frame` | **Categorical** | `base-types-gen` | `d1.json:37-39` |
+| `.ref` (material-kind rows) | **Hard** | `materials-gen` | `d1.json:58`: `"ref": "essence.earth"` |
+| `.ref` (consumable-kind rows) | **Hard** | `consumables-gen` | `d1.json:85`: `"ref": "consumable.k1-001"` |
+| `.ref` (gem-kind rows) | **Hard** | `sockets-gen` | `d1.json:437`: `"ref": "gem.g1-002"` |
 
 ## Objective
 
@@ -24,8 +40,9 @@ already exist and are correctly named as someone else's wiring problem in `item-
 1. `seedsmith items generate --kind drop-table` exists, brief-and-answer shape: model picks which
    band/theme a new table represents; code resolves the actual curve/weight numerics from tuning data,
    matching the existing symbolic (`dropBand`/`qtyCurve`) shape the current 468 entries already use.
-2. A generated table references only base-type and affix-family ids that `base-types-gen`/
-   `affix-families-gen` actually produced — no dangling references.
+2. A generated table's every `.ref` (material/consumable/gem-kind rows) resolves against the REAL
+   corpus named in the reference manifest above, and every `role`+`frame` combination resolves to ≥1
+   real base-type — `items validate --deps` catches a dangling reference before import, per module.
 3. Output through `generator-harness`'s ledger, into the existing `d1..d4.json` corpus shape (or a
    `d5.json` continuation, matching however the existing 4-file split is organized).
 
@@ -51,7 +68,9 @@ that shape staying stable.
 
 ## Testing strategy
 
-- A generated table's referenced ids all resolve against the real base-type/affix-family corpora.
+- A generated table's every hard `.ref` (material/consumable/gem) resolves against its real target
+  corpus; every categorical `role`+`frame` resolves to ≥1 real base-type — four separate assertions,
+  matching the four rows in the reference manifest above, not one generic "references resolve" check.
 - A generated table's symbolic shape is byte-compatible with what the (separate, unbuilt) band→row
   expander expects, per its own documented input contract.
 - Harness tests (resume/reconcile/overwrite).

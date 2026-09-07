@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "A vast, circular chamber of polished white marble where the air hums with a constant, low-frequency vibration. High above, swirling currents of translucent mist dance between the fluted columns, obscuring the ceiling.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Gale-Swept Atrium",
+  "reason": "The party is intercepted by elemental sentinels amidst a localized cyclone.",
+  "roomId": "room.fight-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

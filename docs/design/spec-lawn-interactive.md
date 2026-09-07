@@ -579,7 +579,7 @@ Owner review of this landing **and** the architecture map/specs/plan:
 - Prefixed plan/todo: [lawn-interactive-plan.md](../../tasks/lawn-interactive-plan.md) ·
   [lawn-interactive-todo.md](../../tasks/lawn-interactive-todo.md) (T0–T13; idea coverage matrix)
 - Sibling ActorSheet: [actor-sheet-map.md](../architecture/actor-sheet-map.md) (eight tabs +
-  catalogs; expand/join for 268 channels) — plan parked until Draft approved
+  catalogs; expand/join for 269 channels) — plan parked until Draft approved
 - Sibling Band B HUD catalog-token amend: [actor-hud-plan.md](../../tasks/actor-hud-plan.md)
   **H1–H3** (ideal §4.1 — resolve `hudToken`/`color`; delete `StatusInitials` / hash RGB). Lawn T12
   owns click→dock wiring; HUD owns token resolve.

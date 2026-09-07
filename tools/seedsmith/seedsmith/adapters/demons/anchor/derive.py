@@ -54,12 +54,14 @@ def resolve_unresolved_threat_band(threat_band: str, *, tuning) -> "tuple[str, b
     no reliable signal exists either way. This is the first real caller of that value for THIS
     specific case, not a second, invented default.
 
-    Investigated and explicitly NOT extended to `aptitudePrimary`/`rarity`/`elementPrimary`: none
-    of those three has an equivalent real, already-sanctioned fallback anywhere in this repo —
-    `aptitudes.v2.json` has no stat-to-aptitude mapping, `rarity`'s own field description
-    explicitly forbids deriving it from threatBand/danger, and `elementPrimary` is purely thematic
-    with no numeric anchor at all. Forcing a rule for those three would be inventing one, not
-    deriving it — they stay "unresolved" and reported.
+    Investigated in 2026-09-04 and NOT extended to `aptitudePrimary`/`rarity`/`elementPrimary`:
+    none of those three had an equivalent real, already-sanctioned fallback anywhere in this repo
+    at the time — `aptitudes.v2.json` has no stat-to-aptitude mapping, and `elementPrimary` is
+    purely thematic with no numeric anchor at all; those two still correctly stay "unresolved" and
+    reported. **`rarity` is different as of 2026-09-07** — see `resolve_unresolved_rarity` below,
+    added on explicit owner direction: rarity is this game's own invented mechanism, not an
+    almanac/PvZ property, so "the LLM vote never converged" is not a reason to leave it unresolved
+    forever when a deterministic engine can fill the gap.
 
     Returns `(value, was_deterministic)` — the second element lets a caller record HONEST
     provenance (this was never a real judgment, an LLM never decided it) rather than silently
@@ -68,6 +70,113 @@ def resolve_unresolved_threat_band(threat_band: str, *, tuning) -> "tuple[str, b
     if threat_band != "unresolved":
         return threat_band, False
     return tuning.threshold_for_rung(tuning.inferred_default_rung).id, True
+
+
+def load_rarity_power_fallback(version: "int | str" = 1) -> "dict[str, str]":
+    """`threatBand id -> rarity id`, from `demon-rarity-power-fallback.v{version}.json`. A table,
+    never a formula — same discipline `ThreatTuning` itself uses, because the ladder is fixed by a
+    reviewed file, not computed. Loaded fresh each call (this runs once per self-heal pass, not a
+    hot path)."""
+    path = VARIANT_COUNT_TUNING_DIR / f"demon-rarity-power-fallback.v{int(version)}.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return {row["threatBand"]: row["rarity"] for row in raw["rarityByThreatRung"]}
+
+
+def resolve_unresolved_rarity(rarity: str, threat_band: str, *, mapping: "dict[str, str]") -> "tuple[str, bool]":
+    """demon-corpus-self-heal Phase H (2026-09-07, owner-directed): rarity is OUR game's own
+    mechanism, not an almanac/PvZ property — "if the LLM cannot solve it, just define a
+    deterministic engine to solve it." Reuses `threatBand`'s own already-validated power banding
+    (a species' parsed toughness/damage, bucketed by `demon-threat.v1.json`'s real p10..p90
+    deciles) via a rank-preserving correspondence in `demon-rarity-power-fallback.v1.json` —
+    stronger species land on rarer rungs, and no second, independent power curve is invented.
+
+    Only fires when BOTH `rarity` is a genuine vote-split ("unresolved") AND `threat_band` is
+    itself a real rung (already resolved, or resolved earlier in the SAME fix pass by
+    `resolve_unresolved_threat_band` — callers should pass that function's own output, not the
+    original value, so the two fallbacks chain). If `threat_band` has no signal either, there is
+    nothing to derive from and `rarity` correctly stays "unresolved" and reported — this is a
+    fallback, not a guess invented from nothing.
+
+    Returns `(value, was_deterministic)`, same contract as `resolve_unresolved_threat_band`, so a
+    caller can stamp honest provenance (`"deterministic-fallback"`, never faked as a real LLM
+    judgment)."""
+    if rarity != "unresolved":
+        return rarity, False
+    if threat_band not in mapping:
+        return rarity, False
+    return mapping[threat_band], True
+
+
+def load_aptitude_fallback(version: "int | str" = 1) -> str:
+    """`inferredDefaultAptitude` from `demon-aptitude-fallback.v{version}.json`."""
+    path = VARIANT_COUNT_TUNING_DIR / f"demon-aptitude-fallback.v{int(version)}.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return raw["inferredDefaultAptitude"]
+
+
+def resolve_unresolved_aptitude(aptitude: str, *, default: str) -> "tuple[str, bool]":
+    """demon-corpus-self-heal Phase I (2026-09-07, owner-directed): unlike `rarity`, no real
+    fallback signal exists for `aptitudePrimary` — measured directly, not assumed: of the 151
+    species with a computable power score AND a resolved aptitude, a one-way ANOVA of score by
+    aptitude comes back at F≈1.34 (noise, not separation), and 10 of the 11 real unresolved
+    species have no computable score at all to feed a classifier with in the first place.
+
+    The owner's direction, given that negative finding: aptitude is our own invented mechanism
+    too, so a flat, undisguised default is fine when a real derivation genuinely does not exist —
+    "we make up it" rather than leave it unresolved forever. This is NOT a `resolve_unresolved_*`
+    sibling that derives from another field the way `resolve_unresolved_rarity` derives from
+    `threatBand` — there is nothing to derive from, so `demon-aptitude-fallback.v1.json`'s own
+    `_note` says so plainly rather than dressing up an invented pick as a calculation.
+
+    Returns `(value, was_deterministic)`, same contract as the other `resolve_unresolved_*`
+    functions, so a caller can stamp honest provenance (`"deterministic-fallback"`, never faked as
+    a real LLM judgment)."""
+    if aptitude != "unresolved":
+        return aptitude, False
+    return default, True
+
+
+def resolve_secondary_element_from_fusion_lineage(
+    element_secondary: str, element_primary: str, *,
+    input_a_element: "str | None", input_b_element: "str | None",
+) -> "tuple[str, bool]":
+    """demon-corpus-self-heal follow-up (2026-09-07, owner-directed): a DIFFERENT signal source
+    from the `resolve_unresolved_*` family above, and deliberately not one of them. Those three
+    only ever fire on a genuine `"unresolved"` vote-split; `elementSecondary` is usually a real,
+    resolved LLM judgment of `"none"` — the per-species lore classifier (`element-secondary`'s own
+    prompt) reads only ONE species' own flavor text, so it structurally cannot see that a fusion
+    OUTPUT species was built from two other species that each carry their own real element. This
+    function supplies exactly that cross-species signal, which is why it can override an
+    already-resolved `"none"` rather than only an `"unresolved"` value — a fusion demon literally
+    made partly from a Fire-element parent plausibly carries some of that nature, and DemonRecipe
+    generation already assigns `inputA` to match the output's own `elementPrimary` (verified
+    live against the real 713-recipe corpus: 685/693 candidates), so `inputB`'s own element is
+    usually the one piece of real information the output's own classification never had a chance
+    to consider.
+
+    Owner direction (2026-09-07): "not every demon has a secondary element and that is normal" —
+    this only fires when EXACTLY ONE of the two parents' own `elementPrimary` differs from the
+    output's own `elementPrimary`. Zero such parents means both parents already agree with the
+    output (real signal that this species is intentionally single-typed, not a gap to fill).
+    TWO such parents — both differ from the output AND from each other — means `inputA`'s own
+    "should match" assumption failed for this recipe (confirmed live: `DemonRecipeCatalog.
+    TryFindPair`'s own candidate ordering is a PREFERENCE, not a filter — when no candidate at
+    the eligible rung shares the output's element, `inputA` is picked by the ordinal tie-break
+    alone and carries no elemental meaning), so neither parent can be trusted as "the other
+    element" with any more confidence than a coin flip — left unresolved, same honesty standard
+    as the zero-candidate case, never guessed.
+
+    Returns `(value, was_deterministic)`, same contract as the `resolve_unresolved_*` family, so a
+    caller stamps honest provenance — `"fusion-lineage-derived"`, never `"deterministic-fallback"`
+    (that tag means "no real signal existed"; this one means "real cross-species signal existed
+    and was used") and never faked as a real LLM judgment.
+    """
+    if element_secondary not in ("none", ""):
+        return element_secondary, False
+    candidates = {e for e in (input_a_element, input_b_element) if e and e != element_primary}
+    if len(candidates) != 1:
+        return element_secondary, False
+    return next(iter(candidates)), True
 
 
 def _load_variant_count_bands(version: "int | str" = 1) -> dict:

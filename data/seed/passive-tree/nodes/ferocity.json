@@ -19,7 +19,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active \u2014 tier wins.",
+        "printedText": "Inert while tier is active — tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -32,6 +32,32 @@
       "nodeKey": "n0",
       "rationale": "",
       "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The impact of a blow is not lost, but redirected into the rhythm of the defense.",
+      "id": "skill.ferocity-def-t10-n0",
+      "name": "Kinetic Reciprocation",
+      "nameKey": "tree.node.kinetic-reciprocation-9",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
     },
     {
       "affinity": [
@@ -56,6 +82,32 @@
       "nameKey": "tree.node.rooted-defiance",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "Layers of scar tissue and reinforced plating form a secondary, living skin.",
+      "id": "skill.ferocity-def-t10-n2",
+      "name": "Calloused Carapace",
+      "nameKey": "tree.node.calloused-carapace",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
       "rationale": "",
       "tier": 10
     },
@@ -135,6 +187,32 @@
     },
     {
       "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layered dermal plating that hardens upon impact.",
+      "id": "skill.ferocity-def-t4-n0",
+      "name": "Graftplate",
+      "nameKey": "tree.node.graftplate",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
@@ -159,6 +237,32 @@
     },
     {
       "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The momentum of a blow is not lost, but stored within the marrow to fuel the next defense.",
+      "id": "skill.ferocity-def-t5-n0",
+      "name": "Kinetic Reservoir",
+      "nameKey": "tree.node.kinetic-reservoir-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
         "likely"
       ],
       "affixIds": [
@@ -180,6 +284,30 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-seal"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Scars that refuse to yield, hardening into a second skin.",
+      "id": "skill.ferocity-def-t6-n0",
+      "name": "Sealed Callus",
+      "nameKey": "tree.node.sealed-callus",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
     },
     {
       "affinity": [
@@ -233,6 +361,60 @@
     },
     {
       "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.fortitude",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The marrow hardens into a structural lattice, turning bone into a fortress.",
+      "id": "skill.ferocity-def-t7-n1",
+      "name": "Ossified Bulwark",
+      "nameKey": "tree.node.ossified-bulwark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of impact feeds the strength of the barrier.",
+      "id": "skill.ferocity-def-t8-n0",
+      "name": "Kinetic Siphon",
+      "nameKey": "tree.node.kinetic-siphon-6",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
         "core",
         "core"
       ],
@@ -280,6 +462,54 @@
       "nameKey": "tree.node.kinetic-reciprocation-6",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The wound is not a failure, but a seam for new life to stitch through.",
+      "id": "skill.ferocity-def-t9-n1",
+      "name": "Suture of the Fallen",
+      "nameKey": "tree.node.suture-of-the-fallen",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The skin hardens into a shell of calcified marrow, turning every impact into a structural reinforcement.",
+      "id": "skill.ferocity-def-t9-n2",
+      "name": "Ironclad Graft",
+      "nameKey": "tree.node.ironclad-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
       "rationale": "",
       "tier": 9
     },

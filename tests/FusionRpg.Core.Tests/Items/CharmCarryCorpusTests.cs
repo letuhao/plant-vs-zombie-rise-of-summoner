@@ -40,8 +40,9 @@ public class CharmCarryCorpusTests
         Assert.All(costs, c => Assert.Contains(c, t.ApCostDomain));
         Assert.Equal(t.ApCostDomain.OrderBy(v => v), costs.Distinct().OrderBy(v => v));
 
-        // The measured shape, 2026-09-05: 1x21, 2x21, 3x11, 5x7.
-        Assert.Equal(21, costs.Count(c => c == 1));
+        // The measured shape, 2026-09-05: 1x21, 2x21, 3x11, 5x7. 1x21 -> 1x22 (2026-09-07): the new
+        // apCost=1 trial charm.
+        Assert.Equal(22, costs.Count(c => c == 1));
         Assert.Equal(21, costs.Count(c => c == 2));
         Assert.Equal(11, costs.Count(c => c == 3));
         Assert.Equal(7, costs.Count(c => c == 5));
@@ -104,11 +105,14 @@ public class CharmCarryCorpusTests
         // Measured, and it is the one distribution fact worth pinning: economy ships 20 charms and each
         // of the other four ships 10. Not a defect — §3.5's axes are open categories, not quotas — but
         // it is a real content asymmetry a balance pass should be able to see move.
+        // survivability 10 -> 11 (2026-09-07): a set-charm-live-endpoint trial batch added one real
+        // survivability charm, `charm.surv-util-021` "Carapace of Patience".
         var perAxis = Charms().GroupBy(c => c.Axis, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
 
         Assert.Equal(20, perAxis["economy"]);
-        foreach (var axis in new[] { "offense", "survivability", "control", "utility" })
+        Assert.Equal(11, perAxis["survivability"]);
+        foreach (var axis in new[] { "offense", "control", "utility" })
             Assert.Equal(10, perAxis[axis]);
 
         // Every axis still clears the cap comfortably, so the cap binds on the PLAYER's packing rather
@@ -223,7 +227,7 @@ public class CharmCarryCorpusTests
                 foreach (var e in doc.RootElement.GetProperty("entries").EnumerateArray())
                     hints.Add(e.GetProperty("frameHint").GetString()!);
 
-        Assert.Equal(60, hints.Count);
+        Assert.Equal(61, hints.Count); // 60 -> 61, 2026-09-07 trial charm
         Assert.All(hints, h => Assert.Equal("any", h));
     }
 

@@ -1,0 +1,87 @@
+{
+  "done": {
+    "combination-strain-fortitude-defense": {
+      "entry": {
+        "aptitudes": [
+          "Fortitude"
+        ],
+        "archetype": "defense",
+        "flavor": "The line does not bend. It has never bent. It will not begin today.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.stalwart"
+        ],
+        "id": "combo.strain-fortitude-defense",
+        "ingredients": [
+          {
+            "family": "atom.bulwark",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.fortitude",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.resilience",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.stalwart",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Unbroken Line",
+        "nameKey": "combination.strain-fortitude-defense",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-fortitude-defense"
+    },
+    "combination-strain-might-offense": {
+      "entry": {
+        "aptitudes": [
+          "Might"
+        ],
+        "archetype": "offense",
+        "flavor": "Every blow lands like a verdict -- the wearer doesn't ask permission to hit harder.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.savagery"
+        ],
+        "id": "combo.strain-might-offense",
+        "ingredients": [
+          {
+            "family": "atom.ferocity",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.keen-edge",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.might",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.savagery",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Savage Verdict",
+        "nameKey": "combination.strain-might-offense",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-might-offense"
+    }
+  },
+  "schemaVersion": 1
+}

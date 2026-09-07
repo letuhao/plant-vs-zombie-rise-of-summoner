@@ -20,7 +20,7 @@ public class ReportWriterTests
         var bound = new BoundNode("skill.might-off-t5-n0", new[]
         {
             new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire", NodeAtomOp.Flat,
-                null, null, 3038L, ScaleAxis.PTheta, UnitClass.GameUnits, null),
+                null, null, 3038L, ScaleAxis.PTheta, UnitClass.GameUnits),
         });
         var refused = new RefusedSlot("skill.might-off-t7-b3", "18th atom kind (D16)", 64L, DeliberateHole: false);
         var report = BinderRunReport.From(new[] { bound }, new[] { refused });

@@ -7,12 +7,13 @@ import {
   useFusionPreview,
   useFusionRecipes,
   type FusionMode,
-  type FusionOutcomeDto
+  type FusionOutcomeDto,
+  type SelectedPick
 } from "@/lib/bus/fusion";
 import { Page } from "@/layouts/Page";
 import { usePatron } from "@/lib/bus/patron";
 import { Badge, Banner, Button, EmptyState, Panel, TabList, TypeIcon } from "@/ui";
-import { haveNeed, recipeLabel, starPips, STAR_CAPS } from "./fusionView";
+import { costWithPicks, haveNeed, recipeLabel, starPips, togglePick, STAR_CAPS } from "./fusionView";
 
 /**
  * Fusion lab (spec-demon-fusion.md F9): star merges evolve the base, recipes consume all inputs;
@@ -34,6 +35,7 @@ export function FusionPage() {
   const [baseId, setBaseId] = useState<string | null>(null);
   const [sacrifices, setSacrifices] = useState<string[]>([]);
   const [pickedTrait, setPickedTrait] = useState<string | null>(null);
+  const [selectedAtoms, setSelectedAtoms] = useState<SelectedPick[]>([]);
   const [reveal, setReveal] = useState<FusionOutcomeDto | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +49,10 @@ export function FusionPage() {
   const { mutate: previewMutate, reset: previewReset } = preview;
   useEffect(() => {
     setError(null);
+    // A sacrifice change invalidates any atom picks made against the OLD pair — a stale pick
+    // naming a specimen no longer in the request would bounce off the server's own
+    // picks.source-not-a-sacrifice refusal.
+    setSelectedAtoms([]);
     if (mode === "recipe" ? sacrifices.length !== 2 : !baseId) {
       previewReset();
       return;
@@ -54,9 +60,12 @@ export function FusionPage() {
     previewMutate({ playerId, mode, baseInstanceId: baseId, sacrifices });
   }, [mode, baseId, sacrifices, playerId, previewMutate, previewReset]);
 
+  const pickableAtoms = preview.data?.ok ? (preview.data.pickableAtoms ?? []) : [];
+  const pickSlotCap = preview.data?.ok ? (preview.data.pickSlotCap ?? 0) : 0;
   const cost = preview.data?.ok ? preview.data.cost : undefined;
-  const affordability = cost
-    ? haveNeed(cost, materials.data?.items ?? [], souls.data?.balance ?? 0)
+  const effectiveCost = cost ? costWithPicks(cost, selectedAtoms, pickableAtoms) : undefined;
+  const affordability = effectiveCost
+    ? haveNeed(effectiveCost, materials.data?.items ?? [], souls.data?.balance ?? 0)
     : null;
 
   function toggleSacrifice(id: string) {
@@ -76,11 +85,13 @@ export function FusionPage() {
         baseInstanceId: baseId,
         sacrifices,
         pickedTraitId: pickedTrait,
+        picks: selectedAtoms,
         correlationId: newCorrelationId()
       });
       setReveal(outcome);
       setSacrifices([]);
       setPickedTrait(null);
+      setSelectedAtoms([]);
       if (mode === "recipe") setBaseId(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -175,6 +186,7 @@ export function FusionPage() {
           setMode(v as FusionMode);
           setSacrifices([]);
           setPickedTrait(null);
+          setSelectedAtoms([]);
         }}
       />
 
@@ -215,6 +227,41 @@ export function FusionPage() {
         </Panel>
       ) : null}
 
+      {mode === "recipe" && preview.data?.ok && pickableAtoms.length > 0 ? (
+        <Panel title={`Inherit atoms (${selectedAtoms.length}/${pickSlotCap} — each priced by its own source's rarity)`}>
+          <div className="flex flex-wrap gap-2">
+            {pickableAtoms.map((a) => {
+              const id = `${a.sourceInstanceId}::${a.atomId}`;
+              const isSelected = selectedAtoms.some(
+                (p) => p.sourceInstanceId === a.sourceInstanceId && p.atomId === a.atomId
+              );
+              const atCap = !isSelected && selectedAtoms.length >= pickSlotCap;
+              return (
+                <Button
+                  key={id}
+                  size="sm"
+                  variant={isSelected ? "primary" : "ghost"}
+                  disabled={atCap}
+                  title={
+                    atCap
+                      ? `Full — this fusion carries at most ${pickSlotCap} inherited atom(s)`
+                      : `${speciesName(a.sourceSpeciesId)}'s own roll · ${a.costSouls} Souls`
+                  }
+                  onClick={() =>
+                    setSelectedAtoms((prev) =>
+                      togglePick(prev, { sourceInstanceId: a.sourceInstanceId, atomId: a.atomId }, pickSlotCap)
+                    )
+                  }
+                  data-testid={`fusion-pick-${id}`}
+                >
+                  {speciesName(a.sourceSpeciesId)}: {a.atomId} ({a.costSouls} Souls)
+                </Button>
+              );
+            })}
+          </div>
+        </Panel>
+      ) : null}
+
       <Panel title="Cost">
         {preview.data && !preview.data.ok ? (
           <p className="text-sm text-muted">Not ready: {preview.data.reason}</p>
@@ -225,6 +272,9 @@ export function FusionPage() {
                 {l.label}: {l.have}/{l.need}
               </Badge>
             ))}
+            {selectedAtoms.length > 0 ? (
+              <Badge>+{effectiveCost!.souls - cost!.souls} Souls for {selectedAtoms.length} inherited atom(s)</Badge>
+            ) : null}
             {mode === "recipe" && preview.data?.ok ? (
               <Badge>
                 result:{" "}

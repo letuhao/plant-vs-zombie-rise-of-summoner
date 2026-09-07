@@ -100,7 +100,7 @@ public static class TreeBinderExplain
 
             var op = Enum.Parse<NodeAtomOp>(r.Op, ignoreCase: true);
             var atom = new NodeAtom(r.KindId, AttachPoint.Stat, r.ChannelId, op, r.Trigger, r.WhenJson,
-                kMicro, ScaleAxis.PTheta, unitClass.Value, SoulCurveId: null);
+                kMicro, ScaleAxis.PTheta, unitClass.Value);
             try
             {
                 ChannelLegality.CheckBind(atom);

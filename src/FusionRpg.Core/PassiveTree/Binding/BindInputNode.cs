@@ -17,10 +17,12 @@ namespace FusionRpg.Core.PassiveTree.Binding;
 /// "consequence for tree-plan": "stage 1 owes a flag that suppresses conversion nodes at plan time,
 /// so the refusal is a zero-count assertion in a healthy run rather than a per-run event"). Read
 /// here, never invented by this module: when the plan already knows a slot cannot bind today (the
-/// canonical case is a conversion placeholder reserved ahead of the still-unbuilt 18th atom kind,
-/// D16 — renumbered from "17th" 2026-09-07, since `AtomKindRegistry.KindCount` grew to 17 for
-/// unrelated reasons; see `spec-element-conversion.md`/D56), it flags that node. The binder still
-/// refuses it and still reports the unspent budget
+/// canonical case named when this was written was a conversion placeholder reserved ahead of the
+/// then-unbuilt 18th atom kind, D16 — **`element.convert` shipped 2026-09-07** and the binder no
+/// longer refuses it by kind, but `tree-plan`/`tree-language` still allocate it ZERO nodes upstream,
+/// so this mechanism's illustrative case remains hypothetical: no real plan has ever set this flag
+/// for a real reason yet), it flags that node. The binder still refuses it and still reports the
+/// unspent budget
 /// (§7.2 item 2 — nothing is ever silently absorbed), but a flagged refusal does not by itself fail
 /// the run the way a surprise refusal does (§7.2 item 3's `FAIL, not NOT_MEASURED` is for the
 /// unflagged case — see <see cref="BinderRunReport.From"/>).</para>

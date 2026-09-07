@@ -1,3 +1,4 @@
+using FusionRpg.Core.Items.Drops;
 using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Turn;
 
@@ -12,11 +13,32 @@ namespace FusionRpg.Core.World.Movement;
 /// a claim depends on — who is standing where, who is still alive, and which guards are left — are
 /// decided by then. There is no separate tie-break between rival claims: two hostile forces in one
 /// sector each block the other, and the battle they are already in is what decides it.
+///
+/// <para>⭐ `drop-tables` `sector-loot-wiring` (2026-09-07): <paramref name="Run"/>'s
+/// <c>powerTuning</c> parameter is the real, confirmed call site for
+/// <see cref="WorldSectorLootSource.TryResolve"/> — a claim's own ownership change, not anything
+/// Battle-adjacent (`DESIGN-GATE.md`'s "Battle never grants" rule; `ClaimResolver` sits under
+/// `World/Movement/`, outside Battle entirely). <b>Shipped inert-but-correct, by owner decision</b>:
+/// this session found no live production caller of <see cref="Turn.TurnEngine.Step"/> at all, so
+/// wiring the resolved `LootSourceRow` no further than a `TurnReportEntry` (never actually minting
+/// through `LootPipeline`/`Instantiator`, which need DB-backed idempotency this DB-free `Core` class
+/// cannot provide) is the correct scope until a real caller exists — the same "authored and inert
+/// until X4 lands" shape `AffixChannels` already established. `powerTuning is null` (every existing
+/// caller today) is byte-identical to this file's pre-2026-09-07 behavior.</para>
 /// </summary>
 public static class ClaimResolver
 {
     public static WorldState Run(
-        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, string phase, int turn)
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, string phase, int turn,
+        FusionRpg.Core.Power.PowerTuning? powerTuning = null,
+        // `rate-authoring`'s own real, end-to-end usage: an independent, separately-streamed check
+        // (mirrors D38's kill-drop roll) for a mythic claim bonus -- NEVER reweighted by the normal
+        // table draw, unlike a plain `Weight`. T1/M2 (tunables-ssot.md): a rate is a balance-surface
+        // number, never a bare `const` -- `data/tuning/world-claim-loot.v1.json`'s
+        // `mythicClaimBonusRatePerMillion` is the one source, this parameter is null (skip) until a
+        // real caller loads and injects it, matching every other tunable in this file's own
+        // `powerTuning` parameter.
+        long? mythicClaimBonusRatePerMillion = null)
     {
         var next = world;
 
@@ -98,6 +120,30 @@ public static class ClaimResolver
             };
 
             report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.held:" + sector.SectorId, sector.SectorId);
+
+            // drop-tables `sector-loot-wiring`: inert until powerTuning is supplied (see class doc).
+            // Resolves to a LootSourceRow only -- never mints through LootPipeline/Instantiator, which
+            // is a real DB-writing, idempotency-checked operation this DB-free Core class cannot do.
+            if (powerTuning is { } tuning)
+            {
+                var lootRejection = WorldSectorLootSource.TryResolve(
+                    sector.SectorId, sector.DangerBand, sector.TypeId, tuning, out var lootSource);
+                if (lootRejection.IsOk && lootSource is not null)
+                    report.Add(phase, TurnReportKinds.Event, command.CommandId,
+                        "claim.loot:" + lootSource.TableId, sector.SectorId);
+                // A refusal (e.g. drop.sector-band-safe on safe ground) is not an error here -- no
+                // drop, no report line, matching WorldSectorLootSource.cs's own documented behavior.
+
+                // rate-authoring's real, end-to-end usage: independent of the table draw above --
+                // adding or removing any table entry never moves this roll's own odds.
+                if (mythicClaimBonusRatePerMillion is { } mythicRate)
+                {
+                    var mythicEntry = new IndependentRateEntry("world.mythic-claim-bonus", mythicRate);
+                    if (RateAuthoring.Hit(mythicEntry, unchecked((ulong)turn), "claim.mythic." + sector.SectorId))
+                        report.Add(phase, TurnReportKinds.Event, command.CommandId,
+                            "claim.mythic:" + sector.SectorId, sector.SectorId);
+                }
+            }
 
             // spec-loam-turn.md's settlement rule needs no enforcement — the fade *is* the
             // enforcement (ideal §8.10: barren ground can be taken but never kept). Refusing this

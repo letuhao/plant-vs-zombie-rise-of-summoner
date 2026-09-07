@@ -329,8 +329,10 @@ public class ItemCardTests
         // referenced, and each brought its own template row (7 into triggered.json, 2 into derived.json).
         // 107 → 109 the same day (item-content T11): `atom.chill-punisher` and `atom.rot-punisher` had
         // been authored into g-punisher.json with no template row, so every family now has one --
-        // asserted against the family count itself rather than as a second literal.
-        Assert.Equal(109, Templates.Value.Count);
+        // asserted against the family count itself rather than as a second literal. 109 -> 112
+        // (2026-09-07): an affix-families-gen trial batch's three new families each got a real
+        // template the same run this test caught their absence.
+        Assert.Equal(112, Templates.Value.Count);
         Assert.Equal(RealFamilies.Value.Count, Templates.Value.Count);
         Assert.NotEmpty(BaseTypes.Value);
     }
@@ -1425,11 +1427,13 @@ public class ItemCardTests
             .Select(r => r.FamilyId)
             .ToHashSet(StringComparer.Ordinal);
 
-        // BEFORE — v1, faithfully: exactly the families it has no stem for, and 95 of them.
+        // BEFORE — v1, faithfully: exactly the families it has no stem for. Was 95 of 109; the
+        // 2026-09-07 `affix-families-gen` trial batch added 3 more families v1 (frozen before they
+        // existed) obviously has no share for either -> 98 of 112.
         var unsharedV1 = UnsharedUnder(v1, RealFamilies.Value);
         Assert.Equal(unsharedV1, RefusedForNoShare(v1));
-        Assert.Equal(95, unsharedV1.Count);
-        Assert.Equal(109, RealFamilies.Value.Count);
+        Assert.Equal(98, unsharedV1.Count);
+        Assert.Equal(112, RealFamilies.Value.Count);
 
         // AFTER — the shipped tuning: nothing left at that gate at all.
         Assert.Empty(UnsharedUnder(shipped, RealFamilies.Value));
@@ -1928,10 +1932,25 @@ public class ItemCardTests
     }
 }
 
-/// <summary>Test-local helper so the diff assertion and <c>DisplayModel.Fingerprint</c> agree on what
-/// "the same line" means without exporting a second identity from production code.</summary>
+/// <summary>Test-local helper matching <c>ItemCardCompare.SameLine</c>'s own notion of "the same
+/// line" for compare purposes — NOT <c>DisplayModel.Fingerprint()</c>. Corrected 2026-09-07: this
+/// used to wrap one line into a whole <c>DisplayModel</c> and call <c>Fingerprint()</c>, but that
+/// function deliberately includes <see cref="DisplayLine.GroupOrder"/> (a per-card visual sort key
+/// looked up from the family's own <c>groupId</c>, per <c>ItemCard.AtomLines</c> — never part of a
+/// line's player-visible content) because ITS OWN job is proving one render is fully deterministic,
+/// a stricter notion than "does this line show the player something different," which is what a
+/// two-card DIFF needs and exactly what <c>SameLine</c>'s own doc comment enumerates (key, unit,
+/// source kind, bar, roll quality, context, args — GroupOrder is deliberately not in that list).
+/// Reusing the wrong identity function here made this test fail once the corpus grew enough for two
+/// otherwise-identical lines to land in different visual groups on two different cards — a real
+/// latent test bug, not a defect in `ItemCardCompare` or `DisplayModel`.</summary>
 internal static class DisplayLineTestExtensions
 {
     public static string Fingerprintable(this DisplayLine line) =>
-        new DisplayModel(new[] { new DisplayBlock("", new[] { line }) }).Fingerprint();
+        string.Join('|',
+            line.Key, line.Unit?.ToString() ?? "-", line.SourceKind?.ToString() ?? "-",
+            line.RollBar?.Segments.ToString() ?? "-", line.RollQualityPerMille?.ToString() ?? "-",
+            line.ContextRead ?? "-",
+            string.Join('|', line.Args.OrderBy(a => a.Key, StringComparer.Ordinal)
+                .Select(a => $"{a.Key}={a.Value}")));
 }

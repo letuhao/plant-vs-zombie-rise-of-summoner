@@ -23,11 +23,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T09:57:47Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {
         "elementPrimary": "earth",
         "threatBand": "nuisance"
@@ -52,7 +53,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "talismanic flora"
     ],

@@ -18,11 +18,13 @@ export type RailLayerId =
 /**
  * The one runtime list of every stage id, so "how many stages exist" is never re-derived or
  * hand-counted elsewhere (base-defense's `spec-siege-stage.md` §2 cost 1: "the count assertion
- * becomes 5"). `battle` is declared here but has no stage behind it yet (`spec-battle-stage.md`'s
- * own job to fill in); `RailUnlockInputs.currentStageId` below is typed from this array, not a
- * second hand-written union, so the two can never drift apart.
+ * becomes 5"; party-dungeon's `spec-delve-stage.md` §4 pushes it to 6, D5.1). `battle` is declared
+ * here but has no route behind it yet (`spec-battle-stage.md`'s own job to fill in, or
+ * `spec-board-render.md`'s decision 40, which retires the id instead — whichever lands first);
+ * `RailUnlockInputs.currentStageId` below is typed from this array, not a second hand-written union,
+ * so the two can never drift apart.
  */
-export const STAGE_IDS = ["sanctum", "world", "lawn", "battle", "siege"] as const;
+export const STAGE_IDS = ["sanctum", "world", "lawn", "battle", "siege", "delve"] as const;
 
 export type StageId = (typeof STAGE_IDS)[number];
 

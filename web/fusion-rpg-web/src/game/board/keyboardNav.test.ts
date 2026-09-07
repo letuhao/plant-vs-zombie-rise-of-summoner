@@ -71,7 +71,7 @@ describe("wireKeyboardNav — duck-typed against a KeySource, no Phaser import n
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  it("Enter and Space both confirm the current focus, not the previous one", () => {
+  it("Enter confirms the current focus; Space does not (pause is not confirm)", () => {
     const keys = fakeKeySource();
     const onFocusChange = vi.fn();
     const onConfirm = vi.fn();
@@ -86,8 +86,8 @@ describe("wireKeyboardNav — duck-typed against a KeySource, no Phaser import n
     keys.fire("Enter");
     keys.fire(" ");
 
-    expect(onConfirm).toHaveBeenNthCalledWith(1, { row: 1, col: 1 });
-    expect(onConfirm).toHaveBeenNthCalledWith(2, { row: 1, col: 1 });
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onConfirm).toHaveBeenCalledWith({ row: 1, col: 1 });
     expect(onFocusChange).not.toHaveBeenCalled();
   });
 

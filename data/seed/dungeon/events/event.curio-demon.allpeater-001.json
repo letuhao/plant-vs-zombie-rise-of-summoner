@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.curio-demon.allpeater-001",
+  "flavor": "A jagged obsidian monolith sits in the center of the chamber, pulsing with a rhythmic, crimson light. Etched into its surface are runes that seem to shift, representing a violent 分配 of essence. The air around it vibrates with a low, hungry hum, as if the stone itself is preparing a sudden 攻击 against the very concept of stillness.",
+  "kind": "curio",
+  "name": "The Altar of Redistribution",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a relic that offers a high-risk trade-off between immediate power and long-term vitality.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.allpeater"
+}

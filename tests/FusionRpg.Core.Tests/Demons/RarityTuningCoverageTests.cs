@@ -17,7 +17,7 @@ public class RarityTuningCoverageTests
     static string TuningDir => Path.Combine(FindRepoRoot(), "data", "tuning");
     static string Read(string name) => File.ReadAllText(Path.Combine(TuningDir, name));
 
-    static readonly FusionTuning Fusion = FusionTuningLoader.Parse(Read("fusion.v1.json"));
+    static readonly FusionTuning Fusion = FusionTuningLoader.Parse(Read("fusion.v2.json"));
     static readonly ContractTuning Contracts = ContractTuningLoader.Parse(Read("contracts.v1.json"));
     static readonly SoulEarnTuning Souls = SoulEarnTuningLoader.Parse(Read("souls.v1.json"));
     static readonly PatronTuning Patron = PatronTuningLoader.Parse(Read("patron.v1.json"));
@@ -50,6 +50,13 @@ public class RarityTuningCoverageTests
             Fusion.RecipeCost.Count);
         foreach (var rung in DemonRarityLadder.All.Where(r => DemonRarityLadder.AtLeast(r, DemonRecipeCatalog.OutputEligibilityFloor)))
             Assert.True(Fusion.RecipeCost.ContainsKey(rung), $"RecipeCost missing {rung}");
+
+        // WAVE F2.3: InheritCostByRarity covers the SAME rungs RecipeCost does — the acceptance
+        // criterion's own wording ("covers every rung recipeCost covers"), a different lookup key
+        // (a fusion PICK's own source rarity) over the identical rung set, not a second ten-rung table.
+        Assert.Equal(Fusion.RecipeCost.Count, Fusion.InheritCostByRarity.Count);
+        foreach (var rung in Fusion.RecipeCost.Keys)
+            Assert.True(Fusion.InheritCostByRarity.ContainsKey(rung), $"InheritCostByRarity missing {rung}");
     }
 
     /// <summary>The roller's NATURAL (no hard pity, no soft-ramp — pull 0) distribution must still sum
@@ -101,6 +108,32 @@ public class RarityTuningCoverageTests
             Assert.True(Fusion.RecipeCost[here].Souls >= Fusion.RecipeCost[below].Souls,
                 $"RecipeCost souls regressed: {here}={Fusion.RecipeCost[here].Souls} < {below}={Fusion.RecipeCost[below].Souls}");
         }
+
+        // WAVE F2.3: an inherited pick from a higher-rarity sacrifice must never cost fewer souls
+        // than one from a lower-rarity sacrifice, same monotonicity rule as RecipeCost.
+        var inheritRungs = rungs.Where(r => Fusion.InheritCostByRarity.ContainsKey(r)).ToList();
+        for (var i = 1; i < inheritRungs.Count; i++)
+        {
+            var below = inheritRungs[i - 1];
+            var here = inheritRungs[i];
+            Assert.True(Fusion.InheritCostByRarity[here] >= Fusion.InheritCostByRarity[below],
+                $"InheritCostByRarity regressed: {here}={Fusion.InheritCostByRarity[here]} < {below}={Fusion.InheritCostByRarity[below]}");
+        }
+    }
+
+    /// <summary>WAVE F2.3's own acceptance line: a pick's cost is read from the PICK's own source
+    /// rarity, never the fusion output's — proven here as "the two tables are genuinely independent
+    /// lookups, not one aliased as the other," since <c>ExecuteFusion</c> (F2.4) does not exist yet to
+    /// prove the full "fuse two differently-rarity'd sacrifices" scenario end to end.</summary>
+    [Fact]
+    public void InheritCostByRarity_is_a_real_second_table_not_an_alias_of_RecipeCost()
+    {
+        Assert.NotSame(Fusion.RecipeCost, Fusion.InheritCostByRarity);
+        // Today's shipped values happen to match RecipeCost's own souls (F2.3's own starting-value
+        // choice) — same numbers, but read through a different key (a pick's own source rarity), a
+        // fact only meaningful once F2.4 wires two independently-rarity'd lookups against it.
+        foreach (var rung in Fusion.RecipeCost.Keys)
+            Assert.Equal(Fusion.RecipeCost[rung].Souls, Fusion.InheritCostByRarity[rung]);
     }
 
     /// <summary>spec §6 / Q15: the pity guard fields must name the RUNG they guard, not a leftover

@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Air",
-  "elementSecondary": null,
+  "elementSecondary": "Earth",
   "gameTypeId": 77,
   "magnitudes": {
     "resource.max.hp": 2712,

@@ -4,9 +4,10 @@ namespace FusionRpg.Core.Effects.Atoms.Generation;
 
 /// <summary>
 /// One affix-family entry (E43 input), reduced to the columns the primaryChannel/flatDerivedChannel
-/// formula (bands.v1.json) actually reads. Everything else on the authored entry — roles, frames,
-/// nameWords, tags, notes — is the item program's own authored surface, not this generator's business
-/// (spec-family-expand.md §4: "reconcile and expand only").
+/// formula (bands.v1.json) actually reads, plus the family's own authored <c>tags</c> — the item
+/// program's own authored surface (spec-family-expand.md §4: "reconcile and expand only"), carried
+/// through so it can be stamped rather than dropped (`family-tags-closure`, D28, 2026-09-07). Roles,
+/// frames, nameWords and notes remain out of scope here.
 /// </summary>
 /// <param name="Channel">Raw `params.channel` as authored. May be empty (a kind with no primary
 /// channel), a concrete channel (`"maxHp"`), or an element-typed template (`"combat.power.{variant}"`)
@@ -15,8 +16,14 @@ namespace FusionRpg.Core.Effects.Atoms.Generation;
 /// kind carries no op.</param>
 /// <param name="SourceFile">The affix-family file's own base name (e.g. <c>"g-life.json"</c>) — carried
 /// into every emitted row's <c>tags.generatedFrom</c> (spec §3.2).</param>
+/// <param name="Tags">The family's own authored <c>"tags"</c> array (e.g. <c>["offensive"]</c>) —
+/// stamped as bare dictionary keys into every emitted row's `TagsJson`, alongside (never replacing)
+/// the provenance keys. Required, not defaulted: a caller passes <see cref="Array.Empty{T}"/> for a
+/// family with no tags, so an omission is a visible choice rather than a silent one (this codebase's
+/// established convention for a field with only two real construction sites).</param>
 public sealed record FamilyEntryInput(
-    string Id, string Name, string KindId, string Channel, string? Op, string PowerBand, string SourceFile);
+    string Id, string Name, string KindId, string Channel, string? Op, string PowerBand, string SourceFile,
+    IReadOnlyList<string> Tags);
 
 /// <summary>
 /// The generator-input balance surface (<c>data/seed/items/_tuning/tier-bands.v1.json</c>) — the ONLY

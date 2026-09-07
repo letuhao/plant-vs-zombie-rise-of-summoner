@@ -23,8 +23,11 @@ Server/Injector host wiring (T3) still optional — FE uses fixture catalog fall
 - [x] Checkpoint B
 - [x] T8–T10 condition / aptitudes / derived
 - [x] Checkpoint C
-- [x] T11–T15 remaining tabs (shield / status / elements / kit / paths)
-- [x] Checkpoint D
-- [x] T16 HUD catalog resolve (`resolveStatusHudToken` + root catalog boot)
-- [x] Checkpoint E (playwright viewport screenshots + focused FE suite green)
+- [x] T11–T12 shield / status tabs (honest pending; no Ward label; status uses catalog `hudToken` via `resolveStatusHudToken`)
+- [ ] T13–T14 elements / kit deep chrome (ShieldLayer depth / Elements StatRows polish) — deferred
+- [x] T15 kit honesty — KitTab only (no placeholder ActionsTab Strike/Firebolt); leftover footer only on Aptitudes / dirty draft
+- [ ] Paths `@xyflow` push depth — deferred (PassivesTab wrapper still ships)
+- [x] Checkpoint D (catalog tab shells + Kit/leftover honesty proven)
+- [x] T16 HUD catalog resolve (`resolveStatusHudToken` only; FE `statusInitials` deleted)
+- [x] Checkpoint E (playwright viewport screenshots + focused FE suite green) for proven shell paths
 - [ ] T3 Server/Injector host wiring (optional / out of FE scope this pass)

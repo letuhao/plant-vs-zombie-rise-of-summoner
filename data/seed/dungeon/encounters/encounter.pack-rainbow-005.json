@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.pack-rainbow-005",
+  "formation": "pack",
+  "name": "Kaleidoscopic Maelstrom",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A chaotic surge of diverse elemental entities moving in a coordinated, overwhelming wave.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "short",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "tyrant",
+    "floorRung": "scourge"
+  }
+}

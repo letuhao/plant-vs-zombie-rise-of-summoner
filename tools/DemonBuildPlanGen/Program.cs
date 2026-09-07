@@ -1,3 +1,4 @@
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Generation;
 
 // `redistribution-plan`'s own CLI (T1.7, spec-redistribution-plan.md §"Commands"/"Project structure").
@@ -93,17 +94,38 @@ if (resolved.Count == 0)
 // that `DemonSpeciesCatalog`/`SpeciesBuildPlanCatalog.SharesFor` actually look up, not the
 // seedsmith-anchor's own `SpeciesId` text. Two independent, unrelated pipelines mint that text:
 // this reader takes it straight from the raw anchor's `speciesId` field (seedsmith-anchor
-// PascalCase, e.g. "FumeShroom"), while the shipped roster's id comes from a totally separate
+// PascalCase, e.g. "FumeShroom"), while the live roster's id comes from a totally separate
 // generator (`DemonSpeciesGenerator`'s `KebabId`, over the game's own captured type name, e.g.
 // "fumeshroom") — no shared casing convention, no guaranteed textual relationship at all. The one
 // identity both sides carry straight from the game itself is (Side, GameTypeId); joining on that,
 // instead of guessing a text transform (case-insensitive compare, kebab-casing, etc.), is the only
-// correct way to find "which shipped species does this anchor describe, if any."
-FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+// correct way to find "which live species does this anchor describe, if any."
+//
+// ⛔ Real bug fixed 2026-09-07 (owner caught it: "why did we still stuck at 84 demon"): this used
+// to call `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` — the compiled, 84-species snapshot
+// from BEFORE `catalog-runtime`'s real flip (2026-09-05). That flip already moved the real, live
+// game (`Server/Program.cs:350`, `Injector/Host/RpgHost.cs`) onto the full store-backed roster
+// (904 species today) — this tool alone never followed, so 820 real, live, playable species have
+// been silently getting EMPTY aptitude shares (`SpeciesBuildPlanCatalog.SharesFor` returning
+// `EmptyShares`, indistinguishable from "not yet classified") this whole time. Fixed by reading the
+// SAME committed `data/generated/demons/*.json` tree the live roster is actually built from, via
+// the SQL-free `ConcreteSpeciesSeedReader`/`ConcreteSpeciesMapper` pair the Injector already uses
+// for exactly this reason (no SQL access, no `--db` needed) — never re-deriving the mapping by hand.
+var generatedDemonsRoot = FindUp("data", "generated", "demons");
+if (generatedDemonsRoot is null)
+{
+    Console.Error.WriteLine("could not locate data/generated/demons; run tools/DemonSpeciesGen first");
+    return 2;
+}
 
 var catalogIdByKey = new Dictionary<(string Side, int GameTypeId), string>();
-foreach (var def in FusionRpg.Core.Demons.DemonSpeciesCatalog.All)
+foreach (var file in Directory.GetFiles(generatedDemonsRoot, "*.json", SearchOption.TopDirectoryOnly))
+{
+    if (Path.GetFileName(file).StartsWith('_')) continue; // _fusion-recipes.json, _species-build-plan.json
+    var def = FusionRpg.Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef(
+        FusionRpg.Core.Demons.Generation.ConcreteSpeciesSeedReader.ParseFile(file));
     catalogIdByKey[(def.Side, def.GameTypeId)] = def.SpeciesId;
+}
 
 // A real anchor-authoring duplicate — two anchors claiming the same (Side, GameTypeId) — would
 // silently collide on the same runtime speciesId below and corrupt the plan (last one written
@@ -125,10 +147,12 @@ if (duplicateAnchorKeys.Count > 0)
     return 2;
 }
 
-// Most anchors describe species that have never been assigned a shipped game-type slot (829
-// resolved anchors vs. 84 shipped species today — the corpus deliberately covers unshipped/future
-// content). Those are excluded from the plan entirely rather than written under their own
-// unjoinable anchor text, which is exactly the bug this fixes.
+// A resolved anchor with no matching (Side, GameTypeId) in `data/generated/demons` means
+// `DemonSpeciesGen` itself skipped it (some OTHER field is still unresolved, e.g. attackTempo) —
+// excluded from the plan entirely rather than written under its own unjoinable anchor text.
+// Historically this excluded most of the corpus (829 resolved anchors vs. 84 compiled-default
+// species, pre-flip); now that this tool reads the same live-roster tree the real game does,
+// `unmatchedCount` should be ~0 (only species blocked on a non-attackTempo field, if any exist).
 var unmatchedCount = 0;
 var joined = new List<AnchorRow>(resolved.Count);
 foreach (var anchor in resolved)
@@ -140,8 +164,8 @@ foreach (var anchor in resolved)
 }
 
 Console.WriteLine(
-    $"{joined.Count} resolved anchor(s) matched a shipped species by (side, gameTypeId); " +
-    $"{unmatchedCount} resolved anchor(s) describe a species not in the shipped roster and were " +
+    $"{joined.Count} resolved anchor(s) matched a live species by (side, gameTypeId); " +
+    $"{unmatchedCount} resolved anchor(s) describe a species not in the live roster and were " +
     "excluded from the plan");
 
 resolved = joined;

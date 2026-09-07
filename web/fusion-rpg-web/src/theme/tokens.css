@@ -127,6 +127,14 @@
 .band-toast { z-index: var(--band-toast); }
 .band-system { z-index: var(--band-system); }
 
+/* Notch / home-indicator insets (lawn HUD / commander bar T13). */
+.safe-area-top {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+.safe-area-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+}
+
 :root {
   color: var(--color-text);
   background: var(--color-soil);

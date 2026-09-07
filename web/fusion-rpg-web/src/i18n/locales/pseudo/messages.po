@@ -17,21 +17,33 @@ msgstr ""
 msgid "Board layer"
 msgstr ""
 
-#: src/stages/lawn/LawnStage.tsx:103
+#: src/stages/lawn/LawnStage.tsx:109
 msgid "Board layers arrive with a later pass — this one exists to prove they can open over the live game without resetting it."
 msgstr ""
 
-#: src/stages/lawn/LawnStage.tsx:93
-#: src/stages/lawn/LawnStage.tsx:98
+#: src/stages/lawn/LawnStage.tsx:99
+#: src/stages/lawn/LawnStage.tsx:104
 msgid "Board panel"
 msgstr ""
 
-#: src/stages/lawn/LawnStage.tsx:99
+#: src/stages/delve/DelveStage.tsx:62
+msgid "Delve"
+msgstr ""
+
+#: src/stages/delve/DelveStage.tsx:75
+msgid "Delve panel"
+msgstr ""
+
+#: src/stages/lawn/LawnStage.tsx:105
 msgid "Proves a panel can open here without disturbing the board"
 msgstr ""
 
 #: src/stages/siege/SiegeStage.tsx:36
 msgid "Siege"
+msgstr ""
+
+#: src/stages/delve/DelveStage.tsx:66
+msgid "The room graph arrives with a later pass — this stage exists to prove the route, the panel-in-URL contract and the shell wiring work before the graph does."
 msgstr ""
 
 #: src/stages/siege/SiegeStage.tsx:40
@@ -40,4 +52,8 @@ msgstr ""
 
 #: src/stages/siege/SiegeStage.tsx:53
 msgid "This layer arrives with a later pass."
+msgstr ""
+
+#: src/stages/delve/DelveStage.tsx:79
+msgid "This panel arrives with a later pass."
 msgstr ""

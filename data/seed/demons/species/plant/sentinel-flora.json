@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:11:06Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -48,7 +49,7 @@
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "sentinel-flora"
     ],
@@ -104,21 +105,8 @@
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
       "emittedUtc": "2026-09-04T11:06:37Z",
-      "minorityValues": {
-        "rarity": "sprout"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
       "manualCorrection": {
-        "utc": "2026-09-04T13:45:00Z",
+        "by": "battle-timeline session, owner-approved",
         "field": [
           "rarity",
           "variants"
@@ -141,8 +129,21 @@
             "mutated"
           ]
         },
-        "by": "battle-timeline session, owner-approved",
+        "utc": "2026-09-04T13:45:00Z",
         "why": "The kit-shape rerun classified the game's STARTER PLANT at 'almanac', the top rung of ten, with 6 variants. Four independent signals contradict that, and no single one of them would have been enough alone: (1) 6 variants is out of band for EVERY rung -- across 841 corpus rows the counts track rarity tightly (chaff 0, sprout 1, cultivated 2, fused/chimeric/heirloom 2-3, almanac 4), and this was the ONLY 6-variant row in the corpus; (2) 18 of the 20 genuine almanac rows carry the 'ancient' variant and this row does not; (3) the row's own classifier metadata disagrees with itself -- confidence.rarity is 'split' with minorityValues.rarity 'sprout', so the model was not confident in almanac; (4) the row's own reason text calls it 'a basic first line of defense ... more a nuisance or minor obstacle'. Corrected to 'cultivated' with 2 variants: that is what SpeciesExpanderTests documents against ssot-rarity.md 3.3, and 111 of 122 cultivated rows carry exactly [normal, mutated]. NOTE FOR A RERUN: this is a manual override of a split classification. If the pipeline re-emits 'almanac' here, the prompt or the tie-break is what needs fixing, not this row."
+      },
+      "minorityValues": {
+        "rarity": "sprout"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
       }
     },
     "acquisition": [
@@ -284,10 +285,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:19:37Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -309,7 +311,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "sentinel-flora"
     ],
@@ -438,10 +440,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:34:31Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {
         "rarity": "fused"
       },
@@ -465,7 +468,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "sentinel-flora"
     ],

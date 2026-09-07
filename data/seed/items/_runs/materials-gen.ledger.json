@@ -1,0 +1,125 @@
+{
+  "done": {
+    "shard.almanac": {
+      "flavor": "A record of every season it has outlived, bound into something that no longer decays.",
+      "iconKey": "icon.material.shard-almanac",
+      "id": "material.031",
+      "materialClass": "shard",
+      "name": "Almanac Shard",
+      "nameKey": "material.shard-almanac",
+      "runtimeId": "shard.almanac",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.chaff": {
+      "flavor": "A husk shed before the seed even noticed it was growing. Barely worth the pocket it rides in.",
+      "iconKey": "icon.material.shard-chaff",
+      "id": "material.022",
+      "materialClass": "shard",
+      "name": "Chaff Shard",
+      "nameKey": "material.shard-chaff",
+      "runtimeId": "shard.chaff",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.chimeric": {
+      "flavor": "Its grain runs in more than one direction, as though it could not decide what it was becoming.",
+      "iconKey": "icon.material.shard-chimeric",
+      "id": "material.027",
+      "materialClass": "shard",
+      "name": "Chimeric Shard",
+      "nameKey": "material.shard-chimeric",
+      "runtimeId": "shard.chimeric",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.cultivated": {
+      "flavor": "Tended rather than found, its edges shaped by patient, deliberate hands.",
+      "iconKey": "icon.material.shard-cultivated",
+      "id": "material.025",
+      "materialClass": "shard",
+      "name": "Cultivated Shard",
+      "nameKey": "material.shard-cultivated",
+      "runtimeId": "shard.cultivated",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.firstseed": {
+      "flavor": "The kind every later growth is measured against, and rarely matches.",
+      "iconKey": "icon.material.shard-firstseed",
+      "id": "material.029",
+      "materialClass": "shard",
+      "name": "Firstseed Shard",
+      "nameKey": "material.shard-firstseed",
+      "runtimeId": "shard.firstseed",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.fused": {
+      "flavor": "What used to be several pieces, now closed into one that no longer shows the seams.",
+      "iconKey": "icon.material.shard-fused",
+      "id": "material.026",
+      "materialClass": "shard",
+      "name": "Fused Shard",
+      "nameKey": "material.shard-fused",
+      "runtimeId": "shard.fused",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.grafted": {
+      "flavor": "Two growths bound at the seam until neither remembers which one it started as.",
+      "iconKey": "icon.material.shard-grafted",
+      "id": "material.024",
+      "materialClass": "shard",
+      "name": "Grafted Shard",
+      "nameKey": "material.shard-grafted",
+      "runtimeId": "shard.grafted",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.heirloom": {
+      "flavor": "Carried longer than anyone alive can say, and asked after by name.",
+      "iconKey": "icon.material.shard-heirloom",
+      "id": "material.028",
+      "materialClass": "shard",
+      "name": "Heirloom Shard",
+      "nameKey": "material.shard-heirloom",
+      "runtimeId": "shard.heirloom",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.sprout": {
+      "flavor": "Still soft at the edges, but it has decided to keep growing. A first real step past the husk.",
+      "iconKey": "icon.material.shard-sprout",
+      "id": "material.023",
+      "materialClass": "shard",
+      "name": "Sprout Shard",
+      "nameKey": "material.shard-sprout",
+      "runtimeId": "shard.sprout",
+      "tags": [
+        "mineral"
+      ]
+    },
+    "shard.sunwoven": {
+      "flavor": "Warmth is caught in it rather than reflected, as if the light never quite left.",
+      "iconKey": "icon.material.shard-sunwoven",
+      "id": "material.030",
+      "materialClass": "shard",
+      "name": "Sunwoven Shard",
+      "nameKey": "material.shard-sunwoven",
+      "runtimeId": "shard.sunwoven",
+      "tags": [
+        "mineral"
+      ]
+    }
+  },
+  "schemaVersion": 1
+}

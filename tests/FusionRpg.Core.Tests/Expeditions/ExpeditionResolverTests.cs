@@ -202,10 +202,20 @@ public class ExpeditionResolverTests
     // this test's own comment above: coupled to roster/reward-id churn, expected to move, not a
     // regression signal. Squad size/theta/species set are unchanged; verified by reading the
     // resolver's own diff before re-blessing, not by inspection alone.
-    const string ScoutHash = "955C032F55AF1A5843474926D3029B0501EEE13DBD8AA1ADE9487466AD8A9F7E";
-    const string ForageHash = "E28247CE5E0D7BC248F655296164A41FF02E076826FDD6D01C4085EB054B52F9";
-    const string HuntHash = "A992A6BD17E2122DC64EC1FC7414DAE3F7990D6D45880E44073EBAD2B580C9F0";
-    const string WarpathHash = "D80F2ACEE97E22B1A91B8EBAB474B882559A964D69F414FD585BC728DC1AC0F1";
+    // Re-blessed 2026-09-07 (combat-unification Phase 7 F1, owner decision: hybrid.
+    // secondaryWeightMilli 0 -> 300) — checked before re-blessing, not assumed: `Squad()` above uses
+    // a fixed synthetic "test-species" with no catalog-backed ElementSecondary, so the player side of
+    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`)
+    // is not — 21/841 real species carry a genuine secondary element (measured live 2026-09-07), and
+    // any of the four rolls landing one now embeds a real two-component `elementPayload` on that
+    // enemy's own `BattleSetup` where it carried one component before, which is exactly what moves
+    // this hash. The resolver's own RNG stream and which enemy gets picked are unaffected — only the
+    // embedded setup's own shape changed, the same class of move this golden's own history already
+    // names as expected, not a regression signal.
+    const string ScoutHash = "DFC5BC6405D3985CDA41BDEAFC593D0B0F3B344379E7003AAEEE6A5569CA8182";
+    const string ForageHash = "01305D2A48438E873E83CD8575BEFB80351C651E109A556DBBBA7759DDA3DCD8";
+    const string HuntHash = "68F5FC90E0DBB0E6704623FBA5ACD2A86D573804F0D6ECE8672E4FE0C308FB91";
+    const string WarpathHash = "F1C4A2FA9CD6A296BE0A204A366BE37D97F8BFAE2CD36140409FBA658CFD2453";
 
     [Fact]
     public void Tier_goldens_are_locked()

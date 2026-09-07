@@ -1,9 +1,10 @@
 # Spec: `sockets-gen`
 
-**Module id:** `sockets-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 2 of 10
-**Depends on:** `generator-harness` (1) only — ⚠ **corrected 2026-09-07**: a gem's own content carries
-no base-type reference (gems are element/universal, socketable into any socket of the right count) —
-`base-types-gen`'s own `socketMax` field is a separate corpus this module never reads or writes.
+**Module id:** `sockets-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 2 (parallel with `affix-families-gen`, `materials-gen`, `consumables-gen`)
+**Depends on:** `generator-harness` only — a gem's own content carries no base-type reference (gems are
+element/universal, socketable into any socket of the right count) — `base-types-gen`'s own `socketMax`
+field is a separate corpus this module never reads or writes. **Two later modules depend on THIS one**:
+`combination-write-unblock` (categorical, `ingredients`) and `drop-tables-gen` (hard, gem-row `.ref`).
 
 ## Objective
 

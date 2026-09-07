@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A massive, hollowed-out basalt pillar stands in the center of the chamber, its core glowing with a steady, rhythmic orange light. Heat shimmers off the soot-stained walls, and the air smells of ozone and scorched metal.",
+  "hazardBand": "heavy",
+  "kind": "cache",
+  "name": "The Obsidian Crucible",
+  "reason": "The room contains a cache of heat-tempered gear and precious metals, but the intense thermal currents make movement physically draining.",
+  "roomId": "room.cache-fire-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -1,0 +1,108 @@
+{
+  "tables": [
+    {
+      "tableId": "drop.world.sector-clear.stable",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): per-type split of the original drop.world.sector-clear. Stable Ground is the baseline shape Correction 1 calibrated — unchanged from the pre-split table.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 500 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 500, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.rich",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): Rich Ground's bonus branch favors a real drop over nothing — the type's own name is the reason, not a balance guess.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 300 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 700, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.barren",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): Barren Reach's own name is the content decision — the bonus branch mostly comes up empty, matching a type CanHostSeat=false names as inhospitable ground.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 800 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 200, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.storm",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): Rift Storm is the highest non-boss danger band and CanHostSeat=false — a genuinely dangerous, unstable zone. The bonus branch mostly comes up empty for the same reason as Barren, but the base branch is untouched (clearing it at all is still worth the same real drop).",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 850 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 150, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.warcamp",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): Warcamp CanHostSeat=true at the same danger band as Storm -- a real military objective, not empty danger, so its bonus branch stays at the stable baseline rather than following Storm's mostly-empty shape.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 500 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 500, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.nexus",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): Nexus shares Rich Ground's own danger band and CanHostSeat=true -- the same favors-a-real-drop shape.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 300 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 700, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.world.sector-clear.boss-lair",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "sector-loot-wiring (2026-09-07): the real, substantive differentiation this whole initiative names as its point. Boss Lair is the single highest danger band (6) and draws from drop.shared.hybrid-core-boss (a real, different pool, affixChannel=boss, not drop) with a GUARANTEED bonus branch -- no 'nothing' entry at all, unlike every other type's bonus group.",
+      "groups": [
+        { "groupKey": "sector", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-boss", "weight": 1000, "affixChannel": "boss" }
+        ]},
+        { "groupKey": "sector-bonus", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-boss", "weight": 1000, "affixChannel": "boss" }
+        ]}
+      ]
+    }
+  ]
+}

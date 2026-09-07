@@ -49,7 +49,22 @@ const BANNED_WORDS = [
   "Admit",
   "revision",
   "ingest queue",
-  "matchKey"
+  "matchKey",
+  // D5.10 (spec-delve-stage.md §8, `:178-179`) — delve-stage's own ten. `once`/`many` are
+  // deliberately NOT here: both are ordinary English (§8: "would false-positive across the
+  // tree") and are covered instead by `stages/delve/labels.ts`'s `entryKindLabel` plus a
+  // rendered-phrase test (`labels.test.ts`'s own `Entry_kind_renders_as_a_phrase_never_the_enum`),
+  // not a banned-word entry.
+  "bandDelta",
+  "dangerBand",
+  "PartyIndex",
+  "Retired",
+  "thetaOffset",
+  "rungId",
+  "delveId",
+  "sectorId",
+  "archetypeId",
+  "perMille"
 ];
 
 const BANNED_WORD_PATTERN = new RegExp(`\\b(${BANNED_WORDS.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`);
@@ -90,6 +105,19 @@ const NON_RENDERING_ATTR_PATTERN =
 // followed by an identifier, never preceded by one) and the bracketed content is quote-led.
 const GENERIC_TYPE_ARGS_PATTERN = /\w<"[^>(]*>/;
 
+// `export type X = "a" | "b" | ...;` is erased entirely at compile time — TypeScript emits no
+// runtime code for a type alias, so a banned word appearing only inside one can never reach a
+// player. Matched on the declaration keyword itself (not just "looks like a union"), so a real
+// runtime `const type = "a" | "b"`-shaped value (there is no such JS syntax, but a lookalike
+// string) is never accidentally exempted by resemblance alone.
+const TYPE_ALIAS_DECLARATION_PATTERN = /^\s*(export\s+)?type\s+\w+(<[^=]*>)?\s*=/;
+
+// A `case "X":` label compares its literal against the switch discriminant — it is a comparison
+// value, never itself displayed, the same "identifier/comparison value, not player copy" shape
+// NON_RENDERING_ATTR_PATTERN already applies to attribute values. Whatever the matching branch
+// actually returns or renders is checked separately, on its own line, and stays a real violation.
+const CASE_LABEL_PATTERN = /^\s*case\s+/;
+
 function walk(rootDir: string, onFile: (filePath: string) => void): void {
   for (const entry of readdirSync(rootDir)) {
     if (SKIPPED_DIR_NAMES.has(entry)) continue;
@@ -119,6 +147,8 @@ export function scanForBannedVocabulary(srcDir: string): GuardViolation[] {
       if (line.includes("data-testid") || line.includes("data-test-id")) return;
       if (/^\s*import\s/.test(line) || /\bfrom\s+["']/.test(line)) return;
       if (GENERIC_TYPE_ARGS_PATTERN.test(line)) return;
+      if (TYPE_ALIAS_DECLARATION_PATTERN.test(line)) return;
+      if (CASE_LABEL_PATTERN.test(line)) return;
 
       // Engine symbols are checked against the whole line, for the reason given at BANNED_SYMBOLS:
       // never legitimate in source, so no copy-vs-code narrowing applies.

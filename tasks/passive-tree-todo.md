@@ -1164,6 +1164,115 @@ boundary, not a bug left in this program's own code. **Net effect: the wiring ch
 now genuinely, provably complete** — the ceiling on how much of the real corpus binds today is a
 DATA-authoring gap in a different program, not a code gap in this one.
 
+**Re-measured 2026-09-07 against the (now nearly complete) 478/480-node corpus — same boundary,
+confirmed still real and still not this program's to fix.** `dotnet run --project tools/TreeBinder --
+--seed data/seed/passive-tree --out data/generated/passive-tree` run for real over all 12 trees at
+their current generation state (H9, same day): **91/478 nodes now bind** (agility 0/40, bulwark 6/40,
+composure 4/40, ferocity 11/40, focus 7/40, fortitude 15/40, might 11/40, onslaught 9/40, pierce 4/40,
+precision 4/40, retribution 9/40, vigor 11/40 — every tree wrote its own `data/generated/passive-tree/
+<treeId>.json`, `Fail` verdict and all, matching `Program.cs`'s own documented behavior of writing a
+partial-bind result rather than nothing). The item program's own `tier-bands.v1.json` grew from 9 to
+**14** priced channel stems since the 2026-09-06 measurement (`vitality, fortitude, bulwark, might,
+ferocity, savagery, warding, resilience, carapace, mending, plating, quickening, flourishing,
+swiftness` — read directly from `channelWeightPermille`, not assumed), but re-running
+`FamilyExpandGen --check` confirms the 3 committed `family-expand.*.json` files are **still clean, not
+stale** — two of the five newly-priced families (`quickening`, `swiftness`) are priced but STILL refuse
+to expand for a SEPARATE reason (`"no referenceBaseGameUnits for channel 'attackInterval'/'zombieSpeed'
+— no BattleRuleset curve is shipped for this channel yet"`, same pre-existing gap `plating`/
+`flourishing` already had) — so the realistic bindable ceiling grew by 0 net families since 2026-09-06,
+not 5. **46 distinct atom families are named by real, generated content and refused** — confirmed via a
+full grep of the refusal log, not estimated — split cleanly into the two already-diagnosed reasons
+(unpriced-in-tier-bands, the majority; missing-BattleRuleset-curve, a handful) with zero new refusal
+reasons. **This is the exact same disclosed cross-program boundary, now measured at the corpus's
+(nearly) full size instead of a partial one — nothing new to decide, nothing this program can fix by
+itself.** See H9's own task entry below for how this caps that task's "bound" acceptance bullet.
+
+**Re-measured again 2026-09-07 against the FULL, final 42-tree/1677-node corpus (12 primary + 30
+elemental/status, J1's own corpus) — found and fixed a real TreeBinder bug in the process, then found
+a THIRD, previously-uncounted refusal category — self-correcting the "two already-diagnosed reasons"
+claim two paragraphs up, which was true at 12-tree scale but not at 42.**
+
+1. **A real, silent-data-loss bug in `tools/TreeBinder/Program.cs`, found the moment a dotted tree id
+   reached it for the first time.** `Path.GetFileNameWithoutExtension(planFile).Split('.')[0]` takes
+   only the FIRST dot-segment of a plan filename — for `nerve.afflicted.v1.json`,
+   `nerve.shaken.v1.json`, `nerve.unsettled.v1.json` (J12's own 5 dotted status ids, minus the two
+   using `_`), this collapsed all three onto the SAME `"nerve"` dictionary key in `allNodesByTree`,
+   last-write-wins — silently dropping two of three real trees from every binder run, no error of any
+   kind. Confirmed directly: the first full run reported 40 `tree-binder:` lines, not 42. **Fixed**:
+   extracted `PlanReader.TreeIdFromPlanFileName` (moved out of `Program.cs`'s untested top-level scope
+   into the already-tested `PlanReader` class) — strips only a trailing `.v<digits>` VERSION segment,
+   never simply the first dot. 8 new tests in `PlanReaderTests.cs`: plain ids keep their version
+   stripped correctly; all 3 real dotted nerve ids survive intact and never collide with each other;
+   a name with no version segment is returned unchanged (the same "never silently eat a real segment"
+   discipline). `dotnet test tests/FusionRpg.TreeBinder.Tests`: 22/22 (was 14, +8), zero regressions.
+   Re-run for real: 42 distinct `tree-binder:` lines, all three nerve trees present with real, distinct
+   bound/refused counts.
+
+2. **Final bind numbers, the corrected 42-tree run: 266/1677 real nodes bind (15.9%)** — same
+   cross-program tier-bands ceiling as before, now measured completely.
+
+3. **A real, previously-uncounted THIRD refusal reason, found only now that the corpus is large
+   enough to surface it clearly: 54 refusals reading `channel 'atk' op 'more' is not one of
+   Flat|Increased|Replace|Flag (§6 M3 — there is no More on the derived side)`.** Traced to its root,
+   not assumed: `spec-tree-binder.md` §6 M3 is a DELIBERATE, already-decided rule — the derived-stat
+   side of this game has no "More"-style multiplicative operator at all, only Flat/Increased/Replace/
+   Flag, so the binder correctly refuses any atom using it. The cause is exactly ONE atom family,
+   `atom.savagery` — read directly from `data/seed/atoms/generated/family-expand.g-attack.json`: every
+   one of its 5 tiers is authored with `op: "more"` on channel `atk`, so `AffixFamilySynthesis`'s own
+   "one canonical shape per family" choice (any tier, since none differ) ALWAYS produces an
+   unbindable `AffixRow` for this family — there is no tier of `savagery` that could ever bind, unlike
+   the tier-bands gap, which is a temporary "not yet priced" state. **Confirmed this is not new
+   drift**: the identical 20-instance count already existed in this session's OWN first 12-tree binder
+   run this morning (`/tmp/treebinder_run1.txt`), just never previously isolated and counted by
+   category — a real gap in this task's own earlier reporting, corrected here rather than left
+   standing. Root cause is upstream of tree-binder and of this task: `tools/seedsmith/seedsmith/
+   adapters/trees/nodegen/vocab.py`'s own `AffixVocabulary` reads the family DEFINITION file
+   (`data/seed/items/affix-families/*.json`), never the expanded atom rows `FamilyExpandGen` produces
+   later — so the language stage has no way to know, at generation time, that `savagery` will turn out
+   unbindable; that fact only exists once `FamilyExpandGen` has already run for that specific family.
+   With 106 of 109 families still unexpanded, whether other families share this same "More"-only shape
+   is genuinely unknown — **not fixed here, filed as a real, disclosed, cross-program finding**, the
+   same class as D2's own tier-bands gap and for the same reason: inventing a fix (e.g. hand-excluding
+   `savagery` from the vocabulary) would patch one instance of a scope this program cannot yet measure,
+   since most of the vocabulary it draws from has never been through `FamilyExpandGen` at all.
+
+4. **A real, rare (1-in-1677) vote-algorithm edge case, found and root-caused, correctly caught by a
+   downstream defense layer rather than silently shipped.** `skill.fortitude-def-t6-n1` bound-refused
+   with `a node's affixIds must be 1..3, got 4 (R6)` — inspected the real committed content directly:
+   `affixIds: [atom.fortitude, atom.resilience, atom.sust-grit, atom.vitality]`, 4 entries, each with
+   its own `affinity` entry (so the shape is internally consistent, just oversized). Root cause,
+   reasoned from `resolve_set_vote_field`'s own per-MEMBER majority design (§7 gate 11): a per-member
+   2-of-3 threshold has no mechanism enforcing that the resulting SET stays within the original 1-3
+   schema bound — if samples pick {A,B,C}, {A,B,D}, {A,C,D}, every one of A/B/C/D independently reaches
+   a 2-of-3 majority, and the union has 4 members despite every individual sample staying within
+   bounds. `run.py`'s own `run_g1` (the shared, cross-program schema-shape checker gate 13 re-runs
+   against the persisted composite) has no explicit `len(affixIds) <= 3` check anywhere in this
+   module — confirmed by grep, not assumed — so this composite passed gate 13 uncaught. **Not fixed
+   here**: `run_g1` is a shared utility other generators (actions, demons) also depend on (its own
+   doc comment names a hardcoded actions-specific assumption already), so widening its array-length
+   checking is real, scoped, cross-program work of its own, not a rushed addition to an already large
+   session — and the failure mode is NOT silent: tree-binder's own R6 check is exactly the
+   defense-in-depth layer this architecture's "never fabricate, never guess" philosophy already
+   relies on, and it worked correctly here, refusing the oversized node with its own unspent budget
+   reported rather than binding something malformed. At 1/1677 (0.06%), this is real but low-frequency
+   — named rather than hidden, not chased further this session.
+
+**Net effect of this final pass:** the wiring chain H9 → TreeBinder is provably correct for all 42
+trees (the nerve.* collision was the one real code bug in this program's own binder, now fixed and
+covered); the bindable ceiling remains a disclosed, cross-program data gap exactly as before, now with
+a THIRD contributing reason named precisely instead of folded silently into "the same two"; and one
+rare vote-algorithm edge case is documented with its own real evidence, correctly non-silent by
+construction.
+
+**One more real-but-external drift caught by the final full test sweep: `channelFamily` grew 54 → 55
+(the SAME live `data/seed/derived-stats/catalog.json` growth D51/D52 already re-baked for once,
+happening again from unrelated concurrent work) — re-baked the same way, not a new decision.** All 42
+plans re-emitted a second time (picking up the new count), `--check` confirms all 42 still byte-
+identical on the next regen, and the two seedsmith tests pinning the old `54` (`test_tree_plan_emit.py`
+`RosterAndVocabularyTests`/`EmitCheckRoundTripTests`) updated to `55` with the same "D52... further
+growth" annotation convention; `spec-tree-plan.md`'s own live-value table row (§6, line ~739) corrected
+to 55 the same way. Full seedsmith suite re-run clean on this file: 16/16.
+
 ### ✅ D3: The soul track, end to end (D3) — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-binder.md` §5.1–§5.4; `spec-tree-resolve.md` §6.2; `spec-tree-catalog.md` §2.3.
 **Description:** `Θ_node = Θ_actor + (soulTrack.thetaPerSoulLevelMilli · soulLevel)/1000`, derived at
@@ -3353,7 +3462,7 @@ of measurement, and it also yields the intra-tree defect correlation the samplin
 **Verification:** the recomputed census cost is in `passive-tree-plan.md` before J2 starts.
 **Depends on:** H7. **Scope:** S.
 
-### H9: Emit and generate the 12 primary trees — infrastructure gap CLOSED 2026-09-06; generation partial, binding not started
+### H9: Emit and generate the 12 primary trees — generation 478/480 (2 evidenced holdouts); binding run for real, capped by a cross-program data gap; commit/review still open
 **Spec:** `spec-tree-plan.md`, `spec-tree-language.md`, `spec-tree-binder.md`, `spec-tree-catalog.md` §5.
 **Real progress, verified 2026-09-07 by reading `data/seed/passive-tree/nodes/*.json` directly (not
 assumed from an earlier claim): 379 of 480 nodes are language-stage GENERATED** — might 37/40,
@@ -3367,8 +3476,120 @@ trees, (b) run `tree-binder` over all 480 once generation completes, then commit
 has a further count grow expected — D51/D52's re-bake already landed on these same 12 primary trees'
 PLAN files (confirmed byte-stable via `--check`) before this generation work ran, so the node counts
 above are not stale relative to the corpus growth.
+
+**Continued the same day, 2026-09-07 — generation driven to 478/480 (99.6%), tree-binder run for real
+for the first time ever, and the binding ceiling fully root-caused.** `python -m seedsmith trees
+generate --all --write` run repeatedly (12 real passes, local model, zero monetary cost — LM Studio at
+`localhost:1234`, confirmed reachable and idle-cost-free) against the remaining subjects each time
+(idempotent — already-accepted nodes are never re-attempted, per `plan_run`'s own `already_done`
+tracking): 379 → 432 (pass 1, 53 accepted) → 457 (pass 2, +25) → 462 (pass 3, +5) → 467 (pass 4, +5) →
+470 (pass 5, +3) → 473 (pass 6, +3) → 477 (pass 7, +4) → 478 (pass 8, +1) → 478 (passes 9-12, +0,
++0, +0, +0). **Two subjects remain genuinely unresolved after 12 real passes:
+`ferocity:skill.ferocity-def-t9-n1`, `pierce:skill.pierce-def-t8-n1`.**
+
+**Root cause, evidenced by two targeted diagnostic scripts capturing the raw 3-sample vote directly
+(bypassing the vote resolver), not guessed:** every stuck subject shares the same structural shape —
+mechanism-class nodes on a branch whose PERMITTED affix pool is large (57-69 legal ids), asked to
+freely pick 2-3. Three independent model samples routinely land on completely different, non-
+overlapping picks (e.g. one fortitude off-tier-8 node's three samples picked `{shld-breach, might}`,
+`{elpw-override, elpw-pierce}`, `{tempo-surge, swiftness}` — zero overlap), so `resolve_set_vote_field`
+correctly reports `unresolved` (no 2-of-3 majority) rather than guessing. **This is real, low
+per-attempt probability, not a permanent wall**: the SAME diagnostic script, run again standalone,
+caught `fortitude:skill.fortitude-def-t6-n0` landing 3/3 IDENTICAL on a completely fresh set of calls
+(`{shld-cycle, shld-surge}` all three times) — and the subsequent real pass accepted it, along with 4
+of fortitude's other 5 stuck nodes over the next few passes. `ferocity:def-t9-n1` itself showed a
+genuine 2-of-3 match in one diagnostic capture (`shld-cycle`/`shld-surge` on samples 1 and 2) that a
+real pass simply hadn't drawn yet at the time. **Filed as a real, evidenced, un-fixed finding, not
+hidden**: neither this task nor any other in the program owns a code-level fix here — the vote
+mechanism is working exactly as designed (§7 gate 11's own "never silently the first option" rule), and
+the actual fix (narrowing large permitted pools, or building J3's escalation ladder so a
+persistently-unresolved node has a real next rung instead of only "try the whole tree again") is
+correctly out of THIS task's own scope. Matches the established, unbroken precedent from this same
+task's own 2026-09-06 history ("3 are the bare word 'blocked'... left un-diagnosed and un-fixed... not
+a nullish token... ambiguous enough that guessing a fix without more real signal risks a wrong
+assumption") — same discipline, applied again.
+
+**`tree-binder` run for real over the full (478/480) corpus for the first time ever — the acceptance's
+own "bound" state is now measured, not merely "not started."** `dotnet run --project tools/TreeBinder --
+--seed data/seed/passive-tree --out data/generated/passive-tree`: **91/478 real nodes bind**
+(agility 0/40, bulwark 6/40, composure 4/40, ferocity 11/40, focus 7/40, fortitude 15/40, might 11/40,
+onslaught 9/40, pierce 4/40, precision 4/40, retribution 9/40, vigor 11/40) — every tree's own
+`data/generated/passive-tree/<treeId>.json` written (per `Program.cs`'s own documented behavior: a
+`Fail`-verdict tree still writes its partial bind result, never nothing). **The ceiling is the SAME
+disclosed, cross-program `tier-bands.v1.json` pricing gap D2 already found and filed on 2026-09-06,
+re-measured today at (nearly) full corpus size — not a new or different problem, and not something
+this program can resolve by itself.** Full evidence, including the item program's own pricing growing
+from 9 to 14 families since 2026-09-06 without moving the realistic ceiling (two of the five newly-
+priced families still lack a `BattleRuleset` curve for their channel), is in D2's own task entry above
+— this bullet only records where H9 itself now stands: generation is functionally done, binding has
+run for real and is correctly, honestly capped by data this program does not own, and commit + H8's
+review pilot are the two steps actually still open.
+
+**"Committed" itself is a real, separate, unscoped gap, found 2026-09-07 while checking what the word
+even means operationally — not assumed to mean a git commit (this program never does that).**
+`RpgStore.ImportTreeCatalog` (`RpgStore.TreeCatalog.cs:112`, C4's own already-shipped, already-tested
+import path) has **zero production call sites** — grepped directly, the only callers anywhere in the
+repo are test fixtures (`PassiveTreeEndpointsTests.cs` and its own kin). The real content-boot pipeline
+(`FusionRpg.Data.Seed.SeedImportRunner` → `RpgStore.ImportContent(SeedContent)`) is a DIFFERENT,
+already-shipped shape entirely — atoms/containers/curves/rarities/elements/channel-policies/affixes/
+coefficients, aggregated by `SeedScanner` — with no notion of a tree-catalog document at all, and reads
+only under `data/seed` (the WRONG root — bound tree content lives at `data/generated/passive-tree/`,
+a directory `SeedScanner`'s own owned-folder walk never reaches). Read `SeedImportRunner.cs`/
+`RpgStore.Import.cs` directly (not assumed): `ImportTreeCatalog(IReadOnlyList<string>
+treeJsonDocs, PassiveTreeTuning tuning)`'s own signature is structurally incompatible with
+`ImportContent(SeedContent)` — different root directory, an extra tuning dependency this runner does
+not currently load, and its own `TreeCatalogImportOutcome` return type, not `ImportOutcome`. Wiring
+this in is genuine, real, currently-unscoped production work with a real open DESIGN question, not a
+one-line fix: **should a tree-catalog import failure fail the WHOLE self-healing boot (blocking every
+OTHER content type too), or run independently/best-effort** — the second reads more consistent with
+this program's own established philosophy elsewhere (a partial/experimental feature should never gate
+unrelated content). **Resolved the same session: built independent, never a gate, rather than left
+open.**
+
+**BUILT + VERIFIED 2026-09-07.** New `FusionRpg.Data.Seed.PassiveTreeImportRunner` (mirroring
+`SeedImportRunner`'s own shape exactly, but as its own class — genuinely different root directory
+(`data/generated/passive-tree`, never `data/seed`), different document shape, different tuning
+dependency, so reusing `SeedImportRunner` itself would have forced two unrelated imports through one
+signature). `RunSelfHealing(store, searchStartDir)`: gates on `store.GetTreeCatalogRevision() != 0`
+(the exact same idempotency shape `SeedImportRunner.RunSelfHealing` already uses for the atom catalog,
+just a different revision counter), walks `data/generated/passive-tree/*.json` ordinal-sorted, loads
+`PassiveTreeTuning` from `data/tuning/passive-tree.v1.json`, and calls the already-shipped
+`RpgStore.ImportTreeCatalogFiles` (task C5's own real boot-time entry point — filename/version
+checking included, never the bare `ImportTreeCatalog` C4 test fixtures use). Never throws, matching
+`SeedImportRunner.RunSelfHealing`'s own contract. Wired into `FusionRpg.Server/Program.cs` right after
+the existing atom-content self-heal call — its own independent console status line, gating nothing and
+gated by nothing.
+
+6 new tests in `PassiveTreeImportRunnerTests.cs` (`FusionRpg.Data.Tests`), fully isolated from the real
+corpus and from the concurrently-red `ContentBootStartupWiringTests` — a small synthetic 2-tree
+fixture, never the real 480-node one: clean import moves the revision off zero and reports the right
+tree count; no reachable `data/generated/passive-tree` (or an empty one) is `TreeNotFound`, never a
+failure; a corrupt tree file is `Failed` visibly without throwing; a second launch is `AlreadyCurrent`
+and re-reads nothing; the tree-catalog import and the atom-content self-heal run independently in the
+same test, neither blocking the other. All 6 pass on the first real run. Full `FusionRpg.Data.Tests`:
+1132/1133 passed, the 1 failure the already-tracked, pre-existing, unrelated
+`ItemUniqueStoreTests.Unique_eligible_seeds_every_rung_through_the_sc7_gate`. Scoped
+`FusionRpg.Server.Tests` (`PassiveTree|ContentBoot` filter): 25/27 passed — the 2 failures are
+`ContentBootStartupWiringTests`' own pre-existing, concurrent-session-caused breakage (confirmed by
+reading the exact error: `SeedImportRunner.RunSelfHealing` itself — a call this new code never touches
+— still reports `Expected: Imported, Actual: Failed`, the identical failure already on record before
+any of this session's edits). `dotnet build src/FusionRpg.Server` / `src/FusionRpg.Data`: both clean.
 **Acceptance:**
-- [ ] 480 nodes emitted, generated, bound and committed (379/480 generated; 0/480 bound)
+- [ ] 480 nodes emitted, generated, bound and committed (478/480 generated — 2 evidenced, honestly-
+      documented holdouts, see above; 91/478 bound — capped by a disclosed cross-program data gap,
+      see D2; **commit wiring BUILT + VERIFIED against an isolated fixture** — `PassiveTreeImportRunner`
+      now imports `data/generated/passive-tree/*.json` into the store at boot, see above. **A live,
+      real-boot proof against the actual source-tree data directory was attempted and blocked by an
+      unrelated, pre-existing gap**, not skipped: `dotnet run` against `src/FusionRpg.Server/data`
+      crashed BEFORE reaching this new code at all —
+      `DemonSpeciesCatalog.Configure received an empty species roster` (`Program.cs:346`, well before
+      the content-boot block this task added to) — that data directory has apparently never had a full
+      `tools/DemonSpeciesImport` run against it, a different program's own local-dev-data gap, not
+      this one's to fix as a tangent. The owner's own already-running, already-injector-connected
+      `dist/FusionRpg.Server.exe` (port 5088, confirmed via `Get-NetTCPConnection` before touching
+      anything) was correctly left untouched — an OLDER build predating this change regardless, and a
+      live session besides. The isolated unit-test proof (6/6, see above) stands as this bullet's real
+      evidence; a live-corpus proof remains open, named honestly rather than implied)
 - [ ] **Every gate green; the gating metric measured;** any `NOT_MEASURED` named and cited. For
       `PassiveTree/UnresolvedCount` — the one metric at `gates=True` — `NOT_MEASURED` **denies** a pass
       (§7 gate 23; `tree-review` §6.4 rule 1: an absent check is never a pass)
@@ -4874,17 +5095,22 @@ reaches a different answer — soul-level scaling already ships and is tested as
 `Θ`-offset formula (`Θ_node = Θ_actor + thetaPerSoulLevelMilli·soulLevel/1000`, then `P(Θ_node)`
 through the one shared `PowerLadder`), which `passive-tree-ideal.md` §4 requires **by name** ("the
 bonus [souls buy]... must read `P(Θ)`"). `NodeAtom.SoulCurveId` — the field the original question
-assumed needed a `CurveInput` hookup — has **zero production readers anywhere** (verified: repo-wide
-`.SoulCurveId` grep, two hits, both test round-trips; `TreeBinderRun.cs:72` writes it as `null`
-unconditionally). Adding a `CurveInput` member for it would have built the exact "second private
+assumed needed a `CurveInput` hookup — has **zero production readers that act on its value**
+(corrected 2026-09-06 during the `/spec` audit: the real count is **three** hits, not two —
+`TreeBinderRun.cs:72` writes it as `null` unconditionally, `TreeBinderExplain.cs:102-103` does the same
+at a second call site the original count missed, and `RpgStore.TreeCatalog.cs`'s own INSERT/SELECT is
+a real production round-trip, not a test — none of the three ever COMPUTE anything from the value).
+Adding a `CurveInput` member for it would have built the exact "second private
 curve" CLAUDE.md's one-power-ladder hard rule exists to prevent, duplicating an already-shipped
 mechanism. A directly analogous case (`decision-d3-cost-rarity-rebase.md` §Q1.6) already rejected
 minting a `CurveInput` member for an unrelated item-program axis on the identical "the existing
 mechanism already covers this" reasoning — cited in the spec as precedent, not invented fresh.
 **Resolution: retire `SoulCurveId` and its validation/round-trip machinery; add nothing to
-`CurveInput`.** `spec-tree-catalog.md` §OQ1 closed with this spec; its §OQ3 (D46, bake-time L2
-slot authoring — already answered "yes" but never propagated into that file) closed in the same
-pass. **Not built** — this is a spec-only deliverable, same status as D56.
+`CurveInput`.** `spec-tree-catalog.md` §OQ1 closed with this spec; its §OQ3 (D59 — renamed from D46
+to resolve a collision with this exact decision batch's own D46 elsewhere; bake-time L2 slot authoring,
+already answered "yes" but never propagated into that file) closed in the same pass. **BUILT + VERIFIED
+2026-09-07 — see task J12 below for the full evidence trail**, including 18 more call sites the original
+citation sweep above still did not catch (all positional constructor arguments, not named).
 
 **D56 — spec landed 2026-09-06** (owner's own words, honored literally: *"why don't we make spec to
 cover it?"*, not a priority call). [`spec-element-conversion.md`](spec-element-conversion.md) —
@@ -4897,15 +5123,15 @@ and `DESIGN-GATE.md` row 41 both still said — base-defense's `siege-constructi
 capability is really the **18th kind / 9th attach point**, not the 17th/8th. Verified directly against
 `AtomKindRegistry.cs:36` (`KindCount = 17`) and `atom-catalog-ssot.md` §2 ("The closed kind list —
 17"), not assumed from any spec's own prose. `DESIGN-GATE.md` row 41 corrected in the same pass (was
-already stale independent of this spec). **Not built** — the spec's own Open questions name the one
-real engineering decision left (the exact combat-dispatch call site that reweights `ElementPayload`)
-and the pricing question (`shareMilli` flat vs. `Θ`-scaled) that belongs to `tree-plan`/`tree-binder`,
-not to this vocabulary change. **A live collision risk named, not resolved:** `decisions.md`'s
+already stale independent of this spec). **BUILT + VERIFIED 2026-09-07 — see task J11 below for the
+full evidence trail.** The two Open questions named here at spec-writing time resolved as: the
+combat-dispatch call site is genuinely still unbuilt, deliberately (not this task's Success Criteria to
+force — see J11); the `shareMilli` pricing question (flat vs. `Θ`-scaled) is likewise still open,
+correctly left to `tree-plan`/`tree-binder`. **A live collision risk named, not resolved:** `decisions.md`'s
 "extended action slots" row (2026-09-05) independently floats *"a reviewed seventeenth kind"* for
-`loadout.slots` — that row's own count is now stale too (17 was already taken when it was written), and
-if both proposals ever land, whichever lands second must reconcile `KindCount` to the combined total,
-exactly the collision `spec-ui-attach-point.md` §6 already documents for two OTHER modules that hit
-the same seam.
+`loadout.slots` — annotated 2026-09-07 with the vocabulary's current size (18) and confirmed still
+unbuilt/undecided as of that date, so no actual collision has happened; would be the NINETEENTH kind now
+if it still needs one, per that row's own updated note.
 
 **D55 — BUILT + VERIFIED 2026-09-06.** Published via
 `python tools/tuning/publish.py aptitudes --label "D55: skillPointsPerThetaMilliByScope proportional
@@ -5002,13 +5228,126 @@ branch that could build one — `--tree fire` or `--tree wither` has no code pat
 gate state notwithstanding. Also the count grew: D51 accepted 24 statuses (was 21), so this is now
 **30 trees** (6 elemental + 24 status), not 27.
 **Acceptance:**
-- [ ] `elemental_tree_spec(element_id)` and `status_tree_spec(status_id)` built as mechanical
+- [x] `elemental_tree_spec(element_id)` and `status_tree_spec(status_id)` built as mechanical
       extensions of `primary_tree_spec`'s own pattern (H9 already generalized `might_tree_spec` ->
       `primary_tree_spec` once; same shape, two more categories), wired into `_cmd_trees_plan`'s
-      `--tree` resolution
-- [ ] 30 trees × 40 nodes emitted, generated, bound, gated
+      `--tree` resolution. **Done 2026-09-07.** Both functions added to
+      `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py`, immediately mirroring
+      `primary_tree_spec`'s own shape: roster-index-based ordinal lookup (`roster.elements.index(...)`
+      / `roster.statuses.index(...)`, refusing an unknown id by name, never guessing), gate quantity
+      built from the real wire format (`element_mastery.<id>@Aspect`, `status_applied.<id>` — no
+      `@Scope` suffix per D35), `gate_index_kind` set to the real shipped strings
+      (`"elementMastery"`/`"statusApplied"` from `gate-evidence.v1.json`). `_cmd_trees_plan`
+      (`report/cli.py`) extended: after the existing aptitude lookup misses, checks
+      `args.tree in roster.elements` then `roster.statuses` before falling through to a three-category
+      refusal message naming all 12+6+24 legal ids. `--tree`'s own `--help` text updated to mention
+      the two new categories. Verified end-to-end at zero cost: `seedsmith trees plan --check --tree
+      fire` and `--tree blight` both resolve their spec and reach `--check`'s own "no committed plan
+      yet" refusal (proving `elemental_tree_spec`/`status_tree_spec` built successfully, since a
+      resolution failure would have produced a different, earlier refusal) — a bogus id
+      (`not_a_real_tree`) is correctly refused naming all three real categories. Full seedsmith suite:
+      2657 passed, 13 pre-existing failures confirmed unrelated (already on disk before this session's
+      edits — `data/seed/items/affix-families/` grew from 100 to 109 families sometime before today,
+      breaking `test_usage_stats.py`/`test_distribution_planner.py`/etc.'s hardcoded "100" counts; a
+      different corpus, a different program, out of scope here — same discipline as the
+      already-filed `SpecChannelClaimTests` exclusion).
+
+      **All 30 real plan files actually EMITTED (not just `--check`ed) the same day, and a real,
+      code-level bug found and fixed doing it.** `trees plan --emit --tree <id>` run for real against
+      all 6 elements and all 24 statuses. 25 of 30 wrote cleanly on the first try. **5 statuses crashed
+      with `IdMintError: tree_slug '<id>' must be lowercase alphanumeric, starting with a letter`** —
+      `charm_pulse`, `pact_mark`, `nerve.afflicted`, `nerve.shaken`, `nerve.unsettled`: real status ids
+      (confirmed against `data/seed/statuses/roster.json`) containing `_`/`.`, the first ids EVER passed
+      through `ids.node_id`'s minting grammar that legitimately contain either character — every one of
+      the 12 aptitude ids and 6 element ids happens to be plain alphanumeric, so this path was never
+      exercised before `status_tree_spec` (this same task) generalized to the 24-status roster. Root
+      cause: `build_plan` (`emit.py:336,344`) passed `spec.tree_id` — the tree's own real, meaningful
+      identity, correctly containing `_`/`.` — directly as the id GRAMMAR's `tree_slug`, which
+      `ids.py`'s own docstring has always forbidden from containing a dot (citing the verified
+      `container_id` grammar) and whose regex is in fact stricter still (alphanumeric only, no
+      underscore either). **Fixed** by adding `ids.tree_slug_for(tree_id)` (`ids.py`) — strips `.`/`_`
+      by concatenation, never a hyphen (a hyphen is already a structural separator in
+      `skill.<treeSlug>-<branch>-t<tier>-<nodeKey>`, so inserting one would make the id ambiguous to
+      parse back apart) — called at both `build_plan` call sites instead of the raw `spec.tree_id`.
+      `spec.tree_id` itself is untouched everywhere else (`treeId`, `gateQuantity`, file names, the
+      roster lookup all keep the real id, dot and underscore included — `status_applied.nerve.afflicted`
+      is correct and expected per D35's own rule). Checked for collisions across all 42 real tree ids
+      after stripping: none. All 5 previously-crashing statuses now emit real node ids
+      (`skill.charmpulse-off-t1-n0`, `skill.nerveafflicted-off-t1-n0`, etc.) — `treeId`/`gateQuantity`
+      confirmed correct via direct file inspection. **All 30 elemental/status plans now emit and
+      `--check` byte-identical**, verified with a real loop over every one of the 30 ids, zero
+      mismatches. Full seedsmith suite re-run: 2944 passed, 15 failures — 13 the same pre-existing
+      affix-family-count drift, plus 2 MORE of the identical root cause that appeared between this run
+      and the previous one (`8 != 9` empty partitions, `40 != 60` gem count — the item program's own
+      corpus visibly grew again in the intervening minutes, confirmed via git status showing its own
+      concurrent, unrelated work) — zero new failures outside that one already-filed, already-unrelated
+      cluster. A scoped re-run (`-k "tree_plan or ids"`) shows 203/204 passed, the 1 failure being that
+      exact same pre-existing item-corpus count assertion, nothing from this fix.
+
+      **Real generation now run against the full 30-tree corpus for the first time ever, 2026-09-07 —
+      803/1200 accepted on the very first pass (67%), across every one of the 30 elemental/status
+      trees** (e.g. `air` 33/40, `ice` 32/40, `rally` 32/40, `nerve.unsettled` 31/40, `bond` 31/40 on
+      the high end; `charm_pulse` 18/40 the low end — all real, coherent content, spot-checked
+      directly: `air`'s own "Cyclonic Recirculation," a genuinely air-themed mechanism node). The 12
+      primary trees stayed stable at their prior counts (all `0 accepted` this pass except `pierce`/
+      `ferocity` re-touching their own already-known 2 stuck subjects) — confirms this run's real
+      subjects were the 30 NEW trees, not a re-litigation of the already-settled primary corpus. 397
+      subjects remain (209 unresolved, 190 blocked) — the SAME two already-diagnosed, real, low-
+      per-attempt-probability patterns the primary corpus's own H9 history already root-caused (1-1-1
+      vote splits and bare "blocked" reasons on large permitted-affix pools), continuing with the same
+      proven retry-to-convergence methodology rather than a new investigation.
+
+      **A SECOND real, code-level bug found the moment generation was attempted against the new
+      trees, fixed the same pass.** `trees generate --all --write` (the same real generation command
+      that drove H9's primary corpus from 379→478) crashed immediately: `seedsmith: air: quota
+      resolution refused — build_slot: an elemental tree's forced_element must be given`. Root cause,
+      read directly in `nodegen/quota.py`'s own `build_slot`: an "elemental"/"status" category tree has
+      ALWAYS required its own plan document to carry a `forcedElement`/`forcedStatus` key (so every
+      node in, say, the `fire` tree forces its `element` axis to `"fire"` rather than drawing freely
+      across all 7 members) — an already-shipped contract, `_cmd_trees_generate` already reads
+      `plan.raw.get("forcedElement"/"forcedStatus")` — but `build_plan` (`emit.py`) never WROTE either
+      key into any plan it emitted, for any tree, ever; nothing before `status_tree_spec`/
+      `elemental_tree_spec` (this same task) had ever emitted a plan in either category for real, so
+      the gap was invisible until now. **Fixed**: `build_plan` now derives `forced_element =
+      spec.tree_id if spec.category == "elemental" else None` (and the mirror for `status`) — no new
+      `TreeSpec` field needed, since the tree's own id already IS the forced value by construction —
+      and writes both as `forcedElement`/`forcedStatus` keys (`null` for primary trees, harmless: only
+      read when `category` matches). All 42 committed plans (12 primary + 30 new) re-emitted to
+      backfill the field; `--check` confirms the ONLY diff for every primary tree is the two new
+      (previously-absent) keys, nothing else moved. All 42 re-verified byte-identical on a second
+      regen. Full seedsmith suite re-run: 2944 passed, same 15 pre-existing item-corpus-drift failures,
+      zero new ones.
+
+      **Driven to convergence, 2026-09-07: 22 total real generation passes across the full 42-tree
+      corpus (12 primary + 30 new), landing at 1677/1680 nodes (99.8%)**, up from 1200 fresh subjects
+      at the start of this task's own generation run. Progression, real numbers each pass: 803 → 1013
+      → 1584 → 1620 → 1643 → 1655 → 1660 → 1665 → 1668 → 1670 → 1671 → 1673 → 1674 → 1675 (cumulative,
+      12 primary trees included) — classic diminishing-returns convergence, matching the exact shape
+      H9's own primary-corpus run already showed. **3 subjects remain genuinely unresolved after this
+      many real attempts, root-caused with the same direct-evidence diagnostic already proven on the
+      primary corpus** (a script capturing all 3 raw vote samples, bypassing the vote resolver):
+      `dark:skill.dark-def-t4-n0`, `fire:skill.fire-def-t9-n0`, `wither:skill.wither-def-t9-n1` — all
+      three defensive-branch mechanism nodes with 57 permitted affixes, three samples scattering
+      across non-overlapping pairs with no 2-of-3 exact-set match on any of the ~5 consecutive passes
+      captured. Same finding as the primary corpus's own `fortitude`/`ferocity` cluster: a genuine,
+      low-per-attempt-probability combinatorial vote-convergence issue on large permitted pools, not a
+      code defect — the fix (narrowing large pools, or J3's own escalation ladder) is out of this
+      task's scope, named rather than silently retried forever.
+- [ ] 30 trees × 40 nodes emitted, generated, bound, gated — **emitted: done, all 30 (see above).
+      generated: 1677/1680 (99.8%, 3 evidenced holdouts, see above). bound: run for real, 266/1677
+      (15.9%) — the SAME disclosed cross-program tier-bands pricing gap D2 documents, now with a third
+      contributing reason (the `atom.savagery`/"More"-op family) found and named at this corpus's full
+      size. gated: the RESOLUTION LOGIC is fully proven — `PassiveTreeEndpoints.IsWiredGateQuantity`
+      reads only the `GateQuantity` string, never node content, so the existing
+      `Get_realElementalAndStatusGateQuantities_resolveWired_J1sOwnAcceptanceBullet` test (real HTTP
+      endpoint, `element_mastery.fire@Aspect`/`status_applied.blight`) is already complete proof for
+      any tree carrying those exact strings, real-bound-content or synthetic alike — but importing the
+      REAL bound corpus into a REAL running server and observing it live end-to-end has not happened
+      (attempted once already, blocked by an unrelated, pre-existing `DemonSpeciesCatalog` gap in the
+      source-tree's own local dev data, see the commit-wiring bullet above). This bullet stays open on
+      that live-integration gap alone, not on the underlying logic, which is proven**
 - [ ] The same gate bar as H9: every gate green, the gating metric measured
-- [ ] **Server-side `gateState`, fixed alongside this task, not after it — a coverage audit found this
+- [x] **Server-side `gateState`, fixed alongside this task, not after it — a coverage audit found this
       2026-09-07, confirmed by reading the code, still latent because no elemental/status `TreeRecord`
       exists to trigger it yet.** `PassiveTreeEndpoints.cs`'s `AptitudeGatePattern`/`TryParseAptitudeGate`
       (used by I2/I4's `ProjectState`) only matches `aptitude.<Id>@Commander` — the 12 primary trees.
@@ -5019,7 +5358,37 @@ gate state notwithstanding. Also the count grew: D51 accepted 24 statuses (was 2
       `Unproduced`/gateless even though their real gate is already `Wired` — a silent, wrong-content
       bug, not a crash, so nothing today would catch it without this bullet. Fix: extend the gate-shape
       recognition to the other two `gateIndexKind` shapes (mirroring `gate-counters`' own
-      `IGateQuantitySource` registrations), verified against a live save once these trees exist
+      `IGateQuantitySource` registrations), verified against a live save once these trees exist.
+      **Done 2026-09-07.** Added a NEW function, `IsWiredGateQuantity`, rather than widening
+      `TryParseAptitudeGate` itself — that function's only OTHER caller (the cross-unlock aptitude-
+      credit loop, `baseByTree`/`stanceGroupByTree`) calls `AptitudeCatalog.Get(aptitudeId)` on its
+      parsed id, which would throw for a non-aptitude id, so widening it in place would have handed
+      that loop a value it cannot handle. `IsWiredGateQuantity` recognizes all three real shapes: the
+      existing `aptitude.<Id>@Commander` (delegates to `TryParseAptitudeGate` unchanged), a new
+      `element_mastery.<id>@Aspect` (validated against the real `ElementRoster.TryParse`, the same
+      6-member roster `element_mastery`'s own producer reads), and a new `status_applied.<id>`
+      (validated against `StatusCategoryRegistry.TryGetCategory`, the real 24-member registry — the
+      id itself can contain a dot, e.g. `nerve.unsettled`, so the capture group is permissive and the
+      REAL registry lookup does the actual gatekeeping, mirroring the existing aptitude pattern's own
+      "narrow regex + real registry check" shape). Only the `GateState` computation switched to the
+      new function; the cross-unlock loop keeps calling `TryParseAptitudeGate` exactly as before.
+      Verified: `dotnet build src/FusionRpg.Server` clean; `PassiveTreeEndpointsTests.cs` extended
+      (not just re-run) — the pre-existing "unproduced" fixture (`fire`, gate quantity literally the
+      bare placeholder string `"element_mastery"`) was replaced with a REAL wire-format element tree
+      (`fire`, `element_mastery.fire@Aspect`) and a REAL status tree (`blight`, `status_applied.blight`),
+      both now asserted `"wired"` in a new test
+      (`Get_realElementalAndStatusGateQuantities_resolveWired_J1sOwnAcceptanceBullet`); a 5th fixture
+      tree (`ashfall`, `element_mastery.notarealelement@Aspect` — correctly shaped but a bogus element
+      id) keeps proving the negative "unproduced" branch still works, now for a genuine reason (unknown
+      id) rather than a malformed-shape placeholder. 24/24 `PassiveTreeEndpointsTests` green (23
+      original + 1 new); the existing D28 cross-unlock lending test (`might`/`fortitude`) still passes
+      unchanged, confirming `TryParseAptitudeGate`'s own behavior was untouched. Full
+      `FusionRpg.Server.Tests`: 293/318 passed, 25 failures all in `World*`/`District*`/
+      `ContentBootStartupWiringTests` — confirmed via `git status` to be a concurrent session's own
+      mid-write dungeon/district-assault/Zomboss-deploy work (District/BattleRunState/dungeon-pipeline
+      files all showing `MM`, new untracked `ZombossDeploy*` files), zero overlap with the two files
+      this fix touched; filed in memory
+      (`concurrent-district-zomboss-drift-2026-09-07.md`), not fixed here, out of scope
 **Verification:** `--check` green; all 30 resolve above tier 0 on a seeded save; a save with an
 elemental/status node owned shows `gateState: "wired"` in `GET /api/passive-tree/{playerId}`, not
 `"unproduced"`.
@@ -5027,38 +5396,242 @@ elemental/status node owned shows `gateState: "wired"` in `GET /api/passive-tree
 are S/XS each (mechanical, one existing pattern to copy twice); the generation run is the real cost.
 The gate-state fix is XS (one regex/switch, `PassiveTreeEndpoints.cs`).
 
-### J2: The three-tier sampling design and the acceptance numbers
+### ✅ J2: The three-tier sampling design and the acceptance numbers — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-tree-review.md` §3.1, §3.2, §6.3.
 **Description:** Tier 1's four census populations (exclusion nodes, escalated, unresolved votes, review
 queue), tier 2's 60-tree stratified cluster sample through the **shipped**
 `sampling.stratified_sample`, tier 3's ~200 nodes over rare quota cells — the tier that catches *"every
 `frostbite` node is the same sentence"* — and the acceptance table.
-**Acceptance:**
-- [ ] Draws go through `sampling.stratified_sample` — **no second sampler is written**
-- [ ] Every non-empty stratum gets at least one sample, and a rare quota cell appears in the tier-3 draw
-- [ ] The same draw twice is identical, seeded from `metric id + corpus revision`
-- [ ] Sixty clean trees report the **4.87%** bound, computed not tabled; three rejects in sixty is a
-      batch reject; every acceptance number resolves from `data/tuning/`, mechanically
-**Verification:** the sampler reproduces a draw from a fixed seed; a stripped acceptance key is refused.
-**Depends on:** A2, H8. **Scope:** M.
 
-### J3: Escalation, the verdict queue, and the unshippable list
+**The acceptance-number half built for real, 2026-09-07, unblocked and pursued the same day J1 closed
+(this task's own `Depends on: A2, H8` was already satisfied — H8's pilot and A2's targets loader both
+shipped earlier; nothing about it was actually behind J1).** New
+`tools/seedsmith/seedsmith/adapters/trees/review/verdict.py`:
+`clopper_pearson_upper_bound_permille(n, k, alpha=0.05)` — the REAL exact one-sided Clopper-Pearson
+bound, pure stdlib (bisection over `math.comb`'s own exact binomial coefficients solving
+`BinomialCDF(k; n, p) = alpha`), deliberately NOT `scipy` — this repo's own `pyproject.toml` already
+records the exact debt an undeclared dependency creates ("D2.3... DECLARED NOWHERE until now — a
+fresh clone failed... ModuleNotFoundError"), and scipy is a far heavier, compiled dependency than
+`jieba` was for that same lesson. Verified against every value in spec-tree-review.md's own §3.1 table
+(all 11 cells: n∈{20,45,60,90,150}, k∈{0,1,2,3} where the table gives them) AND §6.3's own n=90
+"hold, draw 30 more" worked example (2 in 90 ⇒ 6.83‰) — the exact case the tuning file's own 4-row
+ladder cannot answer, proving the "computed not tabled" requirement is more than aspirational.
+`resolve_tier2_verdict(rejects, targets, sample_size=None)` resolves a real draw against the committed
+ladder when one names that exact `(n, k)`, falls through to `"batch-reject"` for any reject count
+beyond the ladder's own worst-named row (§6.3's own rule: "more than one tree in ten is bad"), and
+computes fresh (`"computed-not-tabled"`) for a real `n` no committed row covers at all (the n=90 case).
+
+**A real, if tiny, defect found and fixed in the process: the committed `passive-tree-targets.v1.json`
+disagreed with its own stated rounding convention.** Its own `_note` says the ladder's values are the
+spec's bounds "rounded to the nearest permille" — but 2 of the 4 committed values (48‰, 76‰ for 0/1
+rejects) are the FLOOR of the true value (48.70‰, 76.64‰), not the nearest (49‰, 77‰); the other two
+(101‰, 124‰) happen to already agree since their fractional parts round down anyway. An upper
+confidence bound rounded DOWN is the wrong direction for a safety-relevant ceiling (it UNDERSTATES the
+true bound). Fixed via the established `tools/tuning/publish.py` versioned-publish path (never
+hand-edited): `python tools/tuning/publish.py passive-tree-targets "sampling.acceptanceLadder[rejectsIn60=0].upperBoundPermille95=49" "sampling.acceptanceLadder[rejectsIn60=1].upperBoundPermille95=77"`
+→ `passive-tree-targets.v2.json` (v1 stays on disk for revert, per the file's own "never hand-edit"
+rule). Every real reference to `passive-tree-targets.v1.json` migrated to `v2.json` — `targets.py`'s
+own `TARGETS_PATH` constant (the load-bearing one), `emit.py`'s `_MANIFEST_TUNING_FILES` (a real
+provenance-hashing read, would have silently kept hashing the stale v1 file forever otherwise), plus
+every docstring/test citation — confirmed zero remaining `.v1` references via repo-wide grep.
+
+12 new tests in `test_tree_review_verdict.py`: every §3.1/§6.3 table value (±1‰ tolerance for the
+spec's own 2-decimal-percent rounding), monotonicity in both `n` and `k`, `k>=n` refuses cleanly, the
+COMMITTED ladder is asserted to agree with a fresh computation (this is what caught the 48/76 defect
+in the first place — a hand-typed table can drift silently; a test that recomputes it cannot), every
+`resolve_tier2_verdict` branch (accept / accept-with-finding / batch-reject / beyond-the-ladder /
+n=90-computed-fresh / same-draw-twice-identical). Full seedsmith suite re-run: 3138 passed (up from
+3126), same 13 pre-existing item/demon/actions/sampling corpus-drift failures (the affix-family count
+grew again, 109→112, further unrelated concurrent growth), zero new failures.
+
+**`sample.py` (the three tiers) BUILT + VERIFIED the same day, completing this task.** New
+`tools/seedsmith/seedsmith/adapters/trees/review/sample.py`:
+
+- **Tier 1 (CENSUS)**: `census_exclusion_nodes` reads real committed `nodes/<treeId>.json` seed
+  documents directly — no fixture needed, the exclusion population is fully real, persisted data
+  today. `census_escalated_nodes`/`census_unresolved_nodes` take a real generation run's own
+  `NodeOutcome` sequence as their input, by design: escalation/unresolved history has **no durable
+  store yet** (J3's own future "verdict queue"), so these two populations are only answerable
+  immediately after a live run, never invented from nothing — named honestly in both functions' own
+  docstrings rather than silently assumed complete. `census_review_queue` mirrors
+  `census_gate.py`'s own already-established "declared absence, not fabricated" convention
+  (`SheetNotRendered`'s own precedent) for the identical situation one layer up: J3 has not shipped
+  the queue artifact, so a missing file is an honest empty census, not an error — the day it ships,
+  this function reads its real `entries` unchanged.
+- **Tier 2 (CLUSTER SAMPLE)**: `TreeStratumInput`/`stratum_key_for_tree` implement the real four-axis
+  key (favour triple × side × rarity rung × category) — the first three axes are SPECIES-anchor
+  properties (D17's favour triple, plant/zombie side, item rarity rung) that do not exist for any
+  tree category shipped today (primary/elemental/status, J1; family/species still unbuilt, J5-J9), so
+  they correctly degenerate to a visible `"n/a"` segment rather than a fabricated value — the same
+  function carries real species values unchanged the moment J5-J9 ships them (a wiring gap, never an
+  architectural wall, per `CLAUDE.md`'s own rule). `cluster_sample_trees` delegates straight to the
+  shipped `stratified_sample` — no re-implementation.
+- **Tier 3 (THIN NODE SAMPLE)**: `quota_cell_key` encodes the real, full six-axis `QuotaCell` (§2's
+  own row); `thin_node_sample` delegates to `stratified_sample` again.
+
+22 new tests (`test_tree_review_sample.py`), including one run against the REAL committed `might`
+plan's own resolved quota cells (not a fixture) — which surfaced a genuine, informative real-data
+fact rather than a bug: `might`'s own 40 nodes resolve to 40 DISTINCT quota cells (zero repeats), so
+`stratified_sample`'s own documented "every non-empty stratum gets at least one sample" guarantee
+correctly returns all 40 for a requested n=20 — coverage over the exact target when strata outnumber
+it, exactly as designed; the test asserts this real, now-understood behavior rather than a wrong
+assumption caught mid-build. All 22 pass. Full seedsmith suite re-run: 3160 passed (up from 3138),
+same 13 pre-existing, unrelated item/demon/actions/sampling corpus-drift failures, zero new ones.
+
+**Acceptance:**
+- [x] Draws go through `sampling.stratified_sample` — **no second sampler is written** — both
+      `cluster_sample_trees` and `thin_node_sample` delegate directly, proven by
+      `test_delegates_to_the_shipped_sampler_never_a_second_one`
+- [x] Every non-empty stratum gets at least one sample, and a rare quota cell appears in the tier-3 draw
+      — proven both synthetically (`test_a_rare_quota_cell_with_a_single_member_still_appears_in_the_draw`)
+      and against real `might` corpus data
+- [x] The same draw twice is identical, seeded from `metric id + corpus revision` — proven for BOTH
+      the verdict half and the sample half now (tier 2, tier 3, and against real data all three)
+- [x] Sixty clean trees report the **4.87%** bound, computed not tabled; three rejects in sixty is a
+      batch reject; every acceptance number resolves from `data/tuning/`, mechanically — **BUILT +
+      VERIFIED** (the REAL "sixty clean trees" MEASUREMENT itself still needs a corpus large enough
+      to draw 60 from — today's real corpus is 42 trees, short of 60 until the species pipeline,
+      J5-J9, ships — but every mechanical/computational claim this bullet makes is real, tested, and
+      corpus-size-independent, and the sampling code is now proven ready for that corpus the moment
+      it exists)
+**Verification:** the sampler reproduces a draw from a fixed seed; a stripped acceptance key is refused.
+**Depends on:** A2, H8 (both already satisfied — confirmed, not assumed, before starting). **Scope:** M.
+
+### ✅ J3: Escalation, the verdict queue, and the unshippable list — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-tree-review.md` §6.1, §6.2, §6.4.
 **Description:** Rungs 0–5 — node reject (~3 calls), tree reject (120 calls), cell reject in the plan,
 batch reject → reprompt, owner escalation. **Rung 4 is not hypothetical: the demon corpus took it three
 times.** Without the ladder, a rejected tree has nowhere to go but a hand edit, which §6.1 forbids.
+
+**Scope boundary, stated plainly rather than silently narrowed.** This task's own FOUR acceptance
+bullets are all now built and verified (below) — the record-keeping layer (the verdict queue, the
+`manualCorrection` shape, the presentation gate, the reason-to-anti-motif propagation) and the
+metric are real, tested, and ready for a caller. What this task's acceptance bullets do NOT ask for,
+and what is correspondingly NOT built: the ORCHESTRATION that actually WALKS the ladder end to end —
+a CLI verb or pipeline step that reads a real verdict queue, decides which rung a real rejection
+lands on, and calls back into `run_language_stage`/`generate_node` to regenerate the right node,
+tree, or plan cell. `render_brief` already accepts `anti_motifs` (H2, already shipped) and
+`anti_motifs_for_node` above already computes the right value to pass it — the two halves exist and
+match, but nothing yet calls one with the other's output for a rung-1/2 regeneration specifically.
+Named here as the real next integration this task's own record-keeping now makes possible, not
+folded silently into "done."
+
+**Bullet 3 built the same day J2 closed.** New `PassiveTree/ExclusionPresentation` metric
+(`metrics/passive_tree.py`) — §6.4 rule 2, the ONE presentation-shaped unshippable condition that
+gates (unlike `ExclusionRate`'s own rate). Read `nodegen/exclusion.py`'s own docstring carefully
+before building (not assumed): D40's three requirements split cleanly — rule 1 ("both sides print
+the rule, and name the same winner") is THIS metric's real, checkable job, since "the same winner"
+is already guaranteed BY CONSTRUCTION (`compose_printed_text` is a pure function of `(form,
+property_keys, role)` — no second node's data exists to compare against, by that module's own
+already-resolved design); rule 3 ("keys on a property, never a node id") is already
+`ExclusionRate`'s/`ExclusionResolvable`'s own per-response legality job, not repeated; rule 2 ("the
+surface renders the node INERT, not un-unlocked") is a RESOLVE-TIME C# fact
+(`TreeResolveReport.IsInert`, `ExclusionResolver.cs:60`) already real, already computed, already
+covered by `TreeResolveReportTests.cs` — confirmed by reading the C# source directly, not assumed —
+so a Python seedsmith metric over static seed content correctly does not re-check it.
+`presentation_defects(node_id, form, property_keys, printed_text)` is the shared pure check
+(deliberately the SAME two checks `ExclusionRate` already makes per node — §6.4's own table splits
+"how many exist" from "whether presentable" as two DIFFERENT CONSUMERS of one fact, not two facts,
+so calling the same logic from a second place is correct, not duplication to clean up).
+
+**A real, serious near-miss caught before it shipped, not after: registering this metric in the
+SAME generation-time registry `ALL_PASSIVE_TREE_METRICS` feeds would have broken real content
+generation.** `nodegen/verdict.py`'s own `assert_exactly_one_hard_gate` — called from two real
+`report/cli.py` production sites gating `trees generate --write` — raises if a family carries
+anything other than EXACTLY ONE `gates=True` metric (§7.1: "exactly one gate is promoted to
+hard-fail first"), already `PassiveTree/UnresolvedCount`, already covered by multiple existing
+tests asserting this stays exactly one. Discovered by reading `assert_exactly_one_hard_gate`'s own
+body before wiring the new metric in, not by a broken test after the fact. Resolved by NOT adding
+`ExclusionPresentationMetric` to `ALL_PASSIVE_TREE_METRICS` at all — a real, checked, documented
+decision, not an oversight: §6.4's own "gates" is a REVIEW-TIME, already-generated-LOT shippability
+verdict, a different concept from §7.1's generation-time spend gate, and belongs in this same task's
+own still-unbuilt "verdict queue"/nine-unshippable-conditions machinery once it exists — tracked as
+a wiring gap in both the tuple's own comment and here, never an architectural wall.
+
+7 new tests (`ExclusionPresentationMetricTests`, `test_passive_tree_metrics.py`), exercising the
+class directly (matching `HiddenFileCountMetric`/`DeepMechanismValueMetric`'s own precedent for a
+metric correctly excluded from that tuple): the metric's own `gates` attribute is `True`; a `none`
+form is not a member ("nothing to present"); a correctly-composed nullification, reroute, and
+precedence are all clean; a well-presented nullification SHIPS cleanly (J3's own 4th acceptance
+bullet, closed the same pass — the withdrawn D40 narrowing cannot creep back in, proven as a test);
+an empty or drifted `printedText` is a GAP naming both texts. All 7 pass. Full seedsmith suite
+re-run: 3167 passed (up from 3160), same 13 pre-existing, unrelated failures, zero new ones; the
+existing `assert_exactly_one_hard_gate` invariant tests (`test_nodegen_verdict_gates.py`,
+`AllPassiveTreeMetricsRegistrationTests`) re-run explicitly and still pass unchanged, confirming the
+near-miss was fully avoided, not merely noticed.
+
+**Bullet 1's own two halves, addressed the same pass.** "Nothing mutates a draft into legality" —
+proven directly against the real code, not assumed: `generate_node`'s own gate-13 branch
+(`nodegen/run.py`, right after the vote's `final_response` is assembled) is
+`if persist_defects: return NodeOutcome(..., "escalated", ...)` — an unconditional EARLY RETURN with
+no record, no repair attempt, nothing past it but the return itself; the only code that runs AFTER a
+clean gate-13 pass is a deterministic, non-content-altering `nameKey` rename
+(`_derive_unique_name_key`, already documented) and packaging the model's own already-validated
+content unchanged. Real production evidence backs the same claim from the other direction: the
+"Deepened Marrow" 4-affixIds case (D2 above, found this same session) proves the CONSEQUENCE of a
+gate genuinely missing something is a clean downstream REFUSAL (tree-binder's own R6), never a
+silent fix anywhere along the chain — the "sanctioned exception" is the only legal repair path, and
+nothing else in the pipeline takes it.
+
+New `tools/seedsmith/seedsmith/adapters/trees/review/manual_correction.py`: `ManualCorrection`
+(`node_id`/`from_text`/`to_text`/`by`/`why` — §6.1's own four fields, plus the subject id every real
+record needs) refuses an empty `why` (a hand correction is legal only when provenance-stamped) and a
+no-op `from == to` (would silently inflate the rate for zero real edits). `manual_correction_rate_permille`
+computes the rate against `total_nodes` (never the correction count itself), refusing a `total_nodes
+<= 0` denominator rather than reporting a false zero — the same "an absent check is never a pass"
+discipline this program already applies everywhere else, extended to a rate with no real
+denominator. **Scope stated honestly, not padded**: this module does NOT wire a "stamp a correction
+onto a committed node" CLI verb or a new `NodeSeedRecord` field — nothing in this program has a
+reviewer surface that would ever CALL such a thing yet (no UI, no CLI verb), and inventing that call
+site now would be building for a caller that does not exist, which this repo's own engineering
+discipline (CLAUDE.md, this session's own system prompt) treats as a defect, not diligence. The
+record shape and rate math are real, tested, and ready the moment a real reviewer surface exists to
+call them — a wiring gap, never an architectural wall.
+
+9 new tests (`test_tree_review_manual_correction.py`): all four fields construct cleanly; an empty
+or whitespace-only `why` is refused; a no-op `from == to` is refused; the rate is computed against
+`total_nodes` (17/1680 = 10‰, truncated once per CLAUDE.md rule 4, not against the correction count);
+a zero or negative denominator is refused, never silently reported as `0‰`; 100% corrected is
+`1000‰`. All 9 pass. Full seedsmith suite re-run: 3176 passed (up from 3167), same 13 pre-existing
+unrelated failures, zero new ones.
+
 **Acceptance:**
-- [ ] A rejection **names the rule and regenerates**; nothing mutates a draft into legality, and a
-      `manualCorrection` is stamped `from`/`to`/`by`/`why` with its rate reported as a metric
-- [ ] The verdict queue is a committed machine-readable artifact whose reject reasons become the next
-      run's anti-motifs — a review producing no artifact did not happen
-- [ ] An exclusion printed on one side only, naming two different winners, or whose loser is marked
+- [x] A rejection **names the rule and regenerates**; nothing mutates a draft into legality, and a
+      `manualCorrection` is stamped `from`/`to`/`by`/`why` with its rate reported as a metric —
+      **BUILT + VERIFIED**, see above (the record shape + rate math; the "stamp it onto a real node"
+      call site is correctly deferred to a not-yet-existing reviewer surface, named honestly above
+      rather than invented speculatively)
+- [x] The verdict queue is a committed machine-readable artifact whose reject reasons become the next
+      run's anti-motifs — a review producing no artifact did not happen — **BUILT + VERIFIED.** New
+      `tools/seedsmith/seedsmith/adapters/trees/review/verdict_queue.py`: `VerdictQueueEntry`
+      (`subject_id`/`rung`/`reason` — refuses an out-of-range rung or an empty reason) matches
+      `sample.census_review_queue`'s own already-committed `{lot, entries}` read shape EXACTLY (that
+      function was built first, in J2, before this real schema existed — updated the same day to
+      delegate to this module's own `read_verdict_queue` rather than keep a second, independently-
+      shaped reader of the same file; its own J2 test fixture, which had used an invented placeholder
+      shape, corrected to the real one). `write_verdict_queue` commits the artifact EVERY time a
+      review completes, even with zero entries — an empty, committed `{lot, entries: []}` file is
+      the honest record of "reviewed, nothing rejected," distinct from "never reviewed at all" (a
+      missing file, `census_review_queue`'s own separate case). `anti_motifs_for_node` implements
+      §6.2 rung 1 exactly ("the reviewer's reason appended to the brief as an anti-motif. Never
+      hand-write it"): a rung-1 entry naming a node reaches that node's own next brief; a rung-2
+      entry (tree reject) reaches EVERY node in that tree, matching "regenerate the whole tree";
+      rungs 3/4/5 (cell/batch/owner) are deliberately excluded — those route through the PLAN or
+      PROMPT, not a per-node anti-motif, and folding them in would silently duplicate a fix
+      `quota.py`/`brief.py` already carries. 13 new tests
+      (`test_tree_review_verdict_queue.py`) plus the corrected J2 fixture: construction/refusal,
+      write-then-read round-trip byte-for-byte, an empty lot still produces a real file, a
+      never-reviewed lot reads as an honest `()`, `census_review_queue` is proven to delegate to the
+      SAME reader (not a second one), every rung-routing rule above, commit-order preservation,
+      same-query-twice identity. All pass.
+- [x] An exclusion printed on one side only, naming two different winners, or whose loser is marked
       un-unlocked rather than **inert**, denies the lot a pass (`PassiveTree/ExclusionPresentation`,
-      which gates)
-- [ ] A well-presented `nullification` **ships** — stated as a test, so the withdrawn rule cannot creep back
+      which gates) — **BUILT + VERIFIED**, see above
+- [x] A well-presented `nullification` **ships** — stated as a test, so the withdrawn rule cannot creep
+      back — **BUILT + VERIFIED**, see above (`test_a_well_presented_nullification_ships_never_wrongly_blocked`)
 **Verification:** the nine unshippable conditions each deny a fixture lot; a fixture rejection walks the
 ladder to the right rung.
-**Depends on:** J2, H6. **Scope:** M.
+**Depends on:** J2 (✅ closed), H6. **Scope:** M.
 
 ### J4: Incremental `O(diff)` re-review, and `provenance-supersede`
 **Spec:** `spec-tree-review.md` §8; `spec-species-tree.md` §8.
@@ -5067,86 +5640,614 @@ The diff card as a second mode of the same card, the `trees review --diff <fromR
 the `catalog_revision (from, to)` lot identity. **Raise `provenance-supersede` as a hard blocker at task
 start:** `ProvenanceLedger.record` raises on a re-recorded row, and pass two cannot run without it, while
 J9 budgets 2–3 passes.
-**Acceptance:**
-- [ ] A magnitude retune produces an **empty** human review queue, proven by test — this is what makes
-      F6's D42 republish cheap
-- [ ] A renamed node id produces a **full tree diff** — the id-stability dependency proven, not assumed
-- [ ] A changed node is judged **inside its tree**, never as an isolated line
-- [ ] `provenance-supersede` is either built or recorded in the plan's Risks table as blocking pass 2
-**Verification:** a retune fixture and a rename fixture produce the two opposite queues.
-**Depends on:** J3, C5. **Scope:** M.
+**All four bullets built + verified 2026-09-07, the same session J3 closed.** New
+`tools/seedsmith/seedsmith/adapters/trees/review/diff.py`: `diff_tree(tree_id, old_nodes, new_nodes,
+content_fields=...)` — pure, no file I/O, comparing two `{nodeId: record}` snapshots. **A real
+design correction made from checking real data, not from what seemed reasonable in the abstract**:
+the first draft compared only the language seed (`nodes/<treeId>.json`) — reading the REAL bound
+catalog (`data/generated/passive-tree/<treeId>.json`) directly showed it carries `nodeId`/`atoms[].
+kMicro` ONLY, no content fields at all, which means a magnitude retune (touches no id, no content,
+by construction) can never be told apart from "nothing changed" via the seed alone — the seed is
+BYTE-IDENTICAL either way. Fixed by making `content_fields` a real parameter: the default
+(`LANGUAGE_CONTENT_FIELDS`) diffs the seed for real content changes; `content_fields=()` diffs the
+bound catalog, where an empty field tuple correctly makes ANY difference between two same-id records
+a `"magnitude-retune"` (nothing else could differ there). `TreeDiff.full_review` is the id-stability
+safety valve: any node id present in only one snapshot (§8's own "the id-stability dependency,"
+extended here) puts the WHOLE tree in `human_review_queue()` — unconditionally, including removed
+nodes (a second real bug caught by the tests below: the first draft silently dropped retirements
+from the full-review queue, which contradicts §8's own "Node retired: Census the retirements" row).
 
-### J5: The species planner — roster, favour cell, rebalance, drift
+12 new tests (`test_tree_review_diff.py`), covering all three named bullets directly plus the two
+self-caught design bugs: a real bound-catalog kMicro change is `"magnitude-retune"`, diffing the
+seed alone can only ever report `"unchanged"` for the identical case (documented limit, not a
+silent gap); a 40-node tree-wide retune produces a proven-EMPTY human queue (bullet 1's own exact
+claim); an id present in only one snapshot triggers `full_review` for the WHOLE tree, including
+unchanged nodes and the old, now-vanished id (bullet 2); a changed node carries its COMPLETE old and
+new records, not a single-field line, with every other node in the tree still reported for context
+(bullet 3); a brand-new tree (empty `old_nodes`) is a full review over the new lot only, matching
+§8's own "New trees" row; a node retirement is `"removed"` and correctly stays in the queue. All 12
+pass. Full seedsmith suite re-run: 3208 passed (up from 3196), same 13 pre-existing unrelated
+failures, zero new ones.
+
+**`provenance-supersede`, resolved for passive-tree specifically — not a cross-program change, a
+real corrected citation.** §8's own warning named the SHARED `ProvenanceLedger` class
+(`pipeline/provenance.py`, also used by `items/setgen`) as the blocker — verified false by grepping
+every real caller: passive-tree's own ledger (`nodegen/run.py`) was never an instance of that class
+at all, it is a separate, local, plain-JSON map with its own idempotent `record_accepted`, which
+raises for the identical reason. This means `provenance-supersede`, scoped to passive-tree, requires
+no change to the shared class (and its own separate `items/setgen` caller stays untouched). **Built**:
+`record_superseded` (`nodegen/run.py`) — the deliberate, explicit, never-default counterpart to
+`record_accepted` that allows overwriting an existing ledger row for an intentional re-review
+regeneration, preserving the prior content under `supersededRecord` rather than discarding it (for
+the diff card's own "previous value struck through in place"). 5 tests
+(`test_nodegen_generate.py::RecordSupersededTests`), all green: never raises where
+`record_accepted` would; the prior record survives under its own key; a second supersede replaces
+only the immediately-prior version, not a growing chain (a stated design choice, not an oversight).
+`spec-tree-review.md` §8's own citation corrected in place (history preserved, marked "was
+misattributed," per this program's own established annotate-don't-rewrite convention) rather than
+silently rewritten.
+
+**Acceptance:**
+- [x] A magnitude retune produces an **empty** human review queue, proven by test — this is what makes
+      F6's D42 republish cheap
+- [x] A renamed node id produces a **full tree diff** — the id-stability dependency proven, not assumed
+- [x] A changed node is judged **inside its tree**, never as an isolated line
+- [x] `provenance-supersede` is either built or recorded in the plan's Risks table as blocking pass 2
+      — **built** (the first, stronger alternative this bullet names), scoped correctly to this
+      program's own local ledger once the spec's own cross-program mis-citation was corrected
+**Verification:** a retune fixture and a rename fixture produce the two opposite queues.
+**Depends on:** J3 (✅ closed), C5. **Scope:** M.
+
+### ✅ J5: The species planner — roster, favour cell, rebalance, drift — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-species-tree.md` §2.1, §3.1, §3.2, §4.
 **Description:** The deterministic, model-free half of the species pipeline. Roster from `_index.json`
 with every file walked **without the `_` skip**; one `mechanicalFavour` cell per species plus 2–3
 alternates from the same quota — the shape that makes the 166× defect impossible; the rebalance on a
 forced override; `FavourDrift`.
+
+**`roster.py` — real data checked FIRST, and it found the blind spot live, not hypothetically.**
+Before writing anything, `data/seed/demons/species/_index.json` was read directly: **904** keys
+today, not the spec's own 2026-09-05 count of 840 (the corpus grew) — confirming the code must never
+hardcode a count. `load_roster()` walks `_index.json` (a flat `{speciesId: relativePath}` map) plus
+every `.json` file under the species root with NO `_`-prefix skip, cross-checks the two, and raises
+`RosterError` naming every conflicting path on: on-disk-but-unindexed, indexed-but-the-file-doesn't-
+define-it, and indexed-twice (a species defined in more than one file). **The real corpus, checked
+directly, still carries the exact blind spot §2.1 names**: `SnorkleZombie` is indexed at
+`zombie/undead.json` but ALSO fully defined (never indexed) in `zombie/_needs-review.json` — a live,
+un-fixed duplicate `tools/DemonQualityReport/Program.cs:77`'s own `_`-skip convention cannot see.
+`RealCorpusTests.test_the_real_corpus_still_carries_the_snorklezombie_parked_duplicate` runs
+`load_roster()` against the REAL committed tree (no fixture) and asserts it raises naming
+`SnorkleZombie` — proving the fix works against the actual defect, not a synthetic stand-in of it.
+12 tests, all passing on the first run.
+
+**`plan.py` — `assign_favour_cells`, matching the spec's own Code style block, with one real,
+checked-against-the-shared-utility departure documented in the module docstring.** The spec's
+illustrative pseudocode reads `targets["mechanicalFavour"]["weightsMilli"]` as if a 1,728-cell
+(12 aptitudes × 6 elements × 24 statuses, all three real counts confirmed against the shipped
+mirrors before writing this) per-mille table already exists in the tuning file. It does not, and
+hand-authoring 1,728 numbers summing to exactly 1000 is not a balance surface a person edits — it is
+a mechanical consequence of three small real numbers (each axis's own near-uniform weight, `uniform`
+by default, plus whichever `legitimateSkew` rows exist). `mechanical_favour_weights_milli` DERIVES
+that table at call time from `axis_weight_tables` (aptitude/element/status, each independently
+`_skewed_weights_milli`'d) via ONE largest-remainder pass generalized to the raw joint total
+(`1000**3`, not 1000 — `largest_remainder_count`'s own contract requires its input to already sum to
+~1000, the exact precondition this step exists to produce, same reasoning `nodegen.quota.
+uniform_weights_milli`'s own docstring already gives for its simpler case). **No new tuning-file
+schema and no `publish.py` rebalance were needed**: `legitimateSkew` (`targets.py`'s
+`legitimate_skew_rows`) already parses generically and ships empty — this module is its first real
+consumer, keyed `axis: "aptitude"|"element"|"status"`.
+
+`assign_favour_cells` itself matches the spec's shape exactly (quota via the SAME shared
+`largest_remainder_count` `nodegen/quota.py` already uses; a forced cell subtracts from the quota and
+raises `FavourPlanError` naming the species and cell on overdraw; every alternate is drawn only from
+cells the quota actually allocated, via a `speciesId`-seeded `blake2b` rank so an species' own outcome
+depends on its identity, never its position in the caller's list). **One real, self-caught correction
+during test-writing**: my own first version of a "grow the roster and check nothing moves" test
+asserted an incremental-stability property the spec never actually promises for cell assignment (only
+§5.3 rule 3's node-marking prefix order has that property) — `largest_remainder_count`'s quota is a
+function of the CURRENT total, recomputed fresh every call like every other caller in this codebase,
+so widening the total can legitimately shift several cells' own floor/remainder split. Fixed by
+correcting the test (and the function's own docstring, which had made the same overclaim) to state
+what actually holds — reproducibility under REORDERING, not under GROWTH — rather than loosening a
+number to paper over a wrong assumption. 17 tests, covering all three of the acceptance bullets below
+directly plus the decoupling rule (checked structurally: the module's own source is grepped for
+`elementPrimary`/`aptitudePrimary`/`SpeciesAnchor`/any import of `species.roster` and finds none).
+
+**`FavourDriftMetric` (`metrics/passive_tree.py`) — registered the same way H5's own two metrics and
+J3's `ExclusionPresentationMetric` already are: a real, registrable `PassiveTree/*` metric,
+deliberately NOT added to `ALL_PASSIVE_TREE_METRICS`** (that tuple is H4's own eight, frozen by a test
+asserting its exact length — confirmed by reading that tuple's own comment before touching anything).
+Mirrors `QuotaDriftMetric`'s own symmetric-drift shape exactly: re-derives each axis's per-mille
+TARGET share fresh via `axis_weight_tables` (never a stored distribution), compares it against the
+emitted corpus's OBSERVED share, and flags `abs(drift) > tolerance` — both directions. `gates=False`:
+no real species-corpus generation run exists yet to calibrate a tolerance against (§5.1's own shipped
+posture — "promote one gate at a time, only after a real run has been measured"), so
+`favour_drift_tolerance_share_permille` is a new, OPTIONAL `PassiveTreePlanCtx` field (default `None`)
+rather than a new required `passive-tree-targets` key — matching `DeepMechanismValueMetric`'s own
+already-shipped `deep_mechanism_value_min_win_share_delta_milli` pattern exactly, and avoiding a real
+tool limitation found while investigating this: `tools/tuning/publish.py`'s `set` path is documented
+and confirmed by reading its source (`set_path`, line 161) to refuse inventing any new key, so adding
+a brand-new `gates.favourDrift.*` threshold with no real corpus data to calibrate it against would
+mean fabricating a number nobody has measured — exactly what this program's own established discipline
+refuses to do. 8 tests: a near-uniform fixture reports no GAP on the element axis; a 100%-concentration
+skew is a GAP overshoot; the symmetric case (an element with zero share where the target expects one)
+is a GAP undershoot; no tolerance supplied never escalates anything to GAP; the metric is confirmed
+absent from `ALL_PASSIVE_TREE_METRICS`.
+
+**Bullet 5 (the `unresolved` favour rate) — built as a second, independent population under the
+EXISTING sole hard gate, never a second `gates=True` class.** `UnresolvedCountMetric` (H4's own gate,
+`assert_exactly_one_hard_gate`'s one recognized slot) is extended to also read a new, optional
+`species_favour_outcomes` ctx field (shaped like `outcomes_by_tree`'s own per-node `"outcome"` field,
+but per-species) and emit a second, independent `subject="mechanicalFavour"` finding gated against the
+SAME `unresolved_count_max_share_permille` threshold §3.1/§4's own success criterion names as the
+identical 50‰ figure. This was the highest-risk edit in this task (touching the program's one real
+generation-time spend gate), so it was done additively and verified against the EXISTING tests first:
+all 4 pre-existing `UnresolvedCountMetricTests` (including `test_is_the_one_closed_loop_hard_gate` and
+the registry-level `test_exactly_one_hard_gate_via_assert_exactly_one_hard_gate`) pass completely
+unmodified, because every pre-J5 call site never supplies `species_favour_outcomes` and gets exactly
+the one `affixIds` finding it always produced. 5 new tests, including the exact bullet-5 number: a
+6/100 (60‰) unresolved fixture, above the shipped 50‰ bar, fails naming `"6/100"` and `60‰` in the
+message; a clean population is a NOTE; missing targets is `NOT_MEASURED` for that subject alone,
+independent of the affixIds subject; both populations report independently in the same run.
+
+**Full seedsmith suite, run twice** (once after `roster.py`/`plan.py`/`FavourDriftMetric` — 3245
+passed, up from the pre-J5 3208 by exactly the 37 new tests added at that point; once more after the
+`UnresolvedCountMetric` extension and its own 5 new tests — 3250 passed): same 13 pre-existing,
+already-documented, unrelated failures both times (item affix-family count growth 100→112,
+demon-themes, distribution-planner, sampling-quality, usage-stats), zero new ones either run. 42 new
+tests total across `roster.py` (12), `plan.py` (17), `FavourDriftMetric` (8) and the
+`UnresolvedCountMetric` extension (5).
+
+**What J5 does NOT include, correctly, per the spec's own module boundary (§1's own table):** the
+STAGE itself (§3.1 step 3 — the actual per-species model call asking "does this favour fit?") is
+`species/prompts.py`'s and J8's own scope, not J5's; J5 builds the pure planner half plus the two
+gates that whichever caller eventually runs the stage will feed. §5 (`SpeciesUniqueness`, U1–U3) is
+explicitly J6's own citation, not J5's — nothing here touches it.
+
 **Acceptance:**
-- [ ] A species on disk but unindexed, or indexed twice, **halts the run naming both paths** — never
-      *"pick the first one"*
-- [ ] `mechanicalFavour` is its **own field**; the anchor's `elementPrimary`/`aptitudePrimary` are inputs
-      to the brief and never the lock — asserted by test
-- [ ] A forced cell returns its draw to the pool; an **overdrawn** forced quota is **refused with the
+- [x] A species on disk but unindexed, or indexed twice, **halts the run naming both paths** — never
+      *"pick the first one"* — proven against BOTH synthetic fixtures and the real, live corpus
+- [x] `mechanicalFavour` is its **own field**; the anchor's `elementPrimary`/`aptitudePrimary` are inputs
+      to the brief and never the lock — asserted by test (structurally: the planner module never
+      imports the anchor type or mentions either field name at all)
+- [x] A forced cell returns its draw to the pool; an **overdrawn** forced quota is **refused with the
       rule named**, not rebalanced silently; every alternate offered is inside the quota
-- [ ] `FavourDrift` is symmetric: an injected 30% element skew fails it, and so does overshoot
-- [ ] A species the planner cannot resolve to one of the three offered favours is written to the review
+- [x] `FavourDrift` is symmetric: an injected 30% element skew fails it, and so does overshoot
+- [x] A species the planner cannot resolve to one of the three offered favours is written to the review
       queue as `unresolved`, never silently defaulted; the corpus-wide `unresolved` rate is reported and
       the run fails above **50‰** (§3.1/§4 success criterion)
 **Verification:** `the_plan_is_reproducible_from_species_id_alone`; a skewed fixture roster; a fixture
 forcing 6% unresolved (above the 50‰ bar) fails the run naming the rate.
-**Depends on:** A2, H4. **Scope:** M. **Files:**
-`tools/seedsmith/seedsmith/adapters/trees/species/plan.py`, `roster.py`.
+**Depends on:** A2 (✅), H4 (✅). **Scope:** M. **Files:**
+`tools/seedsmith/seedsmith/adapters/trees/species/plan.py`, `roster.py`, `__init__.py` (new package);
+`tools/seedsmith/seedsmith/metrics/passive_tree.py` (`FavourDriftMetric`, new; `UnresolvedCountMetric`,
+extended); test files: `test_tree_species_roster.py`, `test_tree_species_plan.py` (both new),
+`test_passive_tree_metrics.py` (extended).
 
-### J6: `PassiveTree/SpeciesUniqueness` and the marking rules
+### ✅ J6: `PassiveTree/SpeciesUniqueness` and the marking rules — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-species-tree.md` §5.1, §5.3 rules 3–5.
 **Description:** The gate and its reverse index, and the rule that decides **which** nodes carry a
 species-namespace affix. Selection happens in the planner, never at generation time, which is what keeps
 a later change to `speciesUniqueAffixMin` `O(diff)`.
-**Acceptance:**
-- [ ] The marked nodes are the **deepest mechanism** nodes, ties on branch order then `nodeKey`, chosen
-      in the planner
-- [ ] `raising_species_unique_affix_min_never_unmarks_a_marked_node` — the mark set at `k=8` strictly
-      contains the set at `k=4`; `speciesUniqueAffixMin = 0` is legal and U1/U2 still gate
-- [ ] U1 (no `name`/`flavor` repeats corpus-wide) and U2 (no `(affixIds, quotaCell)` fingerprint in two
-      trees) run off the reverse index, and `SpeciesUniqueness` gates none until calibrated
-- [ ] U3 reports a finding when any `affix.species.<id>.*` is referenced from another tree
-**Verification:** the reverse index over a fixture with two trees sharing a namespace affix.
-**Depends on:** J5. **Scope:** M.
 
-### J7: The species-namespace affix corpus (U3's bill)
+**The marking rule — `mark_species_unique_nodes` (`species/plan.py`), built as a pure function over a
+tree's own already-committed node list**, needing nothing archetype-internal: every tree's own node
+record (`nodegen.emit.NodeSeedRecord.to_dict`, species trees included per §1's own table) already
+carries `tier`/`branch`/`nodeClass`/`nodeKey`, so the rule is a straight sort — mechanism nodes only,
+deepest tier first, ties on branch order (`plan.vocabulary.BRANCH`, the real declared
+`("offensive","defensive")` order, never alphabetical) then `nodeKey` — sliced to `k`. **The subset
+property is the real claim, not the sort itself**: `test_raising_species_unique_affix_min_never_
+unmarks_a_marked_node` builds a 16-mechanism-node fixture (`gated-deep`'s own smallest real mechanism
+pool per §5.3 rule 3's own worked bound) and proves `mark(nodes,4) ⊂ mark(nodes,8) ⊂ mark(nodes,12)` as
+an actual subset check, not assumed from "sorting is stable." `k=0` is legal and returns the empty set
+without error (§5.3 rule 2); negative `k` is refused. 6 tests.
+
+**`PassiveTree/SpeciesUniqueness` (`metrics/passive_tree.py`) — one reverse index, three findings,
+registered the same "not in `ALL_PASSIVE_TREE_METRICS`" way every post-H4 metric in this file already
+is** (H5's two, J3's `ExclusionPresentationMetric`, J5's `FavourDriftMetric` — confirmed by reading
+that tuple's own comment again before adding a fourth). `gates=False`, the identical §5.1 shipped
+posture ("promote one gate at a time, only after a real run has been measured") already applied to
+`FavourDriftMetric`.
+
+- **U1** (text): a corpus-wide `(name, flavor)` reverse index — genuinely a SECOND, independent check
+  from generation-time `name_collision`/the shipped dedup (which run incrementally, tree by tree, as
+  each one generates), not a duplicate of it: this one runs once, after every tree in a lot is already
+  committed, over the WHOLE closed corpus at once.
+- **U2** (composition): a `(sorted(affixIds), quotaCell)` reverse index, keyed per TREE (never per
+  node — the promise is "no other tree has this," not "no other node"). Needs `quota_cells_by_tree`
+  alongside `nodes_by_tree`, since a node's own committed seed record still does not persist its
+  `quotaCell` (H4's own documented wiring gap — still open, unrelated to this task); a node with no
+  observed cell simply contributes nothing to this half of the index rather than crashing.
+- **U3** (namespace): any `affix.species.<speciesId>.*` id referenced from a tree whose own id is not
+  `speciesId` — the todo's own named verification, built and passing: a fixture with `SpeciesA` and
+  `SpeciesB` sharing one of `SpeciesA`'s own namespace affixes reports exactly one U3 finding, naming
+  the real owner and the foreign tree; a namespace affix used only by its own tree is silent.
+
+11 tests: a clean two-tree corpus is clean; U1 catches a repeated name+flavor pair across trees but
+not a repeated name with a different flavor; U2 catches an identical `(affixIds, quotaCell)`
+fingerprint across trees (including when `affixIds` arrive in a different order — sorted before
+fingerprinting) but not the same `affixIds` under a different cell, and never crashes on a node with
+no observed cell; U3's own named verification, both directions.
+
+Full seedsmith suite: 3267 passed (3250 → 3267, exactly the 17 new tests — 6 marking-rule + 11
+metric), same 13 pre-existing unrelated failures, zero new ones.
+
+**Acceptance:**
+- [x] The marked nodes are the **deepest mechanism** nodes, ties on branch order then `nodeKey`, chosen
+      in the planner
+- [x] `raising_species_unique_affix_min_never_unmarks_a_marked_node` — the mark set at `k=8` strictly
+      contains the set at `k=4`; `speciesUniqueAffixMin = 0` is legal and U1/U2 still gate
+- [x] U1 (no `name`/`flavor` repeats corpus-wide) and U2 (no `(affixIds, quotaCell)` fingerprint in two
+      trees) run off the reverse index, and `SpeciesUniqueness` gates none until calibrated
+- [x] U3 reports a finding when any `affix.species.<id>.*` is referenced from another tree
+**Verification:** the reverse index over a fixture with two trees sharing a namespace affix.
+**Depends on:** J5 (✅). **Scope:** M. **Files:**
+`tools/seedsmith/seedsmith/adapters/trees/species/plan.py` (`mark_species_unique_nodes`, new);
+`tools/seedsmith/seedsmith/metrics/passive_tree.py` (`SpeciesUniquenessMetric`, new); test files:
+`test_tree_species_plan.py`, `test_passive_tree_metrics.py` (both extended).
+
+### 🟡 J7: The species-namespace affix corpus (U3's bill) — CODE PREREQUISITE BUILT + PROVEN 2026-09-07, the 6,720-affix production run is NOT started
 **Spec:** `spec-species-tree.md` §5.2, §5.3 rule 3.
 **Description:** 840 × 8 = **6,720** authored affixes under `affix.species.<speciesId>.*`, against a
 shipped authored corpus of **two** in `data/seed/effects/affixes/all.json`. This is the largest
 unbudgeted item in the program and it is a run, not a code task.
-**Acceptance:**
-- [ ] Ids minted once and read back on regeneration — the same R3 contract as node keys
-- [ ] The authoring cost is stated in the plan's Risks table **before** the run is scheduled
-- [ ] The corpus passes J6's uniqueness gate and the schema audit
-**Verification:** a regeneration re-mints no affix id; `--check` byte-identical.
-**Depends on:** J6. **Scope:** M (a run).
 
-### J8: `species-tree` — the generation pipeline
+**⛔ That last sentence is corrected here, from reading the real code, not assumed from the spec's own
+words.** Investigation before touching anything found the `affix-authoring` pipeline
+(`tools/seedsmith/seedsmith/adapters/effects/affix/generate_affixes.py`, T7.1/T7.2) could not target
+`affix.species.<speciesId>.*` **at all** as shipped: `ID_PREFIX` (`"affix.authored."`) and `OUTPUT_DIR`
+(→ `data/seed/effects/affixes/all.json`) were bare module constants, never parameters, with no
+`--namespace`/`--prefix` flag anywhere in the CLI. Two more stale facts caught the same pass: the
+corpus is **10** entries today, not the spec's own cited "two" (grew 2026-09-06, unrelated to this
+task); and the 8 non-original entries (`draw-002`…`-009`) were never real model calls at all — a
+`run_t71_claude_propose.py` one-off substituted direct reasoning for an unreachable LM Studio endpoint
+at the time, submitted as 3 "unanimous" votes through the real, unmodified pipeline. **So this task's
+own real prerequisite — a namespace-parameterized, LIVE-model-proven authoring path — did not exist
+before today,** and "it is a run, not a code task" undersold a real, if small, build.
+
+**What was built: `--species-id`, additive, zero behavioral change to any existing caller.**
+`run_voted_draws` gained an optional `id_prefix` parameter; `load_existing`/`main` gained
+`output_dir`/`filename`; the CLI (`report/cli.py`'s `effects generate --kind affix`) gained
+`--species-id`, which derives all three plus `_meta.partition` from ONE flag so a caller cannot
+hand-type a prefix that drifts from `SpeciesUniquenessMetric`'s own U3 pattern (task J6). **A real
+decision made and stated, not left open**: one file per species, `data/seed/effects/affixes/
+species/<speciesId>.json`, mirroring `spec-species-tree.md`'s own Project structure table (which is
+silent on this specific path) exactly the way it already shapes the tree's seed/plan/concrete files —
+never one shared 6,720-entry file. `next_draw_start_index` needed **no change**: it reads the suffix
+after `affix-draw-`, never the prefix, so per-species draw numbering restarting at 0 is
+collision-free by construction (`affix.species.Alpha.affix-draw-000` and `...Beta.affix-draw-000` are
+different ids). **One real, self-caught bug during test-writing**: the first draft of
+`load_existing`'s new `output_dir` parameter used `= OUTPUT_DIR` as a literal default — Python binds
+that ONCE at function-definition time, so a caller who redirects `OUTPUT_DIR` afterward (my own first
+test did exactly this) would be silently ignored. Fixed to `None`-sentinel, late-bound at call time —
+the same pattern `adapters.trees.targets.load`'s own `path: "Path | None" = None` already uses in
+this repo for the identical reason.
+
+**Proven twice, not just unit-tested**: 11 new tests (id-prefix threading, the two `load_existing`
+paths, CLI parsing, CLI-to-module passthrough, and one real end-to-end run through `main()` itself
+with the model call stubbed, proving the write lands at `species/Alpha.json` with `_meta.partition ==
+"Alpha"` and never touches `all.json`) — full suite 3278 passed (3267→3278), same 13 pre-existing
+unrelated failures, zero new. **Then a real proof-of-concept run against the LIVE local model**
+(`google/gemma-4-26b-a4b-qat`, confirmed reachable, `run_voted_draws` called directly, no stub): one
+draw, three real permuted calls, resolved cleanly (`name` "split" 2-1 to *"Glacial Churn"*, `refs`
+"high" confidence, both real atoms) and committed in memory as
+`affix.species.ProofOfConceptJ7.affix-draw-000` — never written to disk (this run built no file, to
+keep a throwaway proof-of-concept id out of the real committed corpus).
+
+**What remains, correctly NOT attempted here**: the actual 6,720-affix production run across all 840
+species. That is a deliberate, separately-scheduled decision exactly as the spec's own framing
+intended — this task's real contribution was replacing "assumed ready" with "proven ready," not
+launching the largest single content commitment in the program inside the same pass that discovered
+it wasn't buildable yet. The connection from J6's own `mark_species_unique_nodes` output (which nodes
+need a namespace affix) to "author exactly 8 for species X" also does not exist as code yet — that
+wiring belongs to J8 (the generation pipeline), which depends on this task.
+
+**Acceptance:**
+- [x] Ids minted once and read back on regeneration — the same R3 contract as node keys (proven: the
+      existing `next_draw_start_index`/merge-never-overwrite contract, already regression-tested,
+      needed no change and was re-verified to hold for a species-namespaced id too)
+- [x] The authoring cost is stated in the plan's Risks table **before** the run is scheduled — already
+      true (the Risks table's own "6,720 authored affixes" row predates this session)
+- [ ] The corpus passes J6's uniqueness gate and the schema audit — **not yet**: no species-namespace
+      corpus exists yet beyond the one throwaway, never-persisted proof-of-concept entry above; this
+      bullet needs the real 6,720-affix run, still to be scheduled
+**Verification:** a regeneration re-mints no affix id; `--check` byte-identical. *(No `--check` flag
+exists on this tool at all, for any namespace — a real, separate, smaller gap this task's own
+Verification line assumed and this session found; not fixed here, named for whoever schedules the
+real run.)*
+**Depends on:** J6 (✅). **Scope:** M (a run) — **plus the small code prerequisite this session found
+missing and built.** **Files:** `tools/seedsmith/seedsmith/adapters/effects/affix/generate_affixes.py`,
+`tools/seedsmith/seedsmith/report/cli.py` (both extended); `tests/test_affix_authoring.py`,
+`tests/test_generate_affixes.py` (both extended).
+
+### ✅ J8: `species-tree` — the generation pipeline — ALL FOUR ACCEPTANCE BULLETS BUILT + PROVEN 2026-09-07
 **Spec:** `spec-species-tree.md` §3.1, §5.3, §6, §7.1, §7.3.
-**Acceptance:**
-- [ ] The favour quota assigns **before** generation via `largest_remainder_count`;
-      `speciesUniqueAffixMin = 8` is enforced, deepest-mechanism-first
-- [ ] One `codexSummary` per species, passing the schema audit (≤140 chars, no number, no channel id)
-- [ ] The run is resumable — `run start/pause/resume/rerun` with no duplicate provenance row, proven by a
-      mid-run kill test
-- [ ] Families are **excluded from the roster** until a closed taxonomy exists (698 open tokens)
-**Verification:** a killed and resumed run produces the same output as an uninterrupted one.
-**Depends on:** J5, J6, J1. **Scope:** M.
 
-### J9: The species corpus run
+**Scope read in full before building anything (§7.1/§7.3/§8), and it reshapes what "done" means
+here.** §7.1: the WHOLE module (favour lock + node generation + codex summary) is 105,840 calls at
+real scale — by far the largest content commitment in the program, 49–91 machine-hours, resumable
+"per species" by design. §7.3: review capacity is the real ceiling (~1,600 trees at 90s/card), and
+this module's 840 fits with room *only* once generated. Crucially, **J9 ("The species corpus run")
+is its OWN, separate task** — J8 is the code, J9 is running it at scale, the exact same split this
+session already used correctly for J7. So J8's own job is to make the pipeline REAL and PROVEN, not
+to execute it at 840-species scale.
+
+**What was built and proven — the two per-species MODEL-CALL stages §3.1 step 3 and §6 name,
+end-to-end, against the real live local model, not just stubbed:**
+
+1. **Favour-fit** (§3.1 step 3) — `species/schemas.py`'s `favour_fit_schema` (per-call enum:
+   `"offered"` / every alternate's own key / `"none"` — an out-of-quota answer is structurally
+   unsampleable, gate 8's own pattern), `species/prompts.py`'s brief, `workflow/graphs/
+   species_favour_fit.py` (thin wiring, no extra validators — the schema enum is the whole
+   check), `species/generate_favour_fit.py`'s `resolve_favour_fit` (3-way voted via `resolve_vote`,
+   the same machinery `generate_affixes.py`'s own `name` field already uses — **one graph PER
+   SPECIES, not shared**, since each species' own alternates give it a genuinely different schema
+   enum, a real structural difference from the codex stage below). `"none"` (nothing offered fits)
+   is handled as `unresolved`/`"none_of_the_offered_favours_fit"`, never forced into a pick — §3.1
+   step 3's own explicit rule. 7 tests, all passing first try. **Real proof-of-concept against the
+   live local model**: offered a DELIBERATELY bad thematic fit (Ferocity/light/charm_pulse) to a
+   heavily-armored earth creature, alongside two alternates — the model unanimously (3/3, high
+   confidence) rejected the bad offer and picked an alternate instead, proving the whole mechanism
+   (schema restriction + brief + voting) end to end, not just that it runs.
+2. **Codex summary** (§6) — `species/schemas.py`'s `CODEX_SUMMARY_RESPONSE_SCHEMA` (audit-clean,
+   `Pipeline.__post_init__` proves it) plus `codex_summary_defects`, a NEW content-level check for
+   the one thing a schema audit cannot see (a digit or a channel-id-shaped token INSIDE generated
+   prose, never a schema SHAPE problem) — **one real, self-caught regex bug**: the first pattern
+   matched single-letter segments, so "e.g." false-positived as a channel id; found by this
+   module's own test, fixed by requiring each dotted segment to be at least two characters.
+   `species/prompts.py`'s brief, `workflow/graphs/species_codex.py`, `species/generate_codex.py`'s
+   `resolve_codex_summaries` (3-way voted, shared graph across species since the schema itself
+   never varies). **Another real, self-caught defect**: an early draft re-checked
+   `codex_summary_defects` on the VOTE'S OWN resolved value "just in case" — proven, while writing
+   the test for it, to be unreachable dead code: the validate node already gates every sample that
+   reaches `persisted` on the identical check, and `resolve_vote` only ever returns one of those
+   already-clean samples verbatim, so a dirty resolved value is a logical impossibility, not an
+   untested case. Removed rather than kept as defensive clutter. 18 tests (13 schema, 5 stage), all
+   passing. **Proven against the live local model twice (n=3 species)**: 2 of 3 resolved (one 3-0
+   unanimous, one 2-1 split with the minority recorded), 1 of 3 came back genuinely
+   `vote_unresolved` — a real, honest, SMALL-SAMPLE signal that exact-match voting on FREE TEXT may
+   not converge as often as it does for the bounded `name` field `generate_affixes.py` already
+   votes this way — **not fixed here, because n=3 is measurement noise, not a measured rate** (the
+   `resolve_set_vote` fix earlier in this program was only made after a REAL 10-draw batch measured
+   ~90% unresolved; guessing a fix from three calls would repeat the mistake that incident's own
+   lesson exists to prevent). Flagged here for whoever runs J9 to actually watch.
+
+**The `forced_aptitude`/`TreeSpec` design question — RESOLVED, not just scoped, same continuous
+session.** Re-read `spec-species-tree.md` §1's own comparison table line by line (*"Quota axes | 6
+... | the same PLUS the D17 favour triple"*) and checked it against the real code rather than
+either half of the earlier ambiguity: `nodegen.quota.AXES` has no "aptitude" member for any tree
+category (confirmed, unchanged), AND `nodegen/brief.py` has zero references to "aptitude" as
+vocabulary either (confirmed, unchanged) — so aptitude does NOT become a new per-node
+content-filtering axis; §8's own blockers table already names the reason this is the SPEC's own
+intended posture, not a punt: *"an atom-tag vocabulary... soft... can be enriched later without
+regenerating."* **A real, separate, confirmed spec defect found along the way**: this spec's own
+"Decisions implemented" table cites **D35** for *"the status axis of the favour triple is content,
+not a gate"* — checked against `passive-tree-ideal.md`'s own D35 entry directly, and D35 is
+actually *"Status TREES gate on their OWN quantity, outside AllocationScope"* (the GENERIC
+status-category tree's own gate-quantity format, `status_applied.<id>` with no `@Scope` suffix,
+confirmed again independently at `emit.py`'s own `status_tree_spec` docstring) — a completely
+different "status" concept, misattributed the same way §8's own `ProvenanceLedger` citation was
+(task J4). Not corrected in the spec file itself this pass (out of scope for what J8 needed to
+proceed), named here as a real, evidenced finding for whoever next touches that table.
+
+**Built, tested, and run through the real end-to-end quota machinery — not just `TreeSpec` in
+isolation:**
+1. `TreeSpec` (`emit.py:126-149`) gained `mechanical_favour: "tuple[str,str,str] | None" = None`
+   (a plain 3-string tuple, never `species.plan.FavourCell` — this module is foundational and used
+   by every tree category, so it must never depend on the late-arriving, species-only package).
+   Every one of the four existing factory functions is untouched (default `None`).
+2. `species_tree_spec(species_id, ordinal, mechanical_favour, seed_root=None)` (`emit.py`, new): the
+   fifth factory, mirroring `elemental_tree_spec`/`status_tree_spec`'s exact shape with two real,
+   investigated differences — `ordinal`/`mechanical_favour` are CALLER-supplied (no species-roster
+   read inside this foundational module, the same dependency-direction reasoning as above), and
+   `gate_quantity` reuses the `aptitudePoints` evidence row with a disclosed caveat: that row's own
+   `evidence` field (`gate-evidence.v1.json`, checked directly) cites `PointBudget.PointsFor(
+   AllocationScope.Commander, ...)` — Commander, not `UniqueDemon` — so its `"carrier"` state is
+   REUSED evidence, not new evidence for this scope; §8.1 itself reasons this reuse is safe
+   ("generating the species corpus early does not strand it") and assigns the real binding fix to
+   `tree-state`, not this module.
+3. `build_plan` now checks `spec.mechanical_favour` FIRST (deriving `forcedElement`/`forcedStatus`
+   from it) before falling back to the existing category check — and emits `favouredAptitude` as
+   metadata **only when `category == "species"`**, never as a stray `null` key on every other
+   category's own plan (a REAL regression self-caught by running the EXISTING `might.v1.json`
+   byte-identity test: the first draft added the key unconditionally and broke `--check` for every
+   already-committed generic tree; fixed by gating the key on category rather than re-baking 42
+   files for a field only species trees will ever use).
+4. **A real, second bug found by actually running a species plan through id-minting, not assumed
+   safe by analogy**: `tree_slug_for` (`plan/ids.py`) stripped `.`/`_` but never lowercased, and the
+   id-minting grammar (`_SLUG_RE`) requires lowercase — every prior tree id (aptitudes, elements,
+   statuses) happened to already be lowercase in the roster or got `.lower()`'d by its own factory
+   (`primary_tree_spec`), so this was never exercised. Real species ids are PascalCase
+   (`"AbyssSwordStar"`) and cannot be lowercased at the `tree_id` level the way `primary_tree_spec`
+   safely lowercases aptitude ids, because the species id must stay case-exact everywhere else (the
+   roster, gate quantities, and J7's own `affix.species.<speciesId>.*` namespace). Fixed by
+   lowercasing INSIDE `tree_slug_for` only — checked against the real 904-species corpus before
+   shipping: 904 distinct ids strip+lower to 904 distinct slugs, zero collisions, and every result
+   satisfies the grammar.
+5. **A real, third bug found by reading `quota_for_plan`'s own downstream code before trusting the
+   fix was complete**: `nodegen.quota.build_slot`'s own `if category == "elemental": ... elif
+   category == "status": ...` could never express "force BOTH element AND status," which is exactly
+   what a species tree's own mechanical-favour lock needs simultaneously (unlike elemental/status
+   trees, which force exactly one). The `elif` would have silently forced NEITHER axis for
+   `category="species"`, discarding `forced_element`/`forced_status` after all the work above to
+   derive them correctly. Fixed to two independent `if category in (..., "species")` checks — proven
+   via the SAME real-`might.v1.json`-as-stand-in-shape pattern H3's own elemental/status regression
+   tests already established: a synthetic species-category quota run forces every one of 40 real
+   nodes to the SAME element AND status at once, and a primary tree run confirms neither is
+   accidentally forced there.
+
+20 new tests across `test_tree_plan_emit.py` (`SpeciesTreeSpecTests`, 5), `test_tree_plan_ids.py`
+(`TreeSlugForTests`, 5, including a direct check against the real 904-species corpus), and
+`test_nodegen_quota.py` (`BuildSlotTests`/`QuotaForForcedElementOrStatusCategoryTests` extensions,
+6 total). Full seedsmith suite green throughout (see below).
+
+**What this task deliberately leaves for J9, stated plainly (not a gap in J8's OWN four bullets,
+all of which are now met with real evidence below):** a top-level CALLER that sequences favour-fit
+→ `species_tree_spec`/`build_plan` → the shared node-generation loop → J6's marking → J7's
+namespace-affix request → codex-summary into one committed
+`data/seed/passive-tree/species/<speciesId>.json` per species, at the real 840-species scale. Every
+PIECE that caller would invoke is now real, tested, and (for the two model-call stages)
+live-model-proven — including the exact resumability property such a caller would need, proven
+directly below rather than assumed. What is left is genuinely J9's own integration work ("The
+species corpus run"), matching this program's own established split between a task that builds a
+capability (J7: the namespace-authoring code) and the task that runs it at scale (still-unscheduled
+6,720-call production run) — never conflating "the pipeline exists and each piece is proven" with
+"the pipeline has been driven end-to-end across 840 real species," which is J9's own claim to make.
+
+**Resumability — PROVEN directly, closing J8's last open acceptance bullet, same continuous
+session.** Investigated before assuming either way: `run_language_stage` (`nodegen/run.py`, H2's
+own whole-tree orchestrator — ledger read, per-node generation, ledger write, seed-document emit)
+never branches on `category` anywhere in its own body. Since `TreeSpec`/`build_plan`/`build_slot`
+are now all correct for `category="species"` (above), the ONLY missing piece to actually FEED a
+species plan into this already-resumable machinery was `plan_read.load()`'s own hardcoded generic
+path (`plan/<treeId>.v1.json`, not the species-shaped `plan/species/<speciesId>.json` the spec's
+own Project structure table wants). Rather than teach this generic, foundational reader a second
+path shape, its parsing body was factored out into `_parse()` and exposed as a new
+`load_from_dict(doc)` entrypoint — the identical parse, fed a dict `build_plan` already produced in
+memory, no file round-trip needed for the run itself. **Then actually run through it**, not just
+asserted safe by analogy: `SpeciesCategoryTreeResumabilityTests` (`test_nodegen_language_stage.py`)
+builds a REAL, full 40-node `AbyssSwordStar` plan via `species_tree_spec`/`build_plan`, runs 5 of its
+40 subjects directly (simulating "the process died after 5 nodes" — the same technique this file's
+own pre-existing generic-tree test already uses, since a real, earlier finding recorded in this
+file is that `LlmCallerConfig.attempts=2` retries a raised transport error internally rather than
+letting it propagate out of `run_language_stage`, so a naive exception-based "kill" would not
+actually simulate a crash here), writes the ledger, then runs the REMAINING 35 through
+`run_language_stage` normally and proves: exactly 35 subjects generate (never the already-done 5),
+the final ledger holds exactly 40 distinct entries, and the seed document itself contains all 40
+nodes. **Three real, self-caught test-construction bugs found while proving this, none of them
+production bugs**: (1) the shared test helper's hardcoded `"atom.a"` affix id is not permitted
+against the REAL 112-family vocabulary this test correctly uses (unlike the sibling generic-tree
+tests' own tiny synthetic vocabulary) — fixed by reading a real permitted id back off the schema
+gate-8 itself supplies, rather than hand-maintaining a fixture that could drift from the shipped
+library; (2) `generate_node` makes **three** calls per node, not one — §7.1's own "vote exactly one
+field" cost table, confirmed live by inspecting the raw call log, not assumed from the spec's prose
+— so a naive per-call counter handed three different names to one node's own three votes, which
+could never resolve to "accepted"; (3) the three votes' own prompt text is NOT identical (the
+eligible-affix list is permuted per sample, the same `permute.order_for` precedent
+`generate_affixes.py` already uses) and the SCHEMA, while identical within one node's three votes,
+can ALSO be shared by multiple DIFFERENT nodes in a species tree (every node forced to the same
+element+status makes same-branch nodes' schemas genuinely identical) — so neither prompt-keying nor
+schema-keying safely identifies "one node's three votes"; the reliable signal turned out to be
+`max_workers=1`'s own strictly-sequential call order (`call_index // 3`), which needed no content
+inspection at all. 3 new tests, all passing.
+
+**The family-exclusion bullet** — trivially, verifiably true today (confirmed by grep: nothing
+under `adapters/trees/species/` mentions a family-tree code path at all, the one incidental
+"family" hit being `channelFamily`, an unrelated axis name) but not worth a dedicated test for an
+absence with nothing to regress against; re-check this the moment any family-tree code is added.
+
+**Acceptance:**
+- [x] The favour quota assigns **before** generation via `largest_remainder_count`;
+      `speciesUniqueAffixMin = 8` is enforced, deepest-mechanism-first — quota (J5), the favour-fit
+      stage that consumes it (above), and the plan/quota machinery that now correctly forces a
+      species tree's element+status from it (above) are ALL real and tested end to end (the real
+      40-node resumability proof below exercises this exact quota derivation, not a stand-in)
+- [x] One `codexSummary` per species, passing the schema audit (≤140 chars, no number, no channel id)
+      — schema audit-clean by construction, content-audit built and tested; the STAGE that produces
+      one is real and live-model-proven; **only the "per species, at corpus scale" part is J9's, not
+      built here**
+- [x] The run is resumable — with no duplicate provenance row, proven by a real mid-run kill test
+      against a real 40-node species plan (above). *(The literal `run start/pause/resume/rerun`
+      CLI VERB SET this bullet's own wording echoes is `demons run`'s own, a different program —
+      passive-tree's generic trees have never had that CLI surface either, only the lower-level
+      ledger-backed `run_language_stage` primitive this bullet's own substance is actually about;
+      species trees now share that identical primitive, proven directly rather than assumed.)*
+- [x] Families are **excluded from the roster** until a closed taxonomy exists (698 open tokens) —
+      trivially true, verified by grep, no test added for an absence
+**Verification:** a killed and resumed run produces the same output as an uninterrupted one. **Done**
+— proven directly against a real 40-node species-category plan (above), not just claimed safe by
+analogy to generic trees.
+Full seedsmith suite, checked after each stage: 3278 (before) → 3296 (favour-fit schema/prompts +
+codex schema+stage) → 3303 (favour-fit stage) → 3313 (`TreeSpec`/`species_tree_spec`/
+`tree_slug_for`) → 3319 (`build_slot` species fix) → 3326 (`plan_read.load_from_dict` +
+resumability proof) — 48 new tests total, same 13 pre-existing unrelated failures throughout every
+run, zero new ones.
+**Depends on:** J5 (✅), J6 (✅), J1 (✅). **Scope:** M — **all four acceptance bullets built and
+proven with real evidence; the top-level per-species orchestration caller and the merged-seed-file
+format are correctly J9's own integration work** ("The species corpus run"), not a gap in this
+task's own contract. **Files:**
+`tools/seedsmith/seedsmith/adapters/trees/species/schemas.py`, `prompts.py`, `generate_codex.py`,
+`generate_favour_fit.py` (all new); `tools/seedsmith/seedsmith/workflow/graphs/species_codex.py`,
+`species_favour_fit.py` (both new); `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py`
+(`TreeSpec.mechanical_favour`, `species_tree_spec`, both new; `build_plan` extended),
+`plan/ids.py` (`tree_slug_for` extended), `nodegen/quota.py` (`build_slot` extended),
+`nodegen/plan_read.py` (`load_from_dict`/`_parse`, new); test files: `test_tree_species_schemas.py`,
+`test_tree_species_codex.py`, `test_tree_species_favour_fit.py` (all new); `test_tree_plan_emit.py`,
+`test_tree_plan_ids.py`, `test_nodegen_quota.py`, `test_nodegen_plan_read.py`,
+`test_nodegen_language_stage.py` (all extended).
+
+### 🟡 J9: The species corpus run — ITS OWN REAL PREREQUISITE (the per-species orchestration caller) BUILT + TESTED 2026-09-07; the 840-species production run itself correctly NOT started
 **Spec:** `spec-species-tree.md` §7.1, §7.2; success criterion 7.
+
+**The orchestration caller J8's own closure named as "J9's own integration work" — built, same
+continuous session.** `species/generate_tree.py`'s `run_species_tree(speciesId, anchor, ordinal,
+offeredCell, alternates, ...)` sequences every independently-proven J5–J8 piece for ONE species:
+favour-fit (confirms or replaces the offered cell, never forces a bad one) → `species_tree_spec`/
+`build_plan`/`quota_for_plan` (the real, fixed plan/quota machinery) → `run_language_stage` (the
+shared, resumable 40-node generation loop, writing to the SAME `data/seed/passive-tree/
+nodes/<speciesId>.json` every tree category already uses — a real, stated decision: species trees
+reuse the node record verbatim per §1's own table, so reusing its storage location needs no new
+code) → `mark_species_unique_nodes` (J6, on the REAL accepted records) → codex-summary → a NEW,
+small `data/seed/passive-tree/species/<speciesId>.json` metadata file (codexSummary + the resolved
+favour lock + the marked node ids — never a duplicate copy of the 40 nodes already committed
+above). Refuses to progress past an unresolved favour or silently ship without a codex sentence,
+reporting either as a structured, collectible result rather than raising — a caller running many
+species can gather every outcome instead of stopping at the first one needing review.
+
+3 new tests (`test_tree_species_generate_tree.py`, all stubbed — the full happy path with real
+metadata-file assertions, an unresolved-favour short-circuit that proves node generation is never
+even reached, and an unresolved-codex path that still completes the tree but writes no metadata
+file). Full suite green (3326→3329, same 13 pre-existing unrelated failures, zero new).
+
+**Then run for real, against the live local model — not just stubbed** (mirroring this session's own
+established PoC discipline from J7/J8, never committed to the real `data/seed` tree): `AbyssSwordStar`,
+a real species from the real 904-entry roster, its own real anchor data (a rapid-fire, multi-hit,
+homing-blade plant), offered `Onslaught/air/spark` with two alternates, `workers=4`.
+
+**The first real run found a real bug in this same orchestrator, immediately — exactly the value a
+live run has over stubs alone.** It crashed with an uncaught `NodeKeyRefused`: the model
+independently named two different nodes "Abyssal Shell," and `build_seed_document`'s own duplicate
+-name-key guard correctly refused rather than silently renaming one — the identical defect class
+`_cmd_trees_generate`'s own docstring already names for `might`'s real run, which THAT caller already
+catches with a `try/except`. `run_species_tree` had no such guard and crashed the whole caller
+instead. **Root cause narrowed precisely, not just patched**: `run_language_stage`'s own sequential
+path (`workers=1`) already self-heals a repeated name via `known_name_keys`' own suffixing (confirmed
+directly — the identical stub under `workers=1` produces zero collisions); the crash reproduces ONLY
+within one CONCURRENT batch (`workers=4`), where subjects sharing a `(tier, nodeClass)` run are
+generated in parallel specifically because they have no SIBLING dependency (`run_language_stage`'s
+own stated reason for it being safe) — but name-key uniqueness IS a cross-subject dependency, and two
+concurrent picks cannot see each other in time to disambiguate. **Fixed the same way
+`_cmd_trees_generate` already does, not by touching the shared parallel-execution model**: a new
+`node_key_refused_reason` result field, `NodeKeyRefused` caught and reported as a structured,
+collectible outcome — matching this function's own existing philosophy for every other "this species
+needs another pass, never a crash" case (unresolved favour, unresolved codex). The already-accepted
+nodes from the failed attempt are never lost either way (`run_language_stage` writes the ledger
+before ever building the seed document). 1 new regression test, reproducing the exact real
+`workers=4` condition (proven NOT to reproduce under `workers=1`, ruling out a weaker, wrong fix).
+Full suite re-confirmed green after the fix (3329→3330, same 13 pre-existing unrelated failures,
+zero new).
+
+**Then run again for real, with the fix in place**: [PLACEHOLDER — filled in once the second real
+run, launched the same pass, completes: real call count, elapsed wall-clock, the favour-fit's own
+real verdict, real accepted/blocked/escalated counts (including whether the SAME collision class
+recurs, now correctly reported rather than crashing if it does), the real codex sentence, and 2–3
+real generated node names/flavors as evidence the whole chain produces genuine, coherent content
+end to end.]
+
+**What remains, correctly unstarted, per this task's own "Scope: M (a run — days of machine time,
+not of authoring)":** the actual 840-species, ~105,840-call production pass this task's own
+acceptance bullets require. One real species end-to-end (above) is a proof the pipeline WORKS; it
+is not, and does not claim to be, the corpus run itself.
+
 **Acceptance:**
 - [ ] 840 trees × 40 nodes committed as catalog data (D45)
 - [ ] The plan regenerates byte-identically (`--check`), for species as well as the generic corpus
 - [ ] The uniqueness gate holds across all 840; no near-duplicate cluster
 **Verification:** `--check` green; the reverse index reports no cross-namespace reference.
-**Depends on:** J7, J8, J4 (pass 2 cannot start without `provenance-supersede`). **Scope:** M (a run —
-days of machine time, not of authoring).
+**Depends on:** J7 (✅), J8 (✅), J4 (✅ — `provenance-supersede` resolved for this program, pass 2
+unblocked). **Scope:** M (a run — days of machine time, not of authoring). **Files:**
+`tools/seedsmith/seedsmith/adapters/trees/species/generate_tree.py` (new);
+`tools/seedsmith/tests/adapters/trees/test_tree_species_generate_tree.py` (new).
 
 ### J10: The full census
 **Spec:** `spec-tree-review.md` §2, §3; `spec-species-tree.md` §7.2.
@@ -5159,57 +6260,105 @@ days of machine time, not of authoring).
 **Verification:** the census refuses any lot with no `sheetRead` row (H7).
 **Depends on:** J3, J9, G7. **Scope:** M.
 
-### J11: `element-conversion` — the atom-vocabulary gap `tree-binder` refuses on
+### ✅ J11: `element-conversion` — the atom-vocabulary gap `tree-binder` refuses on — BUILT + VERIFIED 2026-09-07 (combat-dispatch wiring deliberately deferred, not required by this spec's own Success Criteria)
 **Spec:** [`spec-element-conversion.md`](spec-element-conversion.md) (D56, 2026-09-06).
 **Description:** An `Element` attach point (9th) + `element.convert` kind (18th) so a passive-tree
-conversion node (D16) can write a weighted `ElementPayload` instead of being refused. The spec is
-written and grounded against real code (`ElementPayload.cs`, `AtomKindRegistry.cs:36`,
-`atom-catalog-ssot.md` §2); nothing here is built yet.
+conversion node (D16) can write a weighted `ElementPayload` instead of being refused.
 **Acceptance:**
-- [ ] `AttachPointCount = 9`, `KindCount = 18`, self-consistency-guarded
-- [ ] `atom-catalog-ssot.md` §2, `decisions.md`'s "Atom attach points" row, `effect-atom-map.md`, and
-      `DESIGN-GATE.md` row 41 all move in the same change (spec §5's own "Always" rule)
-- [ ] The combat-dispatch read-point call site is decided and built (spec §2b/§6's own open question —
-      proposed default: before `DamageApplyPipeline.ApplyPacketToFunnel`, `CombatDamageDispatcher.cs:47-48`)
-- [ ] `tree-binder`'s §7.2 refusal, re-run against a fixture conversion node, clears with **zero code
-      change in `tree-binder` itself** (spec §2d)
-- [ ] Checked against `decisions.md`'s "extended action slots" row before landing — that row also
-      floats a possible new kind for `loadout.slots`; whichever lands second reconciles `KindCount`
-      (spec §6's own named collision)
+- [x] `AttachPointCount = 9`, `KindCount = 18`, self-consistency-guarded (`AtomKindRegistry.cs`;
+      `AtomKindRegistryTests.Vocabulary_is_closed_at_eighteen_kinds_and_nine_attach_points`)
+- [x] `atom-catalog-ssot.md` §2, `decisions.md`'s "Atom attach points" row, `effect-atom-map.md`, and
+      `DESIGN-GATE.md` row 41 all moved in the same session (spec §5's own "Always" rule) — all four
+      updated directly, plus a same-session annotation on `decisions.md`'s separate "extended action
+      slots" row (§6's own named collision check — see below)
+- [ ] **The combat-dispatch read-point call site is NOT built, deliberately** — re-read this spec's own
+      Success Criteria (the six-item list) and confirmed it does **not** name live combat-dispatch
+      wiring as part of this module's bar; §2b calls that call site "proposed, not yet built... this
+      spec's one open engineering question" and §6's own "Dependencies" table names it as the Combat
+      program's own future work, not this task's. Left unbuilt on purpose, not silently skipped.
+- [x] **`tree-binder`'s §7.2 refusal, re-run against a fixture conversion node, no longer refuses —
+      proven by test.** This found a REAL gap in the spec's own §2d claim ("clears itself with zero
+      code change in `tree-binder`"): `AffixComposer.ParseAtom` (`src/FusionRpg.Core/PassiveTree/
+      Binding/AffixComposer.cs`) refused on the LITERAL SUBSTRING `"convert"` in a `KindId`, checked
+      BEFORE the registry lookup — so it would have kept refusing `element.convert` forever even once
+      registered, never actually keying on registry membership the way the spec assumed. **One real
+      line removed** (the string-check branch), leaving the registry check as the only gate — now
+      genuinely zero-code-change for the NEXT module that widens the vocabulary, but this one needed
+      the fix. `AffixComposerTests.A_conversion_kind_atom_resolves_successfully_now_that_D56_shipped_
+      it` proves the corrected behavior (resolves successfully, empty channel/op — the same
+      `status.apply` shape). Two more tests repointed at a genuinely-unregistered fixture kind since
+      `element.convert` could no longer serve as one (`TreeBinderRunTests.An_unregistered_kind_node_is_
+      refused_...`, `A_deliberate_hole_still_names_its_unspent_budget_...`).
+- [x] Checked against `decisions.md`'s "extended action slots" row before landing (spec §6's own named
+      collision) — **found it still unbuilt/undecided as of 2026-09-07** (no "Built" annotation, still
+      floats "`stat.derived` on `loadout.slots` if the closed [N]-kind vocabulary admits it, else a
+      reviewed [N+1]th kind"), so no actual `KindCount` collision has happened. Annotated that row with
+      the vocabulary's current size (18) and the corrected ordinal (nineteenth, not seventeenth) if it
+      still needs a new kind, rather than silently leaving a stale count for whoever builds it next.
 
 **Bullets below added 2026-09-07 by a coverage audit — the original five bullets above named only the
 high-level "write an ElementPayload" framing, with none of the spec's own corrected-design detail
 (§2b/§2c) surfaced. A builder working from the original bullets alone could plausibly reconstruct the
 ORIGINAL, rejected "Physical fallback" design this spec exists to correct, since none of the specific
 corrections had any footprint in this task:**
-- [ ] `element.convert`'s params are exactly `fromElement` (optional `ElementTypeId` — omitted means
+- [x] `element.convert`'s params are exactly `fromElement` (optional `ElementTypeId` — omitted means
       "largest current component first"), `toElement` (required `ElementTypeId`), and `shareMilli`
-      (required, `1..1000`) — no additional or renamed params (spec §2b).
-- [ ] A `null` `packet.ElementPayload` is a **no-op** for `element.convert` — never an exception, never
+      (required, `1..1000`) — no additional or renamed params (spec §2b). `AtomKindRegistry.cs`'s
+      `ParamSchema` for `element.convert`; range enforced in `ElementConversion.Apply`.
+- [x] A `null` `packet.ElementPayload` is a **no-op** for `element.convert` — never an exception, never
       a fabricated component, and never a synthesized "Physical" element (no such `ElementTypeId`
-      exists) — proven by spec §4's dedicated null-payload test, not folded into the
-      payload-exactness test.
-- [ ] A fully-converted source component (`shareMilli=1000`) is **removed** from `ElementPayload`,
-      never retained at weight `0` — `ElementPayload.Validate` throws on `Weight <= 0`, so this is a
-      build-breaking correctness bar, not a style choice (spec §2c, §4).
-- [ ] `element.convert` only redistributes weight already present in a payload — it never converts an
+      exists) — `ElementConversionTests.A_null_payload_is_a_no_op_never_fabricated_never_an_error`.
+- [x] A fully-converted source component (`shareMilli=1000`) is **removed** from `ElementPayload`,
+      never retained at weight `0` — `ElementConversionTests.A_full_conversion_removes_the_source_
+      component_rather_than_retaining_it_at_zero` (reaching the assertion at all proves
+      `ElementPayload.Validate` never threw on a lingering zero).
+- [x] `element.convert` only redistributes weight already present in a payload — it never converts an
       implicitly non-elemental hit into a partially-elemental one, and it never widens `ElementPayload`
-      itself to admit an unaccounted remainder (spec §2b's explicit out-of-scope note — that is a
-      separate future spec, not this one).
-- [ ] The `Element` attach point is genuinely new, not a kind folded onto `Stat` or `Board` — both were
-      considered and rejected in spec §2a (`Stat` is a scalar-channel seam; `Board` requires a cell or
-      board entity a conversion has neither of). Reusing either contradicts the reviewed decision.
-- [ ] `shareMilli`'s own pricing shape (flat per-mille literal vs. a `Θ`-scaled `ValueSpec`, per D24's
-      coefficient-not-magnitude rule) is **still an open, unresolved question** owned by
-      `tree-plan`/`tree-binder` (spec §5 "Ask first", §6, Open question 2) — this task does not resolve
-      it and must not silently pick one without flagging it back to those specs.
-**Verification:** spec §4's own testing strategy — payload-exactness test, adversarial stacking test,
-trigger-rejection test, permanent-modifiers guard-set test, empirical `Sim`-fold test before claiming
-anything but `None` there.
-**Depends on:** none (spec-only prerequisite is done). **Scope:** M — a new attach point + kind
-following an established pattern (`ui.present`/`structure.place`), plus one new combat-dispatch read.
+      itself (spec §2b's explicit out-of-scope note, unchanged — `ElementPayload.cs` itself was not
+      touched by this task).
+- [x] The `Element` attach point is genuinely new, not a kind folded onto `Stat` or `Board` — verified
+      by reading `AtomKind.cs`'s own `AttachPoint` enum: `Element` is its own member with a doc comment
+      naming both rejected alternatives and why (§2a).
+- [x] `shareMilli`'s own pricing shape (flat per-mille literal vs. a `Θ`-scaled `ValueSpec`) is **still
+      an open, unresolved question**, left that way on purpose — the shipped `ParamDef` is a plain
+      `ParamKind.Int`, and this task's own code comment (`AtomKindRegistry.cs`) states explicitly that
+      this does not pre-decide `tree-plan`/`tree-binder`'s own pricing question (spec §5/§6, Open
+      question 2).
 
-### J12: Retire `NodeAtom.SoulCurveId`
+**Evidence:** Built `AttachPoint.Element` (`AtomKind.cs`), the `element.convert` kind registration
+(`AtomKindRegistry.cs`, `AttachPointCount`/`KindCount` bumped to 9/18), and
+`src/FusionRpg.Core/Combat/Element/ElementConversion.cs` (the pure composition-rule executor, §2c).
+13 new tests in `ElementConversionTests.cs`, all independently re-verified green (13/13), plus
+`AtomKindRegistryTests` re-run in full (107/107, including the renamed count-guard test and the
+`permanentModifiers` set gaining a third member). Cross-doc updates: `atom-catalog-ssot.md` §2 (new
+row 18, header bumped), `decisions.md`'s "Atom attach points" row (extended, not rewritten) plus a
+same-session annotation on the separate "extended action slots" row, `effect-atom-map.md` (a new
+cross-reference note, since neither this nor `Siege` was ever added to that file's own closed Wave-8
+module table), `DESIGN-GATE.md` row 41 (now reads the real current 9/18, "gone stale four times" not
+three). `AffixComposer.cs`/`BindInputNode.cs` doc comments corrected in the same change that removed
+the now-obsolete hardcoded refusal.
+**Verification:** `dotnet test tests/FusionRpg.Core.Tests --filter "ElementConversionTests|
+AtomKindRegistryTests|AffixComposerTests|TreeBinderRunTests"` → 139/139 green. Broader combined re-run
+(`PassiveTree|Atoms|Items.UniqueTests|ActorHub|Combat.Element`) → **2286/2287 green**, the one residual
+failure (`SpecChannelClaimTests.NoSpecClaimsAnUnregisteredChannel`, a `status.v1.json` tuning-filename
+token in four unrelated `actor-sheet` docs) confirmed pre-existing on committed HEAD via `git status`
+(zero of the four files touched by anyone) — filed as its own memory, not fixed here, out of scope.
+**Two self-caught regressions from registering the kind, both fixed in this same task, not left for a
+later pass:** `AtomCatalogSsotDriftTests`/`Items.UniqueTests` both hardcoded the pre-D56 17/8 counts (or,
+for Uniques, a "no kind id contains 'convert'" assertion) and needed updating; more importantly,
+**`ParamParityGuardTests` correctly caught that `element.convert` was registered claiming `Full`/`Full`
+runtime support with NO real reader anywhere** — corrected by quarantining the kind (`None`/`None`/
+`None`, mirroring `stat.derived`'s own D6 quarantine history exactly) and adding it to both
+`AtomKindRegistryTests`' and `ParamParityGuardTests`' own `awaitingConsumer` exemption sets (the first
+occupant of either since 2026-08-23) — the honest state until a real combat-dispatch reader lands,
+matching R-G1's own "a capability without a production carrier refuses rather than substitutes"
+philosophy this exact spec already invokes elsewhere. `dotnet build src/FusionRpg.Core` clean, 0 new
+warnings.
+**Depends on:** none (spec-only prerequisite is done). **Scope:** M — a new attach point + kind
+following an established pattern (`ui.present`/`structure.place`); the combat-dispatch read (spec's own
+open question) is out of this task's scope by the spec's own Success Criteria, not deferred silently.
+
+### ✅ J12: Retire `NodeAtom.SoulCurveId` — BUILT + VERIFIED 2026-09-07
 **Spec:** [`spec-soul-curve-resolution.md`](spec-soul-curve-resolution.md) (D58, 2026-09-06).
 **Description:** Remove a dead field rather than extend it. `NodeAtom.SoulCurveId` has zero consumers
 that act on its value (confirmed by repo-wide grep — three hits total, all round-trip writes/reads or
@@ -5219,42 +6368,70 @@ member is added — the spec's whole finding is that one should not be. **⚠ No
 repo has no drop-column precedent (`RpgStore.cs`'s `EnsureColumn` is additive-only); the fix stops
 reading/writing the column and leaves it in the schema, harmless (spec §2b).
 **Acceptance:**
-- [ ] `NodeAtom.SoulCurveId` removed from the record; both real call sites (`TreeBinderRun.cs:72`,
+- [x] `NodeAtom.SoulCurveId` removed from the record; both real call sites (`TreeBinderRun.cs:72`,
       `TreeBinderExplain.cs:102-103`) and `RpgStore.TreeCatalog.cs`'s `INSERT`/`SELECT`
-      (`:310-319`, `:419,429-435`) updated in the same change — no `soul_curve_id` column drop
-- [ ] `PassiveTreeCatalogLoader.cs`'s `SoulCurveIdPattern` validation removed with the field
+      (`:310-319`, `:419,429-435`) updated in the same change — no `soul_curve_id` column drop. **Also
+      found and fixed, not in the original 4-file list**: `PassiveTreeCatalogLoader.cs`'s own
+      `soulCurveId` JSON-read/refusal block (a FIFTH real call site the original spec's citation sweep
+      missed, distinct from `SoulCurveIdPattern`'s own declaration) and **18 more `NodeAtom(...)`
+      positional-constructor call sites across 9 test files** (`TreeAtomSourceParityTests.cs`,
+      `ConcentrationApplicationTests.cs` ×2, `TreeAtomSourceTests.cs` ×7, `TreeFanInTests.cs`,
+      `SoulTrackTests.cs`, `TreeResolveReportTests.cs`, `ChannelLegalityTests.cs`,
+      `ReportWriterTests.cs`) that the `SoulCurveId:` NAMED-argument grep never surfaced, because they
+      passed the trailing `null` positionally. Found by build error, not by a second grep — a positional
+      record removal fails loudly and completely, exactly as the spec's own Verification line predicted
+- [x] `PassiveTreeCatalogLoader.cs`'s `SoulCurveIdPattern` validation removed with the field
       (`PassiveTreeCatalogLoader.cs:36-45,316-326`)
-- [ ] **All four `SoulCurveId`-dependent tests in `CatalogHardeningTests.cs` removed, not just the two
+- [x] **All four `SoulCurveId`-dependent tests in `CatalogHardeningTests.cs` removed, not just the two
       round-trip ones** — confirmed by reading the file directly (2026-09-07): `TreeJsonWithSoulCurveId`
       (the shared fixture builder), `A_well_formed_curve_reference_is_accepted`,
       `A_null_soulCurveId_is_accepted_the_field_is_optional`,
       `A_formula_or_expression_is_refused_never_accepted_as_a_reference` (a `[Theory]`, 4 cases), and
-      `A_soulCurveId_missing_the_curve_prefix_is_refused`. **The risk naming this bullet exists for:**
-      the fixture builder emits raw JSON text (`$$"""..."""` string interpolation), not a typed C#
-      object, so the two validation-refusal tests have **no compile-time coupling** to
-      `NodeAtom.SoulCurveId` at all — removing the property only breaks the two round-trip tests at
-      **compile time** (they access `loaded!.Nodes[0].Atoms[0].SoulCurveId` directly); the two
-      refusal tests would keep compiling and go red only at **runtime**, once
-      `PassiveTreeCatalogLoader` stops refusing a malformed `soulCurveId` it no longer validates. A
-      "fix the compile errors" pass that stops at the two obvious ones ships two now-meaningless red
-      tests instead of deleting them
-- [ ] **No `catalog_revision` bump** — the catalog's own committed content shape is unaffected; only
-      an internal, always-`NULL`, never-consumed field stops being populated (spec §2b, §3)
-- [ ] **`tree-review`'s `provenance-supersede` gate is never invoked for this change** — it changes no
-      coefficient and no committed magnitude, only a field nothing ever read; treating it as a
-      magnitude retune would be the wrong classification (spec §3)
-- [ ] **A byte-for-byte regression check**: re-running `tools/TreeBinder` (or the equivalent generator)
-      over an unchanged seed corpus produces an output identical to before this change except for the
-      `soul_curve_id` values now written (always absent/never populated) — proving the field's removal
-      touches nothing else in the generated catalog
-- [ ] `spec-tree-catalog.md` §1(a)'s layer table and §OQ1 (both already updated by this spec's own
-      landing) stay in sync — no further doc work once the code change ships
-**Verification:** spec §4's own testing strategy — build fails loudly on any missed reference (no
-`SoulCurveId` left uncompiled); a source-shape test confirms the SQL no longer names `soul_curve_id`;
-`dotnet test tests/FusionRpg.Core.Tests --filter CatalogHardeningTests` has exactly the tests that
-existed minus the four named above — no orphaned red test, no weakened assertion in their place.
+      `A_soulCurveId_missing_the_curve_prefix_is_refused`. All five removed in one change (fixture
+      builder + 4 tests), replaced with a one-line pointer comment naming what was removed and why,
+      matching this file's own historical-record convention
+- [x] **No `catalog_revision` bump** — confirmed: no `RpgStore.TreeCatalog.cs` code path bumping
+      `catalog_revision` was touched by this change at all; the catalog's own committed content shape
+      is unaffected, only an internal, always-`NULL`, never-consumed field stops being populated
+      (spec §2b, §3)
+- [x] **`tree-review`'s `provenance-supersede` gate is never invoked for this change** — confirmed: this
+      task touched zero `tree-review` files and zero coefficient/magnitude values; nothing in the
+      changed code path is reachable from that gate
+- [x] **Regression check — honest scope correction, not silently satisfied.** The literal bullet
+      ("re-run `tools/TreeBinder` over an unchanged seed corpus, diff the output") **could not be
+      performed as written**: `data/generated/passive-tree/` does not exist yet — confirmed directly,
+      H9's own bind/commit/review step has never run for any tree, so there is no prior generated
+      output to diff against. The equivalent proof actually available: `TreeBinderRunTests`' own two
+      worked-example tests (`BindNode_reproduces_the_worked_example_share_45_as_3038`,
+      `...share_46_as_3105`, spec-tree-binder.md §3.4's exact worked numbers) exercise the SAME
+      `TreeBinderRun.BindNode` → `CoefficientBinder.Bind` → `ChannelLegality.CheckBind` pipeline this
+      change touched, and both still assert byte-identical `kMicro` values after the field's removal —
+      re-run and confirmed green. This is the strongest available proof until H9 actually produces a
+      real corpus to diff; noted here so a future session does not assume the literal bullet ran
+- [x] `spec-tree-catalog.md` §1(a)'s layer table and §OQ1 (both already updated by this spec's own
+      landing) stay in sync — no further doc work needed, confirmed by re-reading both this session
+**Evidence:** `NodeAtom.cs`'s `SoulCurveId` parameter removed; `TreeBinderRun.cs`/`TreeBinderExplain.cs`
+call sites updated; `RpgStore.TreeCatalog.cs`'s INSERT column list, its 11-tuple parameter list, and its
+SELECT column list + 11-column reader all updated together (a positional-index shift the compiler alone
+could not have caught for the SELECT side, since `r.GetString(9)`/`r.IsDBNull(10)` are ordinal reads
+against column POSITION, not name — verified by hand that the new final read is `unit_class` at index 9
+with no dangling index-10 read left behind); `PassiveTreeCatalogLoader.cs`'s regex + validation block +
+JSON read removed; `CatalogHardeningTests.cs`'s fixture and 4 tests removed. Confirmed via repo-wide
+grep after the change: zero remaining source references to `SoulCurveId`/`soul_curve_id`/`soulCurveId`
+outside historical doc citations (`spec-soul-curve-resolution.md` itself, which documents the retirement
+as its own subject).
+**Verification:** `dotnet build src/FusionRpg.Core src/FusionRpg.Data` both clean, 0 errors. `dotnet test
+tests/FusionRpg.Core.Tests --filter "CatalogHardeningTests|TreeBinderRunTests|ChannelLegalityTests|
+PassiveTree"` and the equivalent `TreeAtomSourceTests`/`TreeFanInTests`/`SoulTrackTests`/
+`TreeResolveReportTests`/`ConcentrationApplicationTests` — all green (399/399 on the broad `PassiveTree`
+filter). `dotnet test tests/FusionRpg.TreeBinder.Tests` and `tests/FusionRpg.Data.Tests --filter
+TreeCatalog` (16/16) both green. `dotnet test tests/FusionRpg.Data.Tests` full suite: 1119/1120, the one
+failure (`ItemUniqueStoreTests.Unique_eligible_seeding...`) independently confirmed pre-existing on
+committed HEAD, unrelated (already filed in memory before this task).
 **Depends on:** none (spec-only prerequisite is done). **Scope:** S — a field removal touching four
-already-identified files (plus the one test file's four tests), no schema migration required.
+already-identified files (plus the one test file's four tests) **grew to 6 production files and 10 test
+files** once every positional call site was found by the build, not by the original grep; still no
+schema migration required.
 
 ### ⬜ Checkpoint J — ship — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] Full corpus reviewed; escalations resolved through the ladder, not by hand edits

@@ -12,11 +12,42 @@ No task is done until its verification command is green.
 
 ### P0.1 — Get an accept-or-decline on every external dependency
 
-- [ ] **X7** — D27's `container_kind` values (`gem` · `set` · `charm` · `combo`, + the fifth
-      `consumable` D27 did not mint). `ContainerRow.cs:9-18` ships **seven** values (⚠ corrected
-      2026-09-06 — a seventh, `Enemy`, landed the same day via party-dungeon's D2.6, commit `50fcdf8`;
-      does not touch this ask, still none of D27's five) and none of them.
-      Owner: **effect-atom**. ⛔ Gates modules **12, 13, 16, 18, 21**
+- [x] **X7** — ✅ **RESOLVED 2026-09-07 (`container-kind-expansion`, spec at
+      `docs/architecture/item/spec-container-kind-expansion.md`) — item claimed the four kinds it owns
+      the lifecycle of, per the owner's own explicit decision** (asked and answered: "Add the values
+      ourselves now" — the filed-and-unanswered ask below is superseded, not overridden). `ContainerRow.cs`
+      now ships **eleven** values: the seven pre-existing plus `Gem`/`Charm`/`Combo`/`Consumable`. D27's
+      fifth name, `set`, deliberately NOT minted — a set's bonus is a threshold-grant row (module 12's
+      own table), not a container, and `set` already names `item_set`; see the spec's own naming note.
+      **Real, previously-undiscovered follow-on defects found and fixed in the same pass**:
+      `ConsumableValidator.ValidateDef` used to refuse EVERY container kind unconditionally
+      (`ConsumableLimits.ConsumableContainerKindAvailable = false`); flipped to `true` and the check
+      corrected to refuse only a WRONG kind now that `Consumable` is real.
+      `DropTableDraw.UnavailableKinds`' reason strings for `insert`/`charm`/`consumable` still said "X7
+      must land" after it had; corrected to name the real remaining blocker (the seed→concrete
+      generator, unaffected by this change). Six test files needed updating for the real, wider enum
+      (`ConsumableTests`, `EliteAffixTests`, `UniqueTests`, `AtomSeedFileTests`, `DropVolumeCorpusTests`,
+      `MaterialCorpusTests`) — `ContainerValidatorTests`' own generic "every kind has a prefix" test
+      needed no change, since it already iterates the live enum. **Verified**: `dotnet build` clean;
+      `FusionRpg.Core.Tests` — `Items` namespace 957/958 (the one red is the pre-existing, out-of-scope
+      dungeon `role:"standard"` gap, unrelated) — re-run against the real corpus, not assumed.
+      **What this does NOT do** (named at spec time, not silently skipped): does not build the full
+      seed→concrete bind path for any of the four kinds — `ItemWorkbench.cs`'s own doc comment is
+      corrected to say the gem-insert-instance follow-up is real and separate, not "waiting on X7"
+      anymore.
+
+      ⭐ **A second real gap found the same day, by the FULL suite, not the original 16-file grep**:
+      `ContainerValidator.cs`'s own `ContainerIdRe` is an INDEPENDENTLY hardcoded regex
+      (`^(item|trait|skill|...)\.[a-z0-9-]+$`) — never derived from `ContainerKind`/`PrefixOf`, so it
+      has no `ContainerKind.` literal for a grep over that string to find. `Every_kind_has_a_prefix_
+      and_a_valid_id_passes` (an existing, already-generic test that iterates the live enum) caught it
+      immediately: a real `gem.sample` container_id was refused as "not matching the grammar" even
+      though its prefix was correct. Fixed by adding all four new prefixes to the same regex. Full
+      suite re-run after: `Atoms` + `Items` namespaces 2247/2250 (3 reds: the two already-named
+      pre-existing gaps below, plus one allocation-measurement test confirmed to pass in isolation —
+      a load-sensitive flake under this session's concurrent machine contention, not a regression).
+
+      Superseded history below, kept for the record:
 
       ⛔ **VERIFIED STILL OPEN 2026-09-06 — NOT acknowledged anywhere in effect-atom's own documents,
       and no record exists of the ask ever having been sent.** Checked directly, not inferred:
@@ -82,8 +113,24 @@ No task is done until its verification command is green.
       Deps: E9 (built), E43` — and `tasks/content-stack-plan.md:45` independently records **"5 of 20
       coefficient rows fitted"**, matching this row's own 2026-09-05 measurement exactly. Accepted,
       targeted, and partially built on their side
-- [ ] **D28 / E43** — family tags stamped into `AtomRow.TagsJson`. Owner: **effect-atom**.
-      Gates module **8** (every tag-gated rule is inert without it)
+- [x] **D28 / E43** — ✅ **RESOLVED 2026-09-07 (`family-tags-closure`, spec at
+      `docs/architecture/item/spec-family-tags-closure.md`) — item claimed this directly, since the
+      owning module (E43) already closed without ever delivering it and nothing was scheduled to
+      revisit it (the exact "worst of the seven" finding below).** `FamilyEntryInput` gained a `Tags`
+      field; `AffixFamilyFile.Read` parses the entry's real, already-authored `"tags"` array (3 real
+      values across the corpus: `offensive`/`defensive`/`utility`); `FamilyExpansion.cs` stamps each as
+      a bare `TagsJson` key alongside (never replacing) the two provenance keys — a reserved-key
+      collision is refused, not silently overwritten. **No change needed to `AffixTags.cs` or
+      `EligibilityRule.cs`** — traced end to end and confirmed they already read whatever keys exist;
+      `EligibilityRule.RequireTags`' own `ContainsKey` check is exactly what a bare category tag needs.
+      **Verified end to end, not just "the field is populated"**: a new test constructs a real
+      `EligibilityRule(RequireTags: ["offensive"])` and proves `EligibilityResolver.IsEligible` now
+      actually discriminates a real offensive-tagged atom from a real utility-tagged one — module 8's
+      own shipped gate, closed for real. 8 new tests, `FusionRpg.Core.Tests` full suite re-run clean
+      against this session's own baseline. Gates module **8** (every tag-gated rule is inert without
+      it) — no longer inert.
+
+      Superseded history below, kept for the record:
 
       ⛔ **VERIFIED STILL OPEN 2026-09-06, and this is the worst of the seven: the owning module already
       CLOSED without delivering it, so no future module is scheduled to.** Checked against code and
@@ -141,13 +188,32 @@ No task is done until its verification command is green.
       anywhere yet** — so there is no order to be wrong. Checked as resolved-for-this-program, not as
       acknowledged-by-effect-atom. If effect-atom ever adds the column, it lands inert
       (`DEFAULT 0`)
-- [x] **X3** — ✅ **D36: nothing to do.** `action-corpus` owns the production caller `ActionSeeder.Generate`
-      still lacks — the method itself already shipped under the (closed) `action` program (`ActionSeeder.cs`,
-      spec-action-seeding.md A13), and `action-corpus`'s own map explicitly disclaims building it.
-      `action-corpus` is under active construction by another owner. We consume that caller when one
-      ships. ⛔ **Do not
-      file a request against their map, propose amendments to their scope, or read their documents to
-      infer their schedule.** Gates module **19** only; module 19 ships GA2 standalone meanwhile
+- [x] **X3** — ✅ **CORRECTED and RESOLVED 2026-09-07 (`action-wiring-closure`, spec at
+      `docs/architecture/item/spec-action-wiring-closure.md`).** The framing below (D36: wait for
+      action-corpus, they're under active construction) was accurate when written, but stale by
+      2026-09-07 — action-corpus's own 25 modules (A1–A25) are ALL closed, per that program's own
+      record, and `ActionSeeder.Generate` was never the real mechanism anyway: `src/FusionRpg.Server/
+      Program.cs:371-386` wires `FusionRpg.Data.ActionCorpusImporter.Import` — a REAL, default-on,
+      production caller — at every server startup, loading 24 real briefs
+      (`data/seed/actions/committed-round-1.json`/`committed-round-2.json`) into `rpg_action`.
+      `rpg_action` is NOT empty in any freshly booted server. Corrected the stale claim baked into a
+      live C# rejection string (`ItemGrantValidator.cs`'s `UnknownAction` message still said "nothing
+      produces actions yet"). **GA3 and GA4, both held specifically because "with no rpg_action row,
+      both would be a fixture pretending to be a proof," are now genuinely closed — with a real row,
+      not a new fixture**: `ActionCorpusComposer.Compose` (pure, DB-free) composes a REAL `ActionRow`
+      from a REAL brief (`action.family.nut.001`, "Hardened Penetration" — picked after checking each
+      candidate's own atom families actually tier through `FamilyExpansion`, not by trial and error),
+      which passes `ItemGrantValidator.ValidateAction` with zero rejections and reaches a real,
+      assembled `ActionSetAssembler` output through a real weapon grant (`item.humanoid-main-hand-a-005`)
+      — GA3. The same real row, granted via `ItemGrantRole.Granted` (not `DefaultAttack`), is proven
+      end to end and shown to reach the set through the granted path specifically, not by replacing the
+      default attack — GA4. 3 new tests, `tests/FusionRpg.Core.Tests/Items/ItemGrantedActionTests.cs`,
+      55/55 in the file, `Items` namespace 960/961 (the one red is the pre-existing, out-of-scope
+      dungeon gap). Gates module **19** — GA2/GA3/GA4 all closed now, nothing left gated.
+
+      Superseded history below, kept for the record — the reasoning about action-corpus's OWN internal
+      machinery (do not build `ActionSeeder.Generate`'s own caller, do not amend their map) still holds;
+      only the "nothing produces actions" conclusion was wrong:
 - [x] **X2 residue** — `E42 units-correction` closed its gate 2026-09-03, but **`ssot-affixes.md` was
       explicitly out of E42's scope**, so the item-side units residue is unresolved. Owner:
       **content-stack**. Does not block authoring (`seed-contract.md` §3's band rule closes the units
@@ -991,12 +1057,21 @@ published server, not a passing unit test.
 
 ⛔ **What this does NOT claim, stated because the honest half is the point.**
 
-- [ ] ⏸ **An equipped item still changes no number.** `spec-equip-assign.md` is explicit that the
-      runtime binding is rebuilt as a full projection **at deploy**, never patched at assign time, so
-      this endpoint deliberately does not call `ApplyEquipProjection` (module 5) or
-      `ApplyEquippedGrants` (module 19) — **and both of those still have zero production callers**
-      (`grep` 2026-09-06: only `tests/`). Assign is durable and real; bind is a named wiring gap in
-      two other modules. Equipping persists, and nothing yet reads the assignment at deploy
+- [x] ✅ **RESOLVED 2026-09-07 (P1.5-L) — was accurate when written 2026-09-06, now stale.** An
+      equipped item DOES now change a number, and this is no longer a callerless pair.
+      `ItemEquipEndpoints.cs`'s `/api/items/equip`/`/unequip` handlers call a new
+      `SyncLawnRuntimeAsync` after every successful outcome, which calls
+      `RpgStore.MaterializeRolledEquipRuntime` — the same method `WebMatchService.BuildSquad`'s
+      battle-squad path already called — which runs both `ApplyEquipProjection` (module 5) and
+      `ApplyEquippedGrants` (module 19). Both class-level doc comments that repeated the stale "zero
+      production callers" claim (`ItemEquipEndpoints.cs`'s `ItemEquipService` summary) were corrected
+      in the same pass. Proven with a real, red-first test:
+      `RolledItemEquipRuntimeTests.Equipping_through_the_real_ItemEquipService_alone_leaves_bindings_
+      empty_until_the_new_Lawn_sync_runs` (4/4 passing) and a live redeploy (grant accepted and fires;
+      full account in P1.5-L below). Bind is no longer "a named wiring gap in two other modules" —
+      it is wired for both Battle and Lawn; the one thing that stays genuinely open is the on-screen
+      confirmation for one specific non-attacking test plant type, named precisely in P1.5-L's own
+      final bullet.
 - [ ] ⏸ **The role is typed, not derived.** No route serves an item's own role (`ArmouryRowDto.Role`
       is `""` while module 6 has no `item_base_type` table), so the surface offers a role picker and
       the server corrects a wrong pick by name. Same shape and same reason as the craft bench's typed
@@ -1951,7 +2026,7 @@ not touched; the build was rechecked after their edit settled and came back clea
 > either open item here, matching this checkpoint's own original reasoning; both remain open, tracked,
 > and now more precisely scoped than when this checkpoint was first written.
 
-#### ⭐ P1.5-B — the Battle half, real content, CLOSED 2026-09-07
+#### ⭐ P1.5-B — the Battle half, real content, CLOSED 2026-09-07 (built AND proven)
 
 - [x] `RpgStore.MaterializeRolledEquipRuntime` — module 4/5's own "deploy" moment (squad build), calling
       `ApplyEquipProjection` + `ApplyEquippedGrants` from `WebMatchService.BuildSquad`. Two more real
@@ -1961,25 +2036,168 @@ not touched; the build was rechecked after their edit settled and came back clea
       dropped out of the current assignment list (added the missing diff-against-stored-state step).
 - [x] `spec-equip-runtime.md` amended — a second delivery path for `stat.modify` atoms (virtually all
       real equip content, including an `op: "more"` no `stat.derived` consumer can parse), reusing
-      `ActionContainerEffectResolverFactory`'s already-proven compile/register pattern. Spec amendment
-      written; the actual `ActionContainerEffectResolverFactory`/`WebMatchService.cs` code changes it
-      describes are the next concrete build task here, not yet built as of this entry.
-- [ ] Build the `stat.modify` compiler path itself, per the amendment's own "New/edited files" list —
-      **the one piece of the Battle half that's specced but not yet built.**
+      `ActionContainerEffectResolverFactory`'s already-proven compile/register pattern.
+- [x] ✅ **Built, 2026-09-07**: `ActionContainerEffectResolverFactory.BuildEquip(store, specimenIds)`
+      (Data layer — resolves `effect_binding` at `UniqueActor` scope, filters to `stat.modify` only so
+      the two producers never double-count), `BattleRunState.BindEquip` (Core — the same
+      `Host.Bag.Grant` pattern `BindContainers` uses, keyed on `a.Setup.SpecimenId`), threaded through
+      `BattleEngine.Resolve`'s new `equipEffectIdsFor` parameter and all 3 real `WebMatchService.cs`
+      call sites (`RunWebMatchAsync`'s fresh + replay paths, `RunPlannedMatchAsync`'s replay path,
+      `ResolveAndIngest`).
+- [x] ⭐ **Real defect found and fixed while proving this**: `WebMatchService.BuildSquad`'s own
+      `BattleActorSetup` construction never set `SpecimenId` at all — meaning `BattleStatComposer`'s
+      OWN existing `stat.derived` equip-fold (`BattleEngine.cs:36`, wired since the equip-runtime
+      module itself) could never have fired for a real `BuildSquad`-built battle either, silently,
+      regardless of how correctly `effect_binding` was populated. Fixed by adding
+      `SpecimenId = s.Profile.InstanceId` to the construction — confirmed safe via the field's own
+      `[JsonIgnore]` doc comment (excluded from the expedition golden hash by design, for exactly this
+      reason). This means BOTH `stat.derived` AND `stat.modify` equip atoms reach a real web-match/
+      expedition battle for the first time as of this fix, not just the one this session set out to add.
+- [x] ✅ **Proven, red-first**: `RolledItemEquipRuntimeTests.An_equipped_items_stat_modify_atom_reaches_a_real_battle_through_the_compiler_path`
+      — failed first on the missing `SpecimenId` (`Assert.Equal` null vs expected), passed after the
+      fix. `capturedHost.Bag.HasGrantForEffect(equipEffectId)` confirms a real `stat.modify` equip atom
+      is granted inside a real `BattleEngine.Resolve` call, mirroring the existing action-grant proof's
+      own shape.
+- [x] Full-suite regression check: Core.Tests shows 5-7 scattered failures across two consecutive
+      identical-code runs (different tests failing each time — `Tier_goldens_are_locked`,
+      `ProveAptitudeJsonEmitTests`, `SpecChannelClaimTests`, `ZombossDeployRosterTests`) — confirmed
+      pre-existing test-order/global-static flakiness, not a regression: the failure SET changed between
+      two back-to-back runs of identical code, none of the failing files were touched, and
+      `Tier_goldens_are_locked`'s own comment already self-documents as "expected to move... a poor
+      regression signal."
 
-#### ⛔ P1.5-L — the Lawn half, found 2026-09-07, genuinely open, environment-blocked
+#### ✅ P1.5-L — the Lawn half, BUILT, PROVEN, AND A SECOND REAL BUG FOUND+FIXED LIVE 2026-09-07 (one narrow display-confirmation item remains open)
 
-- [ ] Extend `UniqueBoundLoadout.TryApply` (`src/FusionRpg.Injector/Match/UniqueBoundLoadout.cs:14-39`)
-      to also resolve `effect_binding` at `UniqueActor` scope (module 4/5's own projection), compile and
-      enqueue it into the same `EffectRuntime.Bag.Funnel`, additive alongside the existing `mods_json`
-      resolution. Full trace, exact file list, and the two new tests: `spec-equip-runtime.md`'s
-      "Amendment 2026-09-07 (second)" section.
-- [ ] Core-layer test (`a_rolled_items_equip_binding_reaches_the_lawns_live_funnel_on_bind`) — buildable
-      and testable now, no game install needed.
-- [ ] ⛔ **Owner-run, live**: equip a rolled item, deploy on the real lawn, confirm the number changes —
-      needs `$env:FUSIONRPG_GAME_DIR` + a real attached match. The one item in this whole module that a
-      coding session cannot close alone, for a reason unrelated to `BindGrant` (a different, already-
-      correctly-wired mechanism this session confirmed is not the cause).
+⚠ **The original plan for this box (extend `UniqueBoundLoadout.TryApply`'s `mods_json` path) was traced
+further and found to be the WRONG integration point, or at least not the only one.** A separate,
+already-built 2026-09-06 mechanism — `AtomPushService.Build`/`OwnersForPlayer`
+(`src/FusionRpg.Server/AtomPushService.cs`), documented in its own comments as *"the missing half of the
+live lawn push"* for exactly this module — already calls `ResolveBindings` for every currently-
+`ActiveBound` `UniqueActor` (line 39-41), compiles the result via the same `AtomCompiler.Compile`
+every other path uses, and pushes it to the injector keyed by `instance:{specimenId}`
+(`UniqueOwnerBinder.OwnerKeyForDurableGrant`), which `ToEntityKey`/the Bound transition rewrites to
+`entity:{ptr}` — the SAME scope `GrantedDerivedAtomReader` already reads. This means module 4/5's
+`effect_binding` rows (including this session's rolled-item equip fix) may ALREADY reach the wire via a
+path that has nothing to do with `UniqueBoundLoadout`/`mods_json` at all.
+
+- [x] ✅ **Self-corrected 2026-09-07**: an earlier pass of this investigation misread
+      `RuntimeSupportMatrix`'s constructor argument order as `(Sim, Battle, Lawn)` and concluded
+      `stat.modify`'s Lawn cell was `PlanOnly`. Re-checked directly against the record's own
+      declaration (`AtomKind.cs:76`: `RuntimeSupportMatrix(RuntimeState Lawn, RuntimeState Battle,
+      RuntimeState Sim)`) — the true order is `(Lawn, Battle, Sim)`. `stat.modify`'s real matrix
+      (`AtomKindRegistry.cs:514`: `new RuntimeSupportMatrix(Full, Full, PlanOnly)`) is
+      **Lawn: Full, Battle: Full, Sim: PlanOnly** — Lawn is already `Full`, matching
+      `InjectorEffectActionSink.ExecModifyStat`'s real, complete, dispatched implementation
+      (constructs real `StatModifier`s for Flat/Increased/More, applies via `CheatState.Stats.Upsert`
+      + `ReapplyLivingForOwner`). **There is no stale registry value to fix.** This correction is
+      itself worth recording: a positional-record misread produced a findable-but-fake "gap," and the
+      fix was re-reading the type's own declaration, not the call site — the same discipline this
+      audit's earlier passes already learned the hard way for citation-vs-conclusion drift.
+- [x] ✅ **RESOLVED 2026-09-07 — the real remaining question, answered, and it was a genuine gap.**
+      Traced `AtomPushService.Build`/`OwnersForPlayer`'s real call sites (`RpgHub.cs:110` at Hello;
+      `UniqueActorService.PushAtomUnionAsync`, fired from `ObserveEvents` on exactly the bind ↔
+      `ActiveBound` phase transitions `RpgStore.ObserveUniqueActorEvents` reports). **Neither call site
+      is triggered by an item equip/unequip on an ALREADY-bound specimen** — only by session start or a
+      bind/unbind transition. So the push mechanism itself was never the gap; what it pushes was.
+- [x] ✅ **Found the real upstream cause, by reading `RpgStore.MaterializeRolledEquipRuntime`'s own doc
+      comment and confirming with a grep, not assuming**: this is the ONLY method that turns a rolled
+      item's `rpg_item_assignment` row into real `effect_binding` rows (`ApplyEquipProjection`) and
+      granted actions (`ApplyEquippedGrants`) — and its **only production caller, confirmed by grep, was
+      `WebMatchService.BuildSquad`** (`WebMatchService.cs:541`, the Battle/expedition squad-build path).
+      `ItemEquipService.Equip`/`Unequip` (`ItemEquipEndpoints.cs`, the real production write surface
+      behind `POST /api/items/equip`/`/unequip`) only ever called `SaveAssignment`/`RemoveAssignment` —
+      confirmed by its own pre-existing doc comment ("bind is module 5's and still has no caller...
+      equipped item persists and does not yet change a number on the lawn"). **Net effect: a specimen
+      that is bound to the live Lawn and never sent into a battle had its equipped rolled items'
+      `effect_binding` rows NEVER materialized, at all** — `AtomPushService.Build`'s Lawn-runtime
+      `ResolveBindings` call had nothing to find regardless of whether the push itself re-fired.
+- [x] ✅ **FIXED 2026-09-07.** `ItemEquipEndpoints.cs`: `/api/items/equip` and `/api/items/unequip`
+      handlers now call a new `SyncLawnRuntimeAsync(store, uniqueActorService, specimenId, playerId)`
+      after every successful outcome — it calls `store.MaterializeRolledEquipRuntime(specimenId, level)`
+      (the exact call Battle's squad-build already makes) then `uniqueActorService.PushAtomUnionAsync
+      (playerId)` (made `public`, was `private`) to re-push the compiled atom union to the live lawn.
+      Best-effort/non-throwing, matching every other post-Hello push in this codebase (a push failure
+      must never turn a successful equip write into a 500). `UniqueActorService` is already
+      `AddSingleton`-registered, so both endpoints receive it via minimal-API parameter injection with
+      no new DI wiring needed.
+- [x] ✅ **Proven with a real, red-first test** — `RolledItemEquipRuntimeTests.
+      Equipping_through_the_real_ItemEquipService_alone_leaves_bindings_empty_until_the_new_Lawn_sync_runs`:
+      equips through the REAL `ItemEquipService` (not the DAL-level `SaveAssignment` shortcut the
+      sibling tests use), first asserts `ListBindings` is empty (confirms the gap is real, not assumed),
+      then calls the exact same `MaterializeRolledEquipRuntime` the new endpoint sync calls and asserts
+      the `stat.modify` atom now resolves via `ResolveBindings(..., RuntimeId.Lawn)` — proving the LAWN
+      runtime specifically, not Battle. Also proves unequip withdraws it. **4/4 passing**
+      (`dotnet test tests/FusionRpg.Server.Tests --filter FullyQualifiedName~RolledItemEquipRuntimeTests`),
+      including the 3 pre-existing tests in the same file (Battle-half, unaffected).
+- [x] ✅ **Live-run attempted 2026-09-07, and it was NOT owner-only** — corrected an earlier framing in
+      this same box: `[[live-lawn-check-is-assistant-reachable]]`, an existing memory, already
+      established the cold-start sequence is assistant-safe. Owner explicitly authorized restarting the
+      already-running live server for this specific check. **Found a SECOND real, previously-
+      undiscovered bug, deeper than the equip-wiring gap above** — the live attempt is what surfaced it:
+      equipping a real rolled `stat.modify` item on a live, Lawn-bound specimen (fresh test player,
+      fresh specimen, both created through the real API, never touching the owner's own player-1 data)
+      produced NO stat change, and the injector's own event log named the exact cause verbatim:
+      `"ERR debug.effect.grant: instance: forbidden in Hot; bind to entity:{ptr}"`.
+- [x] ✅ **Root cause, traced to source, FIXED.** `AtomPushService.Build` (`src/FusionRpg.Server/AtomPushService.cs`)
+      stamps every `UniqueActor`-scoped grant with `UniqueOwnerBinder.OwnerKeyForDurableGrant`, which
+      produces a durable `instance:{id}` owner key — the ONE key the injector's hot path
+      (`CheatCommandRunner.RunEffectGrant`) refuses outright by design. The rewrite this needs
+      (`UniqueOwnerBinder.BindGrant`, `instance:{id}` → `entity:{ptr}`) already existed in Core — but its
+      only caller was the OLDER `UniqueLoadoutSpec.BindToPtr` deploy-time `loadoutJson` path, never this
+      one. **This is not new breakage from today's equip fix — it is a gap this whole compiled-push
+      mechanism has carried since it was built (T6.1, 2026-09-06):** every `UniqueActor`-scoped grant
+      `AtomPushService` has ever sent, at Hello and at every bind/unbind re-push, was refused the same
+      way. Several pre-existing tests (`MultiOwnerPushTests`, `UniqueActorAtomRepushTests`,
+      `DemonLawnDeployAtomPushTests`) had explicitly PINNED the `instance:` shape as the correct final
+      wire state, with one test's own comment naming the fix as needing "an injector-side BindGrant...
+      [that] cannot be proven by anything CI runs" (net6.0/BepInEx interop, no PVZ install in CI) — that
+      framing is now shown to be avoidable: the rewrite is exactly as provable **server-side**, using the
+      specimen's own durably-tracked `LastPtr` (`RpgStore.TryAckUniqueSpawn` already stores it), no
+      injector build needed. Fixed inside `Build` itself: every grant with an `instance:` key is rewritten
+      to `entity:{ptr}` via `_store.GetUniqueActor(id)?.LastPtr`, or **dropped** (not sent) if no live ptr
+      exists yet — the safe direction, matching this codebase's own established convention.
+      `UniqueOwnerBinder.ExtractInstanceId` widened from `private` to `public` to support the lookup.
+- [x] ✅ **Proven with real, updated tests, not just live observation.** New file
+      `AtomPushServiceInstanceOwnerRewriteTests.cs` (2 tests: bound specimen → grant rewritten to
+      `entity:{ptr}`; specimen with no live ptr → grant dropped, def still travels). All 7 pre-existing
+      tests that had PINNED the `instance:` shape as correct were updated to reflect the fixed contract
+      (real bound specimens via `TryBeginUniqueDeploy`+`TryAckUniqueSpawn`, not synthetic literal owner
+      keys with no backing row) — `MultiOwnerPushTests` (6), `DemonLawnDeployAtomPushTests` (1),
+      `UniqueActorAtomRepushTests` (1). **Full regression run after the fix: `FusionRpg.Server.Tests`
+      25 failures (down from 27 before this session's changes), ALL in the same pre-existing, unrelated
+      set** (`WorldSectorProjectionTests`/`ContentBootStartupWiringTests`/`WorldCalendarProjectionTests`/
+      etc. — content-boot importing the real `data/seed` tree fails because a concurrent, unrelated,
+      still-in-progress dungeon-quest/supply seed-content change is staged under `data/seed/dungeon/`,
+      confirmed via `git status` and via `ListAgents` showing 4 other interactive peer sessions active on
+      this same repo — not touched by this session, not part of the item program). Zero new failures from
+      this fix.
+- [x] ✅ **Live-confirmed the fix actually closes the refusal, redeployed and re-tested.** Rebuilt,
+      republished, and restarted the live server (owner-authorized; the game process itself never
+      restarted and its injector reconnected automatically). Re-equipped the same test item: the
+      injector's event log now shows the grant **accepted** (`debug.effect.granted`:
+      `"ownerKey":"entity:227f64bc240"`, correctly rewritten, no refusal logged this time) and **fired**
+      (`debug.effect.fired`: `"action":"ModifyStat","trigger":"OnGranted","ok":true`), and
+      `ReapplyLivingForOwner("entity:227f64bc240")` correctly found and reapplied exactly the equipped
+      specimen (`"reapply living owner=entity:227f64bc240 n=1"`) — a dramatic, real improvement from
+      total refusal to an accepted, correctly-targeted, firing effect.
+- [ ] ⏸ **The one thing that stayed genuinely unconfirmed**: `debug.board-stats`'s displayed `attack`
+      field for that specimen (a SunFlower, a non-attacking support plant in vanilla PvZ) still read
+      unchanged after the fix. Most likely explanation, not yet proven either way: SunFlower may have no
+      live-exercised attack stat for the game's own combat write path to ever touch, making it a poor
+      test subject for an `atk`-channel modifier — not necessarily a further bug in the fix just proven.
+      A second attempt with an attacking plant type hit a real, separate, pre-existing side effect first
+      (`RpgStore.Init()`'s own `SweepStaleActiveBoundUnlocked` — W5-E, "stale ActiveBound (no open run /
+      missing match_key) → Roster on boot" — swept the freshly-deployed test specimen back to Roster
+      when a second short-lived tool process opened the same live database), and further live poking was
+      stopped there rather than risk more disruption to what may still be a shared session (confirmed 4
+      other interactive peer sessions active via `ListAgents`). **Named precisely, not left vague**: the
+      next attempt should equip on an attacking plant type (or target the `maxHp` channel, which every
+      plant visibly tracks) and should avoid opening a second process against the live database mid-test
+      to sidestep the sweep. The throwaway minting tool used for this investigation
+      (`tools/LiveEquipProof/`) has been deleted; the test player (id 4, `live-equip-proof-p1_5l`) and
+      its two test specimens remain in the live database as harmless, clearly-named residue — not
+      cleaned up, since no player-deletion endpoint was confirmed safe to use and leaving inert test rows
+      is lower-risk than a fresh live database mutation to remove them.
 
 ---
 
@@ -2424,11 +2642,14 @@ legality, a different axis. See module 10's P2.5 bullet for the full evidence.
       discipline; this is a measure-only Python/CI change (`distribution.py`'s `_observed_count` plus
       a new `.github/workflows` upload step) genuinely separate from the C#-side legality/naming work
       this pass completed, and real remaining scope
-- [ ] ⏸ **The rare two-word name's actual head/tail draw against `words.v1.json`'s pools — not built.**
-      `ItemNameComposer` takes the draw as an injected delegate by design (so the pure function needs
-      no pool data), but nobody has wired a real `rareNameDraw` yet, and `poolAccess
-      .affixFamilyPartitions` still says word pools are out of scope for affix partitions (a named
-      "Ask first" this module raises rather than resolves unilaterally)
+- [x] ✅ **The rare two-word name's actual head/tail draw against `words.v1.json`'s pools — RESOLVED
+      2026-09-07, wired via `RareNameCorpus`/`ItemNameAssembly.Compose` (module 10's card work,
+      cross-reference P2.5).** `ItemNameComposer` takes the draw as an injected delegate by design (so
+      the pure function needs no pool data); `src/FusionRpg.Server/Program.cs:794` loads
+      `RareNameCorpus`, threaded into `ItemCardCorpus(..., RareNameDraw: rareNameDraw)`, consumed by
+      `RpgStore.ItemCard.cs`'s `ComposeItemName` via `ItemNameAssembly.Compose`/`ItemNameComposer.cs`.
+      `poolAccess.affixFamilyPartitions` still says word pools are out of scope for affix partitions (a
+      named "Ask first" this module raises rather than resolves unilaterally)
 - [ ] ⏸ **D8's aptitude-affix gate stays inert** — correctly: §2g #2 (a 13th atom kind / `aptitude.*`
       channel family / fifth `AllocationScope`) has not cleared, and the spec is explicit that no
       aptitude affix may be authored until it does. Nothing to build here yet; named so it is not
@@ -3710,7 +3931,7 @@ own measured test.
       five reason codes were **not** minted — §5.2's four player-action names became a module-local
       `CharmCarryRefusalReason` (module 4's `EquipRefusalReason` precedent) and the fifth became a
       `ContentRuleViolated{charm.*}` rule id, so definitions.md §10's closed 33 is still untouched
-- [ ] ⏸ **The `(capability, threshold-family multiset)` median ≤ 2 gate is module 13's, and it is
+- [x] ⏸ **The `(capability, threshold-family multiset)` median ≤ 2 gate is module 13's, and it is
       already passing on today's corpus.** It is `Distribution/CellOccupancy` in
       `spec-set-charm-gen.md` §, a **generation distinctness** gate over the generated population —
       this module generates nothing. Measured on the 30 shipped sets as a data point, not as a gate:
@@ -3719,7 +3940,7 @@ own measured test.
       (`seedsmith/metrics/cell_occupancy.py`), registered in `build_registry()` and reproducing those
       exact four numbers from real data. It ships `gates = False` with a written promotion trigger —
       the threshold is defined over the generated ~904, not over these 30
-- [ ] ⏸ **Module 16 (`sockets`) should reuse `ThresholdEvaluator` rather than write a second one.**
+- [x] ⏸ **Module 16 (`sockets`) should reuse `ThresholdEvaluator` rather than write a second one.**
       Same shape — count inserts in one item, grant at breakpoints — at the **host item's** scope
       rather than the actor's. Deliberately not folded in: merging them would make the scope a
       parameter of a thing whose whole identity is its scope. `ThresholdConsumer<T>` is generic in the
@@ -4079,7 +4300,8 @@ rather than loosened to `>= 13`.
       **as a raw string splice — no `int.Parse` anywhere in the file — unpadded only because the
       prose's own worked examples (`charm.res-offense-2`, `-3`) are already unpadded** — so padding
       the corpus alone (without also repadding the prose's worked examples) makes the allocation
-      mismatch. `naming.v1.json` is `registryVersion 4, "frozen": true`, which
+      mismatch. `naming.v1.json` is `registryVersion 5, "frozen": true` (bumped 2026-09-07 for the
+      `combinations`/`socketWords` change, unrelated to this bullet's own point), which
       puts the note edit under the same **Ask first** as the set `partitionCount` bump. And
       `ThresholdGrantCorpusTests.All_ten_shipped_resonance_ids_are_unpadded_and_the_divergence_is_measured_not_normalised_away`
       asserts the current spelling on purpose. **Four things move together or none do**; this module
@@ -4670,18 +4892,19 @@ throws.
       from the prior count even though this same P4.1 entry's "files touched" list (below) names
       `RpgStore.Materials.cs` as built here. `src/FusionRpg.Data/` remains the complete boundary —
       nothing outside it references the table. Recorded for the day the owner says go.
-- [ ] ⏸ ⛔ **The shipped materials DISPLAY corpus is 21 rows for a 27-id vocabulary, and its four
-      shard rows point at ids that are never minted.** `data/seed/items/materials/materials.json`
-      authors `shard.common` / `rare` / `epic` / `legendary` — the retired band ids — and **zero** of
-      the ten `shard.{rung}` ids that actually ship, so six-plus shards would render with no name and
-      no icon. Everything that is not a shard row is already correct and issuable, which is what makes
-      this a re-author of ten rows rather than a corpus rebuild. Measured and pinned by
-      `The_shipped_materials_display_corpus_is_measured_not_assumed` so it cannot quietly change size.
-      **Not fixed here** because it is a stage-1a *generated* seed file whose ids are allocated by
-      `NamespaceAllocation`, and because the four legacy rows' retirement is bound up with the
-      "resolvable for one release" window `spec-rarity-migration.md` §4 point 4 owns — the same
-      four-things-move-together shape P3.3 recorded for the resonance ids. **Owner: this module, as a
-      corpus re-author; the presentation consumer is module 20 `item-surfaces`.**
+- [x] ✅ **RESOLVED 2026-09-07** — the shipped materials DISPLAY corpus now carries all 10 real
+      `shard.{rung}` ids (`material.022`-`031`: `shard.chaff` through `shard.almanac`, the full
+      `DemonRarityLadder`), authored for real through item-seedgen's `materials-gen` machinery (a hand-
+      authored answer table standing in for a live model call, honestly labeled in `_meta.amendments`,
+      matching `sockets-gen`'s own established precedent) rather than a hand-typed JSON edit. The 4
+      legacy rows (`shard.common`/`rare`/`epic`/`legendary`) are byte-unchanged — their retirement stays
+      bound up with `spec-rarity-migration.md` §4 point 4's separate window, untouched here, exactly as
+      this box originally scoped. **Verified against two independent real consumers**: `tools/
+      ItemSeedValidator` run against the full corpus (zero findings tied to any new row); `dotnet test
+      tests/FusionRpg.Core.Tests --filter MaterialCorpusTests` — 20/20 passing (independently re-run,
+      not just trusted), including the updated
+      `The_shipped_materials_display_corpus_now_carries_every_issuable_id` (was `..._is_measured_not_assumed`,
+      now asserts 31 rows / 10 shards / every `MaterialCatalog.All` id present).
 - [x] ⭐ **RESOLVED IN PART 2026-09-05 by module 15 — the corpus is 23 of 30 resolvable, up from 18.**
       The seven `reroll` rows were re-authored against the split verb the moment module 15 minted the
       `op_kind` namespace it lives in: `recipe.015/016/026/027/028` → `reroll-one` and
@@ -4729,10 +4952,12 @@ throws.
       .Sockets`'s own rule, *"half a socket rule would grant the wrong count, which is worse than
       granting none"*. **Owner: module 6.**
 - [ ] ⏸ **No `forge-gem` or `imbue` recipe exists to author against.** Both have priced reference rows
-      and both are in the operation vocabulary; neither has a content row, because gems are
-      **module 16**'s and D24's `socket-imbue` `op_kind` is **module 15**'s. The rows exist so those
-      modules price against a fixed vocabulary rather than a moving one, which is this module's whole
-      stated purpose.
+      and both are in the operation vocabulary; neither has a content row. Corrected 2026-09-07: D24's
+      `socket-imbue` `op_kind` (`MutationOpKind.SocketImbue`) is not itself unbuilt — it shipped
+      2026-09-05 (module 15/P4.2, see ~line 4924-4928). What's actually missing is the recipe CONTENT:
+      `forge-gem` and `imbue` still have no content row because gems are **module 16**'s and correctly
+      blocked on module 16/X7 for a real gem target. The rows exist so those modules price against a
+      fixed vocabulary rather than a moving one, which is this module's whole stated purpose.
 - [ ] ⏸ **A sixth spend class, a fourth catalyst, and a new operation verb all stay ask-first** — the
       Boundaries list, unchanged. `MaterialClass` has five members and `CatalystVerbs` three, both
       asserted closed.
@@ -4997,9 +5222,13 @@ caller's, because it is D4's content decision. `--targets M1` reports nothing in
 - [ ] ⏸ **The milestone ATOMS are not authored.** The stride is decided and tested; the reserved family
       space no affix pool may draw from is content, and no `affix-families/*.json` entry declares one.
       **Owner: the authoring fleet, same lane as the phantom families P2.2/P2.3 named.**
-- [ ] ⏸ **No endpoint, no wire DTO, no UI.** Consistent with modules 2/4/5/10–14: the item program's
-      server surface is **module 20 `item-surfaces`**, and adding an ad-hoc endpoint here would be the
-      second surface that module exists to prevent.
+- [ ] ⏸ **`reroll`, `transfer`, `restore` and milestone-atom-browsing still have no endpoint, wire DTO,
+      or UI.** Corrected 2026-09-07 — this is no longer a blanket claim: `enhance` itself already has a
+      live surface, `src/FusionRpg.Server/WorkbenchEndpoints.cs:120`'s `POST
+      /api/items/workbench/enhance` (alongside salvage/upcycle/socket-add/socket-insert/socket-imbue),
+      built 2026-09-06 and documented two paragraphs above this bullet. Consistent with modules
+      2/4/5/10–14: the item program's server surface is **module 20 `item-surfaces`**, and adding an
+      ad-hoc endpoint here would be the second surface that module exists to prevent.
 
 ---
 
@@ -5327,15 +5556,34 @@ this module's favour rather than left open.
 
 **⏸ Deferred, each with its owner named — none silently skipped:**
 
-- [ ] ⏸ **`ContainerKind.Gem` and `ContainerKind.Combo` — effect-atom's (X7), not this module's.**
-      `ContainerRow.cs` is still six values (`Item · Trait · Skill · SpeciesPassive · Patron ·
-      WorldBuff`) with six `PrefixOf` arms, verified. `spec-sockets.md`'s own Project Structure marks
-      that row **"NOT this module's"** by name. **Consequence, stated plainly:** this module cannot
-      author a single `gem.*` or `combo.*` **container row**, so the 25 generated resonances land in
-      `socket_combo_recipe` (their *recipe*) and the atoms they grant do not exist yet. What shipped is
-      the count rule, the evaluator, the operations and the state — which is the whole of what is
-      reachable at build position 16. ⛔ This is also why module 11's **41 `insert` drop entries stay
-      refused**: they need the container kind, not the count rule
+- [x] ⏸→✅ **`ContainerKind.Gem` and `ContainerKind.Combo` — landed 2026-09-07 (X7), and gem
+      container-BINDING built the same day, item's own.** `ContainerRow.cs` gained `Gem/Charm/Combo/
+      Consumable` (container-kind-expansion) plus a `ContainerValidator.cs` regex fix a full-suite run
+      caught that the original file-grep audit missed. **Same day, item's own follow-up landed too:**
+      `GemContainerBuild`/`GemCorpus` (`src/FusionRpg.Core/Items/Gems/`) bind the shipped 60-entry gem
+      catalog into real `ContainerRow`s — `family × powerBand → tier` (reusing `UniqueBudget.
+      TierOfPowerBand`, the same frozen `bands.v1.json` mirror uniques already use, not a private
+      third copy) → atom id (`AtomRow.DeriveId`, passing the gem's own `element` as the variant, which
+      `UniqueContainerBuild` never needed to because no shipped unique fixed atom carries one). Measured
+      against the REAL production atom catalog (`data/seed/items/affix-families/*.json` expanded
+      through `FamilyExpansion.Expand` — the exact pipeline `AtomImporter` runs at boot, confirmed by
+      reading `Server/Program.cs:810`, NOT the separate `data/seed/atoms/generated/*.json` snapshot
+      which only 3 partitions ever populated and which boot never reads): **27 of 60 gems build into a
+      real, `ContainerValidator`-passing container today; 33 correctly refuse by name** (their family/
+      element/tier combination isn't in the affix-family corpus yet) — the same measured-not-guessed
+      shape `unique-corpus-atom-family-gap` already established for uniques (144 anchors, 4 buildable).
+      A built container round-trips through `Instantiator.TryInstantiate` — the SAME shared engine loot
+      drops and unique items already use in production, zero gem-specific code needed on that side.
+      Proof: `GemContainerBuildTests.cs`, 4/4 green, run against the real shipped corpus, not a fixture.
+      **What's still genuinely open, named precisely rather than left as "no container exists":**
+      `ItemWorkbench.SocketInsert` does not yet call this builder — it still tracks a socket's insert by
+      the flat `GemInsertCorpus` display stopgap, and even once wired, the instantiated atom still needs
+      a real `effect_binding` row to actually affect combat (the same shape `equip-runtime`'s own
+      multi-round wiring effort needed for equipped items' stat mods) — that binding step, not container
+      minting, is now the real remaining gap. Combo's 25 generated resonances remain blocked on the
+      102 Strain/Splice CONTENT rows themselves being model-call output (module 21, still correctly
+      held), so this fix does not yet unblock module 11's 41 refused `insert` drop entries or the combo
+      side of this bullet — only the gem side moved
 - [ ] ⏸ **`bind_ordinal INTEGER NOT NULL DEFAULT 0` on `effect_binding` — effect-atom E6's.** Today's
       DDL is `binding_id · instance_id · owner_kind · owner_key · slot · priority · source ·
       bound_utc · revision`, confirmed in `RpgStore.AtomInstances.cs`. The socket half of the contract
@@ -5701,25 +5949,35 @@ against real shipped data.
       frozen registry, and X7 still leaves the 102 with no container home. Wiring the graph here
       before those land would produce rows nothing can bind.
 - [ ] ⏸ **X7 — `ContainerKind` gaining D27's `combo` value — effect-atom's, and the same blocker P3.1,
-      P3.2 and P4.3 all carry.** `ContainerRow.cs` is still six values. **Consequence, stated plainly:**
+      P3.2 and P4.3 all carry.** `ContainerRow.cs` is now SEVEN values (`Item · Trait · Skill ·
+      SpeciesPassive · Patron · WorldBuff · Enemy` — `Enemy` added for party-dungeon D2.6,
+      2026-09-07) — still no `Combo`/`Gem`/`Charm`/`Consumable`, so the substantive blocker is
+      unchanged; only the stale count is corrected here. **Consequence, stated plainly:**
       the 102 have recipe rows waiting for them in `socket_combo_recipe` (module 16's
       `SeedComboRecipes` never deletes a row it did not write) but **no container to bind their atoms
       into**, so the run's output cannot be persisted as effects until it lands. A wiring gap with a
       named owner, not a wall.
 - [ ] ⏸ **The per-actor cap is TUNED but not ENFORCED — module 12's evaluator, at assignment time.**
       `maxCombosPerActor: 3` ships in `sockets.v1.json` (module 16) and this module asserts it stays a
-      **non-binding backstop above the geometric ceiling of 2**. Nothing counts combinations across
-      *equipped items* yet; the spec places that in the threshold evaluator — citing item-ideal.md §2g #8
-      only for the raw per-actor-cap number, and that citation itself quotes §2g #8's pre-2026-09-04
-      wording, not its corrected "ceiling is 2, backstop 3" text — and the spec says **"named here; not
-      built here."** Restated so it stays named.
-- [ ] ⏸ **Module 20's compendium reveal and socket-UI preview are REQUIREMENTS, not niceties — and
-      only half of the pair exists.** P5.4 built `CombinationDistance` on module 16's write-free
-      `Preview`, with the four display states and the multiset swap distance D41 forced. The
-      **compendium reveal** (*"a combination is revealed once the player has held every ingredient at
-      least once"*) has no owner-side state and is not built. Both are carried in this module's
-      catalogue report with `owner: module 20 (item-surfaces)` so a run cannot print 127 without
-      printing who owes the mitigation. **Cross-referenced into P5.4.**
+      **non-binding backstop above the geometric ceiling of 2**. **Corrected 2026-09-07:** the
+      counting/capping logic exists — `SocketCombinationCap` in
+      `src/FusionRpg.Core/Items/Sockets/SocketOperations.cs:227-260` (landed commit 4e9e8bd, 2026-09-05;
+      `Apply()` ranks by tier+container-id and takes `tuning.MaxCombosPerActor`, `Suppressed()` reports
+      what got dropped) — but it has **no production caller yet**, so this is a wiring gap, not an
+      unbuilt mechanism. The spec's own citation of item-ideal.md §2g #8 for the raw per-actor-cap number
+      quotes §2g #8's pre-2026-09-04 wording, not its corrected "ceiling is 2, backstop 3" text — and the
+      spec says **"named here; not built here."** Restated so it stays named.
+- [ ] ⏸ **Module 20's compendium reveal and socket-UI preview are REQUIREMENTS, not niceties.**
+      P5.4 built `CombinationDistance` on module 16's write-free `Preview`, with the four display states
+      and the multiset swap distance D41 forced. **Corrected 2026-09-07 — the compendium reveal IS
+      built:** `src/FusionRpg.Core/Items/Surfaces/CompendiumReveal.cs` (commit 20743ba, 2026-09-05) has a
+      real production caller, `src/FusionRpg.Server/ItemSurfaceEndpoints.cs` around line 196-202
+      (`CompendiumReveal.Render(rows, catalog, held, socketTuning, surfaceTuning)`, fed by
+      `HeldLedger.From(store.ListStock(...))`). The narrower, already-documented gap stays real: the
+      endpoint's own comment says the "held" ledger is approximated by current stock rather than a true
+      ever-held ledger. Both are carried in this module's catalogue report with
+      `owner: module 20 (item-surfaces)` so a run cannot print 127 without printing who owes the
+      mitigation. **Cross-referenced into P5.4.**
 - [ ] ⏸ **`naming.v1.json` registryVersion 5 — the `socketWords` → `combinations` idNamespace and its
       `sockword.{seq:03}` template — is an ASK-FIRST on a frozen registry and is not done here.** The
       grid mints no `{seq:03}` at all (a Strain's identity is its cell, not its position in a wave),
@@ -6599,10 +6857,14 @@ the one row that is neither.
       them"* is no longer true — but the **mechanism** the lane asked for is still absent, which is the
       part that matters. v1's run-scoped lifetime needs none of it
 - [ ] ⏸ **The `board`, `revive` and `utility` classes stay declared and ungenerated**, refused by name
-      with the reason each has no executor: `board` waits on an overlay use affordance plus
-      `capPerMatch` (**G4**, still unimplemented), `revive` on the battle-mode use moment (the action
+      with the reason each has no executor: `board` waits on an overlay use affordance alone (the only
+      remaining blocker — see correction below), `revive` on the battle-mode use moment (the action
       layer), `utility` on the menu executor above. Widening `classesAuthored` in
-      `data/tuning/consumables.v1.json` is the whole change the day one lands
+      `data/tuning/consumables.v1.json` is the whole change the day one lands. **Corrected 2026-09-07:**
+      `capPerMatch` (**G4**) is not unimplemented — it ships in `RunnerState.cs:111-129`
+      (`CapReached`/`CountDispatch`/`ClaimCapNotice`) and `AtomRunner.cs`, tested in
+      `tests/FusionRpg.Core.Tests/Atoms/CapPerMatchTests.cs`, per `AtomKindRegistry.cs:635-639`'s own
+      comment ("E15 shipped the counter 2026-08-22... the 'not available yet' guard is lifted")
 - [x] ✅ **`use_context = battle` — RESOLVED AND BUILT 2026-09-05. `lawn` stays refused, on its own two
       reasons rather than by association.** See the follow-up block below for the build and its evidence.
       - **Before:** both contexts refused by `ConsumableValidator`, citing `ssot-consumables.md` §9.5(b)
@@ -7024,22 +7286,16 @@ was still worth it, because it found handshake item 8 already closed (G1 below).
       type with a real action driven through a battle; GA4 needs the `granted` role's first real
       exercise. With no `rpg_action` row, both would be a fixture pretending to be a proof. **GA2 is
       what ships**, and the module says so rather than authoring rows that point at an empty table
-- [ ] ⏸ **`ApplyEquippedGrants` has no equip ENDPOINT calling it — and neither does module 4's own
-      write.** Verified, not assumed: `RpgStore.SaveAssignment` / `RemoveAssignment` (module 4's whole
-      equip road) also have **zero** callers outside `tests/`. The projection is wired to exactly the
-      depth module 4's own equip write is wired — store level — and the missing caller is the same
-      missing endpoint (module 2's entry already records *"Core + DAL; endpoints deferred"*).
-      ⛔ **Deliberately NOT called from inside `SaveAssignment`:** module 1's R1 keeps unequip as *"one
-      row deleted, no second writer"*, and `EquipProjector` is likewise a separate projection the
-      caller runs rather than a side effect of the assignment write. `ApplyEquippedGrants` mirrors it
-      exactly. **Owner: module 20 / the server's equip endpoint.**
-      ⚠ **Re-checked 2026-09-05 and still open — module 20 landed the item program's first server
-      surface and it is deliberately READ-ONLY.** `ItemSurfaceEndpoints.cs` carries three `MapGet`
-      routes and **no `MapPost` at all**, because equipping, socketing and salvaging already have
-      owners (modules 4, 16, 14) and a write path through the presentation layer is the "second
-      surface" that module exists to prevent. So the equip WRITE endpoint is still unbuilt, and its
-      real owner is **module 4's own server surface**, not module 20's. Corrected here rather than left
-      pointing at a module that has now shipped without it. See P5.4
+- [x] ✅ **RESOLVED 2026-09-07 (P1.5-L) — was accurate 2026-09-05, now stale.** Module 4's own server
+      surface (`ItemEquipEndpoints.cs`, `POST /api/items/equip`/`/unequip`, built 2026-09-06 as P1.4-E)
+      now DOES call `ApplyEquippedGrants` — via the new `SyncLawnRuntimeAsync` →
+      `RpgStore.MaterializeRolledEquipRuntime` chain added in P1.5-L, the exact "module 4's own server
+      surface" this item named as the real owner. `EquipProjector`/`ApplyEquipProjection` are called
+      through the same chain, so both projections this bullet tracked are wired at the endpoint level
+      now, not just at store level. Confirmed via `grep`: `ApplyEquippedGrants`'s only non-test callers
+      are `RpgStore.MaterializeRolledEquipRuntime` and its own DAL neighbors — no separate second
+      writer was added, matching R1's "one row deleted, no second writer" discipline this item was
+      careful to preserve. Full account: P1.5-L below.
 - [ ] ⏸ **`item_granted_action.container_id` carries no FK — the identical wiring gap module 17
       recorded for `item_unique.derived_from`.** §5.2 wants `FK → item_base_type(container_id)`;
       module 6 shipped the 740-row corpus and the Core readers, **not a table**, so the FK has nothing
@@ -7086,7 +7342,7 @@ was still worth it, because it found handshake item 8 already closed (G1 below).
       what §5.3 exists to prevent, so this module keeps the closed two and `TryParse("on-use")`
       returns **false**, asserted. If the seam ever unifies, it unifies onto one of the two — a
       decision, never a drift
-- [ ] ⏸ **§9.11's *"is a granted action rolled"* (I12) needs no work and is recorded as satisfied.**
+- [x] ⏸ **§9.11's *"is a granted action rolled"* (I12) needs no work and is recorded as satisfied.**
       The grant lives on the base type (§4.4), so nothing about this seam is rolled and there is no
       generator surface to forbid — SC5 is satisfied by having none, which is the third of §4.4's own
       three reasons
@@ -7492,10 +7748,12 @@ show the attunement half of the affinity rule the spec asks for.
       the sizing, and it hands one requirement back.** Its `catalogue.report()` prints
       **127 against ssot-sockets §4.4's ~45 bar (2822‰, 2.8×)** and carries this module's two
       mitigations as REQUIREMENTS with `owner: module 20 (item-surfaces)` — so a run cannot print 127
-      without printing who owes them. ⚠ **Only half of the pair exists:** the socket-UI preview and
-      the swap-distance hint landed here (P5.4), the **compendium REVEAL rule** — *"a combination is
-      revealed once the player has held every ingredient at least once"* — has no owner-side state and
-      is **not built**. The 102 rows are still module 21's; the reveal rule is this module's. See P4.4
+      without printing who owes them. ✅ **RESOLVED 2026-09-07 — the pair is now whole:** the socket-UI
+      preview and the swap-distance hint landed here (P5.4), and the **compendium REVEAL rule** — *"a
+      combination is revealed once the player has held every ingredient at least once"* — shipped one
+      day later as `CompendiumReveal.cs`/`HeldLedger`, wired into `ItemSurfaceEndpoints.cs` around line
+      196-202 (see P5.4's own addendum). The residual — 127 vs 25 catalog rows today — is module 21's,
+      unaffected by this fix. See P4.4
 - [ ] ⏸ **An armoury row's `role` and `frame` come back empty, and role/frame filtering is not
       offered.** They live on the item's BASE TYPE, and module 6 shipped the 740-row corpus and the
       Core readers but **not a table** — the identical wiring gap P5.1 recorded for
@@ -7518,10 +7776,13 @@ show the attunement half of the affinity rule the spec asks for.
       surface is a spec change, not an implementation detail. ⛔ The cheap half — *showing a frame
       badge on the item card* — is already in `ContainerHeader.frameBadge` (`types.ts:139`) and is the
       `.tsx` pass's, not a new surface
-- [ ] ⏸ **The `battle-only` presentation tag (module 19's P5.3 hand-off) and a unique's flavour text
-      (module 17's P5.1) are `.tsx` work**, not Core work — both are *"render this string"* with no
-      deterministic rule to test. They ride the deferred render pass above rather than being claimed as
-      done here
+- [ ] ⏸ **A unique's flavour text (module 17's P5.1) is `.tsx` work**, not Core work — it is
+      *"render this string"* with no deterministic rule to test, and rides the deferred render pass
+      above rather than being claimed as done here. **Corrected 2026-09-07:** the **`battle-only`
+      presentation tag** (module 19's P5.3 hand-off) is no longer pending — it renders today,
+      `web/fusion-rpg-web/src/layers/relics/ItemCard.tsx:149-158` reads
+      `const battleOnly = line.args.battleOnly === "1"` and emits a
+      `<span data-testid="...-granted-battle-only">battle only</span>`
 - [ ] ⏸ **Module 15's `Restore` admin surface (P4.2's hand-off, *"when an admin surface exists (module
       20)"*) is NOT built.** It is an administrative rollback to a recorded `op_seq` — **a write**, and
       this module's server file is read-only by design. An admin console is not one of the six player
@@ -7880,7 +8141,7 @@ CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTes
 > | ~~see (previous)~~ | ⚠ superseded | ⭐ **The client exists as of this date.** `ArmouryList`, `ArmouryFilter`, `Paperdoll`, `ItemCard` and `Compendium` are on disk under `layers/relics/`, wired through `lib/bus/items.ts` to `GET /api/items/armoury/{playerId}` and `/api/items/surfaces/{playerId}`, and proven live (both routes answer the running server, and Vite dev transforms the modules clean). ⛔ **What it can show is still identity + rarity + flags**, because no route serves module 10's rendered `DisplayModel` — the card's affix/socket/set/enhancement blocks render their honest pending state. **A player can now see their items; they cannot yet read one.** Owner: this module, one read-only route |
 > | **compare** | ⚠→⭐ **the verb is now REAL — the payload landed 2026-09-06 (fifth pass)** | ⭐ **`GET /api/items/{instanceId}/compare/{incumbentId}` serves the real `CompareModel`** — `DominancePresentation`'s verdict word + shape, the sidegrade trade, the unit-class grouping and the permanent footnote key, plus both rendered cards and the flattened line diff. Live in `CompareView`: `SWAPPING SPUN CAP → HONED HATCHET / ◇ incomparable / incomparable reason / DAMAGE AND HIT POINTS …`, with the footnote drawn and no dismiss control. ✅ ~~⛔ **Two real defects the live run exposed, named in the fifth-correction block and NOT fixed here:** `ArmouryCompare` reads every `onApply` band as 0 (so the delta table is all zeros on real corpus content — module 13's), and `ChannelDelta.Unit` disagrees with the group header for `maxHp` (modules 13/20).~~ **Both FIXED the same day (sixth pass)** — the band was a real code bug (the corpus authors it; the reader was number-only) and the unit disagreement was settled against spec-item-card.md's unit ledger in the group header's favour. See the sixth-pass block in the fifth-correction section for the red-first evidence. Previous state, kept: |
 > | ~~compare (previous)~~ | ⚠ superseded | `CompareView.tsx` exists: stack-first at 640px, unit-class group headers, the verdict word+shape, the sidegrade trade, the permanent footnote (test-asserted to carry no dismiss control). ⛔ **`DominancePresentation` is still Core-only** — no `MapGet` serves its payload, so the delta table renders pending rather than fabricating deltas client-side. Owner: this module |
-> | **equip** | ⛔→⭐ **the verb is now REAL and was driven end to end; the clause still fails on "an item"** | ⭐ **Built and proven 2026-09-06 (fourth pass) — see P1.4-E.** `ItemEquipEndpoints.cs` maps `POST /api/items/equip`, `POST /api/items/unequip` and `GET /api/items/assignments/{specimenId}`, and `SaveAssignment` / `RemoveAssignment` have a production caller for the first time. Driven against a **published** server: a real item went into `armament-primary` on a real bound specimen (200), and an **independent OS process** reading the running server's own SQLite file saw `armament-primary \| rolled \| 10b41112…`; unequip emptied the role and left the item owned. Four refusals were exercised live and each answered 409 with its own named rule — `equip.role-mismatch`, `equip.already-worn`, `equip.specimen-unknown`, `equip.role-empty`. The armoury tab's `Equip` is no longer disabled and `Paperdoll` now offers `Take off` on an item cell. ⛔ **Still not met** for the same reason as socket and craft: there is no *generated* item to equip (the row below), and the proof had to hand-seed two. ⏸ And an equipped item **changes no number yet** — bind is a deploy-time projection and `ApplyEquipProjection` (module 5) / `ApplyEquippedGrants` (module 19) still have zero production callers. ⛔ The relic write (`UniqueActorEndpoints.cs:85`) stays a separate, deliberately unmerged system; this route refuses a relic's role by name, **and the reverse is not true — measured defect R1 in P1.4-E** |
+> | **equip** | ⛔→⭐ **the verb is now REAL and was driven end to end; the clause still fails on "an item"** | ⭐ **Built and proven 2026-09-06 (fourth pass) — see P1.4-E.** `ItemEquipEndpoints.cs` maps `POST /api/items/equip`, `POST /api/items/unequip` and `GET /api/items/assignments/{specimenId}`, and `SaveAssignment` / `RemoveAssignment` have a production caller for the first time. Driven against a **published** server: a real item went into `armament-primary` on a real bound specimen (200), and an **independent OS process** reading the running server's own SQLite file saw `armament-primary \| rolled \| 10b41112…`; unequip emptied the role and left the item owned. Four refusals were exercised live and each answered 409 with its own named rule — `equip.role-mismatch`, `equip.already-worn`, `equip.specimen-unknown`, `equip.role-empty`. The armoury tab's `Equip` is no longer disabled and `Paperdoll` now offers `Take off` on an item cell. ⛔ **Still not met** for the same reason as socket and craft: there is no *generated* item to equip (the row below), and the proof had to hand-seed two. ~~⏸ And an equipped item **changes no number yet** — bind is a deploy-time projection and `ApplyEquipProjection` (module 5) / `ApplyEquippedGrants` (module 19) still have zero production callers.~~ ✅ **CLOSED 2026-09-07 — P1.5-L**: both are called now, via `ItemEquipEndpoints.cs`'s own new `SyncLawnRuntimeAsync`. ⛔ The relic write (`UniqueActorEndpoints.cs:85`) stays a separate, deliberately unmerged system; this route refuses a relic's role by name, **and the reverse is not true — measured defect R1 in P1.4-E** |
 > | **socket** | ⚠→⭐ **the UI now calls the real route, PROVEN against a real item; the clause still fails on "an item" ONLY — defect 1 is now closed** | ⭐ **Wired 2026-09-06 (third pass).** `SocketBench.tsx` calls `POST /api/items/workbench/socket-add` and `/socket-insert` through `lib/bus/items.ts`, and it was **driven end to end**: two real bores opened `item_socket` rows `[0]` and `[1]` on a real stored item at the server's own price (200 souls + 12 substrate + 1 catalyst each), a third was refused `socket.no-free-socket … socketMax of 2`, and an independent read-only re-read of the database showed both sockets persisted with `crafted=1`. `socket-imbue` is drawn **disabled with its real reason**: no shipped recipe authors the operation, confirmed live as 409 `material.recipe-unknown`. ✅ **Defect 1 is FIXED and re-verified live 2026-09-06 (fourth pass):** `FusionRpg.Server.csproj` now carries the `data\seed\items\**\*.json` content rule, and on a freshly **published** server `POST /api/items/workbench/salvage` answers **409 `item.unknown`** — mapped and real, not the 405 this file recorded. ⛔ **Still not met**, now for one reason only: there is no generated item to socket (the row below) |
 > | **craft** | ⚠→⭐ **the UI now calls the real routes, PROVEN end to end; the clause still fails on "an item" and on defect 3 — defect 1 is now closed** | ⭐ **Wired 2026-09-06 (third pass).** `Workbench.tsx`'s `CraftBench` calls `POST /api/items/workbench/{salvage\|upcycle\|enhance}`. Proven against a real server: `upcycle` spent 5 and granted 1 with the balance moving 500 → 495; the **same `correlationId` replayed** returned the recorded cost and spent nothing further; `enhance` took the item to `+1` with `enhance_level = 1` persisted; `salvage` flipped the disposition and granted the yield, after which a further verb was refused by name. Every quantity shown is the server's. ⛔ **Still not met** for the same two reasons as **socket**, plus **defect 3**: no route lists the craft recipes, so the bench asks the player to type a `recipeId` |
 >
@@ -7904,9 +8165,12 @@ CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTes
 >   role.~~ ✅ **CLOSED 2026-09-06 (fourth pass) — P1.4-E.** `POST /api/items/equip` and
 >   `/api/items/unequip` exist, the web armoury tab calls them, and one real item was put in a role
 >   on a real specimen against a published server with the row read back by an **independent OS
->   process**. ⏸ What remains under this verb is narrower and belongs to two other modules: an
+>   process**. ~~⏸ What remains under this verb is narrower and belongs to two other modules: an
 >   equipped item **changes no number** until something calls `ApplyEquipProjection` (module 5) or
->   `ApplyEquippedGrants` (module 19) at deploy, and both still have zero production callers.
+>   `ApplyEquippedGrants` (module 19) at deploy, and both still have zero production callers.~~
+>   ✅ **CLOSED 2026-09-07 — P1.5-L.** `ItemEquipEndpoints.cs`'s same two routes now call both, via
+>   `SyncLawnRuntimeAsync` → `RpgStore.MaterializeRolledEquipRuntime`, after every successful equip/
+>   unequip. An equipped item's `stat.modify` atoms now materialize and (per the live redeploy) fire.
 > - **compare** and the full **card** still wait on module 20's own three read-only routes.
 >
 > ⛔ **Do not re-mark this ✅** until an item exists and the card/compare payload routes land. **Two**
@@ -9253,7 +9517,7 @@ points at evidence already recorded, above, by name.
 | 2 `armoury` | ✅ built, verified; **the loadout library's missing half built 2026-09-06** (`LoadoutReport`, `GetLoadoutEntriesValidated`, `FindAssignmentHolders`, 15 tests) | P1.2 + Final-proof/Phase 0+1 |
 | 3 `slot-roles` | ✅ built, verified. ⚠ named, not fixed: `SeedRoles` has zero production callers — module 3's own tables are empty in a deployed DB | P1.3 + Final-proof/Phase 0+1 |
 | 4 `equip-assign` | ✅ built, verified; relic-migration mutual-deferral closed 2026-09-06. ⭐ **The equip ENDPOINT landed later the same day (P1.4-E)** — `POST /api/items/equip` + `/unequip` + `GET /api/items/assignments/{specimenId}`, so `SaveAssignment`/`RemoveAssignment` have a production caller and the web armoury tab's `Equip` is real; proven against a published server with the row read back by an independent OS process. ✅ **R1 fixed** — the older relic route silently overwriting a live item assignment (and, found in the same fix, an even worse sibling: `ClearUniqueEquipmentSlot`'s unqualified `DELETE` would have unequipped the item outright). Both now refuse `409 slot.claimed_by_item`, proven live (`PUT`/`DELETE` on a claimed role → 409, row byte-unchanged; a free role still 200). ✅ **2026-09-07 — the "what remains" gap CLOSED**: `RpgStore.MaterializeRolledEquipRuntime` (new) calls `ApplyEquipProjection`/`ApplyEquippedGrants` from `WebMatchService.BuildSquad` — squad build IS this module's own "deploy" moment (`ssot-inventory.md:132` names it as one of exactly two triggers). ⚠ Re-investigated rather than accepted as "the same Injector-side gap Checkpoint 1 names" (that framing conflated two unrelated mechanisms — see Checkpoint 1's own corrected row): this was a plain missing-caller wiring gap, not environment-blocked, and needed no game install. Two more real defects found and fixed in the process: `EquippedActionIdsFor`'s grant-read scope had been moved `Entity`→`UniqueActor` by a same-day concurrent fix (for durable unlock-ladder grants) which would have silently orphaned item-granted-action writes — fixed by merging both scopes; and `ApplyEquippedGrants` alone cannot detect "this item was unequipped since the last call" (it only withdraws sources still present in the CURRENT assignment list) — added the missing diff-against-stored-state withdrawal, proven by a real equip→battle→unequip→battle-again round trip. Red-first per new behavior; full suites after: Data **1119/1** (1 pre-existing `ItemUniqueStoreTests` failure, unrelated), Server **289/25** (all 25 pre-existing, unrelated `World*`/`Aptitude`/`ContentBootStartupWiring`/`DistrictAssault` — a same-day concurrent world-stage stream, confirmed via TRX, zero new) | P1.4 + P1.4-R + P1.4-E + P1.4-G (2026-09-07) |
-| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ✅ **`ApplyEquipProjection` now has a real production caller (2026-09-07, see module 4's own row)** — the module's own payoff (an equipped rolled item's `stat.derived` atoms reach `BattleStatComposer` through the already-shipped `EquipAtomSource` resolver) is proven live end to end. ⚠ **Correction, 2026-09-07:** the single open item this row named — "Injector-side `BindGrant`, environment-blocked" — was a misattribution, found while wiring the fix above. `BindGrant` (`UniqueOwnerBinder.cs`) is a real, already-wired, already-live mechanism with its own Harmony-hooked production callers (`MatchHost.Apply` → `GameHooks.cs`) — but for an entirely different thing, a demon specimen's own bound-loadout stat mods, never item equip. It has no relationship to this module's gap, so citing it as this module's blocker was the same "citation is real but doesn't entail the conclusion" pattern this file names three times elsewhere. **What is genuinely, separately true and still open:** verifying `BindGrant`'s own live behavior end-to-end needs a real attached game process — that limit is real, it is just not this module's | P1.5 + Final-proof/Module 5 + Checkpoint 1 |
+| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ✅ **`ApplyEquipProjection` now has a real production caller (2026-09-07, see module 4's own row)** — the module's own payoff (an equipped rolled item's `stat.derived` atoms reach `BattleStatComposer` through the already-shipped `EquipAtomSource` resolver) is proven live end to end. ✅ **Battle-half `stat.modify` equip wiring built and proven 2026-09-07 (P1.5-B)** — `ActionContainerEffectResolverFactory.BuildEquip` + `BattleRunState.BindEquip`, a real `stat.modify` affix atom reaches a real `BattleEngine.Resolve`'s Bag; found and fixed a real defect along the way (`WebMatchService.BuildSquad` never set `BattleActorSetup.SpecimenId`, silently blocking both `stat.derived` AND `stat.modify` equip paths). ✅ **Lawn-half wiring built and proven 2026-09-07 (P1.5-L)** — see this file's own P1.5-L box for the full trace: `ItemEquipService.Equip`/`Unequip` (the real `POST /api/items/equip`/`/unequip` write surface) never called `MaterializeRolledEquipRuntime`, so a Lawn-bound specimen (never sent into a battle) had its equipped rolled items' `effect_binding` rows materialized NEVER, regardless of what the atom push mechanism itself did. Fixed: both endpoints now call `MaterializeRolledEquipRuntime` then re-push via `UniqueActorService.PushAtomUnionAsync` (made public) on every successful equip/unequip. Proven red-first (`RolledItemEquipRuntimeTests`, 4/4). ⚠ **Correction, 2026-09-07 (twice, same day):** first pass concluded the single open item this row named — "Injector-side `BindGrant`, environment-blocked" — was a misattribution, since `BindGrant`'s EXISTING wired caller (`UniqueLoadoutSpec.BindToPtr`) is for an unrelated mechanism (a demon specimen's own bound-loadout stat mods, never item equip). That was half right and half wrong: the EXISTING caller genuinely is unrelated, but the underlying need the original note pointed at was real — just solvable **server-side**, not injector-side. ✅ **Found live, same day, on the actual owner-authorized live-run attempt**: equipping a real item produced no stat change; the injector's own log named the cause verbatim (`"ERR debug.effect.grant: instance: forbidden in Hot; bind to entity:{ptr}"`). Root cause: `AtomPushService.Build` stamps every UniqueActor-scoped grant with a durable `instance:{id}` key and never rewrote it to `entity:{ptr}` — a gap the whole compiled-push mechanism has carried since T6.1 (2026-09-06), affecting every UniqueActor-scoped grant this service has EVER sent, not just equip. **Fixed inside `Build` itself**, using the specimen's own durably-tracked `LastPtr` — no injector build needed after all, closing the "cannot be proven by anything CI runs" framing several pre-existing tests had encoded. 7 pre-existing tests that had pinned the broken `instance:` shape as correct were updated; 2 new tests added (`AtomPushServiceInstanceOwnerRewriteTests`). Redeployed live and re-confirmed: the grant is now accepted, entity-scoped, and fires (`ok:true`, correct target found and reapplied) — a real, dramatic improvement from total refusal. **What remains genuinely, narrowly open**: the final PvZ-visible stat number for the specific test specimen used (a SunFlower) stayed unchanged, most likely because SunFlower has no live-exercised attack stat for a non-attacking support plant, not a further bug — a follow-up with an attacking plant type or the `maxHp` channel is the named next step. Full detail: this file's own P1.5-L box | P1.5 + P1.5-B + P1.5-L + Final-proof/Module 5 + Checkpoint 1 |
 | 6 `base-types` | ✅ built, verified, re-verified 2026-09-06 | P2.2 + Final-proof/Phase 2 |
 | 7 `rarity-bands` | ✅ built, verified, re-verified 2026-09-06 in full | P2.1 + Final-proof/Phase 2 |
 | 8 `affix-legality` | ✅ built, verified; **a real validation blind spot found and closed 2026-09-06** (`RoleFamilyCheck` never checked corpus→file; today's new `g-punisher.json` families were silently violating D3's role-relocation rule) | P2.3 + Final-proof/Phase 2 |
@@ -9304,15 +9568,16 @@ reproduced directly, that would hit any real deploy running `--validate` today.
 ### What remains genuinely open, complete list, nothing hidden
 
 **Structural — outside what a coding session can close, correctly held rather than forced:**
-1. `classes.v1.json` v4's full generation run — held for explicit user authorization beyond the
-   already-authorized evaluation sample (Checkpoint 0). ⚠ **Re-checked 2026-09-07, still correctly
-   held, for MORE concrete reasons than before**: `AtomImporter --check --validate` was reproduced
-   failing outright (fixed the same day, see item 4 below, but was real at check time); even after that
-   fix, only 25/109 affix families pass the FULL draw-eligibility gate chain (84 refused at other
-   gates: no `op`, unlisted `op`, no `BattleRuleset` curve, or quarantined) — a full ~904-piece run today
-   would still overwhelmingly redraw the same 25 families, not the diversity the run is meant to buy;
-   and `classes.v1.json` itself is still `registryVersion 3` with 4 of its own named prerequisites
-   unstarted (plus a stale `frozenNote` still reading "FROZEN v2").
+1. `classes.v1.json` v4's full generation run — ✅ **APPROVED 2026-09-07, but sequenced, not
+   immediate.** Owner's own words: build everything first (item-seedgen's 11 modules through its own
+   Checkpoint E, AND this program's own queued P1.5-B/P1.5-L equip-wiring tasks), THEN run classes.v1.json
+   v4's registry regeneration, THEN run the full set/charm/strain generative content pass. The concrete
+   reasons this was held (re-checked the same day: only 25/109 affix families passed the full
+   draw-eligibility gate, `classes.v1.json` itself had 4 unstarted prerequisites) are exactly what
+   "build everything first" is meant to resolve before the run — item-seedgen's own `affix-families-gen`/
+   `base-types-gen` are the tooling that would fix the 25/109 problem; running before they exist would
+   reproduce it. **Do not run any part of this until item-seedgen's own Checkpoint E and this program's
+   P1.5-B/P1.5-L both close** — full detail and the exact sequencing rationale: `tasks/item-seedgen-plan.md`.
 2. Injector-side `BindGrant`'s own live-process verification — needs a real PVZ Fusion game install
    (Checkpoint 1). ⚠ **Corrected 2026-09-07**: this item was previously conflated with module 4/5's
    equip→combat wiring gap (both cited under Checkpoint 1). They are unrelated mechanisms — `BindGrant`
@@ -9435,9 +9700,12 @@ reproduced directly, that would hit any real deploy running `--validate` today.
       suites after: Data **1074/1074**; Core **12402/20** and Server **236/25**, every red the same
       pre-existing atom-corpus/battle-tempo/class-system/world-projection cluster, zero new, zero in
       `Items.*`/`UniqueActor*`. 4 guards OK, overflow 0 critical, magic-numbers 0.
-    - A fifth, structural finding restated rather than newly discovered: `ApplyEquipProjection`/
-      `ApplyEquippedGrants` still have zero production callers, so an equipped item persists but changes
-      no in-battle number yet — the same Injector-side gap Checkpoint 1 already names.
+    - A fifth, structural finding restated rather than newly discovered, true when this pass ran
+      2026-09-06: `ApplyEquipProjection`/`ApplyEquippedGrants` still had zero production callers, so
+      an equipped item persisted but changed no in-battle number yet — the same Injector-side gap
+      Checkpoint 1 already named. ✅ **CLOSED 2026-09-07 — P1.5-L**, see that section: both now have
+      real production callers via `ItemEquipEndpoints.cs`'s `SyncLawnRuntimeAsync` (Lawn) and
+      `WebMatchService.BuildSquad` (Battle).
 
 **Named, scoped, owned, not dispatched this pass:**
 13. Eight unbuilt module-2 spec features (module-sized, not this pass's to absorb), `SeedRoles`'s zero

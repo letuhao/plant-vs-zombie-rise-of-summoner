@@ -23,10 +23,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:54:26Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -48,7 +49,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "cybernetic-undead",
       "bionic-remnant"
@@ -181,10 +182,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:33:54Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {
         "aptitudePrimary": "Fortitude",
         "elementPrimary": "earth"
@@ -209,7 +211,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "cybernetic-undead"
     ],

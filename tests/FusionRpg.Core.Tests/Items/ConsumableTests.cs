@@ -565,23 +565,31 @@ public class ConsumableTests
     }
 
     [Fact]
-    public void The_container_kind_is_refused_BY_NAME_because_X7_has_not_minted_it()
+    public void A_wrong_container_kind_is_refused_BY_NAME_now_that_X7_has_minted_Consumable()
     {
-        // ⛔ Neither the enum value nor the documented `item` fallback is chosen here.
-        // spec-consumables.md's §Open puts the fifth ask at the owner's level, batched with D27.
-        Assert.False(ConsumableLimits.ConsumableContainerKindAvailable);
-        // 7, not 6, since party-dungeon D2.6 added ContainerKind.Enemy as its own reviewed seventh
-        // kind -- unrelated to "Consumable" (still unminted, the assertion right below still holds).
-        Assert.Equal(7, Enum.GetValues<ContainerKind>().Length);
-        Assert.DoesNotContain("Consumable",
+        // ⭐ CORRECTED 2026-09-07 (container-kind-expansion, X7 landed): this used to prove EVERY
+        // kind was refused because the enum had no `Consumable` value at all. It now proves the
+        // real, narrower rule: binding to anything OTHER than `Consumable` is a real content
+        // mistake, and binding to `Consumable` itself is accepted.
+        Assert.True(ConsumableLimits.ConsumableContainerKindAvailable);
+        // 11, not 7: `Gem`/`Charm`/`Combo`/`Consumable` are container-kind-expansion's four
+        // additions (2026-09-07) alongside the pre-existing seven, `Enemy` included.
+        Assert.Equal(11, Enum.GetValues<ContainerKind>().Length);
+        Assert.Contains("Consumable",
             Enum.GetNames<ContainerKind>(), StringComparer.Ordinal);
 
         var fails = ConsumableValidator.ValidateDef(
             Def(), ContainerKind.Item, Array.Empty<ConsumableCoreAtom>(), 0, 0, null, null, null, Tuning());
         var kindFail = Assert.Single(fails,
             f => f.Detail.StartsWith(ConsumableRules.ContainerKindUnavailable, StringComparison.Ordinal));
-        Assert.Contains("D27", kindFail.Detail, StringComparison.Ordinal);
+        Assert.Contains("Consumable", kindFail.Detail, StringComparison.Ordinal);
         Assert.Contains("X7", kindFail.Detail, StringComparison.Ordinal);
+
+        // The real kind itself is accepted — no ContainerKindUnavailable finding.
+        Assert.DoesNotContain(
+            ConsumableValidator.ValidateDef(
+                Def(), ContainerKind.Consumable, Array.Empty<ConsumableCoreAtom>(), 0, 0, null, null, null, Tuning()),
+            f => f.Detail.StartsWith(ConsumableRules.ContainerKindUnavailable, StringComparison.Ordinal));
 
         // …and with no container to bind at all, only the shape rules run.
         Assert.Empty(ConsumableValidator.ValidateDef(

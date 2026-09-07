@@ -1,4 +1,4 @@
-"""seedsmith.adapters.trees.nodegen.tuning — load `passive-tree-targets.v1.json`; every key
+"""seedsmith.adapters.trees.nodegen.tuning — load `passive-tree-targets.v2.json`; every key
 required, no defaults (task H1, spec-tree-language.md §4.3, §7 gate 4).
 
 **Not a second parser.** Task A2 already shipped the pure parser over this exact file at

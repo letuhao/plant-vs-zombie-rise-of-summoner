@@ -12,7 +12,6 @@ import { RungStateFallback } from "./RungStateFallback";
 import { ActorFrame, formatActorPhase, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
 import { CommanderSheetFooter } from "./CommanderSheetFooter";
 import { AptitudesTab, type AptitudeDraftState } from "./AptitudesTab";
-import { ActionsTab } from "./ActionsTab";
 import { ConditionTab } from "./ConditionTab";
 import { DerivedTab } from "./DerivedTab";
 import { ElementsTab, KitTab, ShieldTab, StatusTab } from "./CatalogTabs";
@@ -100,31 +99,38 @@ export function ActorPanel({
       testId: `actor-sheet-tab-${item.kind}`
     }));
 
-  const leftoverFooter =
-    showLeftover && aptitudeDraft ? (
-      <div className="flex w-full flex-wrap items-center justify-between gap-2" data-testid="actor-leftover-footer">
-        <LeftoverBar budget={aptitudeDraft.budget} spent={aptitudeDraft.spent} />
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            data-testid="actor-leftover-reset"
-            disabled={!aptitudeDraft.dirty || aptitudeDraft.saving}
-            onClick={() => aptitudeDraft.revert()}
-          >
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            data-testid="actor-leftover-confirm"
-            disabled={!aptitudeDraft.dirty || !aptitudeDraft.withinBudget || aptitudeDraft.saving}
-            onClick={() => void aptitudeDraft.save()}
-          >
-            {aptitudeDraft.saving ? "Saving…" : "Confirm"}
-          </Button>
-        </div>
-      </div>
-    ) : null;
+  const leftoverFooter = showLeftover ? (
+    <div className="flex w-full flex-wrap items-center justify-between gap-2" data-testid="actor-leftover-footer">
+      {aptitudeDraft ? (
+        <>
+          <LeftoverBar budget={aptitudeDraft.budget} spent={aptitudeDraft.spent} />
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              data-testid="actor-leftover-reset"
+              disabled={!aptitudeDraft.dirty || aptitudeDraft.saving}
+              onClick={() => aptitudeDraft.revert()}
+            >
+              Reset
+            </Button>
+            <Button
+              size="sm"
+              data-testid="actor-leftover-confirm"
+              disabled={!aptitudeDraft.dirty || !aptitudeDraft.withinBudget || aptitudeDraft.saving}
+              onClick={() => void aptitudeDraft.save()}
+            >
+              {aptitudeDraft.saving ? "Saving…" : "Confirm"}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <p className="text-sm text-muted" data-testid="actor-leftover-pending">
+          Loading aptitudes…
+        </p>
+      )}
+    </div>
+  ) : null;
 
   const defaultFooter =
     isCommander && commanderMeta ? (
@@ -156,7 +162,9 @@ export function ActorPanel({
       subtitle={subtitle}
       testId="actor-panel"
       size="actorSheet"
-      footer={leftoverFooter ?? defaultFooter}
+      // Leftover strip replaces default footer while Aptitudes is active or draft dirty —
+      // never fall back to Release/Deploy on that strip (GG-61 / GG-63).
+      footer={showLeftover ? leftoverFooter : defaultFooter}
     >
       <div className="flex items-start gap-3">
         <ActorFrame side={data.side} initial={displayInitial(data.displayName, data.side)} size="panel" />
@@ -248,12 +256,7 @@ export function ActorPanel({
         {tab === "shield" ? <ShieldTab data={data} /> : null}
         {tab === "status" ? <StatusTab surface={surface} /> : null}
         {tab === "elements" ? <ElementsTab data={data} surface={surface} /> : null}
-        {tab === "kit" ? (
-          <>
-            <ActionsTab data={data} />
-            <KitTab data={data} surface={surface} />
-          </>
-        ) : null}
+        {tab === "kit" ? <KitTab data={data} surface={surface} /> : null}
         {tab === "paths" ? <PathsTab elementTyping={data.elementTyping} /> : null}
       </div>
     </PanelShell>

@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.pack-dual-005",
+  "formation": "pack",
+  "name": "Elemental Scourge",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A coordinated surge of elemental spirits overwhelming the party through sheer numbers and elemental variety.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

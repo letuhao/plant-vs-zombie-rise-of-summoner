@@ -41,10 +41,16 @@ import type {
   ComparePayloadView,
   ContainerView,
   ContractView,
+  DelveDoorState,
+  DelveSightState,
+  DelveView,
   DisplayLine,
+  DomainOfferView,
   DominanceVerdict,
+  DoorView,
   EquipAssignmentView,
   EquipOutcomeView,
+  ExtractionView,
   ForceView,
   IntelState,
   ItemRoleId,
@@ -55,8 +61,18 @@ import type {
   LegionPosition,
   LegionView,
   Magnitude,
+  MemberView,
+  ObjectPromptView,
+  PackCellView,
+  PackItemOriginView,
+  PackView,
+  PartyView,
+  QuestView,
   Rarity,
   RenderStrategy,
+  ResourceId,
+  RoomView,
+  RungOfferView,
   RunResult,
   RunView,
   SectorView,
@@ -66,7 +82,9 @@ import type {
   SocketCellView,
   SocketsView,
   SourceKind,
+  SupplyView,
   SurfaceStatusView,
+  TalkView,
   TurnEventView,
   UnitClass,
   UnitClassGroupView,
@@ -119,7 +137,37 @@ export const PLAYER_PENDING = {
   itemGrantedAction: "Any move this teaches isn't shown yet",
   itemFooter: "Roll quality and salvage value aren't shown yet",
   itemBaseStats: "Its base numbers aren't shown yet",
-  itemCompare: "Side-by-side numbers for these two aren't shown yet"
+  itemCompare: "Side-by-side numbers for these two aren't shown yet",
+  // party-dungeon D5.3 — each reason names the thing the player is missing, matching the item-module
+  // entries' own established tone, not the field or the code behind it.
+  delveRoomFloor: "What's on the floor here isn't shown yet",
+  delvePoolMax: "How full a meter can get isn't shown yet",
+  delvePoolFill: "How full a meter reads isn't shown yet",
+  delveNerveStage: "How shaken this one is isn't named yet",
+  delveStatuses: "This one's status effects aren't shown yet",
+  delvePack: "This party's pack isn't shown yet",
+  delveQuests: "Quest progress isn't shown yet",
+  delveTalkBand: "How this one feels about you isn't shown yet",
+  delveTalkQuote: "What this one is saying isn't shown yet",
+  delveTalkDecision: "The outcome of that isn't shown yet",
+  delveSupplyDecision: "What that supply did isn't shown yet",
+  delveWiped: "Whether the raid wiped isn't shown yet",
+  delveFirstClearGrant: "A first-clear reward isn't shown yet",
+  delveLevelUps: "Level-ups aren't shown yet",
+  delveJoins: "New arrivals aren't shown yet",
+  // D5.7 — the four room-scoped panels (`layers/{Talk,Event,ObjectPrompt,Supply}Panel.tsx`) and the
+  // fight-input panel. `TalkView`/`ObjectPromptView`/`SupplyView` have no field that models "there is
+  // no live producer for this panel at all" the way `PartyView.pack: Pending<PackView>` already does
+  // for Pack — the panels themselves wrap the whole view in a presentation-level `Pending<T>` (a choice
+  // made at the panel prop boundary, not a contract change) and reach for these only on the branch
+  // where a real room genuinely could offer this surface (a wild room for Talk, a room with a real
+  // `eventId` for Event); an ineligible room reads `absent()` instead, never one of these — see each
+  // panel's own doc comment for the exact gating.
+  delveTalkPanel: "What this room has to say isn't shown yet",
+  delveEventPanel: "What's happening in this room isn't shown yet",
+  delveObjectPromptPanel: "What's here isn't shown yet",
+  delveSupplyPanel: "What your supplies can do here isn't shown yet",
+  delveFightControls: "Fight controls aren't shown yet"
 } as const;
 
 /**
@@ -1253,5 +1301,458 @@ export function adaptEquipOutcome(dto: ItemEquipOutcomeDto): EquipOutcomeView {
     refId: dto.refId,
     replaced: dto.replaced ? (adaptEquipAssignments([dto.replaced])[0] ?? null) : null,
     assignments: adaptEquipAssignments(dto.assignments)
+  };
+}
+
+// ===========================================================================
+// party-dungeon D5.3 — delve adapters (spec-delve-stage.md §6). Real DTO shapes read directly off
+// the shipped C# (`DelveEndpoints.cs`'s `HandleGetDelve`, D5.2; `DelveMemberState`; `PackDto`/
+// `PackCellDto`; `QuestDto`; `DomainOfferDto`) — declared locally below, matching
+// `CommanderListRowDto`'s own precedent, since no `src/lib/bus/delve.ts` exists yet (this is the
+// first delve-shaped code anywhere in the web tree, spec-delve-stage.md §19 point 6).
+//
+// Two of the sixteen view types — `EventView`, `FightView` — have no adapter at all: no real,
+// composed Core producer exists for either (see each type's own doc comment in `types.ts`), and
+// building one here would mean deciding new business logic no Core function has decided, which is
+// exactly what an adapter must never do (this file's own item-module-10 rule, line ~583: "adapters
+// RENAME and RESHAPE... they compute nothing").
+// ===========================================================================
+
+type DelveRoomDto = {
+  sectorId: string;
+  rowIndex: number;
+  colIndex: number;
+  visited: boolean;
+  cleared: boolean;
+  keyForLaneId: string | null;
+  /** `SectorSight` — raw ordinal (0 `None` / 1 `Glimpse` / 2 `Full`). `HandleGetDelve` never
+   * `.ToString()`'s this before serialising (confirmed by reading `DelveProjection.cs`/
+   * `DelveEndpoints.cs` in full — unlike `WorldEndpoints.cs:704`'s own `l.State.ToString()` for the
+   * *different* field `LaneState` on a world lane, not a precedent this endpoint follows). */
+  sight: number;
+  kind: string | null;
+  archetypeId: string | null;
+  eventId: string | null;
+  resolvedKind: string | null;
+  resolvedArchetypeId: string | null;
+  floorJson: string | null;
+};
+
+type DelveDoorDto = {
+  laneId: string;
+  fromSectorId: string;
+  toSectorId: string;
+  typeId: string;
+  gateKeyId: string | null;
+  /** `LaneState` — raw ordinal (0 `Open` / 1 `Severed`), same "never `.ToString()`'d here" fact as
+   * `DelveRoomDto.sight` above. */
+  state: number;
+};
+
+type DelvePartyPositionDto = { entityId: number; atSectorId: string | null; onLaneId: string | null };
+
+type DelveHaulEntryDto = {
+  kind: string;
+  speciesId: string;
+  rarity: string;
+  variant: string;
+  traitIds: string[];
+  row: number;
+  col: number;
+  n: number;
+};
+
+type DelveMemberStateDto = {
+  instanceId: string;
+  /** `DelveMemberState.Pools` — keyed by the six resource ids, current values only. */
+  pools: Record<string, number>;
+  nerveStacks: number;
+  downed: boolean;
+  downedOnce: boolean;
+};
+
+/** `DelvePartyPackState` — the RAW, un-projected pack shape `HandleGetDelve` actually sends (its own
+ * `cells` carry no `movable`/no size — see `adaptDelveParty`'s own doc comment for why this stays
+ * unread rather than mistyped as `PackDto`). */
+type DelvePartyPackStateDto = { rows: number; cols: number; cells: unknown[] };
+
+type DelvePartyStateDto = {
+  entityId: number;
+  route: string[];
+  haul: DelveHaulEntryDto[];
+  members: DelveMemberStateDto[] | null;
+  pack: DelvePartyPackStateDto | null;
+};
+
+/** `HandleGetDelve`'s own anonymous `Results.Ok(new {...})` object (`DelveEndpoints.cs:142-160`),
+ * field for field — `questsJson`/`decisionsJson`/`contentTermsJson`/`thetaRun` are deliberately not
+ * in this type at all: `adaptDelve` never reads them (see `DelveView`'s own doc comment for why). */
+type DelveResponseDto = {
+  delveId: number;
+  worldId: string;
+  state: string;
+  domainId: string;
+  raidMode: string;
+  rungId: string;
+  soulsUnbanked: number;
+  rooms: DelveRoomDto[];
+  doors: DelveDoorDto[];
+  partyPositions: DelvePartyPositionDto[];
+  revision: number;
+  parties: DelvePartyStateDto[];
+};
+
+function toDelveSight(wire: number): DelveSightState {
+  switch (wire) {
+    case 1:
+      return "Glimpse";
+    case 2:
+      return "Full";
+    case 0:
+    default:
+      // Defensive only — the wire is a plain number at the type level. An unrecognised ordinal shows
+      // less, never more, matching toIntelState's own "when in doubt, show less" rule for fog.
+      return "None";
+  }
+}
+
+function toDelveDoorState(wire: number): DelveDoorState {
+  return wire === 1 ? "Severed" : "Open";
+}
+
+export function adaptDelveRoom(dto: DelveRoomDto): RoomView {
+  return {
+    sectorId: dto.sectorId,
+    rowIndex: dto.rowIndex,
+    colIndex: dto.colIndex,
+    visited: dto.visited,
+    cleared: dto.cleared,
+    keyForLaneId: dto.keyForLaneId,
+    sight: toDelveSight(dto.sight),
+    kind: dto.kind,
+    archetypeId: dto.archetypeId,
+    eventId: dto.eventId,
+    resolvedKind: dto.resolvedKind,
+    resolvedArchetypeId: dto.resolvedArchetypeId,
+    // `null` here is ambiguous on its own (sight-gated away vs. genuinely empty both serialise the
+    // same way) — `absent()` is the honest reading of that ambiguity, never a claimed-but-unshown
+    // `pending`; a real, non-null blob is real content with no view shape yet, which is `pending`.
+    floorContents: dto.floorJson != null ? pendingWithReason(PLAYER_PENDING.delveRoomFloor) : absent()
+  };
+}
+
+function toDoorView(dto: DelveDoorDto): DoorView {
+  return {
+    laneId: dto.laneId,
+    fromSectorId: dto.fromSectorId,
+    toSectorId: dto.toSectorId,
+    typeId: dto.typeId,
+    gateKeyId: dto.gateKeyId,
+    state: toDelveDoorState(dto.state)
+  };
+}
+
+export function adaptDelveMember(dto: DelveMemberStateDto): MemberView {
+  const pools: Record<ResourceId, Magnitude> = {};
+  for (const [id, value] of Object.entries(dto.pools)) {
+    pools[id] = { unit: "count", value };
+  }
+  return {
+    instanceId: dto.instanceId,
+    pools,
+    poolMax: pendingWithReason(PLAYER_PENDING.delvePoolMax),
+    poolFill: pendingWithReason(PLAYER_PENDING.delvePoolFill),
+    nerveStacks: dto.nerveStacks,
+    nerveStage: pendingWithReason(PLAYER_PENDING.delveNerveStage),
+    downed: dto.downed,
+    downedOnce: dto.downedOnce,
+    shield: pendingWithReason(PLAYER_PENDING.shieldStack),
+    statuses: pendingWithReason(PLAYER_PENDING.delveStatuses)
+  };
+}
+
+/**
+ * Joins `DelvePartyState` with its live `DelveProjectionPartyPosition` by `entityId` — never by array
+ * index, since `DelveProjection.cs`'s own `parties` list is sorted `.OrderBy(p => p.EntityId)` and so
+ * does not share `delve.Parties`' own order. `partyIndex` is the caller's (`adaptDelve`'s) own array
+ * position, passed in explicitly since no field on `DelvePartyState` carries it.
+ */
+export function adaptDelveParty(
+  state: DelvePartyStateDto,
+  partyIndex: number,
+  position: DelvePartyPositionDto | undefined
+): PartyView {
+  return {
+    partyIndex,
+    entityId: state.entityId,
+    atSectorId: position?.atSectorId ?? null,
+    onLaneId: position?.onLaneId ?? null,
+    route: state.route,
+    members: (state.members ?? []).map(adaptDelveMember),
+    // `state.pack` is real (the raw DelvePartyPackState) but is deliberately not read here — its
+    // cells carry no `movable`/size, so mapping it into a `PackView` would fabricate those fields
+    // rather than adapt real ones. `Pending` until a route wires `PackDtoProjection.Project` onto
+    // this data (or a sibling one) the way `adaptPack` below already expects.
+    pack: pendingWithReason(PLAYER_PENDING.delvePack),
+    haul: state.haul.map((h) => ({
+      kind: h.kind,
+      speciesId: h.speciesId,
+      rarity: h.rarity,
+      variant: h.variant,
+      traitIds: h.traitIds,
+      row: h.row,
+      col: h.col,
+      n: h.n
+    }))
+  };
+}
+
+export function adaptDelve(dto: DelveResponseDto): DelveView {
+  const positionByEntityId = new Map(dto.partyPositions.map((p) => [p.entityId, p]));
+  return {
+    delveId: dto.delveId,
+    worldId: dto.worldId,
+    state: dto.state,
+    domainId: dto.domainId,
+    raidMode: dto.raidMode,
+    rungId: dto.rungId,
+    soulsUnbanked: { unit: "count", value: dto.soulsUnbanked },
+    rooms: dto.rooms.map(adaptDelveRoom),
+    doors: dto.doors.map(toDoorView),
+    parties: dto.parties.map((state, index) =>
+      adaptDelveParty(state, index, positionByEntityId.get(state.entityId))
+    ),
+    revision: dto.revision,
+    quests: pendingWithReason(PLAYER_PENDING.delveQuests)
+  };
+}
+
+type PackCellDto = {
+  row: number;
+  col: number;
+  w: number;
+  h: number;
+  kind: string;
+  refId: string;
+  qty: number;
+  /** `PackItemOrigin.ToString()` (`PackDtoProjection.ToDto`) — PascalCase (`"CarryIn"` | `"Haul"`). */
+  origin: string;
+  movable: boolean;
+};
+
+type PackDto = {
+  rows: number;
+  cols: number;
+  cells: PackCellDto[];
+  floor: PackCellDto[];
+  provisionCellsLeft: number;
+};
+
+function toPackItemOrigin(wire: string): PackItemOriginView {
+  return wire === "Haul" ? "haul" : "carryIn";
+}
+
+function toPackCellView(dto: PackCellDto): PackCellView {
+  return {
+    row: dto.row,
+    col: dto.col,
+    w: dto.w,
+    h: dto.h,
+    kind: dto.kind,
+    refId: dto.refId,
+    qty: { unit: "count", value: dto.qty },
+    origin: toPackItemOrigin(dto.origin),
+    movable: dto.movable
+  };
+}
+
+/**
+ * `PackDto` (`PackGrid.cs`) — real and tested (`PackDtoTests.cs`) but `PackDtoProjection.Project` has
+ * zero production callers and no HTTP route serves it yet (confirmed by grep across `src/`), the same
+ * "provably correct, no live trigger" posture this program already carries elsewhere (D4.22's own six
+ * delegates). Built and tested here against a hand-built fixture matching this real shape, ready for
+ * the day a route wires the projection.
+ */
+export function adaptPack(dto: PackDto): PackView {
+  return {
+    rows: dto.rows,
+    cols: dto.cols,
+    cells: dto.cells.map(toPackCellView),
+    floor: dto.floor.map(toPackCellView),
+    provisionCellsLeft: { unit: "count", value: dto.provisionCellsLeft }
+  };
+}
+
+/**
+ * `WildVerb`'s own declared order (`TalkTree.cs:6-16`). No live endpoint has ever serialised this
+ * enum, so its wire ordinal-vs-string convention is not settled by any real code — unlike
+ * `SectorSight`/`LaneState`, directly observed on `HandleGetDelve`'s own live response. Treating it as
+ * a raw ordinal mirrors the one thing both of those DO settle: no delve-domain enum anywhere in this
+ * program has ever been given a `.ToString()` before reaching JSON. Named here because it is a real,
+ * currently-unresolved judgement call about an as-yet-undecided wire shape, not a guess offered as fact.
+ */
+const WILD_VERBS = [
+  "Flatter",
+  "Threaten",
+  "OfferSouls",
+  "OfferSpirit",
+  "OfferSupply",
+  "OfferContract",
+  "Fight",
+  "Leave"
+] as const;
+
+/** `TalkTree.Offered(step, maxSteps, eligibility)` — the only real, shipped output on the wild-talk
+ * surface; see `TalkView`'s own doc comment for why every other field stays `Pending`. */
+export function adaptTalk(offeredOrdinals: number[]): TalkView {
+  return {
+    offered: offeredOrdinals.map((o) => WILD_VERBS[o] ?? "Leave"),
+    effectiveBand: pendingWithReason(PLAYER_PENDING.delveTalkBand),
+    quote: pendingWithReason(PLAYER_PENDING.delveTalkQuote),
+    decision: pendingWithReason(PLAYER_PENDING.delveTalkDecision)
+  };
+}
+
+type RoomObjectDto = { sectorId: string; kind: string; verbs: string[]; oneShot: boolean };
+
+/** `RoomObjectBuilder.For(...)` — real output, offered verbs only; see `ObjectPromptView`'s own doc
+ * comment for why no per-verb enabled/reason is built here. */
+export function adaptRoomObject(dto: RoomObjectDto): ObjectPromptView {
+  return { sectorId: dto.sectorId, kind: dto.kind, verbs: dto.verbs, oneShot: dto.oneShot };
+}
+
+type SupplyUseOutcomeDto = { ok: boolean; reason: string; decrementContainerId: string | null };
+
+/** `SupplyUse.Use(...)`'s real outcome — see `SupplyView`'s own doc comment for the named ambiguity
+ * between this (an act's outcome) and a not-yet-real "what can be used here" browse read. */
+export function adaptSupply(dto: SupplyUseOutcomeDto): SupplyView {
+  return {
+    ok: dto.ok,
+    reason: dto.reason,
+    decrementContainerId: dto.decrementContainerId,
+    decision: pendingWithReason(PLAYER_PENDING.delveSupplyDecision)
+  };
+}
+
+type QuestDto = { name: string; flavor: string; have: number; need: number; done: boolean };
+
+/** `QuestDto` (`QuestDtoProjection.Project`) — real, shipped, matches the spec's own cited source
+ * exactly (`spec-delve-quests.md:341`). */
+export function adaptDelveQuest(dto: QuestDto): QuestView {
+  return {
+    name: dto.name,
+    flavor: dto.flavor,
+    have: { unit: "count", value: dto.have },
+    need: { unit: "count", value: dto.need },
+    done: dto.done
+  };
+}
+
+type MemberSettlementDto = { outcome: string; recoverDelves: number; won: boolean };
+type ExtractionEarnDto = { kills: number; victory: number };
+
+/**
+ * Composes two independently-real, already-fully-decided Core outputs — `ExtractionSettlement.Decide`
+ * (per member) and `DelveSoulLedger.AtExtraction` (per raid) — reshaping only; see `ExtractionView`'s
+ * own doc comment for the fields with no producer at all. `MemberSettlement` itself carries no member
+ * id, so the caller supplies one per settlement, the same positional-join shape `adaptDelveParty`
+ * needs `partyIndex` for.
+ */
+export function adaptExtraction(
+  settlements: { instanceId: string; settlement: MemberSettlementDto }[],
+  earn: ExtractionEarnDto
+): ExtractionView {
+  return {
+    members: settlements.map((s) => ({
+      instanceId: s.instanceId,
+      outcome: s.settlement.outcome,
+      recoverDelves: { unit: "count", value: s.settlement.recoverDelves },
+      won: s.settlement.won
+    })),
+    // Kills and victory stay two figures, never pre-summed here — summing would be arithmetic on a
+    // figure in the client, §16's own "never" list.
+    soulsFromKills: { unit: "count", value: earn.kills },
+    soulsFromVictory: { unit: "count", value: earn.victory },
+    wiped: pendingWithReason(PLAYER_PENDING.delveWiped),
+    firstClearGrant: pendingWithReason(PLAYER_PENDING.delveFirstClearGrant),
+    levelUps: pendingWithReason(PLAYER_PENDING.delveLevelUps),
+    joins: pendingWithReason(PLAYER_PENDING.delveJoins)
+  };
+}
+
+type DomainRungOfferDto = {
+  rungId: string;
+  label: string;
+  bandName: string;
+  oathOffered: boolean;
+  permadeath: boolean;
+};
+type DomainTailOfferDto = { n: number; label: string; bandName: string };
+type ProvisionableOfferDto = { containerId: string; label: string; price: number; cells: number };
+
+type DomainOfferDto = {
+  domainId: string;
+  name: string;
+  flavor: string;
+  climate: string;
+  entranceLabel: string;
+  entryKey: string;
+  sealed: boolean;
+  resume: { delveId: number } | null;
+  rungs: DomainRungOfferDto[];
+  tailSteps: DomainTailOfferDto[];
+  raidModes: string[];
+  bossName: string;
+  cleared: string[];
+  provisionable: ProvisionableOfferDto[];
+};
+
+function toRungOfferView(dto: DomainRungOfferDto): RungOfferView {
+  return {
+    kind: "rung",
+    rungId: dto.rungId,
+    label: dto.label,
+    bandName: dto.bandName,
+    oathOffered: dto.oathOffered,
+    permadeath: dto.permadeath
+  };
+}
+
+function toTailOfferView(dto: DomainTailOfferDto): RungOfferView {
+  return { kind: "tail", n: { unit: "count", value: dto.n }, label: dto.label, bandName: dto.bandName };
+}
+
+/** §8's own two vocabulary ids. An unrecognised wire value falls back to `"standing"` — the more
+ * permissive reading — rather than silently miscasting an unknown value as the stricter, locking one. */
+function toDomainEntryKey(wire: string): "single-descent" | "standing" {
+  return wire === "single-descent" ? "single-descent" : "standing";
+}
+
+/** `DomainOfferDto` (`DomainOffers.cs`) — real, shipped, matches the spec's own cited source
+ * exactly (`spec-domain-catalog.md:380`). `provisionable` is a real field on the wire type but always
+ * empty in production today (`ProvisionableFor` throws unconditionally, unreachable while
+ * `dungeon_domain` has no write arm) — mapped as a plain array, not `Pending`: an empty array is the
+ * honest, valid current state of a real field, not a missing one. */
+export function adaptDomainOffer(dto: DomainOfferDto): DomainOfferView {
+  return {
+    domainId: dto.domainId,
+    name: dto.name,
+    flavor: dto.flavor,
+    climate: dto.climate,
+    entranceLabel: dto.entranceLabel,
+    entryKey: toDomainEntryKey(dto.entryKey),
+    sealed: dto.sealed,
+    resume: dto.resume ? { delveId: dto.resume.delveId } : null,
+    rungs: dto.rungs.map(toRungOfferView),
+    tailSteps: dto.tailSteps.map(toTailOfferView),
+    raidModes: dto.raidModes,
+    bossName: dto.bossName,
+    cleared: dto.cleared,
+    provisionable: dto.provisionable.map((p) => ({
+      containerId: p.containerId,
+      label: p.label,
+      price: { unit: "count", value: p.price },
+      cells: { unit: "count", value: p.cells }
+    }))
   };
 }

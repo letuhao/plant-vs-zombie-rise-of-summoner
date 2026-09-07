@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.bargain-demon.ashthreepeater-001",
+  "flavor": "A silhouette of a skeletal marksman stands amidst a grove of 烧焦 trees, pulling a bowstring made of pure heat. The entity gestures toward a quiver of arrows that pulse with a rhythmic, violent 攻击, offering a single shot that never misses, provided you surrender your sense of touch.",
+  "kind": "bargain",
+  "name": "The Cinder-Archer's Toll",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a spectral entity offering a powerful combat boon at a significant sensory cost.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

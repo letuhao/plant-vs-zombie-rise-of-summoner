@@ -18,6 +18,16 @@ export type ScopePickerValue =
 
 export type ScopePickerMode = ScopePickerValue["kind"];
 
+/**
+ * Target-mode input — ready rows must carry an explicit board/world `targetPtr`.
+ * Never derive targetPtr from UniqueActor.instanceId.
+ */
+export type ScopeTargetCandidate =
+  | { kind: "ready"; targetPtr: string; rungState: Extract<ActorRungState, { kind: "ready" }> }
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "empty" };
+
 const MODES: TabItem[] = [
   { id: "target", label: "Target", testId: "scope-mode-target" },
   { id: "type", label: "Type", testId: "scope-mode-type" },
@@ -73,7 +83,7 @@ export function ActorMenuScopePicker({
 }: {
   value: ScopePickerValue | null;
   onChange: (value: ScopePickerValue) => void;
-  targetCandidates?: ActorRungState[];
+  targetCandidates?: ScopeTargetCandidate[];
   uniqueDemonCandidates?: ActorRungState[];
   typeOptions?: { typeId: number; label: string }[];
 }) {
@@ -99,7 +109,7 @@ export function ActorMenuScopePicker({
         {mode === "target" ? (
           <ActorListPickerPanel
             kind="target"
-            candidates={targetCandidates}
+            targetCandidates={targetCandidates}
             value={value?.kind === "target" ? value : null}
             onChange={onChange}
           />

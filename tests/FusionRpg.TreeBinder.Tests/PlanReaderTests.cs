@@ -190,4 +190,39 @@ public class ReadPlanNodesWithSeedTests
         Assert.True(node.DeliberateHole);
         Assert.Equal(new[] { "atom.a" }, node.AffixIds);
     }
+
+    // ---- TreeIdFromPlanFileName (J1, 2026-09-07): the real silent-data-loss bug --------------------
+
+    [Theory]
+    [InlineData("might.v1", "might")]
+    [InlineData("fire.v1", "fire")]
+    [InlineData("might.v12", "might")]
+    public void A_plain_tree_id_keeps_only_the_version_segment_stripped(string fileName, string expected) =>
+        Assert.Equal(expected, PlanReader.TreeIdFromPlanFileName(fileName));
+
+    [Theory]
+    [InlineData("nerve.afflicted.v1", "nerve.afflicted")]
+    [InlineData("nerve.shaken.v1", "nerve.shaken")]
+    [InlineData("nerve.unsettled.v1", "nerve.unsettled")]
+    public void A_dotted_tree_id_survives_intact_never_collapsing_to_its_first_segment(string fileName, string expected) =>
+        Assert.Equal(expected, PlanReader.TreeIdFromPlanFileName(fileName));
+
+    [Fact]
+    public void The_three_real_nerve_trees_never_collide_on_the_same_id()
+    {
+        var ids = new[] { "nerve.afflicted.v1", "nerve.shaken.v1", "nerve.unsettled.v1" }
+            .Select(PlanReader.TreeIdFromPlanFileName)
+            .ToArray();
+
+        Assert.Equal(3, ids.Distinct().Count());
+    }
+
+    [Fact]
+    public void A_name_with_no_trailing_version_segment_is_returned_unchanged()
+    {
+        // Defensive: a malformed or hand-placed file with no "vN" suffix must never have a real
+        // segment silently eaten — the old bug's failure mode (losing content with no error) is
+        // exactly what this guards against for the "no version segment" edge too.
+        Assert.Equal("nerve.afflicted", PlanReader.TreeIdFromPlanFileName("nerve.afflicted"));
+    }
 }

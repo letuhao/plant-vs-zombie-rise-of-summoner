@@ -18,7 +18,21 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-materials-crafting.md#6.1"
+    "sourceRef": "ssot-materials-crafting.md#6.1",
+    "amendments": [
+      {
+        "batch": "recipes-gen/trial-1",
+        "note": "Two new recipes authored via recipes-gen (tools/seedsmith/seedsmith/adapters/items/recipegen), a small trial batch run end-to-end through plan_run/run_draws/write_corpus and RunLedger (data/seed/items/_runs/recipes-gen.ledger.json) to prove this module's own generation path against real content before committing to a larger run. No live model call was reachable in this environment -- name/flavor were hand-authored as an honest stand-in, the same precedent gemgen used for g2.json (_meta.model 'gemgen/hand-authored-1') and materialgen used for its shard-rungs-1 amendment. recipe.031 (forge) targets an EXISTING, un-recipe'd base type (item.humanoid-head-a-001, head-guard:humanoid:a); recipe.032 (elevate) spends a REAL, currently-issuable shard id (shard.sprout) rather than one of the four legacy shard.* ids the pre-existing 7 broken cost lines in this same corpus use.",
+        "promptVersion": "recipe-gen/1",
+        "model": "recipegen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "sourceRef": "docs/architecture/item-seedgen/spec-recipes-gen.md",
+        "entries": [
+          "recipe.031",
+          "recipe.032"
+        ]
+      }
+    ]
   },
   "entries": [
     {
@@ -659,6 +673,57 @@
       ],
       "soulsCostBand": "exorbitant",
       "tags": []
+    },
+    {
+      "id": "recipe.031",
+      "nameKey": "recipe.forge-cloth-hood",
+      "name": "Forge: Cloth Hood",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.humanoid-head-a-001",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [
+        "crafted-only"
+      ],
+      "flavor": "A cloth hood shaped at the workbench, light enough to forget you're wearing it."
+    },
+    {
+      "id": "recipe.032",
+      "nameKey": "recipe.elevate-take-root",
+      "name": "Elevate: Take Root",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "shard.sprout",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "The graft finally takes — a shard from something just beginning to grow."
     }
   ]
 }

@@ -377,3 +377,165 @@ threatBand unresolved 11/833, 98/833 generation failures.
 
 ### ✅ Checkpoint D/E/F/G — plan closes, sunwoven resolved (owner directive: "resolve it or replace
   it", not tolerated as a permanently-unusable enum value)
+
+## Phase H — rarity gets a deterministic power fallback too (owner-directed, 2026-09-07)
+
+Reopens F1's own scope boundary on the owner's explicit direction: *"rarity is our game mechanism
+not pvz engine mechanism... if llm cannot solve it, just define a deterministic engine to solve it
+(fall back)... stronger species will be rarier."* F1 was correct that no fallback existed in the
+repo **at the time** — this phase authors one, on purpose, rather than treating "no signal yet" as
+permanent.
+
+- [x] **H1: `demon-rarity-power-fallback.v1.json`** (new tunable) — a rank-preserving
+  `threatBand -> rarity` correspondence over both closed 10-value ladders, reusing
+  `demon-threat.v1.json`'s own already-validated power banding (real p10..p90 deciles of a measured
+  toughness/damage score) rather than inventing a second, independent curve. "Stronger species are
+  rarer" falls out of the two ladders' own ascending order (nuisance→calamity, chaff→almanac), not
+  a new formula.
+- [x] **H2: `resolve_unresolved_rarity` + `load_rarity_power_fallback`** (`derive.py`) — same
+  `(value, was_deterministic)` contract as `resolve_unresolved_threat_band`. Only fires when
+  `rarity == "unresolved"` AND the species' `threatBand` is itself a real rung (resolved, or
+  resolved earlier in the SAME fix pass) — no signal in, no guess out. 5 new tests
+  (`test_anchor_derive.py`): pass-through when already resolved, resolves from a resolved
+  threatBand, stays unresolved when threatBand has no signal either, and the mapping is a genuine
+  rank-preserving bijection over both ladders.
+- [x] **H3: `fix_unresolved` chains the two fallbacks in one pass** (`runner.py`) — a species with
+  BOTH fields unresolved gets `threatBand` defaulted first, then `rarity` derived from that
+  freshly-fixed value, not the pre-fix "unresolved" string. Each fixed FIELD (not species) is its
+  own report entry (`{"speciesId","field","before","after"}`) since one species can now produce two
+  fixes. 5 new/updated tests (`test_run_runner.py`): resolves rarity from an already-resolved
+  threatBand, chains off a same-pass threatBand fix, leaves an already-resolved rarity untouched,
+  leaves rarity unresolved when threatBand truly has no value, aptitude/element still untouched.
+  CLI message (`cli.py`) updated to name both fields. Skill doc
+  (`.claude/skills/demon-fix-unresolved/SKILL.md`) rewritten with the new table and reasoning.
+- [x] **H4: full seedsmith suite reverified** — 3103 passed, 1 skipped (own new/changed tests
+  included); the 14 failures seen in a full run are pre-existing, unrelated atom-family-count drift
+  (100 vs 109 across `test_usage_stats.py`/`test_nodegen_vocab.py`/`test_distribution_planner.py`/
+  etc., a different concurrent session's action-corpus content work — confirmed no overlap with any
+  file this phase touched).
+- [x] **H5: run for real against the live corpus, honestly reported** — `demons run fix-unresolved
+  --dry-run` against the real committed `data/seed/demons/species` tree reported **0 field-fixes**.
+  `DemonQualityReport` confirms why: `rarity` and `threatBand` both already show 0/840 unresolved
+  today (rarity's own 15/840 from Phase E's 2026-09-04 result had already been closed by later,
+  undocumented work by the time this phase ran) — `aptitudePrimary` is the field actually open now
+  (11/840, 13‰), and it has no equivalent sanctioned fallback, so it correctly stays unresolved.
+  **Nothing was force-fixed to manufacture a result.** The mechanism ships as standing
+  infrastructure: the next classification rerun or corpus growth that leaves any species' `rarity`
+  unresolved is closed automatically, without rebuilding this from scratch.
+
+### ✅ Checkpoint H — rarity has a real deterministic fallback, proven safe against the live corpus
+- [x] `resolve_unresolved_rarity`/`load_rarity_power_fallback` unit-tested in isolation (5 tests)
+- [x] `fix_unresolved` integration-tested chaining both fields in one pass (5 tests)
+- [x] Full seedsmith suite green modulo pre-existing, unrelated atom-family drift
+- [x] Real dry-run against the live corpus confirms the mechanism is inert today (nothing left to
+  fix) without ever needing to fabricate a non-zero result to prove it works
+
+## Phase I — aptitudePrimary gets an INVENTED flat default, not a derivation (owner-directed, 2026-09-07)
+
+Owner asked for the same treatment as Phase H's rarity fallback. Measured first, same discipline as
+every other fallback decision in this plan — the measurement came back negative, and the owner's
+own direction on hearing that was explicit: *"dont say data don't it, we make up it"* — invent a
+flat default rather than derive one that doesn't exist, since aptitude is this game's own mechanism
+too.
+
+- [x] **I1: measured whether a stats-based derivation holds, before building anything** — joined
+  every species with a computable power score (151/840, `observed`/`stated` basis) against its
+  resolved `aptitudePrimary`, and ran the same one-way separability check that validated rarity's
+  threatBand mapping. Result: **F≈1.34** (noise — rarity/threatBand's real ordinal signal was
+  nowhere near this weak), several categories with n=1-2 samples, stdev routinely larger than the
+  mean. **Worse: 10 of the 11 real unresolved species have no computable score at all** — a
+  stats-based classifier would have nothing to read for 91% of the real cases regardless of
+  accuracy. Conclusion reported honestly: no real signal exists, unlike rarity. `elementPrimary`
+  checked too for completeness (F≈1.68, equally weak; also currently 0/840 unresolved, moot today).
+- [x] **I2: owner overrode the negative finding on purpose** — direction was to invent a flat
+  default rather than leave it unresolved, explicitly NOT to represent it as derived from anything.
+  `data/tuning/demon-aptitude-fallback.v1.json` (new) carries `inferredDefaultAptitude: "Onslaught"`
+  — picked because it is already the single most common aptitude in the real 840-species corpus
+  (332/840, 395‰, measured directly), so the 11 residual species nudge an already-dominant category
+  by ~1% rather than creating a new population anomaly. The tuning file's own `_note` says plainly
+  this is invented, never "calculated."
+- [x] **I3: `resolve_unresolved_aptitude` + `load_aptitude_fallback`** (`derive.py`) — same
+  `(value, was_deterministic)` contract as the other two, but NOT a `resolve_unresolved_*` sibling
+  that derives from another field — nothing chains into it, by design, since there is nothing to
+  derive from. 3 new tests: pass-through when resolved, resolves to the flat default, the default
+  itself names a real aptitude.
+- [x] **I4: wired into `fix_unresolved`** (`runner.py`) as a third, independent field alongside
+  threatBand/rarity — `posture`/`pure` (both functions of `aptitudePrimary`) are recomputed in the
+  same write, mirroring exactly what the real classification path already does at
+  `_finalize` when `aptitudePrimary` is in the merged output, so the fix never leaves those two
+  derived fields stale relative to the new value. 5 new/updated tests (`test_run_runner.py`):
+  resolves to the flat default, posture/pure recompute, idempotent, dry-run never writes, an
+  already-resolved aptitude stays untouched (including its own posture/pure). CLI message and skill
+  doc (`.claude/skills/demon-fix-unresolved/SKILL.md`) rewritten to distinguish DERIVED (threatBand,
+  rarity) from INVENTED (aptitude) fallbacks explicitly, so a future reader never mistakes one for
+  the other.
+- [x] **I5: full seedsmith suite reverified** — 3114 passed, 1 skipped (11 new tests included); the
+  11 failures in a full run are the same pre-existing, unrelated atom-family-count drift from
+  Phase H's own verification (confirmed no overlap with any file this phase touched).
+- [x] **I6: run for real against the live corpus** — `--dry-run` correctly previewed all 11 real
+  unresolved species resolving to `Onslaught`; applied for real
+  (`Tower_iceGloom`, `ZombieEndoFlame`, `AllPeater`, `NutTorch`, `BloverPot`, `EnumValue265`,
+  `EnumValue267`, `Extract_single`, `Refrash`, `EnumValue268`, `SnorkleZombie`). `DemonQualityReport`
+  confirms: **"Unresolved rate per voted field" is now completely empty** — every voted field
+  across all 840 species is resolved, for the first time, by either a real classification or an
+  honestly-labeled deterministic fallback. Re-running the fix confirms idempotency (0 field-fixes).
+
+### ✅ Checkpoint I — aptitude gets an honest, invented fallback; the corpus has zero unresolved fields left
+- [x] The negative empirical finding was measured and reported BEFORE building anything, not
+  skipped to get to the owner's preferred answer faster
+- [x] The owner's override is applied exactly as directed, and documented as an override, not
+  quietly reframed as a derivation it isn't
+- [x] `resolve_unresolved_aptitude`/`load_aptitude_fallback` unit-tested in isolation (3 tests)
+- [x] `fix_unresolved` integration-tested including the posture/pure recompute (5 tests)
+- [x] Full seedsmith suite green modulo the same pre-existing, unrelated atom-family drift
+- [x] Real run against the live corpus: all 11 genuinely-unresolved species fixed, verified via
+  `DemonQualityReport`, idempotency reconfirmed — a real, non-trivial result this time, not a
+  already-closed no-op
+
+## Phase J — the propagation chain, and closing the one CI gap it exposed (2026-09-07)
+
+Fixing the anchor alone was not the end of it — Phase I's aptitude fix had to be pushed through the
+whole `demon-seed` chain to become real, and doing that live surfaced a real, standing CI gap.
+
+- [x] **J1: pushed the fix through the full chain, verified at each step, not assumed** —
+  `DemonSpeciesGen` (829 -> 840 generatable species), `DemonSpeciesImport` (live `demon_species`
+  table 829 -> 840 rows, server stayed healthy), `DemonBuildPlanGen` (67 -> 68 of 84 shipped species
+  planned — this is what actually closed `species-build`'s own G3 for `AllPeater`, see that plan's
+  todo file). Each step's own real console output checked, not inferred.
+- [x] **J2: found the chain's own already-frozen fusion-recipe seed had gone stale** —
+  `data/generated/demons/_fusion-recipes.json` (Phase 8/T8.3) stopped matching a fresh deterministic
+  build (709->713 eligible outputs, 695->699 deterministic recipes) purely because more same-rung
+  species now exist to pair; the Almanac/Sunwoven shortfall itself never moved (still exactly 14
+  deficits). Fixed by re-running `python -m seedsmith.adapters.demons.fusion.reconcile` — the
+  freeze-on-commit `corpusContentHash` (scoped to each deficit's OWN candidate pool, never a
+  whole-corpus hash) correctly reused all 14 existing gap-fill picks with **zero new model calls**.
+  Two stale hardcoded-literal test assertions fixed to match (`test_fusion_recipe.py`'s
+  `test_real_corpus_end_to_end`; `FusionRecipeReconcileTests.EligibleOutputs_...`); the third,
+  `DemonRecipeCatalogTests`'s `695 + 14`, fixed to `699 + 14`.
+- [x] **J3: the real gap this exposed — fusion-recipe-reconcile had a working `--check` but no CI
+  wiring, unlike its two siblings.** `.github/workflows/ci.yml` already gates
+  `DemonSpeciesGen --check` (species-generator) and `DemonBuildPlanGen --check` (species-build
+  plan) — the exact two other links in this chain that commit a generated tree. The fusion-recipe
+  seed had the identical shape of risk and the identical `--check` mechanism already built (T8.3),
+  just never wired to CI the same way — this is *why* the staleness this phase found was only
+  caught by an incidental full local test run, not by the build. Closed by adding a matching
+  "Fusion-recipe seed staleness guard" step (`ci.yml`, beside the other `demons`-prefixed seedsmith
+  steps), same throw-on-nonzero pattern, verified locally with the exact command and working
+  directory CI will use (`python -m seedsmith.adapters.demons.fusion.reconcile --check` from
+  `tools/seedsmith`, exit 0).
+- [x] **J4: full affected-area suite reverified after every step above** — the targeted
+  demon-recipe/species-build C# slice (46 tests) green twice in isolation; seedsmith
+  `test_fusion_recipe.py` green (31/31). A full `dotnet test tests/FusionRpg.Core.Tests` run shows
+  11-14 *other* failures, but the exact SET changes between consecutive runs on identical code
+  (Siege/District-assault/Domain-encounter tests, nothing touching demons) with 11 concurrent
+  `dotnet.exe` processes confirmed running at the time — build contention from other active
+  sessions, not a regression; a targeted, isolated filter is the trustworthy signal here, not the
+  noisy full-suite number.
+
+### ✅ Checkpoint J — the chain is consistent end to end, and the gap that let it drift silently is closed
+- [x] Every real downstream artifact (concrete species, live DB, species-build plan, fusion-recipe
+  seed) matches the current anchor corpus — verified via each tool's own real output, not assumed
+- [x] The CI gap that let the fusion-recipe seed go stale silently is closed with a guard matching
+  its two siblings' own established pattern, verified locally with CI's exact command
+- [x] Zero new model calls were spent closing any of this — every "reconcile" was a pure
+  recomputation over already-resolved data

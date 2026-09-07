@@ -120,9 +120,8 @@ public static class ItemGrantValidator
         {
             fails.Add(ItemGrantRules.Fail(ItemGrantRules.UnknownAction,
                 $"'{row.ContainerId}' seq {row.Seq} names action '{row.ActionId}', which is not in " +
-                "rpg_action. ⛔ X3: nothing produces actions yet (ActionSeeder.Generate has zero " +
-                "production callers), so gate GA2 ships DDL and validator with zero content rows " +
-                "rather than rows pointing at an empty table"));
+                "rpg_action — either a genuinely misnamed id, or this server has never imported the " +
+                "real action-corpus briefs (Program.cs's ActionCorpusImporter.Import call, default on)"));
             return fails;
         }
 

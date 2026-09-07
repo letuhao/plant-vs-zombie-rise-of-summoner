@@ -53,7 +53,7 @@ public class RolledItemEquipRuntimeTests : IDisposable
             FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
@@ -212,5 +212,143 @@ public class RolledItemEquipRuntimeTests : IDisposable
         Assert.True(ok2, reason2);
         var actorAfter = Assert.Single(squad2!);
         Assert.DoesNotContain(actionId, actorAfter.EquippedActionIds ?? Array.Empty<string>());
+    }
+
+    /// <summary>
+    /// spec-equip-runtime.md's Battle-half amendment (2026-09-07): the actual payoff for real content
+    /// — a `stat.modify` affix atom (the kind virtually all real item/relic content ships as, per this
+    /// session's own audit), NOT a synthetic `stat.derived` fixture, reaches a real
+    /// <c>BattleEngine.Resolve</c> call through <see cref="ActionContainerEffectResolverFactory.BuildEquip"/>
+    /// → <c>BattleRunState.BindEquip</c> — the compile/grant path this amendment added, proven the same
+    /// way <c>A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_and_a_real_battle_now_activates_it</c>
+    /// already proves the sibling action-grant path: a real grant lands in the real battle's own Bag,
+    /// not merely that the wiring compiles.
+    /// </summary>
+    [Fact]
+    public void An_equipped_items_stat_modify_atom_reaches_a_real_battle_through_the_compiler_path()
+    {
+        const string containerId = "item.stat-modify-equip-proof";
+        Assert.True(_store.UpsertAtom(new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.stat-modify-equip-proof", "", 1), KindId = "stat.modify",
+            FamilyId = "atom.stat-modify-equip-proof", Variant = "", Tier = 1, Name = "Stat Modify Equip Proof",
+            ParamsJson = "{\"channel\":\"atk\",\"op\":\"flat\",\"amount\":250}",
+        }).IsOk);
+        Assert.True(_store.UpsertContainer(new ContainerRow
+        {
+            ContainerId = containerId, Kind = ContainerKind.Item,
+            Atoms = new[] { new ContainerAtomRow(1, "atom.stat-modify-equip-proof.t1") },
+        }).IsOk);
+
+        var (playerId, specimenId) = SummonOneSpecimen(_store, "stat-modify-proof", rngSeed: 103);
+        var itemInstanceId = MintRolledInstance(containerId);
+        _store.SaveItem(new RpgItemRow { InstanceId = itemInstanceId, PlayerId = playerId.ToString(), AcquiredUtc = "2026-01-01T00:00:00Z" });
+        _store.SaveAssignment(specimenId, ItemRole.ArmamentPrimary, EquipRefKinds.Rolled, itemInstanceId);
+
+        var (ok, reason, squad, _) = _service.BuildSquad(playerId, new[] { specimenId });
+        Assert.True(ok, reason);
+        var mySetup = Assert.Single(squad!);
+        Assert.Equal(specimenId, mySetup.SpecimenId);
+
+        // Confirms ResolveBindings itself already sees the equip atom before blaming the battle wiring
+        // — the same diagnostic-first discipline BuildSquadEquippedActionsTests' own stat.derived proof
+        // uses.
+        var diag = _store.ResolveBindings(
+            new OwnerScope(OwnerKind.UniqueActor, specimenId), new BindContext(RuntimeId.Battle));
+        var diagAtom = diag.AtomsByBinding!.Values.SelectMany(a => a)
+            .Single(a => a.AtomId == "atom.stat-modify-equip-proof.t1");
+        Assert.Equal("stat.modify", diagAtom.KindId);
+
+        var (equipDefs, equipEffectIdsFor) = ActionContainerEffectResolverFactory.BuildEquip(_store, new[] { specimenId });
+        var equipEffectId = Assert.Single(equipEffectIdsFor(specimenId));
+        Assert.NotEmpty(equipDefs);
+
+        var setup = new BattleSetup
+        {
+            Squad = new[] { mySetup with { Key = "squad:0" } },
+            Wave = new[] { new BattleActorSetup { Key = "wave:0", Side = "wave", MaxHp = 1_000_000, Level = 1 } },
+        };
+
+        BattleEffectHost? capturedHost = null;
+        var report = BattleEngine.Resolve(setup, seed: 9003,
+            onEffectHostReady: host =>
+            {
+                capturedHost = host;
+                ActionContainerEffectResolverFactory.RegisterInto(host, equipDefs);
+            },
+            equipEffectIdsFor: equipEffectIdsFor);
+
+        Assert.NotNull(report);
+        Assert.NotNull(capturedHost);
+        Assert.True(capturedHost!.Bag.HasGrantForEffect(equipEffectId),
+            "BindEquip should have granted the compiled equip effect into the same battle's Bag");
+    }
+
+    /// <summary>
+    /// P1.5-L (2026-09-07): the real, previously-undiscovered Lawn half of this same gap.
+    /// <c>RpgStore.MaterializeRolledEquipRuntime</c>'s own doc names its only production caller as
+    /// <c>WebMatchService.BuildSquad</c> — the Battle/expedition path. Module 4's own
+    /// <see cref="ItemEquipService"/> (the real production write surface behind
+    /// <c>POST /api/items/equip</c>) never called it, so a specimen bound to the live Lawn (never sent
+    /// into a battle) had its equipped rolled item persist in <c>rpg_item_assignment</c> and change
+    /// nothing else — <c>effect_binding</c> stayed empty forever, and
+    /// <c>AtomPushService.Build</c>'s Lawn-runtime <c>ResolveBindings</c> call had nothing to find. This
+    /// proves the gap first (equip alone leaves bindings empty), then proves the fix
+    /// <c>ItemEquipEndpoints.SyncLawnRuntimeAsync</c> now applies after every successful equip/unequip —
+    /// the same <c>MaterializeRolledEquipRuntime</c> call Battle's squad-build already made, now also
+    /// reachable from the Lawn's own write surface.
+    /// </summary>
+    [Fact]
+    public void Equipping_through_the_real_ItemEquipService_alone_leaves_bindings_empty_until_the_new_Lawn_sync_runs()
+    {
+        const string containerId = "item.lawn-equip-proof";
+        Assert.True(_store.UpsertAtom(new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.lawn-equip-proof", "", 1), KindId = "stat.modify",
+            FamilyId = "atom.lawn-equip-proof", Variant = "", Tier = 1, Name = "Lawn Equip Proof",
+            ParamsJson = "{\"channel\":\"atk\",\"op\":\"flat\",\"amount\":77}",
+        }).IsOk);
+        Assert.True(_store.UpsertContainer(new ContainerRow
+        {
+            ContainerId = containerId, Kind = ContainerKind.Item,
+            Atoms = new[] { new ContainerAtomRow(1, "atom.lawn-equip-proof.t1") },
+            Slot = ItemRoles.Id(ItemRole.ArmamentPrimary),
+        }).IsOk);
+
+        var (playerId, specimenId) = SummonOneSpecimen(_store, "lawn-equip", rngSeed: 104);
+        var itemInstanceId = MintRolledInstance(containerId);
+        _store.SaveItem(new RpgItemRow
+        {
+            InstanceId = itemInstanceId, PlayerId = playerId.ToString(), AcquiredUtc = "2026-01-01T00:00:00Z"
+        });
+
+        // The real production write surface behind POST /api/items/equip -- not the DAL-level
+        // SaveAssignment shortcut the earlier tests in this file use, since this test's whole point is
+        // whether THIS caller alone reaches the runtime.
+        var equipService = new ItemEquipService(_store);
+        var outcome = equipService.Equip(playerId, specimenId, itemInstanceId, ItemRoles.Id(ItemRole.ArmamentPrimary));
+        Assert.True(outcome.Ok, outcome.Reason);
+
+        // Confirms the gap is real before proving the fix: equip alone (module 4) never materializes
+        // anything outside rpg_item_assignment.
+        Assert.Empty(_store.ListBindings(new OwnerScope(OwnerKind.UniqueActor, specimenId)));
+
+        // The exact call ItemEquipEndpoints.SyncLawnRuntimeAsync now makes after a successful
+        // equip/unequip -- mirrors WebMatchService.BuildSquad's own call for the Battle path.
+        var actor = _store.GetUniqueActor(specimenId)!;
+        _store.MaterializeRolledEquipRuntime(specimenId, checked((int)actor.Level));
+
+        var resolution = _store.ResolveBindings(
+            new OwnerScope(OwnerKind.UniqueActor, specimenId), new BindContext(RuntimeId.Lawn));
+        var atoms = resolution.AtomsByBinding!.Values.SelectMany(a => a).ToList();
+        var atom = Assert.Single(atoms, a => a.AtomId == "atom.lawn-equip-proof.t1");
+        Assert.Equal("stat.modify", atom.KindId);
+
+        // Unequip must withdraw it -- the same lifetime guarantee the Battle-path grant test proves,
+        // now proven for the Lawn's own sync call.
+        var unequipOutcome = equipService.Unequip(playerId, specimenId, ItemRoles.Id(ItemRole.ArmamentPrimary));
+        Assert.True(unequipOutcome.Ok, unequipOutcome.Reason);
+        _store.MaterializeRolledEquipRuntime(specimenId, checked((int)actor.Level));
+        Assert.Empty(_store.ListBindings(new OwnerScope(OwnerKind.UniqueActor, specimenId)));
     }
 }

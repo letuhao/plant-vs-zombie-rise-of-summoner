@@ -35,11 +35,13 @@ public class ThresholdGrantCorpusTests
     public void The_whole_shipped_set_corpus_parses_and_every_tier_is_reachable()
     {
         // SetCorpus.Parse refuses a tier above the set's distinct ROLE count, so this parsing at all is
-        // the completability assertion. The counts are the corpus as measured 2026-09-04.
+        // the completability assertion. The counts are the corpus as measured 2026-09-04; 30 -> 32
+        // sets (2026-09-07): a set-charm-live-endpoint trial batch added two real sets
+        // (`set.retribution-offense-001`/`-002`, 8 members and 2 tiers each).
         var sets = Sets();
-        Assert.Equal(30, sets.Count);
-        Assert.Equal(180, sets.Sum(s => s.Members.Count));
-        Assert.Equal(86, sets.Sum(s => s.Tiers.Count));
+        Assert.Equal(32, sets.Count);
+        Assert.Equal(196, sets.Sum(s => s.Members.Count));
+        Assert.Equal(90, sets.Sum(s => s.Tiers.Count));
         Assert.All(sets, s => Assert.True(s.Tiers.Max(t => t.PiecesRequired) <= s.DistinctRoleCount));
     }
 
@@ -141,11 +143,14 @@ public class ThresholdGrantCorpusTests
         // or three counts at once. That is I5 §3.6's design working — the evaluator counts per SET ID,
         // never one merged count — but it is also a DISCLOSURE requirement for module 20's tooltip:
         // "3 / 4" has to be shown per set, because one piece is three-quarters of an answer.
+        // 154 -> 165 (2026-09-07): the set-charm-live-endpoint trial batch's two new sets declare 16
+        // (role, baseType) member pairs, of which 11 are genuinely new and 5 happen to name a pair an
+        // existing set already declares (re-measured directly, not assumed).
         var sets = Sets();
         var owners = MemberOwners(sets);
 
-        Assert.Equal(154, owners.Count);
-        Assert.Equal(25, owners.Count(kv => kv.Value.Count > 1));
+        Assert.Equal(165, owners.Count);
+        Assert.Equal(28, owners.Count(kv => kv.Value.Count > 1));
         Assert.Equal(3, owners.Max(kv => kv.Value.Count));
 
         var shared = owners.First(kv => kv.Value.Count == 3);
@@ -197,13 +202,15 @@ public class ThresholdGrantCorpusTests
     public void The_shipped_charm_population_is_twenty_one_minor_thirty_two_standard_and_seven_signets()
     {
         // ssot-charms §3.4's own measurement, re-measured against the live corpus.
+        // 60 -> 61, minor 21 -> 22, apCost=1 21 -> 22 (2026-09-07): a set-charm-live-endpoint trial
+        // batch added one real minor/apCost=1 charm, `charm.surv-util-021` "Carapace of Patience".
         var charms = Charms();
-        Assert.Equal(60, charms.Count);
-        Assert.Equal(21, charms.Count(c => c.Class == CharmClass.Minor));
+        Assert.Equal(61, charms.Count);
+        Assert.Equal(22, charms.Count(c => c.Class == CharmClass.Minor));
         Assert.Equal(32, charms.Count(c => c.Class == CharmClass.Standard));
         Assert.Equal(7, charms.Count(c => c.Class == CharmClass.Signet));
 
-        Assert.Equal(21, charms.Count(c => c.ApCost == 1));
+        Assert.Equal(22, charms.Count(c => c.ApCost == 1));
         Assert.Equal(21, charms.Count(c => c.ApCost == 2));
         Assert.Equal(11, charms.Count(c => c.ApCost == 3));
         Assert.Equal(7, charms.Count(c => c.ApCost == 5));

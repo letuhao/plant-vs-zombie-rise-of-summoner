@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Light",
-  "elementSecondary": null,
+  "elementSecondary": "Earth",
   "gameTypeId": 1031,
   "magnitudes": {
     "combat.shield.capacity.omni": 4400,

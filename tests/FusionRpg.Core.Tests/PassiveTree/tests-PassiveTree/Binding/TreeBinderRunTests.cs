@@ -90,31 +90,37 @@ public class TreeBinderRunTests
 
     // ---- 2. §7.2 -- a refused slot names its unspent budget and fails the run ------------------
 
+    /// <summary>Superseded 2026-09-07: this test used `element.convert` as its "guaranteed unregistered
+    /// kind" fixture. D56 shipped `element.convert` as a real, registered kind the same day, so it no
+    /// longer refuses (see `AffixComposerTests.A_conversion_kind_atom_resolves_successfully_now_that_
+    /// D56_shipped_it`) — this test's OWN subject is the generic §7.2 refusal/unspent-budget/FAIL-verdict
+    /// machinery, not conversion specifically, so it is repointed at a genuinely unregistered kind
+    /// rather than deleted.</summary>
     [Fact]
-    public void A_conversion_node_is_refused_its_unspent_budget_is_named_and_the_run_fails()
+    public void An_unregistered_kind_node_is_refused_its_unspent_budget_is_named_and_the_run_fails()
     {
-        var conversionAffixId = "affix.synthetic.convert";
-        var conversionAtomId = "atom.synthetic.convert";
-        var affix = new AffixRow(conversionAffixId, null, new[] { new AffixRefRow(0, conversionAtomId) });
-        var conversionAtom = new AtomRow
+        var badAffixId = "affix.synthetic.unregistered";
+        var badAtomId = "atom.synthetic.unregistered";
+        var affix = new AffixRow(badAffixId, null, new[] { new AffixRefRow(0, badAtomId) });
+        var badAtom = new AtomRow
         {
-            AtomId = conversionAtomId,
-            KindId = "element.convert", // not one of the 16 registered kinds (D16)
-            FamilyId = conversionAtomId,
+            AtomId = badAtomId,
+            KindId = "not.a.real.kind", // guaranteed absent from AtomKindRegistry
+            FamilyId = badAtomId,
             Tier = 1,
             Name = "synthetic",
             ParamsJson = """{"channel":"combat.power.fire","op":"flat"}""",
             WhenJson = "{}",
         };
-        var affixes = new Dictionary<string, AffixRow> { [conversionAffixId] = affix };
-        var atoms = new Dictionary<string, AtomRow> { [conversionAtomId] = conversionAtom };
+        var affixes = new Dictionary<string, AffixRow> { [badAffixId] = affix };
+        var atoms = new Dictionary<string, AtomRow> { [badAtomId] = badAtom };
 
         var (workedAffixes, workedAtoms) = WorkedExampleContent();
         var nodes = new[]
         {
             WorkedExampleNode("skill.might-off-t5-n0", 45), // binds cleanly
             new BindInputNode("skill.might-off-t7-b3", 1000, 1000, 64, 2,
-                new[] { conversionAffixId }, ExclusionForm.None, DeliberateHole: false),
+                new[] { badAffixId }, ExclusionForm.None, DeliberateHole: false),
         };
         var allAffixes = workedAffixes.Concat(affixes).ToDictionary(kv => kv.Key, kv => kv.Value);
         var allAtoms = workedAtoms.Concat(atoms).ToDictionary(kv => kv.Key, kv => kv.Value);
@@ -126,7 +132,7 @@ public class TreeBinderRunTests
         Assert.Equal("skill.might-off-t7-b3", refusal.NodeId);
         Assert.Equal(64L, refusal.UnspentBudgetShareMilli);
         Assert.False(refusal.DeliberateHole);
-        Assert.Contains("18th atom kind", refusal.Reason);
+        Assert.Contains("unregistered kind", refusal.Reason);
         Assert.Equal(64L, report.TotalUnspentBudgetShareMilli);
 
         // §7.2 item 3: FAIL, never a silent partial success.
@@ -135,29 +141,32 @@ public class TreeBinderRunTests
 
     // ---- 3. §7.2's "consequence for tree-plan" -- a deliberate hole is reported but doesn't fail --
 
+    /// <summary>Superseded 2026-09-07: this test used `element.convert` as its "guaranteed unregistered
+    /// kind" fixture, the same way the previous test did — see that test's own note. Repointed at a
+    /// genuinely unregistered kind; the `DeliberateHole` suppression behavior under test is unaffected.</summary>
     [Fact]
     public void A_deliberate_hole_still_names_its_unspent_budget_but_does_not_fail_the_run()
     {
-        var conversionAffixId = "affix.synthetic.convert2";
-        var conversionAtomId = "atom.synthetic.convert2";
-        var affix = new AffixRow(conversionAffixId, null, new[] { new AffixRefRow(0, conversionAtomId) });
-        var conversionAtom = new AtomRow
+        var badAffixId = "affix.synthetic.unregistered2";
+        var badAtomId = "atom.synthetic.unregistered2";
+        var affix = new AffixRow(badAffixId, null, new[] { new AffixRefRow(0, badAtomId) });
+        var badAtom = new AtomRow
         {
-            AtomId = conversionAtomId,
-            KindId = "element.convert",
-            FamilyId = conversionAtomId,
+            AtomId = badAtomId,
+            KindId = "not.a.real.kind",
+            FamilyId = badAtomId,
             Tier = 1,
             Name = "synthetic",
             ParamsJson = """{"channel":"combat.power.fire","op":"flat"}""",
             WhenJson = "{}",
         };
-        var affixes = new Dictionary<string, AffixRow> { [conversionAffixId] = affix };
-        var atoms = new Dictionary<string, AtomRow> { [conversionAtomId] = conversionAtom };
+        var affixes = new Dictionary<string, AffixRow> { [badAffixId] = affix };
+        var atoms = new Dictionary<string, AtomRow> { [badAtomId] = badAtom };
 
         var nodes = new[]
         {
             new BindInputNode("skill.might-off-t7-b3", 1000, 1000, 64, 2,
-                new[] { conversionAffixId }, ExclusionForm.None, DeliberateHole: true),
+                new[] { badAffixId }, ExclusionForm.None, DeliberateHole: true),
         };
 
         var report = TreeBinderRun.BindTree(nodes, affixes, atoms, RealPowerTuning());

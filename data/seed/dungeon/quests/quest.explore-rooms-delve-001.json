@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "many",
+  "flavor": "The local guild requires a complete survey of these uncharted halls to ensure safe passage for future expeditions. Every corridor mapped is a step toward reclaiming this lost territory for the realm.",
+  "name": "The Cartographer's Mandate",
+  "objectiveTemplate": "explore-rooms",
+  "prereqRefs": [],
+  "questId": "quest.explore-rooms-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "delve",
+  "targetRef": "none"
+}

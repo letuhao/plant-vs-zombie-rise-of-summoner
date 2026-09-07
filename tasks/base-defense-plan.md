@@ -20,7 +20,7 @@ spec in the same pass — see `base-defense-map.md`'s own amendment note and
 
 ## 1. What this plans, and what it deliberately does not
 
-**Plans:** all 29 module specs, their ordering, the three gates, and the checkpoints between phases.
+**Plans:** all 30 module specs, their ordering, the three gates, and the checkpoints between phases.
 
 **Does not plan:** time estimates. There is no basis for them here and an invented one becomes a
 commitment. What this gives instead is **module count per level, which modules are small, and which

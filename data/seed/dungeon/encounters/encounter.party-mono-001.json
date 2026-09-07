@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.party-mono-001",
+  "formation": "party",
+  "name": "The Singular Bulwark",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "An elite formation of high-durability specialists sharing a single elemental affinity to force tactical focus.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

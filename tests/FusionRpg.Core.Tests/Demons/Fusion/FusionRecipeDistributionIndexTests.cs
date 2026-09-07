@@ -27,15 +27,16 @@ public class FusionRecipeDistributionIndexTests
             var almanac = Assert.Single(shortfalls);
             Assert.Equal(DemonRarity.Almanac, almanac.Rarity);
 
-            // Pinned to the exact numbers verified live 2026-09-06 and committed in
-            // demon-seed-map.md / spec-fusion-recipe-generator.md / seed-to-concrete-plan.md /
-            // seed-to-concrete-todo.md. If the real corpus legitimately changes and this breaks,
-            // re-run `dotnet run --project tools/DemonRecipeDistributionIndex` and update this
-            // assertion AND those four documents together — never one without the other.
+            // Pinned to the exact numbers verified live 2026-09-07 (full 903-species corpus, T2.11's
+            // own classification run completed) and committed in demon-seed-map.md /
+            // spec-fusion-recipe-generator.md / seed-to-concrete-plan.md / seed-to-concrete-todo.md.
+            // If the real corpus legitimately changes and this breaks, re-run
+            // `dotnet run --project tools/DemonRecipeDistributionIndex` and update this assertion AND
+            // those four documents together — never one without the other.
             Assert.Equal(DemonRarity.Sunwoven, almanac.NearestBelow);
             Assert.Equal(4, almanac.BelowCount);
             Assert.Equal(6, almanac.MaxPairs);
-            Assert.Equal(14, almanac.Deficit);
+            Assert.Equal(16, almanac.Deficit);
 
             // OutputCount is cross-checked against an independent recomputation (not just the bare
             // literal) so a genuinely new Almanac species moves this via the SAME rule Compute()
@@ -43,7 +44,7 @@ public class FusionRecipeDistributionIndexTests
             var expectedAlmanacOutputs = DemonSpeciesCatalog.All.Count(s =>
                 s.BaseRarity == DemonRarity.Almanac && s.Acquisition != DemonAcquisition.CaptureOnly);
             Assert.Equal(expectedAlmanacOutputs, almanac.OutputCount);
-            Assert.Equal(20, almanac.OutputCount); // today's real number — see comment above
+            Assert.Equal(22, almanac.OutputCount); // today's real number — see comment above
 
             // Every OTHER populated rung at/above the output floor has ample headroom — this isn't
             // the coincidence of one lucky rung, every other rung is nowhere near its own ceiling.

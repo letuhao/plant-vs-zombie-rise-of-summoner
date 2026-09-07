@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Thick, calcified roots weave through the floor like the ribs of a giant, cradling a hollowed-out stone basin filled with shimmering, unrefined ores and ancient, moss-covered trinkets.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Root-Bound Reliquary",
+  "reason": "The party discovers a natural geode chamber where mineral deposits have formed around discarded treasures from a bygone era.",
+  "roomId": "room.cache-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -21,6 +21,7 @@ public sealed class BattleTrace
     readonly List<string> _targets = new();
     readonly List<string> _applies = new();
     readonly List<string> _turns = new();
+    readonly List<string> _aiDecisions = new();
 
     /// <summary>
     /// Intra-round phase markers in the order they actually ran. A snapshot, not a live view:
@@ -105,6 +106,27 @@ public sealed class BattleTrace
 
     /// <summary>Turn transitions in order, for the same reason <see cref="Targets"/> is separate.</summary>
     public IReadOnlyList<string> Turns => _turns.ToArray();
+
+    /// <summary>
+    /// base-defense `siege-ai` R6 (spec-siege-ai.md §7): one AI decision's own top-3 scored candidates
+    /// with their full per-term breakdown, pre-formatted by the caller (`AiScoring.FormatTopThree`) —
+    /// this class stays domain-agnostic, the same as every other method here, which takes only
+    /// primitives and never a subsystem's own scoring type.
+    ///
+    /// <para><b>Deliberately not a `DecisionTrace` entry.</b> That class (same namespace) replays HUMAN
+    /// input decisions for `(setup, seed, trace)` determinism — its `TracedDecision` record is a fixed
+    /// `Player`/`Timeout` shape with no room for a scored candidate list, a genuinely different concern
+    /// from an AI's own scoring introspection, not the same trace wearing two hats.</para>
+    ///
+    /// <para>Its own list, kept OUT of <see cref="Digest"/> for the same reason <see cref="Target"/>/
+    /// <see cref="Turn"/> are: an observability addition must not become indistinguishable from a
+    /// behavior change in the fixture the parity ladder compares.</para>
+    /// </summary>
+    public void AiDecision(int round, string actorKey, string topThreeSummary) =>
+        _aiDecisions.Add($"{round} {actorKey} {topThreeSummary}");
+
+    /// <summary>AI decision lines in order, for the same reason <see cref="Targets"/> is separate.</summary>
+    public IReadOnlyList<string> AiDecisions => _aiDecisions.ToArray();
 
     /// <summary>
     /// Decorates the combat RNG so crit-stream draws are recorded without touching

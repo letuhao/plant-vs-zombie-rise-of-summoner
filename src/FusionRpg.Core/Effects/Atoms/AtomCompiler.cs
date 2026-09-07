@@ -1,9 +1,12 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Combat.Element;
 // The owner-key grammar a durable grant is stamped with, and its matching ownerKind, live with the
 // binder that consumes them — one place, so the producer and the rewrite can never drift apart.
 using FusionRpg.Core.Match;
 using FusionRpg.Core.Power;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Effects.Atoms;
 
@@ -49,6 +52,28 @@ public static class AtomCompiler
     /// Null (the default) means an atom carrying <c>ExternalRef</c> throws when compiled — never
     /// silently prices at zero.
     /// </param>
+    /// <param name="ownerElementPrimary">
+    /// Phase 7 F3.1 (combat-unification, 2026-09-07): the SAME "per-owner compile-time context" shape
+    /// <paramref name="ownerLevel"/>/<paramref name="ownerTheta"/> already use, applied to element
+    /// typing. Null (the default) is the shipped behaviour verbatim — no `elementPayload` is baked
+    /// into any compiled grant. Non-null, a compiled <c>ApplyResourceDelta</c> grant with no
+    /// already-authored `elementPayload` gets one built by calling <see cref="HybridPayload.Build"/>
+    /// directly (never a second implementation of its arithmetic) — this keeps `AtomCompiler` a pure
+    /// compiler, same discipline as every other owner-context parameter here: it never applies,
+    /// merges, or calls Unity/the Writer/the bag, and the sealed Foundation `EffectBag` needs no
+    /// change at all, since the compiled grant already carries whatever a hand-authored one would.
+    /// </param>
+    /// <param name="ownerElementSecondary">The owner's secondary element, or null for a single-typed
+    /// owner. Mirrors <see cref="ownerElementPrimary"/> — only meaningful together with it.</param>
+    /// <param name="hybridSecondaryWeightMilli">
+    /// The SAME `hybrid.secondaryWeightMilli` weight <see cref="HybridPayload.Build"/> already takes
+    /// on web-battle (`battle.v5.json`, Phase 7 F1) — passed explicitly rather than read from
+    /// `BattleRuleset` directly, matching how <paramref name="powerTuning"/> is a parameter and not a
+    /// static reach-through: this compiler stays free of hidden global-state dependencies. The real
+    /// caller (`AtomPushService.Build`) sources it from the same `BattleRuleset.HybridSecondaryWeightMilli`
+    /// the server already configures. Defaults to 0 — the pre-Phase-7 shipped value — so an omitted
+    /// argument reproduces today's exact behaviour.
+    /// </param>
     public static CompiledCatalog Compile(
         IEnumerable<AtomRow> atoms,
         RuntimeId runtime,
@@ -61,7 +86,10 @@ public static class AtomCompiler
         int? ownerTheta = null,
         PowerTuning? powerTuning = null,
         Func<string, IReadOnlyCollection<string>?>? grantOwnerKeys = null,
-        Func<string, long>? externalRefs = null)
+        Func<string, long>? externalRefs = null,
+        ElementTypeId? ownerElementPrimary = null,
+        ElementTypeId? ownerElementSecondary = null,
+        int hybridSecondaryWeightMilli = 0)
     {
         var defs = new List<EffectDefDto>();
         var compiled = new List<EffectGrantDto>();
@@ -97,7 +125,8 @@ public static class AtomCompiler
             {
                 var compilable = live.Select(v => v.Atom).ToList();
                 var (def, grants) = EmitDefAndGrant(
-                    group.Key, compilable, curves, ownerLevel, ownerTheta, powerTuning, grantOwnerKeys, externalRefs);
+                    group.Key, compilable, curves, ownerLevel, ownerTheta, powerTuning, grantOwnerKeys, externalRefs,
+                    ownerElementPrimary, ownerElementSecondary, hybridSecondaryWeightMilli);
                 defs.Add(def);
                 compiled.AddRange(grants);
                 compiledIds.AddRange(compilable.Select(m => m.AtomId));
@@ -124,7 +153,10 @@ public static class AtomCompiler
         string icdKey, IReadOnlyList<AtomRow> members, Func<string, CurveTable?>? curves, int ownerLevel,
         int? ownerTheta, PowerTuning? powerTuning,
         Func<string, IReadOnlyCollection<string>?>? grantOwnerKeys = null,
-        Func<string, long>? externalRefs = null)
+        Func<string, long>? externalRefs = null,
+        ElementTypeId? ownerElementPrimary = null,
+        ElementTypeId? ownerElementSecondary = null,
+        int hybridSecondaryWeightMilli = 0)
     {
         // The UNION of the group's triggers, on ONE def. This is what keeps a multi-trigger def's
         // single ICD clock after it was split into several atoms: EffectDef.Triggers has always been
@@ -193,6 +225,28 @@ public static class AtomCompiler
         {
             var filters = LegacyFilters(pred);
             if (filters.Count > 0) overlay["filters"] = filters;
+        }
+
+        // Phase 7 F3.1 (combat-unification, 2026-09-07): the owner's own dual-typing rides the
+        // overlay too, exactly like chance/icd_ms/filters above — but only for a group that actually
+        // deals damage (ApplyResourceDelta), only when the owner has a primary element to build from,
+        // and only when nothing already authored one (no real atom kind does today, but a future one
+        // might, and authored content must always win over this default). Built by calling
+        // HybridPayload.Build directly — never a second implementation of its arithmetic — so this
+        // compiled grant carries exactly what a hand-authored one with the same elements would.
+        if (ownerElementPrimary is { } primary
+            && !overlay.ContainsKey("elementPayload")
+            && actions.Any(a => string.Equals(a.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase)))
+        {
+            var components = HybridPayload.Build(primary, ownerElementSecondary, hybridSecondaryWeightMilli);
+            if (components.Length > 0)
+                overlay["elementPayload"] = components
+                    .Select(c => new Dictionary<string, object?>(StringComparer.Ordinal)
+                    {
+                        ["element"] = c.Element.ToElementId(),
+                        ["weight"] = c.Weight,
+                    })
+                    .ToList();
         }
 
         // One grant per owner that sourced this group. With no owner map that is exactly one grant at

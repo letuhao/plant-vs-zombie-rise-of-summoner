@@ -1,17 +1,19 @@
 # Spec: `combination-write-unblock`
 
-**Module id:** `combination-write-unblock` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 4 of 10
-**Depends on:** `generator-harness` (1), `base-types-gen` (2), `sockets-gen` (2)
+**Module id:** `combination-write-unblock` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 4 (parallel with `set-charm-live-endpoint`, `recipes-gen`)
+**Depends on:** `generator-harness`, `base-types-gen`, `sockets-gen`
 
 ## Reference manifest
 
-Confirmed against `combogen/schema.py`, not assumed:
+Confirmed against `combogen/schema.py`, not assumed — ⚠ **corrected on the second audit pass: the
+`ingredients` and `grants` fields sit four lines apart in the same function and an earlier draft of
+this table cited the wrong one for `ingredients`.**
 
 | Field | Kind | Target | Real evidence |
 |---|---|---|---|
-| `ingredients[]` | **Categorical** | `sockets-gen` | `schema.py:76-98` — enum of gem FAMILIES, ≥1 real gem must satisfy each, not a specific gem id |
+| `ingredients[]` (`supplied_families`) | **Categorical** | `sockets-gen` | `schema.py:76-87`, enum at line 82 — ≥1 real gem must satisfy each family, not a specific gem id |
 | `hostRole` | **Categorical** | `base-types-gen` | `schema.py:100-102` — an enum of roles whose socket ceiling fits the ingredient count |
-| `granted_families` | **Unresolved — ask first** | Same open question as `consumables-gen`'s `family` field | `schema.py:51` — supplied by the caller; source not yet confirmed to be this program's own `affix-families-gen` output at all |
+| `grants` (`granted_families`) | **External** (resolved 2026-09-07) | `atom-family-library.md:62-128`, same corpus as `consumables-gen`'s `family` field — confirmed, not `affix-families-gen` | `schema.py:88-98` |
 
 The owner's *"same [as set bonus]... strain too"* concern is real and confirmed: a combination naming a
 `hostRole`/`ingredients` combination nothing in `base-types-gen`/`sockets-gen` satisfies is exactly the
@@ -33,9 +35,11 @@ already being ruled for retirement.
    `catalogue.py`, `run.py`) — name the specific missing connection, not just restate the refusal.
 2. Resolve the frozen-registry blocker EXPLICITLY, not silently: `naming.v1.json`'s `frozen: true` /
    `registryVersion 4` is a locked decision per this repo's own architecture-change rule
-   (`decisions.md` first). This module's own acceptance criteria cannot include "bump the frozen
-   registry" as a unilateral action — it must either find a path that doesn't require touching the
-   frozen registry, or name the required `decisions.md` entry explicitly as a prerequisite, ask-first.
+   (`decisions.md` first). **Owner pre-approved 2026-09-07**: if T25's investigation confirms bumping
+   the registry is genuinely the only path (not a shortcut around an available workaround), this module
+   MAY proceed — but only paired with a real `decisions.md` entry recording the change, its reason, and
+   what it touches, written and landed in the SAME change as the bump, never after it. Reconciling the
+   documentation to match the change is not optional paperwork; it is the acceptance criterion.
 3. Once unblocked, `items generate --kind combination --write` produces real, valid combination entries
    — the 102 ids currently sitting with "no rows... by design, not by omission" get real content for at
    least a representative sample.
@@ -43,10 +47,9 @@ already being ruled for retirement.
     request has ≥1 real base-type with a matching socket ceiling, and every `ingredients` family has
     ≥1 real gem — a combination naming a hostRole/family nothing satisfies is refused, not generated
     with a dangling reference.
-3b. **Ask first, before this module ships real content**: confirm `granted_families`'s real source
-    (per the reference manifest above) — do not wire this generator against `affix-families-gen`'s
-    output on the unverified assumption they're the same vocabulary consumables' `family` field
-    already showed signs of NOT being.
+3b. ✅ **Resolved 2026-09-07**: `grants`/`granted_families` validates as an `external` reference against
+    `atom-family-library.md`, same as `consumables-gen`'s `family` field — never auto-backfilled, an
+    unresolved id is reported as effect-atom's own gap, not generated here.
 4. `combogen/migrate.py`'s own retirement plan for `sockwords.json` (25 entries) executes cleanly once
    real combination content exists to replace it — confirm the migration path still matches what
    `migrate.py` already specifies, since it may have been written before this unblock was scoped.
@@ -89,9 +92,11 @@ rule applies directly here.
 **Always:** investigate the two named blockers precisely before writing any fix — "unwired graph" and
 "frozen registry" are each a specific, findable fact, not a category to guess at.
 
-**Ask first:** any change to `naming.v1.json`'s `frozen`/`registryVersion` fields — this is exactly the
-kind of architecture-locking change `decisions.md` governs, and this module does not have standing to
-make that call unilaterally.
+**Pre-approved, conditionally (owner, 2026-09-07):** bumping `naming.v1.json`'s `frozen`/
+`registryVersion` fields IS authorized, but only if T25 first confirms no workaround exists, and only
+paired with a real, same-change `decisions.md` entry — never a silent bump, never deferred to a later
+cleanup. If a workaround exists, take it instead; the pre-approval is for "genuinely the only path," not
+a default.
 
 **Never:** work around the frozen-registry blocker by writing combination content that ignores or
 duplicates the naming registry's own id grammar — that reproduces the exact drift a frozen registry

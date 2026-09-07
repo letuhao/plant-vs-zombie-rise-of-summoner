@@ -311,11 +311,12 @@ rejected in this phase (not re-opened at `/spec` unless the owner reverses):
 | **Derived** | Category segs from derived-stat-catalog, one collapse open, StatRow, Show unchanged | Right: unit sentence, compose sentence, cap or “more still counts”, sources (GG-49). Six states from spec-derived-stat-sheet §3. |
 | **Shield** | Three instance radials (empty well dashed) | Omni shield StatRows. Full combat×element matrix stays on Derived → Shield category. Noun is **Shield**, never Ward. |
 | **Status** | Glyphs (live / catalog / mastery segs) from status-catalog | Catalog reading. Mastery is player-lifetime, not a live stack. |
-| **Elements** | Coloured radials from element-catalog + mastery StatRows | Two concrete types from profile. Omni is a baseline, not a seventh type chip. |
+| **Elements** | Coloured radials from element-catalog + mastery StatRows | **One or two concrete types from profile — every species has a real `elementPrimary`, `elementSecondary` is nullable and most species carry none.** A second radial renders only when the profile actually has one; it is never a forced empty slot. Omni is a baseline, not a seventh type chip. |
 | **Kit** | ActionSlot row + paper-doll roles listed in actor-sheet catalog | Auras already live above regular actions. Regular slots stay locked-with-reason until the action corpus ships. Gear binds equipment GET. |
 | **Paths** | Species bloodline vs shared corpus — node track, not a paragraph | Tree surface may push once (`spec-tree-surface.md`). That is GG-10’s last push. |
 
-Header is always on: portrait, name, species, side, level, two elements, Fielded/Wave, Esc.
+Header is always on: portrait, name, species, side, level, element(s) — one shown always, a second
+only when the species actually has one — Fielded/Wave, Esc.
 
 ### Shared widgets (one implementation)
 
@@ -331,8 +332,8 @@ Meters and icons use the locked presentation libs — **`recharts`**, **`react-t
 - Aptitude is a **source share**, never a derived channel id.
 - Allocation is the **sum of scopes**; `share` is on the sum. Aspect scope is **reverted**.
 - Combat families expand over the injected element axis the same way the generator does.
-- `derived-stat-catalog` is a **family** list (~tens of entries). Live registry is **268** channels
-  today (`CatalogResolves268`). The sheet joins expand(family) → `/api/actors/{id}/derived`
+- `derived-stat-catalog` is a **family** list (~tens of entries). Live registry is **269** channels
+  today (`CatalogResolves269`). The sheet joins expand(family) → `/api/actors/{id}/derived`
   `Channels` — it does not require one catalog row per channel, and must not truncate the matrix
   because “200+ is too many for the backend.”
 - `omni` column is visually first and separated.

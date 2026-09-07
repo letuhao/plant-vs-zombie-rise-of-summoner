@@ -356,6 +356,8 @@ def cmd_effects(args: argparse.Namespace) -> int:
             passthrough.append("--dry-run")
         if args.workers:
             passthrough += ["--workers", str(args.workers)]
+        if args.species_id:
+            passthrough += ["--species-id", args.species_id]
         return run(passthrough)
 
     print(f"unknown effects command {args.effects_command!r}")
@@ -374,13 +376,19 @@ def cmd_items(args: argparse.Namespace) -> int:
     flag you must remember to pass to avoid spending them is a flag someone eventually forgets.
     `--write` is the explicit opt-in.
 
-    ⭐ **`--write` now writes, and only along one path: an authored-answer file.** The generation
-    graph is `workflow/graphs/item_set.py`; its `call` is injected, and the transport wired today is
-    `setgen.answers.replay_caller`, which reads answers a model has already authored against briefs
-    this command emitted (`--briefs-out`). There is deliberately still NO live-endpoint path here:
-    `--write` without `--answers` and `--out-dir` refuses with the reason, because a command that
-    silently writes nothing is worse than one that says so.
+    ⭐ **`--write` now writes along either of two transports (module 13, `set-charm-live-endpoint`).**
+    The generation graph is `workflow/graphs/item_set.py`; its `call` is injected. `--answers <file>`
+    keeps the deterministic path from before — `setgen.answers.replay_caller` reads answers a model
+    has already authored against briefs this command emitted (`--briefs-out`); CI and dry runs stay
+    on this path. `--endpoint <url> [--model <name>]` is the new live path — `setgen.run.live_caller`
+    bound to `pipeline.llm_caller.call_model`, the same real HTTP transport `effects generate` and
+    `demons generate` already use. `--write` with neither flag still refuses with the reason, because
+    a command that silently writes nothing is worse than one that says so.
     """
+    if args.items_command == "validate":
+        return _cmd_items_validate(args)
+    if args.items_command == "combogen-migrate":
+        return _cmd_items_combogen_migrate(args)
     if args.items_command != "generate":
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -455,35 +463,67 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
     `--allow-production-tree` is passed.** Every items metric globs that tree recursively, so a
     sample written there moves finding counts other streams baseline against — the failure is
     silent and shows up as someone else's regression.
+
+    ⭐ **Two transports, one refusal (module 13, `set-charm-live-endpoint`).** `--answers <file>` is
+    the deterministic replay path, unchanged. `--endpoint <url>` is the live path — a real call
+    through `pipeline.llm_caller.call_model`, the same transport `effects generate`/`demons generate`
+    already use — and it makes `--answers` optional, not `--out-dir`: a write still needs somewhere
+    to land. Only when NEITHER transport is named does this refuse, the same safety net as before.
     """
     from ..adapters.items.setgen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
+    from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
+    from ..pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig
 
-    if not args.answers or not args.out_dir:
+    if not args.out_dir:
+        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
+              "land.", file=sys.stderr)
+        return EXIT_REFUSED
+    if not args.answers and not args.endpoint:
         print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_set.py) is wired, but its only transport today is an "
-              "authored-answer file: emit briefs with --briefs-out, have a model answer them, then "
-              "pass --answers <file> --out-dir <dir>. There is no live-endpoint path here yet.",
+              "(workflow/graphs/item_set.py) is wired to two: an authored-answer file (emit briefs "
+              "with --briefs-out, have a model answer them, then pass --answers <file>), or a live "
+              "model endpoint (--endpoint <url> [--model <name>]).",
               file=sys.stderr)
         return EXIT_REFUSED
+
     try:
         out_dir = seedfile_mod.resolve_out_dir(
             args.out_dir, allow_production_tree=args.allow_production_tree)
-        answers = answers_mod.load_answers(Path(args.answers))
-    except (seedfile_mod.OutDirRefused, answers_mod.AnswerFileError) as exc:
+    except seedfile_mod.OutDirRefused as exc:
         print(f"seedsmith: {exc}", file=sys.stderr)
         return EXIT_REFUSED
-    if answers.kind != args.kind or answers.population != args.population:
-        print(f"seedsmith: the answer file is for --kind {answers.kind} --population "
-              f"{answers.population}; this run is {args.kind}/{args.population}", file=sys.stderr)
-        return EXIT_REFUSED
+
+    call = None
+    if args.answers:
+        try:
+            answers = answers_mod.load_answers(Path(args.answers))
+        except answers_mod.AnswerFileError as exc:
+            print(f"seedsmith: {exc}", file=sys.stderr)
+            return EXIT_REFUSED
+        if answers.kind != args.kind or answers.population != args.population:
+            print(f"seedsmith: the answer file is for --kind {answers.kind} --population "
+                  f"{answers.population}; this run is {args.kind}/{args.population}",
+                  file=sys.stderr)
+            return EXIT_REFUSED
+        effective_model = args.model
+    else:
+        # No answer file at all this time — `run_batch`'s own `answers` parameter is consulted
+        # only to build the DEFAULT (replay) caller, which never happens here because `call` is
+        # given explicitly. This empty stand-in satisfies the parameter's type without pretending
+        # an answer file exists.
+        answers = answers_mod.AnswerFile(kind=args.kind, population=args.population,
+                                         prompt_version=_prompt_version(), by_subject={})
+        effective_model = (args.model if args.model and args.model != "unrecorded"
+                           else DEFAULT_CONFIG.model)
+        call = run_mod.live_caller(LlmCallerConfig(endpoint=args.endpoint, model=effective_model))
 
     ledger_path = Path(args.ledger) if args.ledger else out_dir / "set-charm-gen.ledger.json"
     result = authored_mod.run_batch(
         plan=plan, answers=answers, tuning=tuning, vocabulary=vocabulary, out_dir=out_dir,
         kind=args.kind, population=args.population, authored_utc=args.authored_utc,
-        model=args.model, ledger_path=ledger_path)
+        model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     return EXIT_CLEAN if result.persisted and not any(
@@ -521,10 +561,16 @@ def _cmd_items_combination(args: argparse.Namespace) -> int:
         print(f"seedsmith: {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
+    planned_total = len(plan.subjects)
+    if args.limit and args.limit > 0:
+        import dataclasses
+        plan = dataclasses.replace(plan, subjects=plan.subjects[:args.limit])
+
     legality = migrate_mod.legality_report(tuning, host_roles=plan.host_roles)
     summary = {
         **plan.summary(),
         "kind": "combination",
+        "plannedBeforeLimit": planned_total,
         "ingredientCount": tuning.ingredient_count,
         "maxCombosPerActor": tuning.max_combos_per_actor,
         "attunedTierBonus": tuning.attuned_tier_bonus,
@@ -536,13 +582,157 @@ def _cmd_items_combination(args: argparse.Namespace) -> int:
         print("\n--- sample brief ---")
         print(plan.subjects[0].brief)
 
+    if args.briefs_out:
+        from ..adapters.items.combogen.brief import PROMPT_VERSION as combo_prompt_version
+
+        target = Path(args.briefs_out)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps({
+            "schemaVersion": 1, "kind": "combination", "shape": args.shape,
+            "promptVersion": combo_prompt_version,
+            "subjects": [{**s.to_dict(), "brief": s.brief} for s in plan.subjects],
+        }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"\nwrote {len(plan.subjects)} brief(s) to {target}", file=sys.stderr)
+
     if args.write:
-        print("seedsmith: --write is refused — the generation graph for `items generate --kind "
-              "combination` is not wired, and the `socket-word` -> `combination` kind rename it "
-              "lands with touches a FROZEN registry (naming.v1.json v4). The plan above is real; "
-              "the model call is not.", file=sys.stderr)
-        return EXIT_REFUSED
+        return _cmd_items_combination_write(args, plan=plan, tuning=tuning)
     return EXIT_CLEAN
+
+
+def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> int:
+    """The `--write` half for `--kind combination` (`combination-write-unblock`, item module 21).
+
+    ⛔ **Investigation finding, not an assumption.** The refusal this replaces used to read *"the
+    generation graph... is not wired, and the kind rename touches a FROZEN registry"* as one
+    blocker. They are two SEPARATE facts and only the first was real:
+
+    1. **The graph really was unwired** — `combogen/grid.py`, `catalogue.py`, `schema.py`,
+       `supply.py`, `emit.py`, `brief.py` and `run.py` were already complete (`run.plan_run`
+       produced real subjects and briefs before this module touched anything); what did not exist
+       anywhere was `workflow/graphs/item_combination.py` — the file that connects a subject's
+       brief to an LLM caller — or a batch driver to run subjects through it
+       (`combogen/authored.py`, mirroring `setgen.authored.run_batch`). Both now exist. This
+       mirrors module 13's own history almost exactly (`workflow/graphs/item_set.py`'s docstring
+       names the identical defect it fixed).
+    2. **The frozen-registry claim does not hold up.** `naming.v1.json`'s `idNamespaces.socketWords`
+       (`registryVersion 4`, `frozen: true`) allocates the WAVE-1 AUTHORING FLEET's tracking-id
+       template (`sockword.{seq:03}`) — a collision-avoidance scheme for ~125 PARALLEL human/LLM
+       partitions. The new `combination` generator is a single deterministic pipeline (one grid,
+       zero parallel partitions, `run.plan_run` already asserts its 102 ids are unique by
+       construction) that mints `combo.strain-*`/`combo.splice-*` directly from the grid cell —
+       it never draws from `sockword.{seq:03}` at all. The same precedent already exists,
+       unregistered, for other deterministic post-wave-1 batches: `build-themes.v1.json`'s 36
+       Strain themes and module 16's C# `ResonanceGenerator` output both have NO `naming.v1.json`
+       idNamespaces entry either, because that registry exists to coordinate parallel AUTHORING
+       AGENTS, and neither of those is one. **A workaround exists and this module takes it: the
+       frozen registry is not bumped, and no `decisions.md` entry is added for a change that is
+       not made** — per the spec's own instruction, the pre-approval to bump was conditional on no
+       workaround existing, and one does.
+
+    **A real, separate, and NOT worked around gap:** `tools/ItemSeedValidator/Registries/
+    KindCatalog.cs` has no `combination` entry (only the legacy `socket-word`), so
+    `NamespaceAllocation` cannot allocate a prefix for it and the C# validator will not recognize a
+    `combination`-kind seed file today. Closing that needs a C# change, and this module's own
+    boundary is read-only C# — so it is reported here, not silently patched around and not hidden.
+    Content this command writes is verified against the checks this program's OWN Python tooling
+    owns (`items validate --deps`, schema/`audit_schema` conformance, `dependency_validator`), not
+    against `tools/ItemSeedValidator`.
+    """
+    from ..adapters.items.combogen import authored as authored_mod
+    from ..adapters.items.setgen import answers as answers_mod
+    from ..adapters.items.setgen import seedfile as seedfile_mod
+
+    if not args.answers or not args.out_dir:
+        print("seedsmith: --write is refused — no transport. The generation graph "
+              "(workflow/graphs/item_combination.py) is wired, but its only transport today is an "
+              "authored-answer file: emit briefs with --briefs-out, have a model answer them, then "
+              "pass --answers <file> --out-dir <dir>. There is no live-endpoint path here yet "
+              "(that is set-charm-live-endpoint's own scope, not this one's).", file=sys.stderr)
+        return EXIT_REFUSED
+    try:
+        out_dir = seedfile_mod.resolve_out_dir(
+            args.out_dir, allow_production_tree=args.allow_production_tree)
+        answers = answers_mod.load_answers(Path(args.answers))
+    except (seedfile_mod.OutDirRefused, answers_mod.AnswerFileError) as exc:
+        print(f"seedsmith: {exc}", file=sys.stderr)
+        return EXIT_REFUSED
+    if answers.kind != "combination":
+        print(f"seedsmith: the answer file is for --kind {answers.kind!r}; this run is "
+              f"'combination'", file=sys.stderr)
+        return EXIT_REFUSED
+
+    ledger_path = Path(args.ledger) if args.ledger else None
+    result = authored_mod.run_batch(
+        plan=plan, answers=answers, tuning=tuning, out_dir=out_dir,
+        authored_utc=args.authored_utc, model=args.model, ledger_path=ledger_path)
+    print("\n--- write report ---")
+    print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+    return EXIT_CLEAN if result.persisted and not any(
+        o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+
+
+def _cmd_items_validate(args: argparse.Namespace) -> int:
+    """`seedsmith items validate --deps` (acceptance 3a, `combination-write-unblock`).
+
+    Scoped to `combination` for now — the module this command was built for. Runs the pre-flight
+    `dependency_validator` report over the REAL corpus, BEFORE any subject is planned: every
+    `hostRole` a run could request must have >=1 real base type whose socket ceiling reaches the
+    ingredient count, and every `ingredients` family must have >=1 real gem. This is the REPORTED
+    form of a guarantee `combogen.schema.combination_schema` already enforces structurally (it
+    refuses to build a schema for an empty universe); reported so "resolves, but only barely" stays
+    visible (`dependency_validator.py`'s own reason for a count, never a bare bool).
+    """
+    if not args.deps:
+        print("seedsmith: `items validate` needs --deps today — no other check is wired to this "
+              "command yet.", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    from ..adapters.items.combogen import deps as deps_mod
+    from ..adapters.items.combogen import tuning as tuning_mod
+
+    tuning = tuning_mod.load()
+    report = deps_mod.preflight(tuning)
+    print(json.dumps({"kind": "combination", **report.to_dict()}, ensure_ascii=False, indent=2))
+    return EXIT_REFUSED if report.refused else EXIT_CLEAN
+
+
+def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
+    """`seedsmith items combogen-migrate --dry-run` (acceptance 4, `combination-write-unblock`).
+
+    ⛔ **`--dry-run` is the only mode this command has.** `combogen.migrate`'s own ✅ ruling
+    ("regenerate, do not retain", 2026-09-04) retires `sockwords.json` only once real combination
+    content exists to replace it — this module ships a representative sample, not the full 102, so
+    actually deleting the 25 legacy entries here would leave the replacement incomplete. This
+    command therefore only ever reports `migrate.py`'s own plan (the legality report, proving 0 of
+    the 25 legacy entries are legal combinations today, and the migration-sites existence check) —
+    it does not execute the retirement.
+    """
+    if not args.dry_run:
+        print("seedsmith: `items combogen-migrate` only supports --dry-run today — the actual "
+              "retirement (deleting sockwords.json) is gated on full 102-entry coverage existing to "
+              "replace it, which this module's own representative sample does not provide.",
+              file=sys.stderr)
+        return EXIT_REFUSED
+
+    from ..adapters.items.combogen import migrate as migrate_mod
+    from ..adapters.items.combogen import tuning as tuning_mod
+
+    tuning = tuning_mod.load()
+    from ..adapters.items.combogen import supply as supply_mod
+    from ..adapters.items.combogen import run as run_mod
+
+    supply = supply_mod.build()
+    plan = run_mod.plan_run(shape="strain", tuning=tuning, supply=supply)
+    legality = migrate_mod.legality_report(tuning, host_roles=plan.host_roles)
+    missing = migrate_mod.missing_sites()
+    summary = {
+        "dryRun": True,
+        "legacyRetirement": legality.to_dict(),
+        "migrationSitesMissing": missing,
+        "planStillHolds": not missing,
+    }
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return EXIT_CLEAN if not missing else EXIT_GAP
 
 
 def cmd_demons(args: argparse.Namespace) -> int:
@@ -1087,14 +1277,35 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         roster = load_roster()
         aptitude_by_lower = {a.lower(): a for a in roster.aptitudes}
         aptitude_id = aptitude_by_lower.get(args.tree)
-        if aptitude_id is None:
-            print(f"seedsmith: {args.tree!r} is not one of the {len(roster.aptitudes)} primary "
-                 f"trees {sorted(aptitude_by_lower)!r}", file=sys.stderr)
-            return EXIT_CANNOT_RUN
-        try:
-            spec = plan_emit.primary_tree_spec(aptitude_id)
-        except Exception as ex:  # ValueError, gates.GateEvidenceError, etc. — never resolved silently
-            print(f"EXIT_CANNOT_RUN: {ex}")
+        # J1 (spec-tree-plan.md §7 table): elemental_tree_spec/status_tree_spec, the two remaining
+        # mechanical extensions of primary_tree_spec's own generalization pattern. Checked after
+        # aptitudes (the pre-existing, most-exercised path stays first and unchanged) — roster.elements
+        # and roster.statuses are already lowercase (generated from ElementTypeId/
+        # StatusCategoryRegistry), so no case-folding lookup is needed the way aptitudes' PascalCase
+        # roster required.
+        if aptitude_id is not None:
+            try:
+                spec = plan_emit.primary_tree_spec(aptitude_id)
+            except Exception as ex:  # ValueError, gates.GateEvidenceError, etc. — never resolved silently
+                print(f"EXIT_CANNOT_RUN: {ex}")
+                return EXIT_CANNOT_RUN
+        elif args.tree in roster.elements:
+            try:
+                spec = plan_emit.elemental_tree_spec(args.tree)
+            except Exception as ex:
+                print(f"EXIT_CANNOT_RUN: {ex}")
+                return EXIT_CANNOT_RUN
+        elif args.tree in roster.statuses:
+            try:
+                spec = plan_emit.status_tree_spec(args.tree)
+            except Exception as ex:
+                print(f"EXIT_CANNOT_RUN: {ex}")
+                return EXIT_CANNOT_RUN
+        else:
+            print(f"seedsmith: {args.tree!r} is not one of the {len(roster.aptitudes)} primary trees "
+                 f"{sorted(aptitude_by_lower)!r}, the {len(roster.elements)} elemental trees "
+                 f"{sorted(roster.elements)!r}, or the {len(roster.statuses)} status trees "
+                 f"{sorted(roster.statuses)!r}", file=sys.stderr)
             return EXIT_CANNOT_RUN
 
     if args.generate:
@@ -1509,11 +1720,25 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
             if args.json:
                 print(json.dumps({"dryRun": args.dry_run, "fixed": fixed}, indent=2))
             else:
-                print(f"{len(fixed)} species {verb} (threatBand only — the one field with a real, "
-                      f"already-sanctioned deterministic default; aptitude/rarity/element have "
-                      f"none and stay unresolved)")
+                print(f"{len(fixed)} field-fixes {verb} (threatBand, rarity, aptitudePrimary — "
+                      f"each has a deterministic fallback now; element has none and stays "
+                      f"unresolved)")
                 for f in fixed:
                     print(f"  {f['speciesId']:24} {f['before']:12} -> {f['after']}")
+            return EXIT_CLEAN
+        elif args.run_verb == "fix-secondary-from-fusion":
+            recipes_path = Path(args.fusion_recipes) if args.fusion_recipes else run_module.DEFAULT_FUSION_RECIPES_PATH
+            fixed = run_module.fix_secondary_from_fusion_lineage(
+                paths=paths, recipes_path=recipes_path, dry_run=args.dry_run)
+            verb = "would fix" if args.dry_run else "fixed"
+            if args.json:
+                print(json.dumps({"dryRun": args.dry_run, "fixed": fixed}, indent=2))
+            else:
+                print(f"{len(fixed)} elementSecondary fix(es) {verb} from fusion-recipe lineage "
+                      f"(one fusion parent's own real element supplied the signal; species with "
+                      f"no clean single-candidate signal are left unchanged)")
+                for f in fixed:
+                    print(f"  {f['speciesId']:24} {f['before']:6} -> {f['after']}")
             return EXIT_CLEAN
         elif args.run_verb == "status":
             s = run_module.status(paths=paths)
@@ -1728,7 +1953,7 @@ def build_parser() -> argparse.ArgumentParser:
     run = demon_sub.add_parser(
         "run", help="run-control: pause/resume/cancel/rerun/overwrite-all over the anchor classification run")
     run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status",
-                                          "overwrite-all", "fix-unresolved"))
+                                          "overwrite-all", "fix-unresolved", "fix-secondary-from-fusion"))
     run.add_argument("--all", action="store_true", help="selector: every species in the dump")
     run.add_argument("--side", default="", help="selector: plant | zombie")
     run.add_argument("--family", default="", help="selector: one family id")
@@ -1745,7 +1970,10 @@ def build_parser() -> argparse.ArgumentParser:
                      help="parallel model-call workers for start/resume/rerun/overwrite-all "
                           "(default 4; 1 = sequential, today's original behaviour)")
     run.add_argument("--dry-run", action="store_true",
-                     help="fix-unresolved: report what would change without writing anything")
+                     help="fix-unresolved/fix-secondary-from-fusion: report what would change without writing anything")
+    run.add_argument("--fusion-recipes", default="",
+                     help="fix-secondary-from-fusion: path to the committed _fusion-recipes.json "
+                          "(default data/generated/demons/_fusion-recipes.json)")
     demons.set_defaults(func=cmd_demons)
 
     items = sub.add_parser("items", help="item corpus generation entrypoints (modules 13, 21)")
@@ -1762,9 +1990,9 @@ def build_parser() -> argparse.ArgumentParser:
                            "model calls")
     igen.add_argument("--write", action="store_true",
                       help="set/charm: run the planned subjects through the generation graph and "
-                           "write seed files; needs --answers and --out-dir. combination: still "
-                           "refused (its graph is unwired and its kind rename touches a frozen "
-                           "registry)")
+                           "write seed files; needs --out-dir and one of --answers or --endpoint. "
+                           "combination: same shape, --answers + --out-dir only (no live endpoint "
+                           "yet, that is set-charm-live-endpoint's own scope)")
     igen.add_argument("--sample-brief", dest="sample_brief", action="store_true",
                       help="print the first subject's assembled brief")
     igen.add_argument("--limit", type=int, default=0,
@@ -1776,7 +2004,13 @@ def build_parser() -> argparse.ArgumentParser:
     igen.add_argument("--answers", default="",
                       help="set/charm --write: an authored-answer file keyed by subjectId (a list "
                            "of attempts per subject is legal — the graph's repair edge consumes "
-                           "them in order)")
+                           "them in order). The deterministic path; mutually exclusive with "
+                           "--endpoint in practice (--answers wins if both are given)")
+    igen.add_argument("--endpoint", default="",
+                      help="set/charm --write: call a real model endpoint via "
+                           "pipeline.llm_caller.call_model instead of replaying an answer file — "
+                           "the same live transport --endpoint already selects for effects/demons "
+                           "generate. Ignored when --answers is also given")
     igen.add_argument("--out-dir", dest="out_dir", default="",
                       help="set/charm --write: where the seed files land. No default, and a path "
                            "inside data/seed/items/ is refused unless --allow-production-tree")
@@ -1790,11 +2024,26 @@ def build_parser() -> argparse.ArgumentParser:
     igen.add_argument("--ignore-ledger", dest="ignore_ledger", action="store_true",
                       help="plan every generatable subject, even ones a previous run recorded")
     igen.add_argument("--model", default="unrecorded",
-                      help="set/charm --write: the model id stamped into each seed file's _meta")
+                      help="set/charm --write: with --answers, metadata only — the model id "
+                           "stamped into each seed file's _meta. With --endpoint, also the model "
+                           "id sent on the live call (falls back to llm_caller's own default if "
+                           "left unset)")
     igen.add_argument("--authored-utc", dest="authored_utc", default="1970-01-01T00:00:00Z",
                       help="set/charm --write: the _meta timestamp. Injected, never read from the "
                            "clock — a wall-clock stamp is the one field that makes a generated "
                            "file non-reproducible (pipeline/provenance.py's own rule)")
+    ivalidate = items_sub.add_parser(
+        "validate", help="pre-flight dependency checks over the real corpus (module 21)")
+    ivalidate.add_argument("--deps", action="store_true",
+                           help="combination: confirm every hostRole/ingredients family a run "
+                                "could request resolves against real content, before any subject "
+                                "is planned (acceptance 3a, spec-combination-write-unblock.md)")
+    imigrate = items_sub.add_parser(
+        "combogen-migrate",
+        help="report combogen.migrate's own socket-word retirement plan (module 21)")
+    imigrate.add_argument("--dry-run", dest="dry_run", action="store_true",
+                          help="the only supported mode — reports the legality/migration-sites "
+                               "check, writes and deletes nothing")
     items.set_defaults(func=cmd_items)
 
     effects = sub.add_parser("effects", help="effect-pipeline generation entrypoints")
@@ -1808,6 +2057,11 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--workers", type=int, default=0)
     gen.add_argument("--endpoint", default="")
     gen.add_argument("--model", default="")
+    gen.add_argument(
+        "--species-id", default="",
+        help="task J7: author into affix.species.<speciesId>.* / "
+             "data/seed/effects/affixes/species/<speciesId>.json instead of the shared corpus "
+             "(--kind affix)")
     effects.set_defaults(func=cmd_effects)
 
     structures = sub.add_parser("structures", help="base-defense structure corpus entrypoints (module 23+)")
@@ -1827,7 +2081,8 @@ def build_parser() -> argparse.ArgumentParser:
     trees_plan.add_argument("--check", action="store_true",
                             help="regenerate in memory and diff against the committed plan")
     trees_plan.add_argument("--tree", default="might",
-                            help="tree id to plan — any of the 12 primary trees named by the roster "
+                            help="tree id to plan — any of the 12 primary trees named by the roster, "
+                                 "or (J1) any of the roster's elemental or status tree ids "
                                  "(default: might, B1's own named tree)")
     trees_plan.add_argument("--manifest", action="store_true",
                             help="operate on the top-level manifest (plan.v1.json) + its trees[], "

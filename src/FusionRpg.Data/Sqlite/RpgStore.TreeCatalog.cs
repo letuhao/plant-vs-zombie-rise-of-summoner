@@ -304,19 +304,25 @@ public sealed partial class RpgStore
                     for (var ordinal = 0; ordinal < n.Atoms.Count; ordinal++)
                     {
                         var a = n.Atoms[ordinal];
+                        // D58/J12 (spec-soul-curve-resolution.md, 2026-09-07): soul_curve_id stopped
+                        // being read/written here -- NodeAtom.SoulCurveId had zero consumers that
+                        // acted on its value. The column itself stays in the CREATE TABLE (no drop-
+                        // column precedent exists in this repo, RpgStore.cs's own EnsureColumn is
+                        // additive-only) and every row it holds from here on is NULL by omission --
+                        // harmless dead schema, never read back (see the SELECT below).
                         ExecIn(db, tx, """
                             INSERT INTO rpg_tree_catalog_atom(
                               node_id, ordinal, kind_id, attach_point, channel_id, op, trigger,
-                              when_json, k_micro, scale_axis, unit_class, soul_curve_id)
+                              when_json, k_micro, scale_axis, unit_class)
                             VALUES ($node, $ord, $kind, $attach, $channel, $op, $trig, $when,
-                                    $kmicro, $axis, $unit, $curve);
+                                    $kmicro, $axis, $unit);
                             """,
                             ("$node", n.NodeId), ("$ord", (long)ordinal), ("$kind", a.KindId),
                             ("$attach", a.AttachPoint.ToString()), ("$channel", a.ChannelId),
                             ("$op", a.Op.ToString()), ("$trig", (object?)a.Trigger ?? DBNull.Value),
                             ("$when", (object?)a.WhenJson ?? DBNull.Value),
                             ("$kmicro", a.KMicro), ("$axis", a.ScaleAxis.ToString()),
-                            ("$unit", a.UnitClass.ToString()), ("$curve", (object?)a.SoulCurveId ?? DBNull.Value));
+                            ("$unit", a.UnitClass.ToString()));
                     }
 
                     ExecIn(db, tx, "INSERT OR IGNORE INTO rpg_tree_catalog_known_node_id(node_id) VALUES ($id);",
@@ -417,7 +423,7 @@ public sealed partial class RpgStore
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = "SELECT a.node_id, a.kind_id, a.attach_point, a.channel_id, a.op, a.trigger, " +
-                "a.when_json, a.k_micro, a.scale_axis, a.unit_class, a.soul_curve_id " +
+                "a.when_json, a.k_micro, a.scale_axis, a.unit_class " +
                 "FROM rpg_tree_catalog_atom a" +
                 (idFilter is null
                     ? ""
@@ -432,8 +438,7 @@ public sealed partial class RpgStore
                     Enum.Parse<NodeAtomOp>(r.GetString(4)),
                     r.IsDBNull(5) ? null : r.GetString(5),
                     r.IsDBNull(6) ? null : r.GetString(6),
-                    r.GetInt64(7), Enum.Parse<ScaleAxis>(r.GetString(8)), Enum.Parse<UnitClass>(r.GetString(9)),
-                    r.IsDBNull(10) ? null : r.GetString(10));
+                    r.GetInt64(7), Enum.Parse<ScaleAxis>(r.GetString(8)), Enum.Parse<UnitClass>(r.GetString(9)));
                 if (!atomsByNode.TryGetValue(nodeId, out var list)) atomsByNode[nodeId] = list = new List<NodeAtom>();
                 list.Add(atom);
             }

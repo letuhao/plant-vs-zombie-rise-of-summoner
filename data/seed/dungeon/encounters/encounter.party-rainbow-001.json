@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.party-rainbow-001",
+  "formation": "party",
+  "name": "The Vanguard of the Prismatic Aegis",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A coordinated trio of heavy hitters designed to split party focus through elemental variety while maintaining a frontline presence.",
+  "slots": [
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

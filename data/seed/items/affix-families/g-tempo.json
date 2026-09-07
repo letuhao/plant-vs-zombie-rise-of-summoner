@@ -18,7 +18,18 @@
     "promptVersion": 1,
     "model": "claude-sonnet-5",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-affixes.md#4.1"
+    "sourceRef": "ssot-affixes.md#4.1",
+    "appendedBatches": [
+      {
+        "batch": "affix-g.tempo-trial-2026-09-07",
+        "model": "affixfamgen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "entryIds": [
+          "atom.tempo-wildgrowth"
+        ],
+        "note": "Small trial batch proving affixfamgen's brief/emit/run mechanism end-to-end with a hand-authored stand-in answer -- no live LLM endpoint reachable this session. Original _meta.model/_meta.authoredUtc above describe the file's existing entries and are left untouched."
+      }
+    ]
   },
   "entries": [
     {
@@ -356,6 +367,54 @@
         "offensive"
       ],
       "notes": "NEW family, stem `tempo`, word `stampede`. The `More`-op rare sibling g.tempo was missing entirely — `bulwark` (`maxHp` More) and `savagery` (`atk` More) are each atom-family-library.md §3.1's \"rare tier band only\" family for their group, and g.tempo had no equivalent for its pressure channel. `powerBand: high` reflects the same rare-appearance, larger-single-pull judgement as those two siblings. `nameWords` carries a single Band-C-only word, following the exact pattern `bulwark` itself already shows in ssot-affixes.md §4.12's sample table (`— | — | Adamant`, i.e. bands A/B deliberately unpopulated for a family that only ever shows up at the top of the ladder). ⛔ 2026-09-06 (item-content T1): same fix as `bulwark` — the row was labelled `band: \"A\"` while declaring `tierRange: \"t1-t5\"`, and `AffixNameTable.Resolve` throws for any tier the label does not cover. The one authored word now sits under all three D29 bands."
+    },
+    {
+      "id": "atom.tempo-wildgrowth",
+      "nameKey": "affix.tempo-wildgrowth",
+      "name": "Unchecked Growth",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "attackInterval",
+        "op": "More"
+      },
+      "frames": [
+        "plant"
+      ],
+      "side": "plant",
+      "roles": [
+        "armament-primary",
+        "manipulator",
+        "footing",
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "powerBand": "high",
+      "nameWords": {
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Overrun"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Overrun"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Overrun"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% faster attack rate",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "NEW family, stem `tempo` (naming.v1.json idNamespaces.affixFamilies), word `wildgrowth`. Closes the one gap `attackInterval` still had: `quickening` ships `Flat` and `tempo-haste` ships `Increased`, but no `More` -- the same trio `zombieSpeed` was missing until `tempo-stampede` filled its own `More` slot. Same rare-tier reasoning `tempo-stampede`'s own notes give for that family: classes.v1.json's design note that no `More`-op family ever appears on an implicit slate applies identically here, so this is rolled-only, gated to a late tier window via `powerBand: high`. `roles`/`frames`/`side` copied verbatim from `quickening`/`tempo-haste` -- same channel, same legality question. `displayTemplate` reuses `tempo-haste`'s own text verbatim (`{value}% faster attack rate`), matching the established, if unusual, precedent this group already set between `tempo-surge` (Increased) and `tempo-stampede` (More) on `zombieSpeed`, which share an identical template. `nameWords` follows `tempo-stampede`'s REAL shape (checked directly 2026-09-07, correcting this note's own earlier misdescription): three rows, one per band, the same word repeated (`tempo-stampede` itself repeats \"Onslaught\" across A/B/C) -- not one row claiming a wide `t1-t5` range under a single band, which `AffixNameTable.Resolve` cannot match for tier 3/4/5 (band-keyed lookup is exact-band, never a range scan). HAND-AUTHORED 2026-09-07 (affixfamgen/hand-authored-1) as a stand-in for a live LLM call -- no reachable model endpoint this session, per the established item-seedgen precedent for this exact situation. RUNTIME: same NOT-bindable-today gap `quickening`'s own notes name -- `attackInterval` sits outside `AtomKindRegistry.PrimaryChannels`, pending E16's channel-extension promotion; this row imports and binds nowhere today, the same declared state as every other entry already in this file."
     }
   ]
 }

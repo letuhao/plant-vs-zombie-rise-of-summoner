@@ -175,6 +175,15 @@ public static class DistrictLayout
     /// centred square of side <c>coreSideMilli</c> per-mille of the board side (divided by 1000
     /// exactly once, last); Rampart is the ring of <paramref name="rampartThickness"/> cells around
     /// it; everything else is Approach.
+    ///
+    /// <para><b>Optional 6-argument overload, resolved 2026-09-07 (17.11, decision 47)</b>: a warded
+    /// lane pushes the Rampart/Approach boundary further from centre, but ONLY on the wedge facing the
+    /// attacker's own entry edge — mirroring `fortressRampartBonus`'s own additive-to-thickness
+    /// contract exactly (spec-district-layout.md §5), just scoped to one wedge instead of the whole
+    /// ring. Every existing call site (`ConstructionPlacement.CanPlace`, `ObjectivePositionFor`'s own
+    /// internal formula, `OpenCellsInZone`) keeps calling the 4-argument form above, byte-identical
+    /// forever — this overload exists ONLY for a caller that has an attacker edge and a real ward
+    /// level (`DistrictAssaultResolver`, once wired).</para>
     /// </summary>
     public static DistrictZone ZoneOf(GridPos p, int side, int coreSideMilli, int rampartThickness)
     {
@@ -189,6 +198,50 @@ public static class DistrictLayout
         if (chebyshev < coreHalfCeil) return DistrictZone.Core;
         if (chebyshev < coreHalfCeil + rampartThickness) return DistrictZone.Rampart;
         return DistrictZone.Approach;
+    }
+
+    public static DistrictZone ZoneOf(GridPos p, int side, int coreSideMilli, int rampartThickness,
+        BoardEdge attackerEdge, int wardExtraDepth)
+    {
+        if (wardExtraDepth < 0) throw new ArgumentOutOfRangeException(nameof(wardExtraDepth));
+        var center = new GridPos(side / 2, side / 2);
+        var coreSideCells = Math.Max(1, checked(coreSideMilli * side) / 1000);
+        var coreHalfCeil = (coreSideCells + 1) / 2;
+
+        var dr = Math.Abs(p.Row - center.Row);
+        var dc = Math.Abs(p.Col - center.Col);
+        var chebyshev = Math.Max(dr, dc);
+
+        if (chebyshev < coreHalfCeil) return DistrictZone.Core;
+        var effectiveRampart = wardExtraDepth > 0 && InWedgeFacing(p, center, attackerEdge)
+            ? checked(rampartThickness + wardExtraDepth)
+            : rampartThickness;
+        if (chebyshev < coreHalfCeil + effectiveRampart) return DistrictZone.Rampart;
+        return DistrictZone.Approach;
+    }
+
+    /// <summary>
+    /// One of four mutually-exclusive wedges a cell falls in relative to <paramref name="center"/> —
+    /// the same "no two equally-plausible answers" discipline `BoardPathfinder`'s own fixed neighbour
+    /// order already establishes. Row-distance vs column-distance ties (an exact diagonal) resolve to
+    /// the North/South wedge, never East/West — a fixed, arbitrary-but-consistent priority, not a gap.
+    /// The centre cell itself (<c>dr == dc == 0</c>) belongs to no wedge, which never matters: `ZoneOf`
+    /// only consults this after the Core check already failed, and the centre is always Core.
+    /// </summary>
+    static bool InWedgeFacing(GridPos p, GridPos center, BoardEdge edge)
+    {
+        var dr = p.Row - center.Row;
+        var dc = p.Col - center.Col;
+        var absDr = Math.Abs(dr);
+        var absDc = Math.Abs(dc);
+        return edge switch
+        {
+            BoardEdge.North => dr < 0 && absDr >= absDc,
+            BoardEdge.South => dr > 0 && absDr >= absDc,
+            BoardEdge.East => dc > 0 && absDc > absDr,
+            BoardEdge.West => dc < 0 && absDc > absDr,
+            _ => throw new DistrictLayoutRejection($"InWedgeFacing: unknown edge '{edge}'."),
+        };
     }
 
     /// <summary>
@@ -279,6 +332,42 @@ public static class DistrictLayout
     /// `siege-resolver` time but not currently threaded into `BattleRunState`) before it can supply
     /// `isAttacker`/`attackerEdge` here — that plumbing, not this formula, is the un-started part.</para>
     /// </summary>
+    /// <summary>
+    /// base-defense `siege-ai` 17.11 (decision 47): the lane's own `WardLevel` an attacker is
+    /// approaching a sector on, or 0 for every case that cannot resolve one (no current lane, an
+    /// unknown lane id) — the SAME graceful-default posture <see cref="EntryEdgeFor"/> already
+    /// established for its own "unknown -> North" fallback, and the SAME lane-resolution lookup
+    /// (ordinal-first, replay-stable) reused verbatim rather than re-derived, Law 1.
+    /// </summary>
+    public static int WardLevelFor(WorldState world, WorldEntity attacker)
+    {
+        if (attacker.OnLaneId is null) return 0;
+
+        var lane = world.Lanes
+            .Where(l => string.Equals(l.LaneId, attacker.OnLaneId, StringComparison.Ordinal))
+            .OrderBy(l => l.LaneId, StringComparer.Ordinal)
+            .FirstOrDefault();
+        return lane?.WardLevel ?? 0;
+    }
+
+    /// <summary>
+    /// base-defense `siege-ai` 17.11: perpendicular distance from a board edge, 0 AT the edge,
+    /// increasing inward — the same cardinal convention <see cref="CardinalMidpoint"/> already fixes
+    /// (`North` = row 0, `South` = row `side-1`, `East` = col `side-1`, `West` = col 0).
+    /// </summary>
+    public static int DistanceFromEdge(GridPos cell, BoardEdge edge, int side)
+    {
+        if (side <= 0) throw new ArgumentOutOfRangeException(nameof(side));
+        return edge switch
+        {
+            BoardEdge.North => cell.Row,
+            BoardEdge.South => side - 1 - cell.Row,
+            BoardEdge.East => side - 1 - cell.Col,
+            BoardEdge.West => cell.Col,
+            _ => throw new DistrictLayoutRejection($"DistanceFromEdge: unknown edge '{edge}'."),
+        };
+    }
+
     public static GridPos ObjectivePositionFor(bool isAttacker, BoardEdge attackerEdge, int side)
     {
         if (side <= 0) throw new ArgumentOutOfRangeException(nameof(side));

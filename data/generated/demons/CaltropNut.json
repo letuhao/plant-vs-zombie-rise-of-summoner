@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Ice",
   "gameTypeId": 1048,
   "magnitudes": {
     "combat.defense.omni": 407,

@@ -264,13 +264,38 @@ public sealed partial class RpgStore
     /// </summary>
     public AtomRejection AcquireItem(RpgItemRow item, string? eventId = null, string? createdUtc = null)
     {
-        var count = CountArmouryRows(item.PlayerId);
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var rejection = AcquireItemUnlocked(db, tx, item, eventId, createdUtc);
+            if (!rejection.IsOk) return rejection;
+            tx.Commit();
+            return rejection;
+        }
+    }
+
+    /// <summary>Same two writes on the caller's connection/transaction — `delve-quests` D4.12/D4.14's
+    /// own named gap: a quest reward's item must be acquired in the SAME transaction `CloseDelve`
+    /// commits. The armoury-row count reads through the SAME `(db, tx)`, never a second connection —
+    /// a real, reproduced bug this task's own two-quest-reward test caught the hard way: a self-locked
+    /// second connection's plain `SELECT` is fine for a LONE call (reading before the caller's own
+    /// write starts), but this method is called MULTIPLE TIMES in the SAME transaction by a caller
+    /// banking more than one item at once (`ApplyQuestRewardBankingUnlocked`'s own multi-quest loop),
+    /// and the SECOND call's read lands AFTER the FIRST call's own write to `rpg_item` — a second
+    /// connection then collides with the still-open write (`SQLite Error 6: database table is locked`).
+    /// See <see cref="AppendMutationOpUnlocked"/> for the established "why" this whole `*Unlocked`
+    /// family shares.</summary>
+    internal AtomRejection AcquireItemUnlocked(
+        SqliteConnection db, SqliteTransaction tx, RpgItemRow item, string? eventId = null, string? createdUtc = null)
+    {
+        var count = CountArmouryRowsUnlocked(db, tx, item.PlayerId);
         if (count >= InventoryCeiling)
             return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
                 $"player '{item.PlayerId}' is at the {InventoryCeiling}-row abuse guard, not a content limit");
 
-        SaveItem(item);
-        SaveItemEvent(new RpgItemEventRow(
+        SaveItemUnlocked(db, tx, item);
+        SaveItemEventUnlocked(db, new RpgItemEventRow(
             eventId ?? Guid.NewGuid().ToString("N"), item.InstanceId, item.PlayerId, "acquired", null,
             createdUtc ?? DateTime.UtcNow.ToString("O")));
 
@@ -282,11 +307,18 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT COUNT(*) FROM rpg_item WHERE player_id = $player;";
-            cmd.Parameters.AddWithValue("$player", playerId);
-            return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+            using var tx = db.BeginTransaction();
+            return CountArmouryRowsUnlocked(db, tx, playerId);
         }
+    }
+
+    static int CountArmouryRowsUnlocked(SqliteConnection db, SqliteTransaction tx, string playerId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT COUNT(*) FROM rpg_item WHERE player_id = $player;";
+        cmd.Parameters.AddWithValue("$player", playerId);
+        return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
     }
 
     // ---- rpg_item_stock ---------------------------------------------------------------------------
@@ -538,27 +570,31 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-
-            ExecIn(db, tx, """
-                INSERT INTO rpg_item
-                  (instance_id, player_id, acquired_utc, origin_kind, origin_ref, locked, seen, stale,
-                   disposition, note, revision)
-                VALUES ($id, $player, $utc, $ok, $oref, $locked, $seen, $stale, $disp, $note, 1)
-                ON CONFLICT(instance_id) DO UPDATE SET
-                  player_id = excluded.player_id, origin_kind = excluded.origin_kind,
-                  origin_ref = excluded.origin_ref, locked = excluded.locked, seen = excluded.seen,
-                  stale = excluded.stale, disposition = excluded.disposition, note = excluded.note,
-                  revision = rpg_item.revision + 1;
-                """,
-                ("$id", item.InstanceId), ("$player", item.PlayerId), ("$utc", item.AcquiredUtc),
-                ("$ok", item.OriginKind), ("$oref", (object?)item.OriginRef ?? DBNull.Value),
-                ("$locked", item.Locked ? 1 : 0), ("$seen", item.Seen ? 1 : 0),
-                ("$stale", item.Stale ? 1 : 0), ("$disp", item.Disposition),
-                ("$note", (object?)item.Note ?? DBNull.Value));
-
+            SaveItemUnlocked(db, tx, item);
             tx.Commit();
         }
     }
+
+    /// <summary>Same write on the caller's connection/transaction — `delve-quests` D4.12/D4.14's own
+    /// named gap: banking a quest reward's item must land in the SAME transaction `CloseDelve`
+    /// commits. See <see cref="AppendMutationOpUnlocked"/> for the established "why".</summary>
+    internal void SaveItemUnlocked(SqliteConnection db, SqliteTransaction tx, RpgItemRow item) =>
+        ExecIn(db, tx, """
+            INSERT INTO rpg_item
+              (instance_id, player_id, acquired_utc, origin_kind, origin_ref, locked, seen, stale,
+               disposition, note, revision)
+            VALUES ($id, $player, $utc, $ok, $oref, $locked, $seen, $stale, $disp, $note, 1)
+            ON CONFLICT(instance_id) DO UPDATE SET
+              player_id = excluded.player_id, origin_kind = excluded.origin_kind,
+              origin_ref = excluded.origin_ref, locked = excluded.locked, seen = excluded.seen,
+              stale = excluded.stale, disposition = excluded.disposition, note = excluded.note,
+              revision = rpg_item.revision + 1;
+            """,
+            ("$id", item.InstanceId), ("$player", item.PlayerId), ("$utc", item.AcquiredUtc),
+            ("$ok", item.OriginKind), ("$oref", (object?)item.OriginRef ?? DBNull.Value),
+            ("$locked", item.Locked ? 1 : 0), ("$seen", item.Seen ? 1 : 0),
+            ("$stale", item.Stale ? 1 : 0), ("$disp", item.Disposition),
+            ("$note", (object?)item.Note ?? DBNull.Value));
 
     public RpgItemRow? GetItem(string instanceId)
     {

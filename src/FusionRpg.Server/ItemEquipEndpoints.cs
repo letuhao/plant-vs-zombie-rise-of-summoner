@@ -48,12 +48,16 @@ public sealed record ItemEquipOutcomeDto(
 /// holds is <b>refused by name</b> and the player is pointed at the flow that owns it. Two flows,
 /// one table, no shared writes.</para>
 ///
-/// <para><b>⏸ Assign is the whole of this module's job; bind is module 5's and still has no
-/// caller.</b> `spec-equip-assign.md` is explicit that the runtime binding is rebuilt as a full
-/// projection <i>at deploy</i>, never patched at assign time — so this class deliberately does not
-/// call <c>ApplyEquipProjection</c> (module 5) or <c>ApplyEquippedGrants</c> (module 19). Both still
-/// have zero production callers, which means an equipped item persists and does not yet change a
-/// number on the lawn. That is a named wiring gap in two other modules, not a silent one here.</para>
+/// <para><b>Assign is this class's whole job; the Lawn-runtime sync lives one layer up.</b>
+/// `spec-equip-assign.md` is explicit that the runtime binding is rebuilt as a full projection
+/// <i>at deploy</i>, never patched at assign time — so this class itself deliberately does not call
+/// <c>ApplyEquipProjection</c> (module 5) or <c>ApplyEquippedGrants</c> (module 19). ⭐ <b>Fixed
+/// 2026-09-07 (P1.5-L):</b> those two calls are no longer callerless — <c>ItemEquipEndpoints</c>'s
+/// own <c>/api/items/equip</c>/<c>/unequip</c> handlers call <c>SyncLawnRuntimeAsync</c> after every
+/// successful outcome from this service, which calls <c>RpgStore.MaterializeRolledEquipRuntime</c>
+/// (the method that runs both). A Lawn-bound specimen's equipped rolled items now materialize their
+/// <c>effect_binding</c> rows and granted actions through the real production write surface, not only
+/// through <c>WebMatchService.BuildSquad</c>'s battle-squad path.</para>
 /// </summary>
 public sealed class ItemEquipService
 {
@@ -297,7 +301,7 @@ public static class ItemEquipEndpoints
         app.MapGet("/api/items/assignments/{specimenId}", (string specimenId) =>
             Results.Ok(equip.List(specimenId)));
 
-        app.MapPost("/api/items/equip", (EquipRequest body, RpgStore store) =>
+        app.MapPost("/api/items/equip", async (EquipRequest body, RpgStore store, UniqueActorService uniqueActorService) =>
         {
             if (body.SpecimenId is not { Length: > 0 } specimenId)
                 return Results.BadRequest(new { error = "specimenId required" });
@@ -306,18 +310,54 @@ public static class ItemEquipEndpoints
             if (body.Role is not { Length: > 0 } role)
                 return Results.BadRequest(new { error = "role required" });
 
-            return Render(equip.Equip(body.PlayerId ?? store.GetCurrentPlayerId(), specimenId, instanceId, role));
+            var playerId = body.PlayerId ?? store.GetCurrentPlayerId();
+            var outcome = equip.Equip(playerId, specimenId, instanceId, role);
+            if (outcome.Ok)
+                await SyncLawnRuntimeAsync(store, uniqueActorService, specimenId, playerId).ConfigureAwait(false);
+            return Render(outcome);
         });
 
-        app.MapPost("/api/items/unequip", (UnequipRequest body, RpgStore store) =>
+        app.MapPost("/api/items/unequip", async (UnequipRequest body, RpgStore store, UniqueActorService uniqueActorService) =>
         {
             if (body.SpecimenId is not { Length: > 0 } specimenId)
                 return Results.BadRequest(new { error = "specimenId required" });
             if (body.Role is not { Length: > 0 } role)
                 return Results.BadRequest(new { error = "role required" });
 
-            return Render(equip.Unequip(body.PlayerId ?? store.GetCurrentPlayerId(), specimenId, role));
+            var playerId = body.PlayerId ?? store.GetCurrentPlayerId();
+            var outcome = equip.Unequip(playerId, specimenId, role);
+            if (outcome.Ok)
+                await SyncLawnRuntimeAsync(store, uniqueActorService, specimenId, playerId).ConfigureAwait(false);
+            return Render(outcome);
         });
+    }
+
+    /// <summary>
+    /// P1.5-L (2026-09-07) — the Lawn half of module 5's equip wiring, found missing by reading
+    /// <c>RpgStore.MaterializeRolledEquipRuntime</c>'s own doc comment: its only production caller was
+    /// <c>WebMatchService.BuildSquad</c> (Battle/expedition), so a specimen bound to the live Lawn never
+    /// had its rolled-item `effect_binding` rows materialized at all — equip/unequip persisted the
+    /// assignment and changed nothing else. This closes the gap the same way Battle already does: run
+    /// the full projection (bindings + granted actions), then re-push the compiled atom union so the
+    /// injector's own <c>effects.grants.apply</c> path picks it up — the same call
+    /// <see cref="UniqueActorService.PushAtomUnionAsync"/> makes for a bind/unbind transition.
+    ///
+    /// <para>Best-effort like every other post-Hello atom push: a failure here must never turn a
+    /// successful equip write into a 500 for the caller, so it is caught and logged, not surfaced.</para>
+    /// </summary>
+    static async Task SyncLawnRuntimeAsync(RpgStore store, UniqueActorService uniqueActorService, string specimenId, long playerId)
+    {
+        try
+        {
+            var actor = store.GetUniqueActor(specimenId);
+            if (actor is null) return;
+            store.MaterializeRolledEquipRuntime(specimenId, checked((int)actor.Level));
+            await uniqueActorService.PushAtomUnionAsync(playerId).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine("[item-equip] Lawn runtime sync failed: " + ex.Message);
+        }
     }
 
     /// <summary>

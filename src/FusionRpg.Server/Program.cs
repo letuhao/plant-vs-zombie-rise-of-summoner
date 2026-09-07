@@ -46,6 +46,9 @@ FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
 FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
     FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "lawn-deploy-events.v1.json"))));
+FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
+    FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
 FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
     FusionRpg.Core.Combat.Shield.ShieldTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "shield.v1.json"))));
@@ -54,7 +57,7 @@ FusionRpg.Core.Combat.CombatPolicy.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "combat.v1.json"))));
 FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
     FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "fusion.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "fusion.v2.json"))));
 FusionRpg.Core.Status.StatusPolicy.Configure(
     FusionRpg.Core.Status.StatusTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "status.v1.json"))));
@@ -142,7 +145,11 @@ FusionRpg.Core.Battle.BattleTuningHub.Configure(
         // stay at 0. Config-only -- ReactionLane has no production caller yet (D14's own pattern), so
         // this is a tuning row change with no observable effect until a caller exists, matching the
         // module's own "buy the option, don't pay for the feature" framing.
-        File.ReadAllText(Path.Combine(tuningDir, "battle.v4.json"))));
+        // v4 -> v5 (combat-unification Phase 7 F1, 2026-09-07, owner decision): hybrid.
+        // secondaryWeightMilli 0 -> 300, published via tools/tuning/publish.py. Wave E3's mechanism
+        // goes live -- an actor with a real ElementSecondary now carries a genuine two-component
+        // attack payload instead of the pre-F1 single-primary shape.
+        File.ReadAllText(Path.Combine(tuningDir, "battle.v5.json"))));
 // battle-tempo battle-resources (2026-09-05): the per-resource share of BaseHp that
 // BattleStatComposer seeds every actor's six pools from. Before this, every battle actor held all
 // six pools at max 0, so no action in a battle could cost anything and reaction-lane's counter
@@ -471,6 +478,24 @@ var gemInserts = FusionRpg.Server.GemInsertCorpus.Load(
 var itemBaseTypes = FusionRpg.Server.ItemBaseTypeCorpus.Load(
     Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types"));
 
+// item-ideal.md, drop-volume (module 11) — `item_base_type`, the table the two ⏸ comments above
+// already name as their own target. `BuildLiveLootContentView`'s own `BaseTypesFor` reads it (D4.12,
+// party-dungeon-todo.md, 2026-09-07); the two boot-time JSON readers above stay as they are (display /
+// socket-max shape, a different job) rather than being folded into this import.
+{
+    var baseTypesDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types");
+    try
+    {
+        var baseTypeRows = FusionRpg.Core.Items.Drops.BaseTypeSeedFile.LoadAll(baseTypesDir);
+        store.ImportBaseTypes(baseTypeRows);
+        Console.WriteLine($"[items] imported {baseTypeRows.Count} base types");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[items] base-type import failed — no base types loaded: {ex.Message}");
+    }
+}
+
 FusionRpg.Server.ItemWorkbench? itemWorkbench = null;
 if (recipeCatalog is { } workbenchRecipes)
 {
@@ -610,6 +635,26 @@ Console.WriteLine(contentBoot.Status switch
     _ => $"[content] seed import failed — running on the shipped code fallback: {contentBoot.Detail}",
 });
 
+// H9's own "committed" acceptance bullet (passive-tree-todo.md, found 2026-09-07): ImportTreeCatalog/
+// ImportTreeCatalogFiles (task C4/C5) had no production caller anywhere — a bound
+// data/generated/passive-tree/*.json catalog never reached the store on its own. Independent of the
+// atom-content self-heal above and never gating it or being gated by it, matching this codebase's own
+// established "a lint, never a gate" pattern for boot-time content checks: H9's corpus is still
+// partial, and a tree-catalog import finding nothing (or failing) must never slow or block anything
+// else in content boot. Never throws, for the identical reason SeedImportRunner.RunSelfHealing doesn't.
+var treeBoot = PassiveTreeImportRunner.RunSelfHealing(store, AppContext.BaseDirectory);
+Console.WriteLine(treeBoot.Status switch
+{
+    PassiveTreeImportStatus.Imported =>
+        $"[content] imported the passive-tree catalog — {treeBoot.Outcome!.TreesImported} tree(s), " +
+        $"now at revision {store.GetTreeCatalogRevision()}",
+    PassiveTreeImportStatus.AlreadyCurrent =>
+        $"[content] passive-tree catalog already at revision {store.GetTreeCatalogRevision()} — no import needed",
+    PassiveTreeImportStatus.TreeNotFound =>
+        $"[content] no generated passive-tree catalog found near the server ({treeBoot.Detail})",
+    _ => $"[content] passive-tree catalog import failed: {treeBoot.Detail}",
+});
+
 // E20: without this, ElementTable/PowerTables.Current never move off their shipped code copy, and
 // an imported roster or coefficient row changes the content hash and nothing else (completeness
 // audit A2). A store with nothing imported behaves exactly as before.
@@ -704,6 +749,7 @@ app.MapStorageEndpoints();
 app.MapUniqueActors();
 app.MapRelics();
 app.MapDemons();
+app.MapZombossDeploy();
 app.MapSouls();
 app.MapExpeditions();
 app.MapFusion();
@@ -711,6 +757,7 @@ app.MapPatron();
 app.MapCommanders();
 app.MapContracts();
 app.MapDelve();
+app.MapDelveWild();
 app.MapWorld();
 app.MapWorldWarden();
 app.MapAptitudes();

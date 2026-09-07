@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.bucketzombie-001",
+  "flavor": "A stone slab sits amidst the dust, topped with a skull that seems to pulse with a rhythmic, internal thrum. The air here feels heavy, as if the very essence of the departed is being squeezed through a narrow needle. A faint, rhythmic thudding echoes from the stone, reminiscent of a relentless 铁头功 strike against a drum.",
+  "kind": "shrine",
+  "name": "The Altar of the Hollowed Skull",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a site of necrotic residue that offers a trade of vitality for spiritual insight.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.bucketzombie"
+}

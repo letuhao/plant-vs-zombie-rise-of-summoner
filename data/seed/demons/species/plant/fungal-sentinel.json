@@ -180,14 +180,15 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:46:15Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -203,19 +204,19 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-sentinel"
     ],
     "gameTypeId": 355,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "cultivated",
     "reach": "short",
     "reason": "The creature provides minor crowd control and low damage, making it a minor obstacle rather than a significant threat.",
@@ -261,10 +262,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:40:31Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "aptitudePrimary": "Focus",
         "attackTempo": "steady"
@@ -289,7 +291,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal-sentinel"
     ],

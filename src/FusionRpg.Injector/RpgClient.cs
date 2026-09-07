@@ -184,6 +184,36 @@ public sealed class RpgClient
 
     public void BumpBullet() => Interlocked.Increment(ref _bullets);
 
+    /// <summary>zomboss-deploy-ai T3.4 — fire-and-forget, matching `EnqueueAlmanacTextDump`'s own exact
+    /// shape: `MatchHost.CheckZombossDeployTrigger()` runs inside its own `lock(Gate)` and must never
+    /// await HTTP there (the established rule `LawnDeployRosterSessionCache`'s own doc comment already
+    /// states for this same class of call), so the decision is made synchronously and the actual
+    /// privileged mint+deploy is kicked off here, outside any lock, never awaited by the caller.</summary>
+    public void EnqueueZombossDeploy(string speciesId, ulong matchSeed, string? matchKey)
+    {
+        if (string.IsNullOrWhiteSpace(speciesId)) return;
+        _ = PostZombossDeployAsync(speciesId, matchSeed, matchKey);
+    }
+
+    async Task PostZombossDeployAsync(string speciesId, ulong matchSeed, string? matchKey)
+    {
+        try
+        {
+            var payload = new { speciesId, matchSeed, matchKey };
+            var body = JsonSerializer.Serialize(payload, Json);
+            using var content = new StringContent(body, Encoding.UTF8, "application/json");
+            var resp = await Http().PostAsync($"{_base}/api/zomboss/deploy", content).ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[zomboss-deploy] {speciesId} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[zomboss-deploy] deployed {speciesId}");
+        }
+        catch (Exception ex)
+        {
+            RpgHost.Log.Warning("[zomboss-deploy] " + ex.Message);
+        }
+    }
+
     /// <summary>Fire-and-forget almanac layer dump (not the event queue).</summary>
     public void EnqueueAlmanacTextDump(
         string side,

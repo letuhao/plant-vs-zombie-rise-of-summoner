@@ -1,7 +1,7 @@
 # Spec: `set-charm-live-endpoint`
 
-**Module id:** `set-charm-live-endpoint` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 3 of 10
-**Depends on:** `generator-harness` (1), `base-types-gen` (2)
+**Module id:** `set-charm-live-endpoint` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 4 (parallel with `recipes-gen`, `combination-write-unblock`)
+**Depends on:** `generator-harness`, `base-types-gen`
 
 ⚠ **Corrected 2026-09-07 — this is not an independent side branch.** A set's `members[].role`/`.frame`
 are a CATEGORICAL reference into the base-type corpus (`setgen/schema.py:104-107`: enums, never a

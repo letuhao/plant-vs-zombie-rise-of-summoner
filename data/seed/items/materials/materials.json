@@ -18,7 +18,21 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-materials-crafting.md#3.1"
+    "sourceRef": "ssot-materials-crafting.md#3.1",
+    "amendments": [
+      {
+        "batch": "materials-gen/shard-rungs-1",
+        "note": "The ten real DemonRarityLadder shard.{rung} rows (material.022-031), authored via materials-gen (tools/seedsmith/seedsmith/adapters/items/materialgen) to close the gap pinned by MaterialCorpusTests.The_shipped_materials_display_corpus_is_measured_not_assumed and test_materials_gen.py's test_the_real_shipped_corpus_is_missing_every_rarity_ladder_shard_rung. No live model call was reachable in this environment -- name/flavor/tags were hand-authored as an honest stand-in, the same precedent gemgen used for g2.json (_meta.model 'gemgen/hand-authored-1'). The four legacy shard.{common,rare,epic,legendary} rows (material.007-010) are untouched by this amendment.",
+        "promptVersion": "material-gen/1",
+        "model": "materialgen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "sourceRef": "tasks/item-todo.md#P4.1 (shipped materials display corpus is missing every rarity-ladder shard rung)",
+        "entries": [
+          "shard.chaff", "shard.sprout", "shard.grafted", "shard.cultivated", "shard.fused",
+          "shard.chimeric", "shard.heirloom", "shard.firstseed", "shard.sunwoven", "shard.almanac"
+        ]
+      }
+    ]
   },
   "entries": [
     {
@@ -287,6 +301,126 @@
       "tags": [
         "arcane"
       ]
+    },
+    {
+      "id": "material.022",
+      "nameKey": "material.shard-chaff",
+      "name": "Chaff Shard",
+      "runtimeId": "shard.chaff",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-chaff",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "A husk shed before the seed even noticed it was growing. Barely worth the pocket it rides in."
+    },
+    {
+      "id": "material.023",
+      "nameKey": "material.shard-sprout",
+      "name": "Sprout Shard",
+      "runtimeId": "shard.sprout",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-sprout",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Still soft at the edges, but it has decided to keep growing. A first real step past the husk."
+    },
+    {
+      "id": "material.024",
+      "nameKey": "material.shard-grafted",
+      "name": "Grafted Shard",
+      "runtimeId": "shard.grafted",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-grafted",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Two growths bound at the seam until neither remembers which one it started as."
+    },
+    {
+      "id": "material.025",
+      "nameKey": "material.shard-cultivated",
+      "name": "Cultivated Shard",
+      "runtimeId": "shard.cultivated",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-cultivated",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Tended rather than found, its edges shaped by patient, deliberate hands."
+    },
+    {
+      "id": "material.026",
+      "nameKey": "material.shard-fused",
+      "name": "Fused Shard",
+      "runtimeId": "shard.fused",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-fused",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "What used to be several pieces, now closed into one that no longer shows the seams."
+    },
+    {
+      "id": "material.027",
+      "nameKey": "material.shard-chimeric",
+      "name": "Chimeric Shard",
+      "runtimeId": "shard.chimeric",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-chimeric",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Its grain runs in more than one direction, as though it could not decide what it was becoming."
+    },
+    {
+      "id": "material.028",
+      "nameKey": "material.shard-heirloom",
+      "name": "Heirloom Shard",
+      "runtimeId": "shard.heirloom",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-heirloom",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Carried longer than anyone alive can say, and asked after by name."
+    },
+    {
+      "id": "material.029",
+      "nameKey": "material.shard-firstseed",
+      "name": "Firstseed Shard",
+      "runtimeId": "shard.firstseed",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-firstseed",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "The kind every later growth is measured against, and rarely matches."
+    },
+    {
+      "id": "material.030",
+      "nameKey": "material.shard-sunwoven",
+      "name": "Sunwoven Shard",
+      "runtimeId": "shard.sunwoven",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-sunwoven",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "Warmth is caught in it rather than reflected, as if the light never quite left."
+    },
+    {
+      "id": "material.031",
+      "nameKey": "material.shard-almanac",
+      "name": "Almanac Shard",
+      "runtimeId": "shard.almanac",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-almanac",
+      "tags": [
+        "mineral"
+      ],
+      "flavor": "A record of every season it has outlived, bound into something that no longer decays."
     }
   ]
 }

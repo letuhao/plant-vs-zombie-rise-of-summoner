@@ -1,5 +1,6 @@
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Tests.Demons.Fusion;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Demons;
@@ -13,9 +14,20 @@ namespace FusionRpg.Core.Tests.Demons;
 /// PascalCase, e.g. <c>"FumeShroom"</c>, vs. <see cref="DemonSpeciesCatalog"/>'s lowercase runtime id,
 /// e.g. <c>"fumeshroom"</c> — zero exact-string overlap between the two). This file loads the REAL
 /// committed <c>data/generated/demons/_species-build-plan.json</c> through the real
-/// <see cref="SpeciesBuildPlanReader"/>, against the real compiled <see cref="DemonSpeciesCatalog.All"/>
-/// roster — no hand-built fixture anywhere in it, matching <c>SpeciesCatalogDiffTests</c>' own
-/// established <c>RepoRoot()</c> convention.
+/// <see cref="SpeciesBuildPlanReader"/> — no hand-built fixture anywhere in it.
+///
+/// <para><b>⛔ Real bug fixed 2026-09-07 (owner caught it: "why did we still stuck at 84 demon"):</b>
+/// this file used to check the plan against <see cref="DemonSpeciesCatalog.ConfigureFromCompiledDefault"/>
+/// — the compiled, 84-species snapshot from BEFORE `catalog-runtime`'s real flip (2026-09-05). That
+/// flip already moved the real, live game (<c>Server/Program.cs:350</c>,
+/// <c>Injector/Host/RpgHost.cs</c>) onto the full store-backed roster (904 species today); this test
+/// file alone never followed, so it was silently validating the plan against a roster the real game
+/// no longer uses. `tools/DemonBuildPlanGen` itself had the exact same bug (fixed the same day,
+/// same root cause) — together they explain why the committed plan was stuck at 84 species long
+/// after the corpus grew to 904. Fixed by scoping every test here to
+/// <see cref="RealCorpusFixture.Snapshot"/> — the SAME real, store-backed 904-species roster
+/// <c>FusionRecipeReconcileTests</c> already uses, re-derived from the real anchor corpus through the
+/// real pipeline, never the stale compiled default.</para>
 /// </summary>
 public class SpeciesBuildPlanCatalogRealFileTests
 {
@@ -46,29 +58,33 @@ public class SpeciesBuildPlanCatalogRealFileTests
         // classified" case. `tools/DemonBuildPlanGen` now keys the plan by the runtime speciesId,
         // joined via the game's own stable (Side, GameTypeId) identity. This proves the fix against
         // the file actually on disk, not a re-derived expectation.
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
-        SpeciesBuildPlanCatalog.Configure(LoadRealPlan());
+        using (DemonSpeciesCatalog.UseScoped(RealCorpusFixture.Snapshot))
+        {
+            SpeciesBuildPlanCatalog.Configure(LoadRealPlan());
 
-        var shares = SpeciesBuildPlanCatalog.SharesFor("fumeshroom");
+            var shares = SpeciesBuildPlanCatalog.SharesFor("fumeshroom");
 
-        Assert.NotEmpty(shares);
-        Assert.Equal(1000, shares.Values.Sum());
+            Assert.NotEmpty(shares);
+            Assert.Equal(1000, shares.Values.Sum());
+        }
     }
 
     [Fact]
     public void Real_plan_keys_are_all_real_runtime_species_ids_never_anchor_text()
     {
         // A regression guard for the whole BUG CLASS, not just the one species above: every key in
-        // the committed file must be a live DemonSpeciesCatalog id. A PascalCase (or any other
-        // unrecognised) key sneaking back in means the generator's (Side, GameTypeId) join broke.
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
-        var plan = LoadRealPlan();
+        // the committed file must be a live species id. A PascalCase (or any other unrecognised) key
+        // sneaking back in means the generator's (Side, GameTypeId) join broke.
+        using (DemonSpeciesCatalog.UseScoped(RealCorpusFixture.Snapshot))
+        {
+            var plan = LoadRealPlan();
 
-        var unknownKeys = plan.Keys.Where(k => !DemonSpeciesCatalog.IsKnown(k)).ToList();
+            var unknownKeys = plan.Keys.Where(k => !DemonSpeciesCatalog.IsKnown(k)).ToList();
 
-        Assert.True(unknownKeys.Count == 0,
-            $"plan has {unknownKeys.Count} key(s) that are not real runtime species ids: " +
-            string.Join(", ", unknownKeys));
+            Assert.True(unknownKeys.Count == 0,
+                $"plan has {unknownKeys.Count} key(s) that are not real runtime species ids: " +
+                string.Join(", ", unknownKeys));
+        }
     }
 
     /// <summary>
@@ -78,41 +94,36 @@ public class SpeciesBuildPlanCatalogRealFileTests
     /// silently grow. If this set ever changes, this test fails and NAMES exactly what changed,
     /// instead of staying green through a regression of G1's own bug class or a new species shipping
     /// with no plan behind it — this is the test that would have caught G1 before it shipped.
-    ///
-    /// <para>Investigated 2026-09-05 (tasks/species-build-todo.md, G3 findings): of these 17,
-    /// <c>allpeater</c> has a real anchor (<c>AllPeater</c>, plant/1347) that is unresolved on
-    /// <c>aptitudePrimary</c>; the other 16 have NO matching anchor at all in the raw seed corpus by
-    /// (Side, GameTypeId) — a bigger gap than "unresolved," never authored for these specific
-    /// (side, gameTypeId) slots at all.</para>
     /// </summary>
-    static readonly IReadOnlyList<string> KnownMissingPlanSpecies = new[]
-    {
-        "allpeater", "cherrygatling", "cherrypaperzombie", "cornpot", "dancepolzombie", "dolldiamond",
-        "dollsilver", "doublecherry", "doublesnow", "driverzombie", "hypnojalapeno", "hypnopeashooter",
-        "icecaltrop", "ironpeazombie", "jalagatling", "jalapeno", "jalastar",
-    };
+    // 2026-09-07: T2.11's full classification run (840 -> 903 -> 904 species) plus DoubleCherry's own
+    // owner-directed manual attackTempo fix closed every real content gap; separately,
+    // `DemonBuildPlanGen`/this test file's own stale "compiled 84" scope was fixed the same day (see
+    // the class doc above) — the plan now genuinely covers all 904 live species. This allowlist is empty.
+    static readonly IReadOnlyList<string> KnownMissingPlanSpecies = Array.Empty<string>();
 
     [Fact]
     public void Species_with_no_real_plan_entry_matches_the_named_checked_in_allowlist()
     {
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
-        var plan = LoadRealPlan();
+        using (DemonSpeciesCatalog.UseScoped(RealCorpusFixture.Snapshot))
+        {
+            var plan = LoadRealPlan();
 
-        var missing = DemonSpeciesCatalog.All
-            .Select(s => s.SpeciesId)
-            .Where(id => !plan.ContainsKey(id))
-            .OrderBy(id => id, StringComparer.Ordinal)
-            .ToList();
+            var missing = DemonSpeciesCatalog.All
+                .Select(s => s.SpeciesId)
+                .Where(id => !plan.ContainsKey(id))
+                .OrderBy(id => id, StringComparer.Ordinal)
+                .ToList();
 
-        var expected = KnownMissingPlanSpecies.OrderBy(id => id, StringComparer.Ordinal).ToList();
+            var expected = KnownMissingPlanSpecies.OrderBy(id => id, StringComparer.Ordinal).ToList();
 
-        var newlyMissing = missing.Except(expected).ToList();
-        var newlyCovered = expected.Except(missing).ToList();
+            var newlyMissing = missing.Except(expected).ToList();
+            var newlyCovered = expected.Except(missing).ToList();
 
-        Assert.True(newlyMissing.Count == 0 && newlyCovered.Count == 0,
-            "the set of shipped species with no species-build plan entry has changed since " +
-            "tasks/species-build-todo.md G3 was last investigated. " +
-            (newlyMissing.Count > 0 ? $"NEWLY MISSING, investigate why (regression or new unclassified species): {string.Join(", ", newlyMissing)}. " : "") +
-            (newlyCovered.Count > 0 ? $"NEWLY COVERED (update KnownMissingPlanSpecies above — one of these got classified/planned): {string.Join(", ", newlyCovered)}. " : ""));
+            Assert.True(newlyMissing.Count == 0 && newlyCovered.Count == 0,
+                "the set of live species with no species-build plan entry has changed since " +
+                "tasks/species-build-todo.md G3 was last investigated. " +
+                (newlyMissing.Count > 0 ? $"NEWLY MISSING, investigate why (regression or new unclassified species): {string.Join(", ", newlyMissing)}. " : "") +
+                (newlyCovered.Count > 0 ? $"NEWLY COVERED (update KnownMissingPlanSpecies above — one of these got classified/planned): {string.Join(", ", newlyCovered)}. " : ""));
+        }
     }
 }

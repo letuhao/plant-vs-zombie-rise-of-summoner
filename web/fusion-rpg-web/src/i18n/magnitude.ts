@@ -13,6 +13,14 @@ import type { Magnitude } from "@/contract/types";
  * the only shipped locale (web/spec.md §10).
  */
 export function formatMagnitude(m: Magnitude, locale = "en"): string {
+  // party-dungeon D5.3 (spec-delve-stage.md §13, §18 ask 8) — a `long` figure whose true value may
+  // sit past `Number.MAX_SAFE_INTEGER` renders through its exact decimal string, via `BigInt`, never
+  // through `m.value` (which may already have lost precision crossing the wire as a JSON number).
+  // `Intl.NumberFormat.prototype.format` accepts a `BigInt` natively — no `Number(...)` round-trip,
+  // per §16's own "never parse a long into a number and back."
+  if (m.exact !== undefined) {
+    return new Intl.NumberFormat(locale).format(BigInt(m.exact));
+  }
   switch (m.unit) {
     case "gameUnits":
     case "gameUnitsPerSecond":

@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-retribution-offense",
+    "partition": "sets/retribution-offense",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 5,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "setgen-live-endpoint/hand-authored-1",
+    "authoredUtc": "2026-09-07T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.retribution-offense-001",
+      "nameKey": "set.vengeful-bastion",
+      "name": "Vengeful Bastion",
+      "themeKey": "build.retribution-offense",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-005"
+        },
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-005"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-005"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-005"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-a-005"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-005"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-005"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-005"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.ferocity",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "Every blow that lands on this line comes back doubled, and the line has learned to smile through the pain.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. CORRECTED 2026-09-07 (found via the real FusionRpg.Core.Tests suite, not the narrower Python/ItemSeedValidator checks the original trial batch ran): every member now names a real, existing `baseType` (matching the established convention every other shipped set uses -- humanoid AND plant frame per role, 8 members total) instead of leaving the field unauthored. `SetCorpus.cs`'s own real, current loader treats `baseType` as required per member and refuses the WHOLE corpus file on its absence -- the original 'not resolved here, module 13 builds no chooser' framing was correct about WHO decides identity long-term, but wrong about the field being safely omittable today. IDs are real, existing base-types picked by (role, frame, band=a), matching the corpus's own band-a starter convention."
+    },
+    {
+      "id": "set.retribution-offense-002",
+      "nameKey": "set.fang-of-retort",
+      "name": "Fang of Retort",
+      "themeKey": "build.retribution-offense",
+      "members": [
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-a-005"
+        },
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-a-005"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-a-005"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-005"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-a-005"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-005"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-005"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-005"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.hit-retort",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.might",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "It waits for the first cut, then answers with three.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. CORRECTED 2026-09-07 (found via the real FusionRpg.Core.Tests suite, not the narrower Python/ItemSeedValidator checks the original trial batch ran): every member now names a real, existing `baseType` (matching the established convention every other shipped set uses -- humanoid AND plant frame per role, 8 members total) instead of leaving the field unauthored. `SetCorpus.cs`'s own real, current loader treats `baseType` as required per member and refuses the WHOLE corpus file on its absence -- the original 'not resolved here, module 13 builds no chooser' framing was correct about WHO decides identity long-term, but wrong about the field being safely omittable today. IDs are real, existing base-types picked by (role, frame, band=a), matching the corpus's own band-a starter convention."
+    }
+  ]
+}

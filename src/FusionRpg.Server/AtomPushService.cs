@@ -1,6 +1,10 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Match;
+using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 
 namespace FusionRpg.Server;
@@ -154,6 +158,37 @@ public sealed class AtomPushService
     }
 
     /// <summary>
+    /// Phase 7 F3.2 (combat-unification, 2026-09-07): the owner-element context
+    /// <see cref="FusionRpg.Core.Effects.Atoms.AtomCompiler.Compile"/> bakes into a compiled
+    /// `ApplyResourceDelta` grant's `elementPayload`, mirroring <c>ownerLevel</c>'s own "resolve once
+    /// per <c>Build</c> call" shape exactly.
+    ///
+    /// <para><b>Named scope limit, not silently guessed:</b> this compile is over the UNION of
+    /// several owners at once (<c>Build</c>'s own doc comment — a player's grants plus every deployed
+    /// specimen), and <c>AtomCompiler.Compile</c>'s owner-context parameters (like <c>ownerLevel</c>
+    /// before this) are ONE value per whole compile, not one per owner. Applying a single specimen's
+    /// element to a batch that might carry several DIFFERENTLY-typed specimens would silently mistype
+    /// the others, which is worse than the pre-Phase-7 shape of carrying none. So this resolves a real
+    /// element pair only when the batch names EXACTLY ONE <see cref="OwnerKind.UniqueActor"/> — the
+    /// common real case (one specimen's own push at bind/deploy time) — and returns null otherwise,
+    /// leaving every multi-specimen batch exactly as inert as it was before this task, named here
+    /// rather than silently accepted as solved.</para>
+    /// </summary>
+    (ElementTypeId Primary, ElementTypeId? Secondary)? OwnerElements(IReadOnlyList<OwnerScope> owners)
+    {
+        var specimenOwners = owners.Where(o => o.Kind == OwnerKind.UniqueActor).ToList();
+        if (specimenOwners.Count != 1) return null;
+
+        var actor = _store.GetUniqueActor(specimenOwners[0].Key);
+        if (actor is null) return null;
+
+        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        if (!index.TryGet(actor.Side, actor.TypeId, out var species)) return null;
+
+        return (species.ElementPrimary, species.ElementSecondary);
+    }
+
+    /// <summary>
     /// The full set for one owner, or an empty up-to-date reply when the receiver already holds this
     /// catalog revision.
     /// </summary>
@@ -255,6 +290,7 @@ public sealed class AtomPushService
             }
         }
 
+        var ownerElements = OwnerElements(owners);
         var catalog = AtomCompiler.Compile(
             distinct.Values.OrderBy(a => a.AtomId, StringComparer.Ordinal).ToList(),
             ctx.Runtime,
@@ -262,7 +298,13 @@ public sealed class AtomPushService
             curves: id => _store.GetCurve(id),
             ownerLevel: ownerLevel ?? 1,
             grantOwnerKeys: id => ownersByAtom.TryGetValue(id, out var keys) ? keys : null,
-            externalRefs: BuildExternalRefs(owners));
+            externalRefs: BuildExternalRefs(owners),
+            ownerElementPrimary: ownerElements?.Primary,
+            ownerElementSecondary: ownerElements?.Secondary,
+            // BattleRuleset may genuinely not be configured in a caller that never touches web-battle
+            // tuning (several Server.Tests fixtures, confirmed live) — 0 is the safe, correct fallback
+            // either way: it is the exact pre-Phase-7 shipped default, not a guess.
+            hybridSecondaryWeightMilli: BattleRuleset.IsConfigured ? BattleRuleset.HybridSecondaryWeightMilli : 0);
 
         var byAtomId = catalog.Runtime.ToDictionary(e => e.AtomId, StringComparer.Ordinal);
         var bindings = new List<RunnerBinding>();
@@ -288,6 +330,34 @@ public sealed class AtomPushService
 
         var payload = AtomPushCodec.BuildPayload(
             catalog, bindings, matchSeed, matchKey, contentHash, receiverRevision, receiverEmitterVersion);
+
+        // P1.5-L (2026-09-07): the real, previously-undiscovered gap this whole compiled-push
+        // mechanism has carried since it was built (T6.1, 2026-09-06). `UniqueOwnerBinder.
+        // OwnerKeyForDurableGrant` (line ~246 above) stamps every UniqueActor-scoped grant with a
+        // durable `instance:{id}` owner key — the ONE key the injector's `RunEffectGrant` refuses
+        // outright ("instance: forbidden in Hot; bind to entity:{ptr}"), confirmed live: a real
+        // stat.modify equip atom compiled correctly, reached the injector, and was silently dropped
+        // at exactly this gate. The rewrite this needs (`UniqueOwnerBinder.BindGrant`, `instance:{id}`
+        // -> `entity:{ptr}`) already existed in Core — but its only caller was `UniqueLoadoutSpec`'s
+        // OLDER deploy-time `loadoutJson` path, never this one. Every UniqueActor-scoped grant this
+        // service has ever sent -- at Hello and at every bind/unbind re-push -- was refused the same
+        // way; nothing about this being equip-specific.
+        if (payload.Grants.Count > 0)
+        {
+            var rewritten = new List<EffectGrantDto>(payload.Grants.Count);
+            foreach (var grant in payload.Grants)
+            {
+                if (!StatApplyScope.IsInstanceOwnerKey(grant.OwnerKey)) { rewritten.Add(grant); continue; }
+
+                var instanceId = UniqueOwnerBinder.ExtractInstanceId(grant.OwnerKey);
+                var ptr = instanceId is null ? null : _store.GetUniqueActor(instanceId)?.LastPtr;
+                // No live ptr yet (rostered/deploying, not yet bound) -- drop rather than send a durable
+                // key the hot path is guaranteed to refuse; the next re-push after bind carries it.
+                if (string.IsNullOrWhiteSpace(ptr)) continue;
+                rewritten.Add(UniqueOwnerBinder.BindGrant(grant, ptr));
+            }
+            payload.Grants = rewritten;
+        }
 
         // patron-absorption (T6.2b, 2026-09-06): `fx.patron_aura` is never behind a real BindingRow —
         // nothing equips or picks a patron aura the way gear/traits are bound (RpgStore.SetPatron

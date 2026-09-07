@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { haveNeed, recipeLabel, starPips, STAR_CAPS } from "./fusionView";
+import {
+  costWithPicks,
+  haveNeed,
+  picksSoulsCost,
+  recipeLabel,
+  starPips,
+  togglePick,
+  STAR_CAPS,
+  type PickableAtom
+} from "./fusionView";
 
 const cost = {
   souls: 150,
@@ -35,6 +44,67 @@ describe("starPips", () => {
     expect(starPips(3, STAR_CAPS.common)).toBe("★★★");
     expect(starPips(0, STAR_CAPS.rare)).toBe("☆☆☆☆");
     expect(starPips(9, STAR_CAPS.epic)).toBe("★★★★★"); // clamped
+  });
+});
+
+describe("togglePick", () => {
+  const pickA = { sourceInstanceId: "spec-a", atomId: "atom.one" };
+  const pickB = { sourceInstanceId: "spec-a", atomId: "atom.two" };
+  const pickC = { sourceInstanceId: "spec-b", atomId: "atom.three" };
+
+  it("adds a new pick under the cap", () => {
+    expect(togglePick([], pickA, 2)).toEqual([pickA]);
+  });
+
+  it("removes an already-selected pick regardless of the cap", () => {
+    expect(togglePick([pickA], pickA, 1)).toEqual([]);
+  });
+
+  it("refuses to add past slotCap — the UI can never assemble an over-cap request", () => {
+    const atCap = togglePick([pickA, pickB], pickC, 2);
+    expect(atCap).toEqual([pickA, pickB]); // unchanged, pickC never lands
+  });
+
+  it("distinguishes picks naming the same atom id from a different source", () => {
+    const differentSource = { sourceInstanceId: "spec-b", atomId: "atom.one" };
+    expect(togglePick([pickA], differentSource, 2)).toEqual([pickA, differentSource]);
+  });
+});
+
+describe("picksSoulsCost / costWithPicks", () => {
+  const pickable: PickableAtom[] = [
+    { sourceInstanceId: "spec-a", sourceSpeciesId: "peashooter", atomId: "atom.one", costSouls: 150 },
+    { sourceInstanceId: "spec-a", sourceSpeciesId: "peashooter", atomId: "atom.two", costSouls: 220 }
+  ];
+
+  it("sums only the selected picks' own priced cost", () => {
+    expect(picksSoulsCost([{ sourceInstanceId: "spec-a", atomId: "atom.one" }], pickable)).toBe(150);
+    expect(
+      picksSoulsCost(
+        [
+          { sourceInstanceId: "spec-a", atomId: "atom.one" },
+          { sourceInstanceId: "spec-a", atomId: "atom.two" }
+        ],
+        pickable
+      )
+    ).toBe(370);
+  });
+
+  it("a pick with no matching priced entry contributes zero, never NaN", () => {
+    expect(picksSoulsCost([{ sourceInstanceId: "spec-x", atomId: "atom.ghost" }], pickable)).toBe(0);
+  });
+
+  it("adds picks' souls on top of the base cost, leaving shards/essence untouched", () => {
+    const result = costWithPicks(
+      cost,
+      [{ sourceInstanceId: "spec-a", atomId: "atom.one" }],
+      pickable
+    );
+    expect(result).toEqual({ ...cost, souls: cost.souls + 150 });
+  });
+
+  it("zero picks reproduces the base cost exactly", () => {
+    expect(costWithPicks(cost, [], pickable)).toEqual(cost);
   });
 });
 

@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Dark",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 9,
   "magnitudes": {
     "combat.defense.omni": 949,

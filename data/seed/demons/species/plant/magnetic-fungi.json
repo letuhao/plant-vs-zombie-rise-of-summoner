@@ -23,11 +23,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "deterministic-fallback"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T12:29:33Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "aptitudePrimary": "Fortitude",
         "attackTempo": "steady"
@@ -52,7 +53,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "magnetic-fungi"
     ],
@@ -105,10 +106,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:49:32Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "aptitudePrimary": "Focus",
         "elementPrimary": "air"
@@ -133,7 +135,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "ice",
     "family": [
       "magnetic fungi"
     ],
@@ -187,11 +189,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T13:27:10Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "steady",
         "threatBand": "harbinger"
@@ -216,7 +219,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "magnetic-fungi"
     ],

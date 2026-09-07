@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "few",
+  "flavor": "The local priest believes a corruption has taken root in this chamber, and only by striking down the creatures within can the sanctity of the temple be restored.",
+  "name": "Purge the Blight",
+  "objectiveTemplate": "cleanse-fights",
+  "prereqRefs": [],
+  "questId": "quest.cleanse-fights-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "delve",
+  "targetRef": "fight"
+}

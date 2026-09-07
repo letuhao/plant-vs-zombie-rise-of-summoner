@@ -5,7 +5,11 @@ import userEvent from "@testing-library/user-event";
 import { known, absent } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import type { ActorRungState } from "@/ui/actor";
-import { ActorMenuScopePicker, type ScopePickerValue } from "./ActorMenuScopePicker";
+import {
+  ActorMenuScopePicker,
+  type ScopePickerValue,
+  type ScopeTargetCandidate
+} from "./ActorMenuScopePicker";
 
 function readyActor(instanceId: string, name: string): ActorRungState {
   const data: ActorView = {
@@ -27,7 +31,13 @@ function readyActor(instanceId: string, name: string): ActorRungState {
   return { kind: "ready", data };
 }
 
-const TARGET_CANDIDATES = [readyActor("a1", "Emberling")];
+const TARGET_CANDIDATES: ScopeTargetCandidate[] = [
+  {
+    kind: "ready",
+    targetPtr: "P:3:1,2",
+    rungState: readyActor("a1", "Emberling") as Extract<ActorRungState, { kind: "ready" }>
+  }
+];
 const UNIQUE_DEMON_CANDIDATES = [readyActor("d1", "Ashkell")];
 const TYPE_OPTIONS = [
   { typeId: 3, label: "Sunflower" },
@@ -92,8 +102,11 @@ describe("ActorMenuScopePicker", () => {
     const user = userEvent.setup();
     render(<Harness />);
     await user.click(screen.getByTestId("scope-mode-target"));
-    await user.click(screen.getByTestId("scope-target-collection-item-a1"));
-    expect(screen.getByTestId("scope-target-collection-item-a1")).toHaveAttribute("data-selected", "true");
+    await user.click(screen.getByTestId("scope-target-collection-item-P:3:1,2"));
+    expect(screen.getByTestId("scope-target-collection-item-P:3:1,2")).toHaveAttribute(
+      "data-selected",
+      "true"
+    );
   });
 
   it("Type mode round-trips the exact typeIds selected", async () => {
@@ -110,22 +123,15 @@ describe("ActorMenuScopePicker", () => {
     const user = userEvent.setup();
     render(<Harness />);
 
-    // Select in Type mode.
     await user.click(screen.getByTestId("scope-mode-type"));
     await user.click(screen.getByTestId("scope-type-option-3"));
     expect(screen.getByTestId("scope-type-option-3")).toBeChecked();
 
-    // Switch to Relation — the Type panel is gone, nothing carries over.
     await user.click(screen.getByTestId("scope-mode-relation"));
     expect(screen.queryByTestId("scope-type-list")).not.toBeInTheDocument();
     expect(screen.getByTestId("scope-relation-ally")).toHaveAttribute("aria-checked", "false");
     expect(screen.getByTestId("scope-relation-enemy")).toHaveAttribute("aria-checked", "false");
 
-    // Switch back to Type — the earlier selection does not silently resurrect as the new default,
-    // because the controlled `value` still names "type" but the picker only ever reflects `value`
-    // as-is; the caller's own value is still the stale { kind: "type", typeIds: [3] } from before —
-    // so option 3 legitimately still shows checked here, which is correct: nothing was silently
-    // cleared or corrupted. The regression this guards is a *different* mode's panel misreading it.
     await user.click(screen.getByTestId("scope-mode-type"));
     expect(screen.getByTestId("scope-type-option-3")).toBeChecked();
     expect(screen.getByTestId("scope-type-option-7")).not.toBeChecked();
@@ -133,14 +139,24 @@ describe("ActorMenuScopePicker", () => {
 
   it("a value shaped for one mode never leaks into a different mode's panel", async () => {
     const user = userEvent.setup();
-    // Start already holding a Relation value, then switch straight to Target.
     function StartedOnRelation() {
-      const [value, setValue] = useState<ScopePickerValue | null>({ kind: "relation", relation: "ally" });
-      return <ActorMenuScopePicker value={value} onChange={setValue} targetCandidates={TARGET_CANDIDATES} />;
+      const [value, setValue] = useState<ScopePickerValue | null>({
+        kind: "relation",
+        relation: "ally"
+      });
+      return (
+        <ActorMenuScopePicker
+          value={value}
+          onChange={setValue}
+          targetCandidates={TARGET_CANDIDATES}
+        />
+      );
     }
     render(<StartedOnRelation />);
     await user.click(screen.getByTestId("scope-mode-target"));
-    // Target's panel must not interpret the leftover relation value as a selected target.
-    expect(screen.getByTestId("scope-target-collection-item-a1")).toHaveAttribute("data-selected", "false");
+    expect(screen.getByTestId("scope-target-collection-item-P:3:1,2")).toHaveAttribute(
+      "data-selected",
+      "false"
+    );
   });
 });

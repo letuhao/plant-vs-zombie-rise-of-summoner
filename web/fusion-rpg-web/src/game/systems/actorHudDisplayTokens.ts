@@ -44,13 +44,6 @@ export function elementColorPhaser(element: string): number {
   return ELEMENT_COLORS[element.toLowerCase()] ?? ELEMENT_COLORS.physical;
 }
 
-/** Legacy id-slice — not SSOT. Prefer resolveStatusHudToken. */
-export function statusInitials(id: string): string {
-  const parts = id.split("_").filter(Boolean);
-  if (parts.length >= 2) return (parts[0]![0]! + parts[1]![0]!).toUpperCase();
-  return id.slice(0, 2).toUpperCase();
-}
-
 /**
  * H2 resolve: catalog hudToken/color when actor-surface is injected; else designed placeholder
  * (GG-62) — never treat id-slice as SSOT.

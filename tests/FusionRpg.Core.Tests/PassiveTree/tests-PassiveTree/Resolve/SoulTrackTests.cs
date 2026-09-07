@@ -33,7 +33,7 @@ public class SoulTrackTests
                     new[]
                     {
                         new NodeAtom("stat.derived", AttachPoint.Stat, DerivedStatChannels.CombatPowerOmni,
-                            NodeAtomOp.Flat, null, null, kMicro, ScaleAxis.PTheta, UnitClass.GameUnits, null),
+                            NodeAtomOp.Flat, null, null, kMicro, ScaleAxis.PTheta, UnitClass.GameUnits),
                     },
                     Array.Empty<string>(), ExclusionForm.None, null, true, null),
             });

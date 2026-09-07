@@ -1,0 +1,17 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.ashthreepeater-001"
+  ],
+  "flavor": "A narrow corridor of polished obsidian where the air feels unnaturally still, broken only by the rhythmic, heavy whistling of something slicing through the dark above.",
+  "hazardBand": "light",
+  "kind": "trap",
+  "name": "The Pendulum's Threshold",
+  "reason": "A single, high-velocity swinging blade triggered by a pressure plate in the center of the hallway.",
+  "roomId": "room.trap-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

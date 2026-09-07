@@ -16,24 +16,30 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.dungeon.registries import (  # noqa: E402
+    ATOMS_DIR,
     BAND_NAMES,
     DEMONS_REGISTRY_DIR,
+    ITEMS_REGISTRY_DIR,
     REGISTRY_DIR,
+    load_atom_families,
     load_band_display_names,
     load_bands,
     load_difficulty_rungs,
     load_disposition,
     load_door_kinds,
+    load_grantable_atom_families,
     load_interaction_verbs,
     load_motifs,
     load_objective_templates,
     load_override_tags,
+    load_power_bands,
     load_raid_modes,
     load_room_kinds,
     load_theme_ids,
     load_themes,
     load_versions,
     load_vocabularies,
+    load_zomboss_pattern_ids,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -214,6 +220,89 @@ class MotifTests(unittest.TestCase):
         for theme_id, row in load_themes().items():
             for motif in row.get("motifs", []):
                 self.assertIn(motif, flat, f"{theme_id}'s own motif {motif!r} missing from the flat union")
+
+
+class AtomFamilyTests(unittest.TestCase):
+    """D1.10 (2026-09-07, dungeon-event work): `outcomes[].effects[].family` needs the same real,
+    closed atom-family vocabulary D4.24 (unique-pipeline) already measured — read fresh here too,
+    a second reader of the same frozen cross-program input the seed contract's own "frozen inputs"
+    list already named (`themes/motifs/families`)."""
+
+    def test_atoms_dir_resolves_to_the_real_committed_folder(self) -> None:
+        self.assertEqual(ATOMS_DIR, REPO_ROOT / "data" / "seed" / "atoms")
+        self.assertTrue(ATOMS_DIR.is_dir())
+
+    def test_load_atom_families_matches_a_direct_scan(self) -> None:
+        expected: "set[str]" = set()
+        for path in ATOMS_DIR.rglob("*.json"):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            for entry in doc.get("entries") or ():
+                if isinstance(entry.get("family"), str):
+                    expected.add(entry["family"])
+        self.assertEqual(load_atom_families(), frozenset(expected))
+        self.assertGreaterEqual(len(expected), 28)  # D4.24's own measured floor, never fewer
+
+    def test_grantable_is_a_strict_subset_of_all_families(self) -> None:
+        grantable = load_grantable_atom_families()
+        every = load_atom_families()
+        self.assertTrue(grantable.issubset(every))
+        self.assertLess(len(grantable), len(every))
+
+    def test_grantable_excludes_every_icdKey_bound_family(self) -> None:
+        # The real, structural discriminator (found by reading the entries, not guessed from
+        # filenames): an icdKey ties a family to one specific subsystem's own trigger wiring.
+        bound: "set[str]" = set()
+        for path in ATOMS_DIR.rglob("*.json"):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            for entry in doc.get("entries") or ():
+                if isinstance(entry.get("family"), str) and "icdKey" in entry:
+                    bound.add(entry["family"])
+        self.assertTrue(bound, "fixture assumption: at least one shipped family carries icdKey")
+        self.assertEqual(load_grantable_atom_families() & bound, set())
+
+    def test_grantable_matches_the_measured_nine_generic_stat_families(self) -> None:
+        # Named explicitly so a future atom-catalog change that silently narrows or widens this
+        # pool is a loud, reviewed diff here rather than a quiet content-time surprise.
+        self.assertEqual(load_grantable_atom_families(), frozenset({
+            "atom.bulwark", "atom.ferocity", "atom.fortitude", "atom.mending", "atom.might",
+            "atom.resilience", "atom.savagery", "atom.vitality", "atom.warding",
+        }))
+
+
+class PowerBandTests(unittest.TestCase):
+    """D1.10 (2026-09-07, dungeon-event work): `powerBand` is a THIRD frozen cross-program input
+    (alongside themes/motifs and atom families) — confirmed the dungeon-native `bands.v1.json` has
+    no `powerBand` member of its own before building a reader for the items-side one."""
+
+    def test_dungeon_native_bands_file_has_no_powerBand_of_its_own(self) -> None:
+        self.assertNotIn("powerBand", load_bands())
+
+    def test_matches_the_real_five_value_enum_the_csharp_side_already_uses(self) -> None:
+        # UniqueBudget.TierOfPowerBand's own switch, read independently here so a drift between
+        # the registry file and that C# switch is caught on the Python side too.
+        self.assertEqual(load_power_bands(), frozenset({"trivial", "low", "medium", "high", "extreme"}))
+
+    def test_reads_the_real_items_registry_file_not_a_hardcoded_copy(self) -> None:
+        raw = json.loads((ITEMS_REGISTRY_DIR / "bands.v1.json").read_text(encoding="utf-8"))
+        self.assertEqual(load_power_bands(), frozenset(raw["powerBand"]["enum"]))
+
+
+class ZombossPatternTests(unittest.TestCase):
+    """D1.10 (2026-09-07, dungeon-encounter pre-work): `boss.build` needs the real nine
+    `ZombossPatterns.cs` ids, read from the checked-in Python-tooling mirror that class's own doc
+    comment names for exactly this purpose."""
+
+    def test_nine_real_pattern_ids(self) -> None:
+        ids = load_zomboss_pattern_ids()
+        self.assertEqual(len(ids), 9)
+        self.assertIn("force-pure", ids)
+        self.assertIn("finesse-pure", ids)
+        self.assertIn("bastion-pure", ids)
+
+    def test_matches_a_direct_scan_of_the_mirror_file(self) -> None:
+        from seedsmith.adapters.dungeon.registries import ZOMBOSS_PATTERNS_PATH
+        raw = json.loads(ZOMBOSS_PATTERNS_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(load_zomboss_pattern_ids(), frozenset(e["id"] for e in raw["entries"]))
 
 
 class VocabularyAgreementTests(unittest.TestCase):

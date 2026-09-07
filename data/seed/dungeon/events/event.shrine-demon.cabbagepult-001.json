@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.cabbagepult-001",
+  "flavor": "A stone pedestal sits in the center of the chamber, topped with a massive, petrified 卷心菜. A rusted iron mechanism, resembling a heavy 投手, is coiled around the base, its tension springs humming with a faint, rhythmic 攻击. A single, narrow slit marked 出 sits at the base of the altar, waiting for an offering.",
+  "kind": "shrine",
+  "name": "The Reliquary of the Verdant Pitcher",
+  "outcomes": [
+    {
+      "consequence": "loot",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a ritual site that requires a sacrifice to activate a mechanical defense or blessing.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cabbagepult"
+}

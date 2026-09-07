@@ -103,10 +103,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:26:09Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "elementPrimary": "air"
       },
@@ -130,7 +131,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "undead-automaton"
     ],

@@ -89,6 +89,31 @@ public sealed record BattleActorSetup
     public IReadOnlyList<string>? EquippedActionIds { get; init; }
 
     /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, resolved after a MAJOR finding this
+    /// session: `DistrictAssaultResolver.BuildAnimateSetups` never set <see cref="EquippedActionIds"/>
+    /// at all, so every siege actor fell back to the fixed basic attack — construction actions were
+    /// structurally unreachable in any real siege, not just missing content). A PURELY ADDITIVE
+    /// sibling to <see cref="EquippedActionIds"/>, never a replacement for it: <see cref="EquippedActionIds"/>'s
+    /// own resolution (basic-attack fallback, or a real catalog-resolved loadout) runs completely
+    /// unchanged, and these PRE-COMPILED actions are appended to whatever it produces
+    /// (<c>BattleRunState</c>'s own setup loop) — an actor never loses its basic attack by gaining
+    /// this. Pre-compiled rather than id-based like <see cref="EquippedActionIds"/> because the only
+    /// today's caller (`DistrictAssaultResolver`) already holds statically-compiled, content
+    /// (`ConstructionActions.Actions`, never player-rolled) that needs no `ActionCatalog`/database
+    /// round trip to resolve — the same "caller already holds the compiled form" shape
+    /// <c>ConstructionActivation.Fire</c>'s own <c>firingAction</c> parameter established. <c>null</c>
+    /// for every existing caller (every non-siege battle, and any siege actor a future pass does not
+    /// grant construction to) — the exact byte-identical-to-today default.
+    ///
+    /// <para><see cref="JsonIgnoreAttribute"/> for the SAME reason <see cref="EquippedActionIds"/>'s
+    /// own comment states: `WhenWritingDefault` keeps every existing golden (expedition's own
+    /// serialized+hashed `BattleActorSetup` included) byte-identical since this field is never set
+    /// outside `DistrictAssaultResolver`.</para>
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<FusionRpg.Core.Actions.CompiledAction>? AdditionalHeldActions { get; init; }
+
+    /// <summary>
     /// base-defense `combatant-kind` (owner decision 4): what sort of thing this actor is. Structures
     /// and obstacles are a new actor kind — no level, no equipment, no aura — but traits, actions, and
     /// hit points.
@@ -245,6 +270,13 @@ public static class BattleRuleset
 
     public static void Configure(BattleTuning tuning) =>
         _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    /// <summary>Phase 7 F3.2 (combat-unification, 2026-09-07): lets an OPTIONAL reader (one that has
+    /// a safe, named fallback for "not configured yet" — <see cref="HybridSecondaryWeightMilli"/>'s
+    /// own caller in <c>AtomPushService</c> is the first) check before reading, instead of every
+    /// caller needing this static configured at all, the way <see cref="RoundDurationMs"/>/
+    /// <see cref="MaxRounds"/> correctly still require.</summary>
+    public static bool IsConfigured => _tuning is not null;
 
     static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
         "BattleRuleset.Configure(...) has not run. RoundDurationMs/MaxRounds read " +

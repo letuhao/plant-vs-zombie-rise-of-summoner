@@ -316,5 +316,68 @@ class RecordAcceptedIdempotenceTests(unittest.TestCase):
         self.assertEqual(original, {})
 
 
+class RecordSupersededTests(unittest.TestCase):
+    """Task J4 (spec-tree-review.md §8) — the deliberate, explicit counterpart to
+    `record_accepted`'s "raise on duplicate" default, for an intentional incremental re-review pass.
+    """
+
+    def test_superseding_a_fresh_subject_with_no_prior_entry_carries_no_supersededRecord(self) -> None:
+        record = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                       _response())
+        done = run.record_superseded({}, "t1:skill.t1-off-t1-n0", record)
+        entry = done["t1:skill.t1-off-t1-n0"]
+        self.assertNotIn("supersededRecord", entry)
+        self.assertEqual(entry["record"]["id"], "skill.t1-off-t1-n0")
+
+    def test_superseding_an_existing_subject_never_raises_unlike_record_accepted(self) -> None:
+        first = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                      _response(name="Old Name"))
+        done = run.record_accepted({}, "t1:skill.t1-off-t1-n0", first)
+
+        second = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                       _response(name="New Name"))
+        # record_accepted would raise here (proven above) -- record_superseded must not.
+        done = run.record_superseded(done, "t1:skill.t1-off-t1-n0", second)
+        self.assertEqual(done["t1:skill.t1-off-t1-n0"]["record"]["name"], "New Name")
+
+    def test_the_prior_record_is_preserved_under_supersededRecord_never_discarded(self) -> None:
+        first = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                      _response(name="Old Name"))
+        done = run.record_accepted({}, "t1:skill.t1-off-t1-n0", first)
+
+        second = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                       _response(name="New Name"))
+        done = run.record_superseded(done, "t1:skill.t1-off-t1-n0", second)
+
+        entry = done["t1:skill.t1-off-t1-n0"]
+        self.assertEqual(entry["record"]["name"], "New Name")
+        self.assertEqual(entry["supersededRecord"]["name"], "Old Name")
+
+    def test_superseding_never_mutates_the_callers_dict(self) -> None:
+        record = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                       _response())
+        original: "dict" = {}
+        run.record_superseded(original, "t1:skill.t1-off-t1-n0", record)
+        self.assertEqual(original, {})
+
+    def test_a_second_supersede_chains_only_the_immediately_prior_record_not_the_whole_history(self) -> None:
+        # A design choice stated as a test: supersededRecord holds the ONE prior version, not a
+        # growing chain -- a full history is the diff card's own job (reading committed catalog
+        # revisions over time), never this ledger's.
+        v1 = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                   _response(name="V1"))
+        done = run.record_accepted({}, "t1:skill.t1-off-t1-n0", v1)
+        v2 = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                   _response(name="V2"))
+        done = run.record_superseded(done, "t1:skill.t1-off-t1-n0", v2)
+        v3 = run.build_node_record("skill.t1-off-t1-n0", "n0", "offensive", 1, "mechanism",
+                                   _response(name="V3"))
+        done = run.record_superseded(done, "t1:skill.t1-off-t1-n0", v3)
+
+        entry = done["t1:skill.t1-off-t1-n0"]
+        self.assertEqual(entry["record"]["name"], "V3")
+        self.assertEqual(entry["supersededRecord"]["name"], "V2")
+
+
 if __name__ == "__main__":
     unittest.main()

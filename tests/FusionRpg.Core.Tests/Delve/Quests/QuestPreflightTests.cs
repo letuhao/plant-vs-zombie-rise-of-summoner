@@ -1,4 +1,6 @@
+using FusionRpg.Core.Delve.Domains;
 using FusionRpg.Core.Delve.Quests;
+using FusionRpg.Core.Delve.Roll;
 using FusionRpg.Core.Dungeon.Registry;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Effects.Atoms;
@@ -161,5 +163,251 @@ public class QuestPreflightTests
         Assert.True(QuestCoverage.WithinRegressionBand(
             (tuning.QuestsAutopilotCompletionBandMinMilli + tuning.QuestsAutopilotCompletionBandMaxMilli) / 2,
             tuning.QuestsAutopilotCompletionBandMinMilli, tuning.QuestsAutopilotCompletionBandMaxMilli));
+    }
+
+    // ---- Run (D4.13's own full orchestration, closed 2026-09-07) ----------------------------------
+    //
+    // These fixtures deliberately use a SELF-CONSISTENT hand-built reward-band/ladder pairing
+    // ("modest" -> staple/occasional, matching this file's own pre-existing `RewardBands`/`Ladder`
+    // fixtures above), NOT the real shipped `DungeonTuningHub.Tuning.QuestsRewardBand` -- running
+    // these two real halves together for the first time (Run calling the already-shipped
+    // CheckFloorNotAboveCeil against REAL content) surfaced a genuine, pre-existing, separate finding:
+    // the real `dungeon.v1.json` quests.rewardBand.*.floorRung/ceilRung values are difficulty-rung ids
+    // ("very-easy".."nightmare"), not item-rarity ladder ids ("chaff".."almanac") the spec's own
+    // Tunables table cites (`item-rarity.v1.json:7-18`) -- named precisely, with real reproduction
+    // evidence, in the todo entry rather than silently worked around here. Isolating THIS file's own
+    // tests from that separate defect keeps them focused on what they exist to prove: `Run`'s own
+    // sweep/composition logic, reusing `RarityDraw`/`CheckFloorNotAboveCeil` correctly.
+    static DungeonTuning Tuning => DungeonTuningHub.Tuning;
+
+    static LayoutTemplateCatalog RealLayoutCatalog()
+    {
+        var rows = LayoutSeedFile.LoadAll(DungeonTestFiles.LayoutsDir());
+        var bandDefs = new Dictionary<string, BandDef>
+        {
+            ["depthBand"] = new BandDef { BandName = "depthBand", Members = Tuning.DepthBandRows.Keys.ToList() },
+            ["widthBand"] = new BandDef { BandName = "widthBand", Members = Tuning.WidthBandCols.Keys.ToList() },
+            ["branchiness"] = new BandDef { BandName = "branchiness", Members = Tuning.BranchinessPathWalks.Keys.ToList() },
+            ["density"] = new BandDef
+            {
+                BandName = "density",
+                Members = Tuning.GateDensityPerRoomMilli.Keys
+                    .Union(Tuning.SecretDensityPerRoomMilli.Keys).Union(Tuning.OneWayDensityPerRoomMilli.Keys).ToList(),
+            },
+        };
+        var load = LayoutTemplateCatalog.Load(rows, bandDefs, Tuning.RaidModes.Keys.ToList());
+        Assert.Empty(load.Rejections);
+        return load.Catalog;
+    }
+
+    static DomainRow RealDomain() => DomainSeedFile.LoadAll(DungeonTestFiles.DomainsDir()).Single(d => d.DomainId == "domain.fire-001");
+
+    /// <summary>This file's own `Row` helper (above) never takes a `targetRef`/`countBand` -- every
+    /// existing fixture in this file is count-less. `Run`'s own new sweep tests need a real
+    /// `cleanse-fights`-shaped row, so this is a second, additive helper rather than widening `Row`'s
+    /// signature under every pre-existing call site in this file.</summary>
+    static QuestRow CountedRow(string id, string template, string targetRef, string countBand, string rewardBand = "modest") =>
+        new(id, template, targetRef, countBand, rewardBand, "delve", null);
+
+    /// <summary>
+    /// `Run` reads `rewardBandsByMember` straight off the `tuning` PARAMETER
+    /// (`tuning.QuestsRewardBand`), never from the corpus -- and every test below needs the REAL
+    /// `Tuning` for graph rolling (real raid modes / countBand / PreflightSampleSeeds), so there is no
+    /// way for these tests to swap in this file's own pre-existing `staple/frequent/occasional` ladder
+    /// fixture. This ladder instead names the SAME ids the real shipped `dungeon.v1.json` actually
+    /// references (`Run_propagates_CheckFloorNotAboveCeil_through_the_real_entry_point` proves this is
+    /// real, reproduced content, not a guess) -- <b>not because that is the correct vocabulary</b> (item-
+    /// rarity ids per spec §12, `item-rarity.v1.json:7-18`) but purely so tests NOT about that separately-
+    /// named defect (`RewardBandRungUnresolvable`) can reach the sweep logic they actually exist to
+    /// prove, the same "isolate one concern, keep the rest working" discipline
+    /// `DomainEventPreflightBridgeTests` already applies.</summary>
+    static readonly IReadOnlyList<RarityRung> RewardBandShapedLadder = new[]
+    {
+        Rung("very-easy", 1), Rung("easy", 2), Rung("medium", 3), Rung("hard", 4), Rung("very-hard", 5), Rung("nightmare", 6),
+    };
+
+    /// <summary>A minimal, real-graph-rollable corpus: real rooms/palette/layout/tuning (so
+    /// `DelveGraphRoll.Roll` really succeeds, proven independently by
+    /// `DomainGraphPreflightBridgeTests.Every_real_shipped_domain_passes_row4...`), but a
+    /// CALLER-SUPPLIED quest pool and a stubbed archetype/loot resolution -- every test below only
+    /// varies the pool to isolate exactly one behaviour of `Run` itself.</summary>
+    static QuestPreflight.QuestPreflightCorpus MinimalCorpus(DomainRow domain, IReadOnlyList<QuestRow> pool) => new(
+        RoomsById: RoomPaletteSeedFile.LoadAll(DungeonTestFiles.RoomsDir()),
+        RoomPaletteByDomainId: DomainSeedFile.LoadRoomPalettes(DungeonTestFiles.DomainsDir()),
+        QuestPoolByDomainId: new Dictionary<string, IReadOnlyList<QuestRow>>(StringComparer.Ordinal) { [domain.DomainId] = pool },
+        ArchetypeEventPoolHasKind: (_, _) => false,
+        LootBindingByDomainId: new Dictionary<string, IReadOnlyDictionary<string, string>>(StringComparer.Ordinal),
+        Tables: new Dictionary<string, DropTableRow>(StringComparer.Ordinal),
+        BaseTypesFor: (_, _) => Array.Empty<string>(),
+        Ladder: RewardBandShapedLadder,
+        BossRoomKindOrdinal: 99);
+
+    [Fact]
+    public void Run_null_arguments_throw()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var corpus = MinimalCorpus(domain, new[] { Row("q1", "kill-boss") });
+        Assert.Throws<ArgumentNullException>(() => QuestPreflight.Run(null!, new[] { domain }, layouts, Tuning));
+        Assert.Throws<ArgumentNullException>(() => QuestPreflight.Run(corpus, null!, layouts, Tuning));
+        Assert.Throws<ArgumentNullException>(() => QuestPreflight.Run(corpus, new[] { domain }, null!, Tuning));
+        Assert.Throws<ArgumentNullException>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, null!));
+    }
+
+    [Fact]
+    public void Run_skips_a_domain_with_no_pool_data_supplied_at_all()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var corpus = MinimalCorpus(domain, new[] { Row("q1", "kill-boss") }) with
+        {
+            QuestPoolByDomainId = new Dictionary<string, IReadOnlyList<QuestRow>>(StringComparer.Ordinal), // this domain absent entirely
+        };
+        QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning); // does not throw
+    }
+
+    [Fact]
+    public void Run_propagates_CheckNoRoomKindIsBoss_through_the_real_entry_point()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var bossGate = new PredicateNode.Leaf(LeafId.RoomKindIs, Subject.Target, Value: 99); // 99 == MinimalCorpus's own BossRoomKindOrdinal
+        var pool = new[] { Row("q1", "kill-boss", predicate: bossGate), Row("q2", "bring-demon-home-alive") };
+        var corpus = MinimalCorpus(domain, pool);
+
+        var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
+        Assert.Equal(QuestPreflightRules.RoomKindIsBossForbidden, ex.Rule);
+        Assert.Equal("q1", ex.QuestId);
+        Assert.Equal(domain.DomainId, ex.DomainId);
+    }
+
+    /// <summary>Real `rewardBand` ids ("modest"/"fair"/"rich") are never inverted in the shipped
+    /// content, so proving `Run` propagates `FloorAboveCeil` needs a ladder whose OWN ordinal
+    /// assignment inverts a real window -- "modest" resolves to (`very-easy`, `easy`); this ladder
+    /// swaps their ordinals (`easy` &lt; `very-easy`) so `floorOrdinal &gt; ceilOrdinal` for real,
+    /// without touching the tuning content itself.</summary>
+    [Fact]
+    public void Run_propagates_CheckFloorNotAboveCeil_through_the_real_entry_point()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
+        var invertedLadder = new[] { Rung("easy", 1), Rung("very-easy", 2) }; // swapped vs. real ordinal order -- inverts "modest"'s real window
+        var corpus = MinimalCorpus(domain, pool) with { Ladder = invertedLadder };
+
+        var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
+        Assert.Equal(QuestPreflightRules.FloorAboveCeil, ex.Rule);
+        Assert.Equal("q1", ex.QuestId);
+    }
+
+    /// <summary>The real, reproduced finding, named precisely: the shipped `dungeon.v1.json`'s own
+    /// `quests.rewardBand.*` values are difficulty-rung ids, not item-rarity ids -- so a ladder that
+    /// only carries real item-rarity-shaped ids (this file's own pre-existing `Ladder` fixture,
+    /// `staple/frequent/occasional`) can never resolve them. Proves the 2026-09-07 hardening: a clean,
+    /// named `QuestRefusal`, never an uncaught `KeyNotFoundException`.</summary>
+    [Fact]
+    public void Run_refuses_reward_band_rung_unresolvable_rather_than_crashing_against_a_mismatched_ladder()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
+        var corpus = MinimalCorpus(domain, pool) with { Ladder = Ladder }; // this file's own staple/frequent/occasional fixture -- never resolves "very-easy"
+
+        var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
+        Assert.Equal(QuestPreflightRules.RewardBandRungUnresolvable, ex.Rule);
+        Assert.Equal("q1", ex.QuestId);
+        Assert.Contains("very-easy", ex.Message);
+    }
+
+    [Fact]
+    public void Run_propagates_CheckEnoughNonSinkAnchors_through_the_real_entry_point()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var pool = new[] { Row("q1", "finish-under-hunger"), Row("q2", "survive-no-downed") }; // both sink-avoidance, offeredAtEntry is 2
+        var corpus = MinimalCorpus(domain, pool);
+
+        var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
+        Assert.Equal(QuestPreflightRules.TooFewNonSinkAnchors, ex.Rule);
+    }
+
+    /// <summary>The literal new Verify line: a pool that structurally PASSES `CheckEnoughNonSinkAnchors`
+    /// (two non-sink anchors, meeting `offeredAtEntry`) but whose graph-dependent anchor can never be
+    /// satisfied on ANY real rolled graph (a `cleanse-fights` naming a room kind that does not exist)
+    /// leaves only ONE satisfiable anchor -- below `offeredAtEntry` -- on every seed and rung the sweep
+    /// samples, and `Run` refuses naming the starved template. This is exactly the DYNAMIC, per-graph
+    /// proof `CheckEnoughNonSinkAnchors`'s own STATIC, pool-only count structurally cannot make.</summary>
+    [Fact]
+    public void Run_refuses_naming_the_starved_template_when_a_non_sink_anchor_is_unsatisfiable_on_every_real_graph()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var pool = new[]
+        {
+            CountedRow("q1", "cleanse-fights", "definitely-not-a-real-room-kind", "few"), // never matches any rolled room -- 0 forever
+            Row("q2", "kill-boss"),
+        };
+        var corpus = MinimalCorpus(domain, pool);
+
+        var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
+        Assert.Equal(QuestPreflightRules.SatisfiabilitySweepStarved, ex.Rule);
+        Assert.Equal("q1", ex.QuestId);
+        Assert.Equal(domain.DomainId, ex.DomainId);
+        Assert.Contains("q1", ex.Message);
+    }
+
+    /// <summary>Determinism (spec §9: "pure over (pool, Facts, delveSeed, rung, tuning)") -- two
+    /// independent `Run` calls over the identical inputs reach the IDENTICAL refusal, matching
+    /// `DomainGraphPreflightBridgeTests.The_verdict_is_identical_across_two_independent_Build_calls...`'s
+    /// own reasoning: `SeededRng.DeriveStream` is deterministic across processes, never
+    /// `string.GetHashCode()`-derived.</summary>
+    [Fact]
+    public void Run_reaches_the_identical_refusal_across_two_independent_calls()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var pool = new[] { CountedRow("q1", "cleanse-fights", "definitely-not-a-real-room-kind", "few"), Row("q2", "kill-boss") };
+
+        var first = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(MinimalCorpus(domain, pool), new[] { domain }, layouts, Tuning));
+        var second = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(MinimalCorpus(domain, pool), new[] { domain }, layouts, Tuning));
+
+        Assert.Equal(first.DomainId, second.DomainId);
+        Assert.Equal(first.QuestId, second.QuestId);
+        Assert.Equal(first.Rule, second.Rule);
+        Assert.Equal(first.Message, second.Message);
+    }
+
+    /// <summary>The healthy-pool proof: every anchor is a structural (graph-independent) template, so
+    /// the sweep passes on every one of `PreflightSampleSeeds` seeds, every raid mode and every rung --
+    /// `Run` returns normally (no `QuestRefusal`) rather than needing a real graph to happen to cooperate.</summary>
+    [Fact]
+    public void Run_passes_a_domain_whose_whole_pool_is_structurally_satisfiable_at_every_rung()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        // kill-boss and bring-demon-home-alive are both non-sink and always-satisfiable (QuestOffer's
+        // own "the other five... hold on every valid graph" set) -- one of the two is always eligible
+        // in slot 0 regardless of rung, so the offer always fills to offeredAtEntry (2).
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive"), Row("q3", "finish-under-hunger") };
+        var corpus = MinimalCorpus(domain, pool);
+
+        QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning); // does not throw
+    }
+
+    /// <summary>Every real shipped domain's own room palette rolls (independently proven,
+    /// `DomainGraphPreflightBridgeTests`) -- this proves `Run`'s own sweep reaches every one of the six
+    /// without a graph-roll exception ever escaping past its own `DelveGraphRollRejection` catch, using
+    /// the SAME always-satisfiable pool as the single-domain proof above.</summary>
+    [Fact]
+    public void Run_reaches_every_real_shipped_domain_without_a_graph_roll_exception_escaping()
+    {
+        var domains = DomainSeedFile.LoadAll(DungeonTestFiles.DomainsDir());
+        var layouts = RealLayoutCatalog();
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive") };
+        var poolByDomain = domains.ToDictionary(d => d.DomainId, IReadOnlyList<QuestRow> (d) => pool, StringComparer.Ordinal);
+        var corpus = MinimalCorpus(domains[0], pool) with { QuestPoolByDomainId = poolByDomain };
+
+        Assert.Equal(6, domains.Count);
+        QuestPreflight.Run(corpus, domains, layouts, Tuning); // does not throw
     }
 }

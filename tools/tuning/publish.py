@@ -252,6 +252,45 @@ def add_rung_power_budget(doc, reference_power):
     return added
 
 
+def add_inherit_cost_table(doc):
+    """demon-standalone WAVE F2.3 (2026-09-07): add `inheritCostByRarity` — a fusion pick's cost is
+    read from the PICK'S OWN source rarity, not the fusion output's, so it needs its own table rather
+    than reusing `recipeCost` (which is keyed by output rarity). Reuses `recipeCost`'s own `souls`
+    escalation verbatim (the todo's own "same 150->1000-souls shape... already uses" instruction) --
+    a flat `{rarity: souls}` map, not the full compound recipeCost shape, since F2.4 only ever sums
+    souls for a pick set. Refuses rather than guesses: `inheritCostByRarity` already existing is a
+    first-time-gap violation (use `set` to change a value), and a missing/malformed `recipeCost` means
+    there is nothing to derive from.
+    """
+    if "inheritCostByRarity" in doc:
+        raise KeyError("'inheritCostByRarity' already exists -- use the set path to change a value, "
+                        "this flag only fills a first-time gap")
+
+    recipe_cost = doc.get("recipeCost")
+    if not isinstance(recipe_cost, dict) or not recipe_cost:
+        raise KeyError("'recipeCost' is missing or empty -- cannot derive inheritCostByRarity from it")
+
+    table = {}
+    for rarity, row in recipe_cost.items():
+        if not isinstance(row, dict) or "souls" not in row or not isinstance(row["souls"], int):
+            raise KeyError("recipeCost['%s'] has no integer 'souls' -- cannot derive from it" % rarity)
+        table[rarity] = row["souls"]
+
+    doc["inheritCostByRarity"] = table
+
+    meta = doc.setdefault("_meta", {})
+    meta["inheritCostByRarityDerivation"] = (
+        "WAVE F2.3 (demon-standalone, 2026-09-07): a flat {rarity: souls} map, one entry per "
+        "recipeCost rung, copied verbatim from recipeCost[rarity].souls at the time this table was "
+        "added. Looked up by the INHERITED PICK's own source species' rarity (F2.2/F2.4), never the "
+        "fusion output's own rarity -- a different lookup key from recipeCost, hence its own table "
+        "rather than a second read of recipeCost. Starting values, not a validated balance decision, "
+        "same as recipeCost's own note when it was widened."
+    )
+
+    return table
+
+
 def rename_key(doc, spec_raw):
     """Rename one dict key in place, preserving insertion order. Refuses rather than guesses."""
     # `container.path:oldLeaf=newLeaf`. The COLON matters: a tuning key is very often itself dotted
@@ -291,6 +330,9 @@ def main():
                     help="derive and add `powerBudgetMilli` to every row of `rows` "
                          "(powerBudgetMilli = poolRolls * REFERENCE_POWER * qPowerMilli / 1000); "
                          "refuses if any row already has the column (action-rungs-shaped only)")
+    ap.add_argument("--add-inherit-cost-table", action="store_true", dest="add_inherit_cost_table",
+                    help="derive and add `inheritCostByRarity` from `recipeCost`'s own souls escalation "
+                         "(fusion-shaped only); refuses if the key already exists")
     ap.add_argument("--label", default="", help="short human note, stored in _meta.rebalanceLabel")
     a = ap.parse_args()
 
@@ -352,6 +394,16 @@ def main():
         for rung, budget in added:
             changes.append(("rows[rung=%s].powerBudgetMilli" % rung, None, budget))
             print("  %-52s ADDED (%r)" % ("rung %s powerBudgetMilli" % rung, budget))
+
+    if a.add_inherit_cost_table:
+        try:
+            table = add_inherit_cost_table(doc)
+        except KeyError as e:
+            print("refused: %s" % e, file=sys.stderr)
+            return 1
+        for rarity, souls in table.items():
+            changes.append(("inheritCostByRarity.%s" % rarity, None, souls))
+        print("  %-52s ADDED (%d rung(s))" % ("inheritCostByRarity", len(table)))
 
     if not changes:
         print("no changes — nothing published")

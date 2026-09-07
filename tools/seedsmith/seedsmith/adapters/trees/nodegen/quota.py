@@ -136,7 +136,7 @@ class QuotaCell:
 
 
 def uniform_weights_milli(members: "Sequence[str]") -> "dict[str, int]":
-    """`weightScheme: "uniform"` (`passive-tree-targets.v1.json`'s own four uniform-scheme axes —
+    """`weightScheme: "uniform"` (`passive-tree-targets.v2.json`'s own four uniform-scheme axes —
     trigger, element, status, channelFamily): an even per-mille split over `members`, summing to
     exactly 1000. Built with the SAME largest-remainder discipline as the weighted axes, over a
     trivial all-equal weight vector, so a caller never has to special-case "uniform" as a different
@@ -215,7 +215,7 @@ def axis_order(axis: str, targets: object, members: "Sequence[str]") -> "tuple[s
     """The declared ORDER `axis_marginals`/`expand_counts` tie-break and flatten against.
     `nodeClass`/`exclusionForm` carry an explicit `_order` in the targets file (both are small,
     named enums where an author-chosen order is meaningful); the four uniform-scheme axes have no
-    such array by design (`passive-tree-targets.v1.json`'s own `_note`: "a roster addition changes
+    such array by design (`passive-tree-targets.v2.json`'s own `_note`: "a roster addition changes
     the grid by construction with no edit here"), so their order is simply the plan's own
     `propertyVocabulary` listing, unmodified — a total order that exists regardless of scheme.
     """
@@ -267,15 +267,26 @@ def build_slot(node: object, *, category: str, forced_element: "str | None" = No
     archetype ramp already decided (§2.1 of this module's docstring). `node` is a
     `plan_read.TreePlanNode` (typed as `object` here to avoid an import cycle with `plan_read`,
     which does not need to know this module exists); only `.node_id` and `.node_class` are read.
+
+    Task J8 (2026-09-07): `elif` -> two independent `if`s. A species tree forces BOTH `element`
+    AND `status` from its own mechanical-favour lock simultaneously (spec-species-tree.md §3/§4) —
+    a real, different shape from elemental/status trees, which force exactly ONE of the two. The
+    original `if category == "elemental": ... elif category == "status": ...` could never express
+    "both," and silently forced NEITHER for any other category (including `"species"`, which did
+    not exist as shipped content when this was first written) — found while wiring `TreeSpec.
+    mechanical_favour` through `build_plan` and checking this function's own body before assuming
+    the forced values it now derives would actually reach the quota; they would not have, without
+    this fix. `category in (..., "species")` on BOTH branches, not a third `elif`, is what lets a
+    species tree hit both without becoming a third, incompatible shape.
     """
     forced: "dict[str, str]" = {"nodeClass": node.node_class}
-    if category == "elemental":
+    if category in ("elemental", "species"):
         if not forced_element:
-            raise ValueError("build_slot: an elemental tree's forced_element must be given")
+            raise ValueError(f"build_slot: a {category} tree's forced_element must be given")
         forced["element"] = forced_element
-    elif category == "status":
+    if category in ("status", "species"):
         if not forced_status:
-            raise ValueError("build_slot: a status tree's forced_status must be given")
+            raise ValueError(f"build_slot: a {category} tree's forced_status must be given")
         forced["status"] = forced_status
     return QuotaSlot(node_id=node.node_id, forced=forced)
 

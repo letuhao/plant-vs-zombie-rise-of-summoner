@@ -99,19 +99,37 @@ def load(tree_id: str, seed_root: "Path | None" = None) -> TreePlan:
             f"no committed plan at {path} — tree-language reads tree-plan's output, it never "
             f"plans a tree itself (spec-tree-language.md is Stage 2, spec-tree-plan.md is Stage 1)")
     doc = json.loads(path.read_text(encoding="utf-8"))
+    return _parse(doc, source_label=str(path))
 
+
+def load_from_dict(doc: "dict", *, source_label: str = "<in-memory plan>") -> TreePlan:
+    """The identical parse `load()` performs, for a caller that already HAS the plan document in
+    memory rather than a committed file at the generic `plan/<treeId>.v1.json` path `plan_path()`
+    assumes. Task J8: `species_tree_spec`'s own committed plan lives at a real but DIFFERENT path
+    (`data/seed/passive-tree/plan/species/<speciesId>.json`, no `.v1` suffix, per spec-species-
+    tree.md's own Project structure table) — this function lets the species orchestration feed
+    `build_plan`'s own dict straight into the SAME `run_language_stage` every generic tree already
+    uses, without teaching this generic, foundational module a second path shape. Whether that dict
+    came from disk or was just built in memory is identical from here on: the exact same refusals
+    (`nodes[]` empty, no `propertyVocabulary`) apply either way, and `raw` still round-trips the
+    real document, never a narrowed copy.
+    """
+    return _parse(dict(doc), source_label=source_label)
+
+
+def _parse(doc: "dict", *, source_label: str) -> TreePlan:
     raw_nodes = _require(doc, "nodes")
     if not raw_nodes:
-        raise TreePlanReadError(f"{path}: nodes[] is empty — an empty tree is a plan-side defect, "
-                                f"not something this stage may paper over")
+        raise TreePlanReadError(f"{source_label}: nodes[] is empty — an empty tree is a plan-side "
+                                f"defect, not something this stage may paper over")
 
     property_vocab = doc.get("propertyVocabulary")
     if not property_vocab:
         # §5.1 / §7 R8: the stage "refuses to run against a plan carrying no propertyVocabulary —
         # it never synthesises one" (H3's own acceptance wording, restated at the read site).
         raise TreePlanReadError(
-            f"{path}: propertyVocabulary is missing or empty — tree-language never synthesises "
-            f"a property vocabulary; it can only read one tree-plan already emitted")
+            f"{source_label}: propertyVocabulary is missing or empty — tree-language never "
+            f"synthesises a property vocabulary; it can only read one tree-plan already emitted")
 
     nodes = tuple(
         TreePlanNode(

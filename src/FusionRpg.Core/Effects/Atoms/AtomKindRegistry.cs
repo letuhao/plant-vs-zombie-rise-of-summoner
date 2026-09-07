@@ -977,7 +977,9 @@ public static class AtomKindRegistry
             // Element-attached kind. Redistributes weight WITHIN an already-elemental ElementPayload —
             // never fabricates a component on a null payload, never invents a "Physical" element
             // (neither exists in the real type, ElementPayload.cs / ActorElementTypes.cs). Permanent
-            // modifier: no trigger, matching stat.derived/bullet.modify's own shape.
+            // modifier: no trigger, matching stat.derived/bullet.modify's own shape. QUARANTINED (all
+            // three runtimes None) until a real combat-dispatch reader exists — see the runtime-matrix
+            // comment below.
             new("element.convert", AttachPoint.Element, new ParamSchema(
                     // Optional: omitted means "any component currently in the payload, largest first"
                     // (spec §2c). Present, it must name a real element — never "omni", never the
@@ -994,13 +996,21 @@ public static class AtomKindRegistry
                     // coefficient) is a tree-plan/tree-binder PRICING question this kind's wire shape
                     // does not need to pre-decide.
                     new ParamDef("shareMilli", ParamKind.Int, Required: true)),
-                // Lawn: Full (real plants/zombies have real attacks to reweight, via
-                // DamagePacketBuilder's own ElementPayload seam). Battle: Full (BattleStatComposer
-                // already folds bound permanent atoms at squad build, the same stat.derived/
-                // bullet.modify precedent). Sim: None until the empirical fold test (spec §4's own
-                // "not Full/Partial until proven otherwise") actually runs -- never assumed from the
-                // Lawn/Battle result.
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None),
+                // QUARANTINED, all three runtimes -- self-corrected 2026-09-07, hours after this kind
+                // first shipped. This kind's own params validate (fromElement/toElement/shareMilli),
+                // but NO real reader resolves a bound element.convert grant into anything yet -- the
+                // combat-dispatch read point (spec §2b's own named open question: before
+                // ApplyPacketToFunnel vs inside DamagePacketBuilder.FromOverlay vs a new stage) is
+                // deliberately NOT decided or built here, since it is a real engineering decision with
+                // more than one defensible answer, not this task's to force. Claiming Full/Full without
+                // one was the exact "advertising support it does not have" defect
+                // AtomKindRegistryTests' own `awaitingConsumer` set exists to prevent (empty since
+                // 2026-08-23 -- this is its first occupant since then). Flip to a real state per
+                // runtime only once each one's own reader/executor actually exists, mirroring
+                // stat.derived's own per-runtime re-opening history exactly (D6 quarantined it in
+                // 2026-08-22 for the identical reason; battle/lawn/sim were each re-opened only as a
+                // real consumer landed, never assumed from a sibling runtime's own state).
+                new RuntimeSupportMatrix(RuntimeState.None, RuntimeState.None, RuntimeState.None),
                 AtomTriggers.None,
                 PowerCategory.Offense,
                 "The only Element-attached kind. Redistributes shareMilli of fromElement's (or, if " +

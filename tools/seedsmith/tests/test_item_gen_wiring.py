@@ -492,7 +492,11 @@ class Module13DefectsFixedTests(unittest.TestCase):
         ring = charm_rules.ring_layer_families(TUNING, VOCAB.all_picks)
         self.assertEqual(used - undeclared - pool, used & ring,
                          "the only shipped families the pool omits are §3.6's ring layer")
-        self.assertEqual(len(ring), 13)
+        # `len(ring)` grew 13->20 after the sockets-gen family-count fix earlier this session
+        # (SUPPLY.family_count 34->54: 20 new affix families, several with a ring-layer kind) --
+        # a real, already-verified corpus growth, not a generator defect. `used & ring` (what the
+        # SHIPPED charms actually draw from) is unaffected, so that count stays 11.
+        self.assertEqual(len(ring), 20)
         self.assertEqual(len(used & ring), 11)
         for path in sorted(charms_dir.glob("*.json")):
             doc = json.loads(path.read_text(encoding="utf-8"))
@@ -583,14 +587,18 @@ class Module13DefectsFixedTests(unittest.TestCase):
 
     def test_the_element_read_does_not_move_the_shipped_corpus_numbers(self):
         """The same fix, measured where it matters: the live set corpus reports identically before
-        and after, so the gate baseline does not move. Latent at 30 sets, real at ~904."""
+        and after, so the gate baseline does not move. Latent at 30 sets, real at ~904.
+
+        30 -> 32 on 2026-09-07: the set-charm-live-endpoint trial batch added 2 real sets
+        (set.retribution-offense-001/-002, a real build.* theme with no prior generated content),
+        each landing in its own new cell — 28 -> 30 cells, 26 -> 28 singletons, max unchanged."""
         entries = []
         for path in sorted((REPO_ROOT / "data" / "seed" / "items" / "sets").glob("*.json")):
             doc = json.loads(path.read_text(encoding="utf-8"))
             entries.extend(doc.get("entries") or [])
         report = cells.cell_report(entries)
         self.assertEqual((report.population, report.cells, report.maximum, report.singletons),
-                         (30, 28, 2, 26))
+                         (32, 30, 2, 28))
 
 
 if __name__ == "__main__":

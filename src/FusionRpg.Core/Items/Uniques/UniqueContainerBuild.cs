@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Items.Thresholds;
 
 namespace FusionRpg.Core.Items.Uniques;
 
@@ -152,6 +153,12 @@ public static class UniqueContainerBuild
             ContainerId = anchor.ContainerId,
             Kind = ContainerKind.Item,
             Rarity = anchor.RarityId,
+            // D3.15/D4.12/D3.11's real remaining blocker, closed here: a unique's own authored frame/
+            // base-type pair, carried forward the identical way Rarity already is (see ContainerRow.
+            // Frame's own doc comment) -- the SAME shared helper UniqueCorpusValidator already uses for
+            // this exact ItemFrame -> wire-id conversion, not a second, drifting inline ternary.
+            Frame = FrameMixPredicate.BucketOf(anchor.Frame),
+            BaseTypeId = anchor.BaseTypeId,
             MinTier = minTier,
             MaxTier = maxTier,
             PrefixRolls = prefixRolls,

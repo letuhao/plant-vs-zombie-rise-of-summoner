@@ -51,7 +51,8 @@ const KEY_TO_DIRECTION: Readonly<Record<string, KeyDirection>> = {
   ArrowRight: "right"
 };
 
-const CONFIRM_KEYS = new Set(["Enter", " "]);
+/** Enter confirms; Space is pause (lawn-interactive §10.1) — never confirm. */
+const CONFIRM_KEYS = new Set(["Enter"]);
 
 export type KeyboardEventLike = { readonly key: string };
 
@@ -67,7 +68,7 @@ export type WireKeyboardNavOptions = {
   readonly getFocus: () => GridPos;
   /** Called with the new cell whenever an arrow key moves focus. */
   readonly onFocusChange: (pos: GridPos) => void;
-  /** Called with the current cell on Enter/Space. */
+  /** Called with the current cell on Enter (Space does not confirm). */
   readonly onConfirm: (pos: GridPos) => void;
   /**
    * When false, arrows/confirm are ignored (GG-18 focus gate).

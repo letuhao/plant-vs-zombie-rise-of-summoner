@@ -1,0 +1,17 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.ashthreepeater-001"
+  ],
+  "flavor": "A massive, suspended obsidian basin hangs from the ceiling, overflowing with a slow-motion cascade of glowing, white-hot coals that drift like snow toward a floor of polished basalt.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Hearth of Eternal Embers",
+  "reason": "The room centers on a singular, mesmerizing phenomenon of gravity-defying fire that serves as a focal point for the dungeon's elemental theme.",
+  "roomId": "room.curio-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

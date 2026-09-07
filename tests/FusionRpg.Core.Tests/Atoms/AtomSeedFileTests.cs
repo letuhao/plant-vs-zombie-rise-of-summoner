@@ -289,9 +289,12 @@ public class AtomSeedFileTests
     [Fact]
     public void An_unknown_container_kind_is_refused()
     {
+        // "consumable" was this test's example until 2026-09-07 (container-kind-expansion, X7) made
+        // it a real ContainerKind member -- swapped for a name that stays genuinely outside the enum,
+        // since the point of this test is "unknown is refused," not this specific string.
         var r = Collect(("c.json", """
             { "schemaVersion": 1, "kind": "container", "entries": [
-                { "id": "x.one", "kind": "consumable" } ] }
+                { "id": "x.one", "kind": "bogus-kind" } ] }
             """));
 
         Assert.False(r.IsOk);

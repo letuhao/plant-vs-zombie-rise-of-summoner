@@ -256,10 +256,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:01:44Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -281,7 +282,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "defensive-flora",
       "umbrella-botanicals"
@@ -498,10 +499,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:35:41Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "attackTempo": "flurry"
       },
@@ -525,7 +527,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "defensive-flora",
       "barrier-sprouts"
@@ -657,10 +659,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:54:19Z",
+      "emittedUtc": "2026-09-07T08:19:29Z",
       "minorityValues": {
         "aptitudePrimary": "Fortitude",
         "elementPrimary": "earth"
@@ -685,7 +688,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "defensive-flora"
     ],

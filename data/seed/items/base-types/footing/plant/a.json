@@ -3,7 +3,7 @@
   "kind": "base-type",
   "_meta": {
     "batch": "base-plant-roots-a",
-    "partition": "footing/plant/a",
+    "partition": "base-types/footing/plant/a",
     "contractVersion": 1,
     "registryVersions": {
       "core": 1,

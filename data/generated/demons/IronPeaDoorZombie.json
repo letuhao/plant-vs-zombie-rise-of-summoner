@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 114,
   "magnitudes": {
     "combat.block.strength.omni": 678,

@@ -16,6 +16,19 @@ namespace FusionRpg.Data;
 /// whatever room a party currently stands in.</summary>
 public sealed record DelvePartyPackState(int Rows, int Cols, IReadOnlyList<PackCell> Cells);
 
+/// <summary>D4.8 (spec-wild-room.md §6, "Altar pulls as at-risk haul") — one pending altar pull, the
+/// spec's own literal shape: "written as `parties_json[p].haul[] += {kind: "pull", speciesId, rarity,
+/// variant, traitIds, r, c, n}`." <see cref="Rarity"/> is the wire id (<c>DemonRarityIds.ToId</c>),
+/// matching <see cref="FusionRpg.Contracts.DemonMintSpec.Rarity"/>'s own string shape — no separate
+/// enum round-trip between a roll and a mint. <see cref="Row"/>/<see cref="Col"/>/<see cref="N"/> are
+/// the altar's own coordinates and pull ordinal — "the rng is `dungeon:altar:{r}:{c}:{n}`... replay-
+/// safe" (spec, verbatim); nothing else in this schema tracks "how many times has this altar been
+/// pulled," so <see cref="RpgStore.PullAtAltar"/> derives <c>n</c> by counting a party's own existing
+/// entries at that <c>(r, c)</c> rather than inventing a second counter.</summary>
+public sealed record DelveHaulEntry(
+    string Kind, string SpeciesId, string Rarity, string Variant, IReadOnlyList<string> TraitIds,
+    int Row, int Col, int N);
+
 /// <summary>One party's route/pity/haul, one element of <c>rpg_delves.parties_json</c> per
 /// <c>PartyIndex</c> — a single JSON array on the header, not a third table (spec-delve-scope.md
 /// §1: "a raid is one, two or four parties written in one transaction with the delve").
@@ -28,9 +41,20 @@ public sealed record DelvePartyPackState(int Rows, int Cols, IReadOnlyList<PackC
 ///
 /// <para><b><see cref="Pack"/></b> — loot-pack D3.22, same nullable-not-empty reasoning as
 /// <see cref="Members"/>: a party written before this field existed has no pack yet, not an empty
-/// one.</para></summary>
+/// one.</para>
+///
+/// <para><b><see cref="Haul"/></b> — D4.8 (spec-wild-room.md §6): pending altar pulls, "no
+/// `UniqueActor` and no phase until `CloseDelve(Extracted)`." A real, already-present positional
+/// field on this record from BEFORE this task — every one of this file's own writers already
+/// constructed it empty (confirmed by reading every real call site: `WritePartyMembers`,
+/// `WritePartyRoute`, `WritePartyPack` all passed an empty array here, and nothing anywhere read it
+/// back), so this task RETYPES it from a bare <c>IReadOnlyList&lt;string&gt;</c> to the real
+/// <see cref="DelveHaulEntry"/> shape the spec names, rather than adding a second, differently-named
+/// list beside an already-unused one. Safe: every persisted row's own `haul` JSON is `[]` today (an
+/// empty array deserializes identically regardless of its element type), so no real data changes
+/// shape.</para></summary>
 public sealed record DelvePartyState(
-    long EntityId, IReadOnlyList<string> Route, IReadOnlyDictionary<string, int> Pity, IReadOnlyList<string> Haul,
+    long EntityId, IReadOnlyList<string> Route, IReadOnlyDictionary<string, int> Pity, IReadOnlyList<DelveHaulEntry> Haul,
     IReadOnlyList<DelveMemberState>? Members = null, DelvePartyPackState? Pack = null);
 
 public sealed record DelveRow(
@@ -432,6 +456,164 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>D4.12 (spec-delve-quests.md §4) — everything <see cref="ApplyQuestRewardBankingUnlocked"/>
+    /// needs that this Data-layer file cannot derive itself. `quests_json` only persists
+    /// <c>{questId, need, done, have}</c> (<see cref="QuestJsonRow"/>) — D4.9's own full
+    /// <c>QuestRow</c>, carrying <c>RewardBand</c>, lives in a Core-layer catalog this file must never
+    /// load from disk itself, matching every other "read model owned elsewhere" delegate this program
+    /// already uses (<c>DomainQuestPreflightBridge</c>'s own <c>archetypeEventPoolHasKind</c>/
+    /// <c>lootBindingOffersRole</c>, <c>LootContentView.BaseTypesFor</c>, etc.) — so <see cref="ResolveQuest"/>
+    /// is a plain caller-supplied lookup (<c>QuestCatalog.Resolve</c> in production, a hand-built
+    /// dictionary in a test). <see cref="View"/>/<see cref="Drops"/>/<see cref="RoleFamilyCells"/>/
+    /// <see cref="MintTuning"/> are the real `mintAt` ingredients — party-dungeon-todo.md's own D4.12
+    /// entry (2026-09-07) already names these as having NO live `Program.cs` wiring yet for ANY caller,
+    /// not just this one ("Program.cs itself does not yet compute or thread roleFamilyCells into a live
+    /// caller"); supplying them here, explicitly, keeps that gap honest rather than guessing at boot-time
+    /// plumbing this task does not own. <c>RewardBandsByMember</c> is deliberately NOT a field here:
+    /// <see cref="CloseDelve"/>'s own <c>tuning</c> parameter already carries it
+    /// (<c>DungeonTuning.QuestsRewardBand</c>) — threading a second copy would risk the two disagreeing.</summary>
+    public sealed record QuestRewardBankingInputs(
+        Func<string, FusionRpg.Core.Delve.Quests.QuestRow?> ResolveQuest,
+        FusionRpg.Core.Items.Drops.LootContentView View,
+        FusionRpg.Core.Items.Drops.DropVolumeTuning Drops,
+        IReadOnlyList<FusionRpg.Core.Items.RoleFamilyCell> RoleFamilyCells,
+        FusionRpg.Core.Power.PowerTuning MintTuning);
+
+    /// <summary>
+    /// D4.12/D4.14 (spec-delve-quests.md §4; party-dungeon-todo.md D4.12's own final remaining piece,
+    /// closed here) — the quest-reward half of <see cref="CloseDelve"/>'s own hook order, banking every
+    /// `Done`-verdict quest's own reward as one more `LootPipeline` request on the SAME transaction as
+    /// pack settlement, attrition and loot/souls earn. Spec's own full stated order is
+    /// "pack/attrition/souls/quest-verdicts/domain-unlocks" (see <see cref="CloseDelve"/>'s own doc
+    /// comment) — this hook is the fourth of those five, slotted in right after
+    /// <see cref="ApplyLootEarnUnlocked"/> and before the still-unbuilt domain-unlocks step, and before
+    /// <see cref="ApplyHaulMintUnlocked"/>'s own bolt-on (that hook is not part of the spec's numbered
+    /// order at all, per its own doc comment).
+    ///
+    /// <para><b>Gated behind TWO independent switches, not one.</b> <paramref name="tuning"/> not null
+    /// (the SAME byte-identical-without-tuning contract every other hook already honors:
+    /// <c>tuning.QuestsRewardBand</c> is this hook's own reward-band source, so it cannot run without
+    /// it) AND <paramref name="inputs"/> not null (checked by <see cref="CloseDelve"/> before this method
+    /// is even invoked). The second gate exists because a real <c>LootContentView</c>/
+    /// <c>DropVolumeTuning</c>/<c>roleFamilyCells</c>/mint <c>PowerTuning</c> has no live `Program.cs`
+    /// wiring yet for ANY caller — D4.12's own todo entry names this precisely — so every EXISTING
+    /// `tuning`-only caller (D3.16/D3.22/D4.8's own already-shipped tests, none of which know about
+    /// quest rewards) stays byte-identical.</para>
+    ///
+    /// <para><b>Only banks on `Extracted`</b> — mirroring <see cref="ApplyLootEarnUnlocked"/>'s own "a
+    /// wipe forfeits the whole pot" rule and D4.8's own "Wiped drops the rows WITH the haul": a quest
+    /// can go `Done` mid-delve (its verdict is evaluated and persisted before extraction, D4.14's own
+    /// <see cref="WriteQuestVerdicts"/>) and still be lost entirely if the party never makes it out.
+    /// `Wiped` (or any other `finalState`) is a plain no-op here — there is no `*_unbanked` column for
+    /// quest rewards to reset the way `souls_unbanked` needs resetting, since nothing is accrued between
+    /// rooms.</para>
+    ///
+    /// <para><b>A quest that cannot be resolved into a real reward is skipped, never thrown.</b> An
+    /// unresolvable quest id (<paramref name="inputs"/>'s own <c>ResolveQuest</c> returns null), a
+    /// domain with no `cache` lootBinding entry, or a `RewardBand` absent from `tuning.QuestsRewardBand`
+    /// all name the SAME "provably correct, zero real production content yet" gap this whole session has
+    /// already used dozens of times — the six real shipped domains all correctly refuse
+    /// `DomainPreflight` today (D4.17 rows 5/6/8/10), so nothing here can be exercised against real
+    /// content in production, only hand-built fixtures. A skip must never abort the REST of this
+    /// extraction — attrition/pack/souls are already committed earlier in this SAME call and must not
+    /// roll back because one quest's own reward could not be assembled.</para>
+    ///
+    /// <para><b>Replay-safety rides `LootPipeline.Resolve`'s own step-1 idempotency gate</b>
+    /// (`view.RecordedManifestFor`) — a replayed <see cref="CloseDelve"/> re-derives the SAME
+    /// deterministic `dungeon:loot:quest:{questId}` seed and the SAME correlation id, finds the manifest
+    /// already recorded, and returns it with empty `Grants` WITHOUT calling `mintAt` again — so this
+    /// method never mints a second, orphaned instance for an already-banked quest. This requires
+    /// <paramref name="inputs"/>'s own `View.RecordedManifestFor` to be wired to the real store (built
+    /// via <see cref="BuildLiveLootContentView"/>, never a stripped test double missing that delegate) —
+    /// proven directly by this task's own replay test, not merely asserted.</para>
+    ///
+    /// <para><b>`ReadLootBinding`/`GetLootPity`/`GetCatalogRevision` are called self-locked (their own
+    /// short-lived second connection), not threaded through as `Unlocked` siblings on this method's own
+    /// `db`.</b> Each runs exactly ONCE per call, before the loop below does any writing — reading
+    /// already-committed state through a second connection before this hook's own writes start is safe
+    /// regardless of connection. <b>This is NOT the same shape as a self-locked read called REPEATEDLY
+    /// inside the loop</b> — see the `RecordedManifestFor` rebind and the armoury-count fix immediately
+    /// below, both real, reproduced bugs of exactly that second shape, caught by this task's own
+    /// multi-quest-reward test and fixed by reading through this hook's own `(db, tx)` instead.</para>
+    /// </summary>
+    void ApplyQuestRewardBankingUnlocked(
+        SqliteConnection db, SqliteTransaction tx, DelveRow delve, string finalState,
+        FusionRpg.Core.Dungeon.Tuning.DungeonTuning tuning, QuestRewardBankingInputs inputs, string now)
+    {
+        if (!string.Equals(finalState, DelveStates.Extracted, StringComparison.Ordinal)) return;
+
+        var offer = JsonSerializer.Deserialize<List<QuestJsonRow>>(delve.QuestsJson ?? "[]") ?? new List<QuestJsonRow>();
+        if (offer.Count == 0) return;
+
+        var lootBinding = ReadLootBinding(delve.DomainId);
+        if (!lootBinding.ContainsKey("cache")) return; // named above: an honest, expected-today content gap
+
+        var playerId = delve.PlayerId.ToString();
+        var catalogRevision = GetCatalogRevision();
+        var pity = GetLootPity(playerId);
+
+        // `inputs.View.RecordedManifestFor` (typically `BuildLiveLootContentView`'s own
+        // `RecordedLootManifest`) is SELF-LOCKING -- it opens its own second connection. That reads fine
+        // for a lone call, but `LootPipeline.Resolve`'s own step-1 idempotency gate calls it on EVERY
+        // roll in this loop, including a SECOND quest's roll after the FIRST quest's own
+        // `PersistLootUnlocked` has already written (uncommitted) into `item_drop_log` on THIS
+        // transaction -- a real, reproduced bug (`SQLite Error 6: database table is locked:
+        // item_drop_log`, caught by this task's own two-quest test). Fixed by reading the SAME check
+        // through this hook's own `(db, tx)` instead, mirroring `PersistLootUnlocked`'s own existing-row
+        // SELECT exactly (`RpgStore.Loot.cs`). The identical bug, same root cause, was also found and
+        // fixed one call later in this same loop -- see `AcquireItemUnlocked`'s own updated doc comment
+        // (`RpgStore.Items.cs`) for the armoury-row-count half of this same fix.
+        var view = inputs.View with { RecordedManifestFor = (p, c) => RecordedLootManifestUnlocked(db, tx, p, c) };
+
+        foreach (var row in offer)
+        {
+            if (row.Done != true) continue;
+            var quest = inputs.ResolveQuest(row.QuestId);
+            if (quest is null) continue; // unresolvable quest id -- content gap, not a crash
+            if (!tuning.QuestsRewardBand.ContainsKey(quest.RewardBand)) continue; // ditto
+
+            var reward = FusionRpg.Core.Delve.Quests.QuestReward.Request(
+                quest, delve.DelveId, lootBinding, tuning.QuestsRewardBand, view.Ladder, delve.ThetaRun);
+
+            FusionRpg.Core.Items.Drops.LootMintResult MintAt(FusionRpg.Core.Items.Drops.LootGrant grant, int theta) =>
+                MintGrantUnlocked(db, tx, grant, theta, inputs.RoleFamilyCells, inputs.MintTuning);
+
+            var rejection = FusionRpg.Core.Delve.Loot.DelveLoot.RollQuestReward(
+                reward, quest.QuestId, delve.Seed, playerId, delve.ThetaRun,
+                view, inputs.Drops, pity, MintAt, catalogRevision, dropTableRevision: 0, out var manifest);
+            if (!rejection.IsOk || manifest is null) continue; // structural drop-table refusal -- skip, don't abort the close
+
+            foreach (var grant in manifest.Grants)
+            {
+                if (grant.InstanceId is not { Length: > 0 } instanceId) continue;
+                AcquireItemUnlocked(db, tx, new RpgItemRow
+                {
+                    InstanceId = instanceId, PlayerId = playerId, AcquiredUtc = now,
+                    OriginKind = "quest-reward", OriginRef = reward.Source.SourceId,
+                });
+            }
+
+            PersistLootUnlocked(db, tx, playerId, manifest, reward.Source.SourceKind, reward.Source.SourceId,
+                catalogRevision, dropTableRevision: 0, Array.Empty<ItemGenerationRow>(), now);
+
+            pity = manifest.PityOut; // chain pity forward across multiple quest rewards in the same close
+        }
+    }
+
+    /// <summary>Same read as <see cref="RecordedLootManifest"/>, on the caller's own connection/
+    /// transaction — <see cref="ApplyQuestRewardBankingUnlocked"/>'s own named fix for a real, reproduced
+    /// cross-connection lock (see that method's own doc comment). Mirrors <see cref="PersistLootUnlocked"/>'s
+    /// own existing-row SELECT exactly (same table, same WHERE, same explicit `Transaction` assignment).</summary>
+    static string? RecordedLootManifestUnlocked(SqliteConnection db, SqliteTransaction tx, string playerId, string correlationId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = "SELECT result_json FROM item_drop_log WHERE player_id = $p AND correlation_id = $c;";
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$c", correlationId);
+        return cmd.ExecuteScalar() as string;
+    }
+
     /// <summary>
     /// Closes a delve — <c>Active -&gt; Extracted|Wiped -&gt; Archived</c> for a <c>once</c> domain
     /// (spec-delve-scope.md §7). <paramref name="finalState"/> is the CALLER's own decision — this
@@ -450,12 +632,24 @@ public sealed partial class RpgStore
     /// every OTHER delve-recovering actor this player owns aged one delve.</item>
     /// <item>D3.16's own souls settlement (spec-dungeon-loot.md §7, `:213-219`) — see
     /// <see cref="ApplyLootEarnUnlocked"/>.</item>
+    /// <item>D4.12's own quest-reward banking (spec-delve-quests.md §4) — see
+    /// <see cref="ApplyQuestRewardBankingUnlocked"/>. Only runs when <paramref name="questRewards"/> is
+    /// ALSO supplied (a second, independent gate beyond <paramref name="tuning"/> — see that method's
+    /// own doc comment for why), so every existing `tuning`-only caller stays byte-identical.</item>
+    /// <item>D4.8's own altar-haul minting (spec-wild-room.md §6) — see
+    /// <see cref="ApplyHaulMintUnlocked"/>. Not itself one of the five items spec-dungeon-loot.md
+    /// §7's own numbered order names (that list is pack/attrition/souls/quest-verdicts/domain-unlocks)
+    /// — wild-room's own §6 is a separate spec naming a separate, independent side effect ("no
+    /// `UniqueActor`... until `CloseDelve(Extracted)`"), so it is appended after the four above
+    /// rather than interleaved into an order that never mentioned it.</item>
     /// </list>
-    /// The spec's own full stated hook order also names quest verdicts and domain unlocks after loot
-    /// earn — `delve-quests` and `domain-catalog` are separate, still-unbuilt modules, named here as an
-    /// honest gap rather than silently skipped.
+    /// The spec's own full stated hook order names quest verdicts right after souls and before domain
+    /// unlocks — `domain-catalog`'s own unlock step is the one piece of that order still genuinely
+    /// unbuilt (a separate, still-unbuilt module), named here as an honest gap rather than silently
+    /// skipped.
     /// </summary>
-    public bool CloseDelve(long delveId, string finalState, bool archiveNow, FusionRpg.Core.Dungeon.Tuning.DungeonTuning? tuning = null)
+    public bool CloseDelve(long delveId, string finalState, bool archiveNow,
+        FusionRpg.Core.Dungeon.Tuning.DungeonTuning? tuning = null, QuestRewardBankingInputs? questRewards = null)
     {
         lock (_gate)
         {
@@ -471,6 +665,9 @@ public sealed partial class RpgStore
                     ApplyPackSettlementUnlocked(db, tx, delve, finalState, now);
                     SettleExtractionUnlocked(db, delve, finalState, tuning, now);
                     ApplyLootEarnUnlocked(db, delve, finalState, now);
+                    if (questRewards is not null)
+                        ApplyQuestRewardBankingUnlocked(db, tx, delve, finalState, tuning, questRewards, now);
+                    ApplyHaulMintUnlocked(db, delve, finalState, now);
                 }
             }
 
@@ -619,6 +816,79 @@ public sealed partial class RpgStore
         cmd.ExecuteNonQuery();
     }
 
+    /// <summary>
+    /// D4.8 (spec-wild-room.md §6) — the 4th `CloseDelve` hook this task adds, alongside pack
+    /// settlement/attrition/loot earn (an independent concern; `CloseDelve`'s own doc comment already
+    /// names the spec's FULL stated hook order as also including quest verdicts and domain unlocks,
+    /// both separate, still-unbuilt modules — this hook slots in beside the three that already exist,
+    /// not ranked against any of them). Spec, verbatim: "no `UniqueActor` and no phase until
+    /// `CloseDelve(Extracted)`, where `RpgStore.Delve` calls `MintDemonUnlocked` per row (`Origin =
+    /// "delve"`, `Level` null — a pull is a pull), the free auto-bind and discovery souls as the summon
+    /// path pays them." `Wiped` drops the rows WITH the haul (spec-loot-pack.md `:88`) — the pity
+    /// advance and the spend already happened at pull time (<see cref="PullAtAltar"/>) and are NOT
+    /// undone here; only delivery was at risk.
+    ///
+    /// <para>Every party's haul list is cleared UNCONDITIONALLY at the end (both `Extracted` and
+    /// `Wiped`) — mirroring <see cref="ApplyLootEarnUnlocked"/>'s own "always reset regardless of
+    /// state" shape for `souls_unbanked`. There is no per-row dedupe key the way
+    /// <see cref="AppendSoulLedgerUnlocked"/> gives souls their own "a replayed close does not
+    /// double-pay" guarantee — <see cref="MintDemonUnlocked"/> always inserts a fresh row — so a
+    /// replayed `CloseDelve` mints nothing the SECOND time for the identical reason it does not pay
+    /// souls twice: nothing is left in the list to re-apply.</para>
+    /// </summary>
+    void ApplyHaulMintUnlocked(SqliteConnection db, DelveRow delve, string finalState, string now)
+    {
+        if (!delve.Parties.Any(p => p.Haul.Count > 0)) return;
+        var extracted = string.Equals(finalState, DelveStates.Extracted, StringComparison.Ordinal);
+
+        if (extracted)
+        {
+            foreach (var party in delve.Parties)
+            {
+                foreach (var entry in party.Haul)
+                {
+                    var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(entry.SpeciesId);
+                    var spec = new FusionRpg.Contracts.DemonMintSpec
+                    {
+                        SpeciesId = species.SpeciesId,
+                        Side = species.Side,
+                        GameTypeId = species.GameTypeId,
+                        Rarity = entry.Rarity,
+                        Variant = entry.Variant,
+                        ElementPrimary = FusionRpg.Core.Stats.Derived.ElementTypeIdExtensions.ToElementId(species.ElementPrimary),
+                        ElementSecondary = species.ElementSecondary is { } es
+                            ? FusionRpg.Core.Stats.Derived.ElementTypeIdExtensions.ToElementId(es)
+                            : null,
+                        TraitIds = entry.TraitIds.ToList(),
+                        Origin = "delve",
+                    };
+                    MintDemonUnlocked(db, delve.PlayerId, spec, now, out var newlyDiscovered);
+
+                    if (newlyDiscovered)
+                    {
+                        var reward = FusionRpg.Core.Demons.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
+                        if (reward > 0)
+                        {
+                            GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, delve.PlayerId).Balance, reward);
+                            AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, reward,
+                                FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Discovery,
+                                "species", entry.SpeciesId, "species:" + entry.SpeciesId, now);
+                        }
+                    }
+                }
+            }
+        }
+
+        var cleared = delve.Parties
+            .Select(p => p.Haul.Count > 0 ? p with { Haul = Array.Empty<DelveHaulEntry>() } : p)
+            .ToList();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;";
+        cmd.Parameters.AddWithValue("$j", JsonSerializer.Serialize(cleared));
+        cmd.Parameters.AddWithValue("$id", delve.DelveId);
+        cmd.ExecuteNonQuery();
+    }
+
     /// <summary>"The party cleared at least half the rooms on its route" (spec §9) and "the boss was
     /// killed" — both read directly off `rpg_delve_rooms.cleared`, since clearing a `boss`-kind room
     /// IS defeating its encounter. A route naming a sector this delve has no room for is skipped, not
@@ -658,7 +928,7 @@ public sealed partial class RpgStore
 
             var updated = parties.Any(p => p.EntityId == partyEntityId)
                 ? parties.Select(p => p.EntityId == partyEntityId ? p with { Members = members } : p).ToList()
-                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<string>(), members)).ToList();
+                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<DelveHaulEntry>(), members)).ToList();
             var json = JsonSerializer.Serialize(updated);
             using (var cmd = Prepared(db, tx,
                 "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
@@ -689,7 +959,7 @@ public sealed partial class RpgStore
 
             var updated = parties.Any(p => p.EntityId == partyEntityId)
                 ? parties.Select(p => p.EntityId == partyEntityId ? p with { Route = route } : p).ToList()
-                : parties.Append(new DelvePartyState(partyEntityId, route, new Dictionary<string, int>(), Array.Empty<string>())).ToList();
+                : parties.Append(new DelvePartyState(partyEntityId, route, new Dictionary<string, int>(), Array.Empty<DelveHaulEntry>())).ToList();
             var json = JsonSerializer.Serialize(updated);
             using (var cmd = Prepared(db, tx,
                 "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
@@ -717,7 +987,7 @@ public sealed partial class RpgStore
 
             var updated = parties.Any(p => p.EntityId == partyEntityId)
                 ? parties.Select(p => p.EntityId == partyEntityId ? p with { Pack = pack } : p).ToList()
-                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<string>(), Pack: pack)).ToList();
+                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<DelveHaulEntry>(), Pack: pack)).ToList();
             var json = JsonSerializer.Serialize(updated);
             using (var cmd = Prepared(db, tx,
                 "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
@@ -726,6 +996,44 @@ public sealed partial class RpgStore
 
             tx.Commit();
             return ReadDelveUnlocked(db, delveId);
+        }
+    }
+
+    /// <summary>D4.8 (spec-wild-room.md §6) — the `parties_json[p].haul[]` writer: appends one pending
+    /// altar-pull row, the same "first room, first row" upsert shape as <see cref="WritePartyMembers"/>/
+    /// <see cref="WritePartyRoute"/>/<see cref="WritePartyPack"/> (a party that has never fought or
+    /// pulled yet has no row here until now). The composable half — takes an existing connection so
+    /// <see cref="PullAtAltar"/> can append the haul row in the SAME transaction as its own spend and
+    /// pity write, matching this file's own established "public locked + private/internal Unlocked"
+    /// convention (D3.16's own doc comment).</summary>
+    void AppendPartyHaulUnlocked(SqliteConnection db, long delveId, long partyEntityId, DelveHaulEntry entry)
+    {
+        var delve = ReadDelveUnlocked(db, delveId) ?? throw new InvalidOperationException($"delve {delveId} not found");
+        var updated = delve.Parties.Any(p => p.EntityId == partyEntityId)
+            ? delve.Parties.Select(p => p.EntityId == partyEntityId
+                ? p with { Haul = p.Haul.Append(entry).ToList() }
+                : p).ToList()
+            : delve.Parties.Append(new DelvePartyState(
+                partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), new[] { entry })).ToList();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;";
+        cmd.Parameters.AddWithValue("$j", JsonSerializer.Serialize(updated));
+        cmd.Parameters.AddWithValue("$id", delveId);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Standalone, self-locking form of <see cref="AppendPartyHaulUnlocked"/> for a caller
+    /// with nothing else to compose the append with (a direct test, or an admin tool) — every real
+    /// production caller is <see cref="PullAtAltar"/>'s own composed transaction.</summary>
+    public void AppendPartyHaul(long delveId, long partyEntityId, DelveHaulEntry entry)
+    {
+        if (entry is null) throw new ArgumentNullException(nameof(entry));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            AppendPartyHaulUnlocked(db, delveId, partyEntityId, entry);
+            tx.Commit();
         }
     }
 
@@ -915,6 +1223,129 @@ public sealed partial class RpgStore
             cmd.ExecuteNonQuery();
         }
         return (true, "", next);
+    }
+
+    /// <summary>
+    /// D4.8 (spec-wild-room.md §4) — closes <see cref="FusionRpg.Core.Delve.Wild.RecruitMint"/>'s own
+    /// named gap: its doc comment says "actually calling `MintDemonUnlocked` with the spec this
+    /// returns is D4.8's own, still-unbuilt... job." One transaction: <see cref="SpendUnbankedUnlocked"/>
+    /// (the souls debit — §3's `wild:{r}:{c}` sinkKey for a normal join, reused as-is for a cage
+    /// `open` join per §7's "same mint"), then <see cref="MintDemonUnlocked"/> (§4's mint, which
+    /// already performs the free auto-bind internally), then the SAME discovery-souls-on-first-sight
+    /// award every other mint path already pays — `RpgStore.Summons.cs:118-125` (keyed off
+    /// `species.BaseRarity`, the species' OWN rarity, not the minted rarity — the two are
+    /// definitionally equal for a wild join per `RecruitMint.Build`'s own doc comment: "`Rarity =
+    /// BaseRarity` — `ConcreteSpecies.Rarity` already IS the species' base rarity"), dedupe-keyed
+    /// `"species:" + speciesId` — "one discovery policy across acquisition paths... the shared dedupe
+    /// keeps it once-ever no matter which path lands first" (`RpgStore.Expeditions.cs`'s own
+    /// 2026-08-21 review S5 comment, quoted verbatim).
+    ///
+    /// <para>Takes an already-assembled <paramref name="spec"/> (Core's own decision, via
+    /// <see cref="FusionRpg.Core.Delve.Wild.RecruitMint.Build"/>) and an already-priced
+    /// <paramref name="price"/> (via <see cref="FusionRpg.Core.Delve.Wild.OfferPricing.Souls"/> or the
+    /// caller's own equivalent) — this method composes the STORE transaction only, matching this
+    /// program's "Core decides, Data writes" split throughout; it does not re-derive `TalkTree`'s own
+    /// verb/outcome resolution (see `DelveWildEndpoints.cs`'s own doc comment for the honest gap that
+    /// leaves: no single Core function resolves "which verb was chosen, what did it draw" end to end
+    /// today — `TalkTree.cs`'s real, shipped shape has no such orchestrator, despite the spec's own
+    /// §Interface table citing a `TalkTree.Step(...)` that does not exist in the tree).</para>
+    /// </summary>
+    public (bool Ok, string Reason, FusionRpg.Contracts.DemonSpecimenDto? Specimen, long SoulsUnbanked) TalkJoin(
+        long delveId, long playerId, long price, string sinkKey, FusionRpg.Contracts.DemonMintSpec spec)
+    {
+        if (spec is null) throw new ArgumentNullException(nameof(spec));
+        if (string.IsNullOrWhiteSpace(sinkKey)) throw new ArgumentException("sinkKey required", nameof(sinkKey));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            if (GetPlayerUnlocked(db, playerId) is null) return (false, "player.unknown", null, 0);
+
+            using var tx = db.BeginTransaction();
+            var (ok, reason, soulsUnbanked) = SpendUnbankedUnlocked(db, delveId, price, sinkKey);
+            if (!ok) { tx.Commit(); return (false, reason, null, soulsUnbanked); }
+
+            var now = DateTime.UtcNow.ToString("o");
+            var specimen = MintDemonUnlocked(db, playerId, spec, now, out var newlyDiscovered);
+
+            if (newlyDiscovered)
+            {
+                var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(spec.SpeciesId);
+                var reward = FusionRpg.Core.Demons.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
+                if (reward > 0)
+                {
+                    GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, playerId).Balance, reward);
+                    AppendSoulLedgerUnlocked(db, playerId, 0, reward, FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Discovery,
+                        "species", spec.SpeciesId, "species:" + spec.SpeciesId, now);
+                }
+            }
+
+            tx.Commit();
+            return (true, "", specimen, soulsUnbanked);
+        }
+    }
+
+    /// <summary>
+    /// D4.8 (spec-wild-room.md §6, "Altar pulls as at-risk haul") — "one pull on the shipped roller,"
+    /// priced via <see cref="SpendUnbankedUnlocked"/> "in the same transaction," delivered as a
+    /// `parties_json[p].haul[]` pending row rather than a mint: "no `UniqueActor` and no phase until
+    /// `CloseDelve(Extracted)`." One transaction: resolve <paramref name="altarBannerId"/> for its own
+    /// `CostPerPull` (pricing only — <see cref="FusionRpg.Core.Delve.Wild.AltarPull.TryPull"/> resolves
+    /// the SAME banner again itself for the roll, a second cheap in-memory catalog lookup, never a
+    /// second store read), price via <see cref="FusionRpg.Core.Delve.Loot.DelvePrices.PullPrice"/>
+    /// (<paramref name="thetaRoom"/> is THIS room's own Θ, a caller-supplied fact — this schema has no
+    /// per-room Θ column anywhere, matching <see cref="RecordClear"/>'s own identical `thetaRoom`
+    /// parameter shape), spend, roll on the delve-seed-derived `dungeon:altar:{r}:{c}:{n}` stream (`n`
+    /// = however many haul rows this party already has at this exact `(row, col)` — the haul array
+    /// itself is the only durable "how many pulls so far" this program persists for an altar, so
+    /// counting it rather than inventing a second counter keeps this self-contained), pity read/write
+    /// on the player's one Sanctum row (`RpgStore.Summons.cs`'s `ReadPityUnlocked`/`WritePityUnlocked`
+    /// — per player, cross-banner, shared, spec verbatim: "the altar reads and writes the Sanctum's one
+    /// row"), then append the haul row via <see cref="AppendPartyHaulUnlocked"/>. No mint yet —
+    /// <see cref="ApplyHaulMintUnlocked"/> at `CloseDelve(Extracted)` is where a haul row becomes a
+    /// demon.
+    /// </summary>
+    public (bool Ok, string Reason, FusionRpg.Core.Demons.SummonRollResult? Result, long SoulsUnbanked) PullAtAltar(
+        long delveId, long partyEntityId, int row, int col, int thetaRoom,
+        string altarBannerId, FusionRpg.Core.Stats.Derived.ElementTypeId? focusElement)
+    {
+        if (string.IsNullOrWhiteSpace(altarBannerId)) throw new ArgumentException("altarBannerId required", nameof(altarBannerId));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            var banner = FusionRpg.Core.Demons.SummonBannerCatalog.TryGet(altarBannerId);
+            if (banner is null) return (false, FusionRpg.Core.Delve.Wild.AltarRefusal.BannerUnknown, null, 0);
+
+            var delve = ReadDelveUnlocked(db, delveId);
+            if (delve is null) return (false, "delve.not-found", null, 0);
+
+            var existingHaul = delve.Parties.FirstOrDefault(p => p.EntityId == partyEntityId)?.Haul
+                ?? Array.Empty<DelveHaulEntry>();
+            var n = existingHaul.Count(h => h.Row == row && h.Col == col) + 1;
+
+            var tuning = FusionRpg.Core.Power.PowerTuningHub.Tuning;
+            var price = FusionRpg.Core.Delve.Loot.DelvePrices.PullPrice(banner.CostPerPull, thetaRoom, tuning);
+
+            using var tx = db.BeginTransaction();
+            var (ok, reason, soulsUnbanked) = SpendUnbankedUnlocked(db, delveId, price, $"wild:{row}:{col}");
+            if (!ok) { tx.Commit(); return (false, reason, null, soulsUnbanked); }
+
+            var pity = ReadPityUnlocked(db, delve.PlayerId);
+            var rng = FusionRpg.Core.Battle.SeededRng.DeriveStream(delve.Seed, $"dungeon:altar:{row}:{col}:{n}");
+            var pulled = FusionRpg.Core.Delve.Wild.AltarPull.TryPull(
+                altarBannerId, focusElement, pity, rng, out var result, out var newPity, out var refusalId);
+            if (!pulled) { tx.Commit(); return (false, refusalId!, null, soulsUnbanked); }
+
+            var now = DateTime.UtcNow.ToString("o");
+            WritePityUnlocked(db, delve.PlayerId, newPity, now);
+
+            var entry = new DelveHaulEntry(
+                "pull", result.SpeciesId, FusionRpg.Core.Demons.DemonRarityIds.ToId(result.Rarity), result.Variant,
+                result.TraitIds, row, col, n);
+            AppendPartyHaulUnlocked(db, delveId, partyEntityId, entry);
+
+            tx.Commit();
+            return (true, "", result, soulsUnbanked);
+        }
     }
 
     /// <summary>

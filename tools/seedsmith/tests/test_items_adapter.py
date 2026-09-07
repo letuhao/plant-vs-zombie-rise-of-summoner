@@ -50,7 +50,9 @@ class RegistryVersionTests(unittest.TestCase):
         versions = ItemsAdapter().registries().versions
         # Measured fresh 2026-08-23: NOT all equal — a single assumed constant would already be
         # wrong for naming/tags (v4) and classes (v3) against bands/core/themes (v1).
-        self.assertEqual(versions["naming"], 4)
+        # naming bumped 4->5 2026-09-07 (combination-write-unblock: additive `combination` kind),
+        # then 5->6 same day (set-charm-live-endpoint trial: additive 36 build-population set ids).
+        self.assertEqual(versions["naming"], 6)
         self.assertEqual(versions["tags"], 4)
         self.assertEqual(versions["classes"], 3)
         self.assertEqual(versions["bands"], 1)
@@ -123,14 +125,27 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         cls.adapter = ItemsAdapter()
 
     def test_loads_the_expected_entry_and_file_counts(self) -> None:
-        # ⛔ CORRECTED 2026-09-06: 1432/122, not 1430/121 -- g-punisher.json (2 new
-        # `atom.chill-punisher`/`atom.rot-punisher` families, the action-corpus pairing-tier fix)
-        # is a new file with 2 new entries in the same live corpus this test loads.
-        self.assertEqual(len(self.corpus.entries), 1432)
+        # ⛔ CORRECTED 2026-09-07 (second pass, same day): 1513/129, not 1498/124 -- a follow-up round
+        # of small trial batches across every remaining item-seedgen pipeline (owner-requested, to
+        # prove each one runs before the full generative pass) added more real content: 3 new
+        # affix-families, 3 new consumables (in 3 new partition files), 2 new milestones, 2 new
+        # recipes, 2 new combinations (a brand-new partition), 2 new set pieces (a brand-new
+        # partition) and 1 new charm -- all landed in the same live corpus this test loads.
+        self.assertEqual(len(self.corpus.entries), 1513)
         seen_files = {e.path for e in self.corpus.entries.values()}
-        self.assertEqual(len(seen_files), 122)
+        self.assertEqual(len(seen_files), 129)
 
-    def test_exactly_nine_empty_partitions_and_no_others(self) -> None:
+    def test_exactly_six_empty_partitions_and_no_others(self) -> None:
+        # ⛔ CORRECTED 2026-09-07: was 9, including two real, previously-undiscovered false positives.
+        # `gems/2` is real content now (sockets-gen's g2.json, this session). `base-types/footing/
+        # plant/{a,b}` were NEVER actually empty (24 real entries between them, confirmed directly) --
+        # their own `_meta.partition` field was stamped `"footing/plant/a"`/`"footing/plant/b"`,
+        # missing the `base-types/` prefix every sibling nested file uses (confirmed against
+        # `footing/humanoid/a.json`'s own correct `"base-types/footing/humanoid/a"`), so this metric's
+        # `corpus.partitions` lookup could never match the allocated id. Fixed at the source (the two
+        # files' own `_meta.partition` strings), not papered over here. The remaining 6 are genuinely
+        # empty -- confirmed directly, not assumed (`manipulator/` has no directory at all;
+        # `mantle/humanoid/` exists but has no `a.json`).
         ctx = Ctx(corpus=self.corpus, adapter=self.adapter)
         registry = MetricRegistry()
         registry.register(EmptyPartitionMetric())
@@ -138,13 +153,11 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         findings = run_all(registry, ctx)
         subjects = {f.subject for f in findings}
 
-        self.assertEqual(len(findings), 9)
+        self.assertEqual(len(findings), 6)
         self.assertEqual(subjects, {
             "attributes",
-            "base-types/footing/plant/a", "base-types/footing/plant/b",
             "base-types/manipulator/humanoid/b", "base-types/mantle/humanoid/a",
             "display-templates/4", "display-templates/5", "display-templates/6",
-            "gems/2",
         })
         self.assertTrue(all(f.severity is Severity.GAP for f in findings))
 

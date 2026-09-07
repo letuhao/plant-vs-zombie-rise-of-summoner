@@ -1,5 +1,10 @@
 # Spec: `soul-curve-resolution`
 
+**Status: BUILT + VERIFIED 2026-09-07** — `tasks/passive-tree-todo.md` task J12. `NodeAtom.SoulCurveId`
+removed; all six real production call sites and ten test files' fixture data updated; full passive-tree
+suite green (399/399). See J12 for the complete evidence trail, including a scope correction found
+mid-build (18 more test call sites the original citation sweep missed, all positional not named args).
+
 Module of [passive-tree](../passive-tree-map.md), closing [`tree-catalog`](spec-tree-catalog.md) §OQ1
 and [`tree-binder`](spec-tree-binder.md) §5's own dangling field. Amends `NodeAtom`
 (`src/FusionRpg.Core/PassiveTree/Catalog/NodeAtom.cs`), `TreeBinderRun.cs`, `RpgStore.TreeCatalog.cs`,

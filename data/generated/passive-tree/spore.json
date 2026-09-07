@@ -1,0 +1,244 @@
+{
+  "treeId": "spore",
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1830,
+  "bound": [
+    {
+      "nodeId": "skill.spore-off-t7-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.spore-def-t1-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.spore-def-t1-n1",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.spore-def-t1-n2",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.spore-def-t2-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.spore-def-t2-n1",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.spore-def-t7-n1",
+      "atoms": []
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.spore-off-t1-n0",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t1-n0\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t1-n1",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t1-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t1-n2",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t1-n2\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t2-n0",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t2-n2\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t3-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t3-n2\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.cruelty\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t5-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.spore-off-t6-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.spore-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-off-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sporing\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.carapace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.carapace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.carapace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-husk\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-grit\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-callus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-regen\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.spore-def-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-harden\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

@@ -58,7 +58,7 @@ public class TreeResolveReportTests
             new[]
             {
                 new NodeAtom("stat.derived", AttachPoint.Stat, DerivedStatChannels.CombatPowerOmni,
-                    NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits, null),
+                    NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits),
             },
             excludeProps ?? Array.Empty<string>(), form, tagsJson, enabled, null);
 

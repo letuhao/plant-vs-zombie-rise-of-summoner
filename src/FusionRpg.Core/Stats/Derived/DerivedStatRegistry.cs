@@ -285,6 +285,13 @@ public sealed class DerivedStatRegistry
         // time" rule (channel > 0 ? 1 : 0) AT THE READ, never here.
         Register(new(DerivedStatChannels.LoadoutSlots, DerivedComposeKind.FlatSum, 0,
                      Class: StatClass.Pool, Unit: UnitClass.Count));
+
+        // H.9 -- siege AI targeting priority (base-defense/spec-siege-ai.md §5.20 rule 4). FlatSum,
+        // no Cap: the -2..+2 bound is enforced by SiegeAi.EffectiveTier throwing out of range, not by
+        // composition (Cap only clamps one-sided, wrong shape for a symmetric range).
+        Register(new(DerivedStatChannels.AiAggression, DerivedComposeKind.FlatSum, 0,
+                     Class: StatClass.Pool, Unit: UnitClass.GameUnits,
+                     UnitClassNote: "Reader: IBattleView.AggressionOf (BattleRunState.cs, 2026-09-07) -> SiegeAiIntentSource -> SiegeAi.EffectiveTier."));
     }
 
     void RegisterCombatDefaults()

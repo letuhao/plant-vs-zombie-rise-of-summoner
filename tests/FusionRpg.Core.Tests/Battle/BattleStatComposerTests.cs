@@ -72,6 +72,32 @@ public class BattleStatComposerTests
     }
 
     [Fact]
+    public void Aggression_channel_defaults_to_zero_with_no_content()
+    {
+        // base-defense/spec-siege-ai.md §5.20 rule 4 -- IBattleView.AggressionOf reads this channel
+        // directly (BattleRunState.cs). No taunt/stealth content exists anywhere yet, so every real
+        // actor must compose to exactly 0 -- byte-for-byte the same as the accessor's old hardcoded
+        // return, proving this wiring changed nothing observable until content actually targets it.
+        var setup = Actor("squad:0", "squad");
+        var snap = BattleStatComposer.Compose(setup);
+        Assert.Equal(0, (int)snap.Get(DerivedStatChannels.AiAggression));
+    }
+
+    [Fact]
+    public void Aggression_channel_composes_additively_from_channel_mods()
+    {
+        // Proves the channel is genuinely live and FlatSum (not a registration nobody can reach):
+        // two independent contributions (e.g. two stacked taunts) add rather than replace.
+        var setup = Actor("squad:0", "squad", mods: new[]
+        {
+            new BattleChannelMod(DerivedStatChannels.AiAggression, 1),
+            new BattleChannelMod(DerivedStatChannels.AiAggression, 1)
+        });
+        var snap = BattleStatComposer.Compose(setup);
+        Assert.Equal(2, (int)snap.Get(DerivedStatChannels.AiAggression));
+    }
+
+    [Fact]
     public void Unknown_mod_channel_rejects()
     {
         var setup = Actor("squad:0", "squad", mods: new[] { new BattleChannelMod("combat.power.plasma", 10) });
@@ -118,6 +144,43 @@ public class BattleStatComposerTests
             Squad = new[] { Actor("squad:0", "squad", mods: attackerMods) },
             Wave = new[] { Actor("wave:0", "wave", mods: defenderMods) }
         }, seed);
+        return report.Actors.Single(a => a.Side == "squad").DamageDealt;
+    }
+
+    [Fact]
+    public void Host_AddDerivedContribution_reaches_Derived_and_swings_a_real_battle()
+    {
+        // base-defense siege-ai / passive-tree G2 (spec-mechanism-wiring.md §4.2): proves the SAME
+        // channel-mutation effect Dodge_mod_swings_fixed_battles proves via setup-time ChannelMods, but
+        // through the DIFFERENT, MID-BATTLE path a future taunt/stealth EFFECT would need for
+        // ai.aggression: Host.AddDerivedContribution -> BattleDerivedModifierLedger.Add ->
+        // RecomposeDerivedForAllActors (called once per actor at the start of every round, from
+        // BattleEngine.Resolve's own SHARED round loop -- confirmed live for Siege/Delve too, not gated
+        // behind TimelineDispatch, by reading BattleEngine.cs:454-461 directly) -> Derived -> read back
+        // by any consumer, the same object AggressionOf itself reads. Reachable from
+        // DistrictAssaultResolver's own EXISTING onEffectHostReady hook (the same one ConstructionActions
+        // already uses) with zero new plumbing — this is what closes the "does a live write mechanism
+        // for ai.aggression actually reach a real siege battle" question with proof, not inference.
+        long withHostDodge = 0, without = 0;
+        for (ulong seed = 0; seed < 20; seed++)
+        {
+            withHostDodge += SquadDamageDealtWithHostContribution(seed, "wave:0", DerivedStatChannels.CombatDodgeOmni, 300);
+            without += SquadDamageDealt(seed, defenderMods: null);
+        }
+
+        Assert.True(withHostDodge < without,
+            $"squad dealt {withHostDodge} vs a host-contributed-dodge defender, {without} vs plain defender");
+    }
+
+    long SquadDamageDealtWithHostContribution(ulong seed, string targetActorKey, string channel, double value)
+    {
+        var report = BattleEngine.Resolve(new BattleSetup
+        {
+            WaveId = "stat-swing-host",
+            Squad = new[] { Actor("squad:0", "squad") },
+            Wave = new[] { Actor("wave:0", "wave") }
+        }, seed, onEffectHostReady: host =>
+            host.AddDerivedContribution?.Invoke(targetActorKey, channel, "test-host-contribution", value));
         return report.Actors.Single(a => a.Side == "squad").DamageDealt;
     }
 

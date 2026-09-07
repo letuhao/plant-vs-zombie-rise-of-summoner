@@ -19,14 +19,96 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
-        "attackTempo": "split",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:12:58Z",
+      "emittedUtc": "2026-09-07T09:42:54Z",
+      "minorityValues": {
+        "aptitudePrimary": "Agility"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead-monarch",
+      "corpse-sovereign"
+    ],
+    "gameTypeId": 332,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "Despite its lore-based title and movement ability, its stats and 3rd-level classification do not align with a world-ending calamity.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "EternalZombie_c",
+    "targetPreference": "backline",
+    "traits": [
+      "spatial-displacement",
+      "area-of-effect-death",
+      "high-durability",
+      "asymmetric-mobility"
+    ],
+    "variants": [
+      "ancient",
+      "cursed"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {
         "attackTempo": "ponderous"
       },
@@ -50,7 +132,7 @@
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "light",
     "family": [
       "undead_monarch"
     ],
@@ -187,10 +269,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:52:05Z",
+      "emittedUtc": "2026-09-07T08:19:32Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -212,7 +295,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "undead_monarch",
       "frost_wraith"

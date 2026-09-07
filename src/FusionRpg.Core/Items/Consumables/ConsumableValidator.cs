@@ -30,10 +30,10 @@ public static class ConsumableValidator
     /// <summary>
     /// Validate a <c>consumable_def</c> row against its container's core atoms.
     ///
-    /// <para><paramref name="containerKind"/> is the container's declared kind. ⛔ There is no
-    /// <c>ContainerKind.Consumable</c> yet (X7), so <b>every</b> value is refused by name — the
-    /// refusal is the build order, not a defect, and it is the one check that goes away the day the
-    /// owner answers the fifth-kind question.</para>
+    /// <para><paramref name="containerKind"/> is the container's declared kind. X7 landed
+    /// 2026-09-07: <see cref="ContainerKind.Consumable"/> is real, so a bound kind that is anything
+    /// ELSE is refused by name — a genuine content mistake to catch, not the "nothing can bind yet"
+    /// blanket refusal this check used to be.</para>
     /// </summary>
     public static IReadOnlyList<AtomRejection> ValidateDef(
         ConsumableDefRow def,
@@ -57,13 +57,13 @@ public static class ConsumableValidator
                 $"'{def.ContainerId}' is not a legal consumable container id — §4.6 fixes the prefix as " +
                 $"'{ConsumableContainerIds.Prefix}'"));
 
-        if (containerKind is not null && !ConsumableLimits.ConsumableContainerKindAvailable)
+        if (containerKind is not null && ConsumableLimits.ConsumableContainerKindAvailable
+            && containerKind != ContainerKind.Consumable)
             fails.Add(ConsumableRules.Fail(ConsumableRules.ContainerKindUnavailable,
-                $"'{def.ContainerId}' binds to a container of kind '{containerKind}', but the " +
-                "'consumable' container_kind does not exist: D27 mints gem/set/charm/combo and not this " +
-                "one, and spec-consumables.md's §Open puts the fifth ask at the owner's level, batched " +
-                "with D27. The documented fallback (reuse 'item' with slot IS NULL) is a decision, never " +
-                "a drift — X7"));
+                $"'{def.ContainerId}' binds to a container of kind '{containerKind}', but a " +
+                $"consumable_def must bind to a '{ContainerKind.Consumable}' container (X7, landed " +
+                "2026-09-07) — the documented 'item' + 'slot IS NULL' fallback was withdrawn once the " +
+                "real kind existed to bind to instead"));
 
         fails.AddRange(ValidateShape(def, coreAtoms, prefixRolls, suffixRolls, rarityId, minTier, maxTier, tuning));
         return fails;

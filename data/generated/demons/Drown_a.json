@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 315,
+  "magnitudes": {
+    "combat.power.omni": 723,
+    "combat.shield.pen.omni": 904,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 6328,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 362,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "Drown_a",
+  "theta": 13,
+  "traitPool": [
+    "backstab_protection",
+    "trident_projectile",
+    "waterproof_gear"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
+}

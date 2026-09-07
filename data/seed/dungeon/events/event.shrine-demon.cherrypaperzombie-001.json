@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.cherrypaperzombie-001",
+  "flavor": "A circular platform of polished obsidian sits in the center of the chamber, surrounded by heaps of bruised, weeping 樱桃. A pale, stiff figure in tattered silk stands motionless in the center, its skin the color of curdled milk, poised in a permanent, dramatic gesture as if the final act of a tragedy is about to be 上演. The air smells of fermented fruit and old dust.",
+  "kind": "shrine",
+  "name": "The Crimson Stage of the Unliving",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a ritual site dedicated to a theatrical undead entity.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cherrypaperzombie"
+}

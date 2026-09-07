@@ -132,12 +132,21 @@ public sealed class WebMatchService
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
             var (replayContainerResolver, replayContainerDefs, replayRunnerBindings, replayRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
+            // spec-equip-runtime.md Battle-half amendment (2026-09-07): a specimen's equipped
+            // stat.modify atoms reach this replay the same way a held action's container does —
+            // compiled once here (Data layer), registered into the SAME EffectHost.Bag.Catalog
+            // alongside the container defs, granted per-actor inside BattleRunState.BindEquip.
+            var replaySpecimenIds = storedSetup.Squad.Select(a => a.SpecimenId)
+                .Where(id => !string.IsNullOrWhiteSpace(id)).Cast<string>().ToList();
+            var (replayEquipDefs, replayEquipEffectIdsFor) = ActionContainerEffectResolverFactory.BuildEquip(_store, replaySpecimenIds);
             var storedReport = ApplyZombossReveal(
                 BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
                     containerResolver: replayContainerResolver,
-                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
+                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(
+                        host, replayContainerDefs.Concat(replayEquipDefs).ToList()),
                     runnerBindings: replayRunnerBindings,
                     containersWithRunnerCoverage: replayRunnerCoverage,
+                    equipEffectIdsFor: replayEquipEffectIdsFor,
                     board: NormalBattleBoard.Build(storedSetup.Squad.Select(a => a.Key).ToList(), storedSetup.Wave.Select(a => a.Key).ToList(), entry.Seed)),
                 playerId, storedSetup);
             // FR3: BattleTrace is a class -- `replayTrace` reflects the resolve that just ran, no
@@ -190,12 +199,21 @@ public sealed class WebMatchService
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
             var (replayContainerResolver, replayContainerDefs, replayRunnerBindings, replayRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
+            // spec-equip-runtime.md Battle-half amendment (2026-09-07): a specimen's equipped
+            // stat.modify atoms reach this replay the same way a held action's container does —
+            // compiled once here (Data layer), registered into the SAME EffectHost.Bag.Catalog
+            // alongside the container defs, granted per-actor inside BattleRunState.BindEquip.
+            var replaySpecimenIds = storedSetup.Squad.Select(a => a.SpecimenId)
+                .Where(id => !string.IsNullOrWhiteSpace(id)).Cast<string>().ToList();
+            var (replayEquipDefs, replayEquipEffectIdsFor) = ActionContainerEffectResolverFactory.BuildEquip(_store, replaySpecimenIds);
             var storedReport = ApplyZombossReveal(
                 BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
                     containerResolver: replayContainerResolver,
-                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
+                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(
+                        host, replayContainerDefs.Concat(replayEquipDefs).ToList()),
                     runnerBindings: replayRunnerBindings,
                     containersWithRunnerCoverage: replayRunnerCoverage,
+                    equipEffectIdsFor: replayEquipEffectIdsFor,
                     board: NormalBattleBoard.Build(storedSetup.Squad.Select(a => a.Key).ToList(), storedSetup.Wave.Select(a => a.Key).ToList(), entry.Seed)),
                 playerId, storedSetup);
             var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
@@ -326,11 +344,19 @@ public sealed class WebMatchService
 
         // platform stamp is, or every added row would look like a determinism break.
         var (freshContainerResolver, freshContainerDefs, freshRunnerBindings, freshRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
+        // spec-equip-runtime.md Battle-half amendment (2026-09-07): see the replay call sites above
+        // for the full rationale — same compile-once/register/grant-per-actor pattern, here for the
+        // fresh-resolve path every real (non-replayed) web match actually takes.
+        var freshSpecimenIds = setup.Squad.Select(a => a.SpecimenId)
+            .Where(id => !string.IsNullOrWhiteSpace(id)).Cast<string>().ToList();
+        var (freshEquipDefs, freshEquipEffectIdsFor) = ActionContainerEffectResolverFactory.BuildEquip(_store, freshSpecimenIds);
         var report = BattleEngine.Resolve(setup, seed, trace, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
             containerResolver: freshContainerResolver,
-            onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, freshContainerDefs),
+            onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(
+                host, freshContainerDefs.Concat(freshEquipDefs).ToList()),
             runnerBindings: freshRunnerBindings,
             containersWithRunnerCoverage: freshRunnerCoverage,
+            equipEffectIdsFor: freshEquipEffectIdsFor,
             board: NormalBattleBoard.Build(setup.Squad.Select(a => a.Key).ToList(), setup.Wave.Select(a => a.Key).ToList(), seed)) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
@@ -518,6 +544,12 @@ public sealed class WebMatchService
             {
                 Key = $"squad:{i}",
                 Side = "squad",
+                // spec-equip-runtime.md Battle-half amendment (2026-09-07): found while proving the
+                // stat.modify equip path end to end — BuildSquad never set SpecimenId at all, so
+                // BattleRunState.BindEquip (keyed on it) could never fire for a real web match/
+                // expedition squad, silently, regardless of how correctly the rest of the equip-atom
+                // wiring was built. A real, previously-unnoticed structural gap, not a hypothetical one.
+                SpecimenId = s.Profile.InstanceId,
                 SpeciesId = species.SpeciesId,
                 TypeId = species.DemonTypeId,
                 Level = level,

@@ -1,0 +1,17 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.ashthreepeater-001"
+  ],
+  "flavor": "A high, open-sided pavilion sits atop a jagged spire, where the constant, whistling gale carries the scent of ozone and dried lavender. At the center, a silver bowl sits atop a pedestal, its contents swirling in a miniature, perpetual cyclone.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Zephyr's Altar",
+  "reason": "The party seeks to commune with the Sky-Father to gain passage through the storm clouds ahead.",
+  "roomId": "room.shrine-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

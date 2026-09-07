@@ -149,6 +149,52 @@ public class DropVolumeCorpusTests
     }
 
     [Fact]
+    public void The_shipped_loot_corpus_passes_the_real_rate_floor_too()
+    {
+        // Task 2 (rate-floor wiring) -- the real corpus, checked against the REAL shipped tuning file,
+        // not a synthetic fixture. Every shipped entry is expected to be far above the floor already
+        // (spec-rate-floor.md's own measured claim: the narrowest real multi-entry group resolves
+        // ~41,667/million against a floor of 1/million) -- this is a regression proof, not a
+        // hypothetical.
+        var t = DropVolumeTests.Tuning();
+        var corpus = Corpus();
+        var rarityIds = RarityLadder.RungIds.ToHashSet(StringComparer.Ordinal);
+        var rateFloor = DropRateFloorTuning.Parse(File.ReadAllText(
+            Path.Combine(RepoRoot(), "data", "tuning", "drop-rate-floor.v1.json")));
+
+        var result = DropTableValidator.Validate(corpus.Sources, corpus.Tables, t, new DropContentLookups(
+            CurrencyExists: id => id == "souls",
+            RarityIdExists: rarityIds.Contains,
+            RarityOrdinalExists: o => Ladder().Any(r => r.Ordinal == o)), rateFloor);
+
+        Assert.True(result.IsOk, result.ToString());
+    }
+
+    [Fact]
+    public void An_entry_deliberately_authored_below_the_floor_is_refused_at_import()
+    {
+        var t = DropVolumeTests.Tuning();
+        var rateFloor = new DropRateFloorTuning(MinRatePerMillion: 1);
+
+        // Two entries, weight 1 vs 2,000,000 -- the rare one resolves to well under 1/million.
+        var table = new DropTableRow("drop.test.below-floor", new[] { "web" }, null, null, true, 1, new[]
+        {
+            new DropTableGroupRow("g", 0, 1, new DropTableEntryRow[]
+            {
+                new(0, DropEntryKind.Currency, "souls", 1),
+                new(1, DropEntryKind.Currency, "souls", 2_000_000),
+            }),
+        });
+
+        var result = DropTableValidator.Validate(
+            Array.Empty<LootSourceRow>(), new[] { table }, t,
+            new DropContentLookups(CurrencyExists: id => id == "souls"), rateFloor);
+
+        Assert.False(result.IsOk);
+        Assert.Contains("drop.rate-below-floor", result.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Every_equipment_entry_names_a_real_frame_and_role_with_real_base_types()
     {
         var baseTypes = BaseTypes();
@@ -296,32 +342,35 @@ public class DropVolumeCorpusTests
             }
         }
 
-        Assert.Equal(40, tables);
+        Assert.Equal(43, tables); // 40 -> 43, 2026-09-07: drop-tables-gen trial batch added 3 tables
 
         // The two kinds spec-drop-volume.md's own data-shape table omits are REAL and shipped —
         // wave R2 added them to entry-shapes.md §9 on 2026-08-23 and the corpus uses them heavily.
         Assert.Equal(144, counts[DropEntryKind.Unique]);
-        Assert.Equal(60, counts[DropEntryKind.Consumable]);
+        Assert.Equal(61, counts[DropEntryKind.Consumable]); // 60 -> 61, 2026-09-07 trial batch
         Assert.Equal(70, counts[DropEntryKind.Charm]);
-        Assert.Equal(41, counts[DropEntryKind.Insert]);
+        Assert.Equal(42, counts[DropEntryKind.Insert]); // 41 -> 42, 2026-09-07 trial batch
 
         // 315 -> 171 (D4.27, party-dungeon spec-unique-pipeline.md §5, 2026-09-06): `unique` (144) now
         // resolves through the real `MintUnique` arm -- Insert (41) + Charm (70) + Consumable (60)
-        // stay unavailable, unchanged.
+        // stay unavailable (reason moved to the seed-to-concrete generator, 2026-09-07, X7 landed).
+        // 171 -> 173 (2026-09-07): the trial batch's new consumable (+1) and insert (+1) drop refs.
         var unavailable = counts.Where(kv => !DropTableDraw.IsAvailable(kv.Key)).Sum(kv => kv.Value);
-        Assert.Equal(171, unavailable);
+        Assert.Equal(173, unavailable);
     }
 
     [Fact]
-    public void An_insert_or_charm_entry_is_refused_by_name_until_x7_lands()
+    public void An_insert_charm_or_consumable_entry_is_refused_by_name_until_seed_to_concrete_lands()
     {
-        // Verified against shipped code rather than asserted: ContainerKind has none of D27's four
-        // (X7 has not landed) -- the total itself is 7, not 6, since party-dungeon D2.6 added
-        // ContainerKind.Enemy as its own reviewed, unrelated seventh kind.
+        // ⭐ CORRECTED 2026-09-07 (container-kind-expansion, X7 landed): ContainerKind now ships all
+        // eleven values, Gem/Charm/Consumable/Combo included -- verified against shipped code, not
+        // assumed. The three drop-entry kinds below stay refused, but for the NEW, narrower reason:
+        // the seed-to-concrete generator, not a missing container_kind.
         var kinds = Enum.GetNames(typeof(ContainerKind));
-        Assert.Equal(7, kinds.Length);
-        Assert.DoesNotContain("Gem", kinds);
-        Assert.DoesNotContain("Charm", kinds);
+        Assert.Equal(11, kinds.Length);
+        Assert.Contains("Gem", kinds);
+        Assert.Contains("Charm", kinds);
+        Assert.Contains("Consumable", kinds);
 
         // `Unique` REMOVED 2026-09-06 (D4.27) -- it now resolves; see
         // `A_unique_entry_now_resolves_rather_than_being_refused_by_x7s_own_gate` below.
@@ -345,8 +394,9 @@ public class DropVolumeCorpusTests
             Assert.Equal(AtomRejectionReason.ContentRuleViolated, result.Reason);
             Assert.Contains("drop.entry-kind-unavailable", result.Detail, StringComparison.Ordinal);
             Assert.Contains(LootCorpusReader.KindName(kind), result.Detail, StringComparison.Ordinal);
-            // The refusal names WHO lands it — a build order, not a defect.
-            Assert.Contains("module", result.Detail, StringComparison.Ordinal);
+            // The refusal names WHO lands it — a build order, not a defect. Now the seed-to-concrete
+            // generator (X7 itself already landed), not a specific numbered module.
+            Assert.Contains("seed-to-concrete", result.Detail, StringComparison.Ordinal);
         }
     }
 

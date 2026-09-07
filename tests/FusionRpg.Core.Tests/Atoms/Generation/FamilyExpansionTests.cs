@@ -166,7 +166,8 @@ public class FamilyExpansionTests
 
         var family = new FamilyEntryInput(
             Id: "atom.synth-elem", Name: "Synthetic Elemental", KindId: "stat.derived",
-            Channel: "combat.power.{variant}", Op: "Increased", PowerBand: "medium", SourceFile: "synthetic.json");
+            Channel: "combat.power.{variant}", Op: "Increased", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: Array.Empty<string>());
 
         var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => null);
 
@@ -200,7 +201,8 @@ public class FamilyExpansionTests
 
         var family = new FamilyEntryInput(
             Id: "atom.synth-elem-2", Name: "No Pool", KindId: "stat.derived",
-            Channel: "combat.power.pierce.{variant}", Op: "Increased", PowerBand: "medium", SourceFile: "synthetic.json");
+            Channel: "combat.power.pierce.{variant}", Op: "Increased", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: Array.Empty<string>());
 
         var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => null);
 
@@ -253,7 +255,8 @@ public class FamilyExpansionTests
 
         var family = new FamilyEntryInput(
             Id: "atom.garbage-pool-family", Name: "Garbage", KindId: "stat.derived",
-            Channel: "combat.made-up-thing.{variant}", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json");
+            Channel: "combat.made-up-thing.{variant}", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: Array.Empty<string>());
 
         var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
 
@@ -305,5 +308,226 @@ public class FamilyExpansionTests
         var result = ExpandReal();
         foreach (var row in result.Rows)
             Assert.DoesNotContain(row.AtomId, shippedIds);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // family-tags-closure (D28, 2026-09-07): a family's own authored `tags` now reaches TagsJson
+    // alongside provenance, closing the gap `AffixFamilyFile.cs`'s own doc comment named as item's to
+    // pick up. AffixTags.ParseTags/EligibilityRule already read whatever keys exist — nothing there
+    // changes; these tests prove the STAMP, and one proves the shipped GATE now actually gates.
+    // ---------------------------------------------------------------------------------------------
+
+    static IReadOnlyDictionary<string, string> ParseTagsJson(string? json)
+    {
+        var tags = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (string.IsNullOrWhiteSpace(json)) return tags;
+        using var doc = JsonDocument.Parse(json);
+        foreach (var prop in doc.RootElement.EnumerateObject())
+            if (prop.Value.ValueKind == JsonValueKind.String)
+                tags[prop.Name] = prop.Value.GetString()!;
+        return tags;
+    }
+
+    [Fact]
+    public void AffixFamilyFile_Read_parses_a_real_tags_array_in_authored_order()
+    {
+        const string json = """
+        {
+          "entries": [
+            {
+              "id": "atom.parser-check", "name": "Parser Check", "kindId": "stat.modify",
+              "powerBand": "medium", "params": { "channel": "x", "op": "Flat" },
+              "tags": ["offensive", "utility"]
+            }
+          ]
+        }
+        """;
+
+        var families = AffixFamilyFile.Read("g-parser-check.json", json);
+
+        var family = Assert.Single(families);
+        Assert.Equal(new[] { "offensive", "utility" }, family.Tags);
+    }
+
+    [Fact]
+    public void AffixFamilyFile_Read_treats_an_absent_tags_key_as_legally_empty()
+    {
+        const string json = """
+        {
+          "entries": [
+            {
+              "id": "atom.no-tags-key", "name": "No Tags", "kindId": "stat.modify",
+              "powerBand": "medium", "params": { "channel": "x", "op": "Flat" }
+            }
+          ]
+        }
+        """;
+
+        var family = Assert.Single(AffixFamilyFile.Read("g-no-tags.json", json));
+        Assert.Empty(family.Tags);
+    }
+
+    [Fact]
+    public void AffixFamilyFile_Read_refuses_a_non_string_tag_rather_than_dropping_it_silently()
+    {
+        const string json = """
+        {
+          "entries": [
+            {
+              "id": "atom.bad-tag", "name": "Bad Tag", "kindId": "stat.modify",
+              "powerBand": "medium", "params": { "channel": "x", "op": "Flat" },
+              "tags": [123]
+            }
+          ]
+        }
+        """;
+
+        Assert.Throws<FormatException>(() => AffixFamilyFile.Read("g-bad-tag.json", json));
+    }
+
+    [Fact]
+    public void A_family_with_a_real_tag_stamps_it_alongside_provenance_not_instead_of_it()
+    {
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long> { ["tagged-stem"] = 1000 },
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
+        var family = new FamilyEntryInput(
+            Id: "atom.tagged-stem", Name: "Tagged", KindId: "stat.modify",
+            Channel: "tagged-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: new[] { "offensive" });
+
+        var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
+
+        Assert.Empty(result.Refusals);
+        Assert.NotEmpty(result.Rows);
+        foreach (var row in result.Rows)
+        {
+            var tags = ParseTagsJson(row.TagsJson);
+            Assert.True(tags.ContainsKey("offensive"));
+            Assert.Equal("synthetic.json", tags["generatedFrom"]);
+            Assert.Equal("E43", tags["generator"]);
+        }
+    }
+
+    [Fact]
+    public void A_family_with_no_tags_emits_only_the_two_provenance_keys_no_phantom_key()
+    {
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long> { ["untagged-stem"] = 1000 },
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
+        var family = new FamilyEntryInput(
+            Id: "atom.untagged-stem", Name: "Untagged", KindId: "stat.modify",
+            Channel: "untagged-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: Array.Empty<string>());
+
+        var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
+
+        Assert.Empty(result.Refusals);
+        var tags = ParseTagsJson(Assert.Single(result.Rows.Take(1)).TagsJson);
+        Assert.Equal(2, tags.Count);
+        Assert.True(tags.ContainsKey("generatedFrom"));
+        Assert.True(tags.ContainsKey("generator"));
+    }
+
+    [Fact]
+    public void A_colon_form_tag_splits_into_a_real_key_value_pair_for_AnyOfTags_even_though_no_real_family_uses_it_yet()
+    {
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long> { ["kv-stem"] = 1000 },
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
+        var family = new FamilyEntryInput(
+            Id: "atom.kv-stem", Name: "KeyValue", KindId: "stat.modify",
+            Channel: "kv-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: new[] { "element:fire" });
+
+        var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
+
+        var tags = ParseTagsJson(result.Rows[0].TagsJson);
+        Assert.Equal("fire", tags["element"]);
+    }
+
+    [Fact]
+    public void A_tag_colliding_with_a_reserved_provenance_key_is_refused_not_silently_overwritten()
+    {
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long> { ["collide-stem"] = 1000 },
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
+        var family = new FamilyEntryInput(
+            Id: "atom.collide-stem", Name: "Collider", KindId: "stat.modify",
+            Channel: "collide-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: new[] { "generator" });
+
+        var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
+
+        Assert.Empty(result.Rows);
+        var refusal = Assert.Single(result.Refusals);
+        Assert.Equal("atom.collide-stem", refusal.FamilyId);
+        Assert.Contains("generator", refusal.Reason);
+    }
+
+    [Fact]
+    public void The_real_corpus_offensive_defensive_utility_tags_reach_real_generated_output()
+    {
+        var (families, tierBands) = LoadReal();
+        var withTags = families.Where(f => f.Tags.Count > 0).ToList();
+        Assert.NotEmpty(withTags); // proves the parser side is real, not just theoretically wired
+
+        var byId = families.ToDictionary(f => f.Id, StringComparer.Ordinal);
+        var result = FamilyExpansion.Expand(families, tierBands, _ => 100);
+
+        var checkedCount = 0;
+        foreach (var row in result.Rows)
+        {
+            if (!byId.TryGetValue(row.FamilyId, out var source) || source.Tags.Count == 0) continue;
+            var tags = ParseTagsJson(row.TagsJson);
+            foreach (var expected in source.Tags)
+                Assert.True(tags.ContainsKey(expected),
+                    $"{row.AtomId}: expected real family tag '{expected}' from {source.Id} in TagsJson, got [{string.Join(",", tags.Keys)}]");
+            checkedCount++;
+        }
+        Assert.True(checkedCount > 0, "no tagged real family produced a row to check — corpus or share gate drifted");
+    }
+
+    [Fact]
+    public void EligibilityRule_RequireTags_now_actually_gates_using_a_real_stamped_family_tag()
+    {
+        // module 8's own shipped mechanism (EligibilityRule/EligibilityResolver) — proving the fix
+        // closes the real, end-to-end gap D28 named, not just that a dictionary key exists.
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long>
+            {
+                ["offense-gate-stem"] = 1000,
+                ["utility-gate-stem"] = 1000,
+            },
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
+        var offensive = new FamilyEntryInput(
+            Id: "atom.offense-gate-stem", Name: "Offense Gate", KindId: "stat.modify",
+            Channel: "offense-gate-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: new[] { "offensive" });
+        var utility = new FamilyEntryInput(
+            Id: "atom.utility-gate-stem", Name: "Utility Gate", KindId: "stat.modify",
+            Channel: "utility-gate-stem-channel", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: new[] { "utility" });
+
+        var result = FamilyExpansion.Expand(new[] { offensive, utility }, tierBands, _ => 100);
+        Assert.Empty(result.Refusals);
+
+        var offensiveAtom = result.Rows.First(r => r.FamilyId == "atom.offense-gate-stem");
+        var utilityAtom = result.Rows.First(r => r.FamilyId == "atom.utility-gate-stem");
+
+        var rule = new EligibilityRule(
+            RequireTags: new[] { "offensive" }, AnyOfTags: Array.Empty<string>(),
+            Allow: Array.Empty<string>(), Deny: Array.Empty<string>());
+
+        var offensiveTags = ParseTagsJson(offensiveAtom.TagsJson);
+        var utilityTags = ParseTagsJson(utilityAtom.TagsJson);
+
+        Assert.True(EligibilityResolver.IsEligible("affix.offense", offensiveTags, rule));
+        Assert.False(EligibilityResolver.IsEligible("affix.utility", utilityTags, rule));
     }
 }

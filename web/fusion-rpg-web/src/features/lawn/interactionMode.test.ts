@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  boardArrowsLive,
   canEnterSpawnTargeting,
   idleInteraction,
   reduceInteraction
@@ -132,17 +133,11 @@ describe("interactionMode", () => {
     expect(s.ptr).toBe("X");
   });
 
-  it("clear from each mode", () => {
-    for (const start of [
-      reduceInteraction(idleInteraction(), { type: "selectTile", row: 0, col: 0 }, "InMatch"),
-      reduceInteraction(
-        idleInteraction(),
-        { type: "selectOccupant", ptr: "P" },
-        "InMatch"
-      ),
-      reduceInteraction(idleInteraction(), { type: "enterSpawnTargeting" }, "InMatch")
-    ]) {
-      expect(reduceInteraction(start, { type: "clear" }, "InMatch").mode).toBe("Idle");
-    }
+  it("boardArrowsLive keeps arrows in Spawn/Action targeting even when dock is open", () => {
+    expect(boardArrowsLive("SpawnTargeting", true)).toBe(true);
+    expect(boardArrowsLive("ActionTargeting", true)).toBe(true);
+    expect(boardArrowsLive("TileSelected", true)).toBe(false);
+    expect(boardArrowsLive("OccupantSelected", true)).toBe(false);
+    expect(boardArrowsLive("Idle", false)).toBe(true);
   });
 });

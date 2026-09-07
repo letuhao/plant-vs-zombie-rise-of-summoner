@@ -1,0 +1,17 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.bucketnutzombie-001"
+  ],
+  "flavor": "A circular chamber of polished white stone where the air hums with a constant, low-frequency vibration. In the center, a slender spire of translucent quartz rises toward a vent in the ceiling, catching a perpetual updraft that makes the very dust dance in rhythmic, swirling patterns.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Hollow of Resonant Sighs",
+  "reason": "The shrine commemorates the Great Breath, a deity of wind and transition, and serves as a waypoint for travelers seeking clarity through meditation.",
+  "roomId": "room.shrine-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

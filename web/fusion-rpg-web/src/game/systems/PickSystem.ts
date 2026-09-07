@@ -64,29 +64,8 @@ export function wirePickSystem(
     const cell = worldToCell(pointer.worldX, pointer.worldY, rows, cols);
     if (!cell) return;
 
-    // Prefer topmost occupant in cell (highest depth after stack layout)
-    let hit: { ptr: string; row?: number; col?: number } | undefined;
-    let bestDepth = -Infinity;
-    for (const rec of registry.entries()) {
-      if (rec.side !== "plant" && rec.side !== "zombie") continue;
-      if (rec.row !== cell.row || rec.col !== cell.col) continue;
-      const depth = typeof rec.go.depth === "number" ? rec.go.depth : 0;
-      if (depth >= bestDepth) {
-        bestDepth = depth;
-        hit = { ptr: rec.ptr, row: rec.row, col: rec.col };
-      }
-    }
-    if (hit) {
-      lawnBusEmit("lawn:select", {
-        generation,
-        kind: "occupant",
-        ptr: hit.ptr,
-        row: hit.row,
-        col: hit.col
-      } satisfies LawnSelectPayload);
-      return;
-    }
-
+    // GG-21: empty-board / cell click opens the tile dock (occupancy list), not topmost-only.
+    // Direct GO hits still select occupants via gameobjectdown.
     lawnBusEmit("lawn:select", {
       generation,
       kind: "tile",

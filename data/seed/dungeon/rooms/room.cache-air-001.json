@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A high, circular balcony overlooks a sea of swirling white clouds. Dozens of silk ribbons hang from the vaulted ceiling, dancing in a constant, gentle updraft that carries the scent of ozone and mountain heather.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Zephyr's Reliquary",
+  "reason": "The room contains a collection of wind-chime charms and lightweight navigational tools suspended in the currents.",
+  "roomId": "room.cache-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

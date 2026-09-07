@@ -18,7 +18,18 @@
       "classes": 2,
       "naming": 4,
       "words": 5
-    }
+    },
+    "amendments": [
+      {
+        "batch": "setgen-live-endpoint/wallnut-1",
+        "note": "One charm (charm.surv-util-021), authored via setgen's authored-answer path (tools/seedsmith/seedsmith/adapters/items/setgen) to prove item module 13's set-charm-live-endpoint pipeline end-to-end -- schema, distribute_charm, emit, seedfile -- on a real species theme before committing to the full ~904-charm run. No live LLM endpoint was reachable this session; name/flavor were hand-authored as an honest stand-in, the same precedent gemgen/materialgen/combogen/affixfamgen already established (_meta.model '<module>/hand-authored-1'). Generated for demon.wallnut (basis: text, motifs: protect/nut/hard/shell/plant), axis survivability, family atom.carapace. The other 20 entries in this file are untouched by this amendment.",
+        "promptVersion": "set-charm-gen/1",
+        "model": "setgen-live-endpoint/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "sourceRef": "docs/architecture/item-seedgen/spec-set-charm-live-endpoint.md",
+        "entries": ["charm.surv-util-021"]
+      }
+    ]
   },
   "entries": [
     {
@@ -355,6 +366,23 @@
       "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: sunwoven-almanac"
+    },
+    {
+      "id": "charm.surv-util-021",
+      "nameKey": "charm.carapace-of-patience",
+      "name": "Carapace of Patience",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.carapace", "powerBand": "medium" }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "It never strikes back. It simply outlasts whatever struck first.",
+      "notes": "themeKey: demon.wallnut"
     }
   ]
 }

@@ -33,6 +33,30 @@
     },
     {
       "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "Thickened plating provides a secondary layer of defense against physical impact.",
+      "id": "skill.onslaught-def-t1-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-7",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
         "core",
         "core"
       ],
@@ -82,6 +106,156 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A layer of reactive fluid that swells with every impact, replenishing the vessel's reserves.",
+      "id": "skill.onslaught-def-t2-n0",
+      "name": "Osmotic Plating",
+      "nameKey": "tree.node.osmotic-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Structural integrity is reinforced through successive layers of density.",
+      "id": "skill.onslaught-def-t2-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-5",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "Layered alloys absorb the impact before it reaches the core.",
+      "id": "skill.onslaught-def-t3-n0",
+      "name": "Kinetic Plating",
+      "nameKey": "tree.node.kinetic-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the shell becomes the strength of the soul.",
+      "id": "skill.onslaught-def-t3-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-6",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact of a blow feeds the very structure meant to deflect it.",
+      "id": "skill.onslaught-def-t4-n0",
+      "name": "Kinetic Graft",
+      "nameKey": "tree.node.kinetic-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The weight of the shell becomes the strength of the soul.",
+      "id": "skill.onslaught-def-t4-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [
@@ -212,6 +386,30 @@
       "nameKey": "tree.node.kinetic-siphon-3",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning every impact into a foundation for the next breath.",
+      "id": "skill.onslaught-def-t7-n1",
+      "name": "Bulwark of the Deep",
+      "nameKey": "tree.node.bulwark-of-the-deep",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 7
     },
@@ -499,6 +697,60 @@
     },
     {
       "affinity": [
+        "core",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the charge amplifies the impact of every blow.",
+      "id": "skill.onslaught-off-t3-n1",
+      "name": "Vanguard's Might",
+      "nameKey": "tree.node.vanguard-s-might",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-stampede",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the charge dictates the speed of the strike.",
+      "id": "skill.onslaught-off-t4-n0",
+      "name": "Momentum Engine",
+      "nameKey": "tree.node.momentum-engine-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
@@ -622,6 +874,30 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air vibrates with a spectrum of colors that shouldn't exist in nature.",
+      "id": "skill.onslaught-off-t7-n0",
+      "name": "Prismatic Resonance",
+      "nameKey": "tree.node.prismatic-resonance-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
     },
     {
       "affinity": [

@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "The air here is a physical weight, shimmering with a dry, blistering heat that turns the horizon into a dancing blur. Beneath your boots, the floor is a mosaic of jagged, blackened obsidian, glowing with a dull, rhythmic crimson light from the fissures below.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Cinder-Glass Crucible",
+  "reason": "The narrow, heat-warped corridor forces the party into a bottleneck, ensuring the elite guardian can engage the front line without being flanked, while the intense heat imposes a taxing toll on their stamina.",
+  "roomId": "room.elite-fire-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

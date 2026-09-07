@@ -6,7 +6,11 @@ import { Page } from "@/layouts/Page";
 import { JsonBlock } from "@/ui";
 import type { ActorRungState } from "@/ui/actor";
 import mockActorFixture from "../../../e2e/fixtures/unique-actor.json";
-import { ActorMenuScopePicker, type ScopePickerValue } from "./ActorMenuScopePicker";
+import {
+  ActorMenuScopePicker,
+  type ScopePickerValue,
+  type ScopeTargetCandidate
+} from "./ActorMenuScopePicker";
 
 type ActorDtoShape = Parameters<typeof adaptActor>[0];
 
@@ -17,9 +21,8 @@ type ActorDtoShape = Parameters<typeof adaptActor>[0];
  * (buff-debuff-scope-ideal.md §5), so this page exists to prove the component works end to end ahead
  * of that feature, the same way the Actor ladder shipped ahead of Creatures/Sanctum.
  *
- * Target and UniqueDemon candidates both come from the same roster query here — a real future
- * consumer would likely feed them from two different sources (live battle ptrs vs. durable
- * specimens), but for a proof surface the same fixture data illustrates both modes honestly.
+ * UniqueDemon candidates come from the roster (instanceId). Target candidates must carry an
+ * explicit board/world targetPtr — demo uses a synthetic ptr, never the specimen instanceId.
  */
 export function ActorMenuScopePickerDemoPage() {
   const [searchParams] = useSearchParams();
@@ -29,7 +32,7 @@ export function ActorMenuScopePickerDemoPage() {
   const typesQuery = useTypes();
   const [value, setValue] = useState<ScopePickerValue | null>(null);
 
-  const candidates: ActorRungState[] = useMock
+  const uniqueCandidates: ActorRungState[] = useMock
     ? [{ kind: "ready", data: adaptActor(mockActorFixture as ActorDtoShape) }]
     : actorsQuery.isLoading
       ? [{ kind: "loading" }]
@@ -38,6 +41,30 @@ export function ActorMenuScopePickerDemoPage() {
         : !actorsQuery.data || actorsQuery.data.items.length === 0
           ? [{ kind: "empty" }]
           : actorsQuery.data.items.map((item) => ({ kind: "ready" as const, data: adaptActor(item) }));
+
+  const targetCandidates: ScopeTargetCandidate[] = [];
+  for (const c of uniqueCandidates) {
+    switch (c.kind) {
+      case "ready":
+        // Explicit ptr — never reuse instanceId as targetPtr.
+        targetCandidates.push({
+          kind: "ready",
+          targetPtr: `P:${c.data.typeId}:0,0`,
+          rungState: c
+        });
+        break;
+      case "loading":
+      case "empty":
+        targetCandidates.push({ kind: c.kind });
+        break;
+      case "error":
+        targetCandidates.push({ kind: "error", message: c.message });
+        break;
+      case "locked":
+        targetCandidates.push({ kind: "error", message: c.reason });
+        break;
+    }
+  }
 
   const typeOptions = (typesQuery.data ?? []).map((t) => ({
     typeId: t.type,
@@ -54,8 +81,8 @@ export function ActorMenuScopePickerDemoPage() {
         <ActorMenuScopePicker
           value={value}
           onChange={setValue}
-          targetCandidates={candidates}
-          uniqueDemonCandidates={candidates}
+          targetCandidates={targetCandidates}
+          uniqueDemonCandidates={uniqueCandidates}
           typeOptions={typeOptions}
         />
         <div>

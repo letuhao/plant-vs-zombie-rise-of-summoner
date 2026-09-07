@@ -568,12 +568,13 @@ public class ItemSurfaceTests
     [Fact]
     public void One_shipped_piece_advances_three_sets_and_the_disclosure_names_all_three()
     {
-        // Module 12's pinned corpus fact, picked up: 154 distinct (role, base type) member pairs, 25
-        // of them in more than one set, one in three.
+        // Module 12's pinned corpus fact, picked up: 165 distinct (role, base type) member pairs, 28
+        // of them in more than one set, one in three (2026-09-07: two trial sets added, see
+        // ThresholdGrantCorpusTests' own count history).
         var sets = ThresholdGrantCorpusTests.Sets();
         var shared = SetDisclosure.SharedMembers(sets);
 
-        Assert.Equal(25, shared.Count);
+        Assert.Equal(28, shared.Count);
         Assert.Equal(3, shared.Max(kv => kv.Value.Count));
 
         var triple = shared.First(kv => kv.Value.Count == 3);

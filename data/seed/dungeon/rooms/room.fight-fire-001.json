@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "The air here is thick and tastes of sulfur, shimmering with a heat that makes the stone walls appear to ripple like water. A bed of glowing embers coats the floor, and the only sound is the rhythmic crackle of dying coals.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Hearth of Cinders",
+  "reason": "A group of Magma Mephlings is guarding the narrow passage, waiting for the heat to drive intruders into their reach.",
+  "roomId": "room.fight-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

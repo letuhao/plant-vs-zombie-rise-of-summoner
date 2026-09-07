@@ -278,16 +278,22 @@ recipe-assignment design needs rework.
 These are reviewed changes to documents that win over any spec. **Listed here so they are not
 discovered halfway through a task.**
 
-| Document | Change | Owed by |
-|---|---|---|
-| [decisions.md](decisions.md):95 | *"species catalog generated deterministically from captured game data"* -> **captured** deterministically, **derived** in seedsmith, made **concrete** in the server | `species-generator` |
-| [decisions.md](decisions.md) | Revert the approved `aspect-scope` spec | Q9, before any aspect work |
-| [item/ssot-rarity.md](item/ssot-rarity.md) §4.1, §4.3 | Demons adopt the ten-rung ladder; the four-row band map becomes a migration shim with an end date, not a permanent wall | `rarity-migration` |
-| [power/ssot-power-scale.md](power/ssot-power-scale.md) §5.3, §10 | A species `Theta` offset joins the composition and the closed inventory | `threat-band` |
-| [item/seed-contract.md](item/seed-contract.md) | Its status line stops saying nothing is authorized, or demon seeds declare their own subtree under the same law | `anchor-emit` |
-| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" | *"built deterministically from `DemonSpeciesCatalog` at startup"* -> a deterministic pass PLUS a bounded, LLM-filled gap for rungs the deterministic pass cannot mathematically satisfy, reconciled and committed as a seed, never computed live in the shipped game | `fusion-recipe-generator` |
-| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Boundaries" ("Ask first: … recipe-graph shape changes") | Cleared, not silently taken: `crossRungGapFill` lets a bounded subset of recipes draw inputs from more than one rung below the output — a real graph-shape change, distinct from the computation-method amendment on the row above. Owner, 2026-09-05 (quoted in `spec-fusion-recipe-generator.md`'s own Objective): authorized the whole pipeline shape this change is one consequence of | `fusion-recipe-generator` |
-| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" ("every summonable rare/epic/legendary species gets exactly one recipe") | Narrowed to best-effort: a deficit whose LLM vote never resolves ships with **no recipe**, named as `unresolved` rather than fabricated. A separate loosening from the two rows above — coverage, not method or graph shape | `fusion-recipe-generator` |
+**Audited 2026-09-07 — six of seven already landed, some as far back as 2026-09-01, and this table
+had never been swept to strike them off.** Caught while chasing an unrelated "clear stale docs"
+request; re-reading every cited document directly (not trusting this table's own claim) is what
+found it. Kept as closed rows below, not deleted, matching this repo's own convention elsewhere for
+exactly this situation (`passive-tree-todo.md`'s "Non-blocking asks" table does the same).
+
+| Document | Change | Owed by | Status |
+|---|---|---|---|
+| [decisions.md](decisions.md):95 | *"species catalog generated deterministically from captured game data"* -> **captured** deterministically, **derived** in seedsmith, made **concrete** in the server | `species-generator` | ✅ **Done** — decisions.md:99 already carries this exact language |
+| [decisions.md](decisions.md) | Revert the approved `aspect-scope` spec | Q9, before any aspect work | ✅ **Done** — decisions.md:99: *"`aspect-scope` reverted 2026-08-31 — its map row is flagged, not authorized to build"* |
+| [item/ssot-rarity.md](item/ssot-rarity.md) §4.1, §4.3 | Demons adopt the ten-rung ladder; the four-row band map becomes a migration shim with an end date, not a permanent wall | `rarity-migration` | ✅ **Done** — §4.3: *"Reversed 2026-09-01 … Demons no longer keep a separate four-value ladder"*; the four-row band map is explicitly labeled a migration shim only |
+| [item/seed-contract.md](item/seed-contract.md) | Its status line stops saying nothing is authorized, or demon seeds declare their own subtree under the same law | `anchor-emit` | ✅ **Done** — status line: *"authoring authorized as of 2026-09-01 … the prior wording … was found to contradict its own dependents"* |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" | *"built deterministically from `DemonSpeciesCatalog` at startup"* -> a deterministic pass PLUS a bounded, LLM-filled gap for rungs the deterministic pass cannot mathematically satisfy, reconciled and committed as a seed, never computed live in the shipped game | `fusion-recipe-generator` | ✅ **Done 2026-09-07** (this sweep — was still the pre-Phase-8 text until now) |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Boundaries" ("Ask first: … recipe-graph shape changes") | Cleared, not silently taken: `crossRungGapFill` lets a bounded subset of recipes draw inputs from more than one rung below the output — a real graph-shape change, distinct from the computation-method amendment on the row above. Owner, 2026-09-05 (quoted in `spec-fusion-recipe-generator.md`'s own Objective): authorized the whole pipeline shape this change is one consequence of | `fusion-recipe-generator` | ✅ **Done 2026-09-07** (this sweep) |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" ("every summonable rare/epic/legendary species gets exactly one recipe") | Narrowed to best-effort: a deficit whose LLM vote never resolves ships with **no recipe**, named as `unresolved` rather than fabricated. A separate loosening from the two rows above — coverage, not method or graph shape | `fusion-recipe-generator` | ✅ **Done 2026-09-07** (this sweep) |
+| [power/ssot-power-scale.md](power/ssot-power-scale.md) §5.3, §10 | A species `Theta` offset joins the composition and the closed inventory | `threat-band` | ⛔ **Still genuinely open — and not actually actionable yet.** Verified: `demon-threat.v1.json`'s `thetaOffset` column (nuisance=0 … calamity=40) has **zero consumers anywhere in `src/`** — `threatBand` itself is discarded during species generation and unreachable from the live `DemonSpeciesDef` catalog. §10 is a closed inventory of scales that actually exist and run; adding a numbered row for a tuning column nothing reads would misrepresent it as shipped. **Real precondition, not previously stated: this amendment is owed once something actually consumes `thetaOffset` (e.g. a demon-as-encounter `Θ_content` contribution), not before.** Until then this stays a named, tracked gap, not a doc-edit task. |
 
 ---
 

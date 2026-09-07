@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "Dust motes dance in the shafts of light piercing through high, narrow slits. The air is still, smelling of old stone and the metallic tang of dried blood.",
+  "hazardBand": "none",
+  "kind": "fight",
+  "name": "The Echoing Vestibule",
+  "reason": "The party is intercepted by a group of territorial guardians before they can reach the next corridor.",
+  "roomId": "room.fight-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

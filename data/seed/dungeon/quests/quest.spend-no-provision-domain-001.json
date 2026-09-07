@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The local magistrate requires a ceremonial offering of rare incense to appease the spirits of the hearth. Failure to provide this tribute could invite a season of bad luck upon the entire district.",
+  "name": "The Tithe of Embers",
+  "objectiveTemplate": "spend-no-provision",
+  "prereqRefs": [],
+  "questId": "quest.spend-no-provision-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "domain",
+  "targetRef": "none"
+}

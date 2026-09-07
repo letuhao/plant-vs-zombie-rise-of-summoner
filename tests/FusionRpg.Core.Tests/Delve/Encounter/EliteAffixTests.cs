@@ -188,8 +188,10 @@ public class EliteAffixTests
     }
 
     [Fact]
-    public void There_are_now_exactly_seven_container_kinds()
+    public void There_are_now_exactly_eleven_container_kinds()
     {
-        Assert.Equal(7, Enum.GetValues<ContainerKind>().Length);
+        // 7 -> 11 (2026-09-07): container-kind-expansion (X7) added Gem/Charm/Combo/Consumable --
+        // item's own four, unrelated to this module's own Enemy addition.
+        Assert.Equal(11, Enum.GetValues<ContainerKind>().Length);
     }
 }

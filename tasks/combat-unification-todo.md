@@ -440,3 +440,252 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       that releases it*, which it is. Every other criterion is met, so the checkpoint closes and S5
       stays visible as the one piece of content still owed.
       description of an action; S5's deferral is recorded with the condition that releases it.
+
+## Phase 7 — hybrid typing goes live (owner decision 2026-09-07, `demon-mechanism-gaps-ideal.md` §2.6)
+
+Wave E3 (Phase 5) shipped the mechanism inert on purpose, with exactly one thing left owner-gated:
+*"raising `secondaryWeightMilli` above 0... is the only thing standing between E3-inert and E3-live."*
+That decision landed: *"Do all, we only have on[e] battle engine, do not make duplicated code, lawn
+game still use same battle engine, reconcile or retire duplicate[d] code if need[ed]."* Two
+consequences follow directly: web-battle goes live (F1), and the lawn side — which this session
+confirmed has **zero** existing hybrid-payload wiring of any kind, not a second implementation to
+reconcile — gains real new code that calls the **same** `HybridPayload.Build`, never a parallel one
+(F3).
+
+- [x] **F1: raise `hybrid.secondaryWeightMilli` off 0, re-bless what it moves** · **S** — **DONE 2026-09-07**
+  - Value shipped: **300‰ (30%)** — not the plan's own 250 guess: `battle.v4.json`'s own `_meta.noteHybrid`
+    already named a concrete suggested value ("the map's own suggestion was 0.7/0.3, i.e. 300 here"),
+    found while publishing and reused instead of the borrowed `MatchupShareK` number — a stronger,
+    more direct precedent, corrected during the task rather than shipped as planned.
+  - Published via `python tools/tuning/publish.py battle hybrid.secondaryWeightMilli=300` →
+    `data/tuning/battle.v5.json` (v4 kept on disk, per this repo's own tuning-publish discipline).
+  - `Program.cs`'s own hardcoded `battle.v4.json` load path updated to `v5` (found live — the loader
+    path is not version-agnostic, a plain publish alone would not have taken effect).
+  - `ContractTuningTestBootstrap.cs` (all three copies: Core/Data/E2E.Tests) updated from
+    `HybridSecondaryWeightMilli: 0` to `300`, keeping the hand-mirrored fixture in sync with the real
+    file per this repo's own "byte-identical mirror" discipline.
+  - `HybridPayloadTests.TheShippedTuningLeavesItInert` renamed/updated to assert `300`, since the
+    hand-built fixtures in this test file carry no secondary element and so are unaffected by the
+    weight change themselves (verified, not assumed — `ANonZeroWeightSplitsThePayloadAndTheWeightsSumToOne`
+    already covered the 300 split before this task even started).
+  - **Predicted-delta checked for real, not assumed:** `ExpeditionResolverTests.Tier_goldens_are_locked`
+    moved (all 4 tier hashes). Verified before re-blessing: `Squad()`'s own player-side fixture is a
+    synthetic `"test-species"` with no catalog-backed `ElementSecondary`, so the player side of every
+    resolve is unaffected; the wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`) is not — 21
+    of 841 real species carry a genuine secondary element, and a roll landing one now embeds a real
+    two-component `elementPayload` on that enemy's own `BattleSetup`. Re-blessed with the real new
+    hashes, documented inline with the same reasoning.
+  - **Verified:** `HybridPayloadTests` 14/14, `Expedition`/`BattleTuning` filters 31/31 (Core.Tests);
+    `Expedition`/`Hybrid`/`Battle` filters 25/25 (Data.Tests), 7/7 (E2E.Tests); full Core.Tests
+    13003/13012 (9 pre-existing, unrelated failures — Items/Atoms/ClassSystem/SpecChannelClaim, none
+    touching battle/expedition/hybrid); `dotnet build src/FusionRpg.Server` clean.
+  - Files touched: `data/tuning/battle.v5.json` (new), `src/FusionRpg.Server/Program.cs`,
+    `tests/{FusionRpg.Core.Tests,FusionRpg.Data.Tests,FusionRpg.E2E.Tests}/ContractTuningTestBootstrap.cs`,
+    `tests/FusionRpg.Core.Tests/Battle/HybridPayloadTests.cs`,
+    `tests/FusionRpg.Core.Tests/Expeditions/ExpeditionResolverTests.cs`.
+
+- [x] **F2a: derive `elementSecondary` from fusion-recipe lineage — DONE 2026-09-07** · content, not code
+  - Owner-suggested (2026-09-07): most demon species are fusion outputs, and their real fusion
+    parents already carry real elements the per-species lore classifier can never see (it reads
+    only one species' own flavor text). Sized against the real 713-recipe corpus before building:
+    `inputA` is already assigned to match the output's own `elementPrimary` by design (confirmed
+    live, 685/693) so it carries no new signal — `inputB`'s own element is the real, previously
+    unused signal.
+  - New deterministic pass, `seedsmith demons run fix-secondary-from-fusion`
+    (`resolve_secondary_element_from_fusion_lineage` in `anchor/derive.py`,
+    `fix_secondary_from_fusion_lineage` orchestration in `run/runner.py`) — runs AFTER
+    `fusion-recipe-reconcile` (needs the committed `_fusion-recipes.json`, not just species
+    generation, correcting this task's own original "sub-pipeline after species generated"
+    framing). Only fires when EXACTLY ONE parent's `elementPrimary` differs from the output's own —
+    owner direction: both parents agreeing is real signal the species is intentionally
+    single-typed (left `"none"`, never invented); both parents disagreeing is *also* left
+    unresolved, since `DemonRecipeCatalog.TryFindPair`'s own A-preference ordering is confirmed-live
+    to be a soft tie-break, not a filter — when neither candidate at a rung matches, `inputA` carries
+    no elemental meaning and can't be trusted over `inputB` with any real confidence. Provenance
+    stamped `"fusion-lineage-derived"` (never `"deterministic-fallback"` — that tag means "no real
+    signal existed"; this one means real cross-species signal existed and was used) — distinguishable
+    from both a real LLM judgment and from the no-signal-fallback family.
+  - **Real corpus run, sized before and confirmed after:** 431 of 693 candidate outputs fixed
+    (matching the pre-build sizing analysis exactly); real elementSecondary coverage
+    **21/841 → 452/841 (~54%)**. Idempotent (0 fixes on immediate re-run).
+  - **Full cascade re-run** (this repo's own established "an anchor edit needs the whole chain"
+    rule): `DemonSpeciesGen` (840 species, 431 files regenerated, matching exactly), `DemonSpeciesImport`
+    (431 written / 409 unchanged / 0 deleted), `DemonBuildPlanGen` (68/840 planned, unchanged — the
+    build plan never reads `elementSecondary`). `fusion-recipe-reconcile --check` clean, 713/713
+    unchanged, exactly as designed — this pass never touches `elementPrimary`/`rarity`/`acquisition`,
+    the only fields the recipe assignment depends on, so it can never invalidate a committed recipe.
+  - **Verified:** `pytest tools/seedsmith/tests/test_anchor_derive.py` (27/27, 6 new),
+    `tools/seedsmith/tests/test_run_runner.py -k fix_secondary_from_fusion` (8/8 new, covering the
+    clean-single-candidate case from both A and B, both-agree, both-disagree, no-recipe, dry-run,
+    and idempotency); full seedsmith suite (3124 passed, 15 pre-existing failures confirmed
+    unrelated — all in items/passive-tree/actions/tree-plan, on files a concurrent session has
+    modified uncommitted, none touching `demons/`/`fusion/`/`anchor/`); `dotnet test
+    tests/FusionRpg.Core.Tests --filter "Expedition|DemonSpecies|DemonRecipe|SpeciesBuildPlan"`
+    60/60, no golden-hash movement.
+  - Files: `tools/seedsmith/seedsmith/adapters/demons/anchor/derive.py`,
+    `tools/seedsmith/seedsmith/adapters/demons/run/runner.py`,
+    `tools/seedsmith/seedsmith/report/cli.py` (new `fix-secondary-from-fusion` verb),
+    `tools/seedsmith/tests/test_anchor_derive.py`, `tools/seedsmith/tests/test_run_runner.py`,
+    431 regenerated `data/generated/demons/*.json` + `data/seed/demons/species/**` anchor files.
+
+- [ ] **F2b (non-blocking, tracked): author real `ElementSecondary` for non-fusion species**
+  · content, not code · **re-sized 2026-09-07, real gap is 127, not 389**
+  - F2a closed the fusion-lineage-derivable slice (431 species). Of the 389 species still
+    `elementSecondary: "none"`, **262 are correctly `"none"` already** — F2a's own "both parents
+    agree" (259) and "conflict" (3) cases, matching the owner's own stated rule ("not every demon
+    needs one, that's normal"). **The real, unexamined gap is 127 species: those with no fusion
+    recipe at all** — measured 2026-09-07 by cross-referencing `_fusion-recipes.json`'s output set
+    against every species still carrying `"none"`.
+  - No deterministic signal exists for these 127 (no fusion lineage to borrow from) — closing this
+    needs a genuine content pass: rerunning the existing `element-secondary` classify-pipeline
+    (`tools/seedsmith/seedsmith/adapters/demons/anchor/prompts.py:135-161`) against just this
+    127-species selector, the same class of cost as the T2.11 classification run (a real local-model
+    job, though far smaller — 127 species × 1 call each for this one pipeline, not the full 8-pipeline
+    per-species budget, since `element-secondary` is a single-attribute prompt). **Do not run
+    concurrently with an in-progress `demons run start/resume`** — both would contend for the same
+    local model.
+  - Not a code task — does not gate F1 or F3, and is not owed a fixed acceptance bar since "which of
+    these 127 should get a second element" is itself a content/balance judgment call, not something
+    a classify-pipeline rerun alone settles (a lore-based classifier may legitimately answer "none"
+    again for most of them, same as the first pass).
+
+- [x] **F3: lawn parity — bake the default in at compile time, server-side — DONE 2026-09-07** ·
+      **size corrected 2026-09-07 — smaller and safer than either prior draft**
+  - **⛔ Self-correction, before any of this was built.** The first draft of this task (an `EffectBag`
+    constructor dependency) was WRONG and would have violated a hard, documented invariant:
+    `effect-system.md:10` — *"Shipped / sealed: Core `EffectBag`... at `FoundationContractVersion =
+    2`"* — and `DESIGN-GATE.md` §2 invariant 8, *"Foundation is sealed... Secondary builds on top; it
+    does not edit it."* Caught by reading that spec before building, not after. `AtomCompiler.cs`'s
+    own docstring states the correct shape in as many words: *"the output is the same
+    `EffectGrantDto` shape the Funnel and the bag already accept, so the sealed layer is
+    untouched... it does not apply, order, merge, or mitigate."*
+  - **The real mechanism, found by reading `AtomCompiler.cs` in full:** `AtomCompiler.Compile`
+    (`:52-64`) already takes per-owner COMPILE-TIME context as plain parameters —
+    `int ownerLevel = 1`, `int? ownerTheta = null` — exactly the shape this task needs, already
+    precedented, already Secondary-side (never touching Foundation). It **runs server-side**
+    (the class's own docstring: *"Runs server-side. E19 delivers the output; the injector never
+    holds content rows"*), called from `AtomPushService.Build`
+    (`src/FusionRpg.Server/AtomPushService.cs:259-266`, which already supplies `ownerLevel`). This
+    means `BattleRuleset` (server-configured since F1, `Program.cs`) is **already reachable** at the
+    exact point this needs it — **no injector-side `RpgHost.cs` change is needed at all**, unlike
+    this task's own original assumption. By the time a compiled grant reaches the injector, its
+    `Overlay` JSON already carries whatever `elementPayload` the server baked in — the lawn-side
+    `EffectBag`/`DamagePacketBuilder` path needs **zero changes**, since it already parses an
+    authored `elementPayload` exactly like any other overlay field (`DamagePacketBuilder.cs:89-112`).
+  - Sub-tasks, in dependency order (F3.1 then F3.2; no lawn/injector task remains):
+    - [x] **F3.1: `AtomCompiler.Compile` gains owner-element parameters, bakes the default at compile time** · **M** — **DONE 2026-09-07**
+      - ### ✅ Evidence
+        - `Compile(...)` (`AtomCompiler.cs:90-92`) and `EmitDefAndGrant(...)` (`:157-159`) both gained
+          `ElementTypeId? ownerElementPrimary = null, ElementTypeId? ownerElementSecondary = null, int
+          hybridSecondaryWeightMilli = 0`, matching `ownerLevel`/`ownerTheta`'s exact optional-parameter
+          shape, threaded through at `:129`.
+        - The injection (`:230-250`) sits right after the `filters` overlay block, guarded by all three
+          conditions the acceptance list names: `ownerElementPrimary is { } primary` (owner has a
+          primary element), `!overlay.ContainsKey("elementPayload")` (authored content always wins),
+          and the group's actions include `ApplyResourceDelta` (only a damage-weighted grant gets one).
+          Calls `HybridPayload.Build` directly (`:241`) — never a re-derived formula — and bakes the
+          result as the same `{element, weight}` list shape `DamagePacketBuilder.ParseElementPayload`
+          already reads.
+        - `tests/FusionRpg.Core.Tests/Atoms/AtomCompilerTests.cs` — 6 new tests added (default-omitted
+          byte-identity, authored-payload-wins, two-component bake matching `HybridPayload.Build`
+          directly, non-`ApplyResourceDelta` grants stay untouched), all 39 tests in the file green
+          (33 existing + 6 new), zero regressions.
+        - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter AtomCompiler` — 39/39 passed.
+        - Files: `src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs`, `tests/FusionRpg.Core.Tests/Atoms/AtomCompilerTests.cs`.
+    - [x] **F3.2: `AtomPushService.Build` supplies the owner's real elements; prove it live** · **S** — **CODE DONE 2026-09-07, live-lawn proof still owed**
+      - ### ✅ Evidence — mechanism
+        - New `OwnerElements(IReadOnlyList<OwnerScope> owners)` (`AtomPushService.cs:177-...`) resolves
+          the compiled grant's real element pair by reusing `LawnElementIndex` (`:185`) — never a
+          second lookup — keyed off the batch's `UniqueActor` owner.
+        - Wired into the existing `AtomCompiler.Compile` call (`:293`, `:302-303`, `:307`):
+          `ownerElementPrimary`/`ownerElementSecondary` from `OwnerElements(owners)`, and
+          `hybridSecondaryWeightMilli: BattleRuleset.IsConfigured ? BattleRuleset.HybridSecondaryWeightMilli : 0`.
+        - **Named scope limitation, not a silent gap:** `AtomCompiler.Compile` accepts only one global
+          owner-element pair per call, but `Build` compiles over a union of several owners at once.
+          `OwnerElements` only resolves real elements when the batch names **exactly one**
+          `UniqueActor` owner (`Count != 1 → null`), leaving multi-specimen batches at today's inert
+          behavior rather than guessing which owner's elements should win.
+        - `BattleRuleset.IsConfigured` (new, `BattleModels.cs`, right after `Configure`) added because
+          `AtomPushService`'s own test suite never bootstraps battle tuning — reading
+          `HybridSecondaryWeightMilli` unconditionally threw `InvalidOperationException` in 6 existing
+          tests (`AtomPushServiceInstanceOwnerRewriteTests`, `AtomPushServicePatronCallbackTests`);
+          guarding the read fixed all 6 with no other change.
+        - Verify: `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~AtomPush"` —
+          6/6 passed, zero regressions (confirmed twice, once with an unrelated concurrent session's
+          mid-edit `DelveProjectionEndpointTests.cs` safely stashed out of the way per this repo's own
+          stash-verify-restore discipline, once after restoring it clean).
+        - Broader regression check: `dotnet test tests/FusionRpg.Core.Tests --filter
+          "FullyQualifiedName~BattleRuleset|FullyQualifiedName~AtomCompiler|FullyQualifiedName~Hybrid"`
+          and `--filter "FullyQualifiedName~AtomPush|FullyQualifiedName~CompiledPush"` (Server.Tests)
+          both clean (88/88 and 28/28 respectively, after isolating one flaky pre-existing test —
+          `ProductionProfilePathTests` passed 4/4 alone; a full-suite run separately reproduced the
+          repo's known unrelated flakiness with a *different* set of 16 failures, none touching
+          hybrid/AtomCompiler/AtomPushService/BattleRuleset — matches the pre-existing
+          "Dominance baseline drift" pattern, not a regression from this change).
+        - Files: `src/FusionRpg.Server/AtomPushService.cs`, `src/FusionRpg.Core/Battle/BattleModels.cs`.
+      - ### ✅ Live-lawn proof — **DONE 2026-09-07**
+        - No debug/cheat endpoint existed to hand-place a specific demon species or a bound atom onto
+          a specimen, and gacha odds for one of the 15 known dual-typed species were too low to gamble
+          the real player's souls on (best case ~1/45 within a rarity tier). Owner direction: *"debug
+          apis for this test coverage purpose, this is repo standard, you should try multiple
+          mechanism[s] too."* Three new debug endpoints added to `DemonEndpoints.cs`, each reusing an
+          existing production primitive rather than a parallel implementation:
+          - `POST /api/demons/debug/grant` — mints a named species via the real `RpgStore.MintDemon`
+            atomic path (the same one summon/fusion/capture/delve already use), no soul cost.
+          - `POST /api/demons/debug/spawn-unique-actor` — a bare `UniqueActor` (no demon profile) at a
+            given side+`gameTypeId`, deployed with a synthetic ptr via the exact
+            `CreateUniqueActor` → `TryBeginUniqueDeploy` → `TryAckUniqueSpawn` sequence
+            `AtomPushServiceInstanceOwnerRewriteTests` already proves at the unit level. No demon
+            profile means the demon-contracts deploy gate never fires (it only fires when
+            `ReadDemonProfileUnlocked` finds a row) — the real player's contract-slot/loyalty state is
+            never touched. `OwnerElements` (`AtomPushService.cs`) reads only `Side`/`TypeId` via
+            `LawnElementIndex`, never the demon profile, so this is sufficient for the real wiring.
+          - `POST /api/demons/debug/grant-test-atom/{instanceId}` — binds one fixed, idempotent
+            `resource.delta` (→ `ApplyResourceDelta`) test atom directly to a `UniqueActor`, via the
+            same `UpsertAtom`/`UpsertContainer`/`Instantiator.TryInstantiate`/`Bind` primitives the
+            equip pipeline already uses, bypassing the whole item-roll/equip flow.
+          - `GET /api/demons/debug/atoms-preview/{instanceId}` — calls the real
+            `AtomPushService.Build` for exactly that one owner and returns the raw compiled grants
+            (plus `ResolveBindings`'s own accepted/refused counts for diagnosis) — the same production
+            compile path every real push already goes through, never a second one.
+        - **A real, previously-undiscovered wrinkle found along the way, not assumed:** a freshly
+          debug-granted demon specimen (`phase: Roster`, no traits) compiled **zero** grants — not a
+          bug, but `AtomPushService.Build`'s own documented P1.5-L behavior (`AtomPushService.cs:345-357`):
+          any grant for a `UniqueActor` with no live `LastPtr` (never deployed) is dropped rather than
+          sent, since the injector refuses a durable `instance:` owner key outright. This is exactly
+          why the acceptance criterion said "deployed live," not "existing on the roster" — confirmed
+          empirically, not by re-reading the comment alone.
+        - **All 5 new/updated E2E tests green** (`tests/FusionRpg.E2E.Tests/DemonDebugGrantE2ETests.cs`,
+          new file): grant mints the named species with its real elements at no soul cost; unknown
+          species rejected; atoms-preview compiles for a real instance and 404s for an unknown one; and
+          the full proof — a dual-typed deployed specimen with a bound test atom compiles a genuine
+          two-component `elementPayload`.
+        - **Then run for real against the live server** (not just the test harness): restarted
+          `dist/FusionRpg.Server` with the new build (the running server predated these changes by
+          several hours and was actively `injectorConnected`, so the restart was confirmed with the
+          owner first rather than done unilaterally). Real HTTP calls against `127.0.0.1:5088`:
+          `spawn-unique-actor` → a real row, `phase: ActiveBound`, real `lastPtr: "DEBUG4447C5AB"` →
+          `grant-test-atom` → bound → `atoms-preview` returns
+          `"elementPayload":[{"element":"earth","weight":0.7},{"element":"fire","weight":0.3}]` —
+          a genuine two-component payload, weights matching F1's shipped 300‰ split exactly, compiled
+          server-side against the real live database for a real specimen.
+        - **Zero regressions confirmed**, not assumed: targeted filters clean
+          (`AtomCompiler|Hybrid|BattleRuleset` in Core.Tests 88/88, `AtomPush|CompiledPush` in
+          Server.Tests 28/28); a full-suite run of both `FusionRpg.E2E.Tests` (207/218) and
+          `FusionRpg.Server.Tests` (316/341) showed failures exclusively in World/District/Zomboss and
+          one `DemonLawnDeployAtomPushTests` file — traced via `git status`/`git log` to a **concurrent
+          session's own uncommitted edit** to that exact test file (10 insertions since its last
+          commit, made by neither me nor this task), matching this repo's own established
+          "concurrent-session drift" pattern, not a regression from this work.
+
+### ✅ Checkpoint 7 — hybrid typing is real on both surfaces, through one shared mechanism — **CLOSED 2026-09-07**
+- [x] F1 done: web-battle demons with a real secondary element attack with both, goldens re-blessed
+      against a checked (not assumed) predicted delta.
+- [x] F3 done: the SAME is true on the lawn, via the SAME `HybridPayload.Build` — confirmed live
+      against the real running server/DB (`elementPayload":[{"earth",0.7},{"fire",0.3}]` for a real,
+      deployed specimen), not only in a test.
+- [x] No new atom/value-spec vocabulary shipped without a reviewed `decisions.md` change — F3.1/F3.2
+      added zero new atom kinds, triggers, or value-spec fields; only optional compile-time parameters
+      and a store-lookup helper. The three new debug endpoints are server-side test-coverage seams,
+      not new content vocabulary.
+- [ ] F2 tracked as a visible, non-blocking content follow-up, not silently dropped.

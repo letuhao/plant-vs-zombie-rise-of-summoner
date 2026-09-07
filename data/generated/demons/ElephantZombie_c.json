@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Air",
   "gameTypeId": 338,
   "magnitudes": {
     "combat.block.shred.omni": 163,

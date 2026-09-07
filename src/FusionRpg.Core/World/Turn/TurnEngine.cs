@@ -131,7 +131,8 @@ public static class TurnEngine
     /// nothing else can start depending on its numbers before the real combat seam lands.
     /// </summary>
     public static TurnResult Step(
-        WorldState world, IReadOnlyList<WorldCommand> commands, ulong seed, IBattleResolver? resolver = null)
+        WorldState world, IReadOnlyList<WorldCommand> commands, ulong seed, IBattleResolver? resolver = null,
+        FusionRpg.Core.Power.PowerTuning? powerTuning = null, long? mythicClaimBonusRatePerMillion = null)
     {
         var report = new TurnReport();
         var turn = world.CurrentTurn + 1;
@@ -167,7 +168,7 @@ public static class TurnEngine
         // order the next turn and the engine dropped it as `claim.already-yours`. Belief is what you
         // know at the end of the turn, and the end of the turn is after the turn has finished
         // happening. Found by playing twenty turns and watching Zomboss claim the same sector twice.
-        next = Snapshot(next, revealed, report, turn);
+        next = Snapshot(next, revealed, report, turn, powerTuning, mythicClaimBonusRatePerMillion);
         next = Observe(world, next, report, turn, movement.VisitedByFaction);
 
         return new TurnResult(next, report, StateHasher.Hash(next));
@@ -370,13 +371,14 @@ public static class TurnEngine
     /// so anything still flagged was broken during *this* turn and owes next turn's orders.
     /// </summary>
     static WorldState Snapshot(
-        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, int turn)
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, int turn,
+        FusionRpg.Core.Power.PowerTuning? powerTuning = null, long? mythicClaimBonusRatePerMillion = null)
     {
         report.BeginPhase(Phases.Snapshot);
 
         // Claims settle here because everything they depend on — who is standing where, who is still
         // alive, which guards are left — is only decided once the rest of the turn has run.
-        world = ClaimResolver.Run(world, commands, report, Phases.Snapshot, turn);
+        world = ClaimResolver.Run(world, commands, report, Phases.Snapshot, turn, powerTuning, mythicClaimBonusRatePerMillion);
 
         // Build resolves right after — the same reason, and so it sees this same turn's claim if
         // one just landed on the same sector (spec-loam-structures.md).

@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:32:14Z",
+      "minorityValues": {
+        "deployMode": "HypnoAlly"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Scholar-class Zombie",
+      "Newspaper-wielder"
+    ],
+    "gameTypeId": 203,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The combination of massive damage output, high durability, immunity to status effects, and an unstoppable movement mechanic justifies a tyrant-level threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "CherryPaperZ95",
+    "targetPreference": "frontline",
+    "traits": [
+      "High-velocity Cherry Burst",
+      "Unstoppable Movement",
+      "Status Immunity",
+      "Aura of Pressure"
+    ],
+    "variants": [
+      "normal",
+      "ancient",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  }
+]

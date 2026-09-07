@@ -44,7 +44,9 @@ public class AtomCatalogSsotDriftTests
         // Sanity anchors: these ARE today's generated values, not guesses. If one of these Assert.Equal
         // lines fails, code moved and the doc needs updating — that is the point.
         // 267 -> 268 (party-dungeon D4.25, 2026-09-06): `loadout.slots`, the extend-action-slot grant.
-        Assert.Equal(268, registry.AllRegistered.Count);
+        // 268 -> 269 (base-defense siege-ai, 2026-09-07): `ai.aggression`, §5.20 rule 4's signed
+        // targeting-priority scalar.
+        Assert.Equal(269, registry.AllRegistered.Count);
         // 11 since E16; E38 (spec-entity-fields-12plus.md) took it to 23.
         Assert.Equal(23, StatChannels.All.Length);
         // E34 (spec-trigger-vocabulary.md): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/OnSunCollect/
@@ -57,8 +59,10 @@ public class AtomCatalogSsotDriftTests
         // E41 (spec-ui-attach-point.md): 15 -> 16 kinds, 6 -> 7 attach points, with ui.present / Ui.
         // base-defense `siege-construction` (decision 27, 2026-09-06): 16 -> 17 kinds, 7 -> 8 attach
         // points, with structure.place / Siege.
-        Assert.Equal(17, AtomKindRegistry.KindCount);
-        Assert.Equal(8, AtomKindRegistry.AttachPointCount);
+        // passive-tree `element-conversion` (D56, spec-element-conversion.md, 2026-09-07): 17 -> 18
+        // kinds, 8 -> 9 attach points, with element.convert / Element.
+        Assert.Equal(18, AtomKindRegistry.KindCount);
+        Assert.Equal(9, AtomKindRegistry.AttachPointCount);
 
         Assert.Contains($"Derived — {registry.AllRegistered.Count} registered", text);
         Assert.Contains($"Primary — {StatChannels.All.Length}, and only these", text);

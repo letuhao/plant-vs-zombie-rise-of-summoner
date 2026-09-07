@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "A circular platform suspended by thick, humming copper coils. Constant, whistling drafts whip through the chamber, carrying the scent of ozone and high-altitude frost.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Gale-Shorn Sanctum",
+  "reason": "The room contains a high-value relic guarded by a whirlwind-infused elemental, requiring tactical positioning to avoid being blown off the ledge.",
+  "roomId": "room.elite-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

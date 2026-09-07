@@ -104,11 +104,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T13:22:53Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -130,7 +131,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "fungal-symbiote"
     ],
@@ -184,11 +185,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T13:23:34Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "aptitudePrimary": "Onslaught",
         "attackTempo": "flurry"
@@ -213,7 +215,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "dark",
     "family": [
       "fungal-symbiote"
     ],

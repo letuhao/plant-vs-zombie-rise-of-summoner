@@ -91,6 +91,16 @@ test.describe("ActorSheet catalog-era shell", () => {
     await page.getByTestId("actor-sheet-tab-kit").click();
     await expect(page.getByTestId("kit-tab")).toBeVisible();
     await expect(page.getByTestId("kit-equip-pending")).toBeVisible();
+    await expect(page.getByTestId("kit-tab")).not.toContainText(/Strike|Firebolt/i);
+    await expect(page.locator('[data-testid="actions-tab"]')).toHaveCount(0);
+
+    await page.getByTestId("actor-sheet-tab-condition").click();
+    await expect(page.getByTestId("actor-panel-deploy")).toBeVisible();
+    await expect(page.locator('[data-testid="actor-leftover-footer"]')).toHaveCount(0);
+
+    await page.getByTestId("actor-sheet-tab-aptitudes").click();
+    await expect(page.getByTestId("actor-leftover-footer")).toBeVisible();
+    await expect(page.locator('[data-testid="actor-panel-deploy"]')).toHaveCount(0);
 
     await page.getByTestId("actor-sheet-tab-shield").click();
     await expect(page.getByTestId("actor-shield-pending")).toBeVisible();

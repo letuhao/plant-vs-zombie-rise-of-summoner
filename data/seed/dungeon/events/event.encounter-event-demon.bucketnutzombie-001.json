@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-demon.bucketnutzombie-001",
+  "flavor": "A rhythmic, heavy thudding echoes through the corridor. A line of pale, stiff-limbed 僵尸 marches forward, their movements jerky and unnatural. Instead of reaching for weapons, they tilt their heads forward, their foreheads gleaming with a dull, metallic sheen as they prepare to charge with a devastating 铁头功 strike.",
+  "kind": "encounter-event",
+  "name": "The Iron-Skull Vanguard",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to attempt to disrupt the momentum of the charging undead or brace for the impact of their kinetic force.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.bucketnutzombie"
+}

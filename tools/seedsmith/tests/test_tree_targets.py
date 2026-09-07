@@ -62,7 +62,7 @@ def base_doc() -> dict:
 
 class LiveTargetsTests(unittest.TestCase):
     def test_the_live_shipped_file_loads_cleanly(self) -> None:
-        targets = load()  # default path: data/tuning/passive-tree-targets.v1.json
+        targets = load()  # default path: data/tuning/passive-tree-targets.v2.json
         self.assertEqual(targets.exclusion_target_share_milli, 20)
         self.assertEqual(targets.species_unique_affix_min, 8)
         self.assertEqual(targets.cell_occupancy_median_max, 2)
@@ -195,7 +195,7 @@ class QuotaShapeTests(unittest.TestCase):
         # a thirteenth aptitude (or an 8th status, etc.) must change the grid by construction alone
         # (spec-tree-language.md §4.3's own worked example names aptitude explicitly).
         live_root = Path(__file__).resolve().parents[3] / "data" / "tuning"
-        raw = (live_root / "passive-tree-targets.v1.json").read_text(encoding="utf-8")
+        raw = (live_root / "passive-tree-targets.v2.json").read_text(encoding="utf-8")
         doc = json.loads(raw)
         for axis in ("aptitude", "trigger", "element", "status", "channelFamily"):
             self.assertIn("weightScheme", doc["quotas"][axis],

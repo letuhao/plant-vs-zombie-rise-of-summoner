@@ -239,6 +239,9 @@
   "disptpl.affix.elpw-pierce": {
     "template": "+{value} {element} penetration"
   },
+  "disptpl.affix.elpw-surfeit": {
+    "template": "{value} increased {element} power overflow"
+  },
   "disptpl.affix.entangling": {
     "template": "{value}% chance to entangle target on hit"
   },
@@ -389,6 +392,9 @@
   "disptpl.affix.shield-toughness": {
     "template": "{element} shields take {value} less damage per hit"
   },
+  "disptpl.affix.shld-absolute": {
+    "template": "sets {element} shield penetration to {value}, ignoring other modifiers"
+  },
   "disptpl.affix.shld-breach": {
     "template": "{value} increased damage dealt to {element} shields"
   },
@@ -439,6 +445,9 @@
   },
   "disptpl.affix.tempo-surge": {
     "template": "{value}% increased zombie advance"
+  },
+  "disptpl.affix.tempo-wildgrowth": {
+    "template": "{value}% more attack interval"
   },
   "disptpl.affix.tempo-yield": {
     "template": "{value}% faster sun production"

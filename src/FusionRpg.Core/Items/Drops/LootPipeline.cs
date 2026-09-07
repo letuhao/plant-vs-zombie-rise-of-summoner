@@ -98,7 +98,19 @@ public sealed record LootContentView(
     /// itself). `null` (the default) refuses any unique draw (`drop.unique-rarity-unresolved`) rather
     /// than guessing a rarity — the same "no default, refuse" posture `DelvePrices.Merchant` already
     /// uses for its own undesigned price.</summary>
-    Func<string, string?>? UniqueRarityFor = null);
+    Func<string, string?>? UniqueRarityFor = null,
+    /// <summary>D3.15/D4.12/D3.11 (this session, 2026-09-07): resolves a `unique` entry's own `RefId`
+    /// to its AUTHORED `(Frame, BaseTypeId)` pair, the identical resolver shape as
+    /// <see cref="UniqueRarityFor"/> for the identical reason — `ContainerRow.Frame`/`.BaseTypeId` are
+    /// Data-layer fields this I/O-free Core file cannot read itself. One combined delegate, not two:
+    /// the pair is only ever meaningful together (a `LootGrant` with a `BaseTypeId` but no `Frame`, or
+    /// the reverse, is not a real state `item_generation` can stamp), so a caller cannot half-supply
+    /// it the way <see cref="SocketMaxFor"/>/<see cref="SocketTuning"/> structurally can. `null` (not
+    /// supplied) or a resolved-but-unresolvable ref both REFUSE the draw (`drop.unknown-unique`) —
+    /// `item_generation.frame`/`.base_type_id` are `NOT NULL` columns, so a unique instance minted
+    /// without this pair could never actually be persisted; refusing loudly here, at the one point that
+    /// knows it, is strictly better than minting a grant nothing downstream can save.</summary>
+    Func<string, (string Frame, string BaseTypeId)?>? UniqueBaseTypeFor = null);
 
 /// <summary>Server-derived correlation ids (§4.4). One shape per source kind, none client-reachable.</summary>
 public static class LootCorrelation
@@ -124,6 +136,11 @@ public static class LootCorrelation
         // literally a delve id) -- the one arm below that departs from "prefix only" above, stated
         // explicitly since the departure is not self-evident from the other three.
         "dungeon-clear" => $"loot:delve:{sourceId}:clear",
+        // drop-tables `siege-loot` (2026-09-07): base-defense's first loot_source binding. sourceId
+        // arrives pre-joined as "{sectorId}:{turn}" (SiegeLoot.cs's own construction) -- turn-qualified
+        // so a district retaken more than once (won, lost, retaken, won again) is a distinct loot event
+        // each time, never a replay of an earlier siege's manifest.
+        "siege-assault" => $"loot:siege:{sourceId}",
         _ => throw new ArgumentException($"no correlation shape for source kind '{sourceKind}'", nameof(sourceKind)),
     };
 }
@@ -435,10 +452,31 @@ public static class LootPipeline
                 return null;
             }
 
+            // D3.15/D4.12/D3.11: the SAME two-step "resolver missing, then resolver returns nothing"
+            // shape as UniqueRarityFor above, for the identical reason -- item_generation.frame/
+            // .base_type_id are NOT NULL, so a unique instance minted without this pair could never be
+            // persisted; refusing here, before Mint ever runs, is strictly better than minting a grant
+            // nothing downstream can save.
+            if (view.UniqueBaseTypeFor is not { } baseTypeFor)
+            {
+                rejected = AtomRejection.ContentRule("drop.unique-base-type-unresolved",
+                    $"drew unique '{entry.RefId}' but the host supplies no UniqueBaseTypeFor resolver");
+                return null;
+            }
+
+            var baseType = baseTypeFor(entry.RefId);
+            if (baseType is not { } resolvedBaseType)
+            {
+                rejected = AtomRejection.ContentRule("drop.unknown-unique",
+                    $"unique container '{entry.RefId}' has no resolvable frame/base type");
+                return null;
+            }
+
             var rollSeed = SeededRng.DeriveStream(lootSeed, LootStreams.RollSeed(i)).NextULong();
 
             var grant = new LootGrant(
                 i, DropEntryKind.Unique, entry.RefId, 1, entry.AffixChannel,
+                BaseTypeId: resolvedBaseType.BaseTypeId, Frame: resolvedBaseType.Frame,
                 RarityId: rung.RarityId, RarityOrdinal: rung.Ordinal, ItemLevel: itemLevel, RollSeed: rollSeed);
 
             if (view.Mint is { } mint)

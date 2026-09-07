@@ -6,7 +6,7 @@ Task H3's own additions are tested below: the per-slot cell walk (`build_slot`,
 `assign_quota_cells`), the return-to-pool rebalance (`rebalance_axis`) and its refusal on an
 overdrawn cell (`OverdrawnQuota`), and the plan-facing wrapper (`quota_for_plan`,
 `permitted_ids_for_cell`) — including an integration pass against the REAL committed `might.v1.json`
-plan and the REAL `passive-tree-targets.v1.json`, which is the "corpus-level quota check reproduces
+plan and the REAL `passive-tree-targets.v2.json`, which is the "corpus-level quota check reproduces
 the declared target" verification the todo's own H3 entry names.
 """
 from __future__ import annotations
@@ -195,6 +195,30 @@ class BuildSlotTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             quota.build_slot(self._node(), category="status")
 
+    def test_a_species_tree_forces_both_element_and_status_at_once(self) -> None:
+        # Task J8 (2026-09-07): the real, different shape from elemental/status trees, which each
+        # force exactly ONE of the two. Found and fixed while wiring `TreeSpec.mechanical_favour`
+        # through to a real quota computation -- the original `if/elif` could never express "both,"
+        # and silently forced NEITHER for `category="species"` before this fix.
+        slot = quota.build_slot(self._node(), category="species", forced_element="air",
+                               forced_status="spark")
+        self.assertEqual({"nodeClass": "magnitude", "element": "air", "status": "spark"}, slot.forced)
+
+    def test_a_species_tree_without_a_forced_element_refuses(self) -> None:
+        with self.assertRaises(ValueError):
+            quota.build_slot(self._node(), category="species", forced_status="spark")
+
+    def test_a_species_tree_without_a_forced_status_refuses(self) -> None:
+        with self.assertRaises(ValueError):
+            quota.build_slot(self._node(), category="species", forced_element="air")
+
+    def test_a_primary_tree_never_silently_forces_element_or_status(self) -> None:
+        # The other real regression the old if/elif shape risked in reverse -- confirming the fix
+        # did not widen forcing to categories that must NOT have it.
+        slot = quota.build_slot(self._node(), category="primary", forced_element="air",
+                               forced_status="spark")
+        self.assertEqual({"nodeClass": "magnitude"}, slot.forced)
+
 
 # ---------------------------------------------------------------------------------------------
 # task H3 — rebalance_axis: the step-5 return-to-pool, and OverdrawnQuota's own refusal.
@@ -295,7 +319,7 @@ class AssignQuotaCellsTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------------
 # task H3 — quota_for_plan / permitted_ids_for_cell: the plan-facing wrapper, proven against the
-# REAL committed `might.v1.json` plan and the REAL passive-tree-targets.v1.json. This is the
+# REAL committed `might.v1.json` plan and the REAL passive-tree-targets.v2.json. This is the
 # "corpus-level quota check reproduces the declared target" verification the H3 todo entry names.
 # ---------------------------------------------------------------------------------------------
 
@@ -416,6 +440,28 @@ class QuotaForForcedElementOrStatusCategoryTests(unittest.TestCase):
         by_id = {n.node_id: n for n in self.plan.nodes}
         for node_id, cell in cells.items():
             self.assertEqual(cell.node_class, by_id[node_id].node_class)
+
+    def test_a_synthetic_species_tree_forces_element_and_status_together_not_either_or(self) -> None:
+        """Task J8 (2026-09-07): a species tree's own real, different shape from elemental/status
+        trees -- BOTH axes forced from the ONE mechanical-favour lock at once, on the same 40-node
+        tree. Reproduces the exact same class of crash `build_slot`'s own `if/elif` would have
+        caused here (silently forcing NEITHER axis for `category="species"`) if this fix had not
+        been made -- proven by checking every cell lands on the forced value, not by trusting the
+        function never raised."""
+        cells = quota.quota_for_plan(self.plan, self.targets, category="species",
+                                     forced_element="air", forced_status="spark")
+        self.assertEqual(len(cells), len(self.plan.nodes))
+        for cell in cells.values():
+            self.assertEqual("air", cell.value_for("element"))
+            self.assertEqual("spark", cell.value_for("status"))
+
+    def test_a_species_tree_missing_either_forced_value_refuses_rather_than_silently_forcing_neither(self) -> None:
+        with self.assertRaises(ValueError):
+            quota.quota_for_plan(self.plan, self.targets, category="species",
+                                 forced_element="air", forced_status=None)
+        with self.assertRaises(ValueError):
+            quota.quota_for_plan(self.plan, self.targets, category="species",
+                                 forced_element=None, forced_status="spark")
 
 
 if __name__ == "__main__":

@@ -111,7 +111,26 @@ const DIALOG_BAND_ALLOWED_PATHS = new Set([
   // only by the Craft button on an already-selected armoury row, and fully controlled by the layer's
   // own `craftOpen` state. It qualifies on the same two grounds, and for the same reason it is a
   // dialog at all: a spend is a decision, which is what band 3 is for.
-  "layers/relics/Workbench.tsx"
+  "layers/relics/Workbench.tsx",
+  // party-dungeon D5.9 (spec-delve-stage.md §7): "the extraction summary — the one result, with any
+  // wipe or permanent-loss notice folded in" — the one band-3 result the delve stage produces
+  // (`ExtractionSettlement.Decide`, `DelveLoot.AtExtraction`). Qualifies the same way the three world
+  // dialogs above do: fully controlled by its own `open` prop, never self-opening from a background
+  // event (`ExtractionSummary.test.tsx`'s own "open=false leaves the layer stack empty" case).
+  "stages/delve/summary/ExtractionSummary.tsx",
+  // party-dungeon D5.8 (spec-delve-stage.md §7): "Descent confirm (single-descent domains, and the
+  // Oath), extract confirm, retreat confirm — confirms, not results." Only `DescendConfirm.tsx` is
+  // listed here, not all three: `ExtractConfirm.tsx`/`RetreatConfirm.tsx` are thin `ui/ConfirmDialog`
+  // wrappers (already-exempt path above) that never themselves render `<DialogShell` or claim
+  // `band-dialog` — the scan patterns above simply never match their own source, so listing them would
+  // be an inert, meaningless entry rather than a real exemption. `DescendConfirm.tsx` is real: it needs
+  // `DialogShell` for the Oath checkbox `ConfirmDialog`'s flat `message: string` has no slot for.
+  // Qualifies on the same two grounds as every entry above: fully controlled by its own `open` prop
+  // (`DelvePickerLayer.tsx` decides when to show it), never self-opening from a background event
+  // (`DescendConfirm.test.tsx`'s own "renders nothing when closed" case). `stages/delve/bandDiscipline
+  // .test.ts`'s own `Only_the_summary_and_three_confirms_open_band_3` is the real-tree guard that keeps
+  // this list honest.
+  "stages/delve/confirms/DescendConfirm.tsx"
 ]);
 
 const DEV_SURFACE_PREFIXES = [

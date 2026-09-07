@@ -1,6 +1,7 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle.Siege;
 
@@ -24,20 +25,30 @@ namespace FusionRpg.Core.Battle.Siege;
 /// comment for the full reasoning and `EmplacementFireMode`'s own doc comment for the replacement
 /// vocabulary this represents.</para>
 ///
-/// <para><b>A real v1, with three sub-scores honestly left at their zero/default value — named here,
-/// not hidden.</b> Of `AiCandidate`'s 7 scoring inputs, THREE are real today: `HitChanceMilli`
+/// <para><b>Five of `AiCandidate`'s 7 scoring inputs are real (resolved 2026-09-07 — see
+/// spec-siege-ai.md's own "Open questions" for the full reasoning behind each): `HitChanceMilli`
 /// (`SiegeHitChance.EstimateMilli`, reusing `OverlayCombatCalculator`'s own Omni formula),
-/// `TargetMissingHpMilli` (direct from `EntityFacts.HpMilli`), and `TargetCanCounter` (does the
-/// target hold any action at all). `ObjectiveClassMilli` (needs `BoardPathfinder.TerrainOnlyOccupancy`
-/// path-scoring against a real objective — R3), `IsKillingBlow` (needs an expected-damage estimate,
-/// not just a hit-chance one), and `IncomingThreatMilli` (needs multi-enemy damage aggregation
-/// discounted by `siege-cover`) are each their own real, separate body of work — left at 0/false
-/// rather than guessed at, matching this program's own "an honest gap costs a sentence; a hidden one
-/// costs an hour" discipline. `BaseTier`/`Aggression` stay flat (every candidate in one tier, zero
-/// aggression) since no stealth/taunt content authors a non-default value yet (§5.20 rule 4's own
-/// vocabulary existing does not obligate every actor to use it). None of this makes the scorer inert:
-/// three independently-meaningful signals (accuracy, existing damage, counter-safety) still produce a
-/// real, non-arbitrary preference order — see `AiScoring.Score`'s own additive formula.</para>
+/// `TargetMissingHpMilli` (direct from `EntityFacts.HpMilli`), `TargetCanCounter` (does the target
+/// hold any action at all), `ObjectiveClassMilli` (Chebyshev distance from the candidate to MY OWN
+/// objective — an honest v1: `IBattleView` exposes only per-actor facts, never board geometry, so a
+/// real `BoardPathfinder` route is not reachable from here), and `IsKillingBlow`
+/// (`SiegeExpectedDamage.IsKillingBlow`, the Omni-fallback branch of `OverlayCombatCalculator`'s own
+/// formula against the target's REAL current HP via the new `IBattleView.MaxHpOf`).</b>
+/// `IncomingThreatMilli` is ALSO real and live by default (corrected 2026-09-07, same session):
+/// nearby same-side raw power around a candidate, AS A FRACTION OF THE DECIDING ACTOR'S OWN power —
+/// no tunable, since an absolute milli reference could never have a safe default once `CombatPowerOmni`
+/// scales with `P(Theta)` (a private per-subsystem curve is exactly what the power-ladder rule
+/// forbids). Still cover-free v1: the full model needs a structure-to-cover-data mechanism
+/// `BattleActorSetup` does not have yet (a separate, un-started task). `Aggression` is ALSO wired
+/// (resolved 2026-09-07, same session) via a new `IBattleView.AggressionOf(actorKey) -> int` — the
+/// exact accessor §5.20 rule 4's own spec snippet names — but reads 0 (neutral) from every real
+/// implementor today since no taunt/stealth/decoy content exists anywhere yet; this is the wiring
+/// seam, matching `EmplacementFireMode`'s own precedent, not a promise of live behavior. `BaseTier`
+/// stays a structural 0 for every candidate, not a gap: R1/R2's own §2 table names signed aggression
+/// as the ONLY per-candidate input into tier, so there is no independent starting-tier concept to
+/// wire. None of this makes the scorer inert: six of `AiCandidate`'s seven fields are real AND live by
+/// default, and the seventh (`Aggression`) is wired and correctly neutral pending content — see
+/// `AiScoring.Score`'s own additive formula.</para>
 /// </summary>
 public sealed class SiegeAiIntentSource : IIntentSource
 {
@@ -48,6 +59,7 @@ public sealed class SiegeAiIntentSource : IIntentSource
     readonly AiTuning _tuning;
     readonly Func<long, int> _roundOf;
     readonly RetargetLedger? _retarget;
+    readonly BattleTrace? _trace;
 
     /// <summary>
     /// `roundOf` converts the kernel's own `nowTick` into `AiScoring`'s own `currentRound` — a
@@ -62,10 +74,15 @@ public sealed class SiegeAiIntentSource : IIntentSource
     /// separate, deferred work: a caller that wants `ai.retargetLatencyTicks` (17.3) actually enforced
     /// constructs ONE `RetargetLedger` and reuses it across every `TryDeclare` call for the SAME
     /// battle, so the "last target, last retarget tick" memory persists tick to tick.</para>
+    ///
+    /// <para><c>trace</c> (R6, §7) is ALSO OPTIONAL and defaults to <c>null</c> — omitting it costs
+    /// nothing (matching `BattleTrace`'s own opt-in design). Supplying one records R6's own top-3
+    /// scored candidates with their full per-term breakdown via `BattleTrace.AiDecision` every time
+    /// `ChooseTarget` actually rescores (never on a 17.8 held-target tick, since nothing was scored).</para>
     /// </summary>
     public SiegeAiIntentSource(
         IBattleView view, CooldownLedger cooldowns, IStanceCheck stance, IAffordabilityCheck affordability,
-        AiTuning tuning, Func<long, int> roundOf, RetargetLedger? retarget = null)
+        AiTuning tuning, Func<long, int> roundOf, RetargetLedger? retarget = null, BattleTrace? trace = null)
     {
         _view = view ?? throw new ArgumentNullException(nameof(view));
         _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
@@ -74,6 +91,7 @@ public sealed class SiegeAiIntentSource : IIntentSource
         _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
         _roundOf = roundOf ?? throw new ArgumentNullException(nameof(roundOf));
         _retarget = retarget;
+        _trace = trace;
     }
 
     public ActionIntent TryDeclare(string actorKey, long nowTick)
@@ -173,12 +191,74 @@ public sealed class SiegeAiIntentSource : IIntentSource
             var hitChanceMilli = SiegeHitChance.EstimateMilli(selfDerived, targetDerived);
             var missingHpMilli = Math.Clamp(1000 - facts.HpMilli, 0, 1000);
             var canCounter = _view.HeldActionsOf(candidateKey).Count > 0;
+            var candidatePos = _view.PositionOf(candidateKey);
+
+            // Resolved 2026-09-07 (spec-siege-ai.md, Open questions): Chebyshev-to-objective, an
+            // honest v1 -- IBattleView exposes only per-actor facts, never board geometry, so a real
+            // BoardPathfinder route is not reachable from here without widening that seam far beyond
+            // its own established "one fact per actor" shape.
+            var objectiveClassMilli = 0;
+            if (_view.ObjectivePositionOf(actorKey) is { } myObjective && candidatePos is { } cPos)
+            {
+                var toObjective = GridDistance.Chebyshev(cPos, myObjective);
+                objectiveClassMilli = (int)(1000 - Math.Clamp(
+                    checked((long)toObjective * 1000 / _tuning.ObjectiveReferenceDistanceCells), 0, 1000));
+            }
+
+            // Resolved 2026-09-07: Omni-only expected damage vs the target's own real (not per-mille)
+            // current HP -- MaxHpOf is the one extra fact EntityFacts.HpMilli alone cannot supply.
+            var isKillingBlow = false;
+            if (_view.MaxHpOf(candidateKey) is { } targetMaxHp)
+            {
+                var targetCurrentHp = checked(targetMaxHp * facts.HpMilli / 1000);
+                isKillingBlow = SiegeExpectedDamage.IsKillingBlow(selfDerived, targetDerived, targetCurrentHp);
+            }
+
+            // Corrected 2026-09-07, same session: the first version divided by an ABSOLUTE
+            // `ReferenceThreatPowerMilli` tunable -- re-examined after the stop-hook's own repeated
+            // "not blocked, re-investigate" pressure and found to be a real design defect, not a
+            // genuine playtest-data gap. CombatPowerOmni scales with P(Theta) (One Power Ladder,
+            // quadratic) -- a FIXED milli reference can never have a safe default, because "a lot of
+            // power" at Theta=10 is trivial at Theta=200, exactly the private-per-subsystem-curve
+            // defect AGENTS.md's power-ladder rule exists to prevent. `OverlayCombatCalculator`'s own
+            // shape is the precedent this should have followed from the start: it never compares a
+            // stat to an absolute constant, only to ANOTHER read stat (`atk.Power - def.Defense`,
+            // `accuracy - dodge`). Fixed the same way: threat is now the CANDIDATE side's nearby raw
+            // power AS A FRACTION OF THE DECIDING ACTOR'S OWN power -- a Theta-invariant ratio, live
+            // from day one, no tunable, no unset gate. Cover-free is still v1 (the full model needs a
+            // structure-to-cover-data mechanism that does not exist yet -- BattleActorSetup carries no
+            // StructureId at all, a separate, un-started task).
+            var incomingThreatMilli = 0L;
+            var selfPowerOmni = (long)selfDerived.Get(DerivedStatChannels.CombatPowerOmni);
+            if (selfPowerOmni > 0 && candidatePos is { } threatCenter)
+            {
+                var threatSum = 0L;
+                for (var t = 0; t < liveActorKeys.Count; t++)
+                {
+                    var threatKey = liveActorKeys[t];
+                    if (_view.SideOf(threatKey) != _view.SideOf(candidateKey)) continue;
+                    if (_view.PositionOf(threatKey) is not { } threatPos) continue;
+                    if (GridDistance.Chebyshev(threatPos, threatCenter) > _tuning.ThreatRadiusCells) continue;
+                    if (_view.DerivedOf(threatKey) is not { } threatDerived) continue;
+                    threatSum = checked(threatSum + (long)threatDerived.Get(DerivedStatChannels.CombatPowerOmni));
+                }
+                incomingThreatMilli = Math.Clamp(checked(threatSum * 1000 / selfPowerOmni), 0, 1000);
+            }
 
             candidates.Add((candidateKey, new AiCandidate(
-                ActorKey: candidateKey, BaseTier: 0, Aggression: 0,
-                HitChanceMilli: hitChanceMilli, ObjectiveClassMilli: 0, IsKillingBlow: false,
+                // BaseTier: always 0, structurally -- R1/R2's own §2 table names signed aggression as
+                // the ONLY per-candidate input into tier ("which tier a candidate lands in is decided
+                // by signed aggression, not a band-membership flag"), so there is no independent
+                // "starting tier" concept to read; it is the anchor aggression offsets FROM.
+                // Aggression: resolved 2026-09-07 -- IBattleView.AggressionOf is the exact accessor
+                // §5.20 rule 4's own snippet names. Reads 0 (neutral) from every real implementor today
+                // since no taunt/stealth/decoy content exists anywhere yet -- a wiring seam for that
+                // future content, matching EmplacementFireMode's own "vocabulary before its second
+                // value has a real consumer" precedent, not a promise of live behavior today.
+                ActorKey: candidateKey, BaseTier: 0, Aggression: _view.AggressionOf(candidateKey),
+                HitChanceMilli: hitChanceMilli, ObjectiveClassMilli: objectiveClassMilli, IsKillingBlow: isKillingBlow,
                 TargetMissingHpMilli: missingHpMilli, TargetCanCounter: canCounter,
-                IncomingThreatMilli: 0)));
+                IncomingThreatMilli: incomingThreatMilli)));
         }
 
         if (candidates.Count == 0)
@@ -187,8 +267,15 @@ public sealed class SiegeAiIntentSource : IIntentSource
             return null;
         }
 
-        var chosen = AiScoring.ChooseTarget(
-            candidates.Select(c => c.Candidate).ToList(), _roundOf(nowTick), _tuning);
+        var scoreable = candidates.Select(c => c.Candidate).ToList();
+
+        if (_trace is not null)
+        {
+            var top3 = AiScoring.TopThree(scoreable, _roundOf(nowTick), _tuning);
+            _trace.AiDecision(_roundOf(nowTick), actorKey, AiScoring.FormatTopThree(top3));
+        }
+
+        var chosen = AiScoring.ChooseTarget(scoreable, _roundOf(nowTick), _tuning);
         if (chosen is not null) _retarget?.RecordRetarget(actorKey, chosen.Value.ActorKey, nowTick);
         return chosen?.ActorKey;
     }

@@ -10,6 +10,7 @@ import { SlotRow } from "./SlotRow";
 import { ForceRow } from "./ForceRow";
 import { WardenBlock } from "./WardenBlock";
 import { DowseBlock } from "./DowseBlock";
+import { ActionCluster, type ActionVerb } from "./ActionCluster";
 
 export type SectorInspectorProps = {
   open: boolean;
@@ -25,6 +26,15 @@ export type SectorInspectorProps = {
    * (`WorldStateDto.ProspectedSectorIds`), so the caller checks membership once and passes the
    * per-sector answer down. */
   prospected: boolean;
+  /**
+   * party-dungeon D1.28 (the world-map door) — the ONE verb `world-inspector` owns so far. Computed
+   * by the caller (`WorldStage.tsx`), never here: this component stays pure/presentational (no
+   * hooks), exactly as it already was, so `SectorInspector.test.tsx`'s existing renders need no
+   * `QueryClientProvider` wrapping to keep passing. `null`/`undefined` when this sector has none of
+   * the four reused slot kinds (`delveDoorCapability.ts`'s own structural gate) — the actions region
+   * stays empty in that case, same as every sector before this task.
+   */
+  delveDoorVerb?: ActionVerb | null;
 };
 
 /**
@@ -33,7 +43,11 @@ export type SectorInspectorProps = {
  * the order were W57's own job**; all nine blocks are now their own real, separately-tested
  * components per the spec's own project-structure list (`IdentityHeader`/`GroundBlock` W58,
  * `NextTurnBlock` W59, `SectorLoamBlock`/`ComponentBlock` W61, `SlotRow`/`ForceRow` W62,
- * `WardenBlock`/`DowseBlock` W63) — only the Actions region stays inline, reserved, pending W64.
+ * `WardenBlock`/`DowseBlock` W63) — the Actions region stays inline, reserved, pending W64's own full
+ * roster (Claim/Build/Cede/etc). party-dungeon D1.28 (2026-09-07) put exactly one verb into it ahead
+ * of W64 — the map-door row, the freeze's own named exception (`world-stage-map.md:262-266`,
+ * decision 2) — via the SAME generic `ActionCluster` W64 will otherwise use; still empty for any
+ * sector without one of the four reused slot kinds.
  *
  * **One real gap remains, stated honestly rather than invented around:** `Dowsing` (block 9) is not
  * a per-sector wire field (`Prospecting.Reveal` is world-scoped, `WorldStateDto.ProspectedSectorIds`);
@@ -51,7 +65,8 @@ export function SectorInspector({
   forces,
   cedeOrderAvailable,
   onPin,
-  prospected
+  prospected,
+  delveDoorVerb
 }: SectorInspectorProps) {
   return (
     <DockShell open={open} onOpenChange={onOpenChange} title={sector.sectorId} testId="sector-inspector">
@@ -102,7 +117,9 @@ export function SectorInspector({
           <DowseBlock prospected={prospected} />
         </section>
 
-        <section data-testid="inspector-actions" />
+        <section data-testid="inspector-actions">
+          {delveDoorVerb ? <ActionCluster verbs={[delveDoorVerb]} /> : null}
+        </section>
       </div>
     </DockShell>
   );

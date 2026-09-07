@@ -535,6 +535,17 @@ public static class DerivedStatChannels
     // The actor's own equipped-slot capacity granted by worn gear -- LoadoutSet/AutoEquip/CapPolicy
     // are this channel's three readers.
     public const string LoadoutSlots = "loadout.slots";
+
+    // H.9 -- siege AI, 1 channel (base-defense/spec-siege-ai.md §5.20 rule 4, resolved 2026-09-07).
+    // Reader: IBattleView.AggressionOf (BattleRunState.cs), consumed by SiegeAiIntentSource ->
+    // SiegeAi.EffectiveTier. Pool class: one actor's own value, no counterpart. Structurally bounded
+    // to [-AiTuning.AggressionRange, +AiTuning.AggressionRange] (currently -2..+2, siege.v1.json's
+    // "ai.aggression.range") by the VOCABULARY, not by this channel or a Cap (Cap only clamps the top
+    // end -- DerivedComposer.cs:72 -- wrong shape for a symmetric range). A future taunt/stealth status
+    // that sets this outside that range makes EffectiveTier throw, by design, matching this repo's
+    // "throw, never silently clamp" rule generalized from magnitude overflow to a closed vocabulary.
+    // Defaults to 0 (neutral) for every actor today -- no content targets this channel yet.
+    public const string AiAggression = "ai.aggression";
 }
 
 /// <summary>Actor element type metadata field names — see element-hub-ssot.md §5.</summary>

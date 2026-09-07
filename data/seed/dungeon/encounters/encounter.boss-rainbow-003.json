@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "finesse-defence-force-breaks-aggro",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "breakpoint",
+    "retinue": 0,
+    "signatureAction": "Prismatic Refraction"
+  },
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.boss-rainbow-003",
+  "formation": "boss",
+  "name": "The Chromatic Singularity",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-level elemental nexus that shifts its defensive properties to match the party's composition.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "swarm"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

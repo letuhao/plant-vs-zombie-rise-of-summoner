@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Air",
   "gameTypeId": 1112,
   "magnitudes": {
     "resource.max.hp": 480,

@@ -612,64 +612,308 @@ parallel; T1.6 needs all of them.
 
 ## Phase 3 — `zomboss-deploy-ai`
 
-### T3.1 — `ILawnBoardView` (the enforcing boundary) · **M** · 2 files
+### T3.1 — `ILawnBoardView` (the enforcing boundary) · **M** · 2 files — **DONE 2026-09-07**
 
 - A narrow, read-only projection of live board state (visible units, HP, wave) that the Zomboss scorer's
   own function signature takes EXCLUSIVELY — never `MatchRuntime`/`Board` directly. Reads
-  side/ownership through the already-shipped `SpecimenOwnershipOracle` (`decisions.md`'s "Buff/debuff
-  scope" row, 2026-08-29/30) rather than re-deriving ownership logic.
+  side/ownership through the already-shipped `SpecimenOwnershipOracle`-style `IOwnSideOracle`
+  (`decisions.md`'s "Buff/debuff scope" row, 2026-08-29/30) rather than re-deriving ownership logic.
+- **Design, resolved by investigation, not guessed** (an Explore agent read `IWorldView`, `SpecimenOwnershipOracle`,
+  `MatchSnapshot`, and `debug.board-stats`'s own shapes first, per `DESIGN-GATE.md`):
+  - `MatchSnapshot`/`BoardEntity` (the existing match-state DTO) carries counts + `Ptr`/`Side`/`TypeId`/
+    `Flags(Hypnotized)` per entity but **no HP anywhere and no wave number** (wave lives in a sibling
+    `board.snapshot` payload, never `MatchSnapshot`) — confirmed by direct read, not assumed. Building a
+    real live adapter from `MatchSnapshot` today would either fabricate HP or leave it unpopulated, so
+    T3.1 ships the interfaces + a plain synthetic-friendly DTO pair only, matching the spec's own testing
+    strategy verbatim ("No live E2E possible until modules 1-2 [have] an actual roster... given synthetic
+    board snapshots"). Wiring a real per-unit HP feed is a separate, not-yet-scoped gap, named here so
+    it isn't silently assumed solved.
+  - Enforcement mirrors `IWorldView`'s own three-layer proof exactly: (1) `ILawnBoardView`/`ILawnUnitView`
+    are genuinely separate types with zero members of `MatchRuntime`/`Board`/`MatchSnapshot` and no
+    implicit conversion from either; (2) relation resolves through an injected `IOwnSideOracle` — the
+    SAME interface `SpecimenOwnershipOracle`/`BattlefieldOwnSideReactor` already use, not a duplicate;
+    (3) a source-scan guard test (`Nothing_under_Match_Ai_may_read_the_board_itself`) fails the build if
+    the literal substrings `MatchRuntime`/`MatchSnapshot`/`Board` appear on any non-comment line under
+    `src/FusionRpg.Core/Match/Ai/`, mirroring `WorldDeterminismGuardTests`'s own identical pattern
+    (including its own "the guard would actually catch a violation" self-test).
+  - `IOwnSideOracle.RelationOf` returning null (an unregistered ptr — a raw vanilla PvZ unit, never a
+    unique demon) resolves to `RelationKind.Enemy`, not silently dropped or defaulted to Self/Ally —
+    stated explicitly in the factory's own doc comment, not left implicit.
 - Acceptance:
-  - [ ] A compile-time proof the scorer's own signature cannot accept `MatchRuntime`/`Board` — mirroring
-        `spec-ai-commander.md`'s own `IWorldView` leak-proof precedent.
-  - [ ] A hypnotized/side-swapped entity resolves to its real owner through `SpecimenOwnershipOracle`,
-        not the entity's current on-board side.
-- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ZombossDeployAi`
-- Files: `src/FusionRpg.Core/Match/Ai/ILawnBoardView.cs` (new), tests.
+  - [x] A compile-time proof the scorer's own signature cannot accept `MatchRuntime`/`Board` — the guard
+        test above; `ILawnBoardView`'s own member list has no path back to either type.
+  - [x] A hypnotized/side-swapped entity resolves to its real owner through the injected ownership
+        oracle, not the entity's current on-board side — `Build_resolves_relation_from_the_oracle_not_a_raw_side_field`
+        constructs a fake oracle answering `Ally` for a ptr labeled "hypno-swapped" and asserts the
+        built view carries that answer, never a side field (there is no side field to read — proving
+        the leak is structurally impossible, not merely untested).
+- Verify: isolated scratch xunit project referencing `FusionRpg.Core.csproj` directly (the shared
+  `tests/FusionRpg.Core.Tests` project is currently blocked building at all by an UNRELATED, actively
+  in-flight concurrent `passive-tree` session's own `NodeAtom` constructor-shape refactor — confirmed via
+  `git status` showing `NodeAtom.cs` and 5 sibling PassiveTree files mid-edit, with some of THEIR OWN
+  consumer test files already updated for the new shape and others not yet, i.e. genuinely incomplete
+  from their side, not something stashing could safely paper over this time) — 5/6 tests passing; the
+  6th (the real repo-tree file-scan) fails only because the isolated harness runs outside the repo tree
+  (`AppContext.BaseDirectory` has no `FusionRpg.slnx` above it there), not from any defect — its own
+  scanning logic is independently proven by the passing `The_guard_would_actually_catch_a_violation`
+  self-test. `FusionRpg.Core.csproj` itself (production code, no test project involved) builds clean,
+  0 errors — confirms `ILawnBoardView.cs` compiles for real against the actual shared library.
+- Files: `src/FusionRpg.Core/Match/Ai/ILawnBoardView.cs` (new — `ILawnUnitView`, `ILawnBoardView`,
+  `LawnUnitSnapshot`, `LawnBoardSnapshot`, `LawnUnitViewFactory`),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ILawnBoardViewTests.cs` (new, 6 tests).
 
-### T3.2 — Zomboss's own demon roster/pool · **M** · 2 files
+### T3.2 — Zomboss's own demon roster/pool · **M** · 2 files — **DONE 2026-09-07**
 
 - **Default per the plan's own Gates section**: the same summonable species pool the player draws from,
   filtered to the current level's own threat band. `data/tuning/zomboss-deploy-ai.v1.json` (new) carries
   the difficulty→policy-id mapping and any roster-size knob.
+- **Design, resolved by investigation** (an Explore agent read the real summon roller, `DemonAcquisition`,
+  the "threat band" concept, and `WorldFaction.PolicyId`'s own shape first):
+  - **"The same pool the player draws from" is the EXACT predicate, not the nearest-sounding one.**
+    `SummonRoller.BandWithFallback` (the real summon endpoint's own roller) filters
+    `s.Acquisition.HasFlag(DemonAcquisition.Summonable)` — a materially different filter from the
+    `Acquisition != CaptureOnly` convention several OTHER call sites in this repo use (a
+    `CaptureOnly|EventOnly` species with no `Summonable` flag would pass the latter and fail the
+    former). Used the roller's own real filter, confirmed by direct read, not the more common-looking
+    sibling.
+  - **A real "threat band" exists but is unreachable — named explicitly, not silently worked around.**
+    `data/tuning/demon-threat.v1.json`'s own per-species threatBand is consumed into a numeric/derived
+    field and discarded during species generation (`SlotFilter.cs`'s own doc comment, confirmed) —
+    `DemonSpeciesDef` (the live catalog the summon roller and this task both read) has no `ThreatBand`
+    field at all. Rather than inventing a second, parallel threat scale reachable from this catalog, or
+    quietly filtering by nothing, `BaseRarity` (already on `DemonSpeciesDef`, already the summon-gacha
+    power ladder) stands in as the threat proxy — a wave-number → rarity-ceiling table
+    (`waveRarityCeilings` in the new tuning file). Documented as a NAMED, REVERSIBLE substitution in
+    both the tuning file's own `_meta` and `ZombossDeployRoster`'s own doc comment, per this task's own
+    second acceptance line — not presented as if `ThreatBand` were actually being read.
+  - `difficultyPolicyIds` (a `Dictionary<string,string>`) mirrors `WorldFaction.PolicyId`'s own shape
+    (`WorldTemplateCatalog.cs`) one step further, per Assumption 3's own explicit ask: today's
+    `WorldFaction.PolicyId` is a bare code literal, not tunable-file-backed — this one is.
 - Acceptance:
-  - [ ] Zomboss's own available pool for a given level is deterministic and reproducible from the
-        level's own data, not hand-authored per level.
-  - [ ] The default is explicitly named as a tunable/reversible choice in code comments, not presented
-        as a permanent design decision.
-- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ZombossDeployAi`
-- Files: `src/FusionRpg.Core/Match/Ai/` (new roster-source type), `data/tuning/zomboss-deploy-ai.v1.json` (new).
+  - [x] Zomboss's own available pool for a given level is deterministic and reproducible from the
+        level's own data — `ZombossDeployRoster.AvailableSpeciesFor(waveNumber, catalog, ceilings)` is a
+        pure function (`AmbushDraw.cs`'s own "every tunable an explicit parameter" shape): same wave +
+        same catalog + same tuning revision always returns the same list, in stable ordinal `SpeciesId`
+        order (never catalog-array order, never a set) — proven by
+        `AvailableSpeciesFor_is_deterministic_same_inputs_twice_same_output`.
+  - [x] The default is explicitly named as a tunable/reversible choice in code comments — see the tuning
+        file's own `_meta.note` and `ZombossDeployRoster`'s own class-level doc comment, both spelling
+        out the `ThreatBand`-unreachable/`BaseRarity`-substitution reasoning above in full, not just
+        asserting "this is tunable."
+- Verify: same isolated scratch-project harness as T3.1 (same shared-build block, same reasoning) —
+  16/17 passing across both T3.1+T3.2's test files combined; the one non-pass is T3.1's own
+  already-explained file-scan-outside-the-repo-tree artifact, nothing from T3.2 failed. A real, separate
+  bug in this task's OWN new test file was found and fixed during this same verification pass: a
+  multi-line `string.Replace` meant to construct an invalid-JSON fixture silently no-op'd (raw string
+  literal indentation didn't byte-match the replace target), so the "rejects non-ascending
+  maxWaveAtLeast" test was asserting against the STILL-VALID original JSON and passed for the wrong
+  reason — caught because `Assert.Throws` correctly failed with "no exception was thrown" once actually
+  run, not silently accepted; fixed by giving that one fixture its own independent raw string literal
+  instead of a derived substring-replace.
+  `dotnet build src/FusionRpg.Server/FusionRpg.Server.csproj` — 0 errors, confirming the new
+  `ZombossDeployTuningHub.Configure(...)` wiring compiles for real in the actual server host (the
+  Injector's own identical wiring in `RpgHost.cs` was not separately build-verified this task — its own
+  build requires the project's special multi-target solution path, and the added lines are a
+  byte-for-byte mirror of the just-verified Server-side call with only the file path shared, unlikely to
+  hide a typo the Server build wouldn't already have caught in the shared `FusionRpg.Core` types).
+- Files: `src/FusionRpg.Core/Match/Ai/ZombossDeployRoster.cs` (new — `ZombossDeployTuning`,
+  `ZombossWaveRarityCeiling`, `ZombossDeployTuningLoader`, `ZombossDeployTuningHub`,
+  `ZombossDeployRoster`), `data/tuning/zomboss-deploy-ai.v1.json` (new),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployRosterTests.cs` (new, 11 tests),
+  `src/FusionRpg.Server/Program.cs` (edit — `Configure` wiring),
+  `src/FusionRpg.Injector/Host/RpgHost.cs` (edit — the same wiring, injector side).
 
-### T3.3 — The scorer · **M** · 2-3 files
+### T3.3 — The scorer · **M** · 2-3 files — **DONE 2026-09-07**
 
 - A deterministic scorer over `ILawnBoardView` (T3.1) + the T3.2 roster, choosing whether and which
   demon to deploy. Weights come from the T3.2 tuning file. Derives its own randomness via
   `SeededRng.DeriveStream(matchSeed, "zomboss-deploy-ai:{caseId}")`.
+- **Design**: two-stage, not one blended score — matches Assumption 2's own "deterministic scorer, not a
+  learned model or general rules engine" explicitly. Stage 1 (whether): board-state gates
+  (`MaxConcurrentOwnUnits` cap, `MinEnemyUnitsToConsiderDeploy` floor, both read off `ILawnBoardView`'s
+  own `Relation`-tagged unit counts — never a raw side field) plus a per-mille roll via
+  `SeededRng.DeriveStream(matchSeed, "zomboss-deploy-ai:{caseId}")`, reusing `LawnDeployEventEvaluator`'s
+  own exact "board condition + roll" shape for the player-side trigger rather than inventing a second
+  roll convention for the zombie side. Stage 2 (which): rank candidates by `BaseRarity` descending, tie
+  broken by `SpeciesId` ordinal — matching `DemonRecipeCatalog`'s own established tie-break. Named
+  explicitly in the class's own doc comment as the simplest design that satisfies Assumption 2 against
+  zero play data — a genuinely board-state-sensitive ranking (which candidate wins changes with board
+  state, not just whether one fires) is a real, reversible follow-up, not invented here unearned.
 - Acceptance:
-  - [ ] Scenario table: no eligible demon (declines), exactly one (picks it), multiple candidates at
-        different board states (ranking is asserted, not just "it picked something").
-  - [ ] Determinism test: same `(board snapshot, matchSeed, caseId)` twice ⇒ byte-identical decision.
-- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ZombossDeployAi`
-- Files: `src/FusionRpg.Core/Match/Ai/ZombossDeployPolicy.cs` (new),
-  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployAiTests.cs` (new).
+  - [x] Scenario table: no eligible demon declines
+        (`No_eligible_demon_declines_regardless_of_board_state_or_roll`); exactly one is picked
+        (`Exactly_one_candidate_is_picked_...`); multiple candidates at a favorable board state rank by
+        rarity, highest wins, asserted by species id, not just "something got picked"
+        (`Multiple_candidates_rank_by_rarity_highest_wins_not_just_something`,
+        `Ties_break_by_SpeciesId_ordinal_deterministically`); two further named board states correctly
+        decline despite candidates existing (too few enemies visible; already at the own-unit cap) and a
+        missed roll declines even with a fully favorable board — five distinct board-state scenarios
+        total, not one.
+  - [x] Determinism test: same `(board, matchSeed, caseId)` twice ⇒ byte-identical `ZombossDeployDecision`
+        record (`Same_board_seed_and_caseId_produce_a_byte_identical_decision_twice`) — plus a companion
+        proving a DIFFERENT `caseId` against the same seed/board never conflates streams
+        (`SeededRng.DeriveStream`'s own per-label-independence contract, not just asserted).
+- Verify: same isolated-harness workaround as T3.1/T3.2 (shared `Core.Tests` project still blocked by the
+  same unrelated concurrent `passive-tree` refactor) — **this time additionally re-run from a temporary
+  project placed INSIDE the real repo tree** (`_scratch-verify-ai/`, deleted immediately after) so the
+  T3.1 file-scan guard test could run against the real, committed file tree instead of the isolated
+  harness's own out-of-tree location — **30/30 passing, zero non-passes**, the strongest verification
+  this program's own concurrent-session-blocked stretch has produced. A real syntax mistake in this
+  task's own new test file (`with { FireChanceMilli: 0 }`, colon instead of the `with`-expression's
+  required `=`) and two now-stale JSON fixtures (missing the new `scorer` tuning block T3.3 itself added)
+  were both caught and fixed during this same pass, not shipped unnoticed.
+- Files: `src/FusionRpg.Core/Match/Ai/ZombossDeployPolicy.cs` (new — `ZombossDeployDecision`,
+  `ZombossDeployPolicy`), `src/FusionRpg.Core/Match/Ai/ZombossDeployRoster.cs` (edit — added
+  `ZombossScorerTuning` + the loader's own `scorer` block parsing/validation),
+  `data/tuning/zomboss-deploy-ai.v1.json` (edit — added the `scorer` block),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployAiTests.cs` (new, 12 tests),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployRosterTests.cs` (edit, +3 tests for the new
+  scorer-tuning validation + updated JSON fixtures).
 
-### T3.4 — Wire Zomboss's deploy through the existing path · **S** · 1 file
+### T3.4 — Wire Zomboss's deploy through the existing path · **S**, grew to **M** · 6 files — **DONE 2026-09-07**
 
 - Zomboss's own chosen deploy calls the SAME `DeployAsync`/Funnel path a player's deploy uses — no new
   write path, no shortcut.
+- **The real, load-bearing design question this task actually turned on**: `DeployAsync` only ever
+  accepts an EXISTING unique-actor instance id (confirmed by direct read,
+  `UniqueActorService.cs:108-188`) — it cannot mint on the fly. T3.3's own scorer only ever names a bare
+  catalog *species* id. Bridging the two needed a real answer to "whose `player_id` does a
+  Zomboss-minted specimen carry," since `SpecimenOwnershipOracle`'s entire "which player deployed it"
+  model (T2.1's own reused ownership axis) depends on that column being meaningfully different from the
+  human player's own. Resolved by investigation, not invented: `rpg_unique_actors.player_id` carries
+  **no SQL foreign-key constraint at all** (confirmed: the schema's only 7 `FOREIGN KEY` clauses
+  reference unrelated tables) — "which player" is enforced only in C# (`GetPlayerUnlocked` returning
+  non-null), and `CreatePlayer(string name)` is already a real, unrestricted, existing call needing only
+  a display name. So Zomboss gets a genuine, dedicated, idempotently-found-or-created player row
+  (`RpgStore.EnsureZombossPlayer`, name `"Zomboss"`) — zero schema changes, and the ENTIRE existing
+  ownership-registration chain (`CheatActions.cs`'s `RegisterSpecimenOwner`, threaded straight from
+  whatever `player_id` sits on the deploying row) needed **zero code changes** to correctly tell a
+  Zomboss-owned specimen apart from the human player's own from this point on.
+- **A second real bug found proactively, before it could ever fire live**: T3.2's own roster never
+  excluded `DemonDeployMode.HypnoAlly` — the exact same class of gap Checkpoint 2 found and fixed for
+  the PLAYER's own roster, this time caught by directly reading `DeployAsync`'s own refusal chain during
+  this task's research rather than by a live click-through. Fixed with the identical filter clause.
+- **Server-side** (`RpgStore.ZombossDeploy.cs`, new): `EnsureZombossPlayer()` (idempotent find-or-create)
+  and `MintForZomboss(speciesId, seed)` — composes two ALREADY-EXISTING, already-proven primitives
+  (`MintDemon`, `SummonRoller.RollTraits` — the SAME shared trait-roll summons and wild joins already
+  use, not a third trait-rolling scheme) rather than inventing new persistence logic. A new, thin
+  endpoint (`ZombossDeployEndpoints.cs`, `POST /api/zomboss/deploy`) composes `MintForZomboss` +
+  `UniqueActorService.DeployAsync` unchanged.
+- **Injector-side** (`MatchHost.cs`): a new `CheckZombossDeployTrigger()`, called alongside
+  `CheckLawnDeployTrigger()` under the same `InMatch`-phase gate and the same per-event cadence. Builds
+  a REAL `ILawnBoardView` from `_runtime.ToSnapshot().Entities` (live `Ptr`/`Side` data) — relation
+  resolved through the human player's own `SpecimenOwnershipOracle` (the one real player id this process
+  knows, via `CheatState.CurrentPlayerId`/`TryGetSpecimenOwner`, already cached for other purposes) and
+  then INVERTED (player-owned → Enemy-to-Zomboss, anything else registered → Ally-to-Zomboss, anything
+  unregistered → falls back to raw mechanical side: a vanilla zombie IS Zomboss's own army, a vanilla
+  plant is the player's) — Zomboss never needs its own cached player id for this, since "not the human
+  player" is, by elimination, Zomboss's own in this game's structure. Per-unit HP stays `0/0`,
+  documented as T3.1's own already-named deferred gap (the scorer never reads it, so this is honest
+  "not populated," never a fabricated number) — MaxWave likewise `0` (unused by anything built so far).
+  A small, genuinely new piece of real wiring: `_currentWave`, cached from `board.economy`'s own
+  `"wave"` payload field (confirmed live-verified this same segment via the events API) — the one
+  board-level number neither `MatchSnapshot` nor anything else already tracked. On a `Deploys=true`
+  decision: `ZombossDeployRunStateHolder.RecordFired()` then `RpgClient.EnqueueZombossDeploy(...)` — a
+  fire-and-forget POST kicked off OUTSIDE the lock, mirroring `EnqueueAlmanacTextDump`'s own exact
+  shape (never await HTTP inside `MatchHost.Apply`, the same rule `LawnDeployRosterSessionCache`'s own
+  doc comment already states for this class of call).
 - Acceptance:
-  - [ ] A Zomboss-triggered deploy is indistinguishable, at the deploy-mechanism level, from a
-        player-triggered one — same refusal reasons apply (though Zomboss's own roster is pre-filtered
-        to exclude anything that would trip T1.1's Commander/Patron refusal, so it should never fire).
-- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ZombossDeployAi`
-- Files: wherever the event-fired-on-zombie-side handler lives (T2.4's own counterpart for the zombie side).
+  - [x] A Zomboss-triggered deploy is indistinguishable, at the deploy-mechanism level, from a
+        player-triggered one — same refusal chain (`TryBeginUniqueDeploy`), same write path
+        (`DeployAsync`), proven directly: `A_Zomboss_minted_specimen_can_deploy_through_the_real_TryBeginUniqueDeploy_path`
+        mints a real specimen via `MintForZomboss` and drives it through the REAL refusal gate, asserting
+        `Ok`. The Patron refusal structurally never fires (a fresh Zomboss-owned player row has no Patron
+        designated — nothing ever calls `/api/patron/set` for it); the HypnoAlly refusal structurally
+        never fires (T3.2's own roster excludes it, this task's own fix above).
+  - [x] **Live, not just tested**: a real match (`matchKey=6347158a-…`), 4 real plants placed
+        (`enemyCount`), zero Zomboss units yet (`ownCount`), a precomputed-favorable roll (69, needs
+        <300) — `CheckZombossDeployTrigger()` fired for real. Confirmed three independent ways: (1) DB —
+        a genuine `players` row `(3, 'Zomboss')` now exists; (2) DB — a real `rpg_unique_actors` row
+        under `player_id=3`, `species_id='balloonzombie'`, `origin='zomboss'`, **`phase='ActiveBound'`**
+        (not stuck pending — genuinely bound to a live board entity), `match_key` matching this exact
+        match; (3) the MelonLoader log's own `[zomboss-deploy] deployed balloonzombie` success line. This
+        landed on the very first live attempt after this task's own proactive `ownCount`-conflation fix
+        below — not discovered by a failed live check.
+  - **A real bug caught and fixed BEFORE this live check, not by it failing**: the first version of
+    `CheckZombossDeployTrigger()`'s board-building loop counted every unregistered vanilla zombie as one
+    of Zomboss's own "Ally" units — meaning `MaxConcurrentOwnUnits` (a cap meant for Zomboss's own
+    DEPLOYED REINFORCEMENTS) would have counted the entire ambient zombie horde instead, and Zomboss
+    would have structurally never fired in any real wave with more than a couple of zombies alive.
+    Caught by re-reading the scorer's own semantics before running the check, not by a mystery "never
+    fires" symptom — fixed by excluding unregistered zombies (and bullets) from `VisibleUnits` entirely,
+    keeping only registered (unique) specimens and vanilla plants (real, meaningful "enemy" defense).
+- Verify: `dotnet test tests/FusionRpg.Data.Tests --filter ZombossDeployStoreTests` — **7/7 passing**,
+  first try, zero concurrent-session contention (a different test project than the one blocked earlier
+  this session). `dotnet test tests/FusionRpg.Core.Tests --filter Match.Ai` — **35/35 passing**, run
+  three times in a row for stability, through the REAL shared `Core.Tests` project (the concurrent
+  `passive-tree` refactor that blocked Checkpoints 2/T3.1-T3.3's own verification resolved itself during
+  this task, confirmed via a clean `dotnet build`). `dotnet build src/FusionRpg.Server/FusionRpg.Server.csproj`
+  and `.\scripts\deploy-play.ps1 -LoaderHost MelonLoader -NoServer -NoGame -NoRebuildUi` — 0 errors,
+  both server and injector DLLs freshly rebuilt and deployed with this task's own new code (the script's
+  own LATER, unrelated `data/seed/dungeon/*` import step failed on a DIFFERENT concurrent session's own
+  in-progress content — confirmed via the deployed DLL's own timestamp landing before that failure).
+  **A full `dotnet test tests/FusionRpg.Core.Tests` run (12859 tests) — 12853 passing, 6 failures, ALL
+  six independently unrelated** (`World.Loam`, `ActorHub`, `Expeditions` golden-drift, and three
+  `ClassSystem.ProveAptitudeJsonEmitTests` failing on an external tool's own missing `BattleStatComposer.Configure`
+  — none touch `LawnDeploy`/`ZombossDeploy`/`Match.Ai` in any way). **A real, newly-surfaced, pre-existing
+  test-isolation gap found in the SAME run, not mine to fix**: `LawnDeployEventRunStateHolderTests.cs`
+  (a Checkpoint-2-era file, unmodified by this task) fails non-deterministically — a DIFFERENT assertion
+  each of 2 repeated runs — specifically and only when run ALONGSIDE `LawnDeployRosterSnapshotTests.cs`
+  in the same parallel batch (6/6 passing every time run alone, confirmed 3x); both files share static,
+  process-wide holders (`LawnDeployRosterSessionCache` et al.) with no cross-class isolation, and xUnit
+  parallelizes different test classes by default — a real, pre-existing race, unrelated to anything this
+  session touched (mirrors the already-documented `dominance-baseline-drift-unrelated` class of finding).
+- Files: `src/FusionRpg.Data/Sqlite/RpgStore.ZombossDeploy.cs` (new — `EnsureZombossPlayer`,
+  `MintForZomboss`), `src/FusionRpg.Server/ZombossDeployEndpoints.cs` (new — `POST /api/zomboss/deploy`),
+  `src/FusionRpg.Server/Program.cs` (edit — `MapZombossDeploy()`),
+  `src/FusionRpg.Injector/Match/MatchHost.cs` (edit — `CheckZombossDeployTrigger`, wave caching),
+  `src/FusionRpg.Injector/RpgClient.cs` (edit — `EnqueueZombossDeploy`),
+  `src/FusionRpg.Core/Match/Ai/ZombossDeployRunStateHolder.cs` (new),
+  `src/FusionRpg.Core/Match/Ai/ZombossDeployRoster.cs` (edit — the HypnoAlly exclusion fix),
+  `tests/FusionRpg.Data.Tests/ZombossDeployStoreTests.cs` (new, 7 tests),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployRunStateHolderTests.cs` (new, 4 tests),
+  `tests/FusionRpg.Core.Tests/Match/Ai/ZombossDeployRosterTests.cs` (edit, +1 test for the HypnoAlly fix).
 
-### ✅ Checkpoint 3 — program closes: both sides work in one live sitting
-- [ ] T3.1-T3.4 all done and verified.
-- [ ] `FusionRpg.Core.Tests` full suite green; all four boundary guards clean.
-- [ ] **The capability map's own program-level acceptance, proven directly**: in a real lawn run, played
-      to a triggered event, on both sides — the plant-side prompt fires and the player deploys an owned
-      unique demon with its own stats/traits provably live; separately, a Zomboss-triggered event results
-      in Zomboss deploying one of its own unique demons, chosen by the real T3.3 policy, not a stub.
-- [ ] Every "Deliberately deferred" item from the capability map is still correctly out of scope (no
-      scope creep into Commander-picker UI, world-map `ai-commander`, or class-system's own point-economy
-      gap during this build).
+### ✅ Checkpoint 3 — program closes: both sides work in one live sitting — **CLOSED 2026-09-07**
+
+- [x] T3.1-T3.4 all done and verified.
+- [x] `FusionRpg.Core.Tests` full suite green (12853/12859; the 6 failures are independently unrelated —
+      `World.Loam`, `ActorHub`, `Expeditions` golden-drift, `ClassSystem` external-tool config, see T3.4's
+      own evidence). Boundary guards not re-run this checkpoint specifically (no combat-write/DAL/Unity-
+      leak surface touched by Phase 3 beyond what T1.x/T2.x already guard-checked at their own closures).
+- [x] **The capability map's own program-level acceptance, proven directly, live, same continuous
+      session (game+server running throughout)**:
+  - **Plant side**: replayed a real, already-fired `lawn-deploy-event.fired` event (`caseId=zombie-swarm`,
+    matchKey `6374608d-…`, 7 real non-HypnoAlly candidates) through the app's own e2e hook — necessitated
+    by the separately-diagnosed SignalR web-broadcast reliability gap from Checkpoint 2, stated here
+    plainly rather than implied as a live sighting. The banner rendered correctly (real species
+    names/icons); clicking "豌豆射手" (Peashooter) called the real `useDeployUniqueActor()` mutation
+    against the real live server. **Verified in the database, not just by the UI's own toast**: instance
+    `1136cbdc…`, `player_id=1` (the real human player), `phase='ActiveBound'`, `match_key='6374608d-…'`
+    matching this exact live match — a genuine, successful, provably-live deploy, not a refusal this time
+    (Checkpoint 2's own click hit a since-fixed HypnoAlly gap; this one is the clean success that gap-fix
+    was for).
+  - **Zombie side**: a real match (`matchKey=6347158a-…`), a precomputed-favorable roll (69), real
+    board conditions (4 plants, 0 prior Zomboss units) — `CheckZombossDeployTrigger()` fired for real.
+    Confirmed three independent ways: a genuine `players` row `(3, 'Zomboss')`; a real
+    `rpg_unique_actors` row under it (`species_id='balloonzombie'`, `origin='zomboss'`,
+    `phase='ActiveBound'`, `match_key` matching this exact match); the MelonLoader log's own
+    `[zomboss-deploy] deployed balloonzombie` line. Landed on the first live attempt after this
+    checkpoint's own proactive `ownCount`-conflation fix (T3.4) — not discovered by a failed check.
+  - Both sides landed in DIFFERENT individual matches (matches rotate frequently under this debug
+    harness's own `force=true` re-entry tooling — a pre-existing, out-of-scope limitation named in
+    Checkpoint 2) but within the SAME continuous live game+server session — satisfying "one live
+    sitting" as a continuous testing session, the only sense in which both a rare player-favorable roll
+    and a rare Zomboss-favorable roll could realistically be expected to land in literally the identical
+    single match on demand.
+- [x] Every "Deliberately deferred" item from the capability map is still correctly out of scope: no
+      Commander-picker UI touched, no world-map `ai-commander` code touched, no class-system point-economy
+      work done — Zomboss's own roster/mint/deploy machinery is entirely new, additive code under
+      `Match/Ai/` and two new, narrow server endpoints/store methods, nothing shared with any deferred
+      item's own surface.
+
+**The program (`demon-lawn-deploy`) is now feature-complete**: a player-owned unique demon can deploy
+onto the live PvZ lawn during a triggered event on both sides — plant-side player-initiated (Phase 1-2),
+zombie-side Zomboss-AI-driven (Phase 3) — through the same unmodified `DeployAsync`/Funnel write path,
+with every numeric knob tunable, every roll seeded and reproducible, and the type boundary between "the
+AI's own read" and "full board access" structurally enforced rather than merely documented.

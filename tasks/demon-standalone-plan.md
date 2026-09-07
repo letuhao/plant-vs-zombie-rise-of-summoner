@@ -103,6 +103,33 @@ Every task below is one complete path (model → store → API → test, or hook
 | F9 | FE: `lib/bus/fusion.ts` + `#/fusion` lab (base slot, sacrifice tray with greyed locked/expedition, recipe silhouettes, cost have/need, pick-one selector, reveal) + star pips on roster cards | Vitest: cost math, pip render, silhouette gating |
 | F10 | Checkpoint F sweep + docs sync (map status, README, spec header) + E2E legendary chain | all suites + guards green; commit draft |
 
+## Wave F2 — fusion trait/action inheritance (added 2026-09-07; owner decision: `demon-mechanism-gaps-ideal.md` §3.4)
+
+Wave F's own F3 already shipped "pick one, roll rest" — but against the old, flavour-only `TraitPool`
+string tags (curated per species), never the mechanically-real `species-passive.{speciesId}` atom
+containers `player-materialise` rolls per player. This wave moves inheritance onto real atoms, on two
+locked owner decisions: **pick ceiling is the full `slotsByRarity` count** (not a smaller,
+randomness-preserving fraction), and **cost is keyed by each picked trait's own source rarity**
+(reusing `recipeCost`'s exact table shape, indexed differently) — both decisions already made, not
+open here.
+
+**Dependency graph:** F2.1 (`InstanceProducer` forced-pick capability) and F2.2 (read a specimen's own
+materialised roll) are independent and parallel-safe. F2.3 (the cost table) is independent of both.
+F2.4 (`ExecuteFusion` wiring) needs all three. F2.5 (FE) needs F2.4.
+
+| Task | Slice | Verify |
+|---|---|---|
+| F2.1 | `InstanceProducer.Compose` gains an optional forced-pool-picks parameter, consumed before `Resolver.Resolve` draws the remainder; illegal picks refused by name | forced pick appears verbatim; illegal pick rejected; zero-forced-picks byte-identical to today |
+| F2.2 | `RpgStore.Fusion.cs`: given a specimen's `instanceId`, return its own real rolled atoms | real specimen resolves its own real roll; no-container specimen returns an explicit empty result, never fabricated |
+| F2.3 | `data/tuning/fusion.v1.json` → `.v2.json`: `inheritCostByRarity`, same 150→1000 shape as `recipeCost`, indexed by the picked trait's own source rarity | two differently-rarity'd picks price correctly off their own source, not the output |
+| F2.4 | `ExecuteFusion` accepts player picks: validates count ≤ `slotsByRarity[resultRarity]`, each pick was actually rolled by its naming specimen, total souls cover the sum of each pick's own cost; remainder rolls normally | valid pick-set succeeds; over-cap/unaffordable/unowned-atom picks each refuse, spending nothing |
+| F2.5 | Web FE: fusion lab shows each sacrifice's own real rolled atoms, lets the player pick up to the rarity cap, live cost readout | player selects real atoms from both sacrifices; cost matches F2.3; cap enforced client-side too |
+
+**Checkpoint F2:** a live fusion — two real sacrificed specimens, a player picking real atoms from
+each up to the full rarity cap, souls spent per each pick's own source rarity, remainder rolled
+normally — proven end to end. Full task detail, acceptance criteria, and verify commands are in
+`tasks/demon-standalone-todo.md`'s own Wave F2.
+
 ## Wave G — demon-contracts (planned 2026-08-21; spec: demons/spec-demon-contracts.md, all eight owner locks)
 
 **Scope note:** server + web only. No injector slice, no LIVE gate — unlike Wave P, full-auto can close this wave end to end.

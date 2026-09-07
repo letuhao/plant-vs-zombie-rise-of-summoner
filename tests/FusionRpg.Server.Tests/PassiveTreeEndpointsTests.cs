@@ -51,14 +51,20 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
 
-        // Two Force-posture Primary trees (to exercise D28 cross-unlock lending) plus one Elemental
-        // tree whose gate quantity has no producer yet (D37 -- the exact "unproduced" state §9.1
-        // describes) -- ImportTreeCatalog is the ALREADY-SHIPPED, already-tested import path (task C4),
-        // never re-derived here.
+        // Two Force-posture Primary trees (to exercise D28 cross-unlock lending) plus a genuinely
+        // unrecognized gate-quantity shape (D37 -- the exact "unproduced" state §9.1 describes) plus
+        // one real Elemental and one real Status tree, each with the REAL wire-format gate quantity
+        // (spec-tree-plan.md: `element_mastery.<id>@Aspect`, `status_applied.<id>` -- D35's own rule,
+        // no @Scope suffix on the status shape) -- J1's own acceptance bullet: these two must resolve
+        // `wired`, not `unproduced`, now that IsWiredGateQuantity recognizes their shapes.
+        // ImportTreeCatalog is the ALREADY-SHIPPED, already-tested import path (task C4), never
+        // re-derived here.
         var outcome = _store.ImportTreeCatalog(
             new[] { TreeJson("might", "primary", "aptitude.Might@Commander"),
                     TreeJson("fortitude", "primary", "aptitude.Fortitude@Commander"),
-                    TreeJson("fire", "elemental", "element_mastery") },
+                    TreeJson("fire", "elemental", "element_mastery.fire@Aspect"),
+                    TreeJson("blight", "status", "status_applied.blight"),
+                    TreeJson("ashfall", "elemental", "element_mastery.notarealelement@Aspect") },
             Tuning());
         Assert.True(outcome.Ok, string.Join("; ", outcome.Refusals));
 
@@ -107,7 +113,7 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
     public async Task Get_onAFreshPlayer_returnsEveryTreeAtTierZero_speciesNeverAppears()
     {
         var body = await GetState();
-        Assert.Equal(3, body.Trees.Count); // "might", "fortitude", "fire" -- never a species tree (none imported, but the filter itself is asserted by I5's own module; this proves the shared-only three round-trip)
+        Assert.Equal(5, body.Trees.Count); // "might", "fortitude", "fire", "blight", "ashfall" -- never a species tree (none imported, but the filter itself is asserted by I5's own module; this proves the shared-only round-trip)
         Assert.All(body.Trees, t => Assert.Equal(0, t.TierReached));
         Assert.All(body.Trees, t => Assert.Equal(0, t.AptitudePoints));
         Assert.Empty(body.SoulLevelByNodeId);
@@ -146,10 +152,24 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
     public async Task Get_aTreeWithNoProducerYet_resolvesUnproduced_aWiredOneDoesNot()
     {
         var body = await GetState();
-        var fire = body.Trees.Single(t => t.TreeId == "fire");
+        var ashfall = body.Trees.Single(t => t.TreeId == "ashfall");
         var might = body.Trees.Single(t => t.TreeId == "might");
-        Assert.Equal("unproduced", fire.GateState);
+        Assert.Equal("unproduced", ashfall.GateState);
         Assert.Equal("wired", might.GateState);
+    }
+
+    [Fact]
+    public async Task Get_realElementalAndStatusGateQuantities_resolveWired_J1sOwnAcceptanceBullet()
+    {
+        // J1 (passive-tree-todo.md): ElementMasterySource/StatusAppliedSource have been real, live-probed
+        // producers since task G6 (2026-09-06), but PassiveTreeEndpoints' own GateState check was never
+        // taught to recognize either wire shape -- fixed 2026-09-07 via IsWiredGateQuantity. Before that
+        // fix, both trees below would have wrongly reported "unproduced" despite having a real producer.
+        var body = await GetState();
+        var fire = body.Trees.Single(t => t.TreeId == "fire");
+        var blight = body.Trees.Single(t => t.TreeId == "blight");
+        Assert.Equal("wired", fire.GateState);
+        Assert.Equal("wired", blight.GateState);
     }
 
     [Fact]

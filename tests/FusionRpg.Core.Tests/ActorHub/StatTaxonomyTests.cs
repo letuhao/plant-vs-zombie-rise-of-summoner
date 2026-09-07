@@ -178,10 +178,11 @@ public class StatTaxonomyTests
     {
         // 9 progression (7 + H.7's 2) + 24 status constants (8 + H.2's 16) + 196 combat (84 + H.1's 112)
         // + 1 healing + 18 resource (15 + `poise`'s 3, 2026-08-26) + 1 move.range + 10 action-category
-        // + 2 turn (speed/haste, P0.5, 2026-08-28) + 1 loadout.slots (H.8, D4.25, 2026-09-06) = 268
+        // + 2 turn (speed/haste, P0.5, 2026-08-28) + 1 loadout.slots (H.8, D4.25, 2026-09-06)
+        // + 1 ai.aggression (H.9, base-defense siege-ai §5.20 rule 4, 2026-09-07) = 269
         // (99 -> 256 T2 -> 259 class-system `poise-resource` -> 267 P0.5/battle-timeline B9 -> 268
-        // party-dungeon D4.25).
-        Assert.Equal(268, AllRegistered.Count);
+        // party-dungeon D4.25 -> 269 base-defense siege-ai).
+        Assert.Equal(269, AllRegistered.Count);
 
         // Every def classifies except five non-combat channels the counterbalance rule does not apply
         // to: the two Theta/progression channels (actor-hub-ssot.md §H.0's "Non-combat" row), plus

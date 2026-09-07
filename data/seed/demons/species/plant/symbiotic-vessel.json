@@ -19,7 +19,7 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -27,7 +27,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:45:43Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {
         "attackTempo": "slow"
       },
@@ -45,7 +45,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "inferred",
@@ -56,8 +56,8 @@
       "symbiotic-vessel"
     ],
     "gameTypeId": 1437,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
     "reason": "The creature functions as a passive support unit that sacrifices itself to buff allies, posing no direct threat to an opponent.",
@@ -185,10 +185,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:23:56Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -210,7 +211,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
-    "elementSecondary": "none",
+    "elementSecondary": "air",
     "family": [
       "symbiotic-vessel",
       "botanical-incubator"

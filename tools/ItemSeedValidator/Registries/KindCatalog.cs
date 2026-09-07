@@ -113,6 +113,29 @@ public static class KindCatalog
         Defined("socket-word", "socket-words", "socketWords", "1c",
             required: new[] { "runtimeId", "minSockets", "ingredients", "fixedAtoms" },
             extra: new[] { "runtimeId", "hostRole", "hostFrame", "minSockets", "ingredients", "fixedAtoms" }),
+        // item-seedgen `combination-write-unblock` (2026-09-07): the retirement target for
+        // `socket-word` (already RULED, `seedsmith-map.md` §5: "regenerate, do not retain"), and the
+        // real gap this catalog carried until now — `combogen`'s own generation graph, schema and
+        // ledger were all built and proven this same day, but nothing here could validate a real
+        // `combination` entry once written, since no SeedKind existed to recognize the directory
+        // `combogen/authored.py`'s own `COMBINATIONS_DIR` already names
+        // (`data/seed/items/combinations/`). Field shape transcribed directly from `combogen/
+        // emit.py`'s `assemble_entry` — the one place a real entry is assembled — not guessed:
+        // `shape` ("strain" or "splice", `grid.py`'s own `combination_kind`) and `aptitudes` are
+        // unconditional; `archetype` (splices carry none), `hostRole` and `hostFrame` are optional,
+        // set only when the model pinned one. `minSockets`/`ingredients`/`grants` always present.
+        // No `naming.v1.json` namespace exists for this kind and none is needed — `combogen` mints
+        // its own ids directly from the deterministic grid cell (one pipeline, zero parallel
+        // partitions), so the collision problem `idNamespaces` solves for wave-1 fan-out never
+        // arises here; `MissingNamespaces` below is a registry-to-catalog check, not the reverse, so
+        // this entry having no counterpart in `naming.v1.json` trips nothing.
+        Defined("combination", "combinations", "combinations", "1c",
+            required: new[] { "shape", "aptitudes", "minSockets", "ingredients", "grants", "grantedTier" },
+            extra: new[]
+            {
+                "shape", "aptitudes", "archetype", "hostRole", "hostFrame",
+                "minSockets", "ingredients", "grants", "grantedTier",
+            }),
         Defined("recipe", "recipes", "recipes", "1c",
             required: new[] { "operation", "outputKind", "frame", "costLines" },
             extra: new[]

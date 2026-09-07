@@ -53,14 +53,17 @@ public static class DropTableValidator
     // caches, elites, the boss room), `dungeon-clear` (the boss's own first-clear grant, source id =
     // the domain), `dungeon-quest` (a completed quest's own reward). Each also gains a `LootCorrelation
     // .Derive` arm (`LootPipeline.cs`) -- neither list is complete without the other.
+    // drop-tables `siege-loot` (2026-09-07): base-defense's first loot_source binding, its own
+    // `LootCorrelation.Derive` arm added alongside this in `LootPipeline.cs`.
     public static readonly IReadOnlyList<string> KnownSourceKinds =
-        new[] { "web-wave", "expedition-tier", "world-sector", UndesignedSourceKind, "dungeon-room", "dungeon-clear", "dungeon-quest" };
+        new[] { "web-wave", "expedition-tier", "world-sector", UndesignedSourceKind, "dungeon-room", "dungeon-clear", "dungeon-quest", "siege-assault" };
 
     public static AtomRejection Validate(
         IReadOnlyList<LootSourceRow> sources,
         IReadOnlyList<DropTableRow> tables,
         DropVolumeTuning tuning,
-        DropContentLookups? lookups = null)
+        DropContentLookups? lookups = null,
+        DropRateFloorTuning? rateFloorTuning = null)
     {
         if (sources is null) throw new ArgumentNullException(nameof(sources));
         if (tables is null) throw new ArgumentNullException(nameof(tables));
@@ -77,6 +80,14 @@ public static class DropTableValidator
         {
             var r = ValidateTable(t, byId, tuning, lookups);
             if (!r.IsOk) return r;
+
+            // rate-floor (drop-tables module 1, D2): opt-in via the same "null skips this specific
+            // check" convention `lookups`'s own individual delegates already use in this file --
+            // existing callers that have not yet loaded the tunable are unaffected, byte-identical.
+            if (rateFloorTuning is { } floorTuning)
+                foreach (var g in t.Groups)
+                    foreach (var floorResult in DropRateFloor.ValidateGroupAcrossBreakpoints(g.Entries, floorTuning))
+                        if (!floorResult.IsOk) return floorResult;
         }
 
         foreach (var s in sources)

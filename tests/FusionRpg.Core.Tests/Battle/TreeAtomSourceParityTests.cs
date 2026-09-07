@@ -42,7 +42,7 @@ public class TreeAtomSourceParityTests
                     new[]
                     {
                         new NodeAtom("stat.derived", AttachPoint.Stat, channelId, NodeAtomOp.Flat,
-                            null, null, kMicro, ScaleAxis.FlatPermille, UnitClass.PerMilleRatio, null),
+                            null, null, kMicro, ScaleAxis.FlatPermille, UnitClass.PerMilleRatio),
                     },
                     Array.Empty<string>(), ExclusionForm.None, null, true, null),
             });

@@ -19,11 +19,12 @@ off by default.**
 > decisions 8/9) and `delve` (`#/delve/{id}`) as the sixth on 2026-09-05 (decisions.md row *"Game GUI — sixth
 > stage `delve`"*; [party-dungeon-map.md](../architecture/party-dungeon-map.md)). Both pass GG-4's test — a place
 > the player acts in, not looks at — which is why each is a stage and not a layer. The four-stage wording
-> above and the §2 catalog are kept as written; §2.4a is the `delve` stub (not yet routed).
+> above and the §2 catalog are kept as written; §2.4a is the `delve` stub.
 > **§2.4b is the `siege` stub — landed 2026-09-06** (`spec-siege-stage.md` task 21.1): `#/siege/:siegeId`
-> is a real, routed, lazy-loaded stage (`railState.ts`'s `STAGE_IDS` — the one runtime list of every
-> stage id — now names five; `delve` isn't in it yet, since it has no route). The rail still renders
-> from state (GG-44), so neither stage adds a rail entry.
+> is a real, routed, lazy-loaded stage. **§2.4a landed 2026-09-07** (`spec-delve-stage.md` task D5.1):
+> `#/delve/:delveId` is a real, routed, lazy-loaded stage too (`railState.ts`'s `STAGE_IDS` — the one
+> runtime list of every stage id — now names all six). The rail still renders from state (GG-44), so
+> neither stage adds a rail entry.
 
 ```text
                     ┌─────────── SHELL (band −1) ───────────┐
@@ -121,7 +122,13 @@ wild-talk layers, the extraction result and the band-4 reports are specified in
 *"Game GUI — sixth stage `delve`"* fixes the band assignments. This entry exists so the catalog's count
 matches the approved stages; the surface itself is specified in
 [party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) (drafted 2026-09-05) — §4 for the
-route and the six shell rows, §7 for the band of every surface, §8 for the player vocabulary.
+route and the six shell rows, §7 for the band of every surface, §8 for the player vocabulary. Unlike this
+entry's own "stub" heading, the route is real as of 2026-09-07 (D5.1) — `DelveStage.tsx` mounts, claims
+`?panel=` per §4's own URL grammar, and dismisses via the existing layer stack. The room graph, the fight
+drawn on it, the HUD, all six band-2 panels, the descent picker, the three band-3 confirms and the
+extraction summary are real too, closed the same day (D5.4–D5.10, D5.12) — drawn at layout fidelity,
+against the shipped components, in [14-delve-stage.html](14-delve-stage.html). The one still-open piece is
+the live session client (D5.11), the thing that would make any of the above reachable by a real player.
 
 ### 2.4b Siege — `#/siege/{siegeId}` (stub, 2026-09-06)
 
@@ -370,3 +377,4 @@ stages, and one (`/recipes`) splits between a reference and a workshop.
 | [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render |
 | [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — every map component in all its states, with the field that drives it. Supersedes plate 03 §A–B |
 | [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — ActorCollection, ActorSheet character landing, cell stack, spawn tray, commander order bar. Contract: spec-lawn-interactive.md. Supersedes plate 04 lawn chrome and plate 08 landing |
+| [14-delve-stage.html](14-delve-stage.html) | **Delve stage, as-built** — the room graph, the fight drawn on it, the HUD, all six band-2 panels, the descent picker, the three band-3 confirms, the extraction summary and the four band-4 report kinds, every surface bucketed built/wiring/real against the real 2026-09-07 components. Contract: [party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) §7 |

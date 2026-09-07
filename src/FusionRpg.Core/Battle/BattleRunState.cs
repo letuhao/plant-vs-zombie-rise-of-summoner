@@ -3,12 +3,15 @@ using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Actions.Movement;
 using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.Battle.Siege;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
+using FusionRpg.Core.World.District;
 
 namespace FusionRpg.Core.Battle;
 
@@ -156,6 +159,19 @@ public static partial class BattleEngine
         public readonly CostLedger CostLedger;
 
         /// <summary>
+        /// base-defense `siege-ai` (2026-09-07, session 5, owner-authorized): a real, live consumer for
+        /// `SiegeAiIntentSource` — built once, here, for the whole battle (never per-call, matching
+        /// `Cooldowns`/`CostLedger`'s own "one instance" shape, and the reason `RetargetLedger` below
+        /// gets real accumulating state rather than resetting every call). Null unless the caller opts
+        /// in via `aiTuning` (every existing caller of `Resolve`/this constructor omits it, so this is
+        /// byte-identical to today for every battle that does not ask for it). `DeclareBasicAttack`'s own
+        /// fallback tries this SECOND, after any explicit `intentSource` override and BEFORE
+        /// `StubIntentSource` — an actor gets the smarter, scored decision the moment its battle opts in,
+        /// with zero change to any battle that doesn't.
+        /// </summary>
+        public readonly IIntentSource? DefaultAiIntentSource;
+
+        /// <summary>
         /// B38 — one <see cref="Timeline.ActorTurnMachine"/> per actor, for the whole battle.
         ///
         /// <para>Before this the per-actor FSM existed and was fully tested but was never driven by a
@@ -241,7 +257,9 @@ public static partial class BattleEngine
             IContainerEffectResolver? containerResolver = null, BoardState? board = null,
             Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null,
             IReadOnlyList<RunnerBinding>? runnerBindings = null,
-            IReadOnlySet<string>? containersWithRunnerCoverage = null)
+            IReadOnlySet<string>? containersWithRunnerCoverage = null,
+            Func<string, IReadOnlyList<string>>? equipEffectIdsFor = null,
+            AiTuning? aiTuning = null, Func<long, int>? roundOf = null)
         {
             Trace = trace;
             _board = board;
@@ -491,8 +509,18 @@ public static partial class BattleEngine
                     }
                 }
 
+                // base-defense `siege-construction`/`siege-ai` (2026-09-07, MAJOR finding this
+                // session): purely additive, appended AFTER `held` is fully resolved above -- an
+                // actor's basic-attack fallback (or its real equipped loadout) is completely
+                // untouched; this only adds to it, never replaces it. `null`/empty for every actor
+                // outside `DistrictAssaultResolver`'s own siege setup -- the exact byte-identical-to-
+                // today default for every other battle mode.
+                if (a.Setup.AdditionalHeldActions is { Count: > 0 } additional)
+                    held = held.Concat(additional).ToList();
+
                 _heldActions[a.Setup.Key] = held;
                 BindContainers(a, held, containerResolver, containersWithRunnerCoverage);
+                BindEquip(a, equipEffectIdsFor);
 
                 // A19 (T56.1): collect real cost rows for every action actually reachable in THIS
                 // battle -- ActionCatalog exposes no "all actions" enumerator (only Get(id)/Count),
@@ -515,6 +543,17 @@ public static partial class BattleEngine
                 rungOf: (actorKey, actionId) =>
                     EffectiveRungOf(actorKey, actionId, actionCatalog, unlockStateFor, unlockTuning),
                 nowTick: () => NowTick);
+
+            // base-defense siege-ai: built AFTER Cooldowns/CostLedger exist (both are constructor-scope
+            // fields SiegeAiIntentSource reads as `cooldowns`/`affordability`) and using `this` as the
+            // live `IBattleView` -- valid here for the same reason Host.UseRunner's own closure over
+            // `this`/NowTick above is: SiegeAiIntentSource only reads the view lazily, per ChooseTarget
+            // call, never during construction. NoStanceHeld.Instance/a fresh RetargetLedger match
+            // StubIntentSource's own and 17.8's own "one ledger per battle" shape respectively.
+            if (aiTuning != null)
+                DefaultAiIntentSource = new SiegeAiIntentSource(
+                    this, Cooldowns, NoStanceHeld.Instance, CostLedger, aiTuning,
+                    roundOf ?? (tick => (int)tick), retarget: new RetargetLedger(), trace: trace);
         }
 
         /// <summary>
@@ -595,6 +634,37 @@ public static partial class BattleEngine
             }
         }
 
+        /// <summary>
+        /// spec-equip-runtime.md's Battle-half amendment (2026-09-07): the SAME grant pattern
+        /// <see cref="BindContainers"/> uses for a held action's container, applied to a specimen's
+        /// equipped `stat.modify` atoms instead — <see cref="ActionContainerEffectResolverFactory.BuildEquip"/>
+        /// already compiled them (Data layer, where `RpgStore.ResolveBindings` lives) and registered
+        /// the resulting defs via the caller's own `onEffectHostReady`; this method's whole job is the
+        /// per-actor grant, mirroring `BindContainers` line for line except the source of `effectIds`.
+        /// A no-op when the actor carries no `SpecimenId` (every wave/enemy actor, every synthetic SIM
+        /// actor) or no resolver was supplied (every caller that hasn't wired equip yet) — exactly as
+        /// inert as `containerResolver` being null already is for an actor with no held actions.
+        /// </summary>
+        void BindEquip(ActorState a, Func<string, IReadOnlyList<string>>? equipEffectIdsFor)
+        {
+            if (equipEffectIdsFor is null) return;
+            if (string.IsNullOrWhiteSpace(a.Setup.SpecimenId)) return;
+
+            var effectIds = equipEffectIdsFor(a.Setup.SpecimenId!);
+            foreach (var effectId in effectIds)
+            {
+                Host.Bag.Grant(new Contracts.EffectGrantDto
+                {
+                    GrantId = $"battle:{a.Setup.Key}:equip:{effectId}",
+                    EffectId = effectId,
+                    OwnerKind = "entity",
+                    OwnerKey = Contracts.EffectOwnerKeys.Entity(a.Setup.Key),
+                    PluginId = "battle",
+                    Priority = 0,
+                });
+            }
+        }
+
         // ---- IBattleView (A17): the read seam StubIntentSource is confined to — never a direct
         // read of Actors/ByKey from outside this class. PositionOf is null with no board (every
         // caller until siege-resolver), which is what makes NearestEnemy's own SourceOrder fallback
@@ -640,6 +710,42 @@ public static partial class BattleEngine
             if (nearestPos is not { } target) return 0;
 
             return MoveAction.MoveToward(_board, actorKey, target, maxCells);
+        }
+
+        /// <summary>
+        /// base-defense `siege-ai` R3 (spec-siege-ai.md §4): "no target in reach -> path toward the
+        /// objective using TerrainOnlyOccupancy." Deliberately NOT <see cref="MoveAction.MoveToward"/>'s
+        /// own greedy Chebyshev step (that primitive's own doc comment: allies block it, which is
+        /// exactly the "boxed in by my own units" failure R3 exists to avoid) -- this walks a REAL
+        /// <see cref="BoardPathfinder"/> route instead, planned as if allies were not there
+        /// (<see cref="TerrainOnlyOccupancy"/>), then executed one real step at a time
+        /// (<see cref="BoardState.CanEnter"/>, the same instant-occupancy gate <see cref="MoveAction"/>
+        /// itself uses) so a currently-occupied next cell simply stops the advance rather than
+        /// skipping past it. "No path at all -> hold and defend, never a random move" (the spec's own
+        /// words) is honored by construction: <see cref="BoardPathfinder.Find"/> returning `null` or the
+        /// very first real step being blocked both return 0, the same "nothing happened" contract
+        /// <see cref="TryMoveTowardNearestEnemy"/> already has.
+        /// </summary>
+        public int TryMoveTowardObjective(string actorKey, int maxCells)
+        {
+            if (_board is null) return 0;
+            if (!_board.Positions.TryGetValue(actorKey, out var from)) return 0;
+            if (ObjectivePositionOf(actorKey) is not { } objective || from == objective) return 0;
+
+            var costs = new MoveCosts(
+                SiegeTuningPolicy.MoveCostOpen, SiegeTuningPolicy.MoveCostRough, SiegeTuningPolicy.DiagonalSurcharge);
+            var path = BoardPathfinder.Find(_board.Spec, new TerrainOnlyOccupancy(_board.Spec), from, objective, costs);
+            if (path is null) return 0;
+
+            var moved = 0;
+            for (var i = 1; i < path.Steps.Count && moved < maxCells; i++)
+            {
+                var next = path.Steps[i];
+                if (!_board.CanEnter(next)) break; // a real occupant stands here right now -- stop, do not skip past it
+                _board.Move(actorKey, next);
+                moved++;
+            }
+            return moved;
         }
 
         public EntityFacts FactsOf(string actorKey)
@@ -692,6 +798,34 @@ public static partial class BattleEngine
             }
             return null;
         }
+
+        /// <summary>
+        /// base-defense `siege-ai` R3 (spec-siege-ai.md §4), `IBattleView`'s own real implementation.
+        /// `null` when no siege context is wired (<see cref="BattleEffectHost.AttackerEdge"/> unset —
+        /// every non-siege battle, and every siege battle before <c>DistrictAssaultResolver</c> sets it)
+        /// or there is no board at all, both byte-identical to every battle before this task. `side ==
+        /// "squad"` means attacker — <c>DistrictAssaultResolver.AttackerSide</c>'s own real convention,
+        /// read directly rather than assumed, matching <see cref="SideOf"/>'s existing 0-means-squad
+        /// mapping.
+        /// </summary>
+        public GridPos? ObjectivePositionOf(string actorKey)
+        {
+            if (Host.AttackerEdge is not { } attackerEdge) return null;
+            if (_board is null) return null;
+            var isAttacker = SideOf(actorKey) == 0;
+            return DistrictLayout.ObjectivePositionFor(isAttacker, attackerEdge, _board.Spec.Rows);
+        }
+
+        public long? MaxHpOf(string actorKey) => ByKey[actorKey].MaxHp;
+
+        // Reads the ai.aggression derived channel (DerivedStatChannels.cs H.9, resolved 2026-09-07).
+        // No taunt/stealth/decoy status content exists anywhere in the game yet (repo-wide search,
+        // 2026-09-07) -- ActorDerivedSnapshot.Get defaults an untouched channel to 0, so this returns
+        // 0 (neutral) for every actor today, byte-for-byte identical to the previous hardcoded return.
+        // A future taunt/stealth status would contribute to this channel (ActorDerivedSnapshot.OverlayAdd,
+        // matching how a patron/commander aura already composes) rather than needing a second mechanism.
+        public int AggressionOf(string actorKey) =>
+            (int)Math.Round(ByKey[actorKey].Derived.Get(DerivedStatChannels.AiAggression));
 
         public string? GarrisonedStructureKeyOf(string actorKey) => FindGarrisonedStructureKey(actorKey);
 

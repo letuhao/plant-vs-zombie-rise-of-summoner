@@ -1,0 +1,17 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.cactus-001"
+  ],
+  "flavor": "A narrow corridor lined with hollowed-out ribcages hangs suspended from the ceiling by rusted iron chains. As the torchlight flickers, the bones sway in a draft that smells of wet earth and ancient dust.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Ossuary of Whispers",
+  "reason": "The floor tiles are pressure-sensitive, designed to trigger a cascade of weighted, bone-studded pendulums that sweep the path.",
+  "roomId": "room.trap-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

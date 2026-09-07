@@ -19,7 +19,18 @@
     "model": "claude-sonnet-5",
     "authoredUtc": "2026-08-22T00:00:00Z",
     "sourceRef": "ssot-affixes.md#4.1",
-    "partitionScopeNote": "naming.v1.json idNamespaces.affixFamilies.groups (g.elem-power) lists TWO existingFamilies: elemental_power and affliction — confirmed independently at ssot-affixes.md#4.3's group-summary table ('g.elem-power | elemental_power · affliction | stat.derived | quarantined'). This partition's brief named only elemental_power and elpw-amplify as already-authored in the exemplar and scoped this file to '~5 further families beyond the two already in the exemplar', with no mention of affliction. Investigated rather than silently deferred: affliction's channel is status.power.{category} (src/FusionRpg.Core/Status/StatusCategoryRegistry.cs — category is one of exactly three closed values, dot/cc/contagion, keyed off StatusId, not off element). That is a genuinely different variant axis from the 'elements+omni' directive this whole file uses, and no second `variants.generate` directive is defined anywhere in seed-contract.md, entry-shapes.md, or any registry read for this partition — 'elements+omni' is the only one that exists. Authoring affliction here would require either inventing an ungrounded second generate directive (forbidden — an author names a registry value, never invents one) or hand-authoring three category-keyed rows outside the variants mechanism the rest of this file relies on, a shape decision this partition has no authority to make alone. Left out of this file deliberately; flagged for the owner or a follow-up pass to place explicitly, either back into this group with its own variant handling or into a dedicated status-power lane."
+    "partitionScopeNote": "naming.v1.json idNamespaces.affixFamilies.groups (g.elem-power) lists TWO existingFamilies: elemental_power and affliction — confirmed independently at ssot-affixes.md#4.3's group-summary table ('g.elem-power | elemental_power · affliction | stat.derived | quarantined'). This partition's brief named only elemental_power and elpw-amplify as already-authored in the exemplar and scoped this file to '~5 further families beyond the two already in the exemplar', with no mention of affliction. Investigated rather than silently deferred: affliction's channel is status.power.{category} (src/FusionRpg.Core/Status/StatusCategoryRegistry.cs — category is one of exactly three closed values, dot/cc/contagion, keyed off StatusId, not off element). That is a genuinely different variant axis from the 'elements+omni' directive this whole file uses, and no second `variants.generate` directive is defined anywhere in seed-contract.md, entry-shapes.md, or any registry read for this partition — 'elements+omni' is the only one that exists. Authoring affliction here would require either inventing an ungrounded second generate directive (forbidden — an author names a registry value, never invents one) or hand-authoring three category-keyed rows outside the variants mechanism the rest of this file relies on, a shape decision this partition has no authority to make alone. Left out of this file deliberately; flagged for the owner or a follow-up pass to place explicitly, either back into this group with its own variant handling or into a dedicated status-power lane.",
+    "appendedBatches": [
+      {
+        "batch": "affix-g.elem-power-trial-2026-09-07",
+        "model": "affixfamgen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "entryIds": [
+          "atom.elpw-surfeit"
+        ],
+        "note": "Small trial batch proving affixfamgen's brief/emit/run mechanism end-to-end with a hand-authored stand-in answer -- no live LLM endpoint reachable this session. Original _meta.model/_meta.authoredUtc above describe the file's existing entries and are left untouched."
+      }
+    ]
   },
   "entries": [
     {
@@ -384,6 +395,57 @@
         "offensive"
       ],
       "notes": "AUTHORED 2026-09-06. It belongs to THIS group, not to g.affliction, despite the name: naming.v1.json idNamespaces.affixFamilies gives g.elem-power existingFamilies = [elemental_power, affliction], and ssot-affixes.md SS4.1's own row says the same (\"g.elem-power | elemental_power . affliction | stat.derived | quarantined\"). It is a stat.derived channel family, not a status.apply rider. channel comes from atom-family-library.md SS3.2: \"Plus 4 status-channel families (not element-expanded): affliction (status.power.* by category), stalwart (status.resist.*), immunity (status.immune.{tag}), susceptibility (status.expose.*)\". It is the ATTACKER half of the pair DerivedStatRegistry.cs already ships -- status.resist.omni declares CounterpartOf: StatusPowerOmni -- and its unit is UnitClass.StatusPotencyPoints. NO `variants` BLOCK, deliberately, and this is what this file's own _meta.partitionScopeNote said it could not resolve alone. Two facts settle it now. (1) atom-family-library.md SS3.2 puts this family in the four that are explicitly \"not element-expanded\", so `elements+omni` -- the only generate directive that exists anywhere in seed-contract.md, entry-shapes.md or any registry -- is the WRONG axis, not a missing one. (2) The corpus already has the precedent for exactly this case: `stalwart` (channel `status.resist`) and `immunity` (channel `status.immune`) in g-ward.json both write the family-level stem with no variants block and leave the concrete segment to a later generation step, with stalwart's notes stating the rule outright. So the family-level stem `status.power` is authored here on established precedent rather than a second generate directive being invented, which seed-contract.md SS2.1 forbids. The category segment resolves at generation time against the closed set DerivedStatChannels.cs registers: omni / dot / cc / contagion. powerBand `medium` mirrors `stalwart`, its own registered counterpart, exactly as `elemental_power` and `elemental_defense` mirror each other at medium -- the one relative-strength statement this entry makes, and the only strength statement of any kind, since no magnitude is authored. Referenced today by exactly one shipped entry: unique ember-harvest-30 \"Resin of Dusk\", as its `varianceSlot.family` rather than a `fixedAtoms` member -- a variance slot names the family whose rolled magnitude spreads across a width band (`variance: \"normal\"`), so it needs a family with a real tier-band ladder, which is what a Flat stat.derived family is and what a status.apply rider is not. That the corpus put it in a variance slot is independent confirmation of the stat.derived reading. Thematically it also fits that entry, whose fixedAtoms are atom.marking + atom.withering: status potency is the stat that makes both of them hit harder. RUNTIME STATE, RE-VERIFIED AGAINST CODE rather than copied from the five entries above: the D6 quarantine has ENDED. AtomKindRegistry.cs:572 declares stat.derived RuntimeSupportMatrix(Full, Full, Partial) as of 2026-09-02 -- Lawn Full, Battle Full, Sim Partial (the Sim fold cannot express Replace/Flag ordering). Every other entry in this file, and all seven in g-ward.json, still carry \"QUARANTINE: stat.derived, D6 ... None/None/None until E12\" in their notes. Those notes are STALE, not wrong-at-the-time; they are another lane's content and are named here rather than edited."
+    },
+    {
+      "id": "atom.elpw-surfeit",
+      "nameKey": "affix.elpw-surfeit",
+      "name": "Elemental Surfeit",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.overflow.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Welling"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Cresting"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Overspilling"
+          }
+        ]
+      },
+      "displayTemplate": "{value} increased bonus {element} power",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "NEW family, stem `elpw` (naming.v1.json idNamespaces.affixFamilies), word `surfeit`. The `Increased` sibling `combat.power.overflow.{variant}` did not yet have -- `elpw-overflow` ships `Flat` only, unlike `combat.power.pierce.{variant}` (`elpw-pierce`/`elpw-focus`, both ops already shipped). NOT the same slot as `atom.elpw-amplify`: that family (the `Increased` sibling of `combat.power.{variant}` itself, this group's PRIMARY channel) is this file's own named, deliberate omission -- its `atom.elemental-power` note states outright that nothing references it and authoring an unreferenced rollable family is a content decision, not a gap closure. This entry does not reopen that decision; it targets `combat.power.overflow.{variant}`, the group's SECONDARY channel, on the same Flat/Increased split logic `elpw-pierce`/`elpw-focus` already use on a different channel. `roles` copied verbatim from `elpw-overflow` -- identical channel legality question. `powerBand: low`, matching the Flat sibling's own `low` rather than stepping down further: `low` is already this group's lowest ordinary rung (only the structural `Flag` family `elpw-attune` sits at `trivial`, for a boolean gate, not a graded stat), so `atom.shld-cycle`'s own precedent applies here (both op-siblings sharing a band once the Flat sibling is already the smallest pull in its own pair, to avoid falling through the tier-1 legibility floor). `nameWords` deliberately uses a flood/excess axis (Welling/Cresting/Overspilling) rather than reusing `elpw-overflow`'s own harvest/hunger axis (Overripe/Brimming/Gorged) -- the brief's own adjective-clustering rule this file's other entries already follow (pierce/focus on shape/sharpening, override/attune on dominance/rooting, overflow on harvest/hunger): a sixth family sharing a channel with an existing one needs its own idea, not a synonym of the sibling's. HAND-AUTHORED 2026-09-07 (affixfamgen/hand-authored-1), stand-in for a live LLM call -- no reachable endpoint this session. RUNTIME: this file's own `atom.elemental-power` note (2026-09-06) reports the stat.derived D6 quarantine ended (AtomKindRegistry.cs:572, Full/Full/Partial) -- this entry inherits whatever that most-recent, code-checked note establishes rather than independently re-verifying the claim against source in this pass."
     }
   ]
 }

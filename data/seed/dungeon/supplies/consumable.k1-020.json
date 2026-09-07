@@ -1,0 +1,8 @@
+{
+  "consumableRef": "consumable.k1-020",
+  "overrideTags": [],
+  "useContextAdds": [
+    "rest",
+    "curio"
+  ]
+}

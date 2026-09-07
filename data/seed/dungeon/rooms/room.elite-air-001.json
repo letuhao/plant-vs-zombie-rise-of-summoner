@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-001",
+  "eventPool": [],
+  "flavor": "A circular platform suspended by swirling, translucent currents. Below, nothing but a vast, dizzying expanse of white clouds, and above, a ceiling of churning, violet-tinged gale winds.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Zephyr's Crucible",
+  "reason": "The narrow footing and high-velocity winds force players to manage movement carefully, while the elite combatants use the verticality to harass the party.",
+  "roomId": "room.elite-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -133,9 +133,46 @@ describe("SectorInspector — the nine blocks, in the plate's order (world-stage
     expect(screen.getAllByTestId("inspector-block-dowsing").at(-1)).toHaveTextContent("A dowser has confirmed");
   });
 
-  it("the actions region is reserved, not filled with a placeholder — empty until world-inspector's later tasks build it", () => {
+  it("the actions region is reserved, not filled with a placeholder — empty with no delveDoorVerb (world-inspector's later W64 tasks still own the rest)", () => {
     renderMaximal();
     expect(screen.getByTestId("inspector-actions")).toBeEmptyDOMElement();
+  });
+
+  it("party-dungeon D1.28: a delveDoorVerb renders as exactly one row inside the actions region, via ActionCluster", () => {
+    const onActivate = vi.fn();
+    renderMaximal({
+      delveDoorVerb: { id: "delve-door", label: "Open a Lair delve", disabledReason: null, onActivate }
+    });
+    const actions = screen.getByTestId("inspector-actions");
+    expect(actions).not.toBeEmptyDOMElement();
+    expect(screen.getByTestId("action-cluster")).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^action-row-/)).toHaveLength(1);
+    expect(screen.getByTestId("action-button-delve-door")).toHaveTextContent("Open a Lair delve");
+  });
+
+  it("party-dungeon D1.28: the delve door row is disabled and visible (never hidden, GG-55) when nothing is discovered yet", () => {
+    renderMaximal({
+      delveDoorVerb: { id: "delve-door", label: "Open a Lair delve", disabledReason: "delve.none-discovered" }
+    });
+    // `delve.none-discovered` is deliberately NOT in `playbackTable.ts`'s DROP_TABLE (that table is
+    // shared with `blockedPlacement.ts`'s own closed march-placement enumeration — see its header
+    // comment) — so this renders through `reasonFor.ts`'s own documented dev-mode fallback rather
+    // than a bespoke sentence. What matters here is what GG-55/ActionCluster actually promise: the
+    // row stays visible and disabled, never hidden, with SOME real reason text present.
+    const button = screen.getByTestId("action-button-delve-door");
+    expect(button).toBeDisabled();
+    expect(screen.getByTestId("action-row-delve-door")).toBeInTheDocument();
+    expect(screen.getByTestId("action-reason-delve-door").textContent!.length).toBeGreaterThan(0);
+  });
+
+  it("party-dungeon D1.28: clicking the enabled delve door fires its own callback, and nothing else in the inspector reacts", async () => {
+    const user = userEvent.setup();
+    const onActivate = vi.fn();
+    renderMaximal({
+      delveDoorVerb: { id: "delve-door", label: "Open a Vault delve", disabledReason: null, onActivate }
+    });
+    await user.click(screen.getByTestId("action-button-delve-door"));
+    expect(onActivate).toHaveBeenCalledOnce();
   });
 
   it("the sparse fixture renders every Pending/absent field honestly, no crash and no zero standing in", () => {

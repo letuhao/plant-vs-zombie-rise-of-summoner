@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-demon.dolldiamond-001",
+  "flavor": "In the center of the chamber stands a life-sized figure, 制成 from translucent white ceramic and inlaid with gold. It mimics the stance of a fallen hero, its hollow eyes reflecting a faint, unnatural 光辉 that pulses in time with the party's own heartbeats.",
+  "kind": "encounter-event",
+  "name": "The Porcelain Effigy",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "A scripted twist where the party must decide whether to destroy a beautiful but cursed relic or attempt to harness its essence during combat.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.dolldiamond"
+}

@@ -26,13 +26,13 @@ public class EventDeckPreflightTests
     static EventOutcomeRow Outcome(string ordinal) => new(ordinal, "staple", "none", Array.Empty<EventEffectRef>());
 
     static EventRow Row(string id, string kind = "curio", PredicateNode? eligibility = null,
-        string? chainRef = null, params string[] outcomeOrdinals) => new(
+        string? chainRef = null, string? supplyOverride = null, params string[] outcomeOrdinals) => new(
         EventId: id, Kind: kind, Theme: null, ClimateAffinity: null, RepeatScope: "per-delve",
         Eligibility: eligibility,
         Outcomes: outcomeOrdinals.Length > 0
             ? outcomeOrdinals.Select(Outcome).ToArray()
             : new[] { Outcome("good"), Outcome("bad") },
-        SupplyOverride: null, ChainRef: chainRef);
+        SupplyOverride: supplyOverride, ChainRef: chainRef);
 
     static string DetailOf(AtomRejection r) => r.Detail;
 
@@ -257,6 +257,43 @@ public class EventDeckPreflightTests
         Assert.Single(EventDeckPreflight.CheckKnownStatusIds(catalog, StatusBit));
     }
 
+    // ---- CheckSupplyOverrideCoverage ----
+
+    [Fact]
+    public void CheckSupplyOverrideCoverage_null_arguments_throw()
+    {
+        var catalog = CatalogOf(Row("e1"));
+        Assert.Throws<ArgumentNullException>(() => EventDeckPreflight.CheckSupplyOverrideCoverage(null!, new HashSet<string>()));
+        Assert.Throws<ArgumentNullException>(() => EventDeckPreflight.CheckSupplyOverrideCoverage(catalog, null!));
+    }
+
+    [Fact]
+    public void CheckSupplyOverrideCoverage_a_tag_no_supply_carries_refuses_naming_it()
+    {
+        var catalog = CatalogOf(Row("e1", supplyOverride: "herbs"));
+        var fails = EventDeckPreflight.CheckSupplyOverrideCoverage(catalog, new HashSet<string>(StringComparer.Ordinal));
+        Assert.Single(fails);
+        Assert.Contains("e1", DetailOf(fails[0]));
+        Assert.Contains("herbs", DetailOf(fails[0]));
+        Assert.Contains(EventRules.OverrideTagUnsupplied, DetailOf(fails[0]));
+    }
+
+    [Fact]
+    public void CheckSupplyOverrideCoverage_a_tag_a_real_supply_carries_passes()
+    {
+        var catalog = CatalogOf(Row("e1", supplyOverride: "herbs"));
+        var fails = EventDeckPreflight.CheckSupplyOverrideCoverage(catalog, new HashSet<string>(StringComparer.Ordinal) { "herbs" });
+        Assert.Empty(fails);
+    }
+
+    [Fact]
+    public void CheckSupplyOverrideCoverage_an_event_with_no_supplyOverride_is_never_checked()
+    {
+        var catalog = CatalogOf(Row("e1")); // supplyOverride: null (the "none" sentinel)
+        var fails = EventDeckPreflight.CheckSupplyOverrideCoverage(catalog, new HashSet<string>(StringComparer.Ordinal));
+        Assert.Empty(fails);
+    }
+
     // ---- Run: everything together ----
 
     [Fact]
@@ -272,5 +309,189 @@ public class EventDeckPreflightTests
         Assert.Contains(fails, f => DetailOf(f).Contains("onlyGood") && DetailOf(f).Contains(EventRules.MissingRequiredOutcomeMix));
         Assert.Contains(fails, f => DetailOf(f).Contains("gatesBoss") && DetailOf(f).Contains(EventRules.RoomKindIsBossForbidden));
         Assert.DoesNotContain(fails, f => DetailOf(f).Contains("clean"));
+    }
+
+    /// <summary>The optional 5th-rule wiring: absent (default) never runs the check at all — not just
+    /// "runs it and it happens to pass" — proven by a fixture that WOULD fail it if it ran; supplied,
+    /// the same fixture DOES refuse.</summary>
+    [Fact]
+    public void Run_only_checks_supply_override_coverage_when_the_caller_opts_in()
+    {
+        var catalog = CatalogOf(Row("needsHerbs", supplyOverride: "herbs", outcomeOrdinals: new[] { "good", "bad" }));
+
+        var withoutOptIn = EventDeckPreflight.Run(catalog, BossOrdinal, StatusBit);
+        Assert.DoesNotContain(withoutOptIn, f => DetailOf(f).Contains(EventRules.OverrideTagUnsupplied));
+
+        var withOptIn = EventDeckPreflight.Run(catalog, BossOrdinal, StatusBit, new HashSet<string>(StringComparer.Ordinal));
+        Assert.Contains(withOptIn, f => DetailOf(f).Contains(EventRules.OverrideTagUnsupplied));
+    }
+
+    // ---- CheckNoNerveTargetInAnyContainer ----
+    // The nerve.* conjunct of D3.9's tenth spec-listed rule. Catalog-free by design (it scans the
+    // container store, not events) -- these fixtures never touch EventCatalog/CatalogOf at all.
+
+    static AtomRow Atom(string id, string kindId, string paramsJson = "{}") => new()
+    {
+        AtomId = id, KindId = kindId, FamilyId = id, Name = id, ParamsJson = paramsJson,
+    };
+
+    static ContainerRow Container(string id,
+        IReadOnlyList<ContainerAtomRow>? atoms = null, IReadOnlyList<ContainerPoolRow>? pool = null) => new()
+    {
+        ContainerId = id, Kind = ContainerKind.Item,
+        Atoms = atoms ?? Array.Empty<ContainerAtomRow>(), Pool = pool ?? Array.Empty<ContainerPoolRow>(),
+    };
+
+    static Func<string, AtomRow?> LookupOf(params AtomRow[] atoms)
+    {
+        var byId = atoms.ToDictionary(a => a.AtomId, StringComparer.Ordinal);
+        return id => byId.TryGetValue(id, out var a) ? a : null;
+    }
+
+    static Func<string, AffixRow?> AffixLookupOf(params AffixRow[] affixes)
+    {
+        var byId = affixes.ToDictionary(a => a.AffixId, StringComparer.Ordinal);
+        return id => byId.TryGetValue(id, out var a) ? a : null;
+    }
+
+    [Fact]
+    public void CheckNoNerveTargetInAnyContainer_null_arguments_throw()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            EventDeckPreflight.CheckNoNerveTargetInAnyContainer(null!, LookupOf(), AffixLookupOf()));
+        Assert.Throws<ArgumentNullException>(() =>
+            EventDeckPreflight.CheckNoNerveTargetInAnyContainer(Array.Empty<ContainerRow>(), null!, AffixLookupOf()));
+        Assert.Throws<ArgumentNullException>(() =>
+            EventDeckPreflight.CheckNoNerveTargetInAnyContainer(Array.Empty<ContainerRow>(), LookupOf(), null!));
+    }
+
+    [Fact]
+    public void An_empty_container_list_passes()
+    {
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            Array.Empty<ContainerRow>(), LookupOf(), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void A_fixed_atom_status_apply_targeting_nerve_fails()
+    {
+        var nerveAtom = Atom("atom.fx-nerve-hit.t1", "status.apply", "{\"status\":\"nerve.unsettled\"}");
+        var container = Container("item.bad-ring", atoms: new[] { new ContainerAtomRow(0, nerveAtom.AtomId) });
+
+        var fails = EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(nerveAtom), AffixLookupOf());
+
+        var f = Assert.Single(fails);
+        Assert.Contains("item.bad-ring", DetailOf(f));
+        Assert.Contains(nerveAtom.AtomId, DetailOf(f));
+        Assert.Contains(EventRules.NerveTargetInContainer, DetailOf(f));
+    }
+
+    [Fact]
+    public void A_pool_affix_status_apply_targeting_nerve_fails()
+    {
+        // The pool path is a second, independent hop this rule must ALSO resolve: container -> pool
+        // row -> affix -> ref -> atom -- never just the fixed core.
+        var nerveAtom = Atom("atom.fx-nerve-jolt.t1", "status.apply", "{\"status\":\"nerve.shaken\"}");
+        var affix = new AffixRow("affix.nerve-jolt", AffixClass.Suffix, new[] { new AffixRefRow(0, nerveAtom.AtomId) });
+        var container = Container("item.cursed-band", pool: new[] { new ContainerPoolRow(affix.AffixId, 10) });
+
+        var fails = EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(nerveAtom), AffixLookupOf(affix));
+
+        var f = Assert.Single(fails);
+        Assert.Contains("item.cursed-band", DetailOf(f));
+        Assert.Contains(nerveAtom.AtomId, DetailOf(f));
+    }
+
+    [Fact]
+    public void A_status_apply_targeting_an_ordinary_status_passes()
+    {
+        var butterAtom = Atom("atom.fx-butter.t1", "status.apply", "{\"status\":\"butter\"}");
+        var container = Container("item.fine-ring", atoms: new[] { new ContainerAtomRow(0, butterAtom.AtomId) });
+
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(butterAtom), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void A_non_status_apply_atom_is_never_inspected_even_when_its_own_id_says_nerve()
+    {
+        // Proves the check resolves to the real AtomRow's own KindId/ParamsJson, never a substring
+        // match on an id -- the exact real collision this program found while scoping this rule:
+        // data/seed/passive-tree/nodes/nerve.unsettled.json is a real, unrelated, legitimate tree whose
+        // own affixIds are ordinary stat.modify atoms, none of them status.apply, none targeting nerve.*.
+        var lookalike = Atom("atom.nerve-brace.t1", "stat.modify", "{\"channel\":\"maxHp\",\"amount\":10}");
+        var container = Container("item.nerve-guard", atoms: new[] { new ContainerAtomRow(0, lookalike.AtomId) });
+
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(lookalike), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void A_container_id_containing_nerve_with_ordinary_content_passes()
+    {
+        // The same proof at the CONTAINER id layer, mirroring the real nerve.unsettled.json collision
+        // (an id containing "nerve" whose real content has nothing to do with the status).
+        var ordinary = Atom("atom.evd-brace.t1", "stat.modify", "{\"channel\":\"dodge\",\"amount\":5}");
+        var container = Container("item.nerve.unsettled-charm", atoms: new[] { new ContainerAtomRow(0, ordinary.AtomId) });
+
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(ordinary), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void Multiple_bad_containers_each_produce_their_own_named_rejection()
+    {
+        var nerve1 = Atom("atom.n1.t1", "status.apply", "{\"status\":\"nerve.unsettled\"}");
+        var nerve2 = Atom("atom.n2.t1", "status.apply", "{\"status\":\"nerve.afflicted\"}");
+        var ok = Atom("atom.ok.t1", "status.apply", "{\"status\":\"butter\"}");
+
+        var containers = new[]
+        {
+            Container("item.bad1", atoms: new[] { new ContainerAtomRow(0, nerve1.AtomId) }),
+            Container("item.bad2", atoms: new[] { new ContainerAtomRow(0, nerve2.AtomId) }),
+            Container("item.ok1", atoms: new[] { new ContainerAtomRow(0, ok.AtomId) }),
+        };
+
+        var fails = EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            containers, LookupOf(nerve1, nerve2, ok), AffixLookupOf());
+
+        Assert.Equal(2, fails.Count);
+        Assert.Contains(fails, f => DetailOf(f).Contains("item.bad1"));
+        Assert.Contains(fails, f => DetailOf(f).Contains("item.bad2"));
+        Assert.DoesNotContain(fails, f => DetailOf(f).Contains("item.ok1"));
+    }
+
+    [Fact]
+    public void A_dangling_fixed_atom_ref_is_skipped_not_thrown()
+    {
+        var container = Container("item.broken", atoms: new[] { new ContainerAtomRow(0, "atom.does-not-exist.t1") });
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void A_dangling_pool_affix_ref_is_skipped_not_thrown()
+    {
+        var container = Container("item.broken-pool", pool: new[] { new ContainerPoolRow("affix.does-not-exist", 5) });
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(), AffixLookupOf()));
+    }
+
+    [Fact]
+    public void A_slot_ref_with_no_concrete_atom_id_is_skipped()
+    {
+        // A slot ref carries no AtomId at all (element-domain variant selection, never a kind choice) --
+        // ResolvedAtomIds must not throw or misresolve it.
+        var affix = new AffixRow("affix.elemental", AffixClass.Prefix, new[]
+        {
+            new AffixRefRow(0, AtomId: null, SlotName: "E1", SlotDomain: "element",
+                SlotPick: 1, SlotAtomPattern: "atom.elemental-power.$E1"),
+        });
+        var container = Container("item.elemental-ring", pool: new[] { new ContainerPoolRow(affix.AffixId, 10) });
+
+        Assert.Empty(EventDeckPreflight.CheckNoNerveTargetInAnyContainer(
+            new[] { container }, LookupOf(), AffixLookupOf(affix)));
     }
 }

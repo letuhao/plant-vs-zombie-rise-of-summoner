@@ -656,6 +656,11 @@ public sealed partial class RpgStore : IRpgDb
         // loot_source / drop_table[_group|_entry] / item_drop_log / item_generation /
         // item_loot_pity / item_first_clear — item-ideal.md, drop-volume (module 11).
         EnsureLootSchemaUnlocked(db);
+        // item_base_type — the real table `ItemBaseTypeCorpus`/`BaseTypeSocketMaxCorpus`'s own boot
+        // comments already name as their target ("Deleted the day that table exists", Program.cs).
+        // Feeds `BuildLiveLootContentView`'s own `BaseTypesFor`, loot-content-view-unwired's one
+        // remaining honest gap (party-dungeon-todo.md D4.12, 2026-09-07).
+        EnsureBaseTypeSchemaUnlocked(db);
         // material_recipe / material_recipe_cost / rpg_material_spend_log — I9 §6.1–6.2,
         // salvage-craft (module 14). The material INVENTORY table (rpg_demon_materials) is DDL'd
         // above with the demon tables and is deliberately not renamed here.

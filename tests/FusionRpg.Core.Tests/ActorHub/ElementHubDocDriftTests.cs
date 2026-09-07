@@ -71,7 +71,9 @@ public class ElementHubDocDriftTests
         // `resource.restore.{resource}` — +6 members over ResourceIds, and the old id stays registered as a
         // retirement shim so the archived aptitudes.v1/v2/v3.json remain loadable (net +6).
         // 267 -> 268 (party-dungeon D4.25, 2026-09-06): `loadout.slots`, the extend-action-slot grant.
-        Assert.Equal(268, registry.AllRegistered.Count);
+        // 268 -> 269 (base-defense siege-ai, 2026-09-07): `ai.aggression`, §5.20 rule 4's signed
+        // targeting-priority scalar.
+        Assert.Equal(269, registry.AllRegistered.Count);
     }
 
     [Fact]

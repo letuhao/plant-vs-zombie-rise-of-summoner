@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.pack-mono-001",
+  "formation": "pack",
+  "name": "The Unyielding Phalanx",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A dense, single-element swarm of frontline blockers designed to clog movement and absorb initial strikes.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "nuisance",
+    "floorRung": "nuisance"
+  }
+}

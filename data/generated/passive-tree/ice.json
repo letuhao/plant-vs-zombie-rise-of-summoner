@@ -1,0 +1,261 @@
+{
+  "treeId": "ice",
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1933,
+  "bound": [
+    {
+      "nodeId": "skill.ice-def-t2-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "defense",
+          "op": "Flat",
+          "kMicro": 192,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.ice-def-t3-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "defense",
+          "op": "Increased",
+          "kMicro": 288,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.ice-def-t4-n1",
+      "atoms": []
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.ice-off-t1-n0",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t1-n1",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t1-n2",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-attune\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t2-n0",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-focus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-pierce\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-focus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-focus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.flash-freeze\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-focus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-pierce\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t7-n1",
+      "unspentBudgetShareMilli": 64,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.chilling\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-off-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-pierce\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t1-n0",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elemental-defense\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t1-n1",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t1-n2",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.warded\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-regen\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.plating\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-regen\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-regen\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t7-n1",
+      "unspentBudgetShareMilli": 64,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-toughness\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.plating\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.ice-def-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-husk\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

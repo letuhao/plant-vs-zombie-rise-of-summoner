@@ -303,7 +303,7 @@ public class SocketOperationsTests
             }
         }
 
-        Assert.Equal(40, seen);
+        Assert.Equal(60, seen); // 40 + 20: sockets-gen's real new g2 partition (gem.g2-001..020), 2026-09-07
     }
 
     [Fact]

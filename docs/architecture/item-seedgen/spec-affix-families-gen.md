@@ -1,10 +1,12 @@
 # Spec: `affix-families-gen`
 
-**Module id:** `affix-families-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 2 of 10
-**Depends on:** `generator-harness` (1) only — ⚠ **corrected 2026-09-07**: an affix family's own content
-(channel/op/tier-curve/tags) carries no base-type reference at all; `item_role_family` legality is a
-SEPARATE, downstream derived matrix module 8 already owns, checked after both corpora exist, not a
-generation-order dependency of this module's own output.
+**Module id:** `affix-families-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 2 (parallel with `materials-gen`, `sockets-gen`, `consumables-gen`)
+**Depends on:** `generator-harness` only — confirmed on two audit passes: an affix family's own content
+(channel/op/tier-curve/tags) carries no outward reference at all; `item_role_family` legality is a
+SEPARATE, downstream derived matrix module 8 already owns. ⭐ **`base-types-gen` depends on THIS
+module** (its `implicit.family` field hard-references a real affix-family id — see this program's own
+capability map §1) — this module must finish before `base-types-gen` starts, the reverse of the first
+draft's grouping.
 
 ## Objective
 

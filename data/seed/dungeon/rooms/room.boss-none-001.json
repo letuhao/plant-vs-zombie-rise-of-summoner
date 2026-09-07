@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.boss-rainbow-001",
+  "eventPool": [],
+  "flavor": "A vast, circular chamber of polished obsidian where the air is unnaturally still. No wind stirs the heavy tapestries, and the only sound is the rhythmic, echoing thrum of a heart beating deep beneath the floorboards.",
+  "hazardBand": "heavy",
+  "kind": "boss",
+  "name": "The Hollowed Sanctum",
+  "reason": "The chamber serves as the final confrontation point, designed to isolate the party and force a decisive encounter with the dungeon's master.",
+  "roomId": "room.boss-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

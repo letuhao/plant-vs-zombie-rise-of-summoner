@@ -49,6 +49,14 @@ import type { Pending } from "./pending";
  *
  * `RequirementLine` is retired with this bump — it had no producer and now has no consumer. ⚠ The
  * matching dated row in `decisions.md` is owed and is the owner's to write.
+ *
+ * party-dungeon D5.3 (2026-09-07): the sixteen delve view types (§"12. Delve", end of file) and
+ * `Magnitude.exact?` landed with **no bump** — every addition is a new type or a new optional field,
+ * never a rename or a narrowing, so the extension rule above admits the whole row free. (The task
+ * brief's own acceptance line says "`CONTRACT_VERSION` stays `2`" — stale by the time this task ran;
+ * two unrelated bumps, v3 and v4 above, had already landed first. The number this task actually kept
+ * unchanged is `4`, and the rule the acceptance line means — no bump for additive work — holds either
+ * way.)
  */
 export const CONTRACT_VERSION = 4;
 
@@ -96,6 +104,28 @@ export type Magnitude = {
    * field that is already a *delta* from zero (a stat modifier's own "+400‰ more" reading).
    */
   op?: "flat" | "increased" | "more" | "absolute";
+  /**
+   * party-dungeon D5.3 (spec-delve-stage.md §13, §18 ask 8 — landed) — the exact base-10 digit
+   * string for a `long` figure whose true value may exceed `Number.MAX_SAFE_INTEGER` (2^53-1).
+   * Additive and optional, so no `CONTRACT_VERSION` bump is owed (game-gui-map.md's extension rule).
+   * `formatMagnitude` renders `exact` through `Intl.NumberFormat` on a `BigInt` when present, and
+   * `value` otherwise (magnitude.ts) — never parses a `long` into a `number` and back (§16).
+   *
+   * ⚠ **Named gap, not solved by this field alone.** §13's own rule is that a `long` figure crosses
+   * the wire "as a decimal string **beside** its `number`" — i.e. the server sends a second, string
+   * field the adapter copies in here. `DelveEndpoints.cs`'s `HandleGetDelve` (D5.2, already shipped)
+   * does not send one yet — it sends `soulsUnbanked = delve.SoulsUnbanked` as a bare `long`, which
+   * `System.Text.Json`'s default policy serialises as a plain JSON number (confirmed: no
+   * `JsonStringEnumConverter`-style option or `[JsonConverter]` touches it anywhere in
+   * `Program.cs`/`DelveEndpoints.cs`). A JSON number past 2^53 is already rounded by the time any
+   * `fetch(...).json()` call in this app parses it, so no adapter downstream can recover the true
+   * digits from `soulsUnbanked` alone. This field and `formatMagnitude`'s support for it are real and
+   * tested against a fixture where the exact string is already known (`A_long_soul_balance_renders_
+   * exactly`) — the shape a decimal-string companion field would arrive in. Wiring that companion
+   * field onto `HandleGetDelve`'s own response is a `DelveEndpoints.cs`-touching follow-up, outside
+   * this task's own Files line.
+   */
+  exact?: string;
 };
 
 export type ContextRead = {
@@ -937,4 +967,375 @@ export type CommanderSheetMeta = {
 export type TurnOrderEntry = {
   round: number;
   displayName: string;
+};
+
+// ===========================================================================
+// 12. Delve — the sixteen view types (party-dungeon D5.3, spec-delve-stage.md §6).
+//
+// Real field shapes were read directly off the shipped C# (not guessed): `DelveEndpoints.cs`'s own
+// `HandleGetDelve` (D5.2, `GET /api/delve/{delveId}`) for DelveView/RoomView/DoorView/PartyView;
+// `DelveMemberState` for MemberView; `PackDto`/`PackCellDto` for PackView/PackCellView; `QuestDto`
+// for QuestView; `DomainOfferDto` for DomainOfferView/RungOfferView. `formatMagnitude` has no
+// bare-`number` overload (GG-46), so every field below that is a rendered quantity is a `Magnitude`;
+// every field that is an id, an index, a flag or already a display name stays a plain primitive.
+//
+// **Two enums reach `HandleGetDelve`'s own wire as raw ints, confirmed field-for-field**:
+// `SectorSight` (`DelveProjectionRoom.Sight`) and `LaneState` (`DelveProjectionDoor.State`) are never
+// `.ToString()`'d before serialising (unlike `WorldEndpoints.cs:704`'s own `State = l.State.ToString()`
+// for the *same* `LaneState` enum on a world lane — a real, different choice made by a different
+// endpoint, not a precedent this module's adapter can copy). `adapt.ts`'s `toDelveSight`/`toLaneState`
+// translate the raw ordinal to the C#-member-name string, matching `IntelState`/`ActorPhase`'s own
+// established convention of keeping the wire enum's PascalCase name verbatim in the view (the English
+// phrase — "unlit"/"glimpsed"/"seen" per §7 — is `labels.ts`'s translation, D5.10, not this layer's).
+//
+// **Six of the sixteen types have no complete, real producer to adapt from, named per type below
+// rather than guessed shut.** The spec's own §6/§18 interface table cites several C# signatures that
+// do not exist in the shipped tree — confirmed independently, before this task, by comments already
+// sitting in `DelveWildEndpoints.cs`, `RpgStore.Delve.cs`, `QuestProgress.cs` and `AmbushDraw.cs`
+// (`TalkTree.Step`/`TalkStep`, `EventResolution`, `EventDeck`, `OfferedQuest{QuestId,Need}`,
+// `DelveLoot.AtExtraction` all confirmed absent by direct grep). Building an adapter against an
+// invented shape, or gluing several real Core functions into one result an adapter decides on its
+// own, would be exactly the "second implementation" / "adapters compute nothing" defect this file's
+// item-module-10 section already states as a rule (line ~583) — so those six types are declared in
+// full (every field `Pending<T>` with the real reason) and left without a same-named adapter, rather
+// than shipped against a guessed contract.
+// ===========================================================================
+
+/** `SectorSight`'s own C# member names, verbatim — `Visibility.cs:6-16`. */
+export type DelveSightState = "None" | "Glimpse" | "Full";
+
+/** `LaneState`'s own C# member names, verbatim — `WorldState.cs:51-55` (shared with the world map). */
+export type DelveDoorState = "Open" | "Severed";
+
+/**
+ * One room, sight-gated exactly as `DelveProjection.cs`'s `ProjectRoom` computes it: every content
+ * field below is `null` at `sight: "None"`; `kind` alone is populated at `"Glimpse"`; every field is
+ * populated at `"Full"` (`SectorSight.None`'s own doc comment: "position and lanes only"; §7:
+ * "a glimpsed room names its kind only"). `sectorId`/`rowIndex`/`colIndex`/`visited`/`cleared`/
+ * `keyForLaneId` are never sight-gated — structural graph shape, not contents.
+ */
+export type RoomView = {
+  sectorId: string;
+  rowIndex: number;
+  colIndex: number;
+  visited: boolean;
+  cleared: boolean;
+  keyForLaneId: string | null;
+  sight: DelveSightState;
+  kind: string | null;
+  archetypeId: string | null;
+  eventId: string | null;
+  resolvedKind: string | null;
+  resolvedArchetypeId: string | null;
+  /**
+   * `DelveRoomStateFact.FloorJson` — real on the wire (gated the same as the other content fields),
+   * but an opaque persisted JSON blob with no structured view spec'd anywhere in spec-delve-stage.md
+   * (§5's "the floor list" names `PackView.floor` instead — a *different* field, the party's own
+   * dropped-item list, not a room's). `Pending`, not omitted, matching `RunView.summary`'s own
+   * identical "real blob on the wire, no view shape yet" precedent.
+   */
+  floorContents: Pending<unknown>;
+};
+
+/** A lane/door — never sight-gated (`SectorSight.None`'s own "position and LANES only" clause). */
+export type DoorView = {
+  laneId: string;
+  fromSectorId: string;
+  toSectorId: string;
+  typeId: string;
+  gateKeyId: string | null;
+  state: DelveDoorState;
+};
+
+/**
+ * One party member. `DelveMemberState` carries only a pointer (`InstanceId`) — no species or level
+ * (those live on the roster's own `UniqueActor` row, not here; confirmed by reading the record).
+ */
+export type MemberView = {
+  instanceId: string;
+  /** `DelveMemberState.Pools` — current values only, keyed by the six resource ids (resource-hub:
+   * hp/stamina/hunger/spirit/qi/poise). `count`, never signed — a stock, not a delta. */
+  pools: Record<ResourceId, Magnitude>;
+  /**
+   * A pool's maximum has no producer joined onto this record — it lives on the actor's own derived
+   * channel sheet, which `ActorView.channelSummary` already carries as `Pending` for the identical
+   * reason (no live read wires a specimen's derived channels to a delve member yet). Pool *fill*
+   * (`perMilleRatio`, `flat` — §6's own row) needs this as its denominator, so it is `Pending` too,
+   * for the same cause, not a second, unrelated gap.
+   */
+  poolMax: Pending<Record<ResourceId, Magnitude>>;
+  poolFill: Pending<Record<ResourceId, Magnitude>>;
+  /** Structural only — §6: nerve stage is "not a number... a name from §8", and this raw stack count
+   * is never itself the rendered figure. Kept as a plain `number`, matching `layoutX`/`partyIndex`'s
+   * own "positional, not a Magnitude" precedent, not wrapped — wrapping it would invite exactly the
+   * bare-nerve-number rendering §6 forbids. */
+  nerveStacks: number;
+  /** The display name (`Unsettled`/`Shaken`/`Afflicted`, `bands.v1.json`'s own `nerveStage` band) —
+   * needs `NerveLadder.StageFor(stacks, spiritResolved, thresholds)`, external inputs this record
+   * doesn't carry alone. No endpoint composes this yet. */
+  nerveStage: Pending<string>;
+  downed: boolean;
+  downedOnce: boolean;
+  /** Real fields on `DelveMemberState` (`BattleInnateShield?`, `BattleStatusSpec[]`) — out of this
+   * stage's own HUD scope (§7 names only "six pool meters and nerve stage per member"), mirroring
+   * `ActorView.shieldStack`'s own identical "not this surface's job yet" posture. */
+  shield: Pending<unknown>;
+  statuses: Pending<unknown>;
+};
+
+/**
+ * One raid party, joining `DelvePartyState` (route/members/pack/haul) with its live
+ * `DelveProjectionPartyPosition` (position) by `EntityId` — **not by array index**:
+ * `DelveProjection.cs`'s own `parties` list is `.OrderBy(p => p.EntityId)`, so the position array's
+ * order does not match `delve.Parties`' own order; `adaptDelve` joins the two by id.
+ */
+export type PartyView = {
+  /** The array position in `delve.Parties` — never rendered raw (§8: `PartyIndex` "never rendered").
+   * `labels.ts` (D5.10) turns this into *First/Second/Third/Fourth Banner*. */
+  partyIndex: number;
+  entityId: number;
+  /** `null`/`null` before any entity is wired into a real delve's `WorldState` — D5.2's own named,
+   * still-real gap ("no real delve wires party entities into `WorldState` yet"), not new here. */
+  atSectorId: string | null;
+  onLaneId: string | null;
+  /** Sector ids already walked — structural, not a Magnitude. */
+  route: string[];
+  members: MemberView[];
+  /**
+   * `HandleGetDelve` sends `delve.Parties[].Pack` — the raw, un-projected `DelvePartyPackState`
+   * (`{rows, cols, cells: [{row, col, item}]}`), never `PackDtoProjection.Project`'s own richer
+   * `PackDto` (`movable`/`floor`/`provisionCellsLeft`). `PackDtoProjection.Project` is real and
+   * tested (`PackDtoTests.cs`) but has zero production callers and no route serves it — the same
+   * "provably correct, no live trigger" posture this program uses elsewhere. `Pending` until a route
+   * wires the projection onto this field or a sibling one.
+   */
+  pack: Pending<PackView>;
+  /** `DelveHaulEntry[]` — pending altar pulls, real and structural (D4.8). No dedicated view type:
+   * the shape is small, stable and inlined here rather than adding a 17th named export. */
+  haul: {
+    kind: string;
+    speciesId: string;
+    rarity: string;
+    variant: string;
+    traitIds: string[];
+    row: number;
+    col: number;
+    n: number;
+  }[];
+};
+
+/** The whole projection `GET /api/delve/{delveId}` returns (D5.2's `HandleGetDelve`). */
+export type DelveView = {
+  delveId: number;
+  worldId: string;
+  /** `DelveStates`: `"Active" | "Extracted" | "Wiped" | "Archived"` — an id, translated by `labels.ts`. */
+  state: string;
+  domainId: string;
+  raidMode: string;
+  rungId: string;
+  /** `count`; see `Magnitude.exact`'s own doc comment for the named, real gap in how far this field's
+   * precision survives the wire today. */
+  soulsUnbanked: Magnitude;
+  rooms: RoomView[];
+  doors: DoorView[];
+  parties: PartyView[];
+  revision: number;
+  /**
+   * `HandleGetDelve` sends `delve.QuestsJson` as a raw JSON string — never parsed into `QuestDto[]`
+   * (that needs `QuestProgress.Evaluate` + `QuestDtoProjection.Project`, neither of which this
+   * endpoint calls). `Pending` rather than exposing the opaque blob, matching `RunView.summary`.
+   */
+  quests: Pending<QuestView[]>;
+  // `contentTermsJson` is deliberately not carried onto this view at all (not even `Pending`): §10
+  // frames "frozen terms" as server-internal only — "the rule id reaches the developer tree only" —
+  // so it is not a future player-facing field, and declaring it `Pending` would misstate that it is.
+  // `thetaRun` is the same deliberate omission for a different, sharper reason: §8's own vocabulary
+  // table lists `theta_run` under "never sent" on the wire, yet `HandleGetDelve` (D5.2, already
+  // shipped) *does* send `thetaRun = delve.ThetaRun` — a real, evidenced contradiction between the
+  // shipped D5.2 response and this very spec section. This view follows §8 (the contract-layer rule
+  // this task is scoped to enforce) and does not surface it; the wire's own over-sending is a
+  // `DelveEndpoints.cs`-side fact this task's Files line does not reach.
+};
+
+/** `PackDto.Cells`/`.Floor` — `PackDtoProjection.ToDto`'s own `Origin.ToString()` sends PascalCase
+ * (`"CarryIn"`/`"Haul"`), translated here to the view's lower-camel form. */
+export type PackItemOriginView = "carryIn" | "haul";
+
+/** One `PackCellDto` — landed ask 5's own `movable` flag included (spec-loot-pack.md:226). */
+export type PackCellView = {
+  row: number;
+  col: number;
+  w: number;
+  h: number;
+  kind: string;
+  refId: string;
+  qty: Magnitude; // count
+  origin: PackItemOriginView;
+  movable: boolean;
+};
+
+/** `PackDto` (`PackGrid.cs`) — real and tested (`PackDtoTests.cs`), but `PackDtoProjection.Project`
+ * has zero production callers and no HTTP route serves it yet (confirmed by grep); see `PartyView
+ * .pack`'s own doc comment. `adaptPack` is built and tested against a hand-built fixture matching
+ * this real shape, ready for the day a route wires the projection. */
+export type PackView = {
+  rows: number;
+  cols: number;
+  cells: PackCellView[];
+  floor: PackCellView[];
+  provisionCellsLeft: Magnitude; // count
+};
+
+/**
+ * Verbs `TalkTree.Offered(step, maxSteps, eligibility)` actually offers — the only real, shipped
+ * output on the wild-talk surface. **`TalkTree.Step`/`TalkStep` (the spec's own cited source for a
+ * turn's resolved band/quote/outcome, `spec-wild-room.md:402`) does not exist** — confirmed absent by
+ * reading `TalkTree.cs` in full, and independently flagged the same way already, before this task, in
+ * `DelveWildEndpoints.cs:18-21` and `RpgStore.Delve.cs:1085`. Every field past `offered` is honestly
+ * `Pending` rather than glued together from unrelated pieces.
+ */
+export type TalkView = {
+  /** `WildVerb`'s own C# member names (`"Flatter" | "Threaten" | "OfferSouls" | "OfferSpirit" |
+   * "OfferSupply" | "OfferContract" | "Fight" | "Leave"`) — ids, translated by `labels.ts`. */
+  offered: string[];
+  effectiveBand: Pending<string>;
+  quote: Pending<string>;
+  decision: Pending<unknown>;
+};
+
+/**
+ * **No adapter exists for this type** (see `adapt.ts`'s own module comment on why). `EventResolution`
+ * and `EventDeck` — the spec's own cited source (`spec-event-deck.md:421`) — do not exist anywhere in
+ * `.cs` source (confirmed by grep across the whole tree). The real pieces (`EventRow`,
+ * `EventChoices.Presented`, `AmbushOutcome`, `DelveBanner`) are separate, untied Core functions with
+ * no orchestrator gluing them into one apply-transaction result; composing one in this adapter layer
+ * would be deciding new business logic no Core function has decided, the one thing an adapter must
+ * never do. Every field is `Pending`, honestly, until that orchestrator ships.
+ */
+export type EventView = {
+  eventId: Pending<string>;
+  kind: Pending<string>;
+  choices: Pending<string[]>;
+  banner: Pending<{ bannerId: string; durationMs: Magnitude }>;
+  warnings: Pending<string[]>;
+};
+
+/**
+ * `RoomObjectBuilder.For(...)`'s real output — `verbs` is **offered-only**, no per-verb
+ * enabled/disabled+reason: that shape (`VerbOutcome`, via `VerbResolver.Resolve`) is computed
+ * per-attempt (needs `alreadySpent`/`breakMode`/`structureHpBand`, attempt-time context a batch
+ * prompt-construction pass doesn't have), not as a precomputed batch a single adapter call can build.
+ * §10's own rule ("a refusal the client can predict is a disabled control carrying its reason") is
+ * therefore not yet satisfiable for a room-object verb from this adapter alone — named, not guessed.
+ */
+export type ObjectPromptView = {
+  sectorId: string;
+  /** `ObjectKind`: `"Curio" | "Obstacle" | "Building" | "Structure"`. */
+  kind: string;
+  verbs: string[];
+  oneShot: boolean;
+};
+
+/**
+ * `SupplyUse.Use(...)`'s real outcome shape — the only real Core function on this surface.
+ *
+ * ⚠ **A named ambiguity, not silently resolved either way**: §7 describes `SupplyView` as a *browse*
+ * panel ("what the party carries that can be used here"), but no "list what's usable here" producer
+ * exists anywhere — `SupplyUse.Use` is an *act* (spend a supply, now), not a listing read, and its own
+ * `Decision` field is C#-typed `object?` (an anonymous literal at its one real call site,
+ * `SupplyUse.cs:56`), so no declared shape exists to mirror there either. This type models the act's
+ * outcome (the one real thing on this surface), matching `WorkbenchOutcomeView`'s own "outcome, not
+ * browse" shape — whether a future browse-panel read needs a *different* type is this task's own
+ * genuine open question, not resolved here.
+ */
+export type SupplyView = {
+  ok: boolean;
+  reason: string;
+  decrementContainerId: string | null;
+  decision: Pending<unknown>;
+};
+
+/**
+ * **No adapter exists for this type.** Confirmed: no SignalR message shape for a live delve fight
+ * exists anywhere (`RpgHub.cs`, the repo's only `Hub`-derived class, carries zero delve/battle-session
+ * messages); no "strike feed" DTO exists (`BattleTrace` is a debug/golden-hash replay log, not a
+ * structured live-UI feed); `dwell.inputWindowMs`/`afkTimeoutMs` are read nowhere in code (confirmed
+ * by grep, and independently named as drift already in `spec-delve-battle-profile.md:256`). The real
+ * primitives that exist (`BattleSession`, `DecisionTrace`, `ScheduledEvent`/`TurnOrderForecast`) are
+ * low-level session/timeline plumbing, not a delve-fight view shape — assembling one here would be
+ * inventing the missing session message this adapter layer cannot decide on its own.
+ */
+export type FightView = {
+  dwellRemaining: Pending<Magnitude>; // milliseconds
+  initiative: Pending<unknown[]>;
+  strikeFeed: Pending<unknown[]>;
+  frozen: Pending<boolean>;
+};
+
+/** `QuestDto` (`QuestDtoProjection.Project`) — real, shipped, matches the spec's own cited source
+ * (`spec-delve-quests.md:341`) exactly. */
+export type QuestView = {
+  name: string;
+  flavor: string;
+  have: Magnitude; // count
+  need: Magnitude; // count
+  done: boolean;
+};
+
+/**
+ * Composes two independently-real, already-fully-decided Core outputs — `ExtractionSettlement.Decide`
+ * (per member) and `DelveSoulLedger.AtExtraction` (per raid) — reshaping, not deciding anything new.
+ * `MemberSettlement` itself carries no member id (`Outcome`/`RecoverDelves`/`Won` only), so
+ * `adaptExtraction` takes an explicit `instanceId` alongside each settlement from its caller, the
+ * same positional-join shape `PartyView`'s own `partyIndex` needs for the identical reason.
+ *
+ * **No unified "extraction result" producer exists** — confirmed: `ExtractionSettlement`,
+ * `DelveSoulLedger` and `DelveLoot.InstantiateBossFirstClearGrant` (first-clear grants) are three
+ * separate producers with no glue; "level-ups" and "joins" (§7's "Drops · level-ups · a wild demon
+ * joining · a first clear") have no producer anywhere at the extraction boundary at all. Every one of
+ * those stays `Pending`, named, rather than invented.
+ */
+export type ExtractionView = {
+  members: { instanceId: string; outcome: string; recoverDelves: Magnitude; won: boolean }[];
+  /** `ExtractionEarn.Kills`/`.Victory` — kept as the two figures the server actually separates,
+   * rather than pre-summed here (that would be arithmetic on a figure in the client, §16's own
+   * "never" list). */
+  soulsFromKills: Magnitude; // count
+  soulsFromVictory: Magnitude; // count
+  wiped: Pending<boolean>;
+  firstClearGrant: Pending<unknown>;
+  levelUps: Pending<unknown[]>;
+  joins: Pending<unknown[]>;
+};
+
+/** One `DomainRungOfferDto` or `DomainTailOfferDto` — the two real, differently-shaped wire rows
+ * `DomainOffers.For` nests inside `DomainOfferDto.Rungs`/`.TailSteps`. A discriminated union rather
+ * than forcing one shape or fabricating fields the other row doesn't have. */
+export type RungOfferView =
+  | { kind: "rung"; rungId: string; label: string; bandName: string; oathOffered: boolean; permadeath: boolean }
+  | { kind: "tail"; n: Magnitude /* count */; label: string; bandName: string };
+
+/** `DomainOfferDto` (`DomainOffers.cs`) — real, shipped, matches the spec's own cited source
+ * (`spec-domain-catalog.md:380`). `entryKey` is narrowed to §8's own two vocabulary ids; an
+ * unrecognised wire value falls back to `"standing"` (the non-locking, more permissive reading)
+ * rather than silently miscasting a `once`-entry domain as open-ended. */
+export type DomainOfferView = {
+  domainId: string;
+  name: string;
+  flavor: string;
+  climate: string;
+  entranceLabel: string;
+  entryKey: "single-descent" | "standing";
+  sealed: boolean;
+  resume: { delveId: number } | null;
+  rungs: RungOfferView[];
+  tailSteps: RungOfferView[];
+  raidModes: string[];
+  bossName: string;
+  cleared: string[];
+  /** Real field on the wire DTO (landed ask 6) — always empty in production today, since
+   * `ProvisionableFor` throws `NotImplementedException` unconditionally and is unreachable while
+   * `dungeon_domain` has no write arm (D4.16). Not `Pending`: an empty array is the honest, valid
+   * current state of a real field, not a missing one. */
+  provisionable: { containerId: string; label: string; price: Magnitude; cells: Magnitude }[];
 };

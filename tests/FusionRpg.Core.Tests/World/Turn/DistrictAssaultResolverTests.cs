@@ -1,6 +1,8 @@
+using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.District;
 using FusionRpg.Core.World.Turn;
 using Xunit;
 
@@ -281,6 +283,44 @@ public class DistrictAssaultResolverTests
         var outcome = DistrictAssaultResolver.Instance.Resolve(request, new[] { attacker }, seed: 1);
 
         Assert.Equal("zomboss", Assert.Single(outcome.SlotResults).HeldByFactionId);
+    }
+
+    /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, MAJOR finding this session): before
+    /// `BattleActorSetup.AdditionalHeldActions` existed, no legion member built by this resolver could
+    /// ever hold a construction action at all. Proving the FULL "a real siege actually builds a
+    /// structure" chain also needs the attacker positioned adjacent to an affordable, legal cell —
+    /// `ConstructionAi.ChooseBuiltSite`'s own 8-cell search — which this resolver's own
+    /// zone-based `Placement.PlaceActors` does not guarantee relative to an arbitrary slot's cell
+    /// (confirmed empirically: an earlier version of this test asserted a built `moat` and failed with
+    /// neither combat damage nor a placement, meaning the attacker's real placement here simply was not
+    /// adjacent to the target cell — a real, pre-existing, geometry-only constraint, unrelated to
+    /// whether the action is held). `ConstructionLiveWiringTests.cs`'s own
+    /// `AdditionalHeldActionsAloneMakeBuiltReachable` proves the actual mechanism this fix adds, under
+    /// the same hand-controlled positioning that module's other tests already use. This test instead
+    /// proves the narrower, still-real claim: wiring `AdditionalHeldActions` into a genuinely opposed,
+    /// unpositioned real battle changes nothing observable when no legal build site is adjacent —
+    /// no exception, no stray structure, no regression to the pre-existing "well" outcome.
+    /// </summary>
+    [Fact]
+    public void Granting_construction_actions_does_not_change_an_unrelated_battles_outcome()
+    {
+        var attacker = Legion("e-a", "player", "s1", ("peashooterzombie", 1, 100));
+        var slots = new[]
+        {
+            new SlotProjection { SlotIndex = 0, SlotTypeId = "rootbed", StructureId = "well", StructureHp = 4_000_000_000L },
+        };
+        var board = Board(slots: slots) with { RubbleStock = 10, IronworkStock = 10 };
+        var request = DistrictRequest("b1", attacker.EntityId, null, board);
+
+        var outcome = DistrictAssaultResolver.Instance.Resolve(request, new[] { attacker }, seed: 1);
+
+        // Same outcome shape `An_existing_structures_ownership_is_preserved...` already established
+        // for this exact slot setup -- proving AdditionalHeldActions being wired for the FIRST time
+        // introduced no regression to an unrelated battle it has no legal site to act on.
+        var slotResult = Assert.Single(outcome.SlotResults);
+        Assert.Equal(0, slotResult.SlotIndex);
+        Assert.False(slotResult.StructureDestroyed);
     }
 
     [Fact]

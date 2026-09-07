@@ -1,0 +1,301 @@
+{
+  "treeId": "retribution",
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1726,
+  "bound": [
+    {
+      "nodeId": "skill.retribution-off-t1-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.retribution-off-t1-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 608,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.retribution-off-t2-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.retribution-off-t5-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 3105,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.retribution-off-t6-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 3713,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.retribution-def-t1-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.retribution-def-t2-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.retribution-def-t5-n1",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.retribution-def-t7-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "defense",
+          "op": "Increased",
+          "kMicro": 1024,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.retribution-off-t2-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.precision\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t3-n0",
+      "unspentBudgetShareMilli": 27,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t3-n1",
+      "unspentBudgetShareMilli": 28,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-glean\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.hit-retort\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.hit-retort\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t7-n1",
+      "unspentBudgetShareMilli": 64,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t8-n0",
+      "unspentBudgetShareMilli": 72,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.hit-retort\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t8-n1",
+      "unspentBudgetShareMilli": 73,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t9-n0",
+      "unspentBudgetShareMilli": 82,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t9-n1",
+      "unspentBudgetShareMilli": 82,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.hit-retort\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t10-n0",
+      "unspentBudgetShareMilli": 91,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-glean\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-off-t10-n1",
+      "unspentBudgetShareMilli": 91,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.retribution\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t1-n1",
+      "unspentBudgetShareMilli": 9,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t2-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t3-n0",
+      "unspentBudgetShareMilli": 27,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-hardening\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t3-n1",
+      "unspentBudgetShareMilli": 28,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-toughness\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-hardening\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t8-n0",
+      "unspentBudgetShareMilli": 72,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t8-n1",
+      "unspentBudgetShareMilli": 73,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t9-n0",
+      "unspentBudgetShareMilli": 82,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t9-n1",
+      "unspentBudgetShareMilli": 82,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t10-n0",
+      "unspentBudgetShareMilli": 91,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.retribution-def-t10-n1",
+      "unspentBudgetShareMilli": 91,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

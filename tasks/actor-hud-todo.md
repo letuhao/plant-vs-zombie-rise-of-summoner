@@ -160,9 +160,9 @@ Spec: [spec-shield-slot-migration.md](../docs/architecture/actor-hud/spec-shield
 
 ### Catalog-token amend (required — ideal §4.1)
 
-- [ ] **H1** Core resolve API from injected status/resource catalogs (`hudToken`/`color`/`displayName`)
-- [ ] **H2** Unity + Phaser + fold Inspector consume H1
-- [ ] **H3** Delete `StatusInitials` / hashed RGB; guard against id-slice player tokens
+- [x] **H1** Core resolve API from injected status/resource catalogs (`hudToken`/`color`/`displayName`)
+- [x] **H2** Unity + Phaser + fold Inspector consume H1
+- [x] **H3** Delete `StatusInitials` / hashed RGB; guard against id-slice player tokens
 - Coordinate with actor-sheet T16 (FE catalog fetch) — HUD owns renderer resolve; no second writer
 
 ### Optional

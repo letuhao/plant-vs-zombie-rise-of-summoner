@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The shadow looming over this realm must be extinguished to restore the natural order. Only by striking down the master of this domain can the survivors hope to see another dawn.",
+  "name": "The Final Silence",
+  "objectiveTemplate": "kill-boss",
+  "prereqRefs": [],
+  "questId": "quest.kill-boss-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "roster",
+  "targetRef": "none"
+}

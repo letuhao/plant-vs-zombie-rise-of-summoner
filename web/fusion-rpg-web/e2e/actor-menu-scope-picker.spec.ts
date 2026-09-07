@@ -111,11 +111,14 @@ test.describe("Actor menu scope picker (fe-essentials T6)", () => {
     await expect(page.getByTestId("scope-picker-demo-value")).toContainText('"relation": "enemy"');
 
     await page.getByTestId("scope-mode-target").click();
-    await expect(page.getByTestId("scope-target-option-fixture-actor-1")).toBeVisible();
+    await expect(page.getByTestId("scope-target-collection-item-P:1:0,0")).toBeVisible();
     // The container itself renders nothing selected in the new mode — the stale "relation" value
     // from before is still what the demo page's own state holds (nothing cleared it), but Target's
     // own panel does not misread it as a selected target.
-    const anyPressed = await page.getByTestId("scope-target-list").locator('[aria-pressed="true"]').count();
-    expect(anyPressed).toBe(0);
+    const anySelected = await page
+      .getByTestId("scope-target-list")
+      .locator('[data-selected="true"]')
+      .count();
+    expect(anySelected).toBe(0);
   });
 });

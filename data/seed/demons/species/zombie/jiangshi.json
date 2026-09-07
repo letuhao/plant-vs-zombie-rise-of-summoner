@@ -76,5 +76,88 @@
       "cursed"
     ],
     "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:42:17Z",
+      "minorityValues": {
+        "aptitudePrimary": "Pierce",
+        "deployMode": "HypnoAlly"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Jiangshi",
+      "Undead",
+      "Spectral"
+    ],
+    "gameTypeId": 331,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The creature's ability to bypass plants and kill two strong plants quickly is a localized threat, but it lacks the world-altering scale required for a 'cataclysm' rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "EternalZombie_b",
+    "targetPreference": "backline",
+    "traits": [
+      "Phase-shifting",
+      "High-resilience",
+      "Area-of-effect deathburst",
+      "High-mobility"
+    ],
+    "variants": [
+      "ancient",
+      "cursed"
+    ],
+    "verdict": "too-high"
   }
 ]

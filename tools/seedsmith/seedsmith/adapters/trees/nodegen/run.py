@@ -342,6 +342,40 @@ def record_accepted(done: "dict[str, dict]", subject_id: str, record: NodeSeedRe
     return {**done, subject_id: {"record": record.to_dict()}}
 
 
+def record_superseded(done: "dict[str, dict]", subject_id: str, record: NodeSeedRecord) -> "dict[str, dict]":
+    """J4 (spec-tree-review.md §8's own two-hazards warning) — the DELIBERATE, EXPLICIT counterpart
+    to `record_accepted`'s "raise on duplicate" default, for the ONE case that default exists to
+    rule out by accident, not by design: an INTENTIONAL re-review pass regenerating an
+    already-accepted node after a prompt-version bump or a plan change (§8's own table). Passive
+    tree's own node ids are the STABLE structural slug (`tree-catalog` §3) — the exact property §8
+    says "is the single decision that makes a second review pass possible at all" — so a
+    regenerated node's `subject_id` is, BY DESIGN, identical to its prior entry's; `record_accepted`
+    would refuse it, correctly, for anyone who did not mean to do this.
+
+    **A real, corrected finding, not the spec's own literal citation.** §8 names
+    `ProvenanceLedger.record` (`pipeline/provenance.py:109-118`, shared with `items/setgen`) as the
+    class that "raises on a re-recorded row" and blocks pass two — but passive-tree's own ledger,
+    read directly here, was NEVER an instance of that shared class (H1's own citation two functions
+    up already says so: "a plain JSON `{subjectId: entry}` map rather than that class"). The actual
+    blocker for THIS program is `record_accepted` above, entirely local to this module — so
+    `provenance-supersede` for passive-tree specifically does not require touching shared
+    `seedsmith.pipeline.provenance` (a genuinely cross-program change with its own, separate
+    `items/setgen` caller to keep safe) at all. Verified by grepping every real caller of
+    `ProvenanceLedger` before writing this docstring, not assumed from the spec's own prose.
+
+    Never the default path — a caller must name this function explicitly, the same "loud, not
+    silent" discipline `record_accepted` itself already states, applied to the ONE case that
+    discipline should not block. The prior entry is PRESERVED under `supersededRecord`, never
+    discarded — §8's own "diff card" wants the previous value "struck through in place" alongside
+    the new one, which needs the old content to still exist somewhere to render.
+    """
+    prior = done.get(subject_id)
+    entry: "dict[str, Any]" = {"record": record.to_dict()}
+    if prior is not None:
+        entry["supersededRecord"] = prior["record"]
+    return {**done, subject_id: entry}
+
+
 # ---------------------------------------------------------------------------------------------
 # H2 — the real gate runner. Gates 6, 7, 9, 10, 11, 12, 13 fire per node; gates 2, 23, 24 fire once
 # per run (description audit before any call, the run verdict after every subject, the offline

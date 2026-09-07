@@ -50,6 +50,7 @@ import { encodeLawnSel, type LawnCollectionRow } from "@/ui/lawn/adaptOccupant";
 import { logLawnInteractive } from "@/ui/lawn/lawnInteractiveObserve";
 import { setLawnKeyboardMuted } from "@/game/focusGate";
 import {
+  boardArrowsLive,
   canEnterSpawnTargeting,
   idleInteraction,
   reduceInteraction,
@@ -234,12 +235,16 @@ export function LawnPage() {
     [living]
   );
   const uniqueActorsQ = useUniqueActors(playerId);
-  const deployableActors = useMemo(() => {
+  const spawnTrayEntries = useMemo(() => {
     const items = uniqueActorsQ.data?.items ?? [];
     const bound = new Set(
       living.filter((o) => o.instanceId).map((o) => o.instanceId as string)
     );
-    return items.filter((a) => !bound.has(a.instanceId));
+    // Bound uniques stay visible as locked rows — never filtered out of the tray (T7).
+    return items.map((a) => ({
+      actor: a,
+      lockedReason: bound.has(a.instanceId) ? "Already Bound on the lawn" : undefined
+    }));
   }, [uniqueActorsQ.data?.items, living]);
   const picked = pickPhaserOccupants(
     living,
@@ -266,13 +271,10 @@ export function LawnPage() {
       : undefined;
 
   useEffect(() => {
-    const mute =
-      dockOpen ||
-      spawnTrayOpen ||
-      Boolean(sheetRow) ||
-      commanderSheetOpen ||
-      interaction.mode === "ActionTargeting";
-    setLawnKeyboardMuted(mute);
+    const dockOrSheetOpen =
+      dockOpen || Boolean(sheetRow) || commanderSheetOpen || spawnTrayOpen;
+    // Spawn/Action targeting keep board arrows (GG-18); dock/sheet mute Idle inspect only.
+    setLawnKeyboardMuted(!boardArrowsLive(interaction.mode, dockOrSheetOpen));
     return () => setLawnKeyboardMuted(false);
   }, [dockOpen, spawnTrayOpen, sheetRow, commanderSheetOpen, interaction.mode]);
 
@@ -369,10 +371,47 @@ export function LawnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deployInstanceId]);
 
-  // GG-6: Esc must cancel deploy-targeting rather than falling through to the empty-stack
-  // System fallback. This isn't a PanelShell layer (it's stage chrome, per the plate), so it
-  // registers directly on the real stack — the same single mechanism `handleEscape()` already
-  // walks, not a second Escape-handling path.
+  // Esc precedence (lawn-interactive §10.1): cancel armed order → pop sheet → pop dock/tray.
+  // claimStageEscape pushes LIFO — register lower layers first so ActionTargeting is topmost.
+  useEffect(() => {
+    if (!dockOpen) return undefined;
+    return claimStageEscape("lawn-occupancy-dock", () => {
+      setDockSelectionKey(null);
+      setSheetRow(null);
+      setInteraction(idleInteraction());
+    });
+  }, [dockOpen]);
+
+  useEffect(() => {
+    if (!spawnTrayOpen) return undefined;
+    return claimStageEscape("lawn-spawn-tray", () => {
+      setSpawnTrayOpen(false);
+      setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+    });
+  }, [spawnTrayOpen, model.phase]);
+
+  useEffect(() => {
+    if (!sheetRow) return undefined;
+    return claimStageEscape("lawn-actor-sheet", () => setSheetRow(null));
+  }, [sheetRow]);
+
+  useEffect(() => {
+    if (!commanderSheetOpen) return undefined;
+    return claimStageEscape("lawn-commander-sheet", () => setCommanderSheetOpen(false));
+  }, [commanderSheetOpen]);
+
+  useEffect(() => {
+    if (interaction.mode !== "ActionTargeting" && interaction.mode !== "SpawnTargeting") {
+      return undefined;
+    }
+    // Deploy URL path owns its own Esc claim; Field tray uses lawn-spawn-tray above.
+    if (deployInstanceId || spawnTrayOpen) return undefined;
+    return claimStageEscape("lawn-armed-order", () => {
+      setArmedOrderId(null);
+      setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+    });
+  }, [interaction.mode, deployInstanceId, spawnTrayOpen, model.phase]);
+
   useEffect(() => {
     if (!deployInstanceId) return undefined;
     return claimStageEscape("lawn-deploy-targeting", cancelDeploy);
@@ -1197,7 +1236,7 @@ export function LawnPage() {
         />
         <SpawnTray
           open={spawnTrayOpen}
-          actors={deployableActors}
+          entries={spawnTrayEntries}
           canSpawn={canSpawn}
           lockedReason={!canSpawn ? `Fielding disabled in ${model.phase}` : undefined}
           onClose={() => {
@@ -1293,7 +1332,7 @@ export function LawnPage() {
         devToolbarAndInspector
       ) : (
         <div data-testid="lawn-canvas-plain">
-          <LawnGameHost model={model} interaction={interaction} viewMode="large" onSelect={onSelect} />
+          <LawnGameHost model={model} interaction={interaction} viewMode="stack" onSelect={onSelect} />
         </div>
       )}
 

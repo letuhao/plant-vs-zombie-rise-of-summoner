@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Light",
-  "elementSecondary": null,
+  "elementSecondary": "Dark",
   "gameTypeId": 1080,
   "magnitudes": {
     "resource.max.hp": 480,

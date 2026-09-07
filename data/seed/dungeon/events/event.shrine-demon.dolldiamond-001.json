@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-demon.dolldiamond-001",
+  "flavor": "A hollowed-out pillar stands in the center of the chamber, 制成 from translucent obsidian that pulses with a rhythmic, internal light. It looks 像是 a frozen heartbeat, casting long, distorted shadows that dance against the damp walls of the world.",
+  "kind": "shrine",
+  "name": "The Reliquary of Glass Veins",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a focal point of ancient ritual energy that offers a chance to exchange vitality for cosmic insight.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.dolldiamond"
+}

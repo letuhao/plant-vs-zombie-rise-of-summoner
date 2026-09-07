@@ -1,0 +1,17 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.ashthreepeater-001"
+  ],
+  "flavor": "Thousands of hollowed glass needles hang from the ceiling by translucent threads, swaying in a breeze that seems to originate from nowhere. As the air currents shift, the needles collide, producing a haunting, polyphonic melody that vibrates in the marrow of your bones.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Aeolian Chime-Garden",
+  "reason": "The room serves as a sonic landmark for navigation, using wind patterns to signal the proximity of larger atmospheric currents in the dungeon.",
+  "roomId": "room.curio-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

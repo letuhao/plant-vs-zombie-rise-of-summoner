@@ -365,6 +365,15 @@ public static class SiegeTuningLoader
             if (maxCandidatesScored <= 0)
                 throw new SiegeTuningRejection($"siege tuning: ai.maxCandidatesScored must be > 0; got {maxCandidatesScored}");
 
+            // Resolved 2026-09-07 (spec-siege-ai.md, Open questions): ObjectiveClassMilli/IncomingThreatMilli.
+            var objectiveReferenceDistanceCells = Int(ai, "objectiveReferenceDistanceCells");
+            if (objectiveReferenceDistanceCells <= 0)
+                throw new SiegeTuningRejection(
+                    $"siege tuning: ai.objectiveReferenceDistanceCells must be > 0; got {objectiveReferenceDistanceCells}");
+            var threatRadiusCells = Int(ai, "threatRadiusCells");
+            if (threatRadiusCells <= 0)
+                throw new SiegeTuningRejection($"siege tuning: ai.threatRadiusCells must be > 0; got {threatRadiusCells}");
+
             return new SiegeTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
@@ -425,7 +434,9 @@ public static class SiegeTuningLoader
                     WeightLowHp: wLowHp, WeightCannotCounter: wCannotCounter, WeightRound: wRound,
                     WeightRisk: wRisk, StanceDefault: stanceDefault,
                     AutoResolveHandicapMilli: autoResolveHandicapMilli, RetargetLatencyTicks: retargetLatencyTicks,
-                    AggressionRange: aggressionRange, MaxCandidatesScored: maxCandidatesScored),
+                    AggressionRange: aggressionRange, MaxCandidatesScored: maxCandidatesScored,
+                    ObjectiveReferenceDistanceCells: objectiveReferenceDistanceCells,
+                    ThreatRadiusCells: threatRadiusCells),
                 Fog: new FogTuning(Enabled: fogEnabled, DefaultVisionRangeTiles: fogDefaultVisionRangeTiles));
         }
     }

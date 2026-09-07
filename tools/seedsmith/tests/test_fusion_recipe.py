@@ -386,23 +386,34 @@ def test_a_clean_rewrite_of_identical_content_writes_nothing(tmp_path):
 
 def test_real_corpus_end_to_end():
     """Shells out to the REAL `tools/DemonRecipeReconcileInput` CLI (no model needed — this proves
-    the seam integration and the reconciler's own bookkeeping against the actual corpus, matching
-    T8.1/T8.3's own already-verified real numbers: 709 eligible, 695 deterministic, 14 deficits)."""
+    the seam integration and the reconciler's own bookkeeping against the actual corpus). Numbers
+    updated 2026-09-07 (T2.11's own full classification run completed: 840 -> 903 generatable
+    species). Almanac itself grew 21 -> 22 eligible outputs while Sunwoven (the one rung below) stayed
+    at its own real ceiling of 4 (C(4,2)=6 pairs either way), so the deficit widened 14 -> 16 by
+    exactly that growth. Every existing Almanac deficit's own candidate pool also grew (more
+    Sunwoven/Firstseed/Heirloom species now populate the nearest-2-3-rungs-below window), which
+    correctly invalidated all 14 previously-resolved gap-fills via the reconciler's own §3a
+    freeze-on-commit (their `corpusContentHash` no longer matches a changed pool) — closing the gap
+    for real needs a fresh live-model vote (Checkpoint 8a), not attempted here or by this test.
+    Updated again same day: DoubleCherry's own `attackTempo` closed via an owner-directed manual pick
+    (never a model call), 903 -> 904 species, 774 -> 775 eligible outputs, 758 -> 759 deterministic
+    (Almanac's own 16 deficits unaffected — DoubleCherry is Fused, not Almanac)
+    (775 eligible, 759 deterministic, 16 deficits — was 774/758/16, before that 713/699/14)."""
     try:
         seam = reconcile.run_seam_cli()
     except (RuntimeError, FileNotFoundError, OSError) as e:
         pytest.skip(f"real C# seam not runnable in this environment: {e}")
 
-    assert len(seam["eligibleOutputs"]) == 709
-    assert len(seam["deterministicRecipes"]) == 695
-    assert len(seam["deficits"]) == 14
+    assert len(seam["eligibleOutputs"]) == 775
+    assert len(seam["deterministicRecipes"]) == 759
+    assert len(seam["deficits"]) == 16
 
-    # A propose_fn that always fails to resolve — proves the real seam's 14 deficits pass all the
+    # A propose_fn that always fails to resolve — proves the real seam's 16 deficits pass all the
     # way through reconcile() as named, unresolved outputs, and every deterministic recipe survives
     # untouched, with zero gap-fills fabricated.
-    outcome = reconcile.reconcile(seam, _fixed_sample_fn(*([(None, None, None)] * 14)))
-    assert len(outcome.recipes) == 695
-    assert len(outcome.unresolved) == 14
+    outcome = reconcile.reconcile(seam, _fixed_sample_fn(*([(None, None, None)] * 16)))
+    assert len(outcome.recipes) == 759
+    assert len(outcome.unresolved) == 16
     assert all(r["crossRungGapFill"] is False for r in outcome.recipes.values())
 
 

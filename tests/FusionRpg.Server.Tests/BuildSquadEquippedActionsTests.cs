@@ -55,7 +55,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
         // (seed-to-concrete T4.1 moved the old hardcoded switch into fusion.v1.json), so the mint
         // path this test drives needs StarPolicy configured too, exactly like AptitudeChannelModsTests.
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         // T59.8: AwardUniqueActorXp's own XpToNext call reads RpgXpCurve.Tuning -- not covered by
         // this assembly's [ModuleInitializer] bootstrap either (no prior test in this file awarded
         // specimen XP through a real level-up).

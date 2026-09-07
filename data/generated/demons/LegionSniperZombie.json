@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Dark",
-  "elementSecondary": null,
+  "elementSecondary": "Light",
   "gameTypeId": 246,
   "magnitudes": {
     "resource.max.hp": 2712,

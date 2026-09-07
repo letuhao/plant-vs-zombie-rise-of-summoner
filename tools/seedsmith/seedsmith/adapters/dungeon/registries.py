@@ -123,6 +123,147 @@ def load_motifs() -> "frozenset[str]":
     return frozenset(_load_demons("motifs.v1.json")["motifs"])
 
 
+#: `data/seed/atoms/` — outside both `REGISTRY_DIR` and `DEMONS_REGISTRY_DIR`, the SAME frozen
+#: cross-program vocabulary `spec-dungeon-seed-contract.md:143`'s own "frozen inputs" list already
+#: names alongside `themes/motifs` ("registries.v1 (7) · species (threatBand) · themes/motifs/
+#: families · consumables"). `adapters/items/registries.py:128-143`'s `load_atom_families()` is the
+#: direct precedent — dungeon's event `outcomes[].effects[].family` field needs the SAME real,
+#: closed vocabulary D4.24 already measured (28 real families, far fewer than any corpus's own
+#: invented list would guess), so this is a second reader of an already-precedented read, not a new
+#: boundary crossing (`families` was in the frozen-inputs list from wave 1, before either items or
+#: dungeon actually built a reader for it).
+ATOMS_DIR = REPO_ROOT / "data" / "seed" / "atoms"
+
+
+def load_atom_families() -> "frozenset[str]":
+    """Every real `family` value across every shipped atom entry — read fresh, never hand-
+    transcribed, for the same reason `items/registries.py`'s own copy exists: a corpus that invents
+    family names against a remembered list silently drifts the moment the atom catalog grows.
+    Unfiltered — includes subsystem-bound families (see `load_grantable_atom_families` below);
+    kept for parity with `items/registries.py`'s own function of the same name and signature."""
+    families: "set[str]" = set()
+    for path in sorted(ATOMS_DIR.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for entry in doc.get("entries") or ():
+            family = entry.get("family")
+            if isinstance(family, str):
+                families.add(family)
+    return frozenset(families)
+
+
+def load_grantable_atom_families() -> "frozenset[str]":
+    """The real subset of `load_atom_families()` legal for a dungeon-event `outcomes[].effects[]`
+    grant — found by direct reading, not assumed: an atom carrying `icdKey` is bound to a SPECIFIC
+    subsystem's own trigger wiring (`fx-board/-core/-status.json`'s lawn `when.trigger` hooks;
+    `patron-aura.json`'s own aura mechanism; `trait-critical-hunter.json`; `extend-slot.json`'s own
+    unique-rung mechanic) and is never handed out generically by another corpus — confirmed the
+    property is per-FAMILY, not per-entry (every tier of a given family agrees). What is LEFT after
+    excluding those (`generated/family-expand.g-*.json`'s own plain `stat.modify` atoms, no
+    `icdKey`, no `when`) is exactly the same ownerless, freely-instantiable pool `unique-pipeline`
+    already draws its 7-family overlap from (D4.24), plus two more of the same shape
+    (`resilience`, `warding`) this reader surfaces for the first time."""
+    grantable: "set[str]" = set()
+    bound: "set[str]" = set()
+    for path in sorted(ATOMS_DIR.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for entry in doc.get("entries") or ():
+            family = entry.get("family")
+            if not isinstance(family, str):
+                continue
+            (bound if "icdKey" in entry else grantable).add(family)
+    return frozenset(grantable - bound)
+
+
+#: `data/seed/items/_registry/bands.v1.json`'s own top-level `powerBand` key — a THIRD frozen
+#: cross-program input (alongside themes/motifs and atom families), confirmed by direct read: the
+#: dungeon-native `bands.v1.json` (`REGISTRY_DIR`) has no `powerBand` member at all (checked
+#: directly — its twenty owned bands are `branchiness/countBand/dangerBand/deltaBand/density/
+#: depthBand/elementSpread/entry/eventKind/formation/hazardBand/hpBand/nerveStage/outcomeOrdinal/
+#: phasing/questScope/repeatScope/rewardBand/sightBand/widthBand`, no `powerBand` among them) — the
+#: SAME five-value vocabulary `unique-pipeline`'s own `fixedAtoms[].powerBand` already reads
+#: (`UniqueBudget.TierOfPowerBand`), one row per tier the atom layer has (definitions.md §1).
+ITEMS_REGISTRY_DIR = REPO_ROOT / "data" / "seed" / "items" / "_registry"
+
+
+def load_power_bands() -> "frozenset[str]":
+    """The legal `outcomes[].effects[].powerBand` vocabulary for a dungeon event — read fresh from
+    the items registry's own frozen `powerBand` entry, never hand-transcribed as a local literal
+    tuple: a five-value enum is small enough to tempt hardcoding, which is exactly the drift risk
+    `load_atom_families`'s own doc comment already names for the sibling cross-program read."""
+    doc = json.loads((ITEMS_REGISTRY_DIR / "bands.v1.json").read_text(encoding="utf-8"))
+    return frozenset(doc["powerBand"]["enum"])
+
+
+#: `data/seed/zomboss/patterns.json` — a FOURTH frozen cross-program input (alongside themes/
+#: motifs/atom-families/powerBand). `ZombossPatterns.cs`'s own doc comment states this file's exact
+#: purpose: "a checked-in MIRROR for tooling that cannot reference this assembly, not the source of
+#: truth" — seedsmith is precisely that tooling (Python, no access to the C# `ZombossPatterns.All`
+#: registry it mirrors). Nine real ids: three pure-posture builds plus six non-self-cancelling
+#: (defence, breaks) pairs, two variants each (class-system-todo.md P7.5).
+ZOMBOSS_PATTERNS_PATH = REPO_ROOT / "data" / "seed" / "zomboss" / "patterns.json"
+
+
+def load_zomboss_pattern_ids() -> "frozenset[str]":
+    """The legal `boss.build` vocabulary for a dungeon encounter — read fresh from the checked-in
+    mirror, never hand-transcribed: `ZombossPatterns.cs`'s own set could grow past nine without this
+    reader noticing unless it stays a live read of the same committed file."""
+    doc = json.loads(ZOMBOSS_PATTERNS_PATH.read_text(encoding="utf-8"))
+    return frozenset(e["id"] for e in doc["entries"])
+
+
+#: `data/seed/demons/_registry/families.v1.json` — a FIFTH frozen cross-program input (alongside
+#: themes/motifs/atom-families/powerBand). A species-lineage grouping (`canonicalKey`+
+#: `nativeLabels`, e.g. `bucket`/`cactus`/`cherry`), unrelated to a species anchor's own free-text
+#: `family` array (`BloverUmbrella.family == ["aerial flora"]`, confirmed by direct read of a real
+#: species file) — `retinueFamily` references THIS registry's `canonicalKey`, never a species's own
+#: prose field. 19 real families, measured directly, not assumed.
+DEMON_FAMILIES_PATH = DEMONS_REGISTRY_DIR / "families.v1.json"
+
+#: The real species corpus — `data/seed/demons/species/**/*.json`, the SAME tree
+#: `check_boss_species.py`-style direct scans already read this session. Not under
+#: `DEMONS_REGISTRY_DIR` (that is frozen vocabulary files, not per-species anchors).
+DEMON_SPECIES_DIR = REPO_ROOT / "data" / "seed" / "demons" / "species"
+
+#: The four `threatBand` values a domain's `bossSpeciesRef` may point at (rungs 7-10,
+#: `spec-domain-catalog.md` §2 row 2's own "`threatBand ≥ bossFloorRung`" — measured directly
+#: against the real 10-band `demon-threat.v1.json` ladder rather than assumed as "the top few").
+BOSS_FLOOR_THREAT_BAND = frozenset({"tyrant", "harbinger", "cataclysm", "calamity"})
+
+
+def load_demon_families() -> "frozenset[str]":
+    """The legal `retinueFamily` vocabulary for a dungeon domain — read fresh from the demon
+    program's own published family registry, never hand-transcribed (the same "second reader, never
+    a second publisher" boundary `load_themes`'s own doc comment already states for its sibling)."""
+    doc = json.loads(DEMON_FAMILIES_PATH.read_text(encoding="utf-8"))
+    return frozenset(doc["families"])
+
+
+def load_boss_species_by_climate() -> "dict[str, frozenset[str]]":
+    """Real, boss-eligible (`threatBand` in `BOSS_FLOOR_THREAT_BAND`) species ids, grouped by their
+    own `elementPrimary` — the legal `bossSpeciesRef` vocabulary for a dungeon domain, PARTITIONED
+    per climate cell the same way `load_grantable_atom_families` partitions atoms into
+    grantable/bound. Read fresh from the real species corpus on every call — never a remembered
+    count — because a re-band or a roster change moves candidates between climates, exactly the
+    drift `stale_ids()` exists to catch downstream. A climate absent from the corpus (none measured
+    this session, all six present) returns an empty frozenset rather than a KeyError, so a caller
+    sees "zero candidates" as data, not a crash."""
+    by_climate: "dict[str, set[str]]" = {}
+    for path in sorted(DEMON_SPECIES_DIR.rglob("*.json")):
+        if path.name.startswith("_"):
+            continue
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        entries = doc if isinstance(doc, list) else doc.get("entries", doc.get("anchors", []))
+        for entry in entries:
+            if entry.get("threatBand") not in BOSS_FLOOR_THREAT_BAND:
+                continue
+            climate = entry.get("elementPrimary")
+            species_id = entry.get("speciesId")
+            if not isinstance(climate, str) or not isinstance(species_id, str):
+                continue
+            by_climate.setdefault(climate, set()).add(species_id)
+    return {climate: frozenset(ids) for climate, ids in by_climate.items()}
+
+
 # The twenty band vocabularies this registry owns (spec-dungeon-registries.md "bands.v1.json" row)
 # — kept as an explicit list so a missing or an extra band in the committed file is a loud
 # assertion failure in the test, never a silent `KeyError` three modules downstream.

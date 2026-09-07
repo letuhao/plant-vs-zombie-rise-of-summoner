@@ -170,20 +170,24 @@ class VocabularyTests(unittest.TestCase):
         transcribed -- this file's own `set-charm-gen.v1.json` tuning note says exactly why
         ("never derive a design proportion from a snapshot of a generated corpus"), which is
         the reason this is a test correction and not a tuning-file edit."""
-        self.assertEqual(VOCAB.capability_count, 62)
-        self.assertEqual(VOCAB.stat_count, 242)
+        # 62 -> 69 / 242 -> 265 (2026-09-07): a same-day affix-families-gen trial batch added 3 real
+        # hand-authored families (atom.tempo-wildgrowth, atom.elpw-surfeit, atom.shld-absolute)
+        # across g-tempo/g-elem-power/g-shield-stat, proving that pipeline end to end. Re-measured
+        # live per this test's own stated discipline, not derived.
+        self.assertEqual(VOCAB.capability_count, 69)
+        self.assertEqual(VOCAB.stat_count, 265)
 
     def test_the_pick_counts_are_reproduced_from_the_families_rather_than_asserted(self) -> None:
         families = vocab_mod.load_families()
-        self.assertEqual(len(families), 100)  # 98 + the 2 punisher families, 2026-09-06
+        self.assertEqual(len(families), 112)  # 100 + 3 affix-families-gen trial entries, 2026-09-07
         caps = [f for f in families if f["kindId"] in TUNING.capability_kinds]
         stats = [f for f in families if f["kindId"] in TUNING.stat_kinds]
-        self.assertEqual(len(caps), 44)
-        self.assertEqual(len(stats), 56)
+        self.assertEqual(len(caps), 51)
+        self.assertEqual(len(stats), 61)
         variant = [f for f in caps
                    if (f.get("variants") or {}).get("generate") == TUNING.variant_generator]
         self.assertEqual(len(variant), 3)
-        self.assertEqual(len(caps) - len(variant) + len(variant) * TUNING.variant_expansion, 62)
+        self.assertEqual(len(caps) - len(variant) + len(variant) * TUNING.variant_expansion, 69)
 
     def test_a_family_whose_kind_is_neither_capability_nor_stat_is_refused_not_dropped(self) -> None:
         with self.assertRaises(ValueError) as caught:
@@ -519,15 +523,23 @@ class ThemeBridgeTests(unittest.TestCase):
 # Charms
 # --------------------------------------------------------------------------------------------
 class CharmTests(unittest.TestCase):
-    def test_the_authored_charm_split_is_21_32_7_excluding_the_ten_resonance_rows(self) -> None:
-        self.assertEqual(len(SHIPPED_CHARM_ROWS), 70)
+    def test_the_authored_charm_split_is_22_32_7_excluding_the_ten_resonance_rows(self) -> None:
+        """22/32/7 (was 21/32/7 through 2026-09-06): the 2026-09-07 set-charm-live-endpoint trial
+        batch added one real `minor` charm (charm.surv-util-021, `demon.wallnut`), so
+        AUTHORED_CHARMS grew 60 -> 61 and the `minor` bucket grew 21 -> 22. Re-measured, not
+        re-guessed, the same rule `vocab.py`'s own header states for a generated-corpus count."""
+        self.assertEqual(len(SHIPPED_CHARM_ROWS), 71)
         self.assertEqual(len(RESONANCE_ROWS), 10)
-        self.assertEqual(len(AUTHORED_CHARMS), 60)
+        self.assertEqual(len(AUTHORED_CHARMS), 61)
         split = {c: sum(1 for e in AUTHORED_CHARMS if e["charmClass"] == c)
                  for c in ("minor", "standard", "signet")}
-        self.assertEqual(split, {"minor": 21, "standard": 32, "signet": 7})
+        self.assertEqual(split, {"minor": 22, "standard": 32, "signet": 7})
 
     def test_the_charm_axis_gini_does_not_exceed_the_authored_corpus_value(self) -> None:
+        """137 (was 133 through 2026-09-06): the same trial batch's survivability-axis charm moved
+        the authored corpus's own measured skew, and `set-charm-gen.v1.json`'s own derivation note
+        says the ceiling tracks that measurement rather than being invented — so the tuning value
+        moved with it, in the same commit as the corpus it describes."""
         gini = charm_rules.axis_gini_permille([c["axis"] for c in AUTHORED_CHARMS])
         self.assertEqual(gini, TUNING.charm_axis_gini_max_permille)
         self.assertLessEqual(gini, TUNING.charm_axis_gini_max_permille)
@@ -602,18 +614,23 @@ SET_CHARM_NAMES = {e["id"]: e["name"] for e in SHIPPED_SETS + SHIPPED_CHARM_ROWS
 
 class NameDistinctnessTests(unittest.TestCase):
     def test_no_two_generated_entries_share_an_exact_name(self) -> None:
-        """Zero tolerance, and the shipped population already meets it."""
+        """Zero tolerance, and the shipped population already meets it.
+
+        Population 103 (was 100 through 2026-09-06): the 2026-09-07 set-charm-live-endpoint trial
+        batch added 3 real, distinct names (2 sets + 1 charm) — measured, not assumed."""
         report = dedup.dedup_report(SET_CHARM_NAMES)
-        self.assertEqual(report.population, 100)
+        self.assertEqual(report.population, 103)
         self.assertEqual(report.exact_duplicates, ())
         self.assertLessEqual(len(report.exact_duplicates), TUNING.exact_duplicate_names_max)
 
     def test_the_lexical_near_duplicate_rate_is_at_most_half_a_percent(self) -> None:
-        """⚠ **Measured, with the honest caveat.** Over the 100 shipped set + charm rows there is
+        """⚠ **Measured, with the honest caveat.** Over the 103 shipped set + charm rows (100
+        through 2026-09-06, +3 from that day's set-charm-live-endpoint trial batch) there is
         exactly **one** genuine near-duplicate pair — `'Root of the Foundation'` /
-        `'Signet of the Foundation'`, true Jaccard 0.652 — which is 10 permille, above the 5
-        permille ceiling. **At n=100 the ceiling is not measurable**: one pair is already 10
-        permille, so the smallest non-zero value the statistic can take is twice the threshold.
+        `'Signet of the Foundation'`, true Jaccard 0.652 — which is 9 permille (was 10 at n=100:
+        same pair, same numerator, a larger denominator), above the 5 permille ceiling. **At
+        n=103 the ceiling is still not measurable**: one pair is already 9 permille, so the
+        smallest non-zero value the statistic can take is still well above the threshold.
         The threshold is derived for the generated population (~1,844 entries, where 5 permille is
         ~9 pairs) and that population does not exist yet.
 
@@ -623,7 +640,7 @@ class NameDistinctnessTests(unittest.TestCase):
         self.assertEqual(len(report.near_duplicates), 1)
         pair = report.near_duplicates[0]
         self.assertGreaterEqual(pair.jaccard_permille, 600)
-        self.assertEqual(report.rate_permille, 10)
+        self.assertEqual(report.rate_permille, 9)
         self.assertLess(TUNING.near_duplicate_rate_max_permille, report.rate_permille)
 
     def test_the_shared_metrics_minhash_estimate_over_reports_on_short_names(self) -> None:

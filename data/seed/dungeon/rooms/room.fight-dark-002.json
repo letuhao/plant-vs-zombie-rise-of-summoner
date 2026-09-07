@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "A thick, oily layer of black ash coats the floor, muffling every footstep. Faint, rhythmic scraping sounds emanate from the shadows just beyond the reach of your torchlight.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Silt-Choked Sepulcher",
+  "reason": "The party is ambushed by undead rising from the ash.",
+  "roomId": "room.fight-dark-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

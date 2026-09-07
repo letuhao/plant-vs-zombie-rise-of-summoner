@@ -2,8 +2,17 @@
 
 ⛔ P1: **the model writes identity, deterministic code writes magnitude.** The model picks the name,
 the flavour, the four ingredient FAMILIES and the granted atom families. It never emits a number,
-and that is enforced mechanically — `Pipeline.__post_init__` runs `audit_schema` at CONSTRUCTION, so
-a numeric field cannot reach a call at all.
+and that is enforced mechanically two ways: `test_strain_splice_gen.py`'s
+`test_a_bare_integer_magnitude_field_fails_pipeline_construction` builds a real
+`pipeline.model.Pipeline` around this function's output and proves `Pipeline.__post_init__` raises
+at CONSTRUCTION for an injected numeric field; `test_the_schema_is_audit_schema_clean` proves the
+un-tampered schema itself passes. **Note for whoever wires the live generation graph
+(`workflow/graphs/item_combination.py`, `combogen/authored.py`):** neither of those two files
+constructs a `Pipeline` — like `setgen.authored`/`workflow/graphs/item_set.py`, they drive the
+model call through the `workflow.graphs` generation graph instead, which has no construction-time
+audit hook of its own. `Pipeline` here is the mechanical PROOF this schema is clean, not the
+runtime path a real batch takes; the graph path is proven clean by the SAME `audit_schema()` call,
+run directly rather than through `Pipeline`.
 
 Four names this schema avoids rather than allow-listing its way past
 (`pipeline.model.MAGNITUDE_DENY_NAMES`): `tier` (the granted tier comes from tuning plus D22's
@@ -29,9 +38,17 @@ HOST_FRAMES: "tuple[str, ...]" = ("humanoid", "plant")
 
 
 def _identity_fields() -> "dict[str, Any]":
+    """`nameKey` is deliberately NOT here. `emit.name_key(cell)` already mints it — grid-derived,
+    deterministic, `combination.{kind}-{key}` — before a single model call happens
+    (`run.plan_run` assigns `Subject.name_key` from it). An earlier draft of this schema also
+    offered `nameKey` to the model with a generic pattern, which is the exact P1 violation this
+    module's own comment warns against one field over: an identity field the corpus needs unique
+    and stable, left for the model to invent, is how two sources of truth for the same key start
+    (naming.v1.json's own `nameKey.globalUniqueness` rule is corpus-wide, not per-run). Compare
+    `kinds.py`'s `UNIQUE_OWNERSHIP["nameKey"] = "PLANNED"` — the same field is planned, not
+    authored, on every other kind that mints one ahead of the call."""
     return {
         "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        "nameKey": {"type": "string", "pattern": r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$"},
         "flavor": {"type": "string", "minLength": 8, "maxLength": 400},
     }
 

@@ -79,7 +79,7 @@ var nodesDir = Path.Combine(seedRoot, "nodes");
 var allNodesByTree = new Dictionary<string, List<BindInputNode>>(StringComparer.Ordinal);
 foreach (var planFile in planFiles)
 {
-    var treeId = Path.GetFileNameWithoutExtension(planFile).Split('.')[0];
+    var treeId = PlanReader.TreeIdFromPlanFileName(Path.GetFileNameWithoutExtension(planFile));
     var seedFile = Path.Combine(nodesDir, $"{treeId}.json");
     var seedJson = File.Exists(seedFile) ? File.ReadAllText(seedFile) : null;
     allNodesByTree[treeId] = PlanReader.ReadPlanNodesWithSeed(File.ReadAllText(planFile), seedJson, treeTuning);

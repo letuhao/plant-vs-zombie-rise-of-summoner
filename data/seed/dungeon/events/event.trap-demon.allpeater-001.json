@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.trap-demon.allpeater-001",
+  "flavor": "The floor tiles shift with a grinding roar, revealing a series of glowing vents. A sudden surge of concentrated火力 erupts from the seams, forcing a violent redistribution of heat across the chamber as the very air begins to burn.",
+  "kind": "trap",
+  "name": "The Crucible of Allocation",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggers a pressure-sensitive mechanism that activates a thermal defense system.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.allpeater"
+}

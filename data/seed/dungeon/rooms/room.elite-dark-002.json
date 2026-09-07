@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-001",
+  "eventPool": [],
+  "flavor": "A single, monolithic slab of obsidian sits in the center of a circular chamber, weeping a thick, ink-like shadow that pools around its base like spilled wine.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Umbral Sarcophagus",
+  "reason": "The room features a high-health elite guardian emerging from the shadow pool, requiring tactical positioning to avoid being engulfed by the darkness.",
+  "roomId": "room.elite-dark-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -59,4 +59,40 @@ public interface IBattleView
     /// fog the way <see cref="DerivedOf"/> gates OTHER actors: an actor always knows its own posting.
     /// </summary>
     string? GarrisonedStructureKeyOf(string actorKey);
+
+    /// <summary>
+    /// base-defense `siege-ai` R3 (spec-siege-ai.md §4): the cell `actorKey` should advance toward when
+    /// no target is in reach — the Core's own centre for an attacker, the attacker's own entry gate for
+    /// a defender (<see cref="FusionRpg.Core.World.District.DistrictLayout.ObjectivePositionFor"/>).
+    /// `null` when no siege context is wired for this battle (every non-siege battle, and every siege
+    /// battle before `DistrictAssaultResolver` sets an attacker edge) — the SAME absence convention
+    /// <see cref="PositionOf"/> already uses. Self-knowledge, never gated by fog the way
+    /// <see cref="DerivedOf"/> gates OTHER actors: which side you attack from is common knowledge to
+    /// your own side, the same reasoning <see cref="GarrisonedStructureKeyOf"/> already established.
+    /// </summary>
+    GridPos? ObjectivePositionOf(string actorKey);
+
+    /// <summary>
+    /// base-defense `siege-ai` (spec-siege-ai.md, `IsKillingBlow`, 2026-09-07): the target's own real
+    /// `MaxHp`, needed to convert <see cref="FactsOf"/>'s per-mille `HpMilli` back to a raw HP a real
+    /// damage estimate can be compared against — <see cref="EntityFacts"/> alone has no HP scale
+    /// reference at all. `null` when unknown/hidden, the SAME absence convention <see cref="PositionOf"/>
+    /// already uses.
+    /// </summary>
+    long? MaxHpOf(string actorKey);
+
+    /// <summary>
+    /// base-defense `siege-ai` §5.20 rule 4 (spec-siege-ai.md §10): the signed −2..+2 taunt/stealth/decoy
+    /// scalar applied INSIDE `AiScoring.EffectiveTier`, never as a score bonus — the exact accessor
+    /// signature that section's own snippet names (`AggressionOf(actorKey)`). Unlike every other member
+    /// here, this one is never "unknown" — 0 (neutral, no taunt/stealth active) is always a correct,
+    /// meaningful answer, the same non-nullable-default shape <c>Stance</c> already has, not the
+    /// might-not-exist absence convention <see cref="PositionOf"/> established. A real implementor with
+    /// no taunt/stealth content to read returns 0 for every actor, matching `AiCandidate`'s own
+    /// previously-hardcoded default byte-for-byte — this is a wiring seam for content that does not
+    /// exist yet (matching <see cref="GarrisonedStructureKeyOf"/>'s/`EmplacementFireMode`'s own
+    /// "vocabulary before its second value has a real consumer" precedent), not a promise of a
+    /// non-default value today.
+    /// </summary>
+    int AggressionOf(string actorKey);
 }

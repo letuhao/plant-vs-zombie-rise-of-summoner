@@ -321,3 +321,128 @@ public class ObjectivePositionForTests
             () => DistrictLayout.ObjectivePositionFor(isAttacker: true, attackerEdge: BoardEdge.North, side: 0));
     }
 }
+
+/// <summary>base-defense `siege-ai` 17.11 (decision 47): the two new geometry primitives the
+/// ward-scaled approach-depth feature needs.</summary>
+public class DistanceFromEdgeTests
+{
+    [Theory]
+    [InlineData(BoardEdge.North, 0, 10, 0)]
+    [InlineData(BoardEdge.North, 5, 10, 5)]
+    [InlineData(BoardEdge.South, 19, 10, 0)]
+    [InlineData(BoardEdge.South, 14, 10, 5)]
+    [InlineData(BoardEdge.East, 10, 19, 0)]
+    [InlineData(BoardEdge.East, 10, 14, 5)]
+    [InlineData(BoardEdge.West, 10, 0, 0)]
+    [InlineData(BoardEdge.West, 10, 5, 5)]
+    public void Distance_is_zero_at_the_edge_and_increases_inward(BoardEdge edge, int row, int col, int expected)
+    {
+        Assert.Equal(expected, DistrictLayout.DistanceFromEdge(new GridPos(row, col), edge, side: 20));
+    }
+
+    [Fact]
+    public void Rejects_a_non_positive_side()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => DistrictLayout.DistanceFromEdge(new GridPos(0, 0), BoardEdge.North, side: 0));
+    }
+}
+
+public class WardLevelForTests
+{
+    static WorldEntity Attacker(string? onLaneId) => new()
+    {
+        EntityId = "e-a", Kind = WorldEntityKind.Warband, OwnerFactionId = "player", AtSectorId = "s1",
+        OnLaneId = onLaneId,
+    };
+
+    [Fact]
+    public void Reads_the_attackers_own_lane_ward_level()
+    {
+        var world = new WorldState
+        {
+            Lanes = new[] { new WorldLane { LaneId = "lane-1", WardLevel = 3 } },
+        };
+
+        Assert.Equal(3, DistrictLayout.WardLevelFor(world, Attacker("lane-1")));
+    }
+
+    [Fact]
+    public void An_attacker_on_no_lane_reads_zero()
+    {
+        var world = new WorldState { Lanes = new[] { new WorldLane { LaneId = "lane-1", WardLevel = 3 } } };
+        Assert.Equal(0, DistrictLayout.WardLevelFor(world, Attacker(onLaneId: null)));
+    }
+
+    [Fact]
+    public void An_unknown_lane_id_reads_zero()
+    {
+        var world = new WorldState { Lanes = new[] { new WorldLane { LaneId = "lane-1", WardLevel = 3 } } };
+        Assert.Equal(0, DistrictLayout.WardLevelFor(world, Attacker("lane-does-not-exist")));
+    }
+}
+
+/// <summary>base-defense `siege-ai` 17.11 (decision 47, resolved 2026-09-07): the 6-argument
+/// `ZoneOf` overload — an edge-aware widening of the Rampart/Approach boundary, scoped to the wedge
+/// facing the attacker's own entry edge only.</summary>
+public class ZoneOfWardedTests
+{
+    const int Side = 20;
+    const int CoreSideMilli = 400; // coreSideCells = 8, coreHalfCeil = 4
+    const int RampartThickness = 1;
+    static readonly GridPos Center = new(10, 10);
+
+    [Fact]
+    public void Zero_extra_depth_is_byte_identical_to_the_unwarded_overload()
+    {
+        foreach (var edge in new[] { BoardEdge.North, BoardEdge.South, BoardEdge.East, BoardEdge.West })
+        for (var r = 0; r < Side; r++)
+        for (var c = 0; c < Side; c++)
+        {
+            var p = new GridPos(r, c);
+            Assert.Equal(
+                DistrictLayout.ZoneOf(p, Side, CoreSideMilli, RampartThickness),
+                DistrictLayout.ZoneOf(p, Side, CoreSideMilli, RampartThickness, edge, wardExtraDepth: 0));
+        }
+    }
+
+    [Fact]
+    public void A_cell_just_past_the_normal_boundary_becomes_rampart_on_the_wedge_facing_the_attacker()
+    {
+        var p = new GridPos(5, 10); // chebyshev 5 from centre -- Approach normally (boundary at 4+1=5)
+        Assert.Equal(DistrictZone.Approach, DistrictLayout.ZoneOf(p, Side, CoreSideMilli, RampartThickness));
+
+        Assert.Equal(DistrictZone.Rampart,
+            DistrictLayout.ZoneOf(p, Side, CoreSideMilli, RampartThickness, BoardEdge.North, wardExtraDepth: 1));
+    }
+
+    [Fact]
+    public void The_other_three_edges_own_wedges_are_unaffected_by_a_different_edges_ward()
+    {
+        // The SAME cell as above, still Approach when the WARD applies to a DIFFERENT edge's wedge --
+        // "the other three edges unchanged" is this task's own explicit acceptance clause.
+        var p = new GridPos(5, 10); // in NORTH's wedge, not South/East/West's
+        foreach (var otherEdge in new[] { BoardEdge.South, BoardEdge.East, BoardEdge.West })
+        {
+            Assert.Equal(DistrictZone.Approach,
+                DistrictLayout.ZoneOf(p, Side, CoreSideMilli, RampartThickness, otherEdge, wardExtraDepth: 1));
+        }
+    }
+
+    [Fact]
+    public void The_core_boundary_itself_never_moves()
+    {
+        // wardExtraDepth widens Rampart's OUTER edge only -- the Core/Rampart line is untouched,
+        // regardless of how large the ward extra depth is.
+        var justInsideCore = new GridPos(7, 10); // chebyshev 3 < coreHalfCeil (4)
+        Assert.Equal(DistrictZone.Core,
+            DistrictLayout.ZoneOf(justInsideCore, Side, CoreSideMilli, RampartThickness, BoardEdge.North, wardExtraDepth: 50));
+    }
+
+    [Fact]
+    public void Rejects_a_negative_ward_extra_depth()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => DistrictLayout.ZoneOf(
+            new GridPos(0, 0), Side, CoreSideMilli, RampartThickness, BoardEdge.North, wardExtraDepth: -1));
+    }
+}

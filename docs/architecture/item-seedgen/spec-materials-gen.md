@@ -1,7 +1,9 @@
 # Spec: `materials-gen`
 
-**Module id:** `materials-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Build order:** 2 of 10
-**Depends on:** `generator-harness` (1)
+**Module id:** `materials-gen` · **Program:** [item-seedgen](../item-seedgen-map.md) · **Phase:** 2 (parallel with `affix-families-gen`, `sockets-gen`, `consumables-gen`)
+**Depends on:** `generator-harness` only. **Two later modules depend on THIS one**: `recipes-gen` (hard,
+`material`-kind `outputRef` and every `costLines[].material`) and `drop-tables-gen` (hard, material-row
+`.ref`).
 
 ## Objective
 

@@ -1,0 +1,17 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.ashthreepeater-001"
+  ],
+  "flavor": "A narrow corridor where the floor is composed of interlocking brass plates, each glowing with a dull, rhythmic orange light from the depths below.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Crucible of Embers",
+  "reason": "A pressure-sensitive plate triggers a sudden, concentrated blast of superheated steam and flame from the wall vents.",
+  "roomId": "room.trap-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

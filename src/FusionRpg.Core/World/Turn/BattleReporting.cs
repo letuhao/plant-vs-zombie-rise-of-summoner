@@ -1,9 +1,21 @@
+using FusionRpg.Core.Items.Drops;
+
 namespace FusionRpg.Core.World.Turn;
 
 /// <summary>
 /// One request in, one line of report and a new world out. Both places that start a fight — a
 /// meeting during movement and a `clear` during sieges — go through here, so a battle always costs
 /// the same and always shows up in the report the same way.
+///
+/// <para>⭐ `drop-tables` `siege-loot` (2026-09-07): the real, confirmed call site for base-defense's
+/// first loot binding — found in review that the original candidate call sites
+/// (`DistrictAssaultResolver`/`DistrictAssaultPhase`) were under another session's active edit, and
+/// that this file already computes the exact win/loss signal needed
+/// (<see cref="EngagementExit.CoreTaken"/>) with no concurrent-edit risk. <b>The last hop is NOT
+/// wired</b>: `TurnEngine.Step` → `Assaults` → `DistrictAssaultPhase.Run` → here would need
+/// `DistrictAssaultPhase.cs` to thread the new `powerTuning`/`turn` parameters through, and that file
+/// is exactly the one under active edit. `powerTuning is null` (every existing caller today) is
+/// byte-identical to this file's pre-2026-09-07 behavior — proven by a dedicated test.</para>
 /// </summary>
 public static class BattleReporting
 {
@@ -14,10 +26,16 @@ public static class BattleReporting
     /// the lane it just used if this fight routs it, the same way a mid-crossing rout already falls
     /// back down the lane it was on.
     /// </param>
+    /// <param name="turn">Only read for the siege-loot correlation id below — every existing caller
+    /// omits it (default 0), which is never observed since that path is itself gated on
+    /// <paramref name="powerTuning"/>.</param>
+    /// <param name="powerTuning">Null (the default) skips siege-loot resolution entirely, matching
+    /// `ClaimResolver.Run`'s identical convention for `sector-loot-wiring`.</param>
     public static WorldState Fight(
         WorldState world, BattleRequest request, IBattleResolver resolver,
         TurnReport report, string phase, ulong seed,
-        IReadOnlyDictionary<string, string>? arrivedViaLane = null)
+        IReadOnlyDictionary<string, string>? arrivedViaLane = null,
+        int turn = 0, FusionRpg.Core.Power.PowerTuning? powerTuning = null)
     {
         var attacker = world.Entities.FirstOrDefault(e =>
             string.Equals(e.EntityId, request.AttackerEntityId, StringComparison.Ordinal));
@@ -60,6 +78,24 @@ public static class BattleReporting
             : $"{request.Kind}:{request.LocationId}:{outcome.WinnerEntityId ?? "none"}";
         report.Add(phase, TurnReportKinds.Battle, request.BattleId, detail,
             sectorId: request.Kind == BattleKinds.Lane ? null : request.LocationId);
+
+        // siege-loot: inert until a real caller supplies powerTuning (see class doc). A won district
+        // assault (CoreTaken) resolves a real LootSourceRow -- never mints through LootPipeline/
+        // Instantiator, the same DB-write boundary sector-loot-wiring's own ClaimResolver call respects.
+        if (powerTuning is { } tuning
+            && request.Kind == BattleKinds.District && outcome.Exit == EngagementExit.CoreTaken)
+        {
+            var sector = next.Sectors.FirstOrDefault(s =>
+                string.Equals(s.SectorId, request.LocationId, StringComparison.Ordinal));
+            if (sector is not null)
+            {
+                var lootRejection = SiegeLoot.TryResolve(
+                    sector.SectorId, turn, sector.DangerBand, sector.TypeId, tuning, out var lootSource);
+                if (lootRejection.IsOk && lootSource is not null)
+                    report.Add(phase, TurnReportKinds.Event, request.BattleId,
+                        "siege.loot:" + lootSource.TableId, sector.SectorId);
+            }
+        }
 
         return next;
     }

@@ -6,9 +6,15 @@ import { cn } from "@/lib/cn";
 
 type UniqueActorDto = Parameters<typeof adaptActor>[0];
 
+export type SpawnTrayEntry = {
+  actor: UniqueActorDto;
+  /** Per-row lock (e.g. already Bound on the lawn). Global phase lock still applies via canSpawn. */
+  lockedReason?: string;
+};
+
 export function SpawnTray({
   open,
-  actors,
+  entries,
   canSpawn,
   lockedReason,
   selectionKey,
@@ -17,7 +23,7 @@ export function SpawnTray({
   className
 }: {
   open: boolean;
-  actors: UniqueActorDto[];
+  entries: SpawnTrayEntry[];
   canSpawn: boolean;
   lockedReason?: string;
   selectionKey?: string | null;
@@ -27,18 +33,22 @@ export function SpawnTray({
 }) {
   const items: ActorCollectionItem[] = useMemo(
     () =>
-      actors.map((a) => ({
-        key: a.instanceId,
-        label:
-          typeof a === "object" && a && "displayName" in a
-            ? String((a as { displayName?: string }).displayName ?? a.instanceId)
-            : a.instanceId,
-        sideLabel: a.side,
-        chip: "Fielded" as const,
-        rungState: { kind: "ready" as const, data: adaptActor(a) },
-        lockedReason: canSpawn ? undefined : lockedReason ?? "Cannot field right now"
-      })),
-    [actors, canSpawn, lockedReason]
+      entries.map(({ actor: a, lockedReason: rowLock }) => {
+        const phaseLock = canSpawn ? undefined : lockedReason ?? "Cannot field right now";
+        const lock = rowLock ?? phaseLock;
+        return {
+          key: a.instanceId,
+          label:
+            typeof a === "object" && a && "displayName" in a
+              ? String((a as { displayName?: string }).displayName ?? a.instanceId)
+              : a.instanceId,
+          sideLabel: a.side,
+          chip: rowLock ? ("Bound" as const) : ("Fielded" as const),
+          rungState: { kind: "ready" as const, data: adaptActor(a) },
+          lockedReason: lock
+        };
+      }),
+    [entries, canSpawn, lockedReason]
   );
 
   if (!open) return null;
@@ -60,7 +70,7 @@ export function SpawnTray({
             data-testid="spawn-tray-close"
             className="rounded-sm border border-border px-2 py-0.5 text-xs text-muted"
             onClick={onClose}
-            >
+          >
             Esc
           </button>
         ) : null}
@@ -75,7 +85,8 @@ export function SpawnTray({
         selectionKey={selectionKey}
         lockedReason={!canSpawn ? lockedReason ?? "Cannot field in this phase" : undefined}
         onSelect={(key) => {
-          if (!canSpawn) return;
+          const entry = entries.find((e) => e.actor.instanceId === key);
+          if (!canSpawn || entry?.lockedReason) return;
           logLawnInteractive("spawn.enter", { instanceId: key });
           onPick(key);
         }}

@@ -27,6 +27,13 @@ public static class EventRules
     public const string ChainRefKindMismatch = "event.chain-ref-kind-mismatch";
     public const string RoomKindIsBossForbidden = "event.room-kind-is-boss-forbidden";
     public const string UnknownStatusId = "event.unknown-status-id";
+    public const string OverrideTagUnsupplied = "event.override-tag-unsupplied";
+
+    // D3.9 continued (spec-event-deck.md §9): the `nerve.*` conjunct of "no `nerve.*` id or non-event
+    // atom kind in any container" -- see EventDeckPreflight.CheckNoNerveTargetInAnyContainer's own doc
+    // comment for why only this conjunct is buildable today; the "non-event atom kind" conjunct is a
+    // separate, still-open scope question, not this rule id.
+    public const string NerveTargetInContainer = "event.nerve-target-in-container";
 
     static EventRules() => ContentRuleNamespaces.Register(Namespace);
 

@@ -19,7 +19,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active \u2014 tier wins.",
+        "printedText": "Inert while tier is active — tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -43,7 +43,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while branch is active \u2014 branch wins.",
+        "printedText": "Inert while branch is active — branch wins.",
         "propertyKeys": [
           "branch"
         ]
@@ -80,6 +80,54 @@
       "nodeKey": "n0",
       "rationale": "",
       "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The rhythm of the shield dictates the pulse of the blood.",
+      "id": "skill.retribution-def-t10-n1",
+      "name": "Sanguine Recirculation",
+      "nameKey": "tree.node.sanguine-recirculation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of your resolve becomes the marrow in your bones.",
+      "id": "skill.retribution-def-t2-n0",
+      "name": "Sanguine Foundation",
+      "nameKey": "tree.node.sanguine-foundation",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
     },
     {
       "affinity": [
@@ -126,6 +174,30 @@
       "nameKey": "tree.node.grit-and-bastion",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The weight of your transgressions becomes your greatest protection.",
+      "id": "skill.retribution-def-t3-n1",
+      "name": "Vengeful Bastion",
+      "nameKey": "tree.node.vengeful-bastion",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 3
     },
@@ -246,6 +318,32 @@
       "nameKey": "tree.node.sanguine-bastion",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The more they strike, the thicker the shell becomes.",
+      "id": "skill.retribution-def-t6-n1",
+      "name": "Layered Spite",
+      "nameKey": "tree.node.layered-spite",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 6
     },
@@ -473,6 +571,30 @@
     },
     {
       "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.retribution"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The eye tracks the wound before the blade even strikes.",
+      "id": "skill.retribution-off-t10-n1",
+      "name": "Vengeful Sightline",
+      "nameKey": "tree.node.vengeful-sightline",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
         "core",
         "likely"
       ],
@@ -679,6 +801,32 @@
         "core"
       ],
       "affixIds": [
+        "atom.hit-retort",
+        "atom.retribution"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The sting of the blow is returned before the blood even hits the ground.",
+      "id": "skill.retribution-off-t6-n0",
+      "name": "Echoing Spite",
+      "nameKey": "tree.node.echoing-spite-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
         "atom.ferocity",
         "atom.might"
       ],
@@ -755,6 +903,32 @@
     },
     {
       "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.hit-retort",
+        "atom.retribution"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Every strike endured is a debt collected in kind.",
+      "id": "skill.retribution-off-t8-n0",
+      "name": "Vengeance Loop",
+      "nameKey": "tree.node.vengeance-loop",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
@@ -776,6 +950,30 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.retribution"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The blood spilled in retaliation feeds the hunger of the grave.",
+      "id": "skill.retribution-off-t9-n0",
+      "name": "Vengeful Harvest",
+      "nameKey": "tree.node.vengeful-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
     },
     {
       "affinity": [

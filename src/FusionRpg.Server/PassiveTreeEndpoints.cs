@@ -8,6 +8,8 @@ using FusionRpg.Core.PassiveTree.State;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Status;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -20,7 +22,7 @@ namespace FusionRpg.Server;
 /// second one — the todo names that file as the exact pattern to follow.
 ///
 /// <para><b>Scope, stated rather than assumed.</b> This endpoint resolves the SHARED corpus only (the
-/// 39 non-species trees) — a species bloodline is Level 0b's own pinned-to-the-creature read
+/// 42 non-species trees, D51 2026-09-06: 24 statuses not 21, was 39) — a species bloodline is Level 0b's own pinned-to-the-creature read
 /// (spec-tree-surface.md §3: "never enters a browse"), a different task (I5) with a different key
 /// shape (per-creature, not per-player). Loading all 840 species trees (33,600 nodes) into one
 /// player-level response would also be exactly the un-windowed volume defect §3's own callout warns
@@ -36,16 +38,18 @@ namespace FusionRpg.Server;
 /// missing plan-emission factory functions mean they have no generated content and therefore no
 /// catalog row, gate state notwithstanding.</para>
 ///
-/// <para><b>⚠ Stale as written 2026-09-06, left uncorrected on purpose — fix lands with J1, not here.</b>
-/// This paragraph originally said the 30 non-Primary trees "have no points-producing pipeline yet."
-/// That stopped being true 2026-09-06 (task G6): `ElementMasterySource`/`StatusAppliedSource` are real,
-/// live-probed producers today. <see cref="AptitudeGatePattern"/>/<c>TryParseAptitudeGate</c> below
-/// were never taught to recognize their gate-quantity shapes, though — only
-/// <c>aptitude.&lt;Id&gt;@Commander</c> resolves `Wired`. Harmless today (no elemental/status
-/// `TreeRecord` exists to exercise the other branch), but it will render every one of those 30 trees
-/// as `GateState = Unproduced` — wrongly, since their real gate is already wired — the moment J1 ships
-/// their content. Tracked as J1's own acceptance bullet (`passive-tree-todo.md`), fixed there rather
-/// than speculatively here against gate-quantity shapes this endpoint cannot yet test end-to-end.</para>
+/// <para><b>Fixed 2026-09-07 (J1's own acceptance bullet) — kept as history, not rewritten.</b> This
+/// paragraph originally said the 30 non-Primary trees "have no points-producing pipeline yet." That
+/// stopped being true 2026-09-06 (task G6): `ElementMasterySource`/`StatusAppliedSource` are real,
+/// live-probed producers today. <see cref="AptitudeGatePattern"/>/<c>TryParseAptitudeGate</c> were
+/// never taught to recognize their gate-quantity shapes, though — only
+/// <c>aptitude.&lt;Id&gt;@Commander</c> resolved `Wired`, which would have rendered every one of those
+/// 30 trees as `GateState = Unproduced` — wrongly, since their real gate is already wired — the moment
+/// J1 shipped their content. Fixed by <see cref="IsWiredGateQuantity"/> below: a SEPARATE function from
+/// <c>TryParseAptitudeGate</c>, deliberately — the cross-unlock credit loop above (`baseByTree`/
+/// `stanceGroupByTree`) calls `AptitudeCatalog.Get(aptitudeId)` on `TryParseAptitudeGate`'s own output,
+/// which would throw for an element/status id; `GateState` only needs a yes/no shape check, never the
+/// parsed id, so it gets its own function rather than widening one whose callers assume an aptitude.</para>
 /// </summary>
 public static class PassiveTreeEndpoints
 {
@@ -56,6 +60,16 @@ public static class PassiveTreeEndpoints
     // A well-formed "aptitude.X@DemonType" also resolves Unproduced here, deliberately: the other
     // three scopes need a specimen picker this surface does not have yet.
     static readonly Regex AptitudeGatePattern = new(@"^aptitude\.(?<id>[A-Za-z]+)@Commander$", RegexOptions.Compiled);
+
+    // J1's own acceptance bullet (passive-tree-todo.md): the other two real, live-probed gate-quantity
+    // shapes (task G6) — element_mastery's own id set is the 6-member ElementRoster (no @Scope collision
+    // risk since "@Aspect" is a literal suffix, not a captured group); status_applied's id can itself
+    // contain a dot (e.g. "nerve.unsettled") and no @Scope suffix at all (D35's own rule, deliberately
+    // outside AllocationScope) -- captured permissively as ".+" and validated for real against
+    // StatusCategoryRegistry, the same "narrow regex + real registry check" shape AptitudeGatePattern
+    // already uses above.
+    static readonly Regex ElementMasteryGatePattern = new(@"^element_mastery\.(?<id>[a-z]+)@Aspect$", RegexOptions.Compiled);
+    static readonly Regex StatusAppliedGatePattern = new(@"^status_applied\.(?<id>.+)$", RegexOptions.Compiled);
 
     public static void MapPassiveTree(this WebApplication app)
     {
@@ -205,7 +219,7 @@ public static class PassiveTreeEndpoints
         foreach (var tree in trees)
         {
             var treeId = tree.Tree.TreeId;
-            var isWired = TryParseAptitudeGate(tree.Tree.GateQuantity, out _);
+            var isWired = IsWiredGateQuantity(tree.Tree.GateQuantity);
             var gateState = isWired ? TreeGateState.Wired : TreeGateState.Unproduced;
 
             // gate(i) = base(i) + credit(i) -- "you have" on the tier row (§7.2), own contribution
@@ -310,6 +324,28 @@ public static class PassiveTreeEndpoints
             return true;
         }
         aptitudeId = "";
+        return false;
+    }
+
+    /// <summary>J1's own acceptance bullet: does <paramref name="gateQuantity"/> match ANY of the three
+    /// real, live-probed gate-quantity shapes (`aptitude.&lt;Id&gt;@Commander`,
+    /// `element_mastery.&lt;id&gt;@Aspect`, `status_applied.&lt;id&gt;`) -- a pure shape+membership
+    /// check for <c>GateState</c> alone. Deliberately NOT <c>TryParseAptitudeGate</c>: that function's
+    /// only caller (the cross-unlock credit loop above) calls <c>AptitudeCatalog.Get</c> on its parsed
+    /// id, which requires the id to actually BE an aptitude -- widening it to also accept an element or
+    /// status id would hand that loop a value its own next line cannot handle.</summary>
+    static bool IsWiredGateQuantity(string gateQuantity)
+    {
+        if (TryParseAptitudeGate(gateQuantity, out _)) return true;
+
+        var elementMatch = ElementMasteryGatePattern.Match(gateQuantity);
+        if (elementMatch.Success && ElementRoster.TryParse(elementMatch.Groups["id"].Value, out _))
+            return true;
+
+        var statusMatch = StatusAppliedGatePattern.Match(gateQuantity);
+        if (statusMatch.Success && StatusCategoryRegistry.TryGetCategory(statusMatch.Groups["id"].Value, out _))
+            return true;
+
         return false;
     }
 }

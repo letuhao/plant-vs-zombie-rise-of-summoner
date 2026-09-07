@@ -65,6 +65,19 @@ public sealed class FoggedBattleView : IBattleView
     /// never board visibility, so fog never applies here.</summary>
     public string? GarrisonedStructureKeyOf(string actorKey) => _inner.GarrisonedStructureKeyOf(actorKey);
 
+    /// <summary>Ungated, like <see cref="GarrisonedStructureKeyOf"/> — which cell you advance toward is
+    /// a fact about your OWN side, never board visibility.</summary>
+    public GridPos? ObjectivePositionOf(string actorKey) => _inner.ObjectivePositionOf(actorKey);
+
+    /// <summary>Gated like <see cref="DerivedOf"/> — an enemy's own MaxHp is board information, not
+    /// self-knowledge, so fog hides it exactly like every other per-actor combat fact.</summary>
+    public long? MaxHpOf(string actorKey) => IsKnownToViewer(actorKey) ? _inner.MaxHpOf(actorKey) : null;
+
+    /// <summary>Gated like <see cref="MaxHpOf"/> — whether a target carries taunt/stealth is board
+    /// information about THAT actor, not self-knowledge. 0 (neutral) for a hidden actor, matching
+    /// <see cref="IBattleView.AggressionOf"/>'s own non-nullable default, never a fog-specific sentinel.</summary>
+    public int AggressionOf(string actorKey) => IsKnownToViewer(actorKey) ? _inner.AggressionOf(actorKey) : 0;
+
     /// <summary>The same "off-board" convention <see cref="EntityFacts"/>'s own `Row`/`Col` doc comment
     /// already establishes — no new sentinel invented for "unseen".</summary>
     static readonly EntityFacts UnknownFacts = new(Side: -1, TypeId: 0, HpMilli: 0, ElementId: -1, Row: -1, Col: -1,

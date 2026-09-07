@@ -23,11 +23,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:39:44Z",
+      "emittedUtc": "2026-09-07T08:19:31Z",
       "minorityValues": {
         "attackTempo": "steady",
         "rarity": "sprout"
@@ -52,7 +53,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "parasitic-flora"
     ],
@@ -100,7 +101,7 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "deterministic-fallback",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -108,7 +109,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T14:46:15Z",
+      "emittedUtc": "2026-09-07T04:26:10Z",
       "minorityValues": {
         "rarity": "heirloom"
       },
@@ -126,7 +127,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "ponderous",
     "basis": "inferred",
@@ -138,8 +139,8 @@
       "undead_botanical"
     ],
     "gameTypeId": 228,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chimeric",
     "reach": "short",
     "reason": "While it possesses annoying mechanics like immunity to damage and the ability to transform other plants, its lack of direct offensive capability and passive nature makes it a persistent irritation rather than a combat threat.",

@@ -181,12 +181,32 @@ charm/gem/set kinds shipped, there are no charms, so the hole cannot be exercise
 > `AtomDerivedSubsystem`, shipped 2026-08-30). **`ActorHub` itself needed no change.** Full account,
 > evidence table and 11 new tests: `item-todo.md` P1.5.
 >
-> ⛔ **Still open at this checkpoint:** the lawn push's **compiled-grant half** (`AtomCompiler`
-> stamps no owner key, so a specimen's passive gear reaches match scope — needs an Injector-side
-> `UniqueOwnerBinder.BindGrant` call that no CI-runnable test can verify), and a **content** gap the
-> geared run exposed: **no concrete `stat.derived` affix atom ships at all**, because
-> `tier-bands.v1.json` authors a `sharePermille` for the 14 `stat.modify` primary-channel families
-> only. Both named in full in `item-todo.md` P1.5.
+> ✅ **The equip-runtime wiring this checkpoint originally left open is now CLOSED, 2026-09-07** — the
+> "`UniqueOwnerBinder.BindGrant` call" framing above turned out to be half right: its EXISTING wired
+> caller (`UniqueLoadoutSpec.BindToPtr`) really is a different, unrelated mechanism (a demon specimen's
+> own bound-loadout stat mods) — but the underlying need it pointed at was real, just solvable
+> server-side rather than via the injector build that framing assumed was required. Three real gaps
+> found and fixed this session: (a) Battle: `stat.modify` equip atoms never reached `BattleEngine.Resolve`
+> (fixed via `ActionContainerEffectResolverFactory.BuildEquip` + `BattleRunState.BindEquip`; also found
+> `WebMatchService.BuildSquad` never set `SpecimenId` at all); (b) Lawn: `ItemEquipService.Equip`/`Unequip`
+> never called `RpgStore.MaterializeRolledEquipRuntime`, so a Lawn-bound specimen's equipped rolled items
+> never materialized `effect_binding` rows regardless of the atom-push mechanism; (c) found LIVE, on the
+> actual owner-authorized live-run attempt: `AtomPushService.Build` stamped every UniqueActor-scoped
+> grant with a durable `instance:{id}` owner key the injector's hot path refuses outright — a gap the
+> whole compiled-push mechanism carried since it was built (T6.1, 2026-09-06), not something (a) or (b)
+> introduced. Fixed by rewriting to `entity:{ptr}` inside `Build` itself, using the specimen's own
+> durably-tracked `LastPtr` — provable in CI after all, closing several pre-existing tests' own
+> "cannot be proven by anything CI runs" framing. All three fixed and proven (red-first where applicable;
+> `RolledItemEquipRuntimeTests` 4/4, `AtomPushServiceInstanceOwnerRewriteTests` 2/2 new, 7 pre-existing
+> tests updated). Redeployed live and re-confirmed: the grant is now accepted and fires correctly. **What
+> remains genuinely open**: the final on-screen number for the specific (non-attacking) test plant type
+> used stayed unchanged — most likely a test-subject-choice artifact, not a further bug; named precisely
+> as a follow-up rather than left vague. Full account: `item-todo.md` P1.5 + P1.5-B + P1.5-L.
+>
+> A separate **content** gap the geared run exposed remains open: **no concrete `stat.derived` affix
+> atom ships at all**, because `tier-bands.v1.json` authors a `sharePermille` for the 14 `stat.modify`
+> primary-channel families only — this is item-seedgen's `affix-families-gen` module's own scope
+> (`tasks/item-seedgen-todo.md` T9/T10, now built and proven, 33/33 tests).
 
 ### Phase 2 — the content model (modules 6–10)
 

@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The ritual requires the essence of your own shadows to be brought back intact to stabilize the rift. The cost of failure is not just a lost battle, but the permanent loss of the very darkness that defines your soul.",
+  "name": "The Weight of the Tether",
+  "objectiveTemplate": "bring-demon-home-alive",
+  "prereqRefs": [],
+  "questId": "quest.bring-demon-home-alive-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "roster",
+  "targetRef": "none"
+}

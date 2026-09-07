@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Delve;
 using FusionRpg.Core.Delve.Difficulty;
 using FusionRpg.Core.Delve.Domains;
 using FusionRpg.Core.Delve.Pack;
@@ -48,6 +49,12 @@ public static class DelveEndpoints
         g.MapGet("/domains/{playerId:long}", (long playerId, RpgStore store) => HandleGetDomains(playerId, store));
 
         g.MapPost("/start", (DelveStartHttpRequest body, RpgStore store) => HandleStart(body, store));
+
+        // D5.2 (spec-delve-stage.md §5, §18 ask 1): the one projection endpoint delve-stage reads.
+        // {delveId:long} sits at the SAME route-group depth as "domains/{playerId:long}" above --
+        // ASP.NET's routing prefers the more specific literal segment ("domains") over the parameter
+        // route at every matching request, so the two coexist without collision.
+        g.MapGet("/{delveId:long}", (long delveId, long? playerId, RpgStore store) => HandleGetDelve(delveId, playerId, store));
     }
 
     /// <summary>Extracted from the route lambda so a test can call it directly without a live HTTP
@@ -96,6 +103,104 @@ public static class DelveEndpoints
         // content has landed, at which point group 7's own write (extending CreateDelve, D4.21's
         // own evidence) is the next task, not yet built.
         return Results.Problem("delve.start-plan-write-not-yet-wired", statusCode: 501);
+    }
+
+    /// <summary>
+    /// D5.2 (spec-delve-stage.md §5, §18 ask 1) — <c>GET /api/delve/{delveId}</c>. Assembles the one
+    /// revision-stamped projection <c>delve-stage</c> reads, from exactly the four sources
+    /// spec-delve-scope.md:347-350 names: this method does the actual <c>LoadWorldState</c> +
+    /// <c>LoadDelve</c> + <c>LoadDelveRooms</c> reads (the "two delve tables"), then hands the results
+    /// to <see cref="DelveProjection.For"/> (Core-layer, store-free — it composes
+    /// <c>Visibility.SeenBy</c>/<c>DelveSight.ForParty</c> and nothing else). <paramref name="playerId"/>
+    /// is an optional query parameter (a GET route has no body to carry one), defaulting to
+    /// <c>GetCurrentPlayerId()</c> — the same fallback <see cref="HandleStart"/>'s own body-bound
+    /// <c>PlayerId</c> already uses, applied to query-string binding instead.
+    /// </summary>
+    internal static IResult HandleGetDelve(long delveId, long? playerId, RpgStore store)
+    {
+        var pid = playerId ?? store.GetCurrentPlayerId();
+        if (!store.PlayerExists(pid)) return Results.NotFound();
+
+        var delve = store.LoadDelve(delveId);
+        if (delve is null) return Results.NotFound();
+
+        var rooms = store.LoadDelveRooms(delveId);
+        var world = store.LoadWorldState(delve.WorldId);
+        if (world is null) return Results.NotFound(); // a delve's own world row should always exist; defensive, not expected
+
+        var roomFacts = rooms.Select(r => new DelveRoomStateFact(
+            r.SectorId, r.RowIndex, r.ColIndex, r.Kind, r.ArchetypeId, r.Visited, r.Cleared,
+            r.KeyForLaneId, r.EventId, r.ResolvedKind, r.ResolvedArchetypeId, r.FloorJson, r.Revision)).ToList();
+        var partyEntityIds = delve.Parties.Select(p => p.EntityId).ToList();
+
+        var projection = DelveProjection.For(
+            pid, delve.PlayerId, delve.Revision, partyEntityIds, roomFacts, world, DungeonTuningHub.Tuning);
+        // Ownership mismatch reads identically to "no such delve" -- never confirms existence to the
+        // wrong requester (the same posture PlayerExists/LoadDelve's own null checks above already keep).
+        if (projection is null) return Results.NotFound();
+
+        return Results.Ok(new
+        {
+            delveId = delve.DelveId,
+            worldId = delve.WorldId,
+            state = delve.State,
+            domainId = delve.DomainId,
+            raidMode = delve.RaidMode,
+            rungId = delve.RungId,
+            soulsUnbanked = delve.SoulsUnbanked,
+            thetaRun = delve.ThetaRun,
+            questsJson = delve.QuestsJson,
+            decisionsJson = delve.DecisionsJson,
+            contentTermsJson = delve.ContentTermsJson,
+            parties = delve.Parties,
+            rooms = projection.Rooms,
+            doors = projection.Doors,
+            partyPositions = projection.Parties,
+            revision = projection.Revision,
+        });
+    }
+
+    /// <summary>
+    /// D5.2 (spec-delve-stage.md §5, §18 ask 2 — spec-delve-battle-profile.md's own structure block
+    /// names the exact shape <c>DelveUpdated{delveId, revision}</c>). Mirrors the existing
+    /// <see cref="NotifyAsync"/> helper's own best-effort shape.
+    ///
+    /// <para><b>No real production caller wires this yet, named honestly rather than guessed:</b> the
+    /// natural trigger, <c>RpgStore.MarkRoom</c>, still has zero production callers (re-checked this
+    /// session — only test fixtures call it). Every OTHER write that bumps `rpg_delves.revision`
+    /// (`WritePartyMembers`, `AppendDecision`, `CloseDelve`, ...) lives behind routes this task's own
+    /// Files line does not touch (`DelveWildEndpoints.cs`, `DelveBattleEndpoints.cs` — none of them
+    /// registered from `DelveEndpoints.cs` itself), and this file's own two other routes never reach a
+    /// real delve mutation either: `/recovery-ritual` never touches `rpg_delves`/`rpg_delve_rooms`, and
+    /// `/start` always returns before <c>CreateDelve</c> today (D4.22's own already-recorded finding —
+    /// `dungeon_domain` is empty, so group 1 refuses first). This method is real and directly callable
+    /// —proven by <c>DelveProjectionEndpointTests.cs</c>'s own direct call against a real
+    /// <c>IHubContext&lt;RpgHub&gt;</c> — with no live production trigger wired to it, the same
+    /// "provably correct, zero production callers" posture this program already uses elsewhere
+    /// (D4.22's own six delegates, D4.25's Data-layer wiring).</para>
+    ///
+    /// <para><b>A pre-existing name collision, found while wiring this, not fixed here:</b>
+    /// <see cref="NotifyAsync"/> already sends an event literally named <c>"DelveUpdated"</c> (shape
+    /// <c>{playerId}</c>) from the real, live `/recovery-ritual` route. spec-delve-battle-profile.md's
+    /// own structure block names this exact event name for a DIFFERENT shape, <c>{delveId, revision}</c>
+    /// — so the same SignalR event name now carries two different payload shapes depending on which
+    /// call site fired it. No real consumer breaks today (a case-insensitive scan of
+    /// `web/fusion-rpg-web/src` for "delve" is still zero hits, spec-delve-stage.md §19 point 6), so
+    /// nothing is silently wrong in production — but a future frontend integration must branch on
+    /// payload shape, or whichever task wires a real trigger for THIS broadcast should also reconcile
+    /// the two under distinct names. Renaming the recovery-ritual one is out of this task's own scope
+    /// (a different, already-shipped, tested D2.23 route) and not done here.</para>
+    /// </summary>
+    internal static async Task NotifyDelveUpdatedAsync(IHubContext<RpgHub> hub, long delveId, long revision)
+    {
+        try
+        {
+            await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("DelveUpdated", new { delveId, revision });
+        }
+        catch
+        {
+            // best-effort: the write is durable, the next read reconciles
+        }
     }
 
     /// <summary>Every delegate <see cref="DomainOffers.For"/> needs beyond the real reads above.

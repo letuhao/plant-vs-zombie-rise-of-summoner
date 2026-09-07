@@ -105,11 +105,12 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "split",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:37:19Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "ponderous",
         "rarity": "fused",
@@ -135,7 +136,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "Luminescent Flora",
       "Economic-Symbiote"
@@ -271,10 +272,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:55:21Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -296,7 +298,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "luminescent flora"
     ],
@@ -425,10 +427,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:36:59Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -450,7 +453,7 @@
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "luminescent_flora"
     ],

@@ -118,41 +118,58 @@ public static class DropTableDraw
     /// and never quietly resolved to nothing.
     ///
     /// <para>Each unavailable kind names the module that lands it, so the refusal reads as a build
-    /// order rather than a defect:</para>
+    /// order rather than a defect. X7 landed 2026-09-07 (`container-kind-expansion`) — `gem`/`charm`/
+    /// `consumable` are now real <c>ContainerKind</c> values, so all three moved to the SAME remaining
+    /// blocker: the seed→concrete generator (per the binding seed-to-concrete rule). The 60 gems, 61
+    /// charms and 60 consumables all ship as SEEDS (families/bands, per seed-contract.md §3's
+    /// no-numbers rule); rolling one into a real <c>effect_container</c> row is that generator's job,
+    /// not this validator's or X7's.</para>
     /// <list type="bullet">
-    /// <item><c>insert</c> — X7's <c>gem</c> container kind, then module 16 `sockets`.</item>
-    /// <item><c>charm</c> — X7's <c>charm</c> container kind, then module 13 `set-charm-gen`.</item>
-    /// <item><c>consumable</c> — module 18; ssot-generation.md §5.4 makes its absence deliberate
-    /// ("adding it now would ship a degenerate action mechanism the action program then has to absorb").</item>
+    /// <item><c>insert</c> — the gem seed→concrete generator (module 16 `sockets` already has the
+    /// container_kind to bind to).</item>
+    /// <item><c>charm</c> — the charm seed→concrete generator (module 13 `set-charm-gen` likewise).</item>
+    /// <item><c>consumable</c> — the consumable seed→concrete generator (module 18 likewise); the
+    /// module 18 CONTENT itself (class vocabulary, use contexts, grade rule, manifest gate,
+    /// `consumable_def`, `rpg_run_draught`, dispatch spend) shipped 2026-09-05 and is unaffected.</item>
     /// </list>
     /// <para><c>unique</c> is REMOVED from this list, D4.27 (party-dungeon, spec-unique-pipeline.md
     /// §5): `LootPipeline.cs`'s own new `MintUnique` arm resolves it — a concrete unique container now
     /// exists (D4.24/26) and the fixed-core/rarity/roll-seed shape is real, not a seed.</para>
     ///
-    /// <para>Verified 2026-09-04, not assumed: <c>ContainerKind</c> (`Effects/Atoms/ContainerRow.cs:7`)
-    /// ships six values — Item, Trait, Skill, SpeciesPassive, Patron, WorldBuff — and none of D27's
-    /// four (<c>gem</c>/<c>set</c>/<c>charm</c>/<c>combo</c>). X7 has not landed.</para>
+    /// <para>⭐ CORRECTED 2026-09-07 (`container-kind-expansion`, X7 landed): <c>ContainerKind`</c>
+    /// (`Effects/Atoms/ContainerRow.cs:7`) now ships eleven values, including all four D27 named
+    /// (<c>Gem</c>/<c>Charm</c>/<c>Combo</c>/<c>Consumable</c> — <c>set</c> deliberately not minted,
+    /// see `ContainerRow.cs`'s own doc). The three kinds below stay unavailable for a DIFFERENT,
+    /// narrower reason now: the seed→concrete generator, not the container_kind itself.</para>
     /// </summary>
     public static readonly IReadOnlyDictionary<DropEntryKind, string> UnavailableKinds =
         new Dictionary<DropEntryKind, string>
         {
-            [DropEntryKind.Insert] = "X7 must land the 'gem' container_kind, then module 16 (sockets)",
-            [DropEntryKind.Charm] = "X7 must land the 'charm' container_kind, then module 13 (set-charm-gen)",
+            // X7 CLOSED 2026-09-07 — `ContainerKind.Gem` is real. Reason moved to the seed→concrete
+            // generator: the 60 shipped gems are seeds (family/band, no magnitude), and rolling one
+            // into a real, bound `effect_container` row is that generator's job, per the binding
+            // seed-to-concrete rule — not a gap in module 16 (`sockets`) or in the container_kind.
+            [DropEntryKind.Insert] =
+                "ContainerKind.Gem exists (X7 closed 2026-09-07); the seed-to-concrete generator must " +
+                "still roll one of the 60 shipped gem seeds into a real, bound effect_container row",
+            // X7 CLOSED 2026-09-07 — `ContainerKind.Charm` is real. Same remaining gap as Insert,
+            // against the 61 shipped charms.
+            [DropEntryKind.Charm] =
+                "ContainerKind.Charm exists (X7 closed 2026-09-07); the seed-to-concrete generator must " +
+                "still roll one of the 61 shipped charm seeds into a real, bound effect_container row",
             // ⚠ Module 18 SHIPPED 2026-09-05 — the six-class vocabulary, the four use contexts, the
             // grade rule, the manifest gate (D37's belt, not a global N), `consumable_def`,
             // `rpg_run_draught` and the dispatch spend are all live, and the 60 refs below all resolve
-            // against its corpus. The kind stays unavailable because what is missing moved TWO steps
-            // on: (a) X7 has not minted the `consumable` container_kind that D27's four do not cover,
-            // and (b) even once it has, the 60 are SEEDS (families and bands, per seed-contract.md §3's
-            // no-numbers rule) with no `effect_container` row, so a draw would resolve to nothing.
-            // Rolling a seed into a container is the runtime generator's, per the seed-to-concrete
-            // rule. Reason updated rather than left pointing at a module that now exists — the same
-            // correction module 17 made for `unique`.
+            // against its corpus. X7 CLOSED 2026-09-07 — `ContainerKind.Consumable` is real. The kind
+            // stays unavailable for the one remaining reason: the 60 are SEEDS (families and bands,
+            // per seed-contract.md §3's no-numbers rule) with no `effect_container` row, so a draw
+            // would resolve to nothing. Rolling a seed into a container is the runtime generator's,
+            // per the seed-to-concrete rule. Reason updated rather than left pointing at a kind that
+            // now exists — the same correction module 17 made for `unique`.
             [DropEntryKind.Consumable] =
-                "module 18 (consumables) shipped the class, the manifest gate and consumable_def, but " +
-                "X7 must still mint the 'consumable' container_kind, and no CONCRETE consumable " +
-                "container exists — the 60 are seeds, and rolling one into an effect_container is the " +
-                "runtime generator's (seed-to-concrete)",
+                "ContainerKind.Consumable exists (X7 closed 2026-09-07); the seed-to-concrete generator " +
+                "must still roll one of the 60 shipped consumable seeds into a real, bound " +
+                "effect_container row",
             // Unique REMOVED 2026-09-06 (D4.27, party-dungeon spec-unique-pipeline.md §5) — the exact
             // "seed-to-concrete" gap this comment named is closed: `UniqueContainerBuild.From` (D4.24)
             // resolves a unique seed into a real `ContainerRow`, and `LootPipeline.cs`'s own new

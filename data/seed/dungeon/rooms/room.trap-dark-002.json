@@ -1,0 +1,17 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "Thick, viscous shadows cling to the corners of this narrow corridor, pulsing in time with a rhythmic, wet thumping sound that seems to emanate from the very walls.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Siphon of Veins",
+  "reason": "The walls are lined with porous, obsidian-like stone that rhythmically draws moisture and light from anything passing through the center of the hall.",
+  "roomId": "room.trap-dark-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

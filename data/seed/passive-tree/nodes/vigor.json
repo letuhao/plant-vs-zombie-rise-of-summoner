@@ -74,6 +74,32 @@
           "atomKind"
         ]
       },
+      "flavor": "The rhythm of the pulse dictates the flow of the barrier.",
+      "id": "skill.vigor-def-t10-n1",
+      "name": "Osmotic Siphon",
+      "nameKey": "tree.node.osmotic-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
       "flavor": "The rhythm of the shield becomes the pulse of the body.",
       "id": "skill.vigor-def-t10-n2",
       "name": "Osmotic Recirculation",
@@ -82,6 +108,30 @@
       "nodeKey": "n2",
       "rationale": "",
       "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of protection is felt in every thickening layer of the spirit.",
+      "id": "skill.vigor-def-t2-n0",
+      "name": "Layered Bulwark",
+      "nameKey": "tree.node.layered-bulwark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
     },
     {
       "affinity": [
@@ -95,7 +145,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while atomKind is active \u2014 atomKind wins.",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
         "propertyKeys": [
           "atomKind"
         ]
@@ -316,6 +366,32 @@
     {
       "affinity": [
         "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning every impact into a foundation.",
+      "id": "skill.vigor-def-t7-n1",
+      "name": "Bulwark of the Deep",
+      "nameKey": "tree.node.bulwark-of-the-deep-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
         "core"
       ],
       "affixIds": [
@@ -412,6 +488,34 @@
       "nameKey": "tree.node.kinetic-recirculation-2",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.sust-grit",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning every impact into a foundation.",
+      "id": "skill.vigor-def-t9-n2",
+      "name": "Rooted Stance",
+      "nameKey": "tree.node.rooted-stance-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
       "rationale": "",
       "tier": 9
     },
@@ -864,6 +968,30 @@
       "nameKey": "tree.node.relentless-momentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
+      "id": "skill.vigor-off-t9-n1",
+      "name": "Momentum Siphon",
+      "nameKey": "tree.node.momentum-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 9
     },

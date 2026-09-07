@@ -324,9 +324,15 @@ public sealed class ItemWorkbench
     /// for a container the corpus does not carry, which is also what a genuinely element-free insert
     /// authors.</para>
     ///
-    /// <para>⚠ Still approximate in one respect: <c>ContainerKind.Gem</c> has not landed (X7), so no
-    /// <c>gem.*</c> container row and no insert <i>instance</i> exist — the insert is identified by
-    /// its catalog id, and the day X7 lands it gets its own bound instance. Tier is likewise
+    /// <para>⚠ Still approximate in one respect, though the reason narrowed again 2026-09-07:
+    /// <c>ContainerKind.Gem</c> now exists (`container-kind-expansion`, X7), and
+    /// <c>FusionRpg.Core.Items.Gems.GemContainerBuild</c> can now mint a real, `Instantiator`-ready
+    /// container for 27 of the 60 shipped gems (measured against the real production atom catalog,
+    /// `GemContainerBuildTests.cs`) — but THIS method does not call it yet, so a socket-insert still
+    /// tracks its insert by the flat <see cref="GemInsertCorpus"/> catalog id, never a real
+    /// `InstanceRow`. Even once wired, the instantiated atom still needs a real `effect_binding` row
+    /// to reach combat — the same shape `equip-runtime`'s own multi-round wiring effort needed for
+    /// equipped items. Both are real, separate follow-ups, not this pass's scope. Tier is likewise
     /// <see cref="GemInsertCorpus.UnauthoredInsertTier"/> because <c>gems/*.json</c> authors none.</para>
     /// </summary>
     public WorkbenchOutcomeDto SocketInsert(

@@ -706,14 +706,17 @@ def test_resume_with_more_workers_than_the_original_start_only_finishes_what_rem
     assert resumed.calls_made == len(species) * CALLS_PER_OBSERVED_SPECIES
 
 
-# ---- fix_unresolved (2026-09-04, demon-corpus-self-heal F1) ------------------------------------
+# ---- fix_unresolved (2026-09-04, demon-corpus-self-heal F1; extended Phase H, 2026-09-07) ------
 #
-# The deliberate fix step: only threatBand has a real, already-sanctioned deterministic default
-# anywhere in this repo (demon-threat.v1.json's own inferredDefaultRung) — a human runs this ON
-# DEMAND after reading DemonQualityReport's own unresolved-rate finding, never automatically
-# during classification.
+# The deliberate fix step, run ON DEMAND after reading DemonQualityReport's own unresolved-rate
+# finding, never automatically during classification. threatBand has a real, already-sanctioned
+# deterministic default (demon-threat.v1.json's own inferredDefaultRung). rarity, added on
+# explicit owner direction (Phase H), falls back to threatBand via a rank-preserving
+# correspondence (demon-rarity-power-fallback.v1.json) — rarity is this game's own invented
+# mechanism, not an almanac/PvZ property, so a vote that never converges gets a deterministic
+# engine instead of staying unresolved forever.
 
-def _mark_threat_band_unresolved(paths, species_id: str) -> None:
+def _mark_field_unresolved(paths, species_id: str, field: str) -> None:
     """Test-only corruption matching what a genuine 1-1-1 vote split looks like on disk."""
     index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
     rel = index[species_id]
@@ -721,8 +724,12 @@ def _mark_threat_band_unresolved(paths, species_id: str) -> None:
     entries = json.loads(path.read_text(encoding="utf-8"))
     for e in entries:
         if e["speciesId"] == species_id:
-            e["threatBand"] = "unresolved"
+            e[field] = "unresolved"
     path.write_text(json.dumps(entries), encoding="utf-8")
+
+
+def _mark_threat_band_unresolved(paths, species_id: str) -> None:
+    _mark_field_unresolved(paths, species_id, "threatBand")
 
 
 def test_fix_unresolved_resolves_threat_band_to_the_real_sanctioned_default(tmp_path):
@@ -746,9 +753,9 @@ def test_fix_unresolved_resolves_threat_band_to_the_real_sanctioned_default(tmp_
     assert entry["_provenance"]["confidence"]["threatBand"] == "deterministic-fallback"
 
 
-def test_fix_unresolved_never_touches_aptitude_rarity_or_element(tmp_path):
-    # The investigated, deliberate scope boundary: no real sanctioned fallback exists for these
-    # three anywhere in this repo, so forcing one would be inventing a rule, not deriving it.
+def test_fix_unresolved_never_touches_aptitude_secondary_or_element(tmp_path):
+    # The remaining, deliberate scope boundary: no fallback of either kind (derived or invented)
+    # exists for these two, so touching them would be guessing, not deriving or deciding.
     paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
     runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
     _mark_threat_band_unresolved(paths, "alpha")
@@ -759,8 +766,164 @@ def test_fix_unresolved_never_touches_aptitude_rarity_or_element(tmp_path):
     runner.fix_unresolved(paths=paths)
 
     after = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
-    for field in ("aptitudePrimary", "aptitudeSecondary", "rarity", "elementPrimary"):
+    for field in ("aptitudeSecondary", "elementPrimary"):
         assert after[field] == before[field], f"{field} changed — out of this fix's scope"
+
+
+def test_fix_unresolved_never_touches_an_already_resolved_aptitude(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")  # aptitude itself is left alone, still resolved
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    before = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+
+    runner.fix_unresolved(paths=paths)
+
+    after = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    assert after["aptitudePrimary"] == before["aptitudePrimary"]
+    assert after["posture"] == before["posture"]
+    assert after["pure"] == before["pure"]
+
+
+def test_fix_unresolved_resolves_aptitude_to_the_flat_invented_default(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_field_unresolved(paths, "alpha", "aptitudePrimary")
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    aptitude_fixes = [f for f in fixed if f["field"] == "aptitudePrimary"]
+    assert len(aptitude_fixes) == 1
+    assert aptitude_fixes[0]["speciesId"] == "alpha"
+    assert aptitude_fixes[0]["before"] == "unresolved"
+    default = runner.load_aptitude_fallback()
+    assert aptitude_fixes[0]["after"] == default
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entry_after = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    assert entry_after["aptitudePrimary"] == default
+    # posture/pure are functions of aptitudePrimary — must not go stale after the fix.
+    assert entry_after["posture"] == runner.derive_posture(default)
+    assert entry_after["pure"] == runner.derive_pure(default, entry_after["aptitudeSecondary"])
+    # Honest provenance: this must never look like a real LLM judgment.
+    assert entry_after["_provenance"]["confidence"]["aptitudePrimary"] == "deterministic-fallback"
+
+
+def test_fix_unresolved_is_idempotent_for_aptitude(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_field_unresolved(paths, "alpha", "aptitudePrimary")
+
+    first = runner.fix_unresolved(paths=paths)
+    second = runner.fix_unresolved(paths=paths)
+
+    assert [f for f in first if f["field"] == "aptitudePrimary"] != []
+    assert [f for f in second if f["field"] == "aptitudePrimary"] == []
+
+
+def test_fix_unresolved_dry_run_never_writes_the_aptitude_fix(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_field_unresolved(paths, "alpha", "aptitudePrimary")
+
+    fixed = runner.fix_unresolved(paths=paths, dry_run=True)
+
+    assert [f for f in fixed if f["field"] == "aptitudePrimary"] != []
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entry = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    assert entry["aptitudePrimary"] == "unresolved"  # untouched — dry run never writes
+
+
+def test_fix_unresolved_never_touches_an_already_resolved_rarity(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")  # rarity itself is left alone, still resolved
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    before_rarity = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]["rarity"]
+
+    runner.fix_unresolved(paths=paths)
+
+    after_rarity = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]["rarity"]
+    assert after_rarity == before_rarity
+
+
+def _set_field(paths, species_id: str, field: str, value) -> None:
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    path = paths.anchors_dir / index[species_id]
+    entries = json.loads(path.read_text(encoding="utf-8"))
+    for e in entries:
+        if e["speciesId"] == species_id:
+            e[field] = value
+    path.write_text(json.dumps(entries), encoding="utf-8")
+
+
+def test_fix_unresolved_resolves_rarity_from_a_resolved_threat_band(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    # This fixture's basis never computes a real threatBand on its own (no parseable
+    # toughness/damage) — set one explicitly so there is a genuine resolved signal to derive from.
+    _set_field(paths, "alpha", "threatBand", "tyrant")
+    _mark_field_unresolved(paths, "alpha", "rarity")
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entry_before = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    threat_band = entry_before["threatBand"]
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    rarity_fixes = [f for f in fixed if f["field"] == "rarity"]
+    assert len(rarity_fixes) == 1
+    assert rarity_fixes[0]["speciesId"] == "alpha"
+    assert rarity_fixes[0]["before"] == "unresolved"
+    mapping = runner.load_rarity_power_fallback()
+    assert rarity_fixes[0]["after"] == mapping[threat_band]
+
+    entry_after = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    assert entry_after["rarity"] == rarity_fixes[0]["after"]
+    # Honest provenance: this must never look like a real LLM judgment.
+    assert entry_after["_provenance"]["confidence"]["rarity"] == "deterministic-fallback"
+
+
+def test_fix_unresolved_chains_rarity_off_a_threat_band_fixed_in_the_same_pass(tmp_path):
+    # Both fields unresolved: threatBand gets the sanctioned default FIRST, then rarity derives
+    # from that freshly-fixed value in the same pass — not from the pre-fix "unresolved" string.
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")
+    _mark_field_unresolved(paths, "alpha", "rarity")
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    fields_fixed = {f["field"] for f in fixed}
+    assert fields_fixed == {"threatBand", "rarity"}
+    threat_fix = next(f for f in fixed if f["field"] == "threatBand")
+    rarity_fix = next(f for f in fixed if f["field"] == "rarity")
+    mapping = runner.load_rarity_power_fallback()
+    assert rarity_fix["after"] == mapping[threat_fix["after"]]
+
+
+def test_fix_unresolved_leaves_rarity_unresolved_when_threat_band_has_no_value_at_all(tmp_path):
+    # `resolve_unresolved_threat_band` unconditionally defaults a literal "unresolved" — the only
+    # way threatBand still carries no usable signal after that pass is when the field itself is
+    # missing (never a real rung, never the vote-split sentinel either) — this fixture's basis
+    # never computes one on its own, so threatBand is already absent without any extra setup.
+    # rarity correctly has nothing to derive from here and stays unresolved and reported.
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_field_unresolved(paths, "alpha", "rarity")
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    path = paths.anchors_dir / index["alpha"]
+    entry_before = json.loads(path.read_text(encoding="utf-8"))[0]
+    assert "threatBand" not in entry_before or entry_before["threatBand"] is None
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    assert [f for f in fixed if f["field"] == "rarity"] == []
+    entry_after = json.loads(path.read_text(encoding="utf-8"))[0]
+    assert entry_after["rarity"] == "unresolved"
 
 
 def test_fix_unresolved_leaves_an_already_resolved_species_untouched(tmp_path):
@@ -797,3 +960,164 @@ def test_fix_unresolved_is_idempotent(tmp_path):
 
     assert len(first) == 1
     assert second == []  # already fixed — nothing left to do, not re-applied
+
+
+# ---- fix_secondary_from_fusion_lineage (2026-09-07, owner-directed combat-unification F2 follow-up) --
+#
+# A DIFFERENT signal source from fix_unresolved's three fields above: those only fire on a genuine
+# vote-split ("unresolved"); this fires on an already-resolved "none" when a fusion recipe's own
+# lineage supplies real cross-species signal the per-species lore classifier could never see.
+
+def _set_field(paths, species_id: str, field: str, value) -> None:
+    """Test-only field override — same disk-level shape `_mark_field_unresolved` already uses,
+    generalized to set an arbitrary value rather than only "unresolved"."""
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    rel = index[species_id]
+    path = paths.anchors_dir / rel
+    entries = json.loads(path.read_text(encoding="utf-8"))
+    for e in entries:
+        if e["speciesId"] == species_id:
+            e[field] = value
+    path.write_text(json.dumps(entries), encoding="utf-8")
+
+
+def _write_fusion_recipes(tmp_path: Path, *, output: str, input_a: str, input_b: str) -> Path:
+    recipes_path = tmp_path / "_fusion-recipes.json"
+    recipes_path.write_text(json.dumps({
+        f"recipe.{output}": {
+            "outputSpeciesId": output, "inputSpeciesIdA": input_a, "inputSpeciesIdB": input_b,
+            "crossRungGapFill": False,
+        }
+    }), encoding="utf-8")
+    return recipes_path
+
+
+def test_fix_secondary_from_fusion_derives_from_the_one_parent_that_differs(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "air")
+    _set_field(paths, "output", "elementSecondary", "none")
+    _set_field(paths, "parenta", "elementPrimary", "air")   # matches output — no new signal
+    _set_field(paths, "parentb", "elementPrimary", "earth")  # the real signal
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert len(fixed) == 1
+    assert fixed[0] == {"speciesId": "output", "field": "elementSecondary",
+                        "before": "none", "after": "earth"}
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entries = json.loads((paths.anchors_dir / index["output"]).read_text(encoding="utf-8"))
+    entry = next(e for e in entries if e["speciesId"] == "output")
+    assert entry["elementSecondary"] == "earth"
+    # Honest, distinct provenance — never confused with a real LLM judgment OR with a
+    # no-real-signal-existed "deterministic-fallback".
+    assert entry["_provenance"]["confidence"]["elementSecondary"] == "fusion-lineage-derived"
+
+
+def test_fix_secondary_from_fusion_leaves_a_real_secondary_untouched(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "air")
+    _set_field(paths, "output", "elementSecondary", "fire")  # already real
+    _set_field(paths, "parentb", "elementPrimary", "earth")
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert fixed == []
+
+
+def test_fix_secondary_from_fusion_leaves_it_none_when_both_parents_agree_with_the_output(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "light")
+    _set_field(paths, "output", "elementSecondary", "none")
+    _set_field(paths, "parenta", "elementPrimary", "light")
+    _set_field(paths, "parentb", "elementPrimary", "light")
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert fixed == []  # both parents already agree with the output — real signal, not a gap
+
+
+def test_fix_secondary_from_fusion_leaves_it_unresolved_when_both_parents_disagree(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "light")
+    _set_field(paths, "output", "elementSecondary", "none")
+    _set_field(paths, "parenta", "elementPrimary", "earth")   # neither matches output —
+    _set_field(paths, "parentb", "elementPrimary", "dark")    # inputA's own "should match" failed
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert fixed == []  # neither parent trustworthy as "the other element" — left unresolved
+
+
+def test_fix_secondary_from_fusion_is_a_noop_for_a_species_with_no_recipe(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("standalone", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "standalone", "elementSecondary", "none")
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert fixed == []
+
+
+def test_fix_secondary_from_fusion_dry_run_never_writes(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "air")
+    _set_field(paths, "output", "elementSecondary", "none")
+    _set_field(paths, "parenta", "elementPrimary", "air")
+    _set_field(paths, "parentb", "elementPrimary", "earth")
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    fixed = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes, dry_run=True)
+
+    assert len(fixed) == 1
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entries = json.loads((paths.anchors_dir / index["output"]).read_text(encoding="utf-8"))
+    entry = next(e for e in entries if e["speciesId"] == "output")
+    assert entry["elementSecondary"] == "none"  # unchanged on disk
+
+
+def test_fix_secondary_from_fusion_is_idempotent(tmp_path):
+    paths = make_paths(tmp_path, species=[
+        species_row("output", "plant", 1), species_row("parenta", "plant", 2),
+        species_row("parentb", "plant", 3)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _set_field(paths, "output", "elementPrimary", "air")
+    _set_field(paths, "output", "elementSecondary", "none")
+    _set_field(paths, "parenta", "elementPrimary", "air")
+    _set_field(paths, "parentb", "elementPrimary", "earth")
+    recipes = _write_fusion_recipes(tmp_path, output="output", input_a="parenta", input_b="parentb")
+
+    first = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+    second = runner.fix_secondary_from_fusion_lineage(paths=paths, recipes_path=recipes)
+
+    assert len(first) == 1
+    assert second == []
+
+
+def test_fix_secondary_from_fusion_missing_recipes_file_is_a_noop(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+
+    fixed = runner.fix_secondary_from_fusion_lineage(
+        paths=paths, recipes_path=tmp_path / "does-not-exist.json")
+
+    assert fixed == []

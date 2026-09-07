@@ -18,6 +18,23 @@ var aptitudeTuning = AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(tu
 var powerTuning = PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json")));
 DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 
+// The line 51 comment below used to be true -- Tuning was only read inside the ElementPrimary/
+// ElementSecondary branches, both skipped by this tool's null defaults. Later feature waves broke
+// that: battle-tempo (T14/B28) added an unconditional Tuning.SpeciesTempoReferenceIntervalMs read for
+// turnSpeed, and battle-resources seeded all six resource pools via BattleRuleset.Base*, which in turn
+// calls BattleRuleset.BaseHp -> PowerTuningHub.Tuning (the SAME power-scale.v2.json already parsed
+// above into `powerTuning` for the overlay-side PowerLadder -- the battle side reads it through a
+// separate static hub, never through that local instance). BattleStatComposer.Compose now throws
+// "Configure(...) has not run" on every call regardless of which setup fields are populated, so this
+// mirrors Program.cs's own boot sequence exactly (same loaders, same tuning files) rather than
+// inventing a narrower substitute.
+FusionRpg.Core.Power.PowerTuningHub.Configure(powerTuning);
+FusionRpg.Core.Battle.BattleTuningHub.Configure(
+    FusionRpg.Core.Battle.BattleTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "battle.v5.json"))));
+FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+    FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v1.json"))));
+
 var ladder = new PowerLadder(powerTuning);
 var registry = DerivedStatRegistry.CreateDefault();
 
@@ -50,9 +67,11 @@ var overlaySnapshot = new DerivedComposer(registry).Compose(overlayMods);
 
 // Battle path: ResolveForBattle -> BattleActorSetup.ChannelMods -> BattleStatComposer.Compose,
 // exactly what WebMatchService.AptitudeChannelMods feeds into a real squad setup. ElementPrimary/
-// Secondary and TraitIds stay at their record defaults (null / empty) so BattleStatComposer.Tuning
-// (PrimaryAffinityDivisor/SecondaryAffinityDivisor) is never touched -- this tool proves the
-// aptitude seam agrees, not the whole battle-setup pipeline, and needs no BattleTuningHub.Configure.
+// Secondary and TraitIds stay at their record defaults (null / empty), so PrimaryAffinityDivisor/
+// SecondaryAffinityDivisor are never read -- this tool still proves only the aptitude seam, not the
+// whole battle-setup pipeline. BattleTuningHub.Configure/BattleRuleset.ConfigureResources ARE required
+// now, though (see the boot sequence above): Compose's turnSpeed and six-resource-pool seeding read
+// Tuning/ResourceTuning unconditionally on every call, independent of which setup fields are set.
 var battleMods = AptitudeResolver.ResolveForBattle(allocation, aptitudeTuning, ladder, theta, registry);
 var setup = new BattleActorSetup { Key = "prove-aptitude", Side = "squad", Level = theta, ChannelMods = battleMods };
 var battleSnapshot = BattleStatComposer.Compose(setup);

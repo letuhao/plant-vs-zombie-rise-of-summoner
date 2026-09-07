@@ -23,12 +23,14 @@ test.describe("lawn interactive chrome", () => {
     await expect(conn).toHaveAttribute("data-connection", /optional|connected|disconnected/);
   });
 
-  test("Field opens spawn tray without typeId input", async ({ page }) => {
+  test("Field opens spawn tray; Esc closes tray", async ({ page }) => {
     await page.getByTestId("lawn-match-hud-field").click();
     await expect(page.getByTestId("spawn-tray")).toBeVisible();
     await expect(page.getByTestId("spawn-tray-hint")).toContainText(/no type id/i);
     // Player Field path must not expose the GG-41 typeId spawn control.
     await expect(page.locator('[data-testid="lawn-spawn-typeid"]')).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("spawn-tray")).toHaveCount(0);
   });
 
   test("commander action bar shows nine locked-visible slots", async ({ page }) => {

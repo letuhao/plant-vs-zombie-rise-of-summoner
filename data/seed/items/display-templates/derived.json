@@ -337,6 +337,24 @@
       "groupId": "g.elem-power",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p2-036",
+      "nameKey": "disptpl.affix.elpw-surfeit",
+      "name": "{value} increased {element} power overflow",
+      "runtimeFamily": "atom.elpw-surfeit",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-037",
+      "nameKey": "disptpl.affix.shld-absolute",
+      "name": "sets {element} shield penetration to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.shld-absolute",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
     }
   ]
 }

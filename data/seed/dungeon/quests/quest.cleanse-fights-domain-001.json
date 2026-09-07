@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "few",
+  "flavor": "The local sanctum has been choked by malevolent shadows that prevent the high priest from completing the ritual. Clearing these corrupted chambers is the only way to restore the temple's sanctity.",
+  "name": "The Purge of Echoing Halls",
+  "objectiveTemplate": "cleanse-fights",
+  "prereqRefs": [],
+  "questId": "quest.cleanse-fights-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "domain",
+  "targetRef": "fight"
+}

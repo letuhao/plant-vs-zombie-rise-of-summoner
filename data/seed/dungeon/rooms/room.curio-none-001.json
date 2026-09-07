@@ -1,0 +1,17 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.ashthreepeater-001"
+  ],
+  "flavor": "A vast, silent chamber where hundreds of glass spheres hang from invisible filaments, each containing a single, perfectly preserved moment of a dying star's light.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Vitreous Menagerie",
+  "reason": "The party discovers a collection of captured celestial phenomena that serve as historical records of the cosmos.",
+  "roomId": "room.curio-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -130,6 +130,46 @@ public class UniqueContainerBuildTests
         Assert.Empty(dropped); // atom.vitality is not known to mix affix classes
     }
 
+    /// <summary>D3.15/D4.12/D3.11 (this session, 2026-09-07): the real remaining blocker this session
+    /// found and closed — `UniqueContainerBuild.From` never copied the anchor's own authored Frame/
+    /// BaseTypeId onto the built `ContainerRow`, so `item_generation` had no data source for any
+    /// unique instance. Compared against the anchor's OWN real fields (via the same
+    /// `FrameMixPredicate.BucketOf` conversion `UniqueContainerBuild.From` itself now uses), not a
+    /// hardcoded literal — stays valid if this anchor's own authored frame/base type is ever
+    /// re-edited.</summary>
+    [Fact]
+    public void The_built_container_carries_the_anchors_own_frame_and_base_type()
+    {
+        var anchor = Corpus.Single(s => s.SeedId == GoldenSeedId);
+        var window = Windows[anchor.RarityId];
+
+        var (container, _) = UniqueContainerBuild.From(
+            anchor, window, BelowExtendSlotThreshold, rollSeed: 0, extendSlotChanceMicro: 0, Lookups());
+
+        Assert.Equal(FusionRpg.Core.Items.Thresholds.FrameMixPredicate.BucketOf(anchor.Frame), container.Frame);
+        Assert.Equal(anchor.BaseTypeId, container.BaseTypeId);
+    }
+
+    /// <summary>Proves the wiring is per-anchor, not a coincidence that happens to match on one seed —
+    /// a second real anchor with a DIFFERENT rarity/rung still carries its own correct pair.</summary>
+    [Fact]
+    public void A_different_anchor_carries_its_own_different_frame_or_base_type()
+    {
+        var golden = Corpus.Single(s => s.SeedId == GoldenSeedId);
+        var other = Corpus.Single(s => s.SeedId == Rung90SeedId);
+        Assert.True(golden.Frame != other.Frame || golden.BaseTypeId != other.BaseTypeId,
+            "fixture assumption: these two real anchors must actually differ for this test to prove anything");
+
+        var (goldenContainer, _) = UniqueContainerBuild.From(
+            golden, Windows[golden.RarityId], BelowExtendSlotThreshold, rollSeed: 0, extendSlotChanceMicro: 0, Lookups());
+        var (otherContainer, _) = UniqueContainerBuild.From(
+            other, Windows[other.RarityId], rungOrdinal: 90, rollSeed: 0, extendSlotChanceMicro: 0, Lookups());
+
+        Assert.Equal(FusionRpg.Core.Items.Thresholds.FrameMixPredicate.BucketOf(other.Frame), otherContainer.Frame);
+        Assert.Equal(other.BaseTypeId, otherContainer.BaseTypeId);
+        Assert.True(goldenContainer.BaseTypeId != otherContainer.BaseTypeId, "two real anchors' own distinct base types must not collapse to the same value");
+    }
+
     [Fact]
     public void An_anchor_with_no_variance_slot_authors_zero_rolls_and_an_empty_pool()
     {

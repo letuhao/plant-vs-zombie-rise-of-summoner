@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.pack-dual-006",
+  "formation": "pack",
+  "name": "Swarming Kineticism",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A relentless wave of elemental skirmishers that overwhelms through sheer numbers and rapid repositioning.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

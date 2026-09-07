@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Ice",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 1406,
   "magnitudes": {
     "resource.max.hp": 5424,

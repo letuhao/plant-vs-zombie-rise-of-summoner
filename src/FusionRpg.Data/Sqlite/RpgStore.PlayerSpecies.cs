@@ -244,6 +244,38 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// WAVE F2.2 (demon-standalone, 2026-09-07): what a sacrificed specimen actually rolled — for
+    /// fusion inheritance (F2.1's <see cref="FusionRpg.Core.Effects.Atoms.ForcedPoolPick"/>, F2.4's
+    /// player-facing picker), never the species' generic pool. `spec-demon-fusion.md` names the gap
+    /// directly: <i>"Recipe inputs are SPECIMENS of those species... All inputs consumed"</i> — the
+    /// specimen's own roll was consumed, never inspected, until now.
+    ///
+    /// <para>Resolves through the exact same tables every other lookup already uses: the specimen's
+    /// own <see cref="UniqueActorDto.PlayerId"/> + <see cref="DemonProfileDto.SpeciesId"/> key
+    /// `player_species` (the SAME per-player, per-species row <see cref="ListPlayerSpecies"/> lists),
+    /// whose `InstanceId` resolves through <see cref="GetInstance"/> like any other instance — no
+    /// second read path invented for fusion.</para>
+    ///
+    /// <para><c>null</c> is the honest "nothing to inherit from" outcome — the specimen doesn't
+    /// exist, carries no demon profile, or this player has never materialised that species (no
+    /// `species-passive.{id}` content yet, or `player-materialise` simply has not run for it) —
+    /// never a fabricated empty roll presented as real.</para>
+    /// </summary>
+    public MaterialisedRoll? GetSpecimenMaterialisedRoll(string specimenInstanceId)
+    {
+        var actor = GetUniqueActor(specimenInstanceId);
+        if (actor is null) return null;
+        var profile = GetDemonProfile(specimenInstanceId);
+        if (profile is null) return null;
+
+        var instanceMap = ListPlayerSpeciesInstanceMapUnlocked(actor.PlayerId);
+        if (!instanceMap.TryGetValue(profile.SpeciesId, out var instanceId)) return null;
+
+        var instance = GetInstance(instanceId);
+        return instance is null ? null : new MaterialisedRoll(profile.SpeciesId, instance);
+    }
+
     Dictionary<string, string> ListPlayerSpeciesInstanceMapUnlocked(long playerId)
     {
         lock (_gate)

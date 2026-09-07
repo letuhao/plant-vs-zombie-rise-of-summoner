@@ -96,6 +96,25 @@ public class MultiOwnerPushTests : IDisposable
         return bindingId;
     }
 
+    /// <summary>
+    /// P1.5-L (2026-09-07): a real, ptr-bound specimen — <see cref="AtomPushService.Build"/> now
+    /// rewrites a UniqueActor-scoped grant's durable <c>instance:{id}</c> owner key to the specimen's
+    /// own live <c>entity:{ptr}</c> using exactly this durably-tracked <c>LastPtr</c>, so a synthetic
+    /// literal owner key with no backing row (this file's older fixture shape) can no longer reach the
+    /// wire — the fix's whole point is refusing to send a key nothing can resolve. Real production
+    /// sequence: Roster -&gt; Deploying -&gt; ActiveBound (<c>TryAckUniqueSpawn</c>), the same transition
+    /// that stamps a live ptr outside this test file.
+    /// </summary>
+    string RealBoundSpecimen(string ptr)
+    {
+        var actor = _store.CreateUniqueActor(1, "plant", typeId: 1);
+        var corr = "corr-" + Guid.NewGuid().ToString("N");
+        Assert.True(_store.TryBeginUniqueDeploy(actor.InstanceId, corr).Ok);
+        var ack = _store.TryAckUniqueSpawn(corr, ptr);
+        Assert.True(ack.Ok, ack.Reason);
+        return actor.InstanceId;
+    }
+
     static BindContext Lawn() => new(RuntimeId.Lawn);
 
     [Fact]
@@ -138,11 +157,12 @@ public class MultiOwnerPushTests : IDisposable
         // through two different owner scopes. The union-then-compile design means this must produce
         // exactly one Defs entry for atom.might.t1, not two independently-compiled copies (which
         // would otherwise silently double the modifier if the client ever summed by def id).
+        var specimen = RealBoundSpecimen("0xSHARED1");
         Bind("item.gear", OwnerKind.Player, "1");
-        Bind("item.gear", OwnerKind.UniqueActor, "specimen-shared");
+        Bind("item.gear", OwnerKind.UniqueActor, specimen);
 
         var payload = _push.Build(
-            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, "specimen-shared") },
+            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, specimen) },
             Lawn(), matchSeed: 7);
 
         var mightDefs = payload.Defs.Where(d => d.EffectId == AtomRow.DeriveId("atom.might", "", 1)).ToList();
@@ -154,8 +174,11 @@ public class MultiOwnerPushTests : IDisposable
         var mightGrants = payload.Grants
             .Where(g => g.EffectId == AtomRow.DeriveId("atom.might", "", 1)).ToList();
         Assert.Equal(2, mightGrants.Count);
+        // P1.5-L: the specimen's half is now entity-scoped to ITS OWN live ptr (rewritten off the
+        // durable instance: key inside Build), not left as the durable key this file's assertions used
+        // to pin as the end state.
         Assert.Equal(
-            new[] { "instance:specimen-shared", FusionRpg.Contracts.EffectOwnerKeys.Match },
+            new[] { FusionRpg.Contracts.EffectOwnerKeys.Entity("SHARED1"), FusionRpg.Contracts.EffectOwnerKeys.Match },
             mightGrants.Select(g => g.OwnerKey).OrderBy(k => k, StringComparer.Ordinal));
         Assert.Equal(2, mightGrants.Select(g => g.GrantId).Distinct(StringComparer.Ordinal).Count());
     }
@@ -176,16 +199,23 @@ public class MultiOwnerPushTests : IDisposable
         // BINDING's own scope (UniqueOwnerBinder.OwnerKeyForDurableGrant) and hands the map to
         // AtomCompiler, which emits one grant per owner of an ICD group while leaving the DEF deduped
         // exactly as before.
-        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-abc");
+        //
+        // P1.5-L (2026-09-07): a SECOND real gap found the same way, live: the durable instance: key
+        // this test used to pin as the final wire shape is exactly the one key the injector's hot path
+        // refuses outright. Build now rewrites it to the specimen's own entity:{ptr} before the grant
+        // ever leaves this method (using the specimen's durably-tracked LastPtr) -- proven here against
+        // a real bound specimen rather than a synthetic literal with no backing row.
+        var specimen = RealBoundSpecimen("0xABC123");
+        Bind("trait.foundation", OwnerKind.UniqueActor, specimen);
 
         var payload = _push.Build(
-            new[] { new OwnerScope(OwnerKind.UniqueActor, "specimen-abc") },
+            new[] { new OwnerScope(OwnerKind.UniqueActor, specimen) },
             Lawn(), matchSeed: 7);
 
         var grant = Assert.Single(payload.Grants);
-        Assert.Equal("instance:specimen-abc", grant.OwnerKey);
-        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.InstanceKind, grant.OwnerKind);
+        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.Entity("ABC123"), grant.OwnerKey);
         Assert.NotEqual(FusionRpg.Contracts.EffectOwnerKeys.Match, grant.OwnerKey);
+        Assert.False(FusionRpg.Core.Stats.StatApplyScope.IsInstanceOwnerKey(grant.OwnerKey));
     }
 
     [Fact]
@@ -207,51 +237,47 @@ public class MultiOwnerPushTests : IDisposable
     [Fact]
     public void The_stamped_grant_is_what_UniqueOwnerBinder_turns_into_a_live_entity_key()
     {
-        // ⛔ THE BOUNDARY, stated exactly. What is proven here is that the two halves CONNECT: a real
-        // grant off a real push, handed to the shipped binder, comes back scoped to one live pointer.
-        // What is NOT proven -- and cannot be, by anything CI runs -- is the CALLER: an injector-side
-        // BindGrant at the moment a specimen's ptr becomes known, mirroring UniqueLoadoutSpec.
-        // BindToPtr (UniqueLoadoutSpec.cs:91) / UniqueBoundLoadout.TryApply. The injector targets
-        // net6.0 against BepInEx/Il2Cpp interop and needs a real PVZ Fusion install to build at all
-        // (GrantedDerivedAtomReader's own doc comment says so, and ci.yml names ten test projects,
-        // none of them the injector).
-        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-abc");
+        // ⛔ THE BOUNDARY, restated after P1.5-L (2026-09-07). This test used to hand-call
+        // UniqueOwnerBinder.BindGrant itself to simulate a rewrite step it documented as needing an
+        // "injector-side BindGrant... [that] cannot be proven by anything CI runs" (net6.0/BepInEx
+        // interop, no real PVZ Fusion install in CI). That framing turned out to be avoidable: found
+        // LIVE that the rewrite is exactly as provable SERVER-side, using the specimen's own durably-
+        // tracked LastPtr (RpgStore.TryAckUniqueSpawn already stores it) -- no injector build needed.
+        // AtomPushService.Build now performs this rewrite itself, so the payload's own grant already
+        // carries the live entity key; nothing left to hand-simulate.
+        var specimen = RealBoundSpecimen("0x7ffab0");
+        Bind("trait.foundation", OwnerKind.UniqueActor, specimen);
 
         var payload = _push.Build(
-            new[] { new OwnerScope(OwnerKind.UniqueActor, "specimen-abc") },
+            new[] { new OwnerScope(OwnerKind.UniqueActor, specimen) },
             Lawn(), matchSeed: 7);
-        var stamped = Assert.Single(payload.Grants);
-
-        var bound = FusionRpg.Core.Match.UniqueOwnerBinder.BindGrant(stamped, "0x7ffab0");
+        var bound = Assert.Single(payload.Grants);
 
         // Upper-cased hex, no `0x`: MatchUniqueBindingsFacet.NormalizePtr's shape, shipped since W5-B.
-        // See CompiledGrantOwnerScopeTests for why that is asserted rather than corrected here.
         Assert.Equal("entity:7FFAB0", bound.OwnerKey);
         Assert.False(FusionRpg.Core.Match.UniqueOwnerBinder.WouldRejectOnHot(bound.OwnerKey));
         Assert.True(FusionRpg.Core.Stats.StatApplyScope.Matches(
             bound.OwnerKey, FusionRpg.Core.Stats.StatSide.Plant, typeId: 0, entityKey: "7ffab0"));
-        Assert.Equal(stamped.GrantId, bound.GrantId);
-        Assert.Equal(stamped.EffectId, bound.EffectId);
     }
 
     [Fact]
-    public void An_unbound_specimen_grant_is_refused_by_the_hot_path_never_applied_match_wide()
+    public void A_specimen_with_no_live_ptr_yet_contributes_no_grant_rather_than_an_unresolvable_one()
     {
-        // The fail-closed half of the boundary above. If the injector-side call is never wired, the
-        // stamped grant is REFUSED (EffectBag.Grant throws on `instance:`, StatApplyScope.Matches
-        // returns false, and the injector's own grant loop logs "instance: forbidden in Hot") -- it
-        // does not silently fall back to the match-wide apply this whole change exists to stop.
-        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-abc");
+        // P1.5-L (2026-09-07): the real remaining fail-closed edge, restated after the fix. A specimen
+        // that is bound (has an effect_binding) but has NEVER been deployed -- so RpgStore has no ptr
+        // to rewrite against -- must not put a durable instance: key on the wire (guaranteed refusal by
+        // the injector's hot path) and must not silently widen to match-wide either. Dropping it is the
+        // documented safe direction; the NEXT re-push after a real deploy carries it correctly.
+        var actor = _store.CreateUniqueActor(1, "plant", typeId: 1);
+        Bind("trait.foundation", OwnerKind.UniqueActor, actor.InstanceId);
 
         var payload = _push.Build(
-            new[] { new OwnerScope(OwnerKind.UniqueActor, "specimen-abc") },
+            new[] { new OwnerScope(OwnerKind.UniqueActor, actor.InstanceId) },
             Lawn(), matchSeed: 7);
-        var stamped = Assert.Single(payload.Grants);
 
-        Assert.True(FusionRpg.Core.Match.UniqueOwnerBinder.WouldRejectOnHot(stamped.OwnerKey));
-        Assert.False(FusionRpg.Core.Stats.StatApplyScope.IsMatchWide(stamped.OwnerKey));
-        Assert.False(FusionRpg.Core.Stats.StatApplyScope.Matches(
-            stamped.OwnerKey, FusionRpg.Core.Stats.StatSide.Plant, typeId: 0, entityKey: "7ffab0"));
+        Assert.Empty(payload.Grants);
+        // The def itself still compiles -- only the grant (which needs a live owner to scope to) is held.
+        Assert.Contains(payload.Defs, d => d.EffectId == AtomRow.DeriveId("atom.vitality", "", 1));
     }
 
     [Fact]
@@ -302,49 +328,51 @@ public class MultiOwnerPushTests : IDisposable
     [Fact]
     public void A_specimens_scoped_grant_survives_all_the_way_onto_the_wire_payload()
     {
-        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-abc");
+        var specimen = RealBoundSpecimen("0xDEF456");
+        Bind("trait.foundation", OwnerKind.UniqueActor, specimen);
         Bind("item.gear", OwnerKind.Player, "1");
 
         var atoms = _push.Build(
-            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, "specimen-abc") },
+            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, specimen) },
             Lawn(), matchSeed: 7);
 
         var grants = Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(
             AtomPushService.BuildApplyPayload(atoms, sessionGrants: null)["grants"]);
 
-        // Both owners' compiled grants, each still carrying the key today's earlier fix stamped.
+        // Both owners' compiled grants -- the specimen's half entity-scoped to its own live ptr
+        // (P1.5-L's rewrite), the player's half unchanged match-wide.
         Assert.Equal(2, grants.Count);
+        var entityKey = FusionRpg.Contracts.EffectOwnerKeys.Entity("DEF456");
         Assert.Equal(
-            new[] { "instance:specimen-abc", FusionRpg.Contracts.EffectOwnerKeys.Match },
+            new[] { entityKey, FusionRpg.Contracts.EffectOwnerKeys.Match },
             grants.Select(g => g.OwnerKey).OrderBy(k => k, StringComparer.Ordinal));
 
-        var scoped = Assert.Single(grants, g => g.OwnerKey == "instance:specimen-abc");
+        var scoped = Assert.Single(grants, g => g.OwnerKey == entityKey);
         Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), scoped.EffectId);
-        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.InstanceKind, scoped.OwnerKind);
     }
 
     [Fact]
     public void The_owner_key_is_not_flattened_by_serialisation()
     {
         // The wire is where an owner key would silently be lost -- EffectGrantDto.OwnerKey has to
-        // actually serialise for the injector's grant loop to read it back, and that loop's whole
-        // fail-closed contract (refuse `instance:`, never apply match-wide) depends on seeing it.
-        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-xyz");
+        // actually serialise for the injector's grant loop to read it back correctly.
+        var specimen = RealBoundSpecimen("0x9988");
+        Bind("trait.foundation", OwnerKind.UniqueActor, specimen);
 
         var atoms = _push.Build(
-            new[] { new OwnerScope(OwnerKind.UniqueActor, "specimen-xyz") }, Lawn(), matchSeed: 7);
+            new[] { new OwnerScope(OwnerKind.UniqueActor, specimen) }, Lawn(), matchSeed: 7);
         var json = System.Text.Json.JsonSerializer.Serialize(
             AtomPushService.BuildApplyPayload(atoms, sessionGrants: null));
 
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var raw = Assert.Single(doc.RootElement.GetProperty("grants").EnumerateArray().ToList());
-        Assert.Equal("instance:specimen-xyz", raw.GetProperty("ownerKey").GetString());
-        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.InstanceKind, raw.GetProperty("ownerKind").GetString());
+        var ownerKey = raw.GetProperty("ownerKey").GetString();
+        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.Entity("9988"), ownerKey);
 
-        // And it is still refused by the hot path in exactly this transmitted form -- the fail-closed
-        // half survives the wire too, so a never-wired injector-side BindGrant stays loud.
-        Assert.True(FusionRpg.Core.Match.UniqueOwnerBinder.WouldRejectOnHot(
-            raw.GetProperty("ownerKey").GetString()));
+        // P1.5-L: this is now the entity-scoped, ACCEPTED shape -- the fail-closed contract this test
+        // used to prove (instance: surviving the wire, then refused) is now unreachable by construction:
+        // the rewrite happens before the payload is ever built, so there is no instance: key to refuse.
+        Assert.False(FusionRpg.Core.Match.UniqueOwnerBinder.WouldRejectOnHot(ownerKey));
     }
 
     [Fact]
@@ -353,11 +381,12 @@ public class MultiOwnerPushTests : IDisposable
         // The wire half of Two_owners_sharing_the_same_atom_compile_to_one_catalog_entry_not_two.
         // EffectBag's grant store is keyed on GrantId: two owners' grants collapsing to one id here
         // would silently drop an owner at the far end, which no DTO-only assertion can see.
+        var specimen = RealBoundSpecimen("0xSHARED2");
         Bind("item.gear", OwnerKind.Player, "1");
-        Bind("item.gear", OwnerKind.UniqueActor, "specimen-shared");
+        Bind("item.gear", OwnerKind.UniqueActor, specimen);
 
         var atoms = _push.Build(
-            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, "specimen-shared") },
+            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, specimen) },
             Lawn(), matchSeed: 7);
         var json = System.Text.Json.JsonSerializer.Serialize(
             AtomPushService.BuildApplyPayload(atoms, sessionGrants: null));

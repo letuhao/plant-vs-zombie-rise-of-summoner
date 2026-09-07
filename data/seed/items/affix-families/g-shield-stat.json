@@ -19,7 +19,18 @@
     "model": "claude-sonnet-5",
     "authoredUtc": "2026-08-22T00:00:00Z",
     "sourceRef": "ssot-affixes.md#4.1",
-    "note": "roles on every entry below are sourced from ssot-equip-slots.md SS2.3-SS2.5 (Lane I2's own SSOT, dated the same day as ssot-affixes.md), not from a naive id-translation of ssot-affixes.md SS4.3's stale 12-role matrix. See atom.shield-capacity's notes for the full reasoning; every other entry in this file inherits the same sourcing unless its own notes say otherwise."
+    "note": "roles on every entry below are sourced from ssot-equip-slots.md SS2.3-SS2.5 (Lane I2's own SSOT, dated the same day as ssot-affixes.md), not from a naive id-translation of ssot-affixes.md SS4.3's stale 12-role matrix. See atom.shield-capacity's notes for the full reasoning; every other entry in this file inherits the same sourcing unless its own notes say otherwise.",
+    "appendedBatches": [
+      {
+        "batch": "affix-g.shield-stat-trial-2026-09-07",
+        "model": "affixfamgen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "entryIds": [
+          "atom.shld-absolute"
+        ],
+        "note": "Small trial batch proving affixfamgen's brief/emit/run mechanism end-to-end with a hand-authored stand-in answer -- no live LLM endpoint reachable this session. Original _meta.model/_meta.authoredUtc above describe the file's existing entries and are left untouched."
+      }
+    ]
   },
   "entries": [
     {
@@ -359,6 +370,62 @@
         "offensive"
       ],
       "notes": "NEW family, stem `shld`, word `breach`. The `Increased` sibling of `atom.shield-pen`, inheriting its narrower `roles` list (armament-primary, jewel-major) unchanged -- an attacker stat scales the same way whether it adds or multiplies. This is the third and last of the three `Increased` siblings minted in this partition; `atom.shield-toughness` deliberately does NOT get one (would bring the group to 8 families against a ~7 target, and a percentage multiplier on an already-subtractive per-hit reduction is the least intuitive of the four candidates -- the odd one out is the flat mitigation stat, not one of the three that read naturally as 'more of this resource/attack')."
+    },
+    {
+      "id": "atom.shld-absolute",
+      "nameKey": "affix.shld-absolute",
+      "name": "Absolute Breach",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.shield.pen.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "jewel-major"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Cinderpoint"
+          },
+          {
+            "variant": "ice",
+            "word": "Shatterfrost"
+          },
+          {
+            "variant": "air",
+            "word": "Galerend"
+          },
+          {
+            "variant": "earth",
+            "word": "Stonebreak"
+          },
+          {
+            "variant": "light",
+            "word": "Sunlance"
+          },
+          {
+            "variant": "dark",
+            "word": "Voidbore"
+          }
+        ]
+      },
+      "displayTemplate": "hits deal exactly {value} damage to {element} shields, ignoring other modifiers",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "NEW family, stem `shld` (naming.v1.json idNamespaces.affixFamilies), word `absolute`. Fills the one op `combat.shield.pen.{variant}` was still missing a graded sibling for: `shield-pen` ships `Flat` and `shld-breach` ships `Increased`, leaving `Replace`/`Flag` open (`Flag` is left alone here -- a boolean 'always breaches' gate is a real, separate future family, not this one). `op: Replace` mirrors the exact structural reasoning `g-precision.json`'s `prec-fixation`/`prec-verdict`/`prec-reckoning` trio already establishes for this op: a fixed, calibrated reading that overrides whatever the additive/Increased pipeline would otherwise produce, never a second `Flat`, since `op` is the only axis distinguishing two families on one channel (the `elemental_power`/`elpw-amplify` precedent this corpus names repeatedly). `roles` copied verbatim from `shield-pen`/`shld-breach` -- the narrowest role list in this file, attacker-side only (armament-primary, jewel-major), for the same reason those two entries already give (`ward-array` is an owner-side concept that does not fit an attacker stat). `powerBand: low`, matching the three `prec-*` `Replace` siblings' own convention exactly (`Replace`/`Flag` carry no tier-band magnitude per bands.v1.json's own note; `powerBand` here only gates the item-level/rarity tier window a roll can appear in, not a scaled amount). `nameWords` uses the `variant` (per-element) keying `shield-capacity`/`shield-toughness`/`shield-regen`/`shield-pen` already use in this same file, rather than the `band` keying `shld-surge`/`shld-cycle`/`shld-breach` use -- a genuine style choice already present twice over in this one file, not an inconsistency invented here; words (Cinderpoint/Shatterfrost/Galerend/Stonebreak/Sunlance/Voidbore) draw on a 'permanent breach' register distinct from `shield-pen`'s own shape-of-the-wound words (Piercing/Splitting/Cracking/Gnawing) and `shld-breach`'s decay words (Gouging/Rending/Corroding). HAND-AUTHORED 2026-09-07 (affixfamgen/hand-authored-1), stand-in for a live LLM call -- no reachable endpoint this session. RUNTIME: inherits the same open item-affix-binding gap `atom.shield-capacity`'s own notes name (ShieldRuntime already reads these channels at the grant barrier; the item-affix path via BattleStatComposer is E12) -- not independently re-verified here."
     }
   ]
 }

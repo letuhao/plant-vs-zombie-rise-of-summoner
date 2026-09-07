@@ -1,0 +1,17 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.cactus-001"
+  ],
+  "flavor": "A single, massive crystal spire rises from the center of the chamber, catching a beam of pure radiance from a skylight above. As the light passes through the facets, it casts dancing, prismatic ghosts of the party across the white marble walls, each shadow trailing a second behind the person who cast it.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Prism of Refracted Echoes",
+  "reason": "The room serves as a focal point for the dungeon's light-based mechanics, acting as a visual landmark and a source of magical illumination.",
+  "roomId": "room.curio-light-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

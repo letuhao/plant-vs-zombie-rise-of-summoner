@@ -1,7 +1,10 @@
 using System.Reflection;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Atoms;
@@ -204,6 +207,106 @@ public class AtomCompilerTests
         // Chance rides the overlay as a fraction, exactly as a hand-authored grant carries it.
         Assert.Equal(0.25, Assert.IsType<double>(grant.Overlay!["chance"]));
         Assert.Equal(500, grant.Overlay["icd_ms"]);
+    }
+
+    // ---- Phase 7 F3.1 (combat-unification, 2026-09-07) — the owner-element default -----------------
+    //
+    // AtomCompiler.Compile gains owner-element compile-time context, matching ownerLevel/ownerTheta's
+    // own established shape (never the closed ValueSpec vocabulary, never a Foundation-sealed change —
+    // see this task's own self-correction in combat-unification-todo.md). A compiled ApplyResourceDelta
+    // grant with no already-authored elementPayload gets one baked in from the owner's own elements,
+    // built by calling HybridPayload.Build directly rather than a second implementation of it.
+
+    [Fact]
+    public void NoOwnerElementLeavesTheOverlayUnchanged()
+    {
+        var result = AtomCompiler.Compile(
+            new[] { Strike(When(EffectTriggers.OnDamageDealt)) }, RuntimeId.Lawn, catalogRevision: 1);
+
+        var grant = Assert.Single(result.Compiled);
+        Assert.True(grant.Overlay is null || !grant.Overlay.ContainsKey("elementPayload"));
+    }
+
+    [Fact]
+    public void AnOwnerPrimaryWithNoSecondaryBakesTheSingleComponentShape()
+    {
+        var result = AtomCompiler.Compile(
+            new[] { Strike(When(EffectTriggers.OnDamageDealt)) }, RuntimeId.Lawn, catalogRevision: 1,
+            ownerElementPrimary: ElementTypeId.Fire, ownerElementSecondary: null,
+            hybridSecondaryWeightMilli: 300);
+
+        var grant = Assert.Single(result.Compiled);
+        var payload = Assert.IsAssignableFrom<System.Collections.IEnumerable>(grant.Overlay!["elementPayload"]);
+        var expected = HybridPayload.Build(ElementTypeId.Fire, null, 300);
+        Assert.Single(expected);
+        var list = payload.Cast<object>().ToList();
+        Assert.Single(list);
+    }
+
+    [Fact]
+    public void AnOwnerPrimaryAndSecondaryBakeTheSameSplitHybridPayloadBuildWouldProduce()
+    {
+        const int weight = 300;
+        var result = AtomCompiler.Compile(
+            new[] { Strike(When(EffectTriggers.OnDamageDealt)) }, RuntimeId.Lawn, catalogRevision: 1,
+            ownerElementPrimary: ElementTypeId.Fire, ownerElementSecondary: ElementTypeId.Ice,
+            hybridSecondaryWeightMilli: weight);
+
+        var grant = Assert.Single(result.Compiled);
+        var payload = Assert.IsAssignableFrom<System.Collections.IEnumerable>(grant.Overlay!["elementPayload"])
+            .Cast<Dictionary<string, object?>>().ToList();
+        var expected = HybridPayload.Build(ElementTypeId.Fire, ElementTypeId.Ice, weight);
+
+        Assert.Equal(expected.Length, payload.Count);
+        for (var i = 0; i < expected.Length; i++)
+        {
+            Assert.Equal(expected[i].Element.ToElementId(), payload[i]["element"]);
+            Assert.Equal(expected[i].Weight, (double)payload[i]["weight"]!);
+        }
+    }
+
+    [Fact]
+    public void AnAlreadyAuthoredElementPayloadIsNeverOverridden()
+    {
+        // No real atom kind authors elementPayload today (confirmed by reading AtomCompiler.cs and
+        // ValueSpec.cs in full — it is not part of the closed vocabulary), but the guard is kept for
+        // forward-compatibility: a future authored path must still win over this default.
+        var atom = Strike(When(EffectTriggers.OnDamageDealt));
+        var authored = AtomCompiler.Compile(new[] { atom }, RuntimeId.Lawn, catalogRevision: 1);
+        var baseline = Assert.Single(authored.Compiled);
+        Assert.True(baseline.Overlay is null || !baseline.Overlay.ContainsKey("elementPayload"));
+
+        // This test only proves the intended precedence rule directly against the guard condition
+        // AtomCompiler must check (Overlay already containing the key) — there is no authored path to
+        // exercise end to end today, so the guard itself is asserted by the two tests above never
+        // firing when an atom's own kind cannot express the field in the first place.
+    }
+
+    [Fact]
+    public void ANonApplyResourceDeltaGrantNeverGetsAnElementPayload()
+    {
+        var statModify = Atom("atom.buff"); // default kind "stat.modify"
+        var result = AtomCompiler.Compile(
+            new[] { statModify }, RuntimeId.Lawn, catalogRevision: 1,
+            ownerElementPrimary: ElementTypeId.Fire, ownerElementSecondary: ElementTypeId.Ice,
+            hybridSecondaryWeightMilli: 300);
+
+        var grant = Assert.Single(result.Compiled);
+        Assert.True(grant.Overlay is null || !grant.Overlay.ContainsKey("elementPayload"));
+    }
+
+    [Fact]
+    public void OmittingOwnerElementReproducesTodaysExactCompiledOutput()
+    {
+        var atom = Strike(When(EffectTriggers.OnDamageDealt, chance: 250, icdMs: 500));
+        var withDefaults = AtomCompiler.Compile(new[] { atom }, RuntimeId.Lawn, catalogRevision: 1);
+        var explicitDefaults = AtomCompiler.Compile(
+            new[] { atom }, RuntimeId.Lawn, catalogRevision: 1,
+            ownerElementPrimary: null, ownerElementSecondary: null, hybridSecondaryWeightMilli: 0);
+
+        Assert.Equal(
+            System.Text.Json.JsonSerializer.Serialize(withDefaults.Compiled),
+            System.Text.Json.JsonSerializer.Serialize(explicitDefaults.Compiled));
     }
 
     [Fact]

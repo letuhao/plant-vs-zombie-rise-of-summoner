@@ -1,0 +1,10 @@
+{
+  "done": {
+    "basetype-draw-core-guard-humanoid-b-000": {
+      "class": "plate",
+      "entryId": "item.humanoid-torso-b-013",
+      "implicitFamily": "atom.vitality"
+    }
+  },
+  "schemaVersion": 1
+}

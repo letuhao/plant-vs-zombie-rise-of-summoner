@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The rations have run dry and the shadows are growing long. You must reach the lower sanctum before the emptiness in your bellies turns into madness.",
+  "name": "The Starving Descent",
+  "objectiveTemplate": "finish-under-hunger",
+  "prereqRefs": [],
+  "questId": "quest.finish-under-hunger-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "delve",
+  "targetRef": "none"
+}

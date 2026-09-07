@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The patron demands every soul that entered the breach returns to the light, for a single casualty is a debt they cannot pay. To leave a comrade behind is to fail the contract entirely.",
+  "name": "The Toll of the Threshold",
+  "objectiveTemplate": "survive-no-downed",
+  "prereqRefs": [],
+  "questId": "quest.survive-no-downed-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "roster",
+  "targetRef": "none"
+}

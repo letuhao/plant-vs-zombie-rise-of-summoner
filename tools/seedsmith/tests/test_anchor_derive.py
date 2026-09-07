@@ -11,6 +11,11 @@ from seedsmith.adapters.demons.anchor.derive import (
     clamp_variant_count,
     derive_posture,
     derive_pure,
+    load_aptitude_fallback,
+    load_rarity_power_fallback,
+    resolve_secondary_element_from_fusion_lineage,
+    resolve_unresolved_aptitude,
+    resolve_unresolved_rarity,
     resolve_unresolved_threat_band,
 )
 from seedsmith.adapters.demons.power.bands import ThreatTuning
@@ -101,3 +106,113 @@ def test_unresolved_threat_band_resolves_to_the_real_sanctioned_default():
     # The exact value the real, committed demon-threat.v1.json names — never invented here.
     assert value == tuning.threshold_for_rung(tuning.inferred_default_rung).id
     assert was_deterministic is True
+
+
+# ---- resolve_unresolved_rarity (2026-09-07, demon-corpus-self-heal Phase H, owner-directed) -----
+#
+# Rarity is this game's OWN mechanism, not an almanac/PvZ property — when the identity pipeline's
+# vote never converges, the owner's direction is "stronger species are rarer, fall back to a
+# deterministic engine" rather than leave it unresolved forever. The fallback reuses threatBand's
+# own already-validated power banding (demon-threat.v1.json) via a rank-preserving correspondence
+# (demon-rarity-power-fallback.v1.json), never a second independent curve.
+
+def test_a_resolved_rarity_passes_through_unchanged():
+    mapping = load_rarity_power_fallback()
+    value, was_deterministic = resolve_unresolved_rarity("fused", "tyrant", mapping=mapping)
+    assert value == "fused"
+    assert was_deterministic is False
+
+
+def test_unresolved_rarity_resolves_from_a_resolved_threat_band():
+    mapping = load_rarity_power_fallback()
+    value, was_deterministic = resolve_unresolved_rarity("unresolved", "calamity", mapping=mapping)
+    # calamity is threat rung 10, the top — the committed mapping names its rarity explicitly.
+    assert value == mapping["calamity"]
+    assert value == "almanac"
+    assert was_deterministic is True
+
+
+def test_unresolved_rarity_stays_unresolved_when_threat_band_has_no_signal_either():
+    mapping = load_rarity_power_fallback()
+    value, was_deterministic = resolve_unresolved_rarity("unresolved", "unresolved", mapping=mapping)
+    assert value == "unresolved"
+    assert was_deterministic is False
+
+
+def test_rarity_power_fallback_is_a_rank_preserving_bijection_over_both_closed_ladders():
+    from seedsmith.adapters.demons.anchor.schema import RARITY, THREAT_BAND
+
+    mapping = load_rarity_power_fallback()
+    assert set(mapping.keys()) == set(THREAT_BAND)
+    assert set(mapping.values()) == set(RARITY)
+    # Rank-preserving: the Nth-weakest threat band maps to the Nth-least-rare rarity.
+    assert [mapping[t] for t in THREAT_BAND] == list(RARITY)
+
+
+# ---- resolve_unresolved_aptitude (2026-09-07, demon-corpus-self-heal Phase I, owner-directed) ---
+#
+# No real signal exists for aptitude (measured: F≈1.34 over the species with a computable score,
+# and 10 of the 11 real unresolved species have no computable score at all) — this is a flat,
+# undisguised invented default, not a derivation, on the owner's own explicit direction.
+
+def test_a_resolved_aptitude_passes_through_unchanged():
+    value, was_deterministic = resolve_unresolved_aptitude("Bulwark", default="Onslaught")
+    assert value == "Bulwark"
+    assert was_deterministic is False
+
+
+def test_unresolved_aptitude_resolves_to_the_flat_default():
+    value, was_deterministic = resolve_unresolved_aptitude("unresolved", default="Onslaught")
+    assert value == "Onslaught"
+    assert was_deterministic is True
+
+
+def test_aptitude_fallback_names_a_real_aptitude():
+    from seedsmith.adapters.demons.anchor.schema import APTITUDES
+
+    default = load_aptitude_fallback()
+    assert default in APTITUDES
+
+
+# ---- resolve_secondary_element_from_fusion_lineage --------------------------------------------
+
+def test_a_real_secondary_passes_through_unchanged():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "fire", "earth", input_a_element="earth", input_b_element="fire")
+    assert value == "fire"
+    assert was_fixed is False
+
+
+def test_input_b_supplies_a_clean_secondary_when_input_a_matches_the_output():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "none", "air", input_a_element="air", input_b_element="earth")
+    assert value == "earth"
+    assert was_fixed is True
+
+
+def test_input_a_supplies_a_clean_secondary_when_it_is_the_one_that_differs():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "none", "air", input_a_element="fire", input_b_element="air")
+    assert value == "fire"
+    assert was_fixed is True
+
+
+def test_both_parents_matching_the_output_is_real_signal_not_a_gap():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "none", "light", input_a_element="light", input_b_element="light")
+    assert value == "none"
+    assert was_fixed is False
+
+
+def test_both_parents_differing_and_disagreeing_is_left_unresolved():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "none", "light", input_a_element="earth", input_b_element="dark")
+    assert value == "none"
+    assert was_fixed is False
+
+
+def test_missing_lineage_data_is_left_unresolved_rather_than_guessed():
+    value, was_fixed = resolve_secondary_element_from_fusion_lineage(
+        "none", "fire", input_a_element=None, input_b_element=None)
+    assert value == "none"
+    assert was_fixed is False

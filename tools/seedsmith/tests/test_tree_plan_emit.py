@@ -52,7 +52,7 @@ class RosterAndVocabularyTests(unittest.TestCase):
         self.assertEqual(vocab.counts["atomKind"], 16)
         self.assertEqual(vocab.counts["atomTrigger"], 13)
         self.assertEqual(vocab.counts["atomTriggerAuthorable"], 11)
-        self.assertEqual(vocab.counts["channelFamily"], 54)  # D52: 53 -> 54, live derived-stats growth
+        self.assertEqual(vocab.counts["channelFamily"], 55)  # D52: 53 -> 54; 2026-09-07: 54 -> 55, live derived-stats growth
         self.assertEqual(vocab.counts["conversionState"], 2)
         self.assertEqual(vocab.counts["exclusionForm"], 3)
 
@@ -127,6 +127,57 @@ class BuildPlanTests(unittest.TestCase):
         # Might is aptitude ordinal 0 -> archetypes[0 % 3] = broad-and-flat.
         plan = plan_emit.build_plan(self.spec, self.tuning)
         self.assertEqual(plan["archetype"], "broad-and-flat")
+
+
+class SpeciesTreeSpecTests(unittest.TestCase):
+    """Task J8 (spec-species-tree.md §3, §4, §8.1) — `species_tree_spec`'s own real difference from
+    every sibling factory: `ordinal`/`mechanical_favour` are caller-supplied (no species-roster
+    read inside this foundational module), and `forcedElement`/`forcedStatus` come from the favour
+    lock rather than a category match."""
+
+    def setUp(self) -> None:
+        self.tuning = plan_tuning.load()
+
+    def test_an_empty_favour_member_is_refused(self) -> None:
+        with self.assertRaises(ValueError):
+            plan_emit.species_tree_spec("AbyssSwordStar", 0, ("Might", "", "poison"))
+
+    def test_category_and_tree_id_and_gate_quantity_are_correct(self) -> None:
+        spec = plan_emit.species_tree_spec("AbyssSwordStar", 3, ("Onslaught", "air", "spark"))
+        self.assertEqual("species", spec.category)
+        self.assertEqual("AbyssSwordStar", spec.tree_id)
+        self.assertEqual(3, spec.ordinal)
+        self.assertEqual("aptitude.Onslaught@UniqueDemon", spec.gate_quantity)
+        self.assertEqual("aptitudePoints", spec.gate_index_kind)
+        self.assertEqual(("Onslaught", "air", "spark"), spec.mechanical_favour)
+
+    def test_build_plan_derives_forced_element_and_status_from_the_favour_lock(self) -> None:
+        spec = plan_emit.species_tree_spec("AbyssSwordStar", 0, ("Onslaught", "air", "spark"))
+        plan = plan_emit.build_plan(spec, self.tuning)
+        self.assertEqual("air", plan["forcedElement"])
+        self.assertEqual("spark", plan["forcedStatus"])
+        self.assertEqual("Onslaught", plan["favouredAptitude"])
+
+    def test_build_plan_still_produces_a_real_forty_node_tree_for_a_species_spec(self) -> None:
+        spec = plan_emit.species_tree_spec("AbyssSwordStar", 0, ("Onslaught", "air", "spark"))
+        plan = plan_emit.build_plan(spec, self.tuning)
+        self.assertEqual(40, len(plan["nodes"]))
+        # The MINTED node id's own slug is lowercased (`tree_slug_for`'s own grammar-only fold) —
+        # the tree's own real id, `plan["treeId"]`, stays case-exact for everything else.
+        self.assertEqual("AbyssSwordStar", plan["treeId"])
+        for n in plan["nodes"]:
+            self.assertTrue(n["id"].startswith("skill.abyssswordstar-"))
+
+    def test_a_non_species_plan_never_carries_a_favouredAptitude_key_at_all(self) -> None:
+        # The real regression this test guards: a bare `null` key on every OTHER category's own
+        # plan would break `--check` byte-identity against every already-committed plan file
+        # (caught for real while building this feature — `might.v1.json`'s own round-trip test
+        # failed the moment this key was added unconditionally, fixed by gating it on category).
+        spec = plan_emit.might_tree_spec()
+        plan = plan_emit.build_plan(spec, self.tuning)
+        self.assertNotIn("favouredAptitude", plan)
+        self.assertIsNone(plan["forcedElement"])
+        self.assertIsNone(plan["forcedStatus"])
 
 
 class EmitCheckRoundTripTests(unittest.TestCase):

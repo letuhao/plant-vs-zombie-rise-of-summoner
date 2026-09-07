@@ -219,16 +219,15 @@ public static class ConsumableLimits
     public const int UnbeltedSlots = 0;
 
     /// <summary>
-    /// ⛔ <b>X7 has not landed, so there is no <c>consumable</c> container kind.</b> Verified
-    /// 2026-09-05, not assumed: <see cref="ContainerKind"/> ships six values — Item, Trait, Skill,
-    /// SpeciesPassive, Patron, WorldBuff — and D27 mints exactly four more (<c>gem</c>, <c>set</c>,
-    /// <c>charm</c>, <c>combo</c>), none of them this one. spec-consumables.md's §Open is explicit that
-    /// the fifth ask is the owner's, batched with D27, and that the documented fallback (reuse
-    /// <c>item</c> with <c>slot IS NULL</c>) is a decision to be taken, never drifted into. So this
-    /// module mints nothing and refuses the binding BY NAME
-    /// (<see cref="ConsumableRules.ContainerKindUnavailable"/>).
+    /// ⭐ <b>X7 landed (`container-kind-expansion`, 2026-09-07)</b> — <see cref="ContainerKind"/> now
+    /// ships <see cref="ContainerKind.Consumable"/>, so a consumable's own container kind is real
+    /// rather than the documented `item`-with-`slot IS NULL` fallback spec-consumables.md's §Open
+    /// once reserved for the owner. `ConsumableValidator.ValidateDef` now checks the bound kind IS
+    /// specifically <see cref="ContainerKind.Consumable"/> (see
+    /// <see cref="ConsumableRules.ContainerKindUnavailable"/>'s corrected doc) rather than refusing
+    /// every kind unconditionally.
     /// </summary>
-    public const bool ConsumableContainerKindAvailable = false;
+    public const bool ConsumableContainerKindAvailable = true;
 
     /// <summary>The <c>container_id</c> prefix §4.6 fixes for the kind, once it exists.</summary>
     public const string ContainerIdPrefix = "consumable";
@@ -294,8 +293,10 @@ public static class ConsumableRules
     /// <c>qty</c> at or below zero.</summary>
     public const string BadValue = "consumable.bad-value";
 
-    /// <summary>⛔ X7's fifth <c>container_kind</c> has not landed, so no consumable container may be
-    /// bound. See <see cref="ConsumableLimits.ConsumableContainerKindAvailable"/>.</summary>
+    /// <summary>A consumable's declared container kind is not <see cref="ContainerKind.Consumable"/>
+    /// (X7 landed 2026-09-07 — see <see cref="ConsumableLimits.ConsumableContainerKindAvailable"/>);
+    /// binding a `consumable_def` to any other kind is a real, catchable content mistake now, not
+    /// the universal "nothing can bind yet" refusal this rule used to mean.</summary>
     public const string ContainerKindUnavailable = "consumable.container-kind-unavailable";
 
     /// <summary>⛔ Recorded, not raised: there is no out-of-combat executor for a <c>menu</c>

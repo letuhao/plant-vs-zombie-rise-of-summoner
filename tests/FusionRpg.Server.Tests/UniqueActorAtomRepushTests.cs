@@ -251,6 +251,19 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
     {
         // The other real call site -- UniqueActorService.PushAtomUnionAsync -- for a UNIQUEACTOR-scoped
         // compiled grant, carrying the per-owner key today's earlier fix stamps.
+        //
+        // P1.5-L (2026-09-07): this test's OWN assertion used to encode the real, previously-
+        // undiscovered bug it should have caught -- it asserted `ownerKey == "instance:{id}"` as the
+        // CORRECT end state, when `instance:` is exactly the one owner key the injector's own
+        // `RunEffectGrant` refuses outright ("instance: forbidden in Hot; bind to entity:{ptr}"),
+        // confirmed against a real running server + game. Found live, traced to
+        // `AtomPushService.Build` never rewriting a UniqueActor-scoped grant's durable `instance:{id}`
+        // key to the specimen's own live `entity:{ptr}` before this test was written. Fixed in
+        // `AtomPushService.Build` (rewrites via `UniqueOwnerBinder.BindGrant`, using the specimen's
+        // `LastPtr` — exactly what this test's own `ptr = "0xCOMPILED"` ack just set). `OwnerKind`
+        // itself is intentionally left unchanged by `BindGrant` — the same behavior its one other
+        // caller (`UniqueLoadoutSpec.BindToPtr`) already relies on, and the hot-path refusal check
+        // reads the KEY's prefix, never this field.
         var player = _store.CreatePlayer("Owner");
         var create = await _http.PostAsJsonAsync("/api/unique/actors", new { playerId = player.Id, side = "plant", typeId = 5 });
         var actor = await create.Content.ReadFromJsonAsync<UniqueActorDto>();
@@ -265,8 +278,10 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
 
         var grant = Assert.Single(GrantsOf(DrainInbox().Single(IsAtomPush)));
         Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), grant.GetProperty("effectId").GetString());
-        Assert.Equal("instance:" + actor.InstanceId, grant.GetProperty("ownerKey").GetString());
-        Assert.Equal(EffectOwnerKeys.InstanceKind, grant.GetProperty("ownerKind").GetString());
+        // "0xCOMPILED" normalizes (strip 0x, upper-invariant) to "COMPILED" -- MatchUniqueBindingsFacet.NormalizePtr.
+        Assert.Equal(EffectOwnerKeys.Entity("COMPILED"), grant.GetProperty("ownerKey").GetString());
+        Assert.False(FusionRpg.Core.Stats.StatApplyScope.IsInstanceOwnerKey(grant.GetProperty("ownerKey").GetString()),
+            "a durable instance: key reaching the wire is exactly the live refusal this test now regresses");
     }
 
     [Fact]

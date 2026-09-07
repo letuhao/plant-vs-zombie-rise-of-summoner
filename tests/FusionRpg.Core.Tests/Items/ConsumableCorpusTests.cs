@@ -55,14 +55,21 @@ public class ConsumableCorpusTests
     // ---- the corpus itself ----------------------------------------------------------------------------
 
     [Fact]
-    public void The_corpus_is_sixty_rows_across_three_partitions_measured_not_assumed()
+    public void The_corpus_is_sixty_three_rows_across_three_partitions_measured_not_assumed()
     {
-        Assert.Equal(60, Corpus.Count);
-        Assert.Equal(60, Corpus.Select(c => c.ContainerId).Distinct(StringComparer.Ordinal).Count());
+        // Re-measured 2026-09-07: the original 60-row wave-1 corpus (20/partition) plus a 3-row
+        // hand-authored trial batch (k1-trial/k2-trial/k3-trial, one per authorable classId), run
+        // through the real consumablegen `generate_one` -> `RunLedger` -> `write_partition_file`
+        // path to prove it end-to-end before the full ~1800-piece run. One new file per partition,
+        // never touching the shipped k1/k2/k3.json (`ItemSeedValidator`'s `PartitionMixed` rule
+        // requires one allocated partition per file, and this module's own docstring already
+        // refuses to rewrite the shipped corpus unprompted).
+        Assert.Equal(63, Corpus.Count);
+        Assert.Equal(63, Corpus.Select(c => c.ContainerId).Distinct(StringComparer.Ordinal).Count());
         Assert.Equal(
             new[] { "consumables/1", "consumables/2", "consumables/3" },
             Corpus.Select(c => c.Partition).Distinct().OrderBy(s => s, StringComparer.Ordinal).ToArray());
-        Assert.All(Corpus.GroupBy(c => c.Partition), g => Assert.Equal(20, g.Count()));
+        Assert.All(Corpus.GroupBy(c => c.Partition), g => Assert.Equal(21, g.Count()));
     }
 
     [Fact]
@@ -87,12 +94,14 @@ public class ConsumableCorpusTests
             new[] { UseContext.Menu, UseContext.Dispatch },
             Corpus.SelectMany(c => c.UseContexts).Distinct().OrderBy(u => (int)u).ToArray());
 
-        // measured, so a corpus change cannot quietly move them
-        Assert.Equal(16, Corpus.Count(c => c.ClassId == ConsumableClass.Restore));
-        Assert.Equal(29, Corpus.Count(c => c.ClassId == ConsumableClass.Draught));
-        Assert.Equal(15, Corpus.Count(c => c.ClassId == ConsumableClass.Ward));
-        Assert.Equal(26, Corpus.Count(c => c.UseContexts.Contains(UseContext.Menu)));
-        Assert.Equal(34, Corpus.Count(c => c.UseContexts.Contains(UseContext.Dispatch)));
+        // measured, so a corpus change cannot quietly move them -- re-measured 2026-09-07 after the
+        // 3-row trial batch: +1 restore/menu (k1-021), +1 draught/dispatch (k2-021), +1 ward/dispatch
+        // (k3-021).
+        Assert.Equal(17, Corpus.Count(c => c.ClassId == ConsumableClass.Restore));
+        Assert.Equal(30, Corpus.Count(c => c.ClassId == ConsumableClass.Draught));
+        Assert.Equal(16, Corpus.Count(c => c.ClassId == ConsumableClass.Ward));
+        Assert.Equal(27, Corpus.Count(c => c.UseContexts.Contains(UseContext.Menu)));
+        Assert.Equal(36, Corpus.Count(c => c.UseContexts.Contains(UseContext.Dispatch)));
     }
 
     [Fact]
@@ -127,14 +136,16 @@ public class ConsumableCorpusTests
     public void Every_row_resolves_to_a_grade_and_the_histogram_is_measured()
     {
         var report = Report();
-        Assert.Equal(60, report.GradeHistogram.Values.Sum());
+        Assert.Equal(63, report.GradeHistogram.Values.Sum());
         Assert.All(report.GradeHistogram.Keys, g => Assert.InRange(g, 1, 5));
 
-        // trivial 3 / low 17 / medium 31 / high 9 / extreme 0 — pinned so a re-author is visible
+        // trivial 3 / low 18 / medium 32 / high 10 / extreme 0 — pinned so a re-author is visible.
+        // Re-measured 2026-09-07: the trial batch adds one row each to low (k3-021, shield-toughness),
+        // medium (k2-021, stoicism) and high (k1-021, mending) via bands.v1.json's tierMap.
         Assert.Equal(3, report.GradeHistogram.GetValueOrDefault(1));
-        Assert.Equal(17, report.GradeHistogram.GetValueOrDefault(2));
-        Assert.Equal(31, report.GradeHistogram.GetValueOrDefault(3));
-        Assert.Equal(9, report.GradeHistogram.GetValueOrDefault(4));
+        Assert.Equal(18, report.GradeHistogram.GetValueOrDefault(2));
+        Assert.Equal(32, report.GradeHistogram.GetValueOrDefault(3));
+        Assert.Equal(10, report.GradeHistogram.GetValueOrDefault(4));
         Assert.Equal(0, report.GradeHistogram.GetValueOrDefault(5));
     }
 
@@ -180,9 +191,12 @@ public class ConsumableCorpusTests
     {
         var report = Report();
         // 17 groups hold more than one row — several grades of one family, of which a run may take
-        // exactly one. That is the rule working, not a collision.
+        // exactly one. That is the rule working, not a collision. Unchanged by the trial batch: the
+        // one row that reuses an existing family (k1-021, atom.mending) grows an already->1 group
+        // from 2 to 3 members, and the two rows in brand-new families (atom.stoicism,
+        // atom.shield-toughness) each start a fresh 1-member group -- neither crosses the >1 line.
         Assert.Equal(17, report.ExclusionGroups.Count(g => g.Value > 1));
-        Assert.Equal(60, report.ExclusionGroups.Values.Sum());
+        Assert.Equal(63, report.ExclusionGroups.Values.Sum());
         Assert.All(report.ExclusionGroups.Keys, k => Assert.Contains('|', k));
     }
 
@@ -270,13 +284,13 @@ public class ConsumableCorpusTests
     }
 
     [Fact]
-    public void All_sixteen_restore_rows_reach_a_kind_that_carries_a_fire_point()
+    public void All_seventeen_restore_rows_reach_a_kind_that_carries_a_fire_point()
     {
         // The instant class is the one that genuinely needs OnActivate — §4.2's "hardest finding", and
-        // the whole reason the eighth trigger was asked for. Every one of the 16 lands on `stat.modify`,
-        // which carries it.
+        // the whole reason the eighth trigger was asked for. Every one of the 17 (16 wave-1 + the
+        // 2026-09-07 trial row k1-021, atom.mending) lands on `stat.modify`, which carries it.
         var restores = Corpus.Where(c => c.ClassId == ConsumableClass.Restore).ToList();
-        Assert.Equal(16, restores.Count);
+        Assert.Equal(17, restores.Count);
         Assert.All(restores, c =>
         {
             Assert.True(FamilyKinds.TryGetValue(c.Family, out var kindId));
@@ -321,7 +335,13 @@ public class ConsumableCorpusTests
         // punisher rows — `IdOutsideNamespace` (no wave-1 prefix owns `atom.*-punisher`) and
         // `MissingDisplayTemplate` — so those two may yet be re-authored. That is the affix lane's call;
         // this test tracks what ships.
-        Assert.Equal(109, FamilyKinds.Count);
+        // 109 -> 112 (2026-09-07): a same-day item-seedgen trial batch added 3 real hand-authored
+        // families (atom.tempo-wildgrowth, atom.elpw-surfeit, atom.shld-absolute) into
+        // g-tempo.json/g-elem-power.json/g-shield-stat.json, proving affix-families-gen's own
+        // pipeline end to end. Same caveat as above: the real C# validator flags these 3 with their
+        // own `MissingDisplayTemplate` finding (module 10's pairing, not yet authored) -- shipped,
+        // not blessed.
+        Assert.Equal(112, FamilyKinds.Count);
     }
 
     // ---- module 11's 60 refused drop entries -------------------------------------------------------------
@@ -352,7 +372,10 @@ public class ConsumableCorpusTests
             }
         }
 
-        Assert.Equal(60, refs.Count);
+        // 60 -> 61 (2026-09-07): drop-tables-gen appended 3 real tables to d1.json this session,
+        // including one new `consumable` drop entry (droptable.d1-013's own row) -- real corpus
+        // growth, not a defect.
+        Assert.Equal(61, refs.Count);
         Assert.All(refs, r => Assert.Contains(r, ids));
     }
 

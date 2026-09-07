@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.pack-rainbow-002",
+  "formation": "pack",
+  "name": "Prismatic Scourge",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A chaotic influx of diverse elemental entities overwhelming the party through sheer numbers.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "harbinger"
+  }
+}

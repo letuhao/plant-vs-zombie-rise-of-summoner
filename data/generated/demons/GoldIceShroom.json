@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Ice",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 1368,
   "magnitudes": {
     "combat.block.shred.omni": 780,

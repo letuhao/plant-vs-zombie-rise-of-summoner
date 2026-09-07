@@ -3,6 +3,14 @@
 **Module 12 of 29 · level 5 · depends on `siege-seam`, `structure-state` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
+**Read `tasks/base-defense-todo.md`'s own MAJOR FINDING (2026-09-07, top of this module's section) for
+the full account.** `DistrictAssaultResolver.BuildAnimateSetups` previously granted no real legion
+member any equipped action at all — CLOSED, same session, via `BattleActorSetup.AdditionalHeldActions`
+(purely additive, no `RpgStore` bridge needed since construction content is static). A follow-on
+"combat always beats construction" concern was investigated further and found to be the spec's own
+correct, intended priority (construction waits for combat to be won, proven reachable once it is) —
+not a remaining defect.
+
 ---
 
 ## Objective
@@ -345,6 +353,130 @@ closed by this correction.
 Decision 5: *"pre battle and in battle, deployment cost unit action and requirement resources."*
 **One code path, two entry points.** Pre-battle deployment is round 0 with a larger action budget —
 not a separate system with its own rules, which would immediately drift.
+
+**Resolved 2026-09-07 (session 5): this decision was never actually wired — `BuildResolver.cs`
+(world-map `WorldSlot`/sector coordinates) and `ConstructionPlacement.CanPlace` (tactical
+`GridPos`/`BoardState`) are two independent validators today, confirmed by direct code read.**
+
+**A first proposed resolution (a shared `IConstructionPlacementRule` covering "adjacency-to-builder,
+unoccupied, never inside Core, no ownership check") was itself wrong, caught by reading
+`BuildResolver.cs` in FULL before writing any code, not after a failing test this time.** The two
+validators' real rules diverge in substance, not just coordinates:
+- **Ownership**: `BuildResolver` REQUIRES the founding legion's own faction to own the sector
+  (`build.not-yours`) — `ConstructionPlacement.CanPlace`'s own Rule 5 EXPLICITLY REFUSES an ownership
+  check, by design (decision 4: "either side may build anywhere legal" on the neutral tactical board).
+  These are not the same rule expressed two ways; they are genuinely opposite rules, each correct for
+  its own context — peacetime construction happens on your own claimed territory, an active siege
+  battle's board is not owned by either side.
+- **Adjacency vs. range**: `BuildResolver`'s own spatial gate is "within `WaystationRangeHops` of an
+  anchored sector" (a world-GRAPH hop-count, `Seat`-kind structures only) — `ConstructionPlacement`'s
+  own is "Chebyshev distance 1 from the builder" (a tactical-GRID adjacency, every structure). Not two
+  expressions of one geometric idea — a world graph has no Chebyshev distance, and a tactical board has
+  no hop-count; the underlying SHAPES of "nearby" are different, not just their units.
+- **Cost currency**: `BuildResolver` spends the founding legion's own `CarriedLoam` — `Built`'s own
+  tactical-board cost spends `Rubble`/`Ironwork` from `ConstructionBoardContext` (sourced from the
+  SECTOR's stock, `SiegeDepot`-adjacent, a battle-scoped budget). Different resources, different
+  owners, not a shared ledger.
+
+The only rules that genuinely match in SUBSTANCE, not just intent, are two one-line boolean checks
+("is the slot/cell already occupied," "does the slot kind match the structure's required kind") — each
+already correctly expressed as a plain comparison in its own validator. Extracting THOSE into a shared
+interface would wrap two one-liners in an abstraction, the over-engineering AGENTS.md's own "don't
+design for hypothetical future requirements" rule warns against, not a real unification.
+
+**A second candidate reading, ALSO checked and ALSO ruled out**: perhaps decision 5 means the
+ACTION-ECONOMY half only (both phases consuming the same `TurnEconomy` shape). Confirmed by direct
+search — `TurnEconomy` has ZERO references anywhere in the `World/Turn/` layer or `BuildResolver.cs`.
+World-turn commands (`Build` among them) and battle-round actions are not two entry points into one
+economy; they are two structurally separate scheduling systems (world turns process every player's
+commands once per world turn; battle rounds process one actor's turn within one battle's own
+resolution) — the same deliberate separation `TurnEngine`/`WorldState` vs `BattleEngine`/`BattleRunState`
+already establish everywhere else in this program, joined only through `IBattleResolver`'s own narrow
+interface.
+
+**Honest conclusion: decision 5's own literal "one code path" does not describe a buildable target,
+given how the rest of this program's architecture has since matured.** Neither the spatial validation
+rules nor the action-economy rules survive contact with what `BuildResolver.cs` and
+`ConstructionPlacement.CanPlace` actually became — each is correct FOR ITS OWN phase, and the
+differences (ownership, spatial-gate shape, cost currency, scheduling system) are not accidents to
+unify away but consequences of pre-battle and in-battle being genuinely different situations. This is
+a complete answer, not an open question deferred for later engineering: there is no further code to
+write here that would not mean deleting a rule one phase correctly needs.
+
+### 11. `Assembled`'s own consumable — content, not mechanism
+
+**Resolved 2026-09-07 (session 5): `AssembledConsumableItemId` ("item.siege.rampart-kit") names an
+item that has never been authored** — confirmed by direct search, zero hits in `data/seed/items/` or
+any C# catalog.
+
+**Corrected the same day, a more significant finding than first thought**: an earlier pass this
+session claimed the MECHANISM (`IStockLedger`/`ActionStockCommit`) was "already shipped and ready,"
+based on a grep for `.TryCommit(` that matched `ActionRunner.TryCommit`/`ReactionCounter`'s own
+UNRELATED methods, not `ActionStockCommit` itself. A precise, class-name-only search
+(`grep -rln "ActionStockCommit" src/`) finds exactly ONE file: `Cost/StockLedger.cs` — its own
+declaration. **`ActionStockCommit.TryCommit` has ZERO production callers anywhere in the game**, not
+"missing from siege specifically" — `TimelineDispatch.cs` never calls it either. The `holdsStock`
+precondition can gate an action's USABILITY (real, tested, wired into `UsabilityEvaluator`), but
+nothing anywhere ever actually TAKES the stack at commit time — matching that class's own doc comment,
+written the day the gap was found (2026-08-28) and apparently never closed: *"a battle-context action
+gated on holdsStock therefore fires for free, forever, as long as the player holds one [item]."* Wiring
+this is a real, GAME-WIDE integration (into `TimelineDispatch.cs` and/or `BasicAttack.cs`'s own atomic
+dispatch, whichever battle modes need it) — genuinely outside `siege-construction`'s own scope, and a
+correction owed back to the `action` program's own "ALL modules CLOSED" status, not something to fix
+inside this task.
+
+**Confirmed from a second, independent angle later the same session**, applying the same
+skeptical-recheck the stop-hook forced onto `siege-ai`'s own two catches: `data/tuning/consumables.v1.json`'s
+own `_contextsAuthoredNote` claimed the `battle` context was safe to author because "the action layer
+now serves it end to end... take the stack at commit." That claim was ALSO wrong — the same precise
+grep shows `new ActionStockCommit(` constructed only in test files. Since `battle` is already in
+`contextsAuthored` (shipped 2026-09-05), this is a LIVE consequence, not an abstract one: a battle
+consumable authored with a real `holdsStock` demand fires for free in the shipped game today. Corrected
+the stale note directly rather than leave two places claiming this is closed — see
+`[[action-program]]`'s own memory for the full account. Not fixed here: the wiring is still
+`action`-program scope, and `item.siege.rampart-kit` not existing means fixing it wouldn't unblock
+`Assembled` today regardless.
+
+**A real cross-program timing note, not a design question**: a concurrent session stood up
+`docs/architecture/item-seedgen/` (a full generator-pipeline plan for consumables/materials/recipes)
+the same day this gap was found. Authoring `item.siege.rampart-kit` by hand, in the SAME seed-anchor
+shape every other consumable already uses (`data/seed/items/consumables/*.json`'s own
+`{schemaVersion, kind, _meta, entries}` shape — see any existing file for the real fields), is
+correct and safe to do UNCOORDINATED — it is one row, not a competing pipeline — but should be flagged
+to that session rather than treated as final without their own review, since their own pipeline may
+want to re-author it through the real generator once it exists (the Diablo-loot seed→concrete model
+this repo's own `[[seed-to-concrete-generator-principle]]` establishes for every item, base-defense's
+consumables included).
+
+**The commit-time HALF of this gap — the part actually inside `siege-construction`'s own ownership —
+CLOSED 2026-09-07, still later the same session.** Re-examining "GAME-WIDE integration, outside this
+module's own scope" with fresh skepticism (the stop-hook's own demand, applied here the same way it
+was applied to `siege-ai`'s two catches) found that framing conflated two different things: fixing
+`ActionStockCommit` for EVERY action in the game (combat included) genuinely does need
+`TimelineDispatch.cs`/`BasicAttack.cs`'s own shared dispatch — that part stays correctly
+`action`-program scope. But `Assembled` itself never needs to go through that shared path at all: it
+fires exclusively through `ConstructionActivation.Fire`, a file this module already owns outright
+(15.3b, 2026-09-06). Extended `Fire` with two OPTIONAL trailing parameters
+(`CompiledAction? firingAction = null, IStockLedger? stockLedger = null`) — omitting either reproduces
+the original behavior byte-for-byte, so `Built`'s own live call site (`BasicAttack.cs`) and every
+existing test are untouched. Supplying `firingAction` spends its compiled `StockDemands` via
+`ActionStockCommit.TryCommit` immediately before the event fires, refusing silently (never throwing,
+matching this function's own established "nothing granted, nothing fires" contract) if the demand is
+no longer met at commit time. Proven with a synthetic action carrying a real `StockDemand` (no shipped
+action has one yet) against a fake `IStockLedger`: the demand is genuinely taken, a refusal genuinely
+blocks the placement, an omitted ledger falls back to `NoStockLedger` (refuses rather than granting
+free stock), and every action with zero demands — every one shipped today — is provably unaffected.
+4 new tests, `ConstructionActionsTests.cs`, full `CORE` 12956/12964 (8 pre-existing/external failures,
+zero in `Battle`/`Siege`/`Actions`/`World.Turn`), `DATA` goldens 12/12 unchanged, all 4 `BOUND` guards
+green, `NUM`/magic-numbers: zero new findings.
+
+**What is STILL genuinely un-started, now precisely two things instead of one conflated "GAME-WIDE"
+claim**: (1) the broader `action`-program fix (every OTHER action type, chiefly combat, still fires a
+`holdsStock`-gated consumable for free — see `[[action-program]]`'s own memory) remains real,
+cross-program, and correctly deferred; (2) `Assembled` still has no live `IIntentSource` decision path
+choosing to use it at all (`TryDeclareBuilt` is deliberately `Built`-only) and no authored item/cost to
+decide over even if one existed — both correctly deferred to content-authoring, not engineering this
+session left undone.
 
 ---
 

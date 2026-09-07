@@ -677,6 +677,18 @@
       "consumer": "LoadoutSet.EffectiveMaxSize (read by LoadoutSet.Validate, AutoEquip.Select, CapPolicy.EquippedSkillCap)",
       "note": "H.8, D4.25 (party-dungeon, spec-unique-pipeline.md SS4: the extend-action-slot grant). Pool (H.9 Q4, same reasoning as resource/movement): the actor's own equipped-slot capacity, no attacker-side counterpart. FlatSum composition sums every worn grant honestly; the three readers collapse any positive value to exactly one extra slot ('one at a time') at the read, never in composition.",
       "unitClassNote": "A discrete extra-slot count (StatClass.cs Count: \"a discrete count, e.g. bullets or max targets\") -- direct, not inferred: the three readers listed above consume it today."
+    },
+    {
+      "family": "ai.aggression",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "IBattleView.AggressionOf (BattleRunState.cs) -> SiegeAiIntentSource.ChooseTarget -> SiegeAi.EffectiveTier",
+      "note": "base-defense/spec-siege-ai.md SS5.20 rule 4, resolved 2026-09-07 after investigating three candidate write-side mechanisms (stat channel vs. effect payload vs. dedicated field) and finding this is the only one with a real, shipped precedent of the needed shape (a status modifies a channel, something reads it back into AI-adjacent math -- Nerve's combat.accuracy.omni/combat.dodge.omni debuffs, read by SiegeHitChance.cs). Pool: one actor's own value, no counterpart. Structurally bounded to [-AggressionRange, +AggressionRange] (currently -2..+2, siege.v1.json's ai.aggression.range) by the VOCABULARY, not by this channel or a Cap (Cap only clamps the top end -- DerivedComposer.cs -- wrong shape for a symmetric range): SiegeAi.EffectiveTier throws if a future status ever sets this outside that range, matching this repo's own 'throw, never silently clamp' rule.",
+      "unitClassNote": "Reader: IBattleView.AggressionOf (BattleRunState.cs, 2026-09-07) -> SiegeAiIntentSource -> SiegeAi.EffectiveTier. Defaults to 0 (neutral) for every actor today -- no taunt/stealth/decoy content targets this channel yet."
     }
   ],
   "prefixFamilies": [

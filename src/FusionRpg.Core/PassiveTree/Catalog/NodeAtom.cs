@@ -46,5 +46,4 @@ public sealed record NodeAtom(
     string? WhenJson,
     long KMicro,
     ScaleAxis ScaleAxis,
-    UnitClass UnitClass,
-    string? SoulCurveId);
+    UnitClass UnitClass);

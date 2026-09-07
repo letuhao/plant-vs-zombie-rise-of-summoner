@@ -606,5 +606,152 @@ class CrossTreeNameKeyDedupTests(unittest.TestCase):
                                 "tree.node.primal-surge-3"})
 
 
+class SpeciesCategoryTreeResumabilityTests(unittest.TestCase):
+    """Task J8's own remaining acceptance bullet: "the run is resumable... proven by a mid-run kill
+    test." `run_language_stage` (this file's whole subject) is ALREADY proven resumable for generic
+    trees above -- this class proves the SAME property holds for a REAL species-category plan, built
+    through the actual `species_tree_spec`/`build_plan` pipeline (task J8's own `TreeSpec.
+    mechanical_favour` + `build_slot` fixes), not a hand-typed fixture standing in for one. No new
+    resumability machinery was built for species trees because none was needed: `run_language_stage`
+    never branches on `category` at all, so a correctly-shaped species plan already gets the
+    identical ledger-backed idempotence every generic tree already has -- proven here, not assumed."""
+
+    def setUp(self) -> None:
+        from seedsmith.adapters.trees.nodegen import quota as quota_mod
+        from seedsmith.adapters.trees.nodegen import vocab as vocab_mod
+        from seedsmith.adapters.trees.plan import emit as plan_emit
+        from seedsmith.adapters.trees.plan import tuning as plan_tuning
+
+        self.seed_root = Path(tempfile.mkdtemp())
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+        spec = plan_emit.species_tree_spec("AbyssSwordStar", 0, ("Onslaught", "air", "spark"))
+        plan_dict = plan_emit.build_plan(spec, plan_tuning.load())
+        self.plan = plan_read.load_from_dict(plan_dict, source_label="species:AbyssSwordStar")
+        self.assertEqual(40, len(self.plan.nodes))  # a real, full-size species tree, not a stub shape
+
+        real_targets = __import__(
+            "seedsmith.adapters.trees.nodegen.tuning", fromlist=["load"]).load()
+        self.cells = quota_mod.quota_for_plan(
+            self.plan, real_targets, category="species", forced_element="air", forced_status="spark")
+        self.affix_vocab = vocab_mod.build()
+
+    def _inputs_for(self, subject: "run.Subject") -> "run.NodeGenerationInputs":
+        from seedsmith.adapters.trees.nodegen import quota as quota_mod
+        cell = self.cells[subject.node_id]
+        permitted_ids = quota_mod.permitted_ids_for_cell(cell, self.plan.property_vocabulary)
+        permitted_affixes = self.affix_vocab.permitted_for_branch(subject.branch)
+        return run.NodeGenerationInputs(
+            tree_display_name="AbyssSwordStar", tree_reading="AbyssSwordStar",
+            motifs=(), anti_motifs=(), anti_motif_tags=(),
+            permitted_affixes=permitted_affixes, permitted_properties=sorted(self.plan.property_vocabulary),
+            property_vocabulary=self.plan.property_vocabulary, affix_vocab=self.affix_vocab)
+
+    def test_every_forced_axis_reaches_the_real_quota_cells_species_needed_this_for(self) -> None:
+        # The real end-to-end proof `build_slot`'s own fix exists for: every one of the real 40
+        # nodes forced to the SAME element+status, reached via the exact quota_for_plan call
+        # run_language_stage's own real callers (e.g. _cmd_trees_generate) already make.
+        self.assertEqual(40, len(self.cells))
+        for cell in self.cells.values():
+            self.assertEqual("air", cell.value_for("element"))
+            self.assertEqual("spark", cell.value_for("status"))
+
+    @staticmethod
+    def _response_for_schema(node_key: str, schema: "dict | None") -> str:
+        """The real `affix_vocab` (112 shipped families, not the sibling tests' own tiny synthetic
+        `VOCAB`) means `_accepted_response`'s own hardcoded `"atom.a"` is never a permitted id here
+        -- found for real the first time this test ran (`'accepted' != 'escalated'`, the content
+        gate correctly refusing a name it does not recognise). `schema_for_call`'s own gate-8
+        per-call `enum` (`nodegen/schema.py`) always carries the REAL permitted affix ids for this
+        exact node, so reading the first one back off the schema the generate node call itself
+        received is what makes this response actually valid, for any node, without hand-maintaining
+        a fixture of real ids that could drift from the shipped library.
+        """
+        response = _accepted_response(node_key)
+        enum = (schema or {}).get("properties", {}).get("affixIds", {}).get("items", {}).get("enum") or []
+        if enum:
+            response["affixIds"] = [enum[0]]
+        return json.dumps(response)
+
+    def test_a_mid_run_kill_then_resume_produces_no_duplicate_provenance_and_completes_the_tree(self) -> None:
+        # Simulates "the process died after N nodes" the SAME way this file's own generic-tree
+        # test does (`test_a_resumed_run_seeds_siblings_from_the_ledger_not_only_this_runs_own_
+        # acceptances`, above): run a handful of subjects directly via `generate_node` +
+        # `record_accepted` + `write_ledger`, never through `run_language_stage` at all for the
+        # "first, partial run" -- a real, previous finding (this file's own comment on that test)
+        # is that `LlmCallerConfig.attempts=2` retries a raised transport error internally rather
+        # than propagating it out of `run_language_stage`, so an exception-based "kill" would not
+        # actually reproduce a mid-run crash here; this is the proven-correct way to do it instead.
+        partial_plan = run.plan_run(self.plan, ledger={})
+        first_five = partial_plan.subjects[:5]
+        done: "dict[str, dict]" = {}
+        killed_node_keys: "list[str]" = []
+
+        def _kill_stub(system, user, *, config=None, temperature=0.2, schema=None):
+            return self._response_for_schema(f"killed-{len(killed_node_keys)}", schema)
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=_kill_stub):
+            for subject in first_five:
+                outcome = run.generate_node(subject, self._inputs_for(subject), config=TEST_CONFIG)
+                self.assertEqual("accepted", outcome.outcome)
+                killed_node_keys.append(outcome.record.name_key)
+                done = run.record_accepted(done, subject.subject_id, outcome.record)
+        run.write_ledger(done, self.ledger_path)
+        self.assertEqual(5, len(run.read_ledger(self.ledger_path)))
+        self.assertEqual(5, len(set(killed_node_keys)), "even the killed partial run mints distinct keys")
+
+        # Resume: a fresh process, a fresh call stub. Real finding while writing this test
+        # (`generate_node` makes THREE calls per node, not one -- §7.1's own "vote exactly one
+        # field" cost table, confirmed live here by inspecting the raw call log): a naive per-CALL
+        # counter would hand three DIFFERENT names to the same node's own three votes, which could
+        # never resolve. Checked and rejected: keying on the prompt text (permuted per sample,
+        # `demons.anchor.permute.order_for`'s own precedent, so NOT identical within a node) or on
+        # the schema (byte-identical within a node, but multiple DIFFERENT nodes sharing a branch
+        # can carry the identical permitted-affix schema too, since every node in this tree is
+        # forced to the SAME element+status -- schema-keying would wrongly collapse them). The
+        # reliable signal is call ORDER: `max_workers=1` (this call's own default) makes
+        # `generate_node`'s three votes strictly consecutive, so `(call_index // 3)` is the node
+        # index regardless of content -- proven correct by `resume_calls["n"] == 35 * 3` below (not
+        # 35): if the first five subjects were regenerated instead of read back from the ledger,
+        # this would be 40 * 3, AND at least one of its answers would collide with a killed-run key
+        # already in the ledger -- `build_seed_document`'s own duplicate-name-key guard would refuse
+        # the whole resumed run outright, which is the concrete, structural meaning of "no duplicate
+        # provenance row" this test proves rather than assumes from a call count alone.
+        resume_calls = {"n": 0}
+
+        def _resume(system, user, *, config=None, temperature=0.2, schema=None):
+            node_index = resume_calls["n"] // 3
+            resume_calls["n"] += 1
+            return self._response_for_schema(f"resumed-{node_index}", schema)
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=_resume):
+            result = run.run_language_stage(self.plan, self._inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+
+        self.assertEqual(105, resume_calls["n"], "3 votes per node (§7.1's own cost shape) x 35 nodes")
+        self.assertEqual(35, len(result.outcomes), "the resumed run's own outcomes are the REMAINDER")
+        final_ledger = run.read_ledger(self.ledger_path)
+        self.assertEqual(40, len(final_ledger), "the full tree, no more no less, once resumed")
+        # No duplicate provenance row: every one of the 40 final subject ids is distinct (a dict
+        # already guarantees this structurally, but the count check above is what proves nothing
+        # was silently dropped OR double-counted across the kill/resume boundary), and the seed
+        # document itself was actually written (build_seed_document did not refuse).
+        self.assertEqual(40, len(set(final_ledger.keys())))
+        self.assertIsNotNone(result.seed_path)
+        doc = json.loads(result.seed_path.read_text(encoding="utf-8"))
+        self.assertEqual(40, len(doc["nodes"]))
+
+    def test_a_species_tree_never_forces_neither_axis_the_bug_this_whole_feature_would_have_shipped_with(self) -> None:
+        # Historical-regression guard: before `build_slot`'s own fix (task J8, 2026-09-07), a
+        # species-category quota_for_plan call would have silently returned a FREELY-DRAWN element/
+        # status distribution instead of refusing OR forcing -- this is the one test in this whole
+        # suite that would have gone red (by finding more than one distinct value) had that fix been
+        # reverted, without needing to re-read build_slot's own source to notice.
+        distinct_elements = {cell.value_for("element") for cell in self.cells.values()}
+        distinct_statuses = {cell.value_for("status") for cell in self.cells.values()}
+        self.assertEqual({"air"}, distinct_elements)
+        self.assertEqual({"spark"}, distinct_statuses)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -10,7 +10,7 @@ namespace FusionRpg.Core.Tests.ActorHub;
 public class SeedCatalogTests
 {
     [Fact]
-    public void CatalogResolves268()
+    public void CatalogResolves269()
     {
         // Derived, not literal: the two independent sources (the family-count formula and the
         // registered-def count) must agree, and whatever they agree ON is the assertion.
@@ -19,7 +19,8 @@ public class SeedCatalogTests
         // 259 -> 261 (P0.5 / battle-timeline B9, 2026-08-28): turn.speed + turn.haste registered now
         // that TurnReadiness.cs gives them a reader.
         // 261 -> 267 (action-corpus Phase 0.8, 2026-09-02) -> 268 (party-dungeon D4.25, 2026-09-06:
-        // `loadout.slots`, the extend-action-slot grant).
+        // `loadout.slots`, the extend-action-slot grant) -> 269 (base-defense siege-ai, 2026-09-07:
+        // `ai.aggression`, §5.20 rule 4's signed targeting-priority scalar).
         var combatExpected = DerivedStatChannels.CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1);
         var registry = DerivedStatRegistry.CreateDefault();
 
@@ -27,7 +28,7 @@ public class SeedCatalogTests
             Assert.True(registry.IsKnown(channelId), $"missing combat channel: {channelId}");
 
         Assert.Equal(combatExpected, DerivedStatChannels.AllCombatChannelIds.Count);
-        Assert.Equal(268, registry.AllRegistered.Count);
+        Assert.Equal(269, registry.AllRegistered.Count);
     }
 
     [Fact]

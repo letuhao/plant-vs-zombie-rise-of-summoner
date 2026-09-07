@@ -34,6 +34,32 @@ public static class PlanReader
     // spec-tree-binder.md §3.3's own worked example fixes it the same way.
     public const long Branches = 2;
 
+    /// <summary>
+    /// J1 (2026-09-07): a real, silent-data-loss bug found the first time `tools/TreeBinder` ran
+    /// against a dotted tree id (`nerve.afflicted.v1.json`, `nerve.shaken.v1.json`,
+    /// `nerve.unsettled.v1.json` -- 5 of the 24 real status ids legitimately contain a dot). The
+    /// original call site did `Path.GetFileNameWithoutExtension(planFile).Split('.')[0]`, which takes
+    /// only the FIRST dot-segment -- all three collapsed onto the SAME "nerve" dictionary key in
+    /// `Program.cs`'s own `allNodesByTree`, last-write-wins, silently dropping two of three real trees
+    /// from every binder run with no error of any kind. Confirmed by actually running the real binder
+    /// against the real 42-tree corpus: 40 `tree-binder:` report lines instead of 42.
+    ///
+    /// <para>Every real plan filename is `&lt;treeId&gt;.v&lt;N&gt;.json` (the caller's own glob,
+    /// `*.v*.json`, already assumes this) -- so the fix strips only the trailing `.v&lt;digits&gt;`
+    /// VERSION segment, never simply the first dot, letting a tree id that itself contains a dot
+    /// survive intact.</para>
+    /// </summary>
+    /// <param name="fileNameWithoutJsonExtension">A plan file's name with `.json` already stripped
+    /// (e.g. <c>Path.GetFileNameWithoutExtension</c>'s own output) -- e.g. `"might.v1"` or
+    /// `"nerve.afflicted.v1"`.</param>
+    public static string TreeIdFromPlanFileName(string fileNameWithoutJsonExtension)
+    {
+        var segments = fileNameWithoutJsonExtension.Split('.');
+        var last = segments[^1];
+        var isVersionSegment = last.Length > 1 && last[0] == 'v' && last[1..].All(char.IsDigit);
+        return isVersionSegment ? string.Join('.', segments[..^1]) : fileNameWithoutJsonExtension;
+    }
+
     public static List<BindInputNode> ReadPlanNodes(string planJson, PassiveTreeTuning treeTuning)
     {
         using var doc = JsonDocument.Parse(planJson);

@@ -1,0 +1,1013 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very ground hardens beneath your feet, turning every impact into a frozen foundation.",
+      "id": "skill.freeze-def-t1-n0",
+      "name": "Permafrost Substrate",
+      "nameKey": "tree.node.permafrost-substrate",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The frost does not merely coat the skin; it knits the very essence of the form into a frozen, unyielding lattice.",
+      "id": "skill.freeze-def-t10-n0",
+      "name": "Glacial Suture",
+      "nameKey": "tree.node.glacial-suture-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thick layer of frost accumulates upon the shield, turning every impact into a source of restorative chill.",
+      "id": "skill.freeze-def-t10-n1",
+      "name": "Glacial Reservoir",
+      "nameKey": "tree.node.glacial-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A crystalline barrier that expands with every impact, turning momentum into structural integrity.",
+      "id": "skill.freeze-def-t10-n2",
+      "name": "Glacial Bulwark",
+      "nameKey": "tree.node.glacial-bulwark-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while tier is active — tier wins.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "A layer of frost thickens upon the skin, turning impact into mere vibrations.",
+      "id": "skill.freeze-def-t2-n0",
+      "name": "Glacial Bastion",
+      "nameKey": "tree.node.glacial-bastion-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layer of frost thickens upon the shield, turning impact into a shattering spray of ice.",
+      "id": "skill.freeze-def-t3-n0",
+      "name": "Glacial Bulwark",
+      "nameKey": "tree.node.glacial-bulwark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layering frost-hardened sap over existing defenses to create a seamless, unyielding barrier.",
+      "id": "skill.freeze-def-t3-n1",
+      "name": "Glacial Grafting",
+      "nameKey": "tree.node.glacial-grafting",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The frost does not merely sit; it flows through the gaps in the armor, turning impact into momentum.",
+      "id": "skill.freeze-def-t4-n0",
+      "name": "Cryostatic Recirculation",
+      "nameKey": "tree.node.cryostatic-recirculation-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A layer of frost thickens upon the armor, turning impact into harmless shards of ice.",
+      "id": "skill.freeze-def-t4-n1",
+      "name": "Glacial Shell",
+      "nameKey": "tree.node.glacial-shell-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The frost settles deep within the marrow, turning every impact into a frozen foundation.",
+      "id": "skill.freeze-def-t5-n0",
+      "name": "Subzero Anchor",
+      "nameKey": "tree.node.subzero-anchor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A layer of ice that thickens with every impact, reinforcing the spirit as it hardens the shell.",
+      "id": "skill.freeze-def-t5-n1",
+      "name": "Permafrost Aegis",
+      "nameKey": "tree.node.permafrost-aegis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The ground hardens beneath your feet, turning every step into a foundation of unyielding frost.",
+      "id": "skill.freeze-def-t6-n0",
+      "name": "Permafrost Anchor",
+      "nameKey": "tree.node.permafrost-anchor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A layer of crystalline ice that hardens the spirit as much as the skin.",
+      "id": "skill.freeze-def-t6-n1",
+      "name": "Permafrost Shell",
+      "nameKey": "tree.node.permafrost-shell-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The very ground beneath the frost becomes an extension of the skin.",
+      "id": "skill.freeze-def-t7-n0",
+      "name": "Glacial Substrate",
+      "nameKey": "tree.node.glacial-substrate",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "A layer of frost so dense it mimics the structural integrity of plate armor.",
+      "id": "skill.freeze-def-t7-n1",
+      "name": "Glacial Integument",
+      "nameKey": "tree.node.glacial-integument-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-seal"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The frost does not merely coat the skin; it weaves into the very seams of your defenses, turning every impact into a structural bond.",
+      "id": "skill.freeze-def-t8-n0",
+      "name": "Cryostatic Sealing",
+      "nameKey": "tree.node.cryostatic-sealing",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-regen",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The frost does not merely sit; it flows, mending the cracks in the ice as quickly as they form.",
+      "id": "skill.freeze-def-t8-n1",
+      "name": "Permafrost Cycle",
+      "nameKey": "tree.node.permafrost-cycle-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The frost does not merely sit upon the armor; it flows through the seams, recycling the kinetic impact into a protective layer of rime.",
+      "id": "skill.freeze-def-t9-n0",
+      "name": "Cryostatic Recirculation",
+      "nameKey": "tree.node.cryostatic-recirculation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The sudden expansion of frost within the plating forces a rhythmic redistribution of kinetic energy.",
+      "id": "skill.freeze-def-t9-n1",
+      "name": "Cryostatic Feedback",
+      "nameKey": "tree.node.cryostatic-feedback",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythmic expansion and contraction of frost creates a pressurized barrier of kinetic energy.",
+      "id": "skill.freeze-def-t9-n2",
+      "name": "Glacial Surge-Cycle",
+      "nameKey": "tree.node.glacial-surge-cycle",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.freezing"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air grows heavy and brittle, turning every breath into a jagged shard of ice.",
+      "id": "skill.freeze-off-t1-n0",
+      "name": "Permafrost",
+      "nameKey": "tree.node.permafrost",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sudden expansion of ice within a crack ensures the break is total.",
+      "id": "skill.freeze-off-t10-n0",
+      "name": "Brittle Fracture",
+      "nameKey": "tree.node.brittle-fracture-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sudden transition from absolute stillness to violent motion shatters the very air.",
+      "id": "skill.freeze-off-t10-n1",
+      "name": "Thermal Shock",
+      "nameKey": "tree.node.thermal-shock",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sudden expansion of ice cracks the very essence of the target.",
+      "id": "skill.freeze-off-t10-n2",
+      "name": "Thermal Rupture",
+      "nameKey": "tree.node.thermal-rupture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sudden expansion of frost cracks the very air, leaving only a biting chill in its wake.",
+      "id": "skill.freeze-off-t2-n0",
+      "name": "Glacial Surge",
+      "nameKey": "tree.node.glacial-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air grows heavy and brittle, turning every movement into a struggle against the frost.",
+      "id": "skill.freeze-off-t3-n0",
+      "name": "Deep Freeze",
+      "nameKey": "tree.node.deep-freeze-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not just slow; it makes the very structure of the enemy brittle and prone to shattering.",
+      "id": "skill.freeze-off-t3-n1",
+      "name": "Brittle Fracture",
+      "nameKey": "tree.node.brittle-fracture-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not merely slow; it builds until the very air shatters.",
+      "id": "skill.freeze-off-t4-n0",
+      "name": "Frostbite Overload",
+      "nameKey": "tree.node.frostbite-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The sudden drop in temperature draws energy from the very air, fueling the next strike.",
+      "id": "skill.freeze-off-t4-n1",
+      "name": "Thermal Sink",
+      "nameKey": "tree.node.thermal-sink",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The structural integrity of the frozen mass is compromised by the very cold that created it.",
+      "id": "skill.freeze-off-t5-n0",
+      "name": "Fracture Point",
+      "nameKey": "tree.node.fracture-point-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air itself becomes a weapon, shattering the very concept of motion.",
+      "id": "skill.freeze-off-t5-n1",
+      "name": "Absolute Zero",
+      "nameKey": "tree.node.absolute-zero-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not just bite; it finds the cracks in the very essence of the target.",
+      "id": "skill.freeze-off-t6-n0",
+      "name": "Thermal Breach",
+      "nameKey": "tree.node.thermal-breach-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.freezing"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not merely bite; it carves through the very essence of the target.",
+      "id": "skill.freeze-off-t6-n1",
+      "name": "Subzero Penetration",
+      "nameKey": "tree.node.subzero-penetration",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The air cracks before the impact, turning momentum into brittle shards.",
+      "id": "skill.freeze-off-t7-n0",
+      "name": "Subzero Fracture",
+      "nameKey": "tree.node.subzero-fracture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.flash-freeze",
+        "atom.freezing"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air does not merely cool; it ceases to move entirely.",
+      "id": "skill.freeze-off-t7-n1",
+      "name": "Absolute Zero",
+      "nameKey": "tree.node.absolute-zero-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.chilling",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air does not merely grow cold; it begins to vibrate with the weight of the frost.",
+      "id": "skill.freeze-off-t8-n0",
+      "name": "Cryostatic Resonance",
+      "nameKey": "tree.node.cryostatic-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air does not merely grow cold; it ceases to move entirely.",
+      "id": "skill.freeze-off-t8-n1",
+      "name": "Absolute Zero",
+      "nameKey": "tree.node.absolute-zero-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.flash-freeze"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not merely coat the surface; it finds the microscopic fault lines in the very structure of reality.",
+      "id": "skill.freeze-off-t9-n0",
+      "name": "Deep Frost Fracture",
+      "nameKey": "tree.node.deep-frost-fracture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.chilling"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while element is active — element wins.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very air rebels against the frost, turning the cold into a catalyst for elemental chaos.",
+      "id": "skill.freeze-off-t9-n1",
+      "name": "Thermal Inversion",
+      "nameKey": "tree.node.thermal-inversion-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.freezing"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The cold does not merely coat the surface; it seeks the marrow.",
+      "id": "skill.freeze-off-t9-n2",
+      "name": "Glacial Penetration",
+      "nameKey": "tree.node.glacial-penetration",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "freeze"
+}

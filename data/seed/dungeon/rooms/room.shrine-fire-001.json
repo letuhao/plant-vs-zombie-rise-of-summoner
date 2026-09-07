@@ -1,0 +1,17 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.ashthreepeater-001"
+  ],
+  "flavor": "Ash falls like grey snow from the vaulted ceiling, coating the cracked obsidian floor in a thick, velvet layer. At the center, a single, unquenchable flame dances atop a pedestal of scorched bone, casting long, flickering shadows that seem to writhe against the heat-warped walls.",
+  "hazardBand": "heavy",
+  "kind": "shrine",
+  "name": "The Cinder-Stained Altar",
+  "reason": "A place of ritual sacrifice where the heat is so intense it physically drains the stamina of those who linger.",
+  "roomId": "room.shrine-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

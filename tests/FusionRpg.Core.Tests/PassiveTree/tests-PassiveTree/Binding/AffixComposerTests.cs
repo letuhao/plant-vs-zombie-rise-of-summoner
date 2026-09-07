@@ -107,28 +107,37 @@ public class AffixComposerTests
         Assert.Contains("atom.fx-cold-on-hit.t1", ex.Message);
     }
 
+    /// <summary>D56 (spec-element-conversion.md, 2026-09-07): `element.convert` shipped as a real,
+    /// registered kind. Resolves successfully — exactly like `status.apply` already does — with EMPTY
+    /// channel/op, since its real params (`fromElement`/`toElement`/`shareMilli`) carry no `channel`/
+    /// `op` at all; `AffixComposer` degrades gracefully for a non-channel-writing kind rather than
+    /// crashing, matching the documented `status.apply` precedent. Superseded 2026-09-07: this test
+    /// used to prove the OPPOSITE (a refusal) before the kind existed; kept renamed rather than
+    /// deleted, since the fixture and the "why not refused any more" reasoning are still useful.</summary>
     [Fact]
-    public void A_conversion_kind_atom_is_refused_with_the_18th_kind_reason()
+    public void A_conversion_kind_atom_resolves_successfully_now_that_D56_shipped_it()
     {
         var affix = new AffixRow("affix.synthetic", null,
             new[] { new AffixRefRow(0, "atom.synthetic-convert") });
         var conversionAtom = new AtomRow
         {
             AtomId = "atom.synthetic-convert",
-            KindId = "element.convert", // not one of the 17 registered kinds, by design (D16)
+            KindId = "element.convert", // one of the 18 registered kinds since D56 (2026-09-07)
             FamilyId = "atom.synthetic-convert",
             Tier = 1,
             Name = "synthetic",
-            ParamsJson = """{"channel":"combat.power.fire","op":"flat"}""",
+            ParamsJson = """{"toElement":"ice","shareMilli":400}""",
             WhenJson = "{}",
         };
         var affixes = new System.Collections.Generic.Dictionary<string, AffixRow> { [affix.AffixId] = affix };
         var atoms = new System.Collections.Generic.Dictionary<string, AtomRow> { [conversionAtom.AtomId] = conversionAtom };
 
-        var ex = Assert.Throws<BindRefusal>(() =>
-            AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms));
-        Assert.Contains("18th atom kind", ex.Message);
-        Assert.Contains("D16", ex.Message);
+        var resolved = AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms);
+
+        var atomResult = Assert.Single(resolved);
+        Assert.Equal("element.convert", atomResult.KindId);
+        Assert.Equal("", atomResult.ChannelId); // no channel field in element.convert's own params
+        Assert.Equal("", atomResult.Op);
     }
 
     [Fact]

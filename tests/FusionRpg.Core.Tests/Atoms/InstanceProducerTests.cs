@@ -216,4 +216,166 @@ public class InstanceProducerTests
         Assert.False(r.IsOk);
         Assert.Null(instance);
     }
+
+    // ---- WAVE F2.1 (demon-standalone, 2026-09-07): forced pool picks -------------------------------
+
+    [Fact]
+    public void A_legal_forced_pick_appears_verbatim_and_shrinks_SuffixRolls_first()
+    {
+        // A single real (weight 100) pool row, SuffixRolls = 1: if the shrink did NOT happen,
+        // Resolver.Resolve would draw this exact row again with 100% certainty (it is the pool's
+        // only member), producing 2 atoms. Exactly 1 atom proves SuffixRolls shrank to 0.
+        Seed(new AffixRow("affix.forced", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.fire.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.forced-shrink", Kind = ContainerKind.Item, SuffixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.forced", 100, "g.a") },
+        };
+        var picks = new[] { new ForcedPoolPick("affix.forced",
+            new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }) };
+
+        var r = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instance, forcedPicks: picks);
+
+        Assert.True(r.IsOk, r.ToString());
+        var atom = Assert.Single(instance!.Atoms);
+        Assert.Equal("atom.ember-power.fire.t1", atom.AtomId);
+        Assert.Equal("{\"amount\":5}", atom.ValuesJson);
+    }
+
+    [Fact]
+    public void Two_forced_picks_shrink_SuffixRolls_then_PrefixRolls()
+    {
+        Seed(
+            new AffixRow("affix.forced-a", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.fire.t1") }),
+            new AffixRow("affix.forced-b", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.ember-power.ice.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.forced-both", Kind = ContainerKind.Item, PrefixRolls = 1, SuffixRolls = 1,
+            Pool = new[]
+            {
+                new ContainerPoolRow("affix.forced-a", 100, "g.a"),
+                new ContainerPoolRow("affix.forced-b", 100, "g.b"),
+            },
+        };
+        var picks = new[]
+        {
+            new ForcedPoolPick("affix.forced-a", new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }),
+            new ForcedPoolPick("affix.forced-b", new[] { new InstanceAtomRow(1, "atom.ember-power.ice.t1", "{\"amount\":5}") }),
+        };
+
+        var r = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instance, forcedPicks: picks);
+
+        // Both budgets exhausted by the two forced picks — Resolver.Resolve draws nothing further
+        // (both real, weight-100 rows would otherwise be drawn with certainty), so exactly the two
+        // forced atoms appear, nothing more.
+        Assert.True(r.IsOk, r.ToString());
+        Assert.Equal(2, instance!.Atoms.Count);
+        Assert.Contains(instance.Atoms, a => a.AtomId == "atom.ember-power.fire.t1");
+        Assert.Contains(instance.Atoms, a => a.AtomId == "atom.ember-power.ice.t1");
+    }
+
+    [Fact]
+    public void A_forced_pick_naming_an_affix_that_is_not_in_this_containers_own_pool_still_succeeds()
+    {
+        // Correction, 2026-09-07: inheritance is cross-species by design (a sacrifice's own species
+        // pool feeding a DIFFERENT output species' container) — real content confirms species pools
+        // never share affix ids, so requiring pool membership on the TARGET would refuse nearly every
+        // real inheritance pick. Legitimacy is the caller's job (F2.4: source only from a real
+        // specimen's real roll), never Compose's own to judge.
+        // A valid, real pool member of its OWN — required so ContainerValidator.Validate accepts the
+        // container at all — that has nothing to do with the forced pick's own affix id.
+        Seed(new AffixRow("affix.own-species-thing", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.ice.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.forced-cross-species", Kind = ContainerKind.Item, SuffixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.own-species-thing", 100, "g.a") },
+        };
+        var picks = new[] { new ForcedPoolPick("affix.from-a-different-species",
+            new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }) };
+
+        var r = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instance, forcedPicks: picks);
+
+        Assert.True(r.IsOk, r.ToString());
+        var atom = Assert.Single(instance!.Atoms);
+        Assert.Equal("atom.ember-power.fire.t1", atom.AtomId);
+    }
+
+    [Fact]
+    public void A_forced_pick_count_exceeding_the_total_roll_budget_is_refused_before_any_roll()
+    {
+        Seed(new AffixRow("affix.forced", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.fire.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.forced-over-budget", Kind = ContainerKind.Item, SuffixRolls = 1, // total budget 1
+            Pool = new[] { new ContainerPoolRow("affix.forced", 100, "g.a") },
+        };
+        var picks = new[]
+        {
+            new ForcedPoolPick("affix.forced", new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }),
+            new ForcedPoolPick("affix.forced", new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }),
+        };
+
+        var r = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instance, forcedPicks: picks);
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.ContentRuleViolated, r.Reason);
+        Assert.Contains("fusion-inherit.exceeds-roll-budget", r.Detail);
+        Assert.Null(instance);
+    }
+
+    [Fact]
+    public void Remaining_slots_still_roll_normally_after_a_forced_pick_on_an_otherwise_unchanged_container()
+    {
+        // Two real (weight 100), different-group pool rows, SuffixRolls = 2 (validator requires
+        // rolls <= drawable groups, so both must be real). Forcing one pick shrinks the budget to 1
+        // — Resolver.Resolve still draws exactly one MORE atom from the unmodified pool (either row
+        // is a legal outcome; which one depends on the seed and is not what this test asserts). A
+        // total of 2 proves the shrink neither over- nor under-shrunk: 1 would mean Resolver drew
+        // nothing (over-shrunk), 3 would mean it still saw the original, unshrunk budget.
+        Seed(
+            new AffixRow("affix.forced", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.fire.t1") }),
+            new AffixRow("affix.other", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.ember-power.ice.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.forced-plus-remaining", Kind = ContainerKind.Item, SuffixRolls = 2,
+            Pool = new[]
+            {
+                new ContainerPoolRow("affix.forced", 100, "g.a"),
+                new ContainerPoolRow("affix.other", 100, "g.b"),
+            },
+        };
+        var picks = new[] { new ForcedPoolPick("affix.forced",
+            new[] { new InstanceAtomRow(1, "atom.ember-power.fire.t1", "{\"amount\":5}") }) };
+
+        var r = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instance, forcedPicks: picks);
+
+        Assert.True(r.IsOk, r.ToString());
+        Assert.Equal(2, instance!.Atoms.Count);
+        Assert.Contains(instance.Atoms, a => a.AtomId == "atom.ember-power.fire.t1"); // the forced pick
+    }
+
+    [Fact]
+    public void Zero_forced_picks_reproduces_todays_exact_output_byte_for_byte()
+    {
+        Seed(new AffixRow("affix.ember", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.ember-power.fire.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.no-forced", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Atoms = new[] { new ContainerAtomRow(1, "atom.vitality.t1") },
+            Pool = new[] { new ContainerPoolRow("affix.ember", 100) },
+        };
+
+        var withNull = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instA, forcedPicks: null);
+        var withEmpty = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 1, PinTheta, Tuning,
+            out var instB, forcedPicks: Array.Empty<ForcedPoolPick>());
+
+        Assert.True(withNull.IsOk); Assert.True(withEmpty.IsOk);
+        Assert.Equal(instA!.ContentFingerprint(), instB!.ContentFingerprint());
+    }
 }

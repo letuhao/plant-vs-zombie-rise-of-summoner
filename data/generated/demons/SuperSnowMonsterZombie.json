@@ -4,7 +4,7 @@
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Ice",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 57,
   "magnitudes": {
     "combat.power.omni": 696,

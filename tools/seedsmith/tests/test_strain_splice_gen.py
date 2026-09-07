@@ -302,8 +302,8 @@ class SchemaTests(unittest.TestCase):
 class SupplyTests(unittest.TestCase):
 
     def test_the_live_gem_corpus_supplies_the_ingredient_vocabulary(self):
-        self.assertEqual(40, SUPPLY.gem_count)
-        self.assertEqual(34, SUPPLY.family_count)
+        self.assertEqual(60, SUPPLY.gem_count)  # 40 + 20: sockets-gen's real new g2 partition, 2026-09-07
+        self.assertEqual(54, SUPPLY.family_count)  # 34 + 20: sockets-gen's real new g2 families, 2026-09-07
         self.assertEqual(SUPPLY.family_count, len(set(SUPPLY.families)))
 
     def test_every_ingredient_family_is_supplied_by_a_live_gem(self):

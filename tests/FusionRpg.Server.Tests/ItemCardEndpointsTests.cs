@@ -851,6 +851,30 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     }
 
     /// <summary>
+    /// item-seedgen T12/Checkpoint B (2026-09-07): the specific audit-found gap — `gems/2` was
+    /// allocated in `allocated_partitions.json` but `g2.json` did not exist — closed with real generated
+    /// content. Proves the real production consumer, not just the generator's own Python-side unit
+    /// tests, actually loads a real g2 entry: family-based (not elemental, so `Element` is legitimately
+    /// blank per this loader's own contract), alongside the pre-existing g1/g3 partitions in the same
+    /// directory.
+    /// </summary>
+    [Fact]
+    public void TheGemCorpus_loadsTheNewlyGeneratedG2PartitionAlongsideG1AndG3()
+    {
+        var lookup = GemInsertCorpus.Load(Seed("items", "gems"));
+
+        var fromG2 = lookup("gem.g2-001");
+        Assert.NotNull(fromG2);
+        Assert.Equal("gem.afflicted-barb", fromG2!.Value.NameKey);
+        Assert.Equal("Afflicted Barb", fromG2.Value.Name);
+        Assert.Equal("atom.affliction", fromG2.Value.Def.FamilyId);
+        Assert.Equal(GemInsertCorpus.UnauthoredInsertTier, fromG2.Value.Def.Tier);
+
+        // Still loads the pre-existing partitions in the same call -- g2 is additive, not a replacement.
+        Assert.NotNull(lookup(EmberShard));
+    }
+
+    /// <summary>
     /// item-content T6: the Server's own loader over the REAL `content/display/en.json`, which is what
     /// turns a unique's or a set's <c>flavourKey</c> into the sentence a player reads. Absence
     /// degrades to "no sentence", never to a guess — the same rule <c>DisplayCheck</c> applies to this

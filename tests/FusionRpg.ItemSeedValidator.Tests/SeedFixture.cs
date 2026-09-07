@@ -96,6 +96,7 @@ public static class SeedFixture
         "curves": { "idTemplate": "curve.{seq:03}" },
         "attributes": { "idTemplate": "attr.{seq:03}" },
         "socketWords": { "idTemplate": "sockword.{seq:03}" },
+        "combinations": {},
         "recipes": { "idTemplate": "recipe.{seq:03}" },
         "enhancementMilestones": { "idTemplate": "enh.{seq:03}" },
         "consumables": { "idTemplate": "consumable.k{slot}-{seq:03}", "slotAssignment": [{ "slot": 1 }] },
@@ -103,7 +104,7 @@ public static class SeedFixture
         "displayTemplates": { "idTemplate": "disptpl.p{slot}-{seq:03}", "slotAssignment": [{ "slot": 1 }] }
       },
       "namingGrammar": {
-        "nameKey": { "kindPrefixes": ["base", "unique", "set", "affix"] },
+        "nameKey": { "kindPrefixes": ["base", "unique", "set", "affix", "combination"] },
         "collisionNormalization": {
           "algorithm": [
             "4. Drop any resolved token that is one of the four closed connectives: `of`, `the`, `a`, `and`."
@@ -173,6 +174,44 @@ public static class SeedFixture
           "band": "a",
           "iconKey": "icon.base.test",
           "tags": ["organic"]{{(extra.Length == 0 ? "" : ",\n          " + extra)}}
+        }
+        """;
+
+    /// <summary>A complete, conforming combination file — item-seedgen `combination-write-unblock`
+    /// (2026-09-07), the `socket-word` retirement target.</summary>
+    public static string CombinationFile(params string[] entries) => $$"""
+    {
+      "schemaVersion": 1,
+      "kind": "combination",
+      "_meta": {
+        "batch": "test", "partition": "combinations/strain", "contractVersion": 1,
+        "registryVersions": { "tags": 1, "naming": 1 },
+        "exemplarVersion": 1, "promptVersion": 1,
+        "model": "test", "authoredUtc": "2026-08-22T00:00:00Z", "sourceRef": "test"
+      },
+      "entries": [ {{string.Join(",\n", entries)}} ]
+    }
+    """;
+
+    /// <summary>A conforming combination entry, real field shape transcribed from `combogen/
+    /// emit.py`'s `assemble_entry` — `ingredients[].minTier`/`.quantity` and top-level `grantedTier`
+    /// are the exact fields `OwnershipCheck`'s combination-scoped exception exists for.</summary>
+    public static string CombinationEntry(string id = "combo.strain-verify-001",
+        string name = "Verified Vanguard", string nameKey = "combination.strain-verify-001", string extra = "") => $$"""
+        {
+          "id": "{{id}}",
+          "nameKey": "{{nameKey}}",
+          "name": "{{name}}",
+          "shape": "strain",
+          "aptitudes": ["Might"],
+          "archetype": "offense",
+          "minSockets": 4,
+          "ingredients": [
+            { "family": "atom.vitality", "minTier": 1, "quantity": 2 },
+            { "family": "atom.vitality", "minTier": 2, "quantity": 2 }
+          ],
+          "grants": ["atom.vitality"],
+          "grantedTier": 1{{(extra.Length == 0 ? "" : ",\n          " + extra)}}
         }
         """;
 

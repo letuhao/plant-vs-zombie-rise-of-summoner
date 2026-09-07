@@ -360,6 +360,32 @@
     {
       "affinity": [
         "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A translucent layer of hardened essence that expands the capacity of the spirit's barrier.",
+      "id": "skill.might-def-t7-n0",
+      "name": "Vitreous Shell",
+      "nameKey": "tree.node.vitreous-shell",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
         "core",
         "core"
       ],
@@ -384,6 +410,30 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the spirit refuses to break.",
+      "id": "skill.might-def-t8-n0",
+      "name": "Calloused Sinew",
+      "nameKey": "tree.node.calloused-sinew-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
     },
     {
       "affinity": [
@@ -966,6 +1016,32 @@
       "nameKey": "tree.node.might-offensive-deep-vanguardmomentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The weight of the blow is measured by the devastation it leaves behind.",
+      "id": "skill.might-off-t9-n1",
+      "name": "Apex of Ruin",
+      "nameKey": "tree.node.apex-of-ruin",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 9
     }

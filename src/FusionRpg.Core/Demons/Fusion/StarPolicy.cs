@@ -116,4 +116,18 @@ public static class FusionCostTable
                 "recipes only produce rare and above");
         return new FusionCost(c.Souls, c.ShardRarity, c.ShardCount, c.EssenceCount);
     }
+
+    /// <summary>
+    /// WAVE F2.3/F2.4: an inherited pick's own cost, keyed by the PICK'S OWN source specimen's
+    /// rarity — never the fusion output's own rarity (that's <see cref="Recipe"/>, a different
+    /// lookup key over the identical rung set). Souls only: F2.4 only ever sums souls for a pick set,
+    /// never shards/essences.
+    /// </summary>
+    public static long InheritPick(DemonRarity sourceRarity)
+    {
+        if (!StarPolicy.Tuning.InheritCostByRarity.TryGetValue(sourceRarity, out var souls))
+            throw new ArgumentOutOfRangeException(nameof(sourceRarity), sourceRarity,
+                "inherited picks only come from rare-and-above sacrifices — see recipeCost's own floor");
+        return souls;
+    }
 }

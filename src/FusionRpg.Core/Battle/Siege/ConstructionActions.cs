@@ -122,6 +122,54 @@ public static class ConstructionActions
         new ActionCostRow(LabouredActionId, "hunger", ValueSpec.Of(SiegeTuningPolicy.Construction.LabourMoatHungerCost), ActionCostTiming.OnCommit),
     };
 
+    /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, MAJOR finding this session):
+    /// `DistrictAssaultResolver.BuildAnimateSetups` never set any legion member's `EquippedActionIds`,
+    /// so no real siege actor could EVER hold a construction action — this is the pre-compiled form
+    /// `BattleActorSetup.AdditionalHeldActions` needs to fix that, WITHOUT touching that risky, shared
+    /// `EquippedActionIds`/`ActionCatalog` resolution path at all (an actor that gains these never
+    /// loses its basic attack, since this is a purely additive sibling field).
+    ///
+    /// <para><b>Compiled once, via the REAL `ActionCompiler.Compile` pipeline — never hand-built</b>,
+    /// so cost/scope/envelope derivation stays byte-identical to how every other authored action in
+    /// the game compiles (no second, silently-diverging implementation of that logic). Every row's
+    /// `Rung` (authored `0`, "no rung-budget concept the way a combat skill does" per this class's own
+    /// top comment) is overridden to `1` against a dedicated, single-row `RungTable` — `RungTable`'s
+    /// own indexing is 1-based (index 0 == rung 1, confirmed by reading `RungTable.cs` directly), so a
+    /// `Rung: 0` row cannot resolve against ANY table, real or fake. The SAME override + throwaway
+    /// table shape `ConstructionLiveWiringTests.BuiltOnlyCatalog` already proved safe for `Built`
+    /// alone; this widens it to all four rows, sharing this file's own already-declared `Actions`/
+    /// `Costs`/`ContainerResolver`, never a second copy of any of them.</para>
+    ///
+    /// <para>Throws at first use (a static `Lazy`, evaluated once) rather than returning a partial or
+    /// null list — matching <see cref="CompiledEffects"/>'s own established "compile-time content
+    /// error is loud, not silently degraded" posture in this exact file.</para>
+    /// </summary>
+    public static IReadOnlyList<CompiledAction> CompiledActionsForGrant => _compiledActionsForGrant.Value;
+
+    static readonly Lazy<IReadOnlyList<CompiledAction>> _compiledActionsForGrant = new(() =>
+    {
+        var rungTable = new RungTable(cap: 1, new[]
+        {
+            new RungRow(1, MinTier: 1, MaxTier: 1, PoolRolls: 1, QPowerMilli: 1000, CostMulti: 1000, CdMulti: 1000, StructureBudget: Array.Empty<string>()),
+        });
+
+        var compiled = new List<CompiledAction>(Actions.Count);
+        foreach (var row in Actions)
+        {
+            var costs = Costs.Where(c => c.ActionId == row.ActionId).ToList();
+            var containerAtomIds = ContainerResolver.EffectIdsFor(row.ContainerId);
+            var (rejection, action) = ActionCompiler.Compile(
+                row with { Rung = 1 }, costs, Array.Empty<ActionScopeRow>(), containerAtomIds,
+                boardAvailable: true, rungTable);
+            if (action is null)
+                throw new InvalidOperationException(
+                    $"ConstructionActions: '{row.ActionId}' failed to compile for live grant — {rejection}");
+            compiled.Add(action);
+        }
+        return compiled;
+    });
+
     static string EffectIdFor(string actionId) => "fx." + actionId;
 
     static IReadOnlyList<EffectDef> BuildEffects()
@@ -184,11 +232,42 @@ public static class ConstructionActivation
     /// `BattleEngine.Resolve` and `ConstructionActions.CompiledEffects` upserted into the host's own
     /// `EffectBag.Catalog` — both wired in `DistrictAssaultResolver`) or this call is a silent no-op:
     /// `Bag.OnEvent` fires whatever is granted for the trigger, and fires nothing if nothing is.
+    ///
+    /// <para><b><paramref name="firingAction"/>/<paramref name="stockLedger"/> (2026-09-07, resolved
+    /// after re-investigating `Assembled`'s own remaining gap): both OPTIONAL, and omitting either
+    /// reproduces the original no-commit behavior byte-for-byte</b> — `Built`'s own live call site
+    /// (`BasicAttack.cs`) omits both deliberately, since `Built`'s cost is the separate
+    /// `ConstructionCost`/sector-Rubble mechanism, not `holdsStock`.</para>
+    ///
+    /// <para>Supplying <paramref name="firingAction"/> spends its compiled `StockDemands` via
+    /// <see cref="ActionStockCommit.TryCommit"/> BEFORE the event fires — the commit-time half
+    /// `Assembled`'s own item precondition needs, matching this class's own doc comment ("at commit,
+    /// not at landing"). Every action shipped today (`Built`/`Assembled`/`Summoned`/`Laboured`) has
+    /// ZERO compiled `StockDemands` (no `holdsStock` condition is authored on any of them yet), so this
+    /// is currently inert for all four real paths — the wiring is real and tested (with a synthetic
+    /// demand), the content is not. A missing <paramref name="stockLedger"/> falls back to
+    /// <see cref="NoStockLedger"/> (refuses, never grants free stock), matching every other seam's own
+    /// "unwired means safe, not permissive" posture.</para>
+    ///
+    /// <para>A failed commit (the `holdsStock` precondition was true when usability was checked but is
+    /// no longer true at this exact commit tick — a genuine, rare TOCTOU race, not the normal path)
+    /// is the SAME silent no-op this function already has for an ungranted container: nothing fires,
+    /// nothing throws. Still genuinely un-started, separate from this wiring: no live `IIntentSource`
+    /// yet decides to USE `Assembled` at all (`BasicAttack.cs`'s own `TryDeclareBuilt` hook is
+    /// deliberately scoped to `Built` only) — that needs its own cell-choosing policy, analogous to
+    /// `ConstructionAi.ChooseBuiltSite`, which cannot be exercised meaningfully until the item itself
+    /// exists regardless.</para>
     /// </summary>
-    public static void Fire(BattleEffectHost host, string actorPtr, int targetRow, int targetCol, long tick = 0)
+    public static void Fire(
+        BattleEffectHost host, string actorPtr, int targetRow, int targetCol, long tick = 0,
+        CompiledAction? firingAction = null, IStockLedger? stockLedger = null)
     {
         if (host is null) throw new ArgumentNullException(nameof(host));
         if (string.IsNullOrEmpty(actorPtr)) throw new ArgumentException("actorPtr must be set.", nameof(actorPtr));
+
+        if (firingAction is not null &&
+            !new ActionStockCommit(stockLedger ?? NoStockLedger.Instance).TryCommit(actorPtr, firingAction).IsSpent)
+            return; // precondition no longer true at commit -- silent no-op, same posture as "nothing granted"
 
         host.Bag.OnEvent(new EffectEventDto
         {

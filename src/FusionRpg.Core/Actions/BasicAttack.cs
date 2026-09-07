@@ -144,7 +144,12 @@ public static partial class BattleEngine
         // A19 (T56.1): AlwaysAffordable.Instance -> state.CostLedger -- the real, first production
         // affordability check. Vacuously affordable for every action with no authored cost row
         // (CostLedger.Check's own early return), so this is byte-identical until content opts in.
+        // base-defense siege-ai (2026-09-07, session 5, owner-authorized): SiegeAiIntentSource tried
+        // SECOND, only when no explicit override was supplied -- `state.DefaultAiIntentSource` is null
+        // for every battle that didn't opt in via `aiTuning` (every battle before this task, and every
+        // non-siege battle today), so this is byte-identical until a caller opts in.
         var source = intentSource
+            ?? state.DefaultAiIntentSource
             ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, state.CostLedger);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
         if (intent.IsNone)
@@ -159,6 +164,13 @@ public static partial class BattleEngine
             // before touching anything, so this is provably byte-identical until both are true.
             if (TryDeclareBuilt(attacker, state, nowTick, out var builtIntent))
                 return builtIntent;
+            // siege-ai R3 (spec-siege-ai.md §4, 2026-09-07): the SAME "combat found nothing at all"
+            // gate, tried second -- an actor with no target in reach advances toward its own objective
+            // instead of standing idle. A no-op for every actor holding no Movement-tagged action, every
+            // battle with no siege objective wired (every non-siege battle kind), and every battle where
+            // no path exists at all ("hold and defend, never a random move" -- the spec's own words).
+            if (TryDeclareObjectiveAdvance(attacker, state, out var advanceIntent))
+                return advanceIntent;
             return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
         }
 
@@ -245,6 +257,50 @@ public static partial class BattleEngine
 
         constructionBoard.SpendBuilt(choice.Value.Structure);
         ConstructionActivation.Fire(state.Host, attacker.Setup.Key, choice.Value.Cell.Row, choice.Value.Cell.Col, nowTick);
+
+        result = (AttackStepOutcome.ActedWithNoTarget, null, ActionEnvelope.NoOp);
+        return true;
+    }
+
+    /// <summary>
+    /// base-defense `siege-ai` R3 (spec-siege-ai.md §4, 2026-09-07): "no target in reach -> path
+    /// toward the objective." Tried after <see cref="TryDeclareBuilt"/>, same shape (returns `true`
+    /// with a ready outcome when it moved the actor at least one cell; `false` when nothing changed —
+    /// the caller's own `Break` fires unaltered). The actual pathing/stepping is
+    /// <see cref="BattleRunState.TryMoveTowardObjective"/> — this method is purely the two gate checks
+    /// that decide whether to even attempt it (holds a Movement-tagged action; has positive move
+    /// range), matching <see cref="ApplyBasicAttack"/>'s own existing A9 Movement-category dispatch
+    /// gate exactly so a real battle behaves the same way whether it reaches this fallback or the
+    /// ordinary dispatch path.
+    /// </summary>
+    static bool TryDeclareObjectiveAdvance(
+        ActorState attacker, BattleRunState state,
+        out (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) result)
+    {
+        result = (AttackStepOutcome.Break, null, ActionEnvelope.NoOp);
+
+        var held = state.HeldActionsOf(attacker.Setup.Key);
+        var holdsMovement = false;
+        for (var i = 0; i < held.Count; i++)
+        {
+            var tags = held[i].Tags;
+            var tagged = false;
+            for (var t = 0; t < tags.Count; t++)
+            {
+                if (tags[t] != FusionRpg.Core.Actions.ActionTag.Movement) continue;
+                tagged = true;
+                break;
+            }
+            if (!tagged) continue;
+            holdsMovement = true;
+            break;
+        }
+        if (!holdsMovement) return false;
+
+        var moveRange = (int)Math.Round(attacker.Derived.Get(DerivedStatChannels.MoveRange));
+        if (moveRange <= 0) return false; // byte-identical for every actor shipped today (move.range defaults to 0)
+
+        if (state.TryMoveTowardObjective(attacker.Setup.Key, moveRange) == 0) return false;
 
         result = (AttackStepOutcome.ActedWithNoTarget, null, ActionEnvelope.NoOp);
         return true;
@@ -421,5 +477,8 @@ public static partial class BattleEngine
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) => _inner.HeldActionsOf(actorKey);
         public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => _inner.DerivedOf(actorKey);
         public string? GarrisonedStructureKeyOf(string actorKey) => _inner.GarrisonedStructureKeyOf(actorKey);
+        public GridPos? ObjectivePositionOf(string actorKey) => _inner.ObjectivePositionOf(actorKey);
+        public long? MaxHpOf(string actorKey) => _inner.MaxHpOf(actorKey);
+        public int AggressionOf(string actorKey) => _inner.AggressionOf(actorKey);
     }
 }

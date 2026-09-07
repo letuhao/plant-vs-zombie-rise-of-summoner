@@ -267,6 +267,8 @@
   "budgetPerBranch": 500,
   "budgetTotal": 1000,
   "category": "primary",
+  "forcedElement": null,
+  "forcedStatus": null,
   "gateIndexKind": "aptitudePoints",
   "gateQuantity": "aptitude.Precision@Commander",
   "gateState": "carrier",
@@ -768,6 +770,7 @@
       "defensive"
     ],
     "channelFamily": [
+      "ai.aggression",
       "combat.absorption",
       "combat.accuracy",
       "combat.amplification",
@@ -896,7 +899,7 @@
     "atomTrigger": 13,
     "atomTriggerAuthorable": 11,
     "branch": 2,
-    "channelFamily": 54,
+    "channelFamily": 55,
     "conversionState": 2,
     "element": 7,
     "exclusionForm": 3,

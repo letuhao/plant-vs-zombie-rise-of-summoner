@@ -105,6 +105,28 @@ describe("ActorPanel (catalog-era)", () => {
     expect(window.__fusionRpgActorSheetObs?.[0]?.channel).toBe("actor-sheet.open");
   });
 
+  it("Kit tab has no placeholder Strike/Firebolt actions", async () => {
+    const user = userEvent.setup();
+    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    await user.click(screen.getByTestId("actor-sheet-tab-kit"));
+    expect(screen.getByTestId("kit-tab")).toBeInTheDocument();
+    expect(screen.queryByText("Strike")).not.toBeInTheDocument();
+    expect(screen.queryByText("Firebolt")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("actions-tab")).not.toBeInTheDocument();
+  });
+
+  it("leftover footer is absent on Condition and present (pending or ready) on Aptitudes", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    expect(screen.queryByTestId("actor-leftover-footer")).not.toBeInTheDocument();
+    expect(screen.getByTestId("actor-panel-deploy")).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("actor-sheet-tab-aptitudes"));
+    expect(screen.getByTestId("actor-leftover-footer")).toBeInTheDocument();
+    expect(screen.queryByTestId("actor-panel-deploy")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("actor-panel-release")).not.toBeInTheDocument();
+  });
+
   it("Release and Deploy each close the panel", async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();

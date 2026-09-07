@@ -35,18 +35,41 @@ as intended (module 4's own principle: a set names a slot shape, the runtime bin
 per player, per [[seed-to-concrete-generator-principle]]). Resolution: does AT LEAST ONE entry in the
 target corpus satisfy the selector? A set requiring `(role: weapon, frame: plant)` with zero base-types
 matching that combination is a real, silent coverage gap no per-entry validity check would ever surface.
+`combogen/schema.py`'s own file has BOTH kinds four lines apart and they must not be conflated:
+`ingredients` (lines 76-87, enum = `supplied_families`, line 82) is the real categorical reference into
+`sockets-gen`; `grants` (lines 88-98, enum = `granted_families`) is a DIFFERENT field, the unresolved
+one named below — an adversarial review caught an earlier draft of this document citing the `grants`
+line range as evidence for the `ingredients` claim, which would have led anyone verifying it to the
+wrong field entirely.
+
+**⚠ Two real failure modes a first draft of this design missed, found by adversarial review:**
+- **Cascade, unbounded.** `plan_backfill` must validate a FRESHLY-BACKFILLED entry's own outward
+  references before considering the gap closed — a base-type minted to satisfy a recipe's `outputRef`
+  can itself carry `implicit.family`/`enhanceTrack[].family` references (see `base-types-gen`'s own
+  corrected spec) that are themselves unresolved. `plan_backfill` recurses with a depth cap and a
+  visited-target set; hitting the cap reports `unresolvable: true` (per criterion 8 below), it never
+  loops silently.
+- **Duplicate requests.** Two entries naming the identical missing selector (the same `(role,frame)`,
+  the same missing exact id) must produce exactly ONE backfill request, not one per referencing entry —
+  `plan_backfill` dedupes by `(target_module, selector_or_id)` before emitting requests.
 
 **No reference** — `recipes.json`'s `outputKind: "mutation"` entries (reroll/enhance/salvage/bore/socket)
 operate on a player's already-owned instance; there is no NEW target content to resolve. (Their
 `costLines[].material` entries are still hard references, into `materials-gen`'s corpus.)
 
-**One open question this module does not resolve unilaterally**: consumables' `family` field
-(`k1.json`: `atom.vitality`, `atom.fortitude`, `atom.mending`...) does not match ANY id shape this
-program's own `affix-families-gen` produces (`atom.ferocity`-style, from `g-attack`/`g-life`/
-`g-armour`) — these look like a DIFFERENT, likely effect-atom-owned vocabulary this program does not
-generate at all. **Ask-first, named explicitly in `consumables-gen`'s own spec**: confirm the real source
-of these ids (an existing, already-populated effect-atom corpus, most likely) before assuming this
-program owns generating it. Never guess a corpus into existence to make a reference resolve.
+**A third reference case, confirmed 2026-09-07: external-corpus reference.** Consumables' `family`
+field (`k1.json`: `atom.vitality`, `atom.fortitude`, `atom.mending`, `atom.bulwark`, `atom.warding`) and
+combinations' `grants` field do NOT match this program's own `affix-families-gen` id shape
+(`atom.ferocity`-style) — confirmed, on investigation, to be a DIFFERENT, real, already-populated
+corpus: `docs/architecture/effect-atom/atom-family-library.md:62-128` documents `vitality`/
+`fortitude`/`bulwark`/`warding`/`mending` as real, shipped effect-atom families with real mechanical
+definitions (e.g. `warding`: `defense Flat`, match-scoped only, per that doc's own §4.1a). This is a
+**hard reference into a corpus item-seedgen does not own and never generates** — the
+`DependencyValidator`'s manifest must support a target that is a read-only external reference list
+(effect-atom's own shipped `AtomKindRegistry`/family corpus), not only another item-seedgen module.
+Resolution is the same (does the exact id exist) but `plan_backfill` NEVER triggers generation against
+an external target — an unresolved external reference is always reported, never auto-backfilled,
+since this program has no standing to author effect-atom's own content.
 
 ## Acceptance criteria
 
@@ -59,8 +82,14 @@ program owns generating it. Never guess a corpus into existence to make a refere
 
 **DependencyValidator (new):**
 4. Each module declares a **reference manifest**: for each field that references another corpus, its
-   kind (`hard` | `categorical`) and target module. A manifest entry is data (a small declared table),
-   never inferred by scanning field names.
+   kind (`hard` | `categorical`) and target — either another item-seedgen module, OR an `external`
+   target (a read-only corpus this program never generates, e.g. effect-atom's own atom-family library).
+   A manifest entry is data (a small declared table), never inferred by scanning field names.
+4a. An `external` target is validated identically to a hard reference (does the exact id exist) but
+    `plan_backfill` NEVER emits a request against it — an unresolved external reference is always
+    reported as a real content gap for its OWNING program to fix, never guessed at or generated by this
+    one. This is the mechanism `consumables-gen`/`combination-write-unblock` use for their real
+    dependency on effect-atom's atom-family library.
 5. `validate(corpus, manifest, targets) -> ValidationReport` — for every entry, every declared
    reference, reports `resolved: bool` and, for categorical refs, the resolved count (so "resolves, but
    only barely — 1 match" is visible, not just pass/fail).
@@ -69,13 +98,19 @@ program owns generating it. Never guess a corpus into existence to make a refere
    emits a targeted generation request naming that EXACT id to the owning module's own generator — never
    a generic "make something." For an unresolved categorical reference, emits a targeted request naming
    the missing `(selector)` combination specifically (e.g. "generate at least one base-type with
-   `role=weapon, frame=plant`"), not an arbitrary new entry.
-7. **Determinism, proven not asserted**: `validate` and `plan_backfill` take no model/LLM call anywhere
-   in their own logic — running either twice against the same on-disk state produces byte-identical
-   output. Backfill's ACTUAL content generation (the targeted request handed to the owning module) still
-   goes through that module's own brief-and-answer authoring — the DECISION of what's missing and that
-   it must be generated is deterministic; the prose/identity of the generated fix is not, and was never
-   claimed to be.
+   `role=weapon, frame=plant`"), not an arbitrary new entry. Requests are deduped by
+   `(target_module, selector_or_id)` before being returned — two entries naming the identical gap
+   produce one request, not two.
+6a. **Cascade guard.** `plan_backfill` validates a freshly-backfilled entry's own outward references
+    before treating the original gap as closed, recursing with a depth cap (default 3) and a
+    visited-`(module, id)` set. Hitting the cap reports `unresolvable: true` for the remaining chain —
+    it never loops silently and never backfills forever.
+7. **Determinism, mechanized not asserted.** Every `validate`/`plan_backfill` output is serialized via
+   `json.dumps(..., sort_keys=True)` (or an equivalent canonical ordering) — **not** the pattern
+   `setgen/run.py`'s own `write_ledger` currently uses (`json.dumps(..., indent=2)`, no `sort_keys`,
+   confirmed by adversarial review to rely on dict insertion order). This module does not inherit that
+   gap: two runs against identical on-disk state produce byte-identical report files, checked by a real
+   test (below), not asserted as a property of "no model call in the logic."
 8. A missing reference that does not match any known owning module's naming/selector convention is
    reported, never guessed at — `plan_backfill` names it as `unresolvable: true` with the raw reference
    value, and the run refuses to proceed past it without an explicit `--ignore-unresolved <id>` override
@@ -117,9 +152,15 @@ manifest exists to remove.
 - Categorical-reference test: a set requiring `(role, frame)` with zero satisfying base-types is
   reported unresolved with count `0`; with one satisfying base-type, resolved with count `1` (visible,
   not just "pass").
-- Determinism test: run `validate` twice against identical on-disk state, assert byte-identical reports.
+- Determinism test: run `validate` twice against identical on-disk state, assert byte-identical report
+  FILES (not just equal in-memory objects) — this is what actually catches a missing `sort_keys=True`.
 - Backfill test: an unresolved hard reference matching a real naming convention produces a targeted
   generation request naming that exact id — not a generic "generate one more entry" request.
+- Dedup test: two entries naming the identical missing `(role,frame)` selector produce exactly one
+  backfill request, not two.
+- Cascade test: a backfilled entry that ITSELF carries an unresolved reference is caught before the
+  original gap is reported closed; a chain deeper than the depth cap reports `unresolvable: true`
+  rather than looping.
 - Unresolvable test: a reference matching no known convention is reported `unresolvable: true` and the
   run refuses without an explicit override — never silently skipped.
 

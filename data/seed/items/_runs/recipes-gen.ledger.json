@@ -1,0 +1,13 @@
+{
+  "done": {
+    "recipe-draw-000": {
+      "entryId": "recipe.031",
+      "operation": "forge"
+    },
+    "recipe-draw-001": {
+      "entryId": "recipe.032",
+      "operation": "elevate"
+    }
+  },
+  "schemaVersion": 1
+}

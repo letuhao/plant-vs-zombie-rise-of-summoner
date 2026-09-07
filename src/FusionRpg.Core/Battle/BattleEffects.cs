@@ -6,6 +6,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.District;
 
 namespace FusionRpg.Core.Battle;
 
@@ -147,6 +148,15 @@ public sealed class BattleEffectHost
     /// call. Get-set (unlike the set-only forwards above) because a caller needs to INVOKE it, not just
     /// hand it to a private sink.</summary>
     public Action<string, string, string, double>? AddDerivedContribution { get; set; }
+
+    /// <summary>
+    /// base-defense `siege-ai` R3 (2026-09-07): which board edge the attacker entered from, for
+    /// `BattleRunState.ObjectivePositionOf` alone — no `BattleEffectSink` executor ever reads this, so
+    /// it lives directly on the host rather than forwarded through `_sink` the way `ConstructionBoard`
+    /// is (that one's own executor DOES need it). `null` (the default) for every battle before
+    /// `DistrictAssaultResolver` sets it — every non-siege battle, byte-identical.
+    /// </summary>
+    public BoardEdge? AttackerEdge { get; set; }
 
     /// <summary>Deltas actually applied in the last flush window (clamped to [0, MaxHp]).</summary>
     public IReadOnlyList<BattleAppliedHpDelta> LastApplied => _sink.Applied;

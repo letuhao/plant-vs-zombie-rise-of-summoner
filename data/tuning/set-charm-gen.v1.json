@@ -59,12 +59,12 @@
   "distinctness": {
     "medianCellOccupancyMax": 2,
     "nearDuplicateRateMaxPermille": 5,
-    "charmAxisGiniMaxPermille": 133,
+    "charmAxisGiniMaxPermille": 137,
     "exactDuplicateNamesMax": 0,
     "derivation": {
       "medianCellOccupancyMax": "Arknights 1.97 units/cell (median 2), Honkai Star Rail 1.7-1.8 (median 2), Summoners War 1.02 (median 1) - the band every well-regarded roster in docs/research/game-design/03-roster-scale.md 1 sits in. Fire Emblem Heroes, the worst documented in the genre, is 15.3 with a max of 129.",
       "nearDuplicateRateMaxPermille": "5 permille = 0.5%, Pokemon's measured TRUE near-duplicate rate: 18 pairs of 1,025, every one a deliberate designed twin (03-roster-scale.md 2).",
-      "charmAxisGiniMaxPermille": "133 permille = 0.133, the AUTHORED charm corpus's own axis Gini (economy 20 : 10 x 4 over the 60 authored rows, excluding the 10 resonance containers). ssot-charms' 'a skew this generator must not deepen' as a number it cannot exceed - a ceiling on inequality, not on content."
+      "charmAxisGiniMaxPermille": "137 permille = 0.137, the AUTHORED charm corpus's own axis Gini over the 61 authored rows (economy 20 : 10 x 4, survivability 10 -> 11 after charm.surv-util-021, 2026-09-07's set-charm-live-endpoint trial batch), excluding the 10 resonance containers. Re-derived, not re-guessed, per this file's own rule: the ceiling tracks the authored corpus's own measured skew and moves only when that corpus does. ssot-charms' 'a skew this generator must not deepen' as a number it cannot exceed - a ceiling on inequality, not on content."
     }
   },
 

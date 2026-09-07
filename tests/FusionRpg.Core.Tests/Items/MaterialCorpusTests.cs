@@ -310,8 +310,9 @@ public class MaterialCorpusTests
     {
         var catalog = Catalog();
 
-        // Measured against the real file, not estimated. 30 authored entries.
-        Assert.Equal(30, catalog.Recipes.Count + catalog.Refusals.Count);
+        // Measured against the real file, not estimated. 30 authored entries; 30 -> 32 (2026-09-07):
+        // a recipes-gen trial batch added recipe.031/032 to prove that pipeline end to end.
+        Assert.Equal(32, catalog.Recipes.Count + catalog.Refusals.Count);
 
         // ⭐ Defect 1 CLOSED 2026-09-05 by module 15 (`enhance-reroll`), which owns the op_kind
         // namespace the reroll-one/reroll-all split lives in. The seven `reroll` rows were re-authored
@@ -331,8 +332,9 @@ public class MaterialCorpusTests
         Assert.Equal(7, legacyRefusals.Count);
         Assert.All(legacyRefusals, r => Assert.Contains("retired band shard", r.Detail));
 
-        // 30 authored − 7 legacy-shard refusals = 23 resolvable, up from 18.
-        Assert.Equal(23, catalog.Recipes.Count);
+        // 30 authored − 7 legacy-shard refusals = 23 resolvable, up from 18. 32 authored (2026-09-07
+        // recipegen trial batch, recipe.031/032) − 7 legacy-shard refusals = 25 resolvable.
+        Assert.Equal(25, catalog.Recipes.Count);
 
         // Nothing is refused for a reason the module invented: every rule is one of the five it
         // registered, all namespaced `material.*` under the ONE ContentRuleViolated code.
@@ -451,26 +453,33 @@ public class MaterialCorpusTests
     }
 
     [Fact]
-    public void The_shipped_materials_display_corpus_is_measured_not_assumed()
+    public void The_shipped_materials_display_corpus_now_carries_every_issuable_id()
     {
-        // ⛔ Defect 3, pinned rather than silently absorbed: data/seed/items/materials/materials.json
-        // authors 21 display rows for a 27-id vocabulary. The four `shard.{legacy}` rows point at ids
-        // that are never minted, and the ten `shard.{rung}` ids that ARE minted have no display row
-        // at all. Recorded in tasks/item-todo.md P4.1 with its owner; measured here so it cannot
-        // quietly change size.
+        // ⭐ Defect 3 CLOSED 2026-09-07 by `materials-gen` (item module 3,
+        // tools/seedsmith/seedsmith/adapters/items/materialgen): data/seed/items/materials/materials.json
+        // grew from 21 to 31 display rows — the ten real `shard.{rung}` ids (material.022-031,
+        // `_meta.amendments[0]`) that DemonRarityLadder actually mints. The four legacy
+        // `shard.{common,rare,epic,legendary}` rows (material.007-010) are untouched: they still
+        // resolve (IsKnown) but stay deliberately non-issuable, exactly as before. Recorded in
+        // tasks/item-todo.md P4.1; measured here so it cannot quietly change size again.
         using var doc = JsonDocument.Parse(
             File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "items", "materials", "materials.json")));
 
         var runtimeIds = doc.RootElement.GetProperty("entries").EnumerateArray()
             .Select(e => e.GetProperty("runtimeId").GetString()!).ToList();
 
-        Assert.Equal(21, runtimeIds.Count);
+        Assert.Equal(31, runtimeIds.Count);
         Assert.Equal(4, runtimeIds.Count(MaterialCatalog.IsLegacyShardId));
-        Assert.Equal(0, runtimeIds.Count(id => id.StartsWith("shard.", StringComparison.Ordinal) && MaterialCatalog.IsIssuable(id)));
+        Assert.Equal(10, runtimeIds.Count(id => id.StartsWith("shard.", StringComparison.Ordinal) && MaterialCatalog.IsIssuable(id)));
 
-        // Everything that is NOT a shard row is already correct and issuable — the gap is exactly the
-        // shard class, which is what makes it a re-author of ten rows rather than a corpus rebuild.
-        Assert.All(runtimeIds.Where(id => !id.StartsWith("shard.", StringComparison.Ordinal)),
-            id => Assert.True(MaterialCatalog.IsIssuable(id), id));
+        // Every issuable id in the 27-id closed vocabulary now resolves to exactly one display row —
+        // the corpus is complete, not merely bigger.
+        foreach (var id in MaterialCatalog.All)
+            Assert.Contains(id, runtimeIds);
+
+        // The four legacy rows still point at ids that are never minted — untouched by this module,
+        // exactly as tasks/item-todo.md requires (their retirement is a separate, unauthorized move).
+        Assert.All(runtimeIds.Where(MaterialCatalog.IsLegacyShardId),
+            id => Assert.False(MaterialCatalog.IsIssuable(id), id));
     }
 }

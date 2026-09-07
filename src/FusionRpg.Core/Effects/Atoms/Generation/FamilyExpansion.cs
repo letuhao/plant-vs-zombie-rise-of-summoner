@@ -164,6 +164,19 @@ public static class FamilyExpansion
                 continue;
             }
 
+            // family-tags-closure (D28, 2026-09-07): a family's own authored tag word becomes a bare
+            // TagsJson key (EligibilityRule.RequireTags/ContainsKey never inspects the value) — refuse
+            // rather than silently shadow the two provenance keys every row also carries.
+            var reservedTagCollision = family.Tags.FirstOrDefault(
+                t => t == "generatedFrom" || t == "generator");
+            if (reservedTagCollision is not null)
+            {
+                refusals.Add(new FamilyRefusal(family.Id,
+                    $"tag '{reservedTagCollision}' collides with a reserved provenance key " +
+                    "(generatedFrom/generator) — rename the authored tag, it is never a family's own to use"));
+                continue;
+            }
+
             var ladder = TierLadder(m1, TierCount, MagnitudeRatioPermille);
             var opLower = string.IsNullOrEmpty(family.Op) ? "flat" : family.Op.ToLowerInvariant();
 
@@ -196,6 +209,16 @@ public static class FamilyExpansion
                     ["generatedFrom"] = family.SourceFile,
                     ["generator"] = "E43",
                 };
+                // Real family tags (family-tags-closure, D28): a bare word ("offensive") becomes a
+                // key with a placeholder value, since EligibilityRule.RequireTags only checks
+                // presence; a "key:value" word (none in real content today, but AnyOfTags's own shape
+                // — see spec acceptance #6) splits on the first colon instead.
+                foreach (var tag in family.Tags)
+                {
+                    var colon = tag.IndexOf(':');
+                    if (colon < 0) tagsObj[tag] = "1";
+                    else tagsObj[tag[..colon]] = tag[(colon + 1)..];
+                }
 
                 rows.Add(new AtomRow
                 {

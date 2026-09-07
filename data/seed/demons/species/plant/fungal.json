@@ -23,10 +23,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:44:19Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "steady"
       },
@@ -50,7 +51,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal",
       "spore-caster"
@@ -104,10 +105,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:44:35Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -129,7 +131,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "fungal",
       "cryo-mycelium"
@@ -183,10 +185,11 @@
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:11:59Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "attackTempo": "quick"
       },
@@ -210,7 +213,7 @@
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementSecondary": "earth",
     "family": [
       "fungal",
       "explosive-flora"
@@ -265,11 +268,12 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:19:12Z",
+      "emittedUtc": "2026-09-07T08:19:30Z",
       "minorityValues": {
         "threatBand": "pest"
       },
@@ -293,7 +297,7 @@
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
       "fungal",
       "mycelial"

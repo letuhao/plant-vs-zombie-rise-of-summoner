@@ -112,7 +112,7 @@ each already paid for the identical reason.
 | `KindId` | `element.convert` |
 | `Attach` | `AttachPoint.Element` |
 | `Params` | `fromElement` (optional — omitted means *"any component currently in the payload, largest first"*), `toElement` (required, an `ElementTypeId`), `shareMilli` (required, per-mille of the **affected component's own weight** moved, `1..1000`) |
-| `Support` | Lawn ✅ (real plants/zombies have real attacks to reweight) · Battle ✅ (`BattleStatComposer` already folds bound permanent atoms at squad build, `atom-catalog-ssot.md` §2 row 2's own precedent) · Sim `Partial` at best — same `Priority`-less fold ceiling `stat.derived`/§2 row 2 already documents; **not** `Full` until proven otherwise, never assumed |
+| `Support` | **Corrected during the build, 2026-09-07 — was Lawn ✅ / Battle ✅ / Sim `Partial` as originally written here; shipped as Lawn `None` / Battle `None` / Sim `None` (fully quarantined) instead.** The original claim assumed the FOLD MECHANISM's own theoretical capacity (`BattleStatComposer` already folds bound permanent atoms structurally) was the same thing as a REAL, WORKING reader existing today — it is not: no code anywhere resolves an actor's bound `element.convert` grants into anything, on any runtime, because the combat-dispatch read point (§2b, below) is genuinely unbuilt. `ParamParityGuardTests` caught this directly (a kind claiming real support with zero consumer files mapped) the same session it shipped. Quarantined per `AtomKindRegistryTests`' own established pattern ("a kind may sit in the vocabulary ahead of its consumer, but it must be quarantined... never advertising support it does not have") — mirrors `stat.derived`'s own D6 quarantine history exactly. Flip each runtime to a real state only once ITS OWN reader/executor actually exists, never assumed from a sibling runtime or from the fold mechanism's theoretical capacity. |
 | `Triggers` | None — permanent modifier, no trigger allowed, none required (the `stat.derived`/`bullet.modify` shape, `atom-catalog-ssot.md` §2's closing paragraph) |
 | `Categories` | `PowerCategory.Offense` |
 
@@ -252,15 +252,27 @@ by this spec, matching this file's own historical-record convention (§0).
 
 ## Success criteria
 
-- [ ] `AttachPointCount = 9`, `KindCount = 18`, both self-consistency-guarded, never a copied literal.
-- [ ] `atom-catalog-ssot.md` §2's table gains row 18; `decisions.md` gains an "Atom attach points"
+**All six BUILT + VERIFIED 2026-09-07 — see `tasks/passive-tree-todo.md` task J11 for the full evidence
+trail (13 new tests, all four cross-doc updates, a real spec-vs-code gap found and fixed in §2d's own
+"zero code change" claim).**
+
+- [x] `AttachPointCount = 9`, `KindCount = 18`, both self-consistency-guarded, never a copied literal.
+- [x] `atom-catalog-ssot.md` §2's table gains row 18; `decisions.md` gains an "Atom attach points"
       amendment naming `Element`; `effect-atom-map.md` names the module; `DESIGN-GATE.md` row 41
       reads 18/9.
-- [ ] `tree-binder`'s §7.2 refusal, re-run against a fixture conversion node, no longer refuses —
-      proven by test, not by inspection.
-- [ ] A conversion node's `ElementPayload` output is exact (§4's payload test), never approximate.
-- [ ] Two stacked conversions never exceed 1000‰ total share (§2c), proven adversarially.
-- [ ] `Sim` support is whatever the empirical fold test (§4) finds, not what this spec assumes.
+- [x] `tree-binder`'s §7.2 refusal, re-run against a fixture conversion node, no longer refuses —
+      proven by test, not by inspection. **Needed one real code change** (removing
+      `AffixComposer.ParseAtom`'s own hardcoded "contains 'convert'" string check, which keyed on the
+      literal substring rather than registry membership) — §2d's own "zero code change in tree-binder"
+      claim did not hold as written; corrected in the same session that found it.
+- [x] A conversion node's `ElementPayload` output is exact (§4's payload test), never approximate.
+- [x] Two stacked conversions never exceed 1000‰ total share (§2c), proven adversarially.
+- [x] `Sim` support is whatever the empirical fold test (§4) finds, not what this spec assumes — no
+      fold test was run, so it ships `None`. **Widened during the build, same day**: `Lawn`/`Battle`
+      also ship `None`, not the `Full`/`Full` this criterion originally implied would need only Sim
+      left honest — `ParamParityGuardTests` found no real reader exists for ANY runtime yet (the
+      combat-dispatch call site, §2b, is genuinely unbuilt), so all three are the honest "not proven"
+      default, quarantined together, never assumed from the fold mechanism's own theoretical capacity.
 
 ## Open questions
 

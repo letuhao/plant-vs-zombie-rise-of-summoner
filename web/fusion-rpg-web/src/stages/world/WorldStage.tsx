@@ -14,17 +14,26 @@ import {
 } from "@/stages/world/worldSelection";
 import { toGraph, summarizeLoam } from "@/stages/world/worldViewModel";
 import { sectorLabel } from "@/stages/world/labels";
-import { useDemonRoster, usePlayers, useRelics, useRuns } from "@/lib/bus";
+import { useDemonRoster, usePlayers, useRelics, useRuns, newCorrelationId } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
-import { useWorldHeader, useWorldState } from "@/lib/bus/world";
+import {
+  useWorldHeader,
+  useWorldState,
+  useDelveDomainOffers,
+  useStartDelveFromWorldDoor,
+  buildDelveDoorStartBody
+} from "@/lib/bus/world";
 import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionReturnWatcher";
 import { adaptWorldState, adaptWorldLegion } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import firstLight from "@/stages/world/fixtures/first-light.json";
 import { WorldGameHost } from "@/stages/world/host/WorldGameHost";
 import { useWorldVerbs, type WorldVerb } from "@/stages/world/turn/worldVerbs";
+import { delveRoute } from "@/stages/delve/route";
 import { SectorInspector } from "./inspector/SectorInspector";
 import { CEDE_ORDER_AVAILABLE } from "./inspector/cedeCapability";
+import { delveDoorSlot, delveDoorLabel, DELVE_DOOR_NONE_DISCOVERED_REASON } from "./inspector/delveDoorCapability";
+import type { ActionVerb } from "./inspector/ActionCluster";
 import { QueuedOrders } from "./targeting/QueuedOrders";
 import { WorldHud } from "./hud/WorldHud";
 import { TopStrip } from "./hud/TopStrip";
@@ -149,6 +158,35 @@ export function WorldStage() {
 
   const selectedSector = world.sectors.find((s) => s.sectorId === ui.selectedSectorId) ?? null;
   const prospectedSectorIds: string[] = dto.prospectedSectorIds ?? [];
+
+  // party-dungeon D1.28 (the world-map door) — one action row, additive only. Hooks live here, not
+  // in SectorInspector: that component stays pure/presentational (no QueryClientProvider needed by
+  // its own tests), the same split TurnCluster already established for `useSubmitWorldCommands`.
+  const eligibleDelveSlot = selectedSector
+    ? delveDoorSlot(world.slotsBySectorId[selectedSector.sectorId] ?? [])
+    : null;
+  const delveOffers = useDelveDomainOffers(playerId);
+  const startDelveFromDoor = useStartDelveFromWorldDoor();
+  const firstDelveOffer = delveOffers.data?.[0] ?? null;
+  const delveDoorVerb: ActionVerb | null =
+    eligibleDelveSlot && worldId
+      ? {
+          id: "delve-door",
+          label: delveDoorLabel(eligibleDelveSlot),
+          disabledReason: firstDelveOffer ? null : DELVE_DOOR_NONE_DISCOVERED_REASON,
+          onActivate: firstDelveOffer
+            ? () => {
+                const body = buildDelveDoorStartBody({
+                  offer: firstDelveOffer,
+                  worldId,
+                  playerId,
+                  correlationId: newCorrelationId()
+                });
+                void startDelveFromDoor.mutateAsync(body).then((result) => navigate(delveRoute(result.delveId)));
+              }
+            : undefined
+        }
+      : null;
 
   useEffect(() => {
     const el = mapPaneRef.current;
@@ -457,6 +495,7 @@ export function WorldStage() {
           forces={world.forcesBySectorId[selectedSector.sectorId] ?? []}
           cedeOrderAvailable={CEDE_ORDER_AVAILABLE}
           prospected={prospectedSectorIds.includes(selectedSector.sectorId)}
+          delveDoorVerb={delveDoorVerb}
         />
       ) : null}
     </StageHost>

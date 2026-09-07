@@ -1,0 +1,306 @@
+{
+  "treeId": "command",
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1745,
+  "bound": [
+    {
+      "nodeId": "skill.command-off-t1-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 1215,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.command-off-t2-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 2430,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 2430,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.command-off-t3-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 1823,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 1823,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.command-off-t5-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 3105,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.command-off-t7-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Increased",
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        },
+        {
+          "kindId": "stat.modify",
+          "channelId": "atk",
+          "op": "Flat",
+          "kMicro": 4320,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.command-def-t7-n1",
+      "atoms": []
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.command-off-t3-n1",
+      "unspentBudgetShareMilli": 28,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.precision\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.tempo-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.precision\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.tempo-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.precision\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-attune\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t8-n0",
+      "unspentBudgetShareMilli": 72,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t8-n1",
+      "unspentBudgetShareMilli": 73,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-focus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t9-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.tempo-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t9-n1",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-overflow\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t9-n2",
+      "unspentBudgetShareMilli": 56,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-attune\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t10-n0",
+      "unspentBudgetShareMilli": 60,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-attune\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t10-n1",
+      "unspentBudgetShareMilli": 60,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-override\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-off-t10-n2",
+      "unspentBudgetShareMilli": 62,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.elpw-override\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t1-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t2-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t3-n0",
+      "unspentBudgetShareMilli": 27,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t3-n1",
+      "unspentBudgetShareMilli": 28,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-toughness\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shield-capacity\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t8-n0",
+      "unspentBudgetShareMilli": 72,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t8-n1",
+      "unspentBudgetShareMilli": 73,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t9-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-hardening\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t9-n1",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t9-n2",
+      "unspentBudgetShareMilli": 56,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-surge\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t10-n0",
+      "unspentBudgetShareMilli": 60,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t10-n1",
+      "unspentBudgetShareMilli": 60,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-husk\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.command-def-t10-n2",
+      "unspentBudgetShareMilli": 62,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

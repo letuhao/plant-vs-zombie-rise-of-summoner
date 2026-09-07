@@ -79,7 +79,7 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "combat.v1.json"))));
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
             FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v2.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status.v1.json"))));
@@ -160,6 +160,9 @@ public static class RpgHost
         FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
             FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "lawn-deploy-events.v1.json"))));
+        FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
+            FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
 
         IsInitialized = true;
     }

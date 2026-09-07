@@ -1,0 +1,17 @@
+{
+  "climate": "air",
+  "dispositionBase": "hostile",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [
+    "event.story-demon.ashthreepeater-001"
+  ],
+  "flavor": "A vertical shaft where the wind screams in a rhythmic, melodic cadence, carrying the scent of ozone and ancient incense. Swirling currents of silver mist coalesce into a translucent, shifting face that watches the party from the center of the vortex.",
+  "hazardBand": "light",
+  "kind": "wild",
+  "name": "The Sky-Whirl Sanctum",
+  "reason": "The room features a sentient air elemental/demon trapped in a permanent cyclone, serving as a focal point for prayer or trade.",
+  "roomId": "room.wild-air-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

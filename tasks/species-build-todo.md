@@ -882,22 +882,34 @@ it is named as such rather than absorbed.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlan` — **13/13 green**
   - Files: `tests/FusionRpg.Core.Tests/Demons/SpeciesBuildPlanCatalogRealFileTests.cs` (new)
 
-- [ ] **G3** Plan coverage for the 17 species with no anchor at any casing · **M (content)** · `m4`
-  - **Investigated and scoped 2026-09-05 (findings below); NOT closed — remaining work is a seedsmith
-    authoring/voting pass, out of this task's own stated bound, not a code change.**
-  - Case-insensitive overlap is only **67 of 84**. These 17 have no plan entry at all:
-    `allpeater, cherrygatling, cherrypaperzombie, cornpot, dancepolzombie, dolldiamond, dollsilver,
+- [x] **G3** Plan coverage — DONE 2026-09-07, species-build coverage is now 904/904 · **M (content)** · `m4`
+  - **Investigated and scoped 2026-09-05; partially closed 2026-09-07 (demon-corpus-self-heal Phase
+    I) — 1 of 17 fixed, 16 remain, out of this task's own stated bound, not a code change.**
+  - **2026-09-07 update:** `allpeater`'s blocker was its anchor's `aptitudePrimary: "unresolved"` —
+    closed by Phase I's deterministic fallback (resolved to `Onslaught`, see
+    `tasks/demon-corpus-self-heal-todo.md`). The chain was re-run end to end to make this real, not
+    just theoretical: `dotnet run --project tools/DemonSpeciesGen` (840 species now expand, up from
+    829 — the 11 Phase I fixed all generate cleanly), `dotnet run --project tools/DemonSpeciesImport`
+    (live `demon_species` table: 829 -> 840 rows), `dotnet run --project tools/DemonBuildPlanGen`
+    (67 -> **68 of 84** shipped species now planned). `SpeciesBuildPlanCatalogRealFileTests`'s
+    `KnownMissingPlanSpecies` allowlist updated to match (`allpeater` removed) — the guard test
+    itself caught the drift and named exactly what to fix, exactly as G2 designed it to. 13/13 green.
+  - Case-insensitive overlap is now **68 of 84**. These 16 still have no plan entry at all:
+    `cherrygatling, cherrypaperzombie, cornpot, dancepolzombie, dolldiamond, dollsilver,
     doublecherry, doublesnow, driverzombie, hypnojalapeno, hypnopeashooter, icecaltrop, ironpeazombie,
     jalagatling, jalapeno, jalastar`
-  - They are absent from the 829-anchor seed corpus the generator reads, so this is a **content gap**,
-    not a code gap — G2 is what turns it from silent into visible.
+  - They are absent from the seed corpus **at their exact `(Side, GameTypeId)`** — a genuinely
+    missing anchor, not a casing or resolution problem — so this is a **content gap**, not a code
+    gap and not something Phase I's kind of fallback can close (there is no existing anchor to
+    default a field on). G2 is what turns it from silent into visible.
   - Acceptance:
     - [ ] Every species in the compiled catalog resolves to a plan whose shares sum to exactly 1000 —
-          **not yet: 17/84 still don't**, per the findings below
+          **not yet: 16/84 still don't**, per the findings below
     - [ ] G2's guard passes naming zero species — **not yet**, it currently passes by matching the
-          17-species allowlist below (proving the mechanism works, not that the gap is closed)
+          16-species allowlist below (proving the mechanism works, not that the gap is closed)
   - Verify: the same guard test as G2 — currently green against the allowlist; re-run after any
-    authoring/voting pass and update `KnownMissingPlanSpecies` in the test to match
+    authoring pass (a NEW anchor for each of these 16, at their exact game-type slot) and update
+    `KnownMissingPlanSpecies` in the test to match
   - Files: `data/seed/demons/species/**` (16 species need a NEW anchor authored; `AllPeater` needs
     `aptitudePrimary` re-voted), regenerated plan
   - **Findings (verified 2026-09-05):** ran `dotnet run --project tools/DemonBuildPlanGen` after the
@@ -936,6 +948,113 @@ it is named as such rather than absorbed.
       nor resolve one still pending a classification vote. All 17 remain open, for the two reasons
       above, until a human/seedsmith pass either authors the missing 16 anchors or re-votes
       `aptitudePrimary` for `AllPeater`.
+    - **Follow-up, 2026-09-07 (kept as history above; this is what changed since):** `AllPeater`'s
+      `aptitudePrimary` did not get re-voted by the model — it was resolved by
+      `demon-corpus-self-heal`'s new deterministic fallback (Phase I, see that plan's own todo file),
+      an explicit owner decision to invent a flat default rather than spend another model call, since
+      no real derivation exists for this field either way. Effect on this list is the same either way
+      (a resolved, non-"unresolved" `aptitudePrimary`): `allpeater` now has a real, non-empty plan
+      entry, confirmed via the real chain (regenerate -> reimport -> replan) and the real guard test,
+      not asserted. **16 of 17 remain open** — the missing-anchor content gap is unaffected, since
+      Phase I's fallback only resolves a field on an anchor that already exists; it cannot manufacture
+      one that was never authored for these 16 species' exact `(Side, GameTypeId)` slots.
+    - **Follow-up, 2026-09-07 (verified against the real generated tree, not assumed): 15 of the 16
+      missing anchors now exist for real.** T2.11's full classification run (840 -> 903 species,
+      `demon-standalone-todo.md`) authored real anchors and generated species for
+      `cherrygatling, cherrypaperzombie, cornpot, dancepolzombie, dolldiamond, dollsilver, doublesnow,
+      driverzombie, hypnojalapeno, hypnopeashooter, icecaltrop, ironpeazombie, jalagatling, jalapeno,
+      jalastar` — confirmed by grepping `data/generated/demons/*.json` for each `speciesId`, not by
+      re-reading this task's own stale list. **`doublecherry` is the ONLY one of the 16 still
+      missing**, and its blocker is narrower than "no anchor" now: the anchor exists and generates,
+      but its `attackTempo` field has no deterministic fallback (unlike `threatBand`/`rarity`/
+      `aptitudePrimary`, which Phase I's fallback can resolve) — `attackTempo` is a real
+      `kit-shape` classify-pipeline attribute (`anchor/prompts.py` — judged from lore, not
+      computable), so closing it needs one real, small model call (1 species x 1 attribute), the
+      same class of action as the now-closed classification run, just far smaller. Tracked, not run
+      — matches the owner's own standing "I run classification passes myself" call
+      (`demon-standalone-todo.md`'s T2.11 handoff).
+    - **Follow-up, 2026-09-07 (closed same day): `doublecherry` resolved, owner-directed manual pick,
+      never a model call.** The owner queried the premise first — "DoubleCherry is a bomb, boom and
+      disappear, no attack" — checked against the real captured stats
+      (`data/seed/demons/_dump/spawn-baseline.json`): `thePlantHealth: 300` (a real persistent HP
+      pool a one-shot bomb would not carry), `thePlantAttackInterval: 1.5`s, `attackDamage: 40` —
+      it is a genuine repeating shooter (樱桃双发射手, "Cherry Twin Shooter"), not the vanilla
+      one-shot Cherry Bomb; no balance buff needed, it was never weak, just unclassified. Set
+      `attackTempo: "quick"` directly in the anchor
+      (`data/seed/demons/species/plant/cherry-based-artillery.json`), justified by the model's OWN
+      already-emitted (if vote-deadlocked, 2 kit-shape attempts, still `"unresolved"`) evidence for
+      this exact species — `reason: "...its high fire rate..."`, `traits: ["Dual-barreled",
+      "Burst-fire", ...]` — one rung below this family's own more extreme "-Gatling" siblings.
+      Stamped `_provenance.confidence.attackTempo: "deterministic-fallback"` (this repo's own
+      established tag for "resolved by something other than a real LLM vote", the same tag Phase
+      I's aptitude/rarity/threat-band fallbacks use — never disguised as a real model judgment).
+      Real chain re-run end to end: `DemonSpeciesGen` (903 -> 904), `DemonSpeciesImport` (1 written,
+      903 unchanged), `DemonBuildPlanGen` (84/84 shipped species now planned, up from 83/84),
+      `fusion-recipe-reconcile --deterministic-only` (774 -> 775 eligible outputs, 758 -> 759
+      deterministic recipes, Almanac's own 16 deficits unaffected — DoubleCherry is Fused, not
+      Almanac; `--check` clean).
+  - Acceptance:
+    - [x] Every species in the compiled catalog resolves to a plan whose shares sum to exactly 1000 —
+          **904/904**
+    - [x] G2's guard passes naming zero species — `SpeciesBuildPlanCatalogRealFileTests`'s
+          `KnownMissingPlanSpecies` allowlist is now empty (13/13 green)
+  - Verified: `dotnet test tests/FusionRpg.Core.Tests --filter "FusionRecipe|DemonSpecies|
+    SpeciesBuildPlan|SpeciesCatalogDiff"` 39/39; full `Demons`-namespace filter 3239/3239;
+    `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py` 31/31; `guard-dal.ps1` clean.
+  - Files: `data/seed/demons/species/plant/cherry-based-artillery.json` (anchor edit),
+    `data/generated/demons/{DoubleCherry.json (new),_species-build-plan.json,_fusion-recipes.json}`,
+    `tests/FusionRpg.Core.Tests/Demons/{SpeciesBuildPlanCatalogRealFileTests.cs,
+    Fusion/FusionRecipeReconcileTests.cs,DemonRecipeCatalogTests.cs}`,
+    `tools/seedsmith/tests/test_fusion_recipe.py`.
+  - ### ⛔ A SECOND, more consequential bug found and fixed the same session — DONE 2026-09-07
+    - **The owner asked directly: "why did we still stuck at 84 demon, dont you retire and update
+      stale documents?"** — spotted from this task's own "84/84 shipped species" framing right after
+      the DoubleCherry fix above, and it was the right instinct: 84 was never the real live roster
+      size, it was `tools/DemonBuildPlanGen`'s own stale hardcoded input.
+    - **Root cause:** `DemonBuildPlanGen/Program.cs:102` called
+      `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` — the compiled, 84-species snapshot from
+      BEFORE `catalog-runtime`'s real flip (2026-09-05, per that program's own todo file). That flip
+      already moved the real, live game (`Server/Program.cs:350`:
+      `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())`,
+      `Injector/Host/RpgHost.cs`) onto the full store-backed roster (904 species today) — this ONE
+      tool alone never followed. Confirmed live, not theorized: a real player's real roster (checked
+      during F2.5's own live click-through, same session) minted species like `biggloom`,
+      `bamboodragon`, `abyssswordstar`, `legionsniperzombie` — none of which exist anywhere in the
+      compiled 84-species `DemonSpeciesCatalog.Generated.cs` (grepped directly, confirmed absent).
+    - **Real impact:** `SpeciesBuildPlanCatalog.SharesFor(speciesId)` (consumed live at
+      `RpgStore.Aptitudes.cs:209`, for ANY real player's ANY real species) was silently returning
+      `EmptyShares` for 820 of 904 real, playable species — indistinguishable from "not yet
+      classified." This whole session's earlier "84/84 shipped species" framing (this task's own G3
+      entry, closed minutes before the owner's question) was ITSELF built on the same stale premise
+      and would have shipped as a false "complete" without the owner catching it.
+    - **Fix:** `DemonBuildPlanGen` no longer touches `DemonSpeciesCatalog` at all. It now builds the
+      `(Side, GameTypeId) -> runtime speciesId` join table by reading the SAME committed
+      `data/generated/demons/*.json` tree the live roster is actually built from, via the SQL-free
+      `ConcreteSpeciesSeedReader`/`ConcreteSpeciesMapper` pair the Injector already uses for exactly
+      this reason (no SQL access, no `--db`/`FUSIONRPG_DATA` needed) — never a second, hand-rolled
+      mapping. Re-run for real: **904 resolved anchor(s) matched a live species; 0 excluded** (up
+      from 84 matched / 820 excluded). `SpeciesBuildPlanCatalogRealFileTests.cs`'s own three tests
+      were ALSO silently checking the plan against the same stale compiled default (same root cause,
+      same file) — rewritten to scope every test to `RealCorpusFixture.Snapshot` (the real,
+      store-backed 904-species roster `FusionRecipeReconcileTests` already builds and reuses),
+      never the compiled default.
+    - Verified: `dotnet run --project tools/DemonBuildPlanGen -- --check` clean, 904 species match;
+      `dotnet test tests/FusionRpg.Core.Tests --filter "SpeciesBuildPlan|FusionRecipe|DemonSpecies|
+      SpeciesCatalogDiff"` 39/39; full `Demons`-namespace filter 3239/3239; `guard-dal.ps1` clean.
+      `FusionRpg.Server.Tests` (built to an alternate `-p:BaseOutputPath` to avoid a lock held by
+      this same session's own F2.5 live-check server, still running with a real connected game
+      client — never stopped for this) `--filter "SpeciesBuild|Aptitude"`: 29/30; the one failure
+      (`AptitudeChannelModsTests.RealBattle_...`, `battle tuning: missing or non-object
+      'speciesTempo'`) confirmed pre-existing/unrelated — `data/tuning/battle.v5.json` is an
+      untracked, concurrent session's own in-progress file (`git status` checked, not assumed),
+      nothing this fix touches.
+    - **Corpus-wide aptitude shares shifted** as a real, honest side effect of covering 820 more real
+      species (152‰ Onslaught baked in from the OLD 84-only sample vs. 150‰ now on the real 904 —
+      close, not identical, exactly what "the sample was too small" predicts) — not a regression, a
+      correction.
+    - Files: `tools/DemonBuildPlanGen/Program.cs`,
+      `tests/FusionRpg.Core.Tests/Demons/SpeciesBuildPlanCatalogRealFileTests.cs`,
+      `data/generated/demons/_species-build-plan.json` (904 entries, up from 84).
 
 - [x] **G4** A real door to contract binding · **S** · `m9` ⚠️ **crosses program boundary**
   - **Done 2026-09-05.** `EmptyState` gained an optional `action?: ReactNode` slot (GG-17, "empty
@@ -1022,9 +1141,12 @@ it is named as such rather than absorbed.
       species past 1, not a gap in the fix itself.
 - [~] Every species in the compiled catalog resolves to a plan; the guard names any that do not
       (G2, G3) — **the guard mechanism is done and green (G2)**; the coverage itself is **not** (G3):
-      67 of 84 species have a real plan entry, 17 remain open pending a seedsmith authoring/voting pass
-      (16 need a new anchor authored, 1 — `AllPeater` — needs `aptitudePrimary` re-voted). The guard
-      correctly names all 17 today rather than staying silently green.
+      **updated 2026-09-07, T2.11's full classification run closed 15 of the 16 missing anchors** —
+      903 of 904 species now have a real plan entry (`AllPeater`'s `aptitudePrimary` was separately
+      closed by `demon-corpus-self-heal` Phase I's deterministic fallback). Only `doublecherry`
+      remains, blocked on its `attackTempo` field (a real classify-pipeline attribute, no deterministic
+      fallback exists) needing one small model call. The guard correctly names it today rather than
+      staying silently green.
 - [x] An unlevelled species, a failed request, and a pending price each render honestly (G5, G6, G7)
 - [x] `dotnet test tests\FusionRpg.Core.Tests` (7162/7167, 5 pre-existing/unrelated — confirmed via
       `git status` that each failing test's file predates this work), a filtered
@@ -1035,11 +1157,13 @@ it is named as such rather than absorbed.
       matches Checkpoint 5's own established practice of scoping "all green" to the suites this
       program's changes actually touch, not a first-ever full-repo run
 - [ ] `docs/guide/mechanisms/species-builds.md` moves from **WIP** to **Shipped** — **not yet, by this
-      checkpoint's own rule**: G3's 17-species gap is real and unclosed, so the guide's WIP status
-      stays accurate until a seedsmith pass closes it. Everything else above is real and playable today
-      for the 67 covered species — this is the one honest thing left holding the guide's badge back.
+      checkpoint's own rule**: G3's gap is down to exactly one species (`doublecherry`, updated
+      2026-09-07 — T2.11 closed the other 15, see G3's own follow-up note), real and unclosed, so the
+      guide's WIP status stays accurate until a model call resolves its `attackTempo`. Everything else
+      above is real and playable today for 903 of 904 species — this is the one honest thing left
+      holding the guide's badge back.
 
-## 🟡 `species-build` — PLAYABLE FOR 67 OF 84 SPECIES; ONE CONTENT GAP LEFT
+## 🟡 `species-build` — PLAYABLE FOR 68 OF 84 SPECIES; ONE CONTENT GAP LEFT (was 67/84 — `allpeater` closed 2026-09-07)
 
 All ten modules — `resolver-memo`, `budget-source`, `species-xp`, `redistribution-plan`,
 `demon-type-allocation`, `allocation-transport`, `species-respec`, `zomboss-adaptive`,
@@ -1066,6 +1190,13 @@ insisted on an identity join rather than a text guess). The 17th, `AllPeater`, h
 still `unresolved` on `aptitudePrimary`. Closing this is a seedsmith authoring/voting pass, named and
 scoped in G3's own findings — not a code task, and not this session's to do without inventing
 classification data the rest of this repo's rules forbid inventing.
+
+**2026-09-07 update: `AllPeater` closed, 16 remain.** `demon-corpus-self-heal` Phase I gave
+`aptitudePrimary` a deterministic fallback (an owner-directed invented default, not a vote) for the
+whole corpus, which included `AllPeater`. Re-running the real chain (`DemonSpeciesGen` ->
+`DemonSpeciesImport` -> `DemonBuildPlanGen`) confirmed it end to end: 67/84 -> **68/84**, verified
+by the real, updated guard test (`SpeciesBuildPlanCatalogRealFileTests`, 13/13). The other 16 are
+untouched — a missing anchor still needs authoring, which no fallback can manufacture.
 
 What the audit confirmed was genuinely working, and the fixes did not regress: species XP really does
 accrue from real lawn play (verified `plant_place` -> `peashooter` and `zombie_spawn` ->

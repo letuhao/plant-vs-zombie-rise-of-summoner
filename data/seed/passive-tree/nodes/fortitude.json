@@ -67,7 +67,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active \u2014 tier wins.",
+        "printedText": "Inert while tier is active — tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -80,6 +80,30 @@
       "nodeKey": "n2",
       "rationale": "",
       "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythmic pulse of the shield feeds the marrow, and the marrow, in turn, reinforces the barrier.",
+      "id": "skill.fortitude-def-t10-n0",
+      "name": "Circulatory Sapping",
+      "nameKey": "tree.node.circulatory-sapping",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
     },
     {
       "affinity": [
@@ -317,6 +341,54 @@
     },
     {
       "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very essence of the wood thickens, turning life-blood into a viscous, protective resin.",
+      "id": "skill.fortitude-def-t5-n1",
+      "name": "Thickened Sap",
+      "nameKey": "tree.node.thickened-sap",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of hardened sap and iron-rich sediment fuse into a permanent, unyielding shell.",
+      "id": "skill.fortitude-def-t6-n0",
+      "name": "Calcified Graft",
+      "nameKey": "tree.node.calcified-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
         "core",
         "core",
         "likely",
@@ -344,6 +416,56 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of bark and iron fuse into a seamless, unyielding shell.",
+      "id": "skill.fortitude-def-t7-n0",
+      "name": "Lignified Plating",
+      "nameKey": "tree.node.lignified-plating-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The deeper the roots, the harder the spirit breaks.",
+      "id": "skill.fortitude-def-t7-n1",
+      "name": "Rooted Endurance",
+      "nameKey": "tree.node.rooted-endurance-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
     },
     {
       "affinity": [
@@ -777,6 +899,30 @@
     },
     {
       "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The strength of the stem dictates the force of the strike.",
+      "id": "skill.fortitude-off-t6-n1",
+      "name": "Vigorous Sprout",
+      "nameKey": "tree.node.vigorous-sprout",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
         "core",
         "likely"
       ],
@@ -826,6 +972,54 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the defense becomes the edge of the strike.",
+      "id": "skill.fortitude-off-t8-n0",
+      "name": "Shatter-Point Momentum",
+      "nameKey": "tree.node.shatter-point-momentum",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The harder the blow, the deeper the puncture.",
+      "id": "skill.fortitude-off-t9-n0",
+      "name": "Sanguine Thorns",
+      "nameKey": "tree.node.sanguine-thorns",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
     }
   ],
   "schemaVersion": 1,

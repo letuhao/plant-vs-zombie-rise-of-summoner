@@ -103,6 +103,27 @@ zero-rider invariant. `RulesetVersion` stays 4; no golden is re-blessed.
 the species→action eligibility *content* waits on `demon-corpus-self-heal`'s four open items, because
 the species ids are mid-regeneration and authoring against them means authoring twice.
 
+## Phase 7 — hybrid typing goes live (added 2026-09-07)
+
+Owner decision (`docs/architecture/demon-mechanism-gaps-ideal.md` §2.6): Wave E3's mechanism was
+always going to sit inert until an owner-gated balance value moved; that moved. **"We only have one
+battle engine — do not make duplicated code"** is the load-bearing instruction for this phase: lawn
+parity is built by wiring the lawn's own attack construction to call the *same* `HybridPayload.Build`
+web-battle already uses, never a second implementation. Full task breakdown, acceptance criteria, and
+the investigation gate for F3 (which may touch the closed atom vocabulary and needs
+`decisions.md`-level review if so) live in `tasks/combat-unification-todo.md`'s own Phase 7.
+
+| Task | Slice | Verify |
+|---|---|---|
+| F1 | Raise `hybrid.secondaryWeightMilli` 0 → 250‰ (reusing `MatchupShareK`'s own precedent number); re-run and check the predicted expedition-golden delta before re-blessing | `--filter "Hybrid\|Expedition"` |
+| F2 (non-blocking) | Seedsmith authoring pass to grow real `ElementSecondary` coverage past today's 21/841 | content only, no code verify |
+| F3 | Investigate whether any existing value-spec lets a grant reference its own firing attacker dynamically; reuse it for element if found, stop and escalate for review if not; wire lawn attacks to `HybridPayload.Build`; prove live on a real lawn demon | new unit tests + a real live-lawn check |
+
+Risk carried forward explicitly, not hidden in the todo alone: F3's size is genuinely unknown until
+its own investigation step runs — it may be a small wiring addition or may require a reviewed,
+closed-vocabulary change (`DESIGN-GATE.md` row 41). The task itself is scoped to stop and report
+rather than decide that unilaterally.
+
 ## Open items
 
 - ~~The build gate above~~ — lifted 2026-09-04.

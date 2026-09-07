@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "many",
+  "flavor": "The patron seeks only to know which of your souls are still tethered to your bodies by something stronger than fear. Every chamber entered is a test of whether you return as heroes or merely as ghosts in armor.",
+  "name": "The Weight of the Living",
+  "objectiveTemplate": "explore-rooms",
+  "prereqRefs": [],
+  "questId": "quest.explore-rooms-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "roster",
+  "targetRef": "none"
+}

@@ -10,7 +10,7 @@ on and, where its live behaviour is not yet wired, which later task closes the g
 
 | module | side | what it owns |
 |---|---|---|
-| `tuning` | deterministic | thin re-export of A2's `passive-tree-targets.v1.json` parser — one loader, not two |
+| `tuning` | deterministic | thin re-export of A2's `passive-tree-targets.v2.json` parser — one loader, not two |
 | `vocab` | deterministic | the affix pick vocabulary (98 families, 3 tag values), **counted** fresh from `data/seed/items/affix-families/` |
 | `quota` | the boundary | axis-marginal apportionment via the shared `largest_remainder_count`, PLUS (task H3) the per-slot cell walk, hard-constraint override and step-5 return-to-pool rebalance (spec §4.2 steps 4-5 / spec-tree-plan.md §8), refusing an overdrawn cell (`OverdrawnQuota`) rather than rebalancing it silently; `quota_for_plan`/`permitted_ids_for_cell` wire a real `plan_read.TreePlan` straight through |
 | `plan_read` | deterministic | reads `tree-plan`'s committed plan for one tree; refuses an unfilled hole rather than defaulting |

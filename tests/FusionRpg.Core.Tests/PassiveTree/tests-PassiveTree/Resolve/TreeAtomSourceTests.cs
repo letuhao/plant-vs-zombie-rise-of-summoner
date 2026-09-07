@@ -30,7 +30,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "aptitude.Might@Commander",
             "broad-and-flat", 10, 2, new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom(kindId, Effects.Atoms.AttachPoint.Stat, channelId, NodeAtomOp.Flat,
-            null, null, kMicro, ScaleAxis.PTheta, UnitClass.GameUnits, null);
+            null, null, kMicro, ScaleAxis.PTheta, UnitClass.GameUnits);
         var node = new NodeRecord($"skill.might-off-t{tier}-n0", "might", TreeBranch.Off, tier, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 45,
             new[] { atom }, Array.Empty<string>(), ExclusionForm.None, null, enabled, null);
@@ -115,7 +115,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "aptitude.Might@Commander",
             "broad-and-flat", 10, 2, new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var loserAtom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Stat, "combat.power.fire",
-            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits, null);
+            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits);
         var loser = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 45,
             new[] { loserAtom }, new[] { "posture" }, ExclusionForm.Nullification, null, true, null);
@@ -136,7 +136,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "aptitude.Might@Commander",
             "broad-and-flat", 10, 2, new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Stat, "combat.power.fire",
-            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits, null);
+            NodeAtomOp.Flat, null, null, 3038, ScaleAxis.PTheta, UnitClass.GameUnits);
         var node = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 45,
             new[] { atom }, new[] { "posture" }, ExclusionForm.Nullification, null, true, null);
@@ -159,7 +159,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "x", "broad-and-flat", 10, 2,
             new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Status, "status.resist.dot",
-            NodeAtomOp.Increased, null, null, 1000, ScaleAxis.Theta, UnitClass.StatusPotencyPoints, null);
+            NodeAtomOp.Increased, null, null, 1000, ScaleAxis.Theta, UnitClass.StatusPotencyPoints);
         var node = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 18,
             new[] { atom }, Array.Empty<string>(), ExclusionForm.None, null, true, null);
@@ -184,7 +184,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "x", "broad-and-flat", 10, 2,
             new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Status, "status.resist.dot",
-            NodeAtomOp.Increased, null, null, 1000, ScaleAxis.Theta, UnitClass.StatusPotencyPoints, null);
+            NodeAtomOp.Increased, null, null, 1000, ScaleAxis.Theta, UnitClass.StatusPotencyPoints);
         var node = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 18,
             new[] { atom }, Array.Empty<string>(), ExclusionForm.None, null, true, null);
@@ -216,7 +216,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "x", "broad-and-flat", 10, 2,
             new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Stat, "combat.power.fire",
-            NodeAtomOp.Flat, null, null, 1_000_000, axis, UnitClass.GameUnits, null);
+            NodeAtomOp.Flat, null, null, 1_000_000, axis, UnitClass.GameUnits);
         var node = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 45,
             new[] { atom }, Array.Empty<string>(), ExclusionForm.None, null, true, null);
@@ -243,7 +243,7 @@ public class TreeAtomSourceTests
         var tree = new TreeRecord("might", TreeCategory.Primary, "x", "broad-and-flat", 10, 2,
             new[] { 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, 1, true);
         var atom = new NodeAtom("stat.derived", Effects.Atoms.AttachPoint.Stat, "combat.power.fire",
-            NodeAtomOp.Flat, null, null, 3038, axis, UnitClass.GameUnits, null);
+            NodeAtomOp.Flat, null, null, 3038, axis, UnitClass.GameUnits);
         var node = new NodeRecord("skill.might-off-t1-n0", "might", TreeBranch.Off, 1, "n0",
             Array.Empty<string>(), NodeClass.Magnitude, new[] { "affix.a" }, 45,
             new[] { atom }, Array.Empty<string>(), ExclusionForm.None, null, true, null);

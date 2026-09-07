@@ -36,6 +36,9 @@ public class ActionSelectionTests
             Held.TryGetValue(actorKey, out var list) ? list : Array.Empty<CompiledAction>();
         public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => null;
         public string? GarrisonedStructureKeyOf(string actorKey) => null;
+        public GridPos? ObjectivePositionOf(string actorKey) => null;
+        public long? MaxHpOf(string actorKey) => null;
+        public int AggressionOf(string actorKey) => 0;
     }
 
     static CompiledAction Action(

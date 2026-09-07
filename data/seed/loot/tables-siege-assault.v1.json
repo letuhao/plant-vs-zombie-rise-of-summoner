@@ -1,0 +1,108 @@
+{
+  "tables": [
+    {
+      "tableId": "drop.siege-assault.stable",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): base-defense's first loot binding, per district type — Stable Ground uses the same baseline shape sector-loot-wiring's own stable table uses.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 500 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 500, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.rich",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): Rich Ground favors a real drop over nothing, matching sector-loot-wiring's own rich table.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 300 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 700, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.barren",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): Barren Reach's bonus branch mostly comes up empty, matching sector-loot-wiring's own barren table.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 800 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 200, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.storm",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): Rift Storm's bonus branch mostly comes up empty, matching sector-loot-wiring's own storm table.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 850 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 150, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.warcamp",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): Warcamp is a real military objective worth taking by force — a siege-assault-specific reason this table stays at the stable baseline rather than storm's mostly-empty shape, since sieging a warcamp is the archetypal base-defense use case for this whole binding.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 400 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 600, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.nexus",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): Nexus shares Rich Ground's favors-a-real-drop shape.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 1000, "affixChannel": "drop" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "nothing", "weight": 300 },
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-any", "weight": 700, "affixChannel": "drop" }
+        ]}
+      ]
+    },
+    {
+      "tableId": "drop.siege-assault.boss-lair",
+      "sourceAllow": ["web"],
+      "revision": 1,
+      "note": "siege-loot (2026-09-07): the real, substantive differentiation this initiative names as its point, mirrored from sector-loot-wiring's own boss-lair table — the highest danger band, drop.shared.hybrid-core-BOSS (affixChannel=boss, a different pool entirely), and a GUARANTEED bonus branch with no 'nothing' entry.",
+      "groups": [
+        { "groupKey": "siege", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-boss", "weight": 1000, "affixChannel": "boss" }
+        ]},
+        { "groupKey": "siege-bonus", "rolls": 1, "entries": [
+          { "entryKind": "table", "ref": "drop.shared.hybrid-core-boss", "weight": 1000, "affixChannel": "boss" }
+        ]}
+      ]
+    }
+  ]
+}

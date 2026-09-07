@@ -585,11 +585,21 @@ bumped once per transaction and only when something changed.
 
 **Two hazards, named now rather than discovered on pass two:**
 
-⚠ **`ProvenanceLedger.record` raises on a re-recorded row** — *"a second write means idempotence
-failed"* (`tools/seedsmith/seedsmith/pipeline/provenance.py:109-118`), loud rather than
-last-write-wins. Regenerating after a prompt bump therefore needs `provenance-supersede`, which is
-core seedsmith backlog and **unbuilt**. **An incremental review pipeline cannot run its second pass
-without it.**
+⚠ **A row raises on being re-recorded** — *"a second write means idempotence failed"*, loud rather
+than last-write-wins — **corrected 2026-09-07, was misattributed**: this paragraph originally named
+`ProvenanceLedger.record` (`tools/seedsmith/seedsmith/pipeline/provenance.py:109-118`, shared with
+`items/setgen`) as the blocking class, but passive-tree's own ledger was never an instance of it —
+confirmed by grepping every real `ProvenanceLedger` caller directly, not assumed from this
+paragraph's own prior wording. The REAL mechanism is `nodegen/run.py`'s own `record_accepted`
+(H1's own local, plain-JSON ledger, entirely independent of the shared class), which raises the
+identical way for the identical stated reason. This matters: it means `provenance-supersede`,
+scoped to passive-tree, is NOT a cross-program change to shared `seedsmith.pipeline.provenance`
+(which would need to stay safe for `items/setgen` too) — it is local to this program's own module.
+**BUILT + VERIFIED 2026-09-07 (task J4):** `record_superseded` (`nodegen/run.py`) is the deliberate,
+explicit counterpart — never the default path — that allows overwriting an existing ledger row for
+an intentional re-review regeneration, preserving the prior content under `supersededRecord` rather
+than discarding it (feeding the diff card's own "previous value struck through in place"). 5 tests
+in `test_nodegen_generate.py::RecordSupersededTests`, all green.
 
 ⚠ **A retired node makes an actor unloadable today.** `AptitudeAllocation.Single` throws on an unknown
 id (`src/FusionRpg.Core/Stats/Aptitudes/AptitudeAllocation.cs:36-39`), called per row from the store.

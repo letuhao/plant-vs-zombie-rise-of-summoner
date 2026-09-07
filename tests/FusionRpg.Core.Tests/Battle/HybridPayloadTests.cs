@@ -5,15 +5,16 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
-/// combat-unification **Wave E3** — the secondary element as a weighted payload component.
+/// combat-unification **Wave E3**, live since **Phase 7 F1** (2026-09-07) — the secondary element as
+/// a weighted payload component.
 ///
-/// <para>The mechanism ships <b>inert</b>: `hybrid.secondaryWeightMilli` is 0, so the payload is the
-/// single full-weight primary component it was before E3, and every golden is unmoved. The weight is
-/// a <b>tunable</b> rather than the hardcoded policy constant the map sketched (0.7/0.3), for two
-/// reasons stated here so the choice is not mistaken for an oversight: the todo marks that constant
-/// <b>ask-first</b>, and picking it is not free — it <b>moves the expedition goldens</b>, because wave
-/// demons carry a real `ElementSecondary` (`WaveCatalog.cs:115`) while the hand-built battle goldens
-/// do not.</para>
+/// <para>Shipped inert at first on purpose: `hybrid.secondaryWeightMilli` was 0 from Wave E3
+/// (2026-09-04) until Phase 7's owner decision raised it, so the payload was the single full-weight
+/// primary component it had always been, and no golden moved. The weight is a <b>tunable</b> rather
+/// than a hardcoded policy constant, because raising it is not free — it <b>moves the expedition
+/// goldens</b>, since wave demons carry a real `ElementSecondary` (`WaveCatalog.cs:115`) while the
+/// hand-built battle goldens in this test project do not. The value now shipped, 300 (0.7/0.3), is the
+/// exact number the original combat-unification map itself suggested.</para>
 /// </summary>
 public class HybridPayloadTests
 {
@@ -37,9 +38,13 @@ public class HybridPayloadTests
     }
 
     [Fact]
-    public void TheShippedTuningLeavesItInert()
+    public void TheShippedTuningIsLiveAt300PerMille()
     {
-        Assert.Equal(0, BattleRuleset.HybridSecondaryWeightMilli);
+        // Phase 7 F1 (2026-09-07, owner decision, demon-mechanism-gaps-ideal.md §2.6): raised off 0
+        // -- data/tuning/battle.v5.json and this test project's own ContractTuningTestBootstrap
+        // fixture both carry 300 now, reusing the value the original combat-unification map itself
+        // already suggested (0.7/0.3) rather than inventing a new one.
+        Assert.Equal(300, BattleRuleset.HybridSecondaryWeightMilli);
     }
 
     [Fact]

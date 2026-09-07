@@ -1,0 +1,15 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "A vast, hollowed-out cavern where the floor is a sheet of translucent, cerulean ice. Frozen stalactites hang like jagged teeth from a ceiling lost in a swirling, white mist.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Glacial Amphitheater",
+  "reason": "The party is cornered by frost-touched guardians in a wide, open arena with minimal cover.",
+  "roomId": "room.fight-ice-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

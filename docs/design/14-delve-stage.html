@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delve stage — as-built catalog — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Plate 14 — delve stage, as-built. Every class below is `.p14-` prefixed; everything else on this
+     page is a real _kit/ primitive (`.panel-shell`, `.dialog`, `.toast`, `.meter`, `.card`, `.state`,
+     `.viewport`, …) reused as-is, per this plate's own header note on why. */
+  .p14-key { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0 0; }
+  .p14-key .k { display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px var(--sp-2); border-radius: var(--r-pill);
+    border: 1px solid var(--border-control); font-size: var(--text-2xs);
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .p14-key .k::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); }
+  .p14-key .k[data-b="built"]::before { background: var(--ok); }
+  .p14-key .k[data-b="wiring"]::before { background: var(--warn); }
+  .p14-key .k[data-b="real"]::before { background: var(--bad); }
+  .bucket { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px;
+    border-radius: var(--r-pill); font-size: var(--text-2xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    border: 1px solid var(--border-control); color: var(--muted); white-space: nowrap; }
+  .bucket[data-b="built"] { color: var(--ok); border-color: rgb(111 191 115 / .5); }
+  .bucket[data-b="wiring"] { color: var(--warn); border-color: rgb(216 169 79 / .5); }
+  .bucket[data-b="real"] { color: var(--bad); border-color: rgb(217 123 123 / .5); }
+
+  .p14-band { display: inline-block; font-family: var(--font-mono); font-size: var(--text-2xs);
+    font-weight: 800; color: var(--sun); border: 1px solid rgb(224 180 75 / .4);
+    border-radius: var(--r-pill); padding: 1px var(--sp-2); white-space: nowrap; }
+
+  /* --- room graph (§A) ----------------------------------------------------- */
+  .p14-graph { position: relative; background: var(--soil); }
+  .p14-graph-plane { position: absolute; inset: 0; }
+  /* SVG `<line>`s — real stroke properties, not the div-shaped background/height a `.p14-door` div
+     would have used. Drawn in the same coordinate space as the room nodes below (percentage x/y),
+     mirroring `DoorEdge.tsx`'s own real `<line x1/y1/x2/y2>` shape. */
+  .p14-door { fill: none; stroke: var(--muted); stroke-width: 2; }
+  .p14-door.is-severed { stroke: var(--bad); stroke-dasharray: 6 6; }
+  .p14-door.is-secret { stroke: var(--muted); stroke-dasharray: 6 6; opacity: .6; }
+  .p14-room { position: absolute; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; width: 64px; height: 64px; border: 1px solid var(--border);
+    border-radius: var(--r-sm); background: var(--soil); color: var(--text); font-size: 11px;
+    text-align: center; transform: translate(-50%, -50%); opacity: .6; }
+  .p14-room[data-sight="glimpse"] { background: var(--panel); opacity: .9; }
+  .p14-room[data-sight="seen"] { background: var(--panel); opacity: .9; }
+  .p14-room[data-sight="seen"][data-cleared="true"] { opacity: 1; }
+  .p14-room[data-selected="true"] { border-width: 2px; border-color: var(--border-strong); }
+  .p14-room[data-secret="true"] { border-style: dashed; }
+  .p14-room .p14-mark { font-size: 9px; line-height: 1; }
+  .p14-room.is-expanded { width: 220px; height: 168px; align-items: flex-start; justify-content: flex-start;
+    text-align: left; padding: var(--sp-2); gap: 4px; opacity: 1; z-index: 1; overflow: hidden; }
+  .p14-party-pin { position: absolute; display: inline-flex; align-items: center; gap: 4px;
+    border-radius: var(--r-pill); border: 1px solid var(--border-strong); background: var(--panel-raised);
+    padding: 1px var(--sp-2); font-size: 10px; color: var(--text); transform: translate(-50%, -50%);
+    white-space: nowrap; z-index: 2; }
+  .p14-fit-controls { position: absolute; left: 8px; bottom: 8px; display: flex; gap: 4px; }
+  .p14-fit-controls button { background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    border-radius: var(--r-sm); font-size: var(--text-sm); padding: 2px 8px; }
+
+  /* --- fight-in-place (§B) --------------------------------------------------- */
+  .p14-ranks { display: flex; gap: 4px; }
+  .p14-ranks i { width: 8px; height: 8px; border-radius: 50%; background: var(--text); opacity: .8; }
+  .p14-strike { display: flex; flex-direction: column; gap: 3px; width: 100%; margin-top: 2px; }
+  .p14-strike i { display: block; height: 5px; border-radius: var(--r-pill); background: var(--text); opacity: .55; }
+
+  /* --- HUD anchors (§C) ------------------------------------------------------ */
+  .p14-hud-top { position: absolute; inset: 0 0 auto 0; display: flex; justify-content: space-between;
+    align-items: center; gap: var(--sp-3); padding: var(--sp-2); pointer-events: none; }
+  .p14-hud-top > * { pointer-events: auto; }
+  .p14-hud-right { position: absolute; top: 0; bottom: 0; right: 0; width: 210px; padding: var(--sp-2);
+    overflow: auto; display: flex; flex-direction: column; gap: var(--sp-2); pointer-events: none; }
+  .p14-hud-right > * { pointer-events: auto; }
+  .p14-hud-bl { position: absolute; left: 0; bottom: 0; width: 190px; padding: var(--sp-2); pointer-events: none; }
+  .p14-hud-bl > * { pointer-events: auto; }
+  .p14-hud-br { position: absolute; right: 0; bottom: 0; width: 210px; padding: var(--sp-2); pointer-events: none; }
+  .p14-hud-br > * { pointer-events: auto; }
+  .p14-hud-init { position: absolute; top: 40px; left: 0; right: 0; display: flex; justify-content: center;
+    pointer-events: none; }
+  .p14-hud-init > * { pointer-events: auto; }
+  .p14-conn { display: inline-flex; align-items: center; gap: 6px; border-radius: var(--r-pill);
+    border: 1px solid var(--border-control); background: var(--panel); padding: 3px var(--sp-2);
+    font-size: var(--text-xs); color: var(--text); }
+  .p14-conn i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .p14-conn[data-status="live"] i { background: var(--ok); }
+  .p14-conn[data-status="reconnecting"] i { background: var(--warn); }
+  .p14-conn[data-status="frozen"] i { background: var(--bad-solid); }
+  .p14-souls { display: inline-flex; align-items: center; gap: 4px; border-radius: var(--r-pill);
+    border: 1px solid var(--border-control); background: var(--panel); padding: 3px var(--sp-2);
+    font-size: var(--text-xs); color: var(--sun); }
+  .p14-member { border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--panel-inset);
+    padding: 6px; }
+  .p14-pool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; font-size: 10px; margin-top: 4px; }
+  .p14-pool-grid div { display: flex; justify-content: space-between; gap: 6px; color: var(--muted); }
+  .p14-pool-grid div b { color: var(--text); font-weight: 400; }
+  .p14-init-dots { display: flex; gap: 4px; }
+  .p14-init-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+
+  /* --- pack rows (§D) --------------------------------------------------------- */
+  .p14-pack-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2);
+    border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px var(--sp-2); font-size: var(--text-xs); }
+
+  /* the real Oath control is a CHECKBOX, not the pill `.toggle` switch kit.css already has —
+     using `.toggle` here would misdraw the control's own real shape. */
+  .p14-checkbox { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); }
+  .p14-checkbox .box { width: 14px; height: 14px; border: 1px solid var(--border-control); border-radius: 2px;
+    display: inline-grid; place-items: center; background: var(--panel-inset); font-size: 10px; flex: none; }
+  .p14-checkbox.is-checked .box { background: var(--lawn); border-color: var(--lawn-hot); color: var(--text); }
+
+  .p14-dialog-wide { max-width: 620px; }
+
+  .p14-real { border-left: 3px solid var(--bad); background: rgb(217 123 123 / 0.07);
+    padding: var(--sp-3) var(--sp-4); border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    color: var(--muted); font-size: var(--text-sm); margin-top: var(--sp-3); }
+  .p14-real strong { color: var(--bad); }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Delve stage — the as-built component catalog</h1>
+  <p>
+    <code>#/delve/{delveId}</code>, the sixth stage (<code>decisions.md</code>: &ldquo;Game GUI &mdash;
+    sixth stage <code>delve</code>&rdquo;, 2026-09-05). The room graph is the stage; a fight is drawn on
+    it; the pack, wild talk, event, object prompt, supply bag and fight input are band-2 panels over it,
+    alongside the Sanctum&rsquo;s own descent picker; one extraction summary closes a run; drops,
+    level-ups, joins and first clears report without stopping anything. Governed by
+    <a href="../architecture/party-dungeon-ideal.md">party-dungeon-ideal.md</a> (the ideal that names this
+    deliverable, &sect;7: &ldquo;The stage needs a design plate under <code>docs/design/</code>; this
+    document names the stage and its HUD, not their pixels&rdquo;) and
+    <a href="../architecture/party-dungeon/spec-delve-stage.md">party-dungeon/spec-delve-stage.md</a> (the
+    module spec; &sect;7 is the bands-and-surfaces table every section below is keyed against).
+  </p>
+  <p>
+    <strong>Drawn after the code, not before it.</strong> Every surface on this plate is grounded against
+    the real <code>web/fusion-rpg-web/src/stages/delve/</code> and <code>src/layers/delve/</code> components
+    this program shipped on 2026-09-07 (D5.1, D5.4&ndash;D5.10, D5.12, all closed) &mdash; their own doc
+    comments, their real prop types, and a live browser check against the bundled
+    <code>fixtures/first-descent.json</code> fallback (no server required; <code>DelveStage.tsx</code> falls
+    back to it whenever <code>GET /api/delve/&#123;id&#125;</code> has no data, which is every real id today).
+    The one piece still genuinely unbuilt is <strong>D5.11, the live session client</strong> &mdash; see
+    &sect;I. Where a real, honestly-named gap survives in the shipped code, this plate keeps it: a
+    <span class="bucket" data-b="wiring">wiring</span> or
+    <span class="bucket" data-b="real">real</span> badge here is not a to-do list, it is what the working
+    tree actually says today.
+  </p>
+  <p>
+    <span class="tag tag--ok">As-built &mdash; documents shipped UI, 2026-09-07</span>
+    <span class="tag">Plate 14</span>
+    <span class="tag">GG-1 &middot; GG-5 &middot; GG-7 &middot; GG-17 &middot; GG-19 &middot; GG-21 &middot; GG-23 &middot; GG-41 &middot; GG-46 &middot; GG-53 &middot; GG-55 &middot; GG-61</span>
+    <span class="tag">Viewport floor 1280&times;720</span>
+  </p>
+  <div class="p14-key">
+    <span class="k" data-b="built">Built &mdash; real, tested, and reachable end to end today</span>
+    <span class="k" data-b="wiring">Wiring gap &mdash; real, tested component; no live producer feeds it yet</span>
+    <span class="k" data-b="real">Real gap &mdash; no field, no mechanism, not even a <code>Pending</code> placeholder</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">&larr; Foundation</a>
+  <a href="11-world-stage.html">Plate 11 &middot; World stage</a>
+  <a href="12-lawn-stage.html">Plate 12 &middot; Lawn stage</a>
+  <a href="#a">A &middot; Room graph</a>
+  <a href="#b">B &middot; Fight in place</a>
+  <a href="#c">C &middot; The HUD</a>
+  <a href="#d">D &middot; The six panels</a>
+  <a href="#e">E &middot; Descent picker</a>
+  <a href="#f">F &middot; Extraction summary</a>
+  <a href="#g">G &middot; The three confirms</a>
+  <a href="#h">H &middot; Band-4 reports</a>
+  <a href="#i">I &middot; Settled, and the one root cause</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A &middot; The room graph &mdash; the stage itself <span class="p14-band">Band 0 &middot; Stage</span></h2>
+  <p class="lede">
+    <code>stages/delve/graph/DelveGraph.tsx</code> (D5.4). Rooms, doors, party markers and three sight
+    treatments, composed with <code>RoomNode.tsx</code>/<code>DoorEdge.tsx</code>/<code>PartyMarker.tsx</code>
+    over a plain CSS-transform camera (pan by drag, zoom/fit by button) &mdash; not Phaser (GG-38 scopes
+    game canvases to lawn/world only) and not <code>@xyflow/react</code> (locked for &ldquo;genuine
+    node/tree surfaces&rdquo; by <code>tech-stack.md</code> T3, but <code>xyflowGuard.test.ts</code> still
+    enforces its old repo-wide removal, unedited by that amendment &mdash; flipping a live guard is an
+    architecture-lock change this module does not have standing to make on its own, so it stays a plain,
+    tested DOM+SVG tree). <span class="bucket" data-b="built">built</span> &mdash; live-verified below.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="p14-graph" style="position:absolute;inset:0;">
+        <div class="p14-graph-plane">
+          <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" aria-hidden="true">
+            <line x1="26%" y1="30%" x2="54%" y2="18%" class="p14-door" />
+            <line x1="54%" y1="18%" x2="80%" y2="30%" class="p14-door is-severed" />
+            <line x1="26%" y1="30%" x2="26%" y2="72%" class="p14-door" />
+            <line x1="26%" y1="72%" x2="58%" y2="82%" class="p14-door" />
+          </svg>
+          <div class="p14-room is-expanded" data-sight="seen" data-cleared="true" data-selected="true" style="left:26%;top:30%">
+            <div class="row-flex" style="justify-content:space-between;width:100%">
+              <b>Fight</b><span aria-hidden="true">&check;</span>
+            </div>
+            <span class="readout" style="font-size:10px">1.2 s dwell</span>
+            <div class="p14-ranks"><i></i><i></i><i></i></div>
+            <div class="p14-strike"><i style="width:100%"></i><i style="width:70%"></i></div>
+          </div>
+          <div class="p14-party-pin" style="left:26%;top:44%"><span aria-hidden="true">&#9873;</span>First Banner</div>
+          <div class="p14-party-pin" style="left:26%;top:50%"><span aria-hidden="true">&#9873;</span>Second Banner</div>
+          <div class="p14-room" data-sight="seen" data-cleared="false" style="left:54%;top:18%">Cache</div>
+          <div class="p14-room" data-sight="glimpse" style="left:80%;top:30%">Trap</div>
+          <div class="p14-room" data-sight="seen" data-secret="true" style="left:26%;top:72%">
+            Elite<span class="p14-mark" aria-hidden="true">&#128273;</span>
+          </div>
+          <div class="p14-room" data-sight="unlit" style="left:58%;top:82%"><span aria-hidden="true">?</span></div>
+        </div>
+        <div class="p14-fit-controls">
+          <button type="button">Fit</button><button type="button">+</button><button type="button">&minus;</button>
+        </div>
+      </div>
+    </div>
+    <p class="vp-note">
+      A real, live render of this exact composition (bundled fixture, six rooms &mdash; Fight, Cache, Trap,
+      Elite, Curio and one <code>unlit</code> room &mdash; two parties both at the Fight room) is on file
+      from this session&rsquo;s own browser check; node positions above are a hand-arranged, readable stand-in
+      for the camera-dependent real layout, not a pixel trace of one camera state.
+    </p>
+    <div class="note">
+      <strong>The stage layer is full-bleed; the HUD floats over it (&sect;C), never beside it.</strong>
+      <code>stage-layer</code> is <code>absolute inset-0</code>; every HUD anchor is a
+      <code>pointer-events-none</code> wrapper with <code>pointer-events-auto</code> only on its real
+      content, so a door or room the fixed-width side anchors happen to sit over stays fully clickable
+      underneath &mdash; confirmed live: the right-edge party dock visibly crosses the Cache/Trap door in
+      the real browser check, and the room beneath it is still reachable.
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Sight treatments &mdash; three states, never carried by opacity alone</h3>
+    <table class="t">
+      <thead><tr><th>Sight</th><th>Shows</th><th>Drawn as</th></tr></thead>
+      <tbody>
+        <tr><td><code>unlit</code></td><td>Nothing &mdash; not even the kind</td>
+          <td>Dark card, a bare <code>?</code>, 60% opacity</td></tr>
+        <tr><td><code>glimpsed</code></td><td>The room&rsquo;s kind only</td>
+          <td>Lit card, kind label, 90% opacity, no cleared mark, no fight detail</td></tr>
+        <tr><td><code>seen</code></td><td>Kind, cleared mark, key mark, fight detail</td>
+          <td>Lit card, full opacity once cleared</td></tr>
+      </tbody>
+    </table>
+    <p class="lede" style="margin-top:var(--sp-3)">
+      Selected: a 2px <code>border-strong</code> ring. Secret dead end (exactly one door, and that door
+      is itself secret): a dashed border. Neither is a fourth sight state &mdash; both compose with any
+      of the three above. Room kind text is <code>roomKindLabel</code> (D5.10) &mdash; the same eleven
+      words &sect;D&rsquo;s panel legends use, never a raw <code>RoomKind</code> id.
+    </p>
+  </div>
+
+  <div class="sub">
+    <h3>Doors &mdash; never sight-gated, so every door always draws its real treatment</h3>
+    <table class="t">
+      <thead><tr><th>Treatment</th><th>Line</th><th>Extra mark</th></tr></thead>
+      <tbody>
+        <tr><td>Open</td><td>Solid, muted</td><td>&mdash;</td></tr>
+        <tr><td>One-way</td><td>Solid, muted</td><td>Arrowhead at the destination end</td></tr>
+        <tr><td>Gated</td><td>Solid, muted</td><td>&#128273; at the midpoint</td></tr>
+        <tr><td>Secret</td><td>Dashed, 60% opacity</td><td>&mdash;</td></tr>
+        <tr><td>Severed</td><td>Dashed, <code>bad</code>-coloured</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sub">
+    <h3>Party markers</h3>
+    <p class="lede">
+      <code>graph/PartyMarker.tsx</code> &mdash; a flag pill at a room&rsquo;s centre
+      (<code>PartyView.atSectorId</code>) or a lane&rsquo;s midpoint while marching
+      (<code>onLaneId</code>); never both, never neither drawn as a guess &mdash; a party with neither
+      field set gets no marker at all rather than one at the origin. Always <code>partyBannerLabel</code>
+      (Ask 13, D5.10): <strong>First Banner &middot; Second Banner &middot; Third Banner &middot; Fourth
+      Banner</strong> &mdash; <code>partyIndex</code> itself is never rendered (&sect;8 row 4), keyed by
+      the party&rsquo;s own <code>entityId</code>, never its index. Member count rides the accessible name
+      only (<code>&ldquo;First Banner &mdash; 2 members&rdquo;</code>), not the visible pill text &mdash;
+      confirmed against the real live accessibility snapshot, not assumed.
+    </p>
+    <div class="row-flex">
+      <div class="p14-party-pin" style="position:static;transform:none"><span aria-hidden="true">&#9873;</span>First Banner</div>
+      <span class="statenote">at a room&rsquo;s centre (<code>atSectorId</code>)</span>
+      <span style="width:1px;align-self:stretch;background:var(--border)"></span>
+      <div class="p14-party-pin" style="position:static;transform:none"><span aria-hidden="true">&#9873;</span>Third Banner</div>
+      <span class="statenote">on a lane, at the door&rsquo;s midpoint (<code>onLaneId</code>)</span>
+    </div>
+    <div class="note">
+      <strong>A real, live-observed emergent detail, kept rather than idealised away:</strong> a party
+      standing in the room that is currently the site of an active fight renders at that room&rsquo;s
+      centre point exactly as always &mdash; and since the fight expands the room to 220&times;168px
+      (&sect;B) while the marker&rsquo;s own anchor point never moves, the marker visibly lands inside the
+      now much larger card. <code>DelveGraph.tsx</code> draws rooms, then parties, in that DOM order, so
+      the pin always paints on top. Confirmed in this session&rsquo;s own live check, not a mockup artifact.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B &middot; The fight, drawn on the room it is in <span class="p14-band">Band 0 &middot; Stage</span></h2>
+  <p class="lede">
+    <code>graph/FightInPlace.tsx</code> (D5.5) &mdash; rendered by <code>RoomNode.tsx</code>
+    <em>inside</em> the room&rsquo;s own expanded <code>&lt;button&gt;</code>, never a separate screen or
+    route (<code>decisions.md:114</code>: &ldquo;a fight is drawn on it&rdquo;). Expansion is gated on
+    <code>sight === "Full"</code> &mdash; a glimpsed or unlit room never reveals fight detail, the same
+    rule every other <code>seen</code>-only field already follows. No z-index anywhere: an expanded room
+    paints over its neighbours because <code>DelveGraph.tsx</code>&rsquo;s own stable sort moves any room
+    carrying an active fight to the end of the DOM, the one mechanism bandGuard/GG-5 allows outside the
+    seven <code>.band-*</code> tiers.
+  </p>
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">Expanded, mid-fight <span class="bucket" data-b="wiring">wiring</span></p>
+        <div class="p14-room is-expanded" style="position:static;transform:none;width:220px">
+          <div class="row-flex" style="justify-content:space-between;width:100%"><b>Fight</b></div>
+          <span class="statenote" data-testid="delve-fight-dwell">1.2 s</span>
+          <div class="p14-ranks" aria-hidden="true"><i style="opacity:1"></i><i></i><i></i></div>
+          <div class="p14-strike"><i style="width:100%"></i><i style="width:70%"></i></div>
+        </div>
+        <p class="statenote">Real fixture numbers, live-verified this session.</p>
+      </div>
+      <div>
+        <p class="spec-label">Frozen (three consecutive timeouts) &mdash; still <span class="bucket" data-b="wiring">wiring</span></p>
+        <div class="p14-room is-expanded" style="position:static;transform:none;width:220px">
+          <div class="row-flex" style="justify-content:space-between;width:100%"><b>Fight</b></div>
+          <span style="font-size:10px;font-weight:700;color:var(--bad)">Your band is waiting.</span>
+          <span class="statenote">dwell isn&rsquo;t shown yet</span>
+          <div class="p14-ranks" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+        <p class="statenote">&sect;9&rsquo;s own literal copy, reused verbatim &mdash; no producer feeds <code>frozen</code> live yet.</p>
+      </div>
+    </div>
+    <table class="t" style="margin-top:var(--sp-4)">
+      <thead><tr><th>Field</th><th>Reads as</th><th>Bucket</th></tr></thead>
+      <tbody>
+        <tr><td>Dwell remaining</td><td>A <code>milliseconds</code> figure, or its real pending reason</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Ranks</td><td><code>initiative</code>, read as position dots only &mdash; the array element
+          type is <code>unknown</code>, so this can animate a real count, never invented per-slot content</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Strike feed</td><td><code>strikeFeed</code>, one animated bar per entry, same length-only rule</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Steered vs. read-only</td><td>A passive visual accent only &mdash; zero interactive elements
+          either way; the chooser is band-2&rsquo;s Fight panel (&sect;D), never drawn here</td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Enemy roster / ally distinction</td><td>Nothing draws it</td>
+          <td><span class="bucket" data-b="real">real</span></td></tr>
+      </tbody>
+    </table>
+    <div class="p14-real">
+      <strong>Enemies &mdash; named, not built, not guessed at.</strong> No field anywhere, not even a
+      <code>Pending</code> placeholder, carries an enemy roster or distinguishes an enemy actor from an
+      ally inside <code>initiative</code>/<code>strikeFeed</code> &mdash; confirmed by a dedicated search,
+      not assumed. No SignalR message shape or strike-feed DTO exists anywhere in the codebase for this.
+      This is the one place on the whole stage where drawing anything more than a count would mean
+      inventing a session message this layer has no standing to design.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C &middot; The HUD <span class="p14-band">Band 1 &middot; HUD</span></h2>
+  <p class="lede">
+    <code>hud/DelveHud.tsx</code> (D5.6) wraps the graph in five reserved, always-present anchor
+    containers plus one conditional occupant &mdash; mirroring <code>stages/world/hud/WorldHud.tsx</code>&rsquo;s
+    own shipped shape exactly: <code>.band-hud</code> on every anchor, <code>pointer-events-none</code>
+    wrappers with <code>pointer-events-auto</code> only on real content, so the room graph underneath stays
+    interactive everywhere the HUD has nothing drawn. The shell&rsquo;s own <code>Rail.tsx</code> (identical
+    on every stage, already catalogued on plates 01&ndash;12) is deliberately not redrawn here &mdash;
+    <strong>Delve adds no rail entry</strong>: the descent door is a Sanctum affordance, not a rail row
+    (&sect;E).
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="p14-graph" style="position:absolute;inset:0">
+        <div class="p14-graph-plane" style="opacity:.35">
+          <div class="p14-room" data-sight="seen" style="left:30%;top:40%">Fight</div>
+          <div class="p14-room" data-sight="seen" style="left:55%;top:25%">Cache</div>
+          <div class="p14-room" data-sight="unlit" style="left:70%;top:55%"><span aria-hidden="true">?</span></div>
+        </div>
+        <div class="p14-hud-top">
+          <div class="p14-conn" data-status="offline"><i></i><span>Not connected</span></div>
+          <div class="p14-souls"><span aria-hidden="true">&#10022;</span><b>140</b><span style="color:var(--muted)">unclaimed</span></div>
+        </div>
+        <div class="p14-hud-init">
+          <div class="row-flex" style="border:1px solid var(--border);border-radius:var(--r-sm);background:var(--panel);padding:2px 8px">
+            <span style="font-size:10px;font-weight:700;color:var(--bad)">Your band is waiting.</span>
+            <span class="statenote">1.2 s</span>
+            <div class="p14-init-dots"><i style="background:var(--text)"></i><i></i><i></i></div>
+          </div>
+        </div>
+        <div class="p14-hud-right">
+          <div class="p14-member">
+            <div class="row-flex" style="justify-content:space-between">
+              <b style="font-size:12px">First Banner</b><span class="statenote">Nothing to carry yet</span>
+            </div>
+            <span class="statenote" style="font-style:italic">How shaken this one is isn&rsquo;t named yet</span>
+            <div class="p14-pool-grid">
+              <div>HP <b>80</b></div><div>Stamina <b>40</b></div>
+              <div>Hunger <b>&mdash;</b></div><div>Spirit <b>&mdash;</b></div>
+              <div>Qi <b>&mdash;</b></div><div>Poise <b>&mdash;</b></div>
+            </div>
+          </div>
+          <div class="p14-member">
+            <div class="row-flex" style="justify-content:space-between">
+              <b style="font-size:12px">Second Banner</b><span class="statenote">Nothing to carry yet</span>
+            </div>
+            <span class="statenote" style="font-style:italic">How shaken this one is isn&rsquo;t named yet</span>
+            <div class="p14-pool-grid">
+              <div>HP <b>90</b></div><div>Stamina <b>50</b></div>
+              <div>Hunger <b>&mdash;</b></div><div>Spirit <b>&mdash;</b></div>
+              <div>Qi <b>&mdash;</b></div><div>Poise <b>&mdash;</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="p14-hud-bl">
+          <div style="border:1px solid var(--border);border-radius:var(--r-sm);background:var(--panel);padding:6px 8px">
+            <p style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 2px">Quests</p>
+            <p class="statenote" style="font-style:italic;margin:0">Quest progress isn&rsquo;t shown yet</p>
+          </div>
+        </div>
+        <div class="p14-hud-br">
+          <div style="border:1px solid var(--border);border-radius:var(--r-sm);background:var(--panel);padding:6px 8px">
+            <p class="statenote" style="font-style:italic;margin:0">No room selected</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="vp-note">
+      Real fixture render, this session (screenshot on file) &mdash; every string above is copied from
+      that live page, including the two pending-italic lines. The initiative-rail anchor is drawn here to
+      show its position; live, it never mounts at all today (<code>DelveHud</code>&rsquo;s <code>fight</code>
+      prop is always <code>undefined</code> &mdash; see the ledger in &sect;I).
+    </p>
+  </div>
+
+  <div class="sub">
+    <h3>Every HUD element &sect;7 names, and its bucket</h3>
+    <table class="t">
+      <thead><tr><th>Element</th><th>Component</th><th>Real state today</th><th>Bucket</th></tr></thead>
+      <tbody>
+        <tr><td>Party strip, by name</td><td><code>PartyRail.tsx</code></td>
+          <td>Real names via <code>partyBannerLabel</code>, keyed by <code>entityId</code></td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Six pool meters, current value</td><td><code>PoolMeters.tsx</code></td>
+          <td><code>MemberView.pools</code> &mdash; real, always known, never <code>Pending</code></td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Pool meter fill bar</td><td><code>PoolMeters.tsx</code></td>
+          <td><code>poolFill</code> &mdash; real field, <code>pendingWithReason(...)</code> on every real/fixture response today</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Nerve stage per member</td><td><code>MemberRow.tsx</code></td>
+          <td>Same &mdash; <code>nerveStage</code> always <code>Pending</code> on the live wire</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>&ldquo;Down&rdquo; badge</td><td><code>MemberRow.tsx</code></td>
+          <td><code>MemberView.downed</code> &mdash; real, beyond the acceptance line&rsquo;s own literal words</td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Haul count / unclaimed souls</td><td><code>PartyRail.tsx</code> / top-strip</td>
+          <td>Real counts (<code>party.haul.length</code>, <code>DelveView.soulsUnbanked</code>)</td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Quest tracker</td><td><code>QuestTracker.tsx</code></td>
+          <td><code>DelveView.quests</code> always <code>Pending</code> &mdash; <code>adaptDelve</code> never calls <code>adaptDelveQuest</code></td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Room readout</td><td><code>RoomReadout.tsx</code></td>
+          <td>Real kind/cleared/key/occupants; <code>floorContents</code> its own honest <code>Pending</code></td>
+          <td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>Initiative rail (during a fight)</td><td><code>InitiativeRail.tsx</code></td>
+          <td>Real <code>FightView</code>-typed component; never mounts today &mdash; <code>fight</code> prop always <code>undefined</code></td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>Connection state</td><td><code>ConnectionStateBadge.tsx</code></td>
+          <td>Real, tested badge; no live session exists at any layer, so it always reads its one honest default, &ldquo;Not connected&rdquo;</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D &middot; The six band-2 panels <span class="p14-band">Band 2 &middot; Panel</span></h2>
+  <p class="lede">
+    <code>stages/delve/layers/</code> (D5.7) &mdash; one <code>PanelShell</code> (the same shared, GG-61-bounded
+    shell every other layer already uses), one title per <code>?panel=</code> id
+    (<code>pack&middot;talk&middot;event&middot;object&middot;supply&middot;fight</code>, resolved once by
+    <code>DelvePanelHost.tsx</code>), one sub-component per surface. Talk/Event/ObjectPrompt/Supply are
+    room-scoped; Pack reads every raid party at once; Fight reads none.
+  </p>
+
+  <div class="sub">
+    <h3>Pack &mdash; the richest of the six <span class="bucket" data-b="wiring">wiring</span></h3>
+    <p class="lede">
+      Every raid party&rsquo;s own carry grid, not just one &mdash; nothing on the wire singles out
+      &ldquo;the player&rsquo;s own party&rdquo;. Move/Drop gate correctly on the real, shipped
+      <code>PackCellView.movable</code> signal (<code>PackDto.cs</code>&rsquo;s own autopilot flag,
+      mutation-tested) with a real disabled reason &mdash; but <code>PartyView.pack</code> itself is
+      <code>Pending&lt;PackView&gt;</code> on every real and fixture wire response today, so this is the
+      state a real player actually sees.
+    </p>
+    <div class="spec">
+      <div class="panel-shell" style="max-width:640px;max-height:none">
+        <header><h3>Pack</h3><span style="flex:1"></span><span class="esc">Esc</span></header>
+        <div class="body">
+          <p style="font-weight:800;margin:0 0 2px">First Banner</p>
+          <p class="statenote" style="font-style:italic;margin:0 0 var(--sp-3)">This party&rsquo;s pack isn&rsquo;t shown yet</p>
+          <p style="font-weight:800;margin:0 0 2px">Second Banner</p>
+          <p class="statenote" style="font-style:italic;margin:0">This party&rsquo;s pack isn&rsquo;t shown yet</p>
+        </div>
+      </div>
+      <p class="vp-note" style="margin-top:var(--sp-3)">The hypothetical <code>known</code> row shape (real, tested, not reachable live today):</p>
+      <div class="p14-pack-row">
+        <span>Item</span><span class="statenote">&times;3</span>
+        <span class="row-flex">
+          <button class="btn btn--sm" disabled title="This band moves on its own — its pack can't be moved.">Move</button>
+          <button class="btn btn--sm" disabled title="This band moves on its own — its pack can't be moved.">Drop</button>
+        </span>
+      </div>
+      <div class="p14-pack-row" style="margin-top:4px">
+        <span>Item</span><span class="statenote">&times;1</span>
+        <span class="row-flex">
+          <button class="btn btn--sm">Move</button>
+          <button class="btn btn--sm">Drop</button>
+        </span>
+      </div>
+      <p class="statenote">&ldquo;7 spaces left&rdquo; &mdash; &sect;8&rsquo;s own rule, &ldquo;never cells&rdquo;. Posting an actual move/drop is out of scope: no route exists yet, so an enabled handle has no <code>onClick</code>.</p>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Talk &middot; Event &middot; Object prompt &middot; Supply &middot; Fight input</h3>
+    <p class="lede">
+      All five are room-scoped and all five render their real, honest fallback line today &mdash; no
+      caller in this codebase has ever produced a <code>known</code> value for any of them. Each is a
+      genuinely different reason, named in its own file, not a repeated placeholder.
+    </p>
+    <table class="t">
+      <thead><tr><th>Panel</th><th>§7 says</th><th>Real fallback shown today</th><th>Why</th><th>Bucket</th></tr></thead>
+      <tbody>
+        <tr><td><b>Talk</b></td><td>Verbs, the band as a name, the quote, the offer</td>
+          <td><i>&ldquo;There&rsquo;s no one to talk to here.&rdquo;</i></td>
+          <td>No field ties a <code>TalkView</code> to a room at all &mdash; wrapped at the panel boundary</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td><b>Event</b></td><td>Choices, warnings, the banner</td>
+          <td><i>&ldquo;There&rsquo;s nothing happening here.&rdquo;</i> &times;3 (kind/choices/warnings)</td>
+          <td>Every <code>EventView</code> field is individually <code>Pending</code> at the contract level; <code>banner</code> arrives through <code>ui.present</code> instead, never drawn here</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td><b>Object prompt</b></td><td>One panel per <code>RoomObject</code>, offered verbs, each disabled verb carrying its reason</td>
+          <td><i>&ldquo;Pick a room first.&rdquo;</i></td>
+          <td>No field signals &ldquo;does this room even have one&rdquo;; offered verbs (once known) render as inert tags, never a fabricated disabled button</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td><b>Supply bag</b></td><td>What the party carries that can be used here</td>
+          <td><i>&ldquo;Pick a room first.&rdquo;</i></td>
+          <td><code>SupplyView</code> models an act&rsquo;s outcome, not a browse read &mdash; opening the panel is not itself an act</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td><b>Fight input</b></td><td>Initiative detail, action chooser, target picker</td>
+          <td><i>&ldquo;Fight controls aren&rsquo;t shown yet&rdquo;</i> &times;2</td>
+          <td>Every field is genuinely <code>Pending</code>, always &mdash; no shape exists this panel could honestly reach with any input yet</td>
+          <td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+      </tbody>
+    </table>
+    <div class="spec-grid wide" style="margin-top:var(--sp-3)">
+      <div>
+        <p class="spec-label">Talk, <code>known</code> (real, tested; not reachable live)</p>
+        <div class="row-flex" style="flex-wrap:wrap">
+          <span class="tag">Flatter</span><span class="tag">Threaten</span><span class="tag">Offer souls</span>
+          <span class="tag">Fight</span><span class="tag">Leave</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Object prompt, <code>known</code> (real, tested; not reachable live)</p>
+        <p style="margin:0 0 4px">Curio</p>
+        <div class="row-flex" style="flex-wrap:wrap">
+          <span class="tag">Open</span><span class="tag">Pray</span><span class="tag">Loot</span>
+        </div>
+        <p class="statenote" style="margin-top:4px">Once only.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>The closed vocabularies these panels read &mdash; every real id, §8&rsquo;s own wording</h3>
+    <table class="t">
+      <thead><tr><th>Table</th><th>Ids &rarr; player words</th></tr></thead>
+      <tbody>
+        <tr><td>8 wild-talk verbs</td><td>Flatter &middot; Threaten &middot; Offer souls &middot; Offer spirit &middot; Offer supplies &middot; Offer a contract &middot; Fight &middot; Leave</td></tr>
+        <tr><td>6 object verbs</td><td>Open &middot; Disarm &middot; Pray &middot; Loot &middot; Destroy &middot; Garrison</td></tr>
+        <tr><td>4 object kinds</td><td>Curio &middot; Obstacle &middot; Building &middot; Structure</td></tr>
+        <tr><td>11 room kinds</td><td>Fight &middot; Elite &middot; Cache &middot; Curio &middot; A stranger &middot; Shrine &middot; Camp &middot; Trader &middot; Trap &middot; Unclear &middot; The lair</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E &middot; The descent picker <span class="p14-band">Band 2 &middot; Panel</span></h2>
+  <p class="lede">
+    <code>layers/delve/DelvePickerLayer.tsx</code> (D5.8) &mdash; the Sanctum door&rsquo;s own picker, the
+    seventh band-2 surface &sect;7 names. Lives under the top-level <code>layers/</code> root every other
+    picker/inspector already uses (<code>ExpeditionsLayer</code>, <code>RelicsLayer</code>) &mdash; a
+    different shape from a within-stage panel (&sect;D). <span class="bucket" data-b="built">built</span>:
+    real hooks, real fetch, real Descend attempt, live-verified against a real seeded server.
+  </p>
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">Locked (GG-17) &mdash; today&rsquo;s one honest, provable live state</p>
+        <div class="card" style="margin:0">
+          <div class="hd"><div class="nm">Descend</div></div>
+          <p class="statenote">Delve &mdash; first domain found (expedition)</p>
+          <button class="btn" disabled title="Delve — first domain found (expedition)" style="align-self:flex-start">Open</button>
+        </div>
+        <p class="statenote" style="margin-top:6px">
+          The reason is carried BOTH as the disabled control&rsquo;s own <code>title</code> AND as
+          separate, always-visible body text &mdash; stronger than the rail&rsquo;s own tooltip-only
+          precedent. Honestly always this state in production: <code>GET /api/delve/domains/&#123;playerId&#125;</code>
+          always returns <code>[]</code> today &mdash; <code>dungeon_domain</code> has no write arm yet
+          (D4.16, a content gap in a different program, not a UI wiring gap).
+        </p>
+      </div>
+      <div>
+        <p class="spec-label">A found domain, expanded &mdash; the real builder</p>
+        <div class="card" style="margin:0;gap:var(--sp-2)">
+          <div class="hd" style="justify-content:space-between">
+            <span class="nm">Ashfall Hollow</span><span class="statenote">One descent only</span>
+          </div>
+          <div class="field"><label>Rung</label>
+            <select class="select"><option>Rung One &mdash; Deep</option></select>
+          </div>
+          <div class="field"><label>Bands</label>
+            <select class="select"><option>One band</option><option>Two bands</option></select>
+          </div>
+          <p class="statenote">Party: a flat creature checklist &mdash; the server partitions it into bands itself</p>
+          <button class="btn btn--sm" style="align-self:flex-start">Descend</button>
+        </div>
+      </div>
+    </div>
+    <div class="row-flex" style="margin-top:var(--sp-3);flex-wrap:wrap;gap:var(--sp-2)">
+      <span class="tag tag--bad">Closed to you</span><span class="statenote">sealed domain</span>
+      <span class="tag tag--warn">In progress</span><span class="statenote">a Return action, not Descend</span>
+    </div>
+    <div class="p14-real" style="margin-top:var(--sp-3)">
+      <strong>Two real, named sub-gaps inside an otherwise built picker.</strong> Rung/band display
+      names have no producer anywhere &mdash; <code>DelveEndpoints.cs</code>&rsquo;s own
+      <code>RungLabelFor</code> throws <code>NotImplementedException</code> unconditionally in production;
+      the &ldquo;Rung One &mdash; Deep&rdquo; text above is this plate&rsquo;s own placeholder for what that
+      row will read once a registry exists, not a real string in the tree today. Member eligibility is
+      honestly partial: only a <code>Fallen</code> member is proactively disabled (the one phase the
+      client can tell apart) &mdash; &ldquo;on an expedition&rdquo;/&ldquo;recovering&rdquo;/&ldquo;already
+      carrying&rdquo; surface reactively, after a real refused attempt, never as a guessed pre-emptive
+      disable.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F &middot; The extraction summary <span class="p14-band">Band 3 &middot; Dialog</span></h2>
+  <p class="lede">
+    <code>summary/ExtractionSummary.tsx</code> (D5.9) &mdash; the one band-3 result this stage produces
+    (&sect;7: &ldquo;the one result, with any wipe or permanent-loss notice folded in&rdquo;). A report, not
+    a decision: one <code>Close</code>, never a confirm/cancel pair. Holds the band-4 queue (&sect;H) for
+    exactly its own open lifetime. <span class="bucket" data-b="wiring">wiring</span> &mdash; structurally
+    complete and live-verified through a dev-only preview trigger, but no HTTP endpoint for extraction
+    exists anywhere on the server yet, so nothing real opens this today.
+  </p>
+  <div class="spec">
+    <div class="dialog p14-dialog-wide" style="margin:0 auto">
+      <div class="panel-shell" style="max-height:none">
+        <header><h3>Extraction summary</h3></header>
+        <div class="body">
+          <table class="t" style="margin-top:0">
+            <tbody>
+              <tr><td>Souls from kills</td><td style="text-align:right" class="val">340</td></tr>
+              <tr><td>Souls from victory</td><td style="text-align:right" class="val">1,200</td></tr>
+            </tbody>
+          </table>
+          <p style="color:var(--bad);font-weight:700;margin:var(--sp-2) 0 2px">2 members fell for good this run.</p>
+          <p class="statenote" style="margin:0 0 var(--sp-2)">Whether the raid wiped isn&rsquo;t shown yet</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px;font-size:var(--text-sm)">
+            <li class="row-flex">Unharmed <span class="tag tag--ok">Cleared</span></li>
+            <li class="row-flex">Unharmed <span class="tag tag--ok">Cleared</span></li>
+            <li class="row-flex">Recovering <span class="statenote">&mdash; 2 more descents</span></li>
+            <li class="row-flex">Fallen</li>
+            <li class="row-flex">Fallen</li>
+          </ul>
+          <div class="col-flex" style="margin-top:var(--sp-2)">
+            <p class="statenote" style="font-style:italic;margin:0">A first-clear reward isn&rsquo;t shown yet</p>
+            <p class="statenote" style="font-style:italic;margin:0">Level-ups aren&rsquo;t shown yet</p>
+            <p class="statenote" style="font-style:italic;margin:0">New arrivals aren&rsquo;t shown yet</p>
+          </div>
+        </div>
+        <footer><button class="btn btn--ghost btn--sm">Close</button></footer>
+      </div>
+    </div>
+    <p class="vp-note">Byte-for-byte the real, live, screenshotted render this session (dev-only preview trigger, the fixture&rsquo;s own demo settlement).</p>
+    <div class="note">
+      <strong>&ldquo;Folded in,&rdquo; from real fields, not invented ones.</strong> The per-member
+      permanent-loss notice counts a real, already-decided field (<code>outcome === "Retire"</code>);
+      the whole-raid <code>wiped</code> flag is a genuinely separate, still-<code>Pending</code> field,
+      never conflated with it. Souls from kills and victory stay two figures, never pre-summed &mdash; the
+      server has no third, composed total field to read instead. No member has a display name anywhere on
+      this type (<code>instanceId</code> only) &mdash; the same absence &sect;C&rsquo;s HUD already named
+      for the live, in-room case.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G &middot; The three confirms <span class="p14-band">Band 3 &middot; Dialog</span></h2>
+  <p class="lede">
+    &ldquo;Confirms, not results &mdash; they name what is staked before it is staked&rdquo; (&sect;7).
+    Exactly these three, plus the summary above, may open a band-3 dialog from
+    <code>stages/delve/</code> or <code>layers/delve/</code> &mdash; <code>bandDiscipline.test.ts</code>&rsquo;s
+    own real, whole-tree lint enforces it (GG-53), currently green.
+  </p>
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">Descend <span class="bucket" data-b="built">built</span></p>
+        <div class="dialog" style="margin:0">
+          <div class="panel-shell" style="max-height:none">
+            <header><h3 style="font-size:var(--text-lg)">Descend into Ashfall Hollow</h3></header>
+            <div class="body">
+              <p class="statenote">One descent only &middot; Rung One &mdash; Deep &middot; One band &middot; 2 creatures</p>
+              <div class="note" style="border-left-color:var(--warn);background:rgb(216 169 79 / .08);margin-top:var(--sp-3)">
+                This is a single descent. Anyone who falls here is Fallen for good &mdash; the Oath is how
+                you say you understand that.
+                <div class="p14-checkbox" style="margin-top:6px"><span class="box"></span>I accept the Oath</div>
+              </div>
+            </div>
+            <footer><button class="btn btn--ghost btn--sm">Stay</button><button class="btn btn--sm" disabled title="Accept the Oath to descend">Descend</button></footer>
+          </div>
+        </div>
+        <p class="statenote">Oath gate reads the CHOSEN rung&rsquo;s own <code>oathOffered</code> flag, not <code>entryKey === "single-descent"</code> at the domain level &mdash; a real, per-rung refinement.</p>
+      </div>
+      <div>
+        <p class="spec-label">Extract <span class="bucket" data-b="wiring">wiring</span></p>
+        <div class="dialog" style="margin:0 0 var(--sp-4)">
+          <div class="panel-shell" style="max-height:none">
+            <header><h3 style="font-size:var(--text-lg)">Leave with the haul</h3></header>
+            <div class="body"><p style="margin:0">Your party leaves the delve now, banking 140 unclaimed souls and everything carried. Anyone still down stays down &mdash; there&rsquo;s no second trip back for them this run.</p></div>
+            <footer><button class="btn btn--ghost btn--sm">Stay</button><button class="btn btn--sm">Extract</button></footer>
+          </div>
+        </div>
+        <p class="spec-label">Retreat <span class="bucket" data-b="wiring">wiring</span></p>
+        <div class="dialog" style="margin:0">
+          <div class="panel-shell" style="max-height:none">
+            <header><h3 style="font-size:var(--text-lg)">Fall back</h3></header>
+            <div class="body"><p style="margin:0">Your party pulls out now, without banking the haul or the souls still unclaimed down there. Whatever wasn&rsquo;t already carried out stays behind.</p></div>
+            <footer><button class="btn btn--ghost btn--sm">Keep going</button><button class="btn btn--danger btn--sm">Retreat</button></footer>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Why Descend is <span class="bucket" data-b="built">built</span> but Extract/Retreat are
+      <span class="bucket" data-b="wiring">wiring</span>, though all three are equally real and tested.</strong>
+      Descend is reachable end to end: the picker (&sect;E) really calls it, and a real (if always-refused
+      today) <code>POST /api/delve/start</code> follows. Extract and Retreat are pure, real, tested
+      components with <strong>zero callers anywhere in this codebase</strong> &mdash; the &ldquo;declare
+      extract/retreat&rdquo; order is a live-session decision (&sect;9), and D5.11 (&sect;I), the client
+      that would call them, does not exist yet.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== H -->
+<section class="sec" id="h">
+  <h2>H &middot; Drops &middot; level-ups &middot; joins &middot; first clears <span class="p14-band">Band 4 &middot; Toast</span></h2>
+  <p class="lede">
+    <code>summary/reportQueue.ts</code> (D5.9) &mdash; a thin, delve-only rule layered in front of the
+    shell&rsquo;s own real <code>toastStack.ts</code>/<code>Toasts.tsx</code> (no second toast component,
+    no second ARIA live region). Queued, never racing band 3: a report arriving while the summary (&sect;F)
+    is open waits and, past three held, collapses into one combined report on close &mdash; a genuinely
+    different rule from <code>Toasts.tsx</code>&rsquo;s own unrelated <code>VISIBLE_CAP=3</code>, which only
+    hides overflow behind a &ldquo;+N more&rdquo; count.
+  </p>
+  <div class="spec">
+    <div class="toast-stack">
+      <div class="toast toast--ok"><div class="msg"><b>Dev: found a relic</b></div></div>
+      <div class="toast toast--ok"><div class="msg"><b>Dev: leveled up</b></div></div>
+      <div class="toast toast--ok"><div class="msg"><b>Dev: a wild demon joined</b></div></div>
+    </div>
+    <p class="statenote" style="margin-top:var(--sp-2)">Live-verified this session: pushing 4 while closed shows exactly 3 plus a &ldquo;+1 more&rdquo; indicator (<code>Toasts.tsx</code>&rsquo;s own cap); pushing 4 while the summary is held and then closing collapses them into one &ldquo;4 more results from this raid&rdquo; toast.</p>
+    <table class="t" style="margin-top:var(--sp-3)">
+      <thead><tr><th>Report kind</th><th>Mechanism</th><th>Per-kind authored copy</th></tr></thead>
+      <tbody>
+        <tr><td>Drop</td><td rowspan="4"><span class="bucket" data-b="wiring">wiring</span> real queue, real hold/collapse rule, zero production callers</td>
+          <td rowspan="4"><span class="bucket" data-b="real">real</span> — see below</td></tr>
+        <tr><td>Level-up</td></tr>
+        <tr><td>A wild demon joins</td></tr>
+        <tr><td>First clear</td></tr>
+      </tbody>
+    </table>
+    <div class="p14-real">
+      <strong>Per-kind display copy is a real gap, distinct from the queue mechanism.</strong> No producer
+      anywhere composes a drop/level-up/join/first-clear event at the extraction boundary — the module
+      queues a caller-supplied <code>&#123;kind, title, message&#125;</code> shape only, and does not invent
+      richer content nobody has authored. The four titles shown above (&ldquo;Dev: found a relic&rdquo;,
+      &hellip;) are this build&rsquo;s own dev-only placeholder strings, not real player copy.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== I -->
+<section class="sec" id="i">
+  <h2>I &middot; What this plate settles, and the one root cause</h2>
+  <div class="spec">
+    <table class="statsheet">
+      <thead><tr><th class="fam">Question</th><th class="fam">Answer</th></tr></thead>
+      <tbody>
+        <tr><td class="fam">Is the delve a stage or a layer?</td><td class="fam">A stage — GG-4&rsquo;s test: the player descends to <em>act</em>, not to look or configure</td></tr>
+        <tr><td class="fam">Does a fight ever leave the stage?</td><td class="fam">No. It expands the room it is in; the chooser is a band-2 panel, the fight itself never moves</td></tr>
+        <tr><td class="fam">Does Delve get a rail entry?</td><td class="fam">No — the descent door is a Sanctum affordance, exactly like the sector inspector</td></tr>
+        <tr><td class="fam">What survives a refresh mid-fight?</td><td class="fam">Everything — the state was never in the client; the graph camera, once fit, also survives every refetch</td></tr>
+        <tr><td class="fam">How is a blocked action shown?</td><td class="fam">Disabled with its reason beside it — the locked descent door names its own unlock condition twice over</td></tr>
+        <tr><td class="fam">How many band-3 dialogs can this stage open?</td><td class="fam">Exactly four — the summary and the three confirms — enforced by a real, whole-tree lint, not a convention</td></tr>
+        <tr><td class="fam">Where do the words on screen come from?</td><td class="fam"><code>labels.ts</code>, the one id&rarr;message table — no engine id, no <code>Θ</code>, no <code>‰</code>, no bare party index ever reaches a player surface</td></tr>
+      </tbody>
+    </table>
+
+    <p class="lede" style="margin-top:var(--sp-4)">
+      <strong>Every §7 row, in one place.</strong>
+    </p>
+    <table class="t">
+      <thead><tr><th>Band</th><th>Surface</th><th>Plate section</th><th>Bucket</th></tr></thead>
+      <tbody>
+        <tr><td>0 Stage</td><td>Room graph</td><td><a href="#a">§A</a></td><td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>0 Stage</td><td>Fight drawn on the room</td><td><a href="#b">§B</a></td><td><span class="bucket" data-b="wiring">wiring</span> (enemies: <span class="bucket" data-b="real">real</span>)</td></tr>
+        <tr><td>1 HUD</td><td>Party strip / pools / nerve / haul / souls / quests / room readout / initiative rail / connection state</td><td><a href="#c">§C</a></td><td>mixed — see §C&rsquo;s own table</td></tr>
+        <tr><td>2 Panel</td><td>Pack</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Wild talk</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Event</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Object prompt</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Supply bag</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Fight input</td><td><a href="#d">§D</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>2 Panel</td><td>Descent picker</td><td><a href="#e">§E</a></td><td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>3 Dialog</td><td>Extraction summary</td><td><a href="#f">§F</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>3 Dialog</td><td>Descend confirm</td><td><a href="#g">§G</a></td><td><span class="bucket" data-b="built">built</span></td></tr>
+        <tr><td>3 Dialog</td><td>Extract confirm</td><td><a href="#g">§G</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>3 Dialog</td><td>Retreat confirm</td><td><a href="#g">§G</a></td><td><span class="bucket" data-b="wiring">wiring</span></td></tr>
+        <tr><td>4 Toast</td><td>Drops · level-ups · joins · first clears</td><td><a href="#h">§H</a></td><td><span class="bucket" data-b="wiring">wiring</span> (per-kind copy: <span class="bucket" data-b="real">real</span>)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="p14-real" style="margin-top:var(--sp-4)">
+      <strong>The one root cause behind almost every <span class="bucket" data-b="wiring">wiring</span> badge on this
+      plate: D5.11, the live session client.</strong> <code>subscribe &middot; steer &middot; declare
+      &middot; freeze &middot; resume &middot; reconnect</code> &mdash; <code>src/stages/delve/session.ts</code>
+      does not exist. Its server half (D2.16) is separately, honestly still blocked: no concurrency
+      primitive for a mid-battle pause/resume has ever been built for <em>any</em> profile, siege included.
+      Connection state, the initiative rail, the fight-in-place live data, the Fight input panel, and the
+      Extract/Retreat confirms are all real, tested, and correctly built against the real contract shapes
+      (<code>FightView</code>, <code>DelveConnectionStatus</code>) &mdash; every one of them is a finished
+      component waiting on this exact module, not an unfinished one.
+    </div>
+
+    <p class="lede" style="margin-top:var(--sp-4)">
+      <strong>What this plate does not decide.</strong> Any number — every figure shown here is a real,
+      live fixture value, never a balance decision. Rung/band display wording (no registry exists yet —
+      &sect;E). Whether a live PvZ lawn ever becomes a room kind (party-dungeon-ideal.md &sect;7 — the
+      injector&rsquo;s kernel drive is sequenced last, in its own program). Pixels beyond layout fidelity —
+      colour, spacing and type all come from <code>_kit/tokens.css</code> unchanged; nothing here is a new
+      design-system decision.
+    </p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

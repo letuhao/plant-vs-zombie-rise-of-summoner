@@ -30,7 +30,11 @@ public class FusionRecipeReconcileTests
                 DemonRarityLadder.AtLeast(s.BaseRarity, DemonRecipeCatalog.OutputEligibilityFloor)
                 && s.Acquisition != DemonAcquisition.CaptureOnly);
             Assert.Equal(expected, eligible.Count);
-            Assert.Equal(709, eligible.Count); // today's real number, verified live 2026-09-06
+            // 840 -> 903 -> 904 generatable species 2026-09-07 (T2.11's own full classification run,
+            // then DoubleCherry's own attackTempo closed same day via an owner-directed manual pick —
+            // real captured stats + the model's own already-emitted reasoning/traits both pointed at
+            // "quick", never a model call), 713 -> 774 -> 775 eligible outputs accordingly.
+            Assert.Equal(775, eligible.Count); // today's real number, verified live 2026-09-07
 
             Assert.All(eligible, s => Assert.True(DemonRarityLadder.AtLeast(s.BaseRarity, DemonRecipeCatalog.OutputEligibilityFloor)));
             Assert.All(eligible, s => Assert.NotEqual(DemonAcquisition.CaptureOnly, s.Acquisition));
@@ -38,13 +42,16 @@ public class FusionRecipeReconcileTests
     }
 
     [Fact]
-    public void UnresolvedOutputs_on_the_real_corpus_is_exactly_the_14_known_Almanac_deficits()
+    public void UnresolvedOutputs_on_the_real_corpus_is_exactly_the_16_known_Almanac_deficits()
     {
         using (DemonSpeciesCatalog.UseScoped(RealCorpusFixture.Snapshot))
         {
             var unresolved = DemonRecipeCatalog.UnresolvedOutputs();
 
-            Assert.Equal(14, unresolved.Count);
+            // 14 -> 16 with the full 903-species corpus (2026-09-07) — Almanac grew 21 -> 22 eligible
+            // outputs while Sunwoven (the one rung below) stayed at its own real ceiling of 4,
+            // C(4,2)=6 pairs either way; the deficit widened by exactly the growth in Almanac's own count.
+            Assert.Equal(16, unresolved.Count);
             Assert.All(unresolved, s => Assert.Equal(DemonRarity.Almanac, s.BaseRarity));
 
             // Independently recomputed (eligible minus covered), not just the count — proves
@@ -92,10 +99,10 @@ public class FusionRecipeReconcileTests
         {
             var pool = DemonRecipeCatalog.CandidatePoolBelow(DemonRarity.Almanac, maxPopulatedRungs: 3);
 
-            Assert.Equal(41, pool.Count); // 4 Sunwoven + 4 Firstseed + 33 Heirloom, verified live 2026-09-06
+            Assert.Equal(53, pool.Count); // 4 Sunwoven + 4 Firstseed + 45 Heirloom, verified live 2026-09-07 (full 903-species corpus)
             Assert.Equal(4, pool.Count(p => p.RungDistance == 1));
             Assert.Equal(4, pool.Count(p => p.RungDistance == 2));
-            Assert.Equal(33, pool.Count(p => p.RungDistance == 3));
+            Assert.Equal(45, pool.Count(p => p.RungDistance == 3));
 
             Assert.All(pool.Where(p => p.RungDistance == 1), p => Assert.Equal(DemonRarity.Sunwoven, p.Species.BaseRarity));
             Assert.All(pool.Where(p => p.RungDistance == 2), p => Assert.Equal(DemonRarity.Firstseed, p.Species.BaseRarity));

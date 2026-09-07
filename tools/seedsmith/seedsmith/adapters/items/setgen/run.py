@@ -21,7 +21,9 @@ import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
+from ....pipeline.llm_caller import LlmCallerConfig, call_model
 from . import brief as brief_mod
 from . import emit, themes as themes_mod
 from .themes import Theme
@@ -30,6 +32,28 @@ from .vocab import Vocabulary
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_LEDGER = REPO_ROOT / "data" / "seed" / "items" / "_runs" / "set-charm-gen.ledger.json"
+
+
+def live_caller(live_config: LlmCallerConfig) -> "Callable[..., str]":
+    """A `call(system, user, *, config, schema)` that reaches a REAL model endpoint through
+    `pipeline.llm_caller.call_model`, bound to `live_config` at build time (module 13,
+    `set-charm-live-endpoint`) — the transport `answers.replay_caller`'s own docstring already said
+    a live run would use "the day a live run happens." That day is this module.
+
+    Same shape `answers.ReplayTransport.__call__` already satisfies: `workflow.nodes.generate`'s
+    `generate_node` calls whichever `call` it was handed as `caller(system, user, config=config,
+    schema=schema)`, where `config` is whatever `build_item_set_graph` was itself built with
+    (today, always `DEFAULT_CONFIG` — `authored.run_batch` never threads its own `config` through
+    to the graph). This transport accepts that incoming `config` for shape parity only and ignores
+    it: the endpoint/model/timeout a live run actually talks to is `live_config`, decided once at
+    the CLI from `--endpoint`/`--model`, not whatever the graph's unrelated default happens to be.
+    """
+
+    def _call(system: str, user: str, *, config: "LlmCallerConfig | None" = None,
+              schema: "dict | None" = None) -> str:  # noqa: ARG001 - config kept for shape parity
+        return call_model(system, user, config=live_config, schema=schema)
+
+    return _call
 
 
 @dataclass(frozen=True)

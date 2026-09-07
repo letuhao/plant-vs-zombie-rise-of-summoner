@@ -18,11 +18,16 @@ namespace FusionRpg.Core.Battle.Siege;
 /// file never references `BoardPathfinder`), a real `IIntentSource` that reads `IBattleView` to compute
 /// live `hitChanceMilli`/`incomingThreatMilli`/`objectiveClassMilli` from actual battle state (the
 /// AI-side slot on <see cref="SiegeIntentSource"/> below is caller-supplied, not implemented here),
-/// wiring <see cref="AiScoring.TopThree"/> into the real `DecisionTrace.cs`, §5.20 rule 5's emplacement
-/// replacement vocabulary, and enforcing `RetargetLatencyTicks` from a live retarget loop. Every one of
-/// those needs a working read of `IBattleView`/`BoardPathfinder` this session has not exercised in full,
-/// and the spec's own §5.20 addendum on Relic's five-patch cover-seeking regression is a direct warning
-/// against shipping an unverified live decision-maker under time pressure.</para>
+/// §5.20 rule 5's emplacement replacement vocabulary, and enforcing `RetargetLatencyTicks` from a live
+/// retarget loop. Every one of those needed a working read of `IBattleView`/`BoardPathfinder`, and the
+/// spec's own §5.20 addendum on Relic's five-patch cover-seeking regression was a direct warning
+/// against shipping an unverified live decision-maker under time pressure — all four are now built
+/// (`SiegeAiIntentSource`, 2026-09-05/07). <see cref="AiScoring.TopThree"/> is wired into a live trace
+/// too (R6, 2026-09-07) — correcting the spec's own citation: `Battle/Timeline/DecisionTrace.cs`
+/// replays HUMAN input decisions for `(setup, seed, trace)` determinism, a fixed `Player`/`Timeout`
+/// shape with no room for a scored candidate list, so the real target is `BattleTrace.AiDecision`,
+/// the SAME opt-in/non-null-gated/golden-neutral observability object the spec's own R6 text names as
+/// the pattern to follow ("exactly as `BattleTrace` is").</para>
 /// </summary>
 public enum Stance { Hold, Guard, Engage }
 
@@ -55,7 +60,8 @@ public sealed record TargetFilter
 public sealed record AiTuning(
     int WeightHitChance, int WeightObjective, int WeightKill, int WeightLowHp, int WeightCannotCounter,
     int WeightRound, int WeightRisk, Stance StanceDefault, int AutoResolveHandicapMilli,
-    long RetargetLatencyTicks, int AggressionRange, int MaxCandidatesScored);
+    long RetargetLatencyTicks, int AggressionRange, int MaxCandidatesScored,
+    int ObjectiveReferenceDistanceCells, int ThreatRadiusCells);
 
 /// <summary>
 /// One candidate target, already resolved to the plain facts the scorer needs (§3's additive formula)
@@ -66,6 +72,16 @@ public readonly record struct AiCandidate(
     string ActorKey, int BaseTier, int Aggression,
     int HitChanceMilli, int ObjectiveClassMilli, bool IsKillingBlow,
     int TargetMissingHpMilli, bool TargetCanCounter, long IncomingThreatMilli);
+
+/// <summary>
+/// R6's own per-term breakdown of one candidate's <see cref="AiScoring.Score"/> — for trace/debug
+/// readability only, never an independent computation: <see cref="Total"/> is always
+/// <see cref="AiScoring.Score"/>'s own return value for the SAME candidate, called directly rather
+/// than re-derived from the individual terms, so the breakdown can never silently disagree with the
+/// total a real decision actually used.
+/// </summary>
+public readonly record struct AiScoreBreakdown(
+    long HitChance, long Objective, long Kill, long LowHp, long CannotCounter, long Round, long Risk, long Total);
 
 public static class AiScoring
 {
@@ -129,16 +145,48 @@ public static class AiScoring
             .First();
     }
 
-    /// <summary>R6: the top three scored candidates with their raw score, ordinal-tie-broken —
-    /// `DecisionTrace.cs`'s eventual input. Pure; costs nothing until a caller wires it in.</summary>
-    public static IReadOnlyList<(string ActorKey, long Score)> TopThree(
+    /// <summary>
+    /// Every individual weighted term <see cref="Score"/> sums, broken out for R6's own trace.
+    /// <see cref="AiScoreBreakdown.Total"/> calls <see cref="Score"/> directly rather than re-summing
+    /// the terms here — a second accumulation could overflow/round differently than the tested,
+    /// already-shipped one, exactly the "silently-diverging second copy" this program avoids elsewhere
+    /// (`SiegeExpectedDamage`/`SiegeHitChance` reusing `OverlayCombatCalculator`'s formula verbatim).
+    /// </summary>
+    public static AiScoreBreakdown ScoreBreakdownOf(AiCandidate c, int currentRound, AiTuning w) =>
+        new(
+            HitChance: checked((long)w.WeightHitChance * c.HitChanceMilli),
+            Objective: checked((long)w.WeightObjective * c.ObjectiveClassMilli),
+            Kill: checked((long)w.WeightKill * (c.IsKillingBlow ? 1000 : 0)),
+            LowHp: checked((long)w.WeightLowHp * c.TargetMissingHpMilli),
+            CannotCounter: checked((long)w.WeightCannotCounter * (c.TargetCanCounter ? 0 : 1000)),
+            Round: checked((long)w.WeightRound * currentRound),
+            Risk: checked((long)w.WeightRisk * c.IncomingThreatMilli),
+            Total: Score(c, currentRound, w));
+
+    /// <summary>R6: the top three scored candidates with their full per-term breakdown, ordinal-tie-broken
+    /// — `BattleTrace.AiDecision`'s eventual input via `FormatTopThree`. Pure; costs nothing until a
+    /// caller wires it in.</summary>
+    public static IReadOnlyList<(string ActorKey, AiScoreBreakdown Breakdown)> TopThree(
         IReadOnlyList<AiCandidate> candidates, int currentRound, AiTuning w) =>
         candidates
-            .Select(c => (c.ActorKey, Score: Score(c, currentRound, w)))
-            .OrderByDescending(x => x.Score)
+            .Select(c => (c.ActorKey, Breakdown: ScoreBreakdownOf(c, currentRound, w)))
+            .OrderByDescending(x => x.Breakdown.Total)
             .ThenBy(x => x.ActorKey, StringComparer.Ordinal)
             .Take(3)
             .ToList();
+
+    /// <summary>
+    /// Formats R6's own top-three-with-breakdown as one line for `BattleTrace.AiDecision`.
+    /// `BattleTrace` stays domain-agnostic (every other method there takes primitives, never a
+    /// subsystem's own type) — this module owns its own trace text instead of handing `BattleTrace`
+    /// an `AiScoreBreakdown` and creating a `Timeline` → `Siege` dependency opposite the existing one
+    /// (`SiegeAiIntentSource` already depends on `Timeline`, not the reverse).
+    /// </summary>
+    public static string FormatTopThree(IReadOnlyList<(string ActorKey, AiScoreBreakdown Breakdown)> topThree) =>
+        string.Join(" ", topThree.Select((t, i) =>
+            $"#{i + 1}={t.ActorKey}(hit={t.Breakdown.HitChance},obj={t.Breakdown.Objective}," +
+            $"kill={t.Breakdown.Kill},lowhp={t.Breakdown.LowHp},cc={t.Breakdown.CannotCounter}," +
+            $"rnd={t.Breakdown.Round},risk={t.Breakdown.Risk},total={t.Breakdown.Total})"));
 }
 
 /// <summary>

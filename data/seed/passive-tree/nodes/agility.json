@@ -121,7 +121,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while posture is active \u2014 posture wins.",
+        "printedText": "Inert while posture is active — posture wins.",
         "propertyKeys": [
           "posture"
         ]
@@ -158,6 +158,32 @@
       "nameKey": "tree.node.light-footed-resilience",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evasion",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "Tension held in the muscle, ready to snap back against the strike.",
+      "id": "skill.agility-def-t2-n2",
+      "name": "Spring-Loaded Sinew",
+      "nameKey": "tree.node.spring-loaded-sinew",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
       "rationale": "",
       "tier": 2
     },

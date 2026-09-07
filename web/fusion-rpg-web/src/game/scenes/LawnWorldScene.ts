@@ -273,29 +273,11 @@ export class LawnWorldScene extends Phaser.Scene {
     };
   }
 
-  /** Confirm current keyboard focus — same payload shape as PickSystem cell path. */
+  /**
+   * Confirm current keyboard focus — GG-21 tile dock: Enter opens the cell occupancy dock
+   * (`kind: "tile"`), never topmost-only inspect. Direct GO hits still select occupants.
+   */
   private emitKeyboardSelect(pos: GridPos): void {
-    let hit: { ptr: string; row?: number; col?: number } | undefined;
-    let bestDepth = -Infinity;
-    for (const rec of this.ptrRegistry.entries()) {
-      if (rec.side !== "plant" && rec.side !== "zombie") continue;
-      if (rec.row !== pos.row || rec.col !== pos.col) continue;
-      const depth = typeof rec.go.depth === "number" ? rec.go.depth : 0;
-      if (depth >= bestDepth) {
-        bestDepth = depth;
-        hit = { ptr: rec.ptr, row: rec.row, col: rec.col };
-      }
-    }
-    if (hit) {
-      lawnBusEmit("lawn:select", {
-        generation: this.generation,
-        kind: "occupant",
-        ptr: hit.ptr,
-        row: hit.row,
-        col: hit.col
-      });
-      return;
-    }
     lawnBusEmit("lawn:select", {
       generation: this.generation,
       kind: "tile",

@@ -1,5 +1,6 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Unlock;
+using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
@@ -217,7 +218,9 @@ public static partial class BattleEngine
         Timeline.IIntentSource? intentSource = null, Board.BoardState? board = null,
         Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null,
         IReadOnlyList<RunnerBinding>? runnerBindings = null,
-        IReadOnlySet<string>? containersWithRunnerCoverage = null)
+        IReadOnlySet<string>? containersWithRunnerCoverage = null,
+        Func<string, IReadOnlyList<string>>? equipEffectIdsFor = null,
+        AiTuning? aiTuning = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -235,13 +238,27 @@ public static partial class BattleEngine
         foreach (var a in setup.Squad.Concat(setup.Wave))
             ValidateActorKey(a, seenKeys);
 
+        // B37: the profile is now READ. `null` means "content did not choose" and resolves to
+        // classic-round, mirroring WaveDef.Profile's own resolution. Resolved BEFORE `state` below
+        // (moved 2026-09-07, base-defense siege-ai) so its own `RoundDurationMs` can build a real
+        // `roundOf` for `SiegeAiIntentSource` — a safe, purely-local reorder: nothing between here and
+        // the old call site read anything `state`'s own construction depends on.
+        var activeProfile = profile ?? Timeline.BattleModeProfileCatalog.ClassicRound;
+
         // B13 (spec-kernel-adoption.md): every local this method used to hold — actors, byKey,
         // host, shields, gate, sink, events, RNG streams — plus the eight closures over them, now
         // live on BattleRunState (BattleRunState.cs, nested in this partial class). Zero behavior
         // change: every line below is the same statement sequence as before extraction, reading
         // through `state.` instead of a captured local.
+        // base-defense siege-ai: `roundOf` derives from THIS battle's own real round duration, not a
+        // guess — `weightRound` is XCOM's own smallest-weighted term, so precision here is a nicety,
+        // not a correctness requirement, but deriving it costs nothing once `activeProfile` is resolved
+        // (immediately above) before this call. `aiTuning` null (every existing caller) leaves both
+        // arguments inert — `BattleRunState`'s own constructor never reads `roundOf` unless `aiTuning`
+        // is also non-null.
         var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver, board,
-            unlockStateFor, unlockTuning, runnerBindings, containersWithRunnerCoverage);
+            unlockStateFor, unlockTuning, runnerBindings, containersWithRunnerCoverage, equipEffectIdsFor,
+            aiTuning, roundOf: tick => (int)(tick / Math.Max(1, activeProfile.RoundDurationMs)));
 
         // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
         // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`
@@ -255,9 +272,6 @@ public static partial class BattleEngine
         // OTHER half); status delivery is fully event-driven. Exactly one event of EACH kind is ever
         // pending at a time, recomputed and rescheduled after it fires — the same "does the queue
         // still hold a scheduled X" pattern B14 already established for rounds, now applied twice.
-        // B37: the profile is now READ. `null` means "content did not choose" and resolves to
-        // classic-round, mirroring WaveDef.Profile's own resolution.
-        var activeProfile = profile ?? Timeline.BattleModeProfileCatalog.ClassicRound;
         // One economy per BATTLE, never the profile's own — profiles are cached singletons and an
         // economy holds mutable per-key budget state, so sharing one across concurrent battles
         // starves actors of turns. See BattleModeProfile.NewEconomy for the reproduction.

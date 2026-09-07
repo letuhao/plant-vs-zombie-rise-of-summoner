@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "batch": "consumables-trial-2026-09-07",
+    "partition": "consumables/2",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 5,
+      "tags": 4,
+      "classes": 4,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "consumables-gen/1",
+    "model": "consumablegen/hand-authored-1",
+    "authoredUtc": "2026-09-07T00:00:00Z",
+    "sourceRef": "ssot-consumables.md §3.1, §5.2, §7.2 -- trial batch, item-seedgen consumables-gen"
+  },
+  "entries": [
+    {
+      "id": "consumable.k2-021",
+      "nameKey": "consumable.draught-stoicism",
+      "name": "Steadfast Distillate",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.stoicism",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Crit-resist stat.derived family (combat.crit.resist.*); run-scoped binding at dispatch, same discipline as k2's other stat.derived draughts."
+    }
+  ]
+}

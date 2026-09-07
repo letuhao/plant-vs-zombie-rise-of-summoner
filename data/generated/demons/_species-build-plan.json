@@ -1,471 +1,6330 @@
 {
-  "ashthreepeater": {
-    "Agility": 102,
-    "Bulwark": 102,
-    "Composure": 592,
-    "Ferocity": 102,
-    "Focus": 102
+  "abyssswordstar": {
+    "Agility": 163,
+    "Bulwark": 163,
+    "Composure": 162,
+    "Ferocity": 162,
+    "Onslaught": 350
   },
-  "bucketnutzombie": {
+  "acientsunnut": {
+    "Bulwark": 502,
+    "Focus": 125,
+    "Fortitude": 125,
+    "Might": 124,
+    "Pierce": 124
+  },
+  "allpeater": {
+    "Focus": 195,
+    "Onslaught": 350,
+    "Precision": 152,
+    "Retribution": 152,
+    "Vigor": 151
+  },
+  "apple": {
+    "Bulwark": 502,
+    "Fortitude": 124,
+    "Might": 125,
+    "Pierce": 125,
+    "Vigor": 124
+  },
+  "armedgargantuar": {
+    "Composure": 101,
+    "Ferocity": 101,
+    "Might": 596,
+    "Precision": 101,
+    "Retribution": 101
+  },
+  "armoredimpzombie": {
+    "Agility": 102,
+    "Bulwark": 131,
+    "Fortitude": 563,
+    "Pierce": 102,
+    "Precision": 102
+  },
+  "ashthreepeater": {
+    "Agility": 101,
+    "Composure": 597,
+    "Ferocity": 101,
+    "Retribution": 101,
+    "Vigor": 100
+  },
+  "balloonzombie": {
+    "Agility": 585,
+    "Focus": 104,
+    "Pierce": 104,
+    "Precision": 103,
+    "Retribution": 104
+  },
+  "bamboo": {
+    "Ferocity": 120,
+    "Focus": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "bamboodragon": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "bamboofurnace": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Pierce": 125,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "bamboospruce": {
+    "Ferocity": 102,
+    "Focus": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "bedrocksnowzombie": {
+    "Bulwark": 502,
+    "Focus": 125,
+    "Fortitude": 125,
+    "Might": 124,
+    "Pierce": 124
+  },
+  "bedrocktallnut": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Vigor": 124
+  },
+  "bigchomper": {
+    "Agility": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "biggatling": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Retribution": 163,
+    "Vigor": 162
+  },
+  "biggloom": {
+    "Agility": 162,
+    "Focus": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "bigpumpkin": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Might": 125,
+    "Retribution": 125
+  },
+  "bigseashroom": {
+    "Focus": 120,
+    "Fortitude": 119,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "bigsunnut": {
+    "Agility": 163,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "bigsunshroom": {
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 115,
+    "Precision": 116,
+    "Vigor": 116
+  },
+  "bigwallnut": {
+    "Agility": 162,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 163
+  },
+  "blackelephantzombie": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Fortitude": 124,
+    "Might": 124,
+    "Pierce": 125
+  },
+  "blackflagfootball": {
+    "Agility": 195,
+    "Ferocity": 151,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Vigor": 152
+  },
+  "blackfootball": {
+    "Composure": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 110
+  },
+  "blackfootball_a": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "blackfootball_b": {
+    "Agility": 109,
     "Fortitude": 563,
     "Might": 110,
-    "Onslaught": 109,
+    "Precision": 109,
+    "Retribution": 109
+  },
+  "blackfootball_c": {
+    "Composure": 94,
+    "Ferocity": 599,
+    "Fortitude": 120,
+    "Might": 93,
+    "Pierce": 94
+  },
+  "blackfootball_c2": {
+    "Focus": 152,
+    "Onslaught": 350,
+    "Precision": 195,
+    "Retribution": 151,
+    "Vigor": 152
+  },
+  "blackhorse": {
+    "Agility": 152,
+    "Bulwark": 195,
+    "Composure": 151,
+    "Onslaught": 350,
+    "Pierce": 152
+  },
+  "blackjackboxzombie": {
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 162,
+    "Vigor": 163
+  },
+  "blacktrainzombie": {
+    "Agility": 163,
+    "Composure": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "blover": {
+    "Agility": 115,
+    "Focus": 538,
+    "Precision": 116,
+    "Retribution": 115,
+    "Vigor": 116
+  },
+  "blovermine": {
+    "Composure": 112,
+    "Fortitude": 143,
+    "Pierce": 112,
+    "Precision": 112,
+    "Retribution": 521
+  },
+  "bloverpot": {
+    "Agility": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "bloverumbrella": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "blowerpumpkin": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Precision": 124
+  },
+  "bluegargantuar": {
+    "Agility": 195,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Vigor": 151
+  },
+  "boatimp": {
+    "Composure": 163,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "bucketdoom": {
+    "Ferocity": 162,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "bucketnutzombie": {
+    "Agility": 109,
+    "Composure": 110,
+    "Fortitude": 563,
     "Pierce": 109,
     "Precision": 109
   },
+  "bucketpaper": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 125,
+    "Precision": 124,
+    "Retribution": 125
+  },
+  "bucketplant": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Focus": 125,
+    "Vigor": 125
+  },
   "bucketzombie": {
-    "Agility": 114,
-    "Bulwark": 544,
-    "Ferocity": 114,
-    "Retribution": 114,
-    "Vigor": 114
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 124,
+    "Pierce": 125,
+    "Retribution": 125
+  },
+  "bucketzombieduck": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Focus": 124,
+    "Precision": 125,
+    "Vigor": 125
+  },
+  "bungizombie": {
+    "Agility": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Retribution": 109
+  },
+  "cabbageblover": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cabbagecaltrop": {
+    "Agility": 120,
+    "Composure": 119,
+    "Might": 120,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "cabbagecannon": {
+    "Agility": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "cabbagefume": {
+    "Agility": 119,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "cabbagemelon": {
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "cabbagenut": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Focus": 120,
+    "Pierce": 119,
+    "Retribution": 521
+  },
+  "cabbagepot": {
+    "Agility": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 115,
+    "Vigor": 116
+  },
+  "cabbagepuff": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564
   },
   "cabbagepult": {
-    "Focus": 118,
-    "Might": 117,
-    "Onslaught": 118,
-    "Pierce": 150,
-    "Precision": 497
+    "Composure": 102,
+    "Fortitude": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "cabbagesquash": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cabbageumbrella": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "cacstusstar": {
+    "Agility": 109,
+    "Fortitude": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
   },
   "cactus": {
-    "Agility": 126,
-    "Ferocity": 125,
-    "Precision": 497,
-    "Retribution": 126,
-    "Vigor": 126
+    "Composure": 109,
+    "Fortitude": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564
   },
   "cactusblover": {
-    "Focus": 118,
-    "Might": 118,
-    "Onslaught": 117,
-    "Pierce": 150,
-    "Precision": 497
+    "Agility": 102,
+    "Ferocity": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "cactuscaltrop": {
+    "Composure": 102,
+    "Focus": 102,
+    "Might": 102,
+    "Pierce": 130,
+    "Precision": 564
+  },
+  "cactusfume": {
+    "Ferocity": 102,
+    "Focus": 130,
+    "Fortitude": 102,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "cactusnut": {
+    "Agility": 112,
+    "Composure": 112,
+    "Might": 112,
+    "Pierce": 143,
+    "Retribution": 521
+  },
+  "cactuspumpkin": {
+    "Agility": 119,
+    "Ferocity": 120,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "cactusumbrella": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Fortitude": 116,
+    "Might": 117,
+    "Pierce": 149
   },
   "caltrop": {
-    "Ferocity": 106,
-    "Focus": 107,
-    "Pierce": 573,
-    "Retribution": 107,
-    "Vigor": 107
+    "Ferocity": 105,
+    "Focus": 105,
+    "Might": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "caltropfume": {
+    "Agility": 105,
+    "Composure": 105,
+    "Focus": 105,
+    "Fortitude": 105,
+    "Pierce": 580
+  },
+  "caltropkelp_land": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "caltropkelp_water": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Focus": 105,
+    "Fortitude": 105,
+    "Pierce": 580
   },
   "caltropnut": {
-    "Agility": 107,
-    "Fortitude": 136,
-    "Might": 106,
-    "Onslaught": 107,
-    "Retribution": 544
+    "Composure": 112,
+    "Fortitude": 143,
+    "Might": 112,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "caltroppot": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Focus": 125
+  },
+  "catapultzombie": {
+    "Agility": 109,
+    "Focus": 109,
+    "Might": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "cattailgirl": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "cattaillour": {
+    "Agility": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "cattailplant": {
+    "Composure": 102,
+    "Ferocity": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "cherryblover": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350
   },
   "cherrybomb": {
-    "Agility": 156,
-    "Ferocity": 156,
-    "Focus": 157,
-    "Onslaught": 374,
-    "Vigor": 157
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cherrycatapultzombie": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "cherrychomper": {
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Retribution": 195
+  },
+  "cherryfume": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 162,
+    "Focus": 163,
+    "Onslaught": 350
+  },
+  "cherrygatling": {
+    "Agility": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cherryhypno": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Focus": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "cherryjalapeno": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350
+  },
+  "cherrymagnet": {
+    "Agility": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cherrymine": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Focus": 120,
+    "Might": 119,
+    "Retribution": 521
   },
   "cherrynut": {
-    "Composure": 114,
-    "Focus": 114,
-    "Might": 114,
-    "Retribution": 544,
-    "Vigor": 114
+    "Agility": 120,
+    "Focus": 119,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 120
   },
   "cherrynutzombie": {
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "cherrypaperz95": {
+    "Agility": 163,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "cherrypaperzombie": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "cherrypot": {
+    "Composure": 109,
+    "Focus": 109,
+    "Fortitude": 563,
+    "Might": 110,
+    "Vigor": 109
+  },
+  "cherrypuff": {
+    "Agility": 120,
+    "Composure": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "cherrypumpkin": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Focus": 125
+  },
+  "cherryscaredy": {
+    "Ferocity": 119,
+    "Focus": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "cherryshooter": {
+    "Agility": 109,
+    "Composure": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564
+  },
+  "cherryshooterzombie": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Focus": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "cherrysplit": {
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "cherrysquash": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "cherrysubmarine": {
+    "Composure": 109,
+    "Focus": 109,
+    "Fortitude": 563,
+    "Might": 110,
+    "Vigor": 109
+  },
+  "cherrythreepeater": {
+    "Agility": 152,
+    "Ferocity": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Retribution": 195
+  },
+  "cherrytorch": {
+    "Composure": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "cherryultimatepumpkin": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Might": 124
+  },
+  "cherryumbrella": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Focus": 125,
+    "Pierce": 124,
+    "Vigor": 125
+  },
+  "chickenimp": {
+    "Agility": 585,
+    "Composure": 104,
+    "Focus": 103,
+    "Might": 104,
+    "Vigor": 104
+  },
+  "chomper": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "chomperpumpkin": {
+    "Ferocity": 109,
+    "Focus": 109,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 110
+  },
+  "chompersquash": {
+    "Composure": 162,
+    "Focus": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "chrysantheautumn": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Pierce": 125,
+    "Vigor": 124
+  },
+  "coachpaper": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115
+  },
+  "cobcannon": {
+    "Agility": 162,
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "conezombie": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 124,
+    "Pierce": 125,
+    "Vigor": 124
+  },
+  "conezombieduck": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Pierce": 125
+  },
+  "cornblover": {
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "corncabbage": {
+    "Agility": 109,
+    "Composure": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "corncaltrop": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Might": 124
+  },
+  "cornfume": {
+    "Composure": 119,
+    "Focus": 120,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "cornmelon": {
+    "Agility": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116
+  },
+  "cornnut": {
+    "Agility": 120,
+    "Composure": 119,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "cornpot": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Pierce": 116
+  },
+  "cornpuff": {
+    "Agility": 109,
+    "Composure": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "cornpult": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116
+  },
+  "cornumbrella": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Might": 124,
+    "Pierce": 125,
+    "Vigor": 125
+  },
+  "dancepolzombie": {
+    "Agility": 195,
+    "Composure": 151,
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350
+  },
+  "dancepolzombie2": {
+    "Agility": 585,
+    "Ferocity": 103,
+    "Might": 104,
+    "Pierce": 104,
+    "Vigor": 104
+  },
+  "darkthreepeater": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "deathchomper": {
+    "Ferocity": 120,
+    "Fortitude": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "deathmine": {
+    "Composure": 119,
+    "Ferocity": 120,
+    "Might": 120,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "diamondimitater": {
+    "Focus": 538,
+    "Fortitude": 116,
+    "Might": 116,
+    "Pierce": 115,
+    "Vigor": 115
+  },
+  "diamondpotatonut": {
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "diamondrandomzombie": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 110
+  },
+  "dolldiamond": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 110
+  },
+  "dollgold": {
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 110,
+    "Pierce": 109,
+    "Vigor": 109
+  },
+  "dollsilver": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Vigor": 124
+  },
+  "dolphingatlingzombie": {
+    "Agility": 195,
+    "Composure": 151,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 152
+  },
+  "dolphinpaper": {
+    "Agility": 143,
+    "Might": 112,
+    "Pierce": 112,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "dolphinpeazombie": {
+    "Agility": 195,
+    "Composure": 152,
+    "Ferocity": 152,
+    "Might": 151,
+    "Onslaught": 350
+  },
+  "dolphinrider": {
+    "Agility": 585,
+    "Composure": 103,
+    "Ferocity": 104,
+    "Pierce": 104,
+    "Vigor": 104
+  },
+  "doomblover": {
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Retribution": 195,
+    "Vigor": 152
+  },
+  "doomcabbage": {
+    "Composure": 163,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "doomcactus": {
+    "Composure": 151,
+    "Ferocity": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "doomcherry": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "doomchomper": {
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "doomcorn": {
+    "Composure": 163,
+    "Focus": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "doomfume": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "doomgarlic": {
+    "Agility": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "doomgatling": {
+    "Composure": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
+  },
+  "doomjalapeno": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Focus": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "doomkelp": {
+    "Composure": 163,
+    "Focus": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "doommelon": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "doomnut": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Focus": 125,
+    "Might": 124,
+    "Vigor": 125
+  },
+  "doompaper": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "doompeashooter": {
+    "Agility": 151,
+    "Focus": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "doomplantern": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "doompumpkin": {
+    "Agility": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Vigor": 115
+  },
+  "doomseashroom": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "doomseed": {
+    "Composure": 120,
+    "Might": 119,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "doomshroom": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "doomsniper": {
+    "Fortitude": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "doomsquash": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350
+  },
+  "doomstar": {
+    "Composure": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "doomsunflower": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Pierce": 120,
+    "Precision": 119,
+    "Retribution": 521
+  },
+  "doomthreepeater": {
+    "Focus": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "doomtorch": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "doomzombie": {
+    "Focus": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "doorzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Precision": 124
+  },
+  "doublecherry": {
+    "Focus": 109,
+    "Fortitude": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "doublepuff": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "doubleshooter": {
+    "Composure": 163,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "doublesnow": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564
+  },
+  "driver_a": {
+    "Composure": 163,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "driver_b": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Pierce": 124
+  },
+  "driver_c": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Fortitude": 125,
+    "Might": 124
+  },
+  "driverzombie": {
+    "Agility": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "drown_a": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Fortitude": 105,
+    "Might": 105,
+    "Pierce": 580
+  },
+  "drown_b": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "drown_c": {
+    "Ferocity": 151,
+    "Fortitude": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "drowngargantuar": {
+    "Agility": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "drownpult_a": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "drownpult_b": {
+    "Composure": 162,
+    "Focus": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "drownpult_c": {
+    "Agility": 151,
+    "Ferocity": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Retribution": 195
+  },
+  "drownpultzombie": {
+    "Composure": 162,
+    "Focus": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "drownzombie": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "electriconion": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "elephantzombie": {
+    "Agility": 163,
+    "Composure": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "elephantzombie_a": {
+    "Composure": 101,
+    "Ferocity": 101,
+    "Focus": 101,
+    "Fortitude": 101,
+    "Might": 596
+  },
+  "elephantzombie_b": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 117,
+    "Focus": 116,
+    "Onslaught": 149
+  },
+  "elephantzombie_c": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Fortitude": 117,
+    "Onslaught": 149,
+    "Vigor": 116
+  },
+  "elitepaperzombie": {
+    "Agility": 101,
+    "Composure": 597,
+    "Ferocity": 101,
+    "Focus": 100,
+    "Pierce": 101
+  },
+  "emeraldumbrella": {
+    "Ferocity": 119,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "endoflame": {
+    "Agility": 120,
+    "Focus": 120,
+    "Fortitude": 119,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "endoflamegirl": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "endoflamezombie": {
+    "Bulwark": 502,
+    "Focus": 125,
+    "Fortitude": 124,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "endpumpiner": {
+    "Bulwark": 502,
+    "Focus": 125,
+    "Might": 124,
+    "Pierce": 125,
+    "Precision": 124
+  },
+  "enumvalue261": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "enumvalue262": {
+    "Agility": 585,
+    "Focus": 104,
+    "Might": 103,
+    "Pierce": 104,
+    "Precision": 104
+  },
+  "enumvalue263": {
+    "Ferocity": 162,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "enumvalue264": {
+    "Composure": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 163
+  },
+  "enumvalue265": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "enumvalue266": {
+    "Composure": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109,
+    "Vigor": 110
+  },
+  "enumvalue267": {
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "enumvalue268": {
+    "Composure": 163,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "eternalzombie_a": {
+    "Ferocity": 102,
+    "Fortitude": 563,
+    "Pierce": 102,
+    "Precision": 102,
+    "Retribution": 131
+  },
+  "eternalzombie_b": {
+    "Composure": 152,
+    "Focus": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "eternalzombie_c": {
+    "Agility": 195,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Precision": 152,
+    "Vigor": 151
+  },
+  "extract_single": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "extract_ten": {
+    "Agility": 585,
+    "Might": 103,
+    "Pierce": 104,
+    "Precision": 104,
+    "Vigor": 104
+  },
+  "firecabbage": {
+    "Composure": 163,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "firecaltrop": {
+    "Ferocity": 105,
+    "Might": 105,
+    "Pierce": 580,
+    "Retribution": 105,
+    "Vigor": 105
+  },
+  "firecannon": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "firecattail": {
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Retribution": 162
+  },
+  "firecracker": {
+    "Ferocity": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "firefume": {
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 163,
+    "Vigor": 162
+  },
+  "firegloom": {
+    "Ferocity": 163,
+    "Focus": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "firekelp": {
+    "Agility": 163,
+    "Composure": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Retribution": 163
+  },
+  "firemelon": {
+    "Ferocity": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "firemine": {
+    "Agility": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 163
+  },
+  "firenut": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "fireseashroom": {
+    "Agility": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115,
+    "Precision": 116
+  },
+  "firesniper": {
+    "Composure": 102,
+    "Fortitude": 102,
+    "Onslaught": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "firespikerock": {
+    "Agility": 162,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "firesquash": {
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "firesunshroom_a": {
+    "Agility": 116,
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115
+  },
+  "firesunshroom_b": {
+    "Agility": 119,
+    "Fortitude": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "firesunshroom_c": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "flagfootball": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "flagzombie": {
+    "Composure": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "flyingthreepeater": {
+    "Agility": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152
+  },
+  "flyingthreepeater_sp": {
+    "Bulwark": 152,
+    "Composure": 151,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "footballboss": {
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "footballdolphin": {
+    "Agility": 585,
+    "Bulwark": 97,
+    "Composure": 97,
+    "Ferocity": 97,
+    "Fortitude": 124
+  },
+  "footballdrown": {
+    "Bulwark": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Precision": 195,
+    "Vigor": 151
+  },
+  "footballzombie": {
+    "Agility": 131,
+    "Composure": 102,
+    "Focus": 102,
+    "Fortitude": 563,
+    "Might": 102
+  },
+  "frozenpear": {
+    "Bulwark": 119,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "fumepumpkin": {
+    "Focus": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 151,
+    "Vigor": 152
+  },
+  "fumeshroom": {
+    "Bulwark": 105,
+    "Composure": 105,
+    "Ferocity": 105,
+    "Might": 105,
+    "Pierce": 580
+  },
+  "gargantuar": {
+    "Composure": 101,
+    "Focus": 101,
+    "Might": 596,
+    "Precision": 101,
+    "Vigor": 101
+  },
+  "garlic": {
+    "Bulwark": 120,
+    "Ferocity": 120,
+    "Focus": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "garlicblover": {
+    "Bulwark": 115,
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Precision": 116
+  },
+  "garliccabbage": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "garliccorn": {
+    "Bulwark": 163,
+    "Composure": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "garlicfume": {
+    "Agility": 163,
+    "Bulwark": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "garlicgatling": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350
+  },
+  "garlicmelon": {
+    "Bulwark": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "garlicnut": {
+    "Agility": 120,
+    "Composure": 120,
+    "Ferocity": 119,
+    "Fortitude": 120,
+    "Retribution": 521
+  },
+  "garlicpea": {
+    "Bulwark": 120,
+    "Focus": 120,
+    "Fortitude": 120,
+    "Might": 119,
+    "Retribution": 521
+  },
+  "garlicpot": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Pierce": 125,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "garlicpumpkin": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Focus": 119,
+    "Fortitude": 120,
+    "Retribution": 521
+  },
+  "garlicrepeater": {
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "garlicsniper": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "garlicsplit": {
+    "Focus": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "garlicthreepeater": {
+    "Agility": 151,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Precision": 152,
+    "Retribution": 195
+  },
+  "garlictorch": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "garlicultimatechomper": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Onslaught": 149,
+    "Pierce": 117,
+    "Vigor": 116
+  },
+  "garlicumbrella": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Fortitude": 124,
+    "Precision": 125
+  },
+  "gatlingblackfootball": {
+    "Composure": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "gatlingdoomscaredy": {
+    "Agility": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Precision": 152,
+    "Retribution": 195
+  },
+  "gatlingfootballzombie": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "gatlingpaper_a": {
+    "Agility": 162,
+    "Composure": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "gatlingpaper_b": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "gatlingpaper_c": {
+    "Composure": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 162
+  },
+  "gatlingpea": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "gatlingpeazombie": {
+    "Composure": 162,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162
+  },
+  "gatlingpuff": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "gloomshroom": {
+    "Composure": 151,
+    "Focus": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "goldbungizombie": {
+    "Agility": 120,
+    "Might": 119,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "goldcabbage": {
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Precision": 195,
+    "Vigor": 151
+  },
+  "goldcorn": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "golddoom": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "goldgarlic": {
+    "Agility": 109,
+    "Composure": 109,
+    "Focus": 109,
+    "Fortitude": 563,
+    "Might": 110
+  },
+  "goldhypnodoom": {
+    "Bulwark": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 163
+  },
+  "goldiceshroom": {
+    "Agility": 152,
+    "Focus": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "goldmagnet": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "goldmelon": {
+    "Agility": 162,
+    "Bulwark": 163,
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "goldnut": {
+    "Ferocity": 109,
+    "Focus": 110,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 109
+  },
+  "goldpot": {
+    "Bulwark": 115,
+    "Composure": 115,
+    "Focus": 538,
+    "Precision": 116,
+    "Vigor": 116
+  },
+  "goldscarypot": {
+    "Agility": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115
+  },
+  "goldsunflower": {
+    "Bulwark": 162,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 163
+  },
+  "goldthreeplantern": {
+    "Agility": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115
+  },
+  "goldthreetorch": {
+    "Agility": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "goldumbrella": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "goldzombie": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Precision": 125
+  },
+  "gravebuster": {
+    "Fortitude": 563,
+    "Might": 110,
+    "Pierce": 109,
+    "Precision": 109,
+    "Vigor": 109
+  },
+  "greengargantuar": {
+    "Agility": 162,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "hamburger": {
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "helmetfume": {
+    "Agility": 98,
+    "Composure": 98,
+    "Ferocity": 98,
+    "Fortitude": 126,
+    "Pierce": 580
+  },
+  "helmetgatling": {
+    "Bulwark": 195,
+    "Composure": 151,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Precision": 152
+  },
+  "helmetplant": {
+    "Agility": 117,
+    "Bulwark": 502,
+    "Fortitude": 149,
+    "Might": 116,
+    "Vigor": 116
+  },
+  "holographicplant": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "horseboss": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "horsezombie": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "hugewallnut": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "hurricaneblover": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521
+  },
+  "hypnoblover": {
+    "Composure": 115,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Precision": 116,
+    "Vigor": 116
+  },
+  "hypnocattailgirl": {
+    "Agility": 116,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115,
+    "Vigor": 115
+  },
+  "hypnocattailgirl_land": {
+    "Composure": 152,
+    "Ferocity": 151,
+    "Focus": 195,
+    "Onslaught": 350,
+    "Precision": 152
+  },
+  "hypnochomper": {
+    "Agility": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "hypnodoom": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "hypnoemperor": {
+    "Agility": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Retribution": 195,
+    "Vigor": 151
+  },
+  "hypnofume": {
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116,
+    "Precision": 116
+  },
+  "hypnogarlic": {
+    "Ferocity": 120,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "hypnogatling": {
+    "Agility": 163,
+    "Composure": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "hypnojalapeno": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "hypnojalapenopickaxezombie": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564
+  },
+  "hypnojalapenozombie": {
+    "Agility": 120,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "hypnomagnet": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521
+  },
+  "hypnomelon": {
+    "Agility": 120,
+    "Composure": 119,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "hypnomine": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "hypnonut": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Fortitude": 125,
+    "Might": 124,
+    "Vigor": 125
+  },
+  "hypnopeashooter": {
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "hypnopot": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Precision": 124
+  },
+  "hypnopuff": {
+    "Agility": 120,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Retribution": 521
+  },
+  "hypnopumpkin": {
+    "Bulwark": 502,
+    "Might": 124,
+    "Pierce": 125,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "hypnoqueen": {
+    "Agility": 120,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Retribution": 521
+  },
+  "hypnorepeater": {
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "hypnoshroom": {
+    "Agility": 120,
+    "Composure": 120,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "hypnosplit": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "hypnosquash": {
+    "Agility": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "hypnotorch": {
+    "Agility": 119,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "icebean": {
+    "Focus": 538,
+    "Fortitude": 116,
+    "Might": 115,
+    "Pierce": 115,
+    "Vigor": 116
+  },
+  "iceblover": {
+    "Composure": 116,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Vigor": 115
+  },
+  "icecabbage": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "icecactus": {
+    "Composure": 102,
+    "Fortitude": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "icecaltrop": {
+    "Agility": 105,
+    "Composure": 105,
+    "Fortitude": 105,
+    "Might": 105,
+    "Pierce": 580
+  },
+  "icecannon": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "icecattail": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "icecherry": {
+    "Agility": 120,
+    "Composure": 120,
+    "Fortitude": 120,
+    "Might": 119,
+    "Retribution": 521
+  },
+  "iceclawzombie": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "icecorn": {
+    "Agility": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Precision": 138,
+    "Vigor": 108
+  },
+  "icedoom": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "icefumeshroom": {
+    "Agility": 115,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Fortitude": 116,
+    "Vigor": 116
+  },
+  "icefurnace": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Fortitude": 125,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "icegloom": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "icehypno": {
+    "Composure": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "icelaserumbrella": {
+    "Agility": 108,
+    "Composure": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Precision": 138
+  },
+  "icelotus": {
+    "Agility": 101,
+    "Ferocity": 101,
+    "Fortitude": 101,
+    "Pierce": 101,
+    "Vigor": 596
+  },
+  "icemine": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "icenut": {
+    "Agility": 120,
+    "Fortitude": 119,
+    "Might": 120,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "icepeach": {
+    "Agility": 151,
+    "Composure": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "iceplantern": {
+    "Composure": 115,
+    "Focus": 538,
+    "Fortitude": 116,
+    "Might": 116,
+    "Precision": 115
+  },
+  "icepot": {
+    "Agility": 116,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 115
+  },
+  "icepuff": {
+    "Agility": 105,
+    "Composure": 105,
+    "Ferocity": 105,
+    "Pierce": 580,
+    "Precision": 105
+  },
+  "icepumpkin": {
+    "Bulwark": 115,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Vigor": 116
+  },
+  "icescaredyshroom": {
+    "Agility": 119,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "iceseashroom": {
+    "Bulwark": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "iceshroom": {
+    "Agility": 115,
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Precision": 116
+  },
+  "icespikerock": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Pierce": 580,
+    "Precision": 105,
+    "Vigor": 105
+  },
+  "icesquash": {
+    "Agility": 162,
+    "Bulwark": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "icetorch": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Precision": 116,
+    "Vigor": 115
+  },
+  "ifvblover": {
+    "Agility": 195,
+    "Bulwark": 151,
+    "Fortitude": 152,
+    "Might": 152,
+    "Onslaught": 350
+  },
+  "ifvironpuff": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "ifvpumpkin": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "ifvstar": {
+    "Agility": 163,
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "imitater": {
+    "Agility": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Vigor": 116
+  },
+  "imitatewheat": {
+    "Composure": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Onslaught": 138,
+    "Vigor": 108
+  },
+  "impking": {
     "Agility": 109,
     "Ferocity": 109,
     "Fortitude": 563,
     "Might": 110,
     "Vigor": 109
   },
-  "cherryshooter": {
-    "Bulwark": 126,
-    "Composure": 126,
+  "impzombie": {
+    "Composure": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "ironballoonzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Vigor": 125
+  },
+  "ironballoonzombie2": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "ironconezombie": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 124,
+    "Pierce": 125,
+    "Precision": 125
+  },
+  "ironcorn": {
+    "Agility": 102,
+    "Ferocity": 102,
+    "Fortitude": 563,
+    "Pierce": 131,
+    "Vigor": 102
+  },
+  "ironfume": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Might": 116,
+    "Onslaught": 149,
+    "Precision": 117
+  },
+  "irongargantuar": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 116,
+    "Fortitude": 149,
+    "Vigor": 117
+  },
+  "ironmelon": {
+    "Agility": 101,
+    "Composure": 101,
+    "Might": 596,
+    "Pierce": 101,
+    "Precision": 101
+  },
+  "ironnut": {
+    "Bulwark": 502,
     "Ferocity": 125,
-    "Might": 126,
-    "Precision": 497
+    "Pierce": 124,
+    "Precision": 124,
+    "Vigor": 125
   },
-  "cherrysplit": {
-    "Agility": 157,
-    "Bulwark": 156,
-    "Focus": 157,
-    "Onslaught": 374,
-    "Vigor": 156
+  "ironpea": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Vigor": 124
   },
-  "cherrythreepeater": {
-    "Composure": 146,
-    "Ferocity": 146,
-    "Might": 147,
-    "Onslaught": 374,
-    "Retribution": 187
+  "ironpeadoorzombie": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Pierce": 125,
+    "Precision": 125
   },
-  "chomper": {
-    "Agility": 157,
-    "Bulwark": 156,
-    "Focus": 157,
-    "Onslaught": 374,
-    "Vigor": 156
+  "ironpeazombie": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Pierce": 124,
+    "Precision": 124,
+    "Vigor": 125
   },
-  "conezombie": {
-    "Bulwark": 544,
-    "Composure": 114,
-    "Ferocity": 114,
-    "Might": 114,
-    "Pierce": 114
+  "ironpuff": {
+    "Agility": 152,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
   },
-  "cornpult": {
-    "Agility": 121,
-    "Composure": 121,
-    "Focus": 516,
-    "Might": 121,
-    "Vigor": 121
+  "ironpumpkin": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Precision": 125
   },
-  "darkthreepeater": {
-    "Agility": 156,
-    "Ferocity": 157,
-    "Onslaught": 374,
-    "Pierce": 157,
-    "Vigor": 156
+  "ironredgargantuar": {
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109,
+    "Vigor": 109
   },
-  "dollgold": {
+  "ironsquash": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Pierce": 125
+  },
+  "ironstar": {
+    "Bulwark": 502,
+    "Might": 116,
+    "Onslaught": 149,
+    "Precision": 117,
+    "Vigor": 116
+  },
+  "jackbox_a": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Pierce": 120,
+    "Precision": 119,
+    "Retribution": 521
+  },
+  "jackbox_b": {
+    "Agility": 195,
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Vigor": 152
+  },
+  "jackbox_c": {
+    "Composure": 120,
+    "Pierce": 120,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "jackboxdoom": {
+    "Agility": 112,
+    "Composure": 112,
+    "Might": 112,
+    "Onslaught": 143,
+    "Retribution": 521
+  },
+  "jackboxjumpzombie": {
+    "Ferocity": 120,
+    "Pierce": 120,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "jackboxplant": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 125,
+    "Pierce": 124
+  },
+  "jackboxpumpkin": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "jackboxstar": {
+    "Composure": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "jackboxzombie": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "jackson_a": {
+    "Agility": 585,
+    "Composure": 104,
+    "Might": 104,
+    "Pierce": 104,
+    "Precision": 103
+  },
+  "jackson_b": {
+    "Agility": 585,
+    "Ferocity": 104,
+    "Fortitude": 104,
+    "Might": 103,
+    "Vigor": 104
+  },
+  "jackson_c": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162
+  },
+  "jacksondriver": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "jacksondriverboss": {
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Pierce": 110,
+    "Precision": 109,
+    "Vigor": 109
+  },
+  "jacksonzombie": {
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162
+  },
+  "jalacaltrop": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "jalacorn": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "jaladoubleshooter": {
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162
+  },
+  "jalagatling": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "jalakelp": {
+    "Ferocity": 120,
+    "Fortitude": 120,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "jalamine": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "jalapeashooter": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "jalapeno": {
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "jalapenozombie": {
+    "Agility": 162,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "jalapumpkin": {
+    "Ferocity": 112,
+    "Might": 112,
+    "Onslaught": 143,
+    "Precision": 112,
+    "Retribution": 521
+  },
+  "jalasplit": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "jalasquash": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "jalasquashzombie": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "jalastar": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "jalatorch": {
+    "Composure": 119,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "kelpfume": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "kelpmine_land": {
+    "Composure": 119,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "kelpmine_water": {
+    "Agility": 119,
+    "Ferocity": 120,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "kelpnut": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Fortitude": 125,
+    "Pierce": 124,
+    "Vigor": 125
+  },
+  "kelppuff": {
+    "Ferocity": 119,
+    "Focus": 120,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "kelptorch": {
+    "Agility": 163,
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "kirov_a": {
+    "Focus": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "kirov_b": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350
+  },
+  "kirov_c": {
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "kirovzombie": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "ladderzombie": {
+    "Composure": 105,
+    "Focus": 105,
+    "Pierce": 580,
+    "Precision": 105,
+    "Vigor": 105
+  },
+  "landsubmarine": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "lanternblover": {
+    "Agility": 116,
+    "Focus": 538,
+    "Fortitude": 116,
+    "Might": 115,
+    "Precision": 115
+  },
+  "lanterncactus": {
+    "Composure": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
+  },
+  "lanternchomper": {
+    "Agility": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "lanternfume": {
+    "Agility": 105,
+    "Composure": 105,
+    "Ferocity": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "lanterngatling": {
+    "Ferocity": 151,
+    "Focus": 195,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Precision": 152
+  },
+  "lanternmagnet": {
+    "Agility": 115,
+    "Composure": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Vigor": 116
+  },
+  "lanternnut": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Fortitude": 117,
+    "Might": 116,
+    "Vigor": 149
+  },
+  "lanternpea": {
+    "Agility": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Fortitude": 108,
+    "Precision": 138
+  },
+  "lanternpot": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Might": 125,
+    "Precision": 124
+  },
+  "lanternpumpkin": {
+    "Agility": 110,
     "Composure": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "lanternrepeater": {
+    "Agility": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Precision": 195,
+    "Vigor": 151
+  },
+  "lanternsplit": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564
+  },
+  "lanternstar": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "lanternumbrella": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 124,
+    "Vigor": 125
+  },
+  "laserumbrella": {
+    "Agility": 108,
+    "Composure": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Vigor": 138
+  },
+  "legionsniperzombie": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564
+  },
+  "legionzombie": {
+    "Composure": 102,
+    "Fortitude": 563,
+    "Might": 102,
+    "Retribution": 131,
+    "Vigor": 102
+  },
+  "levatationzombie": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "lilypad": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Might": 125
+  },
+  "lotusaloes": {
+    "Composure": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Pierce": 108,
+    "Vigor": 138
+  },
+  "lotusbamboo": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 117,
+    "Pierce": 116,
+    "Vigor": 149
+  },
+  "lotusspruce": {
+    "Composure": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Vigor": 138
+  },
+  "luckyblover": {
+    "Agility": 116,
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116
+  },
+  "machinelevatation": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 117,
+    "Fortitude": 149,
+    "Pierce": 116
+  },
+  "machinenut": {
+    "Bulwark": 502,
+    "Composure": 117,
+    "Ferocity": 116,
+    "Fortitude": 149,
+    "Might": 116
+  },
+  "machinenutzombie": {
+    "Agility": 162,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "machineshardplant": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 125,
+    "Pierce": 124,
+    "Vigor": 124
+  },
+  "magicsnowpea": {
+    "Agility": 109,
+    "Composure": 109,
+    "Fortitude": 109,
+    "Might": 109,
+    "Precision": 564
+  },
+  "magicsnowpea2": {
+    "Agility": 105,
+    "Ferocity": 105,
+    "Might": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "magnetblover": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Fortitude": 116,
+    "Might": 115
+  },
+  "magnetbox": {
+    "Agility": 585,
+    "Composure": 104,
+    "Ferocity": 103,
+    "Fortitude": 104,
+    "Vigor": 104
+  },
+  "magnetcactus": {
+    "Composure": 105,
+    "Fortitude": 105,
+    "Might": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "magnetcorn": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "magnetdoom": {
+    "Bulwark": 138,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Fortitude": 108,
+    "Vigor": 108
+  },
+  "magnetfume": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "magnetinterface": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "magnetmelon": {
+    "Agility": 102,
+    "Ferocity": 102,
+    "Might": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "magnetnut": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Fortitude": 125
+  },
+  "magnetpumpkin": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Fortitude": 125,
+    "Vigor": 125
+  },
+  "magnetshroom": {
+    "Composure": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Vigor": 115
+  },
+  "magnetstar": {
+    "Agility": 152,
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "marigold": {
+    "Agility": 115,
+    "Composure": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Vigor": 116
+  },
+  "melonblover": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "meloncaltrop": {
+    "Agility": 120,
+    "Composure": 120,
+    "Fortitude": 120,
+    "Pierce": 119,
+    "Retribution": 521
+  },
+  "meloncannon": {
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "melonfume": {
+    "Agility": 108,
+    "Composure": 108,
+    "Focus": 538,
+    "Might": 138,
+    "Pierce": 108
+  },
+  "melonnut": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "melonpot": {
+    "Composure": 116,
+    "Focus": 538,
+    "Pierce": 115,
+    "Precision": 116,
+    "Vigor": 115
+  },
+  "melonpuff": {
+    "Agility": 102,
+    "Ferocity": 102,
+    "Might": 102,
+    "Pierce": 130,
+    "Precision": 564
+  },
+  "melonpult": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350
+  },
+  "melonpumpkin": {
+    "Fortitude": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "melonumbrella": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "minerzombie": {
+    "Agility": 105,
+    "Composure": 105,
+    "Fortitude": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "minisandmonster": {
+    "Agility": 585,
+    "Composure": 103,
+    "Ferocity": 104,
+    "Fortitude": 104,
+    "Might": 104
+  },
+  "minisnowmonster": {
+    "Agility": 195,
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Vigor": 152
+  },
+  "mixanim": {
+    "Composure": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 162
+  },
+  "mixbomb": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116
+  },
+  "newyearzombie": {
     "Ferocity": 109,
     "Fortitude": 563,
     "Might": 110,
-    "Pierce": 109
+    "Precision": 109,
+    "Vigor": 109
   },
-  "doomcactus": {
-    "Agility": 146,
-    "Might": 147,
-    "Onslaught": 374,
-    "Pierce": 187,
-    "Vigor": 146
+  "normalzombie": {
+    "Composure": 101,
+    "Ferocity": 101,
+    "Might": 101,
+    "Precision": 101,
+    "Vigor": 596
   },
-  "doorzombie": {
-    "Agility": 114,
-    "Bulwark": 544,
-    "Composure": 114,
-    "Ferocity": 114,
-    "Might": 114
+  "nucleardoomcherry": {
+    "Composure": 152,
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
   },
-  "doubleshooter": {
-    "Composure": 157,
-    "Ferocity": 156,
-    "Focus": 156,
-    "Onslaught": 374,
-    "Vigor": 157
+  "nuclearsquash": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
   },
-  "flagzombie": {
-    "Agility": 156,
-    "Composure": 156,
-    "Might": 157,
-    "Onslaught": 374,
-    "Pierce": 157
+  "nutblover": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 117,
+    "Precision": 116,
+    "Vigor": 149
   },
-  "footballzombie": {
-    "Agility": 131,
+  "nutchomper": {
+    "Composure": 101,
+    "Ferocity": 101,
+    "Pierce": 101,
+    "Precision": 101,
+    "Vigor": 596
+  },
+  "nutfume": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Ferocity": 116,
+    "Might": 117,
+    "Pierce": 149
+  },
+  "nutpot": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Fortitude": 124,
+    "Might": 124,
+    "Precision": 125
+  },
+  "nutpumpkin": {
+    "Agility": 110,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Precision": 109
+  },
+  "nuttorch": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "nutumbrella": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Pierce": 124,
+    "Precision": 125
+  },
+  "obsidianclawzombie": {
+    "Agility": 163,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "obsidianimpzombie": {
+    "Agility": 162,
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "obsidianjalapeno": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 124,
+    "Pierce": 124,
+    "Precision": 125
+  },
+  "obsidianspike": {
+    "Agility": 117,
+    "Bulwark": 502,
+    "Ferocity": 116,
+    "Fortitude": 149,
+    "Precision": 116
+  },
+  "obsidiantallnutzombie": {
+    "Bulwark": 131,
+    "Composure": 102,
+    "Fortitude": 563,
+    "Might": 102,
+    "Pierce": 102
+  },
+  "obsidianwallnut": {
+    "Agility": 120,
+    "Composure": 119,
+    "Ferocity": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "obsidianwheat": {
+    "Agility": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "paperzombie": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Pierce": 115,
+    "Precision": 116
+  },
+  "passionfruit": {
+    "Composure": 98,
+    "Ferocity": 98,
+    "Might": 98,
+    "Pierce": 580,
+    "Precision": 126
+  },
+  "peablover": {
+    "Agility": 116,
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Vigor": 116
+  },
+  "peachomper": {
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152,
+    "Vigor": 151
+  },
+  "peafume": {
+    "Agility": 152,
+    "Composure": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "peamine": {
+    "Agility": 151,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Retribution": 195,
+    "Vigor": 152
+  },
+  "peanut": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Fortitude": 105,
+    "Might": 105,
+    "Pierce": 580
+  },
+  "peapot": {
+    "Agility": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "peapuff": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "peapumpkin": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 125,
+    "Precision": 124
+  },
+  "peascaredy": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "peashooter": {
+    "Composure": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "peashooterzombie": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564
+  },
+  "peasquash": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "peasunflower": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Vigor": 115
+  },
+  "penguinzombie": {
+    "Agility": 195,
+    "Composure": 152,
+    "Fortitude": 151,
+    "Might": 152,
+    "Onslaught": 350
+  },
+  "pickaxe_a": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "pickaxe_b": {
+    "Agility": 110,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "pickaxe_c": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Pierce": 125,
+    "Precision": 124
+  },
+  "pickaxeplant": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 124,
+    "Pierce": 124,
+    "Vigor": 125
+  },
+  "pickaxepumpkin": {
+    "Agility": 116,
+    "Bulwark": 502,
+    "Composure": 117,
+    "Precision": 116,
+    "Vigor": 149
+  },
+  "pickaxestar": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564
+  },
+  "pickaxezombie": {
+    "Agility": 105,
+    "Ferocity": 105,
+    "Might": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "pinefurnace": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Vigor": 124
+  },
+  "pinkonion": {
+    "Agility": 162,
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "pit": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "plantern": {
+    "Agility": 116,
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Vigor": 115
+  },
+  "pogozombie": {
+    "Agility": 585,
+    "Composure": 103,
+    "Fortitude": 104,
+    "Might": 104,
+    "Retribution": 104
+  },
+  "polevaulterzombie": {
+    "Agility": 585,
+    "Ferocity": 104,
+    "Fortitude": 103,
+    "Precision": 104,
+    "Vigor": 104
+  },
+  "polfootballzombie": {
+    "Agility": 585,
+    "Composure": 104,
+    "Ferocity": 103,
+    "Might": 104,
+    "Retribution": 104
+  },
+  "portalballoonzombie": {
+    "Bulwark": 502,
+    "Fortitude": 124,
+    "Pierce": 124,
+    "Precision": 125,
+    "Vigor": 125
+  },
+  "portalcorn": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 163
+  },
+  "portaldoom": {
+    "Agility": 195,
+    "Onslaught": 350,
+    "Pierce": 151,
+    "Precision": 152,
+    "Vigor": 152
+  },
+  "portalmelon": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Retribution": 163
+  },
+  "portalnut": {
     "Ferocity": 102,
     "Fortitude": 563,
+    "Pierce": 102,
+    "Retribution": 131,
+    "Vigor": 102
+  },
+  "portalpea": {
+    "Composure": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Precision": 138
+  },
+  "portalplant": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Pierce": 116,
+    "Precision": 115,
+    "Vigor": 116
+  },
+  "portalpolevaulter": {
+    "Agility": 585,
+    "Composure": 104,
+    "Might": 104,
+    "Retribution": 104,
+    "Vigor": 103
+  },
+  "pot": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 124,
+    "Pierce": 125,
+    "Precision": 125
+  },
+  "potatochomper": {
+    "Composure": 120,
+    "Pierce": 120,
+    "Precision": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "potatodoom": {
+    "Composure": 163,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "potatofume": {
+    "Ferocity": 151,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Precision": 152,
+    "Retribution": 195
+  },
+  "potatomine": {
+    "Composure": 120,
+    "Fortitude": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "potatonut": {
+    "Composure": 120,
+    "Might": 119,
+    "Pierce": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "potatopuff": {
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 162
+  },
+  "potatopumpkin": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "potatosquash": {
+    "Fortitude": 120,
+    "Pierce": 119,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "potatosquashbody": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "present": {
+    "Composure": 115,
+    "Focus": 538,
+    "Pierce": 115,
+    "Precision": 116,
+    "Vigor": 116
+  },
+  "presentzombie": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Fortitude": 124,
+    "Might": 125,
+    "Vigor": 125
+  },
+  "projectilezombie": {
+    "Composure": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 163
+  },
+  "protalzombie": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "pudding": {
+    "Composure": 120,
+    "Might": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "puffdoom": {
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "puffjalapeno": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "puffnut": {
+    "Composure": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 110,
+    "Precision": 109
+  },
+  "puffpumpkin": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Pierce": 124,
+    "Vigor": 125
+  },
+  "puffseashroom": {
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "puffsquash": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162
+  },
+  "pumpiner": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 110
+  },
+  "pumpkin": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "qingzombie": {
+    "Agility": 162,
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "quickjacksonzombie": {
+    "Agility": 585,
+    "Ferocity": 104,
+    "Pierce": 103,
+    "Precision": 104,
+    "Vigor": 104
+  },
+  "randomgargantuar": {
+    "Composure": 101,
+    "Ferocity": 101,
+    "Might": 596,
+    "Precision": 101,
+    "Vigor": 101
+  },
+  "randompluszombie": {
+    "Composure": 109,
+    "Fortitude": 563,
+    "Pierce": 110,
+    "Precision": 109,
+    "Vigor": 109
+  },
+  "randomzombie": {
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 109
+  },
+  "redemeraldumbrella": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Pierce": 119,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "redgargantuar": {
+    "Ferocity": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 163
+  },
+  "redzombieloonnut": {
+    "Composure": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 162
+  },
+  "refrash": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Focus": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "sandjackson": {
+    "Composure": 120,
+    "Might": 120,
+    "Precision": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "scaredfume": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Focus": 109,
+    "Precision": 564
+  },
+  "scaredsun": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116,
+    "Vigor": 116
+  },
+  "scaredyblover": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Pierce": 124,
+    "Vigor": 124
+  },
+  "scaredydoom": {
+    "Agility": 162,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "scaredyhypno": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116,
+    "Vigor": 116
+  },
+  "scaredynut": {
+    "Agility": 119,
+    "Composure": 120,
+    "Pierce": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "scaredypot": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115
+  },
+  "scaredypotato": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "scaredypumpkin": {
+    "Agility": 100,
+    "Composure": 597,
+    "Pierce": 101,
+    "Precision": 101,
+    "Vigor": 101
+  },
+  "scaredyshroom": {
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "scaredystar": {
+    "Agility": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "seablover": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Might": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "seacactus": {
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
+  },
+  "seafume": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "seahypno": {
+    "Agility": 115,
+    "Composure": 115,
+    "Focus": 538,
+    "Pierce": 116,
+    "Vigor": 116
+  },
+  "sealantern": {
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 110,
+    "Precision": 109,
+    "Vigor": 109
+  },
+  "seamagnet": {
+    "Agility": 109,
+    "Composure": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 110
+  },
+  "seamine_land": {
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163,
+    "Vigor": 163
+  },
+  "seamine_water": {
+    "Agility": 163,
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "seanut": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
+  },
+  "seapumpkin": {
+    "Agility": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109,
+    "Vigor": 109
+  },
+  "seascaredyshroom": {
+    "Agility": 101,
+    "Composure": 597,
+    "Ferocity": 101,
+    "Might": 100,
+    "Pierce": 101
+  },
+  "seashroom": {
+    "Ferocity": 116,
+    "Focus": 538,
+    "Pierce": 115,
+    "Precision": 115,
+    "Vigor": 116
+  },
+  "seasquash": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "seastarfruit": {
+    "Agility": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 163
+  },
+  "seasunshroom": {
+    "Agility": 101,
+    "Ferocity": 101,
+    "Pierce": 101,
+    "Precision": 101,
+    "Vigor": 596
+  },
+  "shulkbamboo": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 125,
+    "Pierce": 124,
+    "Precision": 124
+  },
+  "shulkflower": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521
+  },
+  "shulkfurnace": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Precision": 125
+  },
+  "shulklotus": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Pierce": 125,
+    "Precision": 124
+  },
+  "silvercabbage": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "silvercorn": {
+    "Agility": 162,
+    "Composure": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "silverdoom": {
+    "Composure": 597,
+    "Ferocity": 101,
+    "Might": 101,
+    "Pierce": 101,
+    "Precision": 100
+  },
+  "silvergarlic": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Focus": 110,
+    "Fortitude": 563,
+    "Might": 109
+  },
+  "silvericeshroom": {
+    "Focus": 538,
+    "Might": 115,
+    "Pierce": 116,
+    "Precision": 116,
+    "Vigor": 115
+  },
+  "silvermelon": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162
+  },
+  "silvernut": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 110
+  },
+  "silverpot": {
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 109,
+    "Vigor": 110
+  },
+  "silversunflower": {
+    "Agility": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Pierce": 115,
+    "Vigor": 116
+  },
+  "silverumbrella": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Might": 125,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "silverzombie": {
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Precision": 109
+  },
+  "smalliceshroom": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115,
+    "Vigor": 116
+  },
+  "smallpuff": {
+    "Agility": 163,
+    "Composure": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "smallumbrella": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Pierce": 124,
+    "Vigor": 125
+  },
+  "sniperchomper": {
+    "Composure": 102,
+    "Might": 102,
+    "Onslaught": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "sniperpea": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Pierce": 109,
+    "Precision": 564
+  },
+  "sniperpot": {
+    "Ferocity": 109,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "sniperpuff": {
+    "Agility": 102,
+    "Composure": 102,
+    "Might": 102,
+    "Onslaught": 130,
+    "Precision": 564
+  },
+  "snorklezombie": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "snowbucketzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "snowconezombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 124,
+    "Pierce": 125
+  },
+  "snowdolphinrider": {
+    "Agility": 585,
+    "Ferocity": 104,
+    "Might": 103,
+    "Pierce": 104,
+    "Vigor": 104
+  },
+  "snowdrownzombie": {
+    "Composure": 109,
+    "Ferocity": 109,
+    "Precision": 564,
+    "Retribution": 109,
+    "Vigor": 109
+  },
+  "snowgatling": {
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "snowgatlingpeazombie": {
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Retribution": 163
+  },
+  "snowgatlingpuff": {
+    "Composure": 152,
+    "Focus": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
+  },
+  "snowgunzombie": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Retribution": 116
+  },
+  "snowmonsterrider": {
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Retribution": 163,
+    "Vigor": 162
+  },
+  "snowmonsterzombie": {
+    "Agility": 101,
+    "Composure": 101,
+    "Might": 596,
+    "Pierce": 101,
+    "Retribution": 101
+  },
+  "snownormalzombie": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Vigor": 109
+  },
+  "snowpeashooter": {
+    "Ferocity": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Retribution": 109,
+    "Vigor": 109
+  },
+  "snowpresent": {
+    "Agility": 116,
+    "Composure": 116,
+    "Focus": 538,
+    "Pierce": 115,
+    "Retribution": 115
+  },
+  "snowshieldzombie": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Vigor": 125
+  },
+  "snowsplit": {
+    "Ferocity": 109,
+    "Pierce": 109,
+    "Precision": 564,
+    "Retribution": 109,
+    "Vigor": 109
+  },
+  "snowzombie": {
+    "Agility": 109,
+    "Composure": 110,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Retribution": 109
+  },
+  "solarlily": {
+    "Agility": 115,
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Vigor": 116
+  },
+  "solarpot": {
+    "Ferocity": 115,
+    "Focus": 538,
+    "Pierce": 116,
+    "Retribution": 116,
+    "Vigor": 115
+  },
+  "solarsunflower": {
+    "Agility": 163,
+    "Composure": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Retribution": 162
+  },
+  "spikerock": {
+    "Ferocity": 112,
+    "Might": 112,
+    "Pierce": 143,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "splitpea": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Might": 109,
+    "Precision": 564
+  },
+  "splitpuff": {
+    "Agility": 162,
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "spreadfume": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "spreadscaredyshroom": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "spruceballista": {
+    "Agility": 151,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "sprucefurnace": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 125,
+    "Retribution": 124,
+    "Vigor": 124
+  },
+  "spruceshooter": {
+    "Composure": 98,
+    "Ferocity": 98,
+    "Fortitude": 126,
+    "Might": 98,
+    "Pierce": 580
+  },
+  "spruceshulk": {
+    "Agility": 98,
+    "Might": 98,
+    "Onslaught": 126,
+    "Pierce": 580,
+    "Vigor": 98
+  },
+  "squalour": {
+    "Agility": 120,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "squalourzombie": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "squash": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "squashblover": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "squashcorn": {
+    "Composure": 152,
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "squashkelp": {
+    "Agility": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "squashmelon": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 163
+  },
+  "squashnut": {
+    "Agility": 120,
+    "Focus": 120,
+    "Fortitude": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "squashpumpkin": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "squashspike": {
+    "Focus": 120,
+    "Fortitude": 120,
+    "Might": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "squashtorch": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "squashzombie": {
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "starblover": {
+    "Agility": 120,
+    "Composure": 120,
+    "Focus": 120,
+    "Fortitude": 119,
+    "Retribution": 521
+  },
+  "starfruit": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "starfume": {
+    "Composure": 98,
+    "Focus": 98,
+    "Fortitude": 98,
+    "Onslaught": 126,
+    "Pierce": 580
+  },
+  "starhypno": {
+    "Ferocity": 112,
+    "Focus": 112,
+    "Onslaught": 143,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "starnut": {
+    "Composure": 120,
+    "Fortitude": 120,
+    "Might": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "starpea": {
+    "Agility": 152,
+    "Ferocity": 152,
+    "Focus": 151,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "starpuff": {
+    "Composure": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "starpumpkin": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Focus": 124
+  },
+  "starsniper": {
+    "Fortitude": 102,
+    "Might": 102,
+    "Onslaught": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "starsquash": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Focus": 162,
+    "Fortitude": 162,
+    "Onslaught": 350
+  },
+  "startorch": {
+    "Agility": 115,
+    "Composure": 116,
+    "Focus": 538,
+    "Might": 116,
+    "Vigor": 115
+  },
+  "stonedancer": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Might": 124,
+    "Vigor": 124
+  },
+  "submarine_a": {
+    "Agility": 195,
+    "Composure": 151,
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350
+  },
+  "submarine_b": {
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "submarine_b2": {
+    "Agility": 195,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Vigor": 151
+  },
+  "submarine_c": {
+    "Ferocity": 151,
+    "Fortitude": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "submarine_c2": {
+    "Agility": 195,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Vigor": 151
+  },
+  "submarinezombie": {
+    "Ferocity": 162,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "summonedhorse": {
+    "Composure": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "sunblover": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 162,
+    "Fortitude": 163,
+    "Onslaught": 350
+  },
+  "sunbomb": {
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "suncabbage": {
+    "Agility": 109,
+    "Composure": 109,
+    "Focus": 109,
+    "Fortitude": 109,
+    "Precision": 564
+  },
+  "suncaltrop": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "sunchomper": {
+    "Agility": 163,
+    "Composure": 162,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "sunflower": {
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 115,
+    "Vigor": 116
+  },
+  "sungatlingpuff": {
+    "Agility": 152,
+    "Composure": 152,
+    "Ferocity": 151,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "sunhypno": {
+    "Agility": 119,
+    "Fortitude": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "suniceshroom": {
+    "Composure": 115,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Pierce": 116,
+    "Vigor": 116
+  },
+  "sunjalapeno": {
+    "Agility": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "sunmagnet": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Vigor": 116
+  },
+  "sunmine": {
+    "Agility": 120,
+    "Composure": 119,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "sunnut": {
+    "Ferocity": 101,
+    "Fortitude": 101,
+    "Might": 101,
+    "Pierce": 101,
+    "Vigor": 596
+  },
+  "sunnutzombie": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Precision": 109
+  },
+  "sunpot": {
+    "Agility": 115,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 116
+  },
+  "sunpumpkin": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Pierce": 124,
+    "Precision": 125
+  },
+  "sunshroom": {
+    "Agility": 101,
+    "Composure": 101,
+    "Ferocity": 101,
+    "Precision": 101,
+    "Vigor": 596
+  },
+  "sunsquash": {
+    "Agility": 119,
+    "Ferocity": 120,
+    "Might": 120,
+    "Pierce": 120,
+    "Retribution": 521
+  },
+  "sunstar": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
+  },
+  "superblackfootball": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "superblackhorse": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Pierce": 125
+  },
+  "superbombthrower": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
+  },
+  "supercaltrop": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "supercaltroppot": {
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115,
+    "Precision": 116
+  },
+  "supercherrygatling": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "supercherryshooter": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
+  },
+  "supercherryshooterzombie": {
+    "Agility": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "superchomper": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Onslaught": 149,
+    "Pierce": 116,
+    "Precision": 117
+  },
+  "superdancepolzombie": {
+    "Agility": 585,
+    "Composure": 103,
+    "Ferocity": 104,
+    "Fortitude": 104,
+    "Precision": 104
+  },
+  "superdriver": {
+    "Agility": 195,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Vigor": 152
+  },
+  "superfume": {
+    "Composure": 151,
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "superfurnace": {
+    "Bulwark": 502,
+    "Ferocity": 116,
+    "Might": 116,
+    "Precision": 117,
+    "Vigor": 149
+  },
+  "supergargantuar": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Fortitude": 125,
+    "Might": 124,
+    "Precision": 125
+  },
+  "supergatling": {
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "supergatlingpeamine": {
+    "Composure": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "supergatlingpumpkin": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163
+  },
+  "superhorse": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "superhurricaneblover": {
+    "Composure": 119,
+    "Fortitude": 120,
+    "Pierce": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "superhypno": {
+    "Agility": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Precision": 151,
+    "Retribution": 195
+  },
+  "superhypnodoom": {
+    "Ferocity": 112,
+    "Onslaught": 143,
+    "Pierce": 112,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "superhypnogatling": {
+    "Agility": 162,
+    "Composure": 163,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "superjackboxzombie": {
+    "Ferocity": 120,
+    "Pierce": 120,
+    "Precision": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "superjalanut": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Focus": 125,
+    "Fortitude": 125,
+    "Pierce": 124
+  },
+  "superkelp": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "superkirov": {
+    "Bulwark": 502,
+    "Focus": 116,
+    "Fortitude": 116,
+    "Might": 117,
+    "Onslaught": 149
+  },
+  "superladderzombie": {
+    "Composure": 163,
+    "Focus": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "superlevatation": {
+    "Agility": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Precision": 138,
+    "Vigor": 108
+  },
+  "supermachinenut": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Fortitude": 125,
+    "Pierce": 124,
+    "Vigor": 124
+  },
+  "supermachinenutzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Fortitude": 124,
+    "Might": 124
+  },
+  "supermachineshardplant": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Pierce": 124,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "supermelon": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "supernutshooter": {
+    "Bulwark": 195,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Precision": 152,
+    "Vigor": 151
+  },
+  "superpenguinzombie": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "superpogozombie": {
+    "Agility": 585,
+    "Composure": 104,
+    "Fortitude": 104,
+    "Precision": 104,
+    "Vigor": 103
+  },
+  "superpolevaulter": {
+    "Agility": 585,
+    "Ferocity": 103,
+    "Fortitude": 104,
+    "Pierce": 104,
+    "Precision": 104
+  },
+  "superpumpkin": {
+    "Composure": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "supersnowgatling": {
+    "Bulwark": 195,
+    "Ferocity": 151,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Precision": 152
+  },
+  "supersnowmonsterzombie": {
+    "Agility": 121,
+    "Composure": 95,
+    "Focus": 94,
+    "Might": 596,
+    "Vigor": 94
+  },
+  "superspruce": {
+    "Composure": 105,
+    "Focus": 105,
+    "Fortitude": 105,
+    "Pierce": 580,
+    "Precision": 105
+  },
+  "superstar": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "supersubmarine": {
+    "Agility": 149,
+    "Bulwark": 502,
+    "Ferocity": 116,
+    "Focus": 117,
+    "Precision": 116
+  },
+  "supersunnut": {
+    "Focus": 120,
+    "Fortitude": 119,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "supersunnutzombie": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Vigor": 124
+  },
+  "superthreegatling": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "superthreepeater": {
+    "Focus": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 151,
+    "Vigor": 152
+  },
+  "superthreepeater_sp": {
+    "Composure": 151,
+    "Fortitude": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "supertorch": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "superumbrella": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Fortitude": 125,
+    "Might": 125
+  },
+  "swordstar": {
+    "Focus": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 152
+  },
+  "tallfirenut": {
+    "Composure": 120,
+    "Ferocity": 119,
+    "Fortitude": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "tallfirenutzombie": {
+    "Focus": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109,
+    "Vigor": 110
+  },
+  "tallicenut": {
+    "Composure": 102,
+    "Ferocity": 102,
+    "Fortitude": 563,
+    "Retribution": 131,
+    "Vigor": 102
+  },
+  "tallicenutzombie": {
+    "Composure": 109,
+    "Focus": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109
+  },
+  "tallnut": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Pierce": 125,
+    "Vigor": 124
+  },
+  "tallnutfootball": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 125,
+    "Precision": 125
+  },
+  "tallnutfootballzombie": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Pierce": 125,
+    "Vigor": 124
+  },
+  "tanglekelp": {
+    "Agility": 119,
+    "Composure": 120,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "thorns": {
+    "Ferocity": 163,
+    "Focus": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "thornsbamboo": {
+    "Agility": 119,
+    "Composure": 120,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "thornslotus": {
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Precision": 116
+  },
+  "thornsshulk": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "thornsspruce": {
+    "Composure": 120,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "threecabbage": {
+    "Agility": 152,
+    "Composure": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "threecorn": {
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "threekelp": {
+    "Agility": 163,
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "threemelon": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "threemine": {
+    "Composure": 163,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "threenut": {
+    "Agility": 105,
+    "Composure": 105,
+    "Ferocity": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "threepeater": {
+    "Ferocity": 109,
+    "Focus": 109,
+    "Might": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "threeplantern": {
+    "Agility": 102,
+    "Composure": 102,
+    "Ferocity": 102,
+    "Pierce": 130,
+    "Precision": 564
+  },
+  "threepot": {
+    "Agility": 115,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Vigor": 116
+  },
+  "threepumpkin": {
+    "Agility": 119,
+    "Composure": 120,
+    "Might": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "threespike": {
+    "Composure": 98,
+    "Ferocity": 98,
+    "Might": 98,
+    "Pierce": 580,
+    "Precision": 126
+  },
+  "threesquash": {
+    "Agility": 162,
+    "Ferocity": 162,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "threetorch": {
+    "Composure": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "thronsaloes": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "torchfirenut": {
+    "Agility": 109,
+    "Ferocity": 109,
+    "Focus": 110,
+    "Fortitude": 563,
+    "Vigor": 109
+  },
+  "torchfirepumpkin": {
+    "Composure": 110,
+    "Focus": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "torchfume": {
+    "Agility": 112,
+    "Composure": 112,
+    "Ferocity": 112,
+    "Pierce": 143,
+    "Retribution": 521
+  },
+  "torchmine": {
+    "Ferocity": 162,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "torchpumpkin": {
+    "Agility": 116,
+    "Composure": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Vigor": 115
+  },
+  "torchseashroom": {
+    "Agility": 116,
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Might": 115
+  },
+  "torchspike": {
+    "Agility": 163,
+    "Composure": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "torchsunflower": {
+    "Agility": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Precision": 116,
+    "Vigor": 115
+  },
+  "torchwood": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "tower_bigsunshroom": {
+    "Agility": 115,
+    "Composure": 115,
+    "Focus": 538,
+    "Pierce": 116,
+    "Vigor": 116
+  },
+  "tower_cherrychomper": {
+    "Ferocity": 119,
+    "Might": 120,
+    "Pierce": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "tower_cherryshooter": {
+    "Agility": 163,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "tower_doomfume": {
+    "Ferocity": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152
+  },
+  "tower_doomstar": {
+    "Agility": 163,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "tower_electriconion": {
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "tower_gravebuster": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Might": 124,
+    "Precision": 124
+  },
+  "tower_iceblover": {
+    "Agility": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Pierce": 116
+  },
+  "tower_icegloom": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "tower_lilypad": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Fortitude": 124,
+    "Might": 125,
+    "Pierce": 125
+  },
+  "tower_peapuff": {
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "tower_peasunflower": {
+    "Agility": 109,
+    "Composure": 109,
+    "Ferocity": 109,
+    "Precision": 564,
+    "Vigor": 109
+  },
+  "tower_scaredyfume": {
+    "Agility": 105,
+    "Composure": 105,
+    "Ferocity": 105,
+    "Might": 105,
+    "Pierce": 580
+  },
+  "tower_squashnut": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 120,
+    "Retribution": 521,
+    "Vigor": 119
+  },
+  "tower_starnut": {
+    "Agility": 120,
+    "Composure": 119,
+    "Fortitude": 120,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "tower_sunmine": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 163
+  },
+  "tower_sunshroom": {
+    "Composure": 116,
+    "Ferocity": 115,
+    "Focus": 538,
+    "Fortitude": 116,
+    "Vigor": 115
+  },
+  "tower_threemine": {
+    "Agility": 163,
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "tower_watercan": {
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Precision": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "trainingdummy": {
+    "Agility": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 109,
+    "Precision": 109
+  },
+  "treasuremine": {
+    "Agility": 119,
+    "Composure": 120,
+    "Ferocity": 120,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "twinflower": {
+    "Composure": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Pierce": 115,
+    "Precision": 116
+  },
+  "twinmarigold": {
+    "Agility": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Vigor": 116
+  },
+  "twinshulk": {
+    "Composure": 152,
+    "Ferocity": 151,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152
+  },
+  "ulti_cherrygatling": {
+    "Agility": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "ultimatebamboo": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Pierce": 124,
+    "Vigor": 124
+  },
+  "ultimatebigchomper": {
+    "Agility": 163,
+    "Composure": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "ultimatebiggatling": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "ultimatebigsniper": {
+    "Composure": 162,
+    "Fortitude": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "ultimateblover": {
+    "Ferocity": 112,
+    "Focus": 143,
+    "Pierce": 112,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "ultimatecabbage": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "ultimatecabbagecannon": {
+    "Composure": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "ultimatecactus": {
+    "Agility": 152,
+    "Fortitude": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "ultimatecannon": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "ultimatecattail": {
+    "Agility": 152,
+    "Fortitude": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "ultimatechomper": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Ferocity": 117,
+    "Precision": 116,
+    "Vigor": 149
+  },
+  "ultimatecorn": {
+    "Agility": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Might": 120,
+    "Retribution": 521
+  },
+  "ultimatecornfume": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "ultimatedolphin": {
+    "Agility": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163
+  },
+  "ultimatedoomgatling": {
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152,
+    "Vigor": 151
+  },
+  "ultimatedoomscaredy": {
+    "Agility": 152,
+    "Ferocity": 152,
+    "Focus": 195,
+    "Fortitude": 151,
+    "Onslaught": 350
+  },
+  "ultimateendoflamezombie": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Might": 125,
+    "Precision": 125,
+    "Vigor": 124
+  },
+  "ultimateexplodecannon": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "ultimatefireseashroom": {
+    "Composure": 163,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "ultimatefly": {
+    "Ferocity": 98,
+    "Fortitude": 98,
+    "Might": 98,
+    "Pierce": 580,
+    "Precision": 126
+  },
+  "ultimatefootballdrown": {
+    "Agility": 163,
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "ultimatefootballzombie": {
+    "Bulwark": 195,
+    "Ferocity": 152,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Precision": 151
+  },
+  "ultimatefume": {
+    "Agility": 152,
+    "Composure": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Vigor": 151
+  },
+  "ultimategargantuar": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Fortitude": 124,
+    "Might": 125,
+    "Precision": 124
+  },
+  "ultimategarlicsplit": {
+    "Agility": 98,
+    "Composure": 98,
+    "Onslaught": 126,
+    "Pierce": 580,
+    "Vigor": 98
+  },
+  "ultimategatling": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "ultimategatlingblover": {
+    "Composure": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "ultimategloom": {
+    "Agility": 162,
+    "Ferocity": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Precision": 162
+  },
+  "ultimategoldgargantuar": {
+    "Composure": 110,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Might": 109,
+    "Vigor": 109
+  },
+  "ultimatehelmetgatling": {
+    "Agility": 162,
+    "Composure": 163,
+    "Onslaught": 350,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "ultimatehorse": {
+    "Composure": 162,
+    "Ferocity": 163,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350
+  },
+  "ultimatehorse2": {
+    "Agility": 152,
+    "Bulwark": 195,
+    "Onslaught": 350,
+    "Precision": 151,
+    "Vigor": 152
+  },
+  "ultimatehugenut": {
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Focus": 124,
+    "Might": 125,
+    "Vigor": 124
+  },
+  "ultimatehypno": {
+    "Agility": 120,
+    "Composure": 120,
+    "Might": 119,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "ultimatehypnodoom": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Focus": 125,
+    "Vigor": 124
+  },
+  "ultimatehypnopumpkin": {
+    "Agility": 120,
+    "Ferocity": 119,
+    "Might": 120,
+    "Precision": 120,
+    "Retribution": 521
+  },
+  "ultimateicedoom": {
+    "Composure": 162,
+    "Focus": 163,
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "ultimateiceshroom": {
+    "Agility": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "ultimateiceshroom2": {
+    "Focus": 151,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Precision": 195
+  },
+  "ultimateimpking": {
+    "Agility": 585,
+    "Composure": 104,
+    "Ferocity": 103,
+    "Might": 104,
+    "Vigor": 104
+  },
+  "ultimatejackboxzombie": {
+    "Composure": 163,
+    "Fortitude": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 162
+  },
+  "ultimatejacksondriver": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Focus": 125,
+    "Might": 125,
+    "Precision": 124
+  },
+  "ultimatejalanut": {
+    "Focus": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Retribution": 195
+  },
+  "ultimatejalapeno": {
+    "Composure": 120,
+    "Ferocity": 120,
+    "Fortitude": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "ultimatejalapuff": {
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 124,
+    "Precision": 125,
+    "Vigor": 125
+  },
+  "ultimatekelp": {
+    "Focus": 538,
+    "Fortitude": 108,
+    "Might": 108,
+    "Onslaught": 138,
+    "Pierce": 108
+  },
+  "ultimatekirovzombie": {
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Vigor": 162
+  },
+  "ultimatelanternsplit": {
+    "Focus": 538,
+    "Fortitude": 108,
+    "Might": 108,
+    "Pierce": 108,
+    "Precision": 138
+  },
+  "ultimatelegionzombie": {
+    "Agility": 102,
+    "Bulwark": 131,
+    "Fortitude": 563,
+    "Might": 102,
+    "Pierce": 102
+  },
+  "ultimatelunarcabbage": {
+    "Agility": 101,
+    "Composure": 101,
+    "Ferocity": 101,
+    "Pierce": 101,
+    "Vigor": 596
+  },
+  "ultimatemachinenut": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Might": 117,
+    "Precision": 116,
+    "Vigor": 149
+  },
+  "ultimatemachinenutzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 125,
+    "Might": 124,
+    "Pierce": 124
+  },
+  "ultimatemagnet": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Precision": 163
+  },
+  "ultimatemelon": {
+    "Composure": 151,
+    "Might": 152,
+    "Onslaught": 350,
+    "Pierce": 195,
+    "Precision": 152
+  },
+  "ultimatemeloncannon": {
+    "Agility": 152,
+    "Ferocity": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "ultimatemelonpuff": {
+    "Composure": 151,
+    "Fortitude": 152,
+    "Onslaught": 350,
+    "Pierce": 152,
+    "Precision": 195
+  },
+  "ultimateminigun": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 162
+  },
+  "ultimatepaperzombie": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 124,
+    "Fortitude": 125
+  },
+  "ultimateplantern": {
+    "Focus": 538,
+    "Fortitude": 108,
+    "Might": 108,
+    "Onslaught": 138,
+    "Vigor": 108
+  },
+  "ultimatepoisonfume": {
+    "Agility": 151,
+    "Composure": 152,
+    "Ferocity": 152,
+    "Onslaught": 350,
+    "Pierce": 195
+  },
+  "ultimateportalnut": {
+    "Bulwark": 502,
+    "Fortitude": 124,
+    "Might": 125,
+    "Precision": 124,
+    "Vigor": 125
+  },
+  "ultimateportalsniper": {
+    "Composure": 102,
+    "Onslaught": 130,
+    "Precision": 564,
     "Retribution": 102,
     "Vigor": 102
   },
-  "fumeshroom": {
-    "Focus": 107,
-    "Might": 107,
-    "Pierce": 573,
-    "Retribution": 106,
-    "Vigor": 107
-  },
-  "garlic": {
-    "Composure": 114,
-    "Ferocity": 114,
-    "Focus": 114,
-    "Might": 114,
-    "Retribution": 544
-  },
-  "garlicpea": {
-    "Agility": 114,
-    "Composure": 114,
-    "Ferocity": 114,
-    "Retribution": 544,
-    "Vigor": 114
-  },
-  "garlicthreepeater": {
-    "Focus": 147,
-    "Might": 146,
-    "Onslaught": 374,
-    "Retribution": 187,
-    "Vigor": 146
-  },
-  "gatlingpea": {
-    "Agility": 157,
-    "Composure": 156,
-    "Ferocity": 157,
-    "Focus": 156,
-    "Onslaught": 374
-  },
-  "hypnochomper": {
-    "Ferocity": 114,
-    "Might": 114,
-    "Precision": 114,
-    "Retribution": 544,
-    "Vigor": 114
-  },
-  "hypnoshroom": {
-    "Agility": 114,
-    "Bulwark": 114,
-    "Composure": 114,
-    "Might": 114,
-    "Retribution": 544
-  },
-  "iceshroom": {
-    "Agility": 121,
-    "Ferocity": 121,
-    "Focus": 516,
-    "Precision": 121,
-    "Vigor": 121
-  },
-  "jalacaltrop": {
-    "Bulwark": 156,
-    "Composure": 157,
-    "Might": 156,
-    "Onslaught": 374,
-    "Pierce": 157
-  },
-  "jalapeashooter": {
-    "Agility": 156,
-    "Ferocity": 156,
-    "Onslaught": 374,
-    "Precision": 157,
-    "Vigor": 157
-  },
-  "lanterncactus": {
-    "Bulwark": 146,
-    "Composure": 146,
-    "Fortitude": 147,
-    "Onslaught": 374,
-    "Pierce": 187
-  },
-  "lanternchomper": {
-    "Ferocity": 156,
-    "Might": 157,
-    "Onslaught": 374,
-    "Precision": 156,
-    "Vigor": 157
-  },
-  "lanternpea": {
-    "Agility": 113,
-    "Composure": 113,
-    "Focus": 516,
-    "Fortitude": 113,
-    "Precision": 145
-  },
-  "marigold": {
-    "Agility": 121,
-    "Bulwark": 121,
-    "Focus": 516,
-    "Might": 121,
-    "Pierce": 121
-  },
-  "melonpult": {
-    "Composure": 156,
-    "Ferocity": 156,
-    "Fortitude": 157,
-    "Onslaught": 374,
-    "Vigor": 157
-  },
-  "normalzombie": {
-    "Agility": 104,
-    "Bulwark": 105,
-    "Might": 105,
-    "Pierce": 104,
-    "Vigor": 582
-  },
-  "nutchomper": {
-    "Bulwark": 104,
-    "Composure": 104,
-    "Fortitude": 105,
-    "Precision": 105,
-    "Vigor": 582
-  },
-  "paperzombie": {
-    "Agility": 121,
-    "Ferocity": 121,
-    "Focus": 516,
-    "Might": 121,
-    "Pierce": 121
-  },
-  "peachomper": {
-    "Bulwark": 146,
-    "Fortitude": 146,
-    "Onslaught": 374,
-    "Pierce": 187,
-    "Precision": 147
-  },
-  "peanut": {
-    "Agility": 106,
-    "Composure": 107,
-    "Ferocity": 107,
-    "Might": 107,
-    "Pierce": 573
-  },
-  "peashooter": {
-    "Composure": 157,
-    "Ferocity": 156,
-    "Fortitude": 156,
-    "Onslaught": 374,
-    "Precision": 157
-  },
-  "peashooterzombie": {
-    "Agility": 126,
-    "Bulwark": 126,
-    "Composure": 125,
-    "Might": 126,
-    "Precision": 497
-  },
-  "peasquash": {
-    "Agility": 156,
-    "Bulwark": 157,
-    "Ferocity": 156,
-    "Might": 157,
-    "Onslaught": 374
-  },
-  "peasunflower": {
-    "Bulwark": 121,
-    "Composure": 121,
-    "Focus": 516,
-    "Fortitude": 121,
-    "Might": 121
-  },
-  "plantern": {
-    "Agility": 121,
-    "Composure": 121,
-    "Ferocity": 121,
-    "Focus": 516,
-    "Fortitude": 121
-  },
-  "polevaulterzombie": {
-    "Agility": 592,
-    "Bulwark": 102,
-    "Ferocity": 102,
-    "Fortitude": 102,
-    "Might": 102
-  },
-  "pot": {
-    "Bulwark": 544,
-    "Composure": 114,
-    "Ferocity": 114,
-    "Fortitude": 114,
-    "Might": 114
-  },
-  "pumpkin": {
-    "Bulwark": 544,
-    "Composure": 114,
-    "Fortitude": 114,
-    "Might": 114,
-    "Precision": 114
-  },
-  "scaredyshroom": {
-    "Composure": 126,
-    "Ferocity": 126,
-    "Fortitude": 125,
-    "Pierce": 126,
-    "Precision": 497
-  },
-  "snowgatling": {
-    "Composure": 156,
-    "Ferocity": 157,
-    "Might": 157,
-    "Onslaught": 374,
-    "Pierce": 156
-  },
-  "snowpeashooter": {
+  "ultimatepotatonut": {
+    "Agility": 124,
+    "Bulwark": 502,
     "Ferocity": 125,
-    "Fortitude": 126,
-    "Might": 126,
-    "Precision": 497,
-    "Vigor": 126
+    "Might": 124,
+    "Pierce": 125
   },
-  "snowsplit": {
+  "ultimatepumpkin": {
+    "Composure": 112,
+    "Fortitude": 112,
+    "Pierce": 143,
+    "Retribution": 521,
+    "Vigor": 112
+  },
+  "ultimateredlunar": {
+    "Agility": 163,
+    "Ferocity": 163,
+    "Fortitude": 162,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "ultimateseashroom": {
+    "Composure": 110,
+    "Ferocity": 109,
+    "Fortitude": 563,
+    "Pierce": 109,
+    "Vigor": 109
+  },
+  "ultimatesnipergatling": {
+    "Agility": 102,
+    "Composure": 102,
+    "Might": 102,
+    "Onslaught": 130,
+    "Precision": 564
+  },
+  "ultimatesnowgatlingpuff": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Focus": 105,
+    "Pierce": 580,
+    "Vigor": 105
+  },
+  "ultimatesnowzombie": {
+    "Agility": 163,
+    "Focus": 162,
+    "Might": 163,
+    "Onslaught": 350,
+    "Vigor": 162
+  },
+  "ultimatespring": {
+    "Agility": 108,
+    "Composure": 108,
+    "Ferocity": 108,
+    "Focus": 538,
+    "Onslaught": 138
+  },
+  "ultimatespruce": {
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Retribution": 124,
+    "Vigor": 125
+  },
+  "ultimatestar": {
+    "Agility": 152,
+    "Composure": 152,
+    "Might": 151,
+    "Onslaught": 350,
+    "Precision": 195
+  },
+  "ultimatestartorch": {
+    "Composure": 162,
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Retribution": 163,
+    "Vigor": 163
+  },
+  "ultimatesunflower": {
+    "Agility": 108,
+    "Focus": 538,
+    "Might": 108,
+    "Onslaught": 138,
+    "Vigor": 108
+  },
+  "ultimatesungatlingpuff": {
+    "Composure": 105,
+    "Ferocity": 105,
+    "Fortitude": 105,
+    "Pierce": 580,
+    "Retribution": 105
+  },
+  "ultimatesunmagnet": {
+    "Agility": 116,
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Vigor": 115
+  },
+  "ultimatesunnut": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Ferocity": 116,
+    "Onslaught": 149,
+    "Retribution": 117
+  },
+  "ultimateswordzombie": {
     "Agility": 125,
-    "Composure": 126,
-    "Fortitude": 126,
-    "Pierce": 126,
-    "Precision": 497
+    "Bulwark": 502,
+    "Fortitude": 124,
+    "Might": 125,
+    "Vigor": 124
   },
-  "splitpea": {
-    "Ferocity": 126,
-    "Might": 126,
-    "Pierce": 125,
-    "Precision": 497,
-    "Vigor": 126
+  "ultimatetallnut": {
+    "Bulwark": 502,
+    "Composure": 116,
+    "Ferocity": 116,
+    "Fortitude": 149,
+    "Retribution": 117
   },
-  "squash": {
-    "Agility": 156,
-    "Composure": 157,
-    "Fortitude": 157,
-    "Onslaught": 374,
-    "Retribution": 156
+  "ultimatetorch": {
+    "Agility": 163,
+    "Might": 163,
+    "Onslaught": 350,
+    "Retribution": 162,
+    "Vigor": 162
   },
-  "starfruit": {
-    "Ferocity": 156,
-    "Might": 157,
-    "Onslaught": 374,
-    "Pierce": 156,
-    "Vigor": 157
+  "ultimatewintermelon": {
+    "Agility": 162,
+    "Composure": 163,
+    "Ferocity": 163,
+    "Might": 162,
+    "Onslaught": 350
   },
-  "starpea": {
-    "Composure": 146,
-    "Fortitude": 147,
-    "Onslaught": 374,
-    "Pierce": 187,
-    "Retribution": 146
+  "ultiwatergargantuar": {
+    "Bulwark": 502,
+    "Fortitude": 125,
+    "Precision": 125,
+    "Retribution": 124,
+    "Vigor": 124
   },
-  "sunchomper": {
-    "Agility": 157,
-    "Ferocity": 156,
-    "Might": 156,
-    "Onslaught": 374,
-    "Vigor": 157
+  "umbrellaleaf": {
+    "Bulwark": 502,
+    "Composure": 125,
+    "Ferocity": 125,
+    "Fortitude": 124,
+    "Precision": 124
   },
-  "sunflower": {
-    "Agility": 121,
-    "Composure": 121,
-    "Focus": 516,
-    "Fortitude": 121,
-    "Retribution": 121
+  "umbrellapot": {
+    "Agility": 116,
+    "Focus": 538,
+    "Might": 115,
+    "Retribution": 115,
+    "Vigor": 116
   },
-  "threecabbage": {
-    "Ferocity": 146,
-    "Might": 146,
-    "Onslaught": 374,
-    "Pierce": 187,
-    "Vigor": 147
+  "vectorplant": {
+    "Agility": 115,
+    "Composure": 115,
+    "Ferocity": 116,
+    "Focus": 538,
+    "Pierce": 116
   },
-  "threepeater": {
-    "Agility": 125,
-    "Composure": 126,
-    "Fortitude": 126,
-    "Precision": 497,
-    "Retribution": 126
-  },
-  "threeplantern": {
-    "Bulwark": 118,
-    "Might": 117,
-    "Pierce": 150,
-    "Precision": 497,
-    "Vigor": 118
-  },
-  "twinflower": {
-    "Composure": 121,
-    "Ferocity": 121,
-    "Focus": 516,
-    "Fortitude": 121,
-    "Retribution": 121
+  "voodoodollzombie": {
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Retribution": 162,
+    "Vigor": 162
   },
   "wallnut": {
-    "Agility": 114,
-    "Bulwark": 544,
-    "Ferocity": 114,
-    "Might": 114,
-    "Vigor": 114
+    "Bulwark": 502,
+    "Composure": 124,
+    "Ferocity": 125,
+    "Might": 125,
+    "Pierce": 124
+  },
+  "wallnutzombie": {
+    "Agility": 125,
+    "Bulwark": 502,
+    "Ferocity": 124,
+    "Might": 125,
+    "Precision": 124
+  },
+  "wateraloes": {
+    "Fortitude": 163,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Retribution": 162,
+    "Vigor": 162
+  },
+  "waterballista": {
+    "Agility": 163,
+    "Composure": 163,
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350
+  },
+  "waterbamboo": {
+    "Bulwark": 502,
+    "Pierce": 125,
+    "Precision": 125,
+    "Retribution": 124,
+    "Vigor": 124
+  },
+  "waterfurnace": {
+    "Agility": 124,
+    "Bulwark": 502,
+    "Composure": 125,
+    "Fortitude": 125,
+    "Precision": 124
+  },
+  "waterjackboxjumpzombie": {
+    "Agility": 195,
+    "Ferocity": 152,
+    "Might": 152,
+    "Onslaught": 350,
+    "Retribution": 151
+  },
+  "watershulk": {
+    "Composure": 100,
+    "Ferocity": 599,
+    "Fortitude": 100,
+    "Pierce": 100,
+    "Vigor": 101
+  },
+  "waterspruce": {
+    "Composure": 102,
+    "Fortitude": 102,
+    "Pierce": 130,
+    "Precision": 564,
+    "Vigor": 102
+  },
+  "wheat": {
+    "Focus": 538,
+    "Fortitude": 115,
+    "Might": 116,
+    "Retribution": 116,
+    "Vigor": 115
+  },
+  "whitefootball": {
+    "Composure": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Pierce": 109,
+    "Retribution": 109
+  },
+  "wintermelon": {
+    "Agility": 163,
+    "Composure": 162,
+    "Onslaught": 350,
+    "Pierce": 162,
+    "Vigor": 163
+  },
+  "xxspot": {
+    "Agility": 115,
+    "Focus": 538,
+    "Might": 116,
+    "Retribution": 116,
+    "Vigor": 115
+  },
+  "yellowfootball": {
+    "Agility": 585,
+    "Composure": 104,
+    "Might": 104,
+    "Pierce": 103,
+    "Retribution": 104
+  },
+  "yellowgargantuar": {
+    "Composure": 120,
+    "Might": 120,
+    "Pierce": 119,
+    "Retribution": 521,
+    "Vigor": 120
+  },
+  "zombie9527": {
+    "Agility": 585,
+    "Composure": 97,
+    "Fortitude": 124,
+    "Might": 97,
+    "Precision": 97
+  },
+  "zombieboss": {
+    "Ferocity": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Precision": 162,
+    "Vigor": 163
+  },
+  "zombieboss2": {
+    "Composure": 109,
+    "Fortitude": 563,
+    "Might": 110,
+    "Pierce": 109,
+    "Vigor": 109
+  },
+  "zombieduck": {
+    "Composure": 109,
+    "Ferocity": 110,
+    "Fortitude": 563,
+    "Might": 109,
+    "Precision": 109
+  },
+  "zombieendoflame": {
+    "Ferocity": 162,
+    "Might": 162,
+    "Onslaught": 350,
+    "Pierce": 163,
+    "Vigor": 163
+  },
+  "zombieloonnut": {
+    "Composure": 163,
+    "Onslaught": 350,
+    "Precision": 163,
+    "Retribution": 162,
+    "Vigor": 162
   }
 }

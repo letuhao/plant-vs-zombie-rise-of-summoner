@@ -1,0 +1,17 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.bargain-demon.ashthreepeater-001"
+  ],
+  "flavor": "A heavy velvet curtain hangs across the doorway, muffling the sounds of the dungeon. Inside, the air smells of old parchment and expensive spice, illuminated by the steady, warm glow of a dozen floating candles.",
+  "hazardBand": "none",
+  "kind": "merchant",
+  "name": "The Gilded Ledger",
+  "reason": "The party requires a safe haven to exchange scavenged loot for specialized equipment before the next descent.",
+  "roomId": "room.merchant-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

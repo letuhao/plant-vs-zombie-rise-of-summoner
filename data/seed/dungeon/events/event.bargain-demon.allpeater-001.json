@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.bargain-demon.allpeater-001",
+  "flavor": "A towering silhouette of smoke and embers coalesces in the center of the chamber. It offers to bolster your party's offensive火力, turning your strikes into torrents of hellfire, but it demands a portion of your vitality as a permanent 分配 of your life force to its own furnace.",
+  "kind": "bargain",
+  "name": "The Cinder-Soul Pact",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a powerful entity that offers a high-risk, high-reward combat enhancement in exchange for permanent resource reduction.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.allpeater"
+}

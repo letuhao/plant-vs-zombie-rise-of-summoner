@@ -32,8 +32,11 @@ namespace FusionRpg.Core.Tests.PassiveTree.Catalog;
 /// closes them:
 ///
 ///   3b. `soulCurveId` had ZERO format validation before this task — any string, including a bare
-///       formula/expression, loaded silently. Closed below by `PassiveTreeCatalogLoader`'s new
-///       `SoulCurveIdPattern` check.
+///       formula/expression, loaded silently. Closed (2026-09-06) by `PassiveTreeCatalogLoader`'s new
+///       `SoulCurveIdPattern` check. **Superseded 2026-09-07 (J12, D58, spec-soul-curve-resolution.md):
+///       `NodeAtom.SoulCurveId` had zero consumers that ever acted on its value — retired entirely
+///       rather than extended. `SoulCurveIdPattern` and all four tests this gap's own closure added are
+///       removed below, not left asserting a field that no longer exists.**
 ///   4.  no reflection sweep existed proving every stored magnitude is `long`, nor one that would
 ///       fail if a `float` field were added. Closed below, with an automated falsifiability proof —
 ///       `The_float_or_double_sweep_actually_turns_red_on_a_planted_float_field` and
@@ -60,104 +63,12 @@ public class CatalogHardeningTests
         Respec: new RespecTuning(50, 500),
         GateCounters: new GateCountersTuning(23, 23, 4, 4, 5000, null));
 
-    /// <summary>Same minimal shape as `PassiveTreeCatalogLoaderTests.ValidTreeJson`, duplicated
-    /// locally (that fixture is a private static of a different test class) with a substitutable
-    /// `soulCurveId` so each test below can drop in exactly the string it wants to prove refused or
-    /// accepted.</summary>
-    static string TreeJsonWithSoulCurveId(string? soulCurveId) => $$"""
-    {
-      "treeId": "might",
-      "category": "primary",
-      "gateQuantity": "aptitude.Might@Commander",
-      "shapeArchetype": "broad-and-flat",
-      "tiers": 10,
-      "branches": 2,
-      "nodesPerTier": [2,2,2,2,2,2,2,2,2,2],
-      "catalogVersion": 1,
-      "enabled": true,
-      "nodes": [
-        {
-          "id": "skill.might-off-t1-n0",
-          "branch": "off",
-          "tier": 1,
-          "nodeKey": "n0",
-          "prereqNodeIds": [],
-          "nodeClass": "magnitude",
-          "affixIds": ["affix.might.power1"],
-          "budgetShareMilli": 18,
-          "atoms": [
-            {
-              "kindId": "stat.modify",
-              "attachPoint": "Stat",
-              "channelId": "atk",
-              "op": "flat",
-              "trigger": null,
-              "whenJson": null,
-              "kMicro": 12345,
-              "scaleAxis": "PTheta",
-              "unitClass": "GameUnits",
-              "soulCurveId": {{(soulCurveId is null ? "null" : $"\"{soulCurveId}\"")}}
-            }
-          ],
-          "excludeProps": [],
-          "exclusionForm": "None",
-          "tagsJson": null,
-          "enabled": true,
-          "retiredAtRevision": null
-        }
-      ]
-    }
-    """;
-
-    // ---- gap 3b: soulCurveId is a curve REFERENCE, never a formula (D3) --------------------------
-
-    [Fact]
-    public void A_well_formed_curve_reference_is_accepted()
-    {
-        var (loaded, report) = PassiveTreeCatalogLoader.Load(
-            TreeJsonWithSoulCurveId("curve.might.resist"), MakeTuning());
-
-        Assert.True(report.IsOk, string.Join("; ", report.Refusals));
-        Assert.Equal("curve.might.resist", loaded!.Nodes[0].Atoms[0].SoulCurveId);
-    }
-
-    [Fact]
-    public void A_null_soulCurveId_is_accepted_the_field_is_optional()
-    {
-        var (loaded, report) = PassiveTreeCatalogLoader.Load(TreeJsonWithSoulCurveId(null), MakeTuning());
-
-        Assert.True(report.IsOk, string.Join("; ", report.Refusals));
-        Assert.Null(loaded!.Nodes[0].Atoms[0].SoulCurveId);
-    }
-
-    [Theory]
-    [InlineData("kMicro * 2")]                 // an inline expression referencing another field
-    [InlineData("0.1 * theta")]                // a literal arithmetic formula
-    [InlineData("(budgetShareMilli + 1) / 2")] // parens and arithmetic — unmistakably a formula
-    [InlineData("Θ_node * 1.5")]                // the exact shape §2.3 warns a formula would take
-    public void A_formula_or_expression_is_refused_never_accepted_as_a_reference(string formula)
-    {
-        var (loaded, report) = PassiveTreeCatalogLoader.Load(
-            TreeJsonWithSoulCurveId(formula), MakeTuning());
-
-        Assert.False(report.IsOk);
-        Assert.Null(loaded);
-        var msg = Assert.Single(report.Refusals, r => r.Contains("soulCurveId"));
-        Assert.Contains(formula, msg);
-        Assert.Contains("formula", msg, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void A_soulCurveId_missing_the_curve_prefix_is_refused()
-    {
-        // Not a formula, but also not a reference into the curve table (CurveTable.cs's shipped ids
-        // are all "curve.<id>") — refused for the same reason, named explicitly.
-        var (loaded, report) = PassiveTreeCatalogLoader.Load(
-            TreeJsonWithSoulCurveId("might.resist"), MakeTuning());
-
-        Assert.False(report.IsOk);
-        Assert.Contains(report.Refusals, r => r.Contains("might.resist"));
-    }
+    // ---- gap 3b (soulCurveId format validation) retired 2026-09-07 (J12, D58) alongside the field
+    // itself -- see the class doc comment above. TreeJsonWithSoulCurveId and its four tests
+    // (A_well_formed_curve_reference_is_accepted, A_null_soulCurveId_is_accepted_the_field_is_optional,
+    // A_formula_or_expression_is_refused_never_accepted_as_a_reference,
+    // A_soulCurveId_missing_the_curve_prefix_is_refused) removed rather than left asserting a field
+    // and a validation path that no longer exist.
 
     // ---- gap 4: the reflection sweep -------------------------------------------------------------
 

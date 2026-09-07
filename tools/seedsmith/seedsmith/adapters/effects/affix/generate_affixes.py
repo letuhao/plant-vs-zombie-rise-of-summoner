@@ -37,6 +37,28 @@ was always a real 2+-member sample to begin with).
 Usage:
     python -m seedsmith.adapters.effects.affix.generate_affixes --dry-run   # briefs only
     python -m seedsmith.adapters.effects.affix.generate_affixes --count 5   # real model calls
+    python -m seedsmith.adapters.effects.affix.generate_affixes --species-id Alpha --count 8
+
+⛔ **`--species-id` (task J7, spec-species-tree.md §5.2/§5.3 rule 3), added 2026-09-07.** Investigated
+against the real code before writing anything: as shipped, this tool could not target
+`affix.species.<speciesId>.*` at all — `ID_PREFIX`/`OUTPUT_DIR` were bare module constants, not
+parameters, and `data/seed/passive-tree/species/<speciesId>.json` (spec's own Project structure
+table) is silent on where a species' OWN affix corpus should live. **Decision made and stated here,
+not left unresolved**: one file per species, `data/seed/effects/affixes/species/<speciesId>.json`,
+mirroring the identical per-species-file convention that table already uses for the tree's own
+seed/plan/concrete stages — never one shared 6,720-entry file, and never per-node files (too
+granular, nothing needs that resolution). `--species-id` derives `id_prefix`, `output_dir` and
+`filename` from ONE flag so a caller cannot typo a prefix that drifts from `SpeciesUniquenessMetric`'s
+own `affix.species.<speciesId>.*` pattern (`metrics/passive_tree.py`, task J6); every underlying
+function still accepts the raw `id_prefix`/`output_dir`/`filename` parameters directly; for tests.
+Every parameter below defaults to EXACTLY its old hardcoded value, so every pre-existing call site
+(`run_t71_claude_propose.py`, both test files, the plain `--count N` CLI form) is unaffected byte for
+byte. `next_draw_start_index` itself needed no change: draw numbering restarts at 0 inside a fresh
+per-species file, which is collision-free by construction since the SPECIES id is already embedded in
+the full affix id (`affix.species.Alpha.affix-draw-000` vs `affix.species.Beta.affix-draw-000` are
+different ids even though `affix-draw-000` repeats). **The 6,720-affix production run itself is
+deliberately NOT launched by this change** — it remains its own scheduled decision (spec's own
+"largest unbudgeted item in the program" framing), now unblocked rather than attempted blind.
 """
 from __future__ import annotations
 
@@ -167,8 +189,13 @@ def groundable_slot_families(registry: "Mapping[str, dict]") -> "dict[str, dict]
     return {f: r for f, r in registry.items() if r["domain"] is not None}
 
 
-def load_existing() -> "dict[str, dict]":
-    path = OUTPUT_DIR / "all.json"
+def load_existing(output_dir: "Path | None" = None, filename: str = "all.json") -> "dict[str, dict]":
+    """`output_dir=None` (the default) resolves the CURRENT module-level `OUTPUT_DIR` at call time,
+    never a value captured once at import time — a plain `output_dir: Path = OUTPUT_DIR` default
+    would bind early and silently ignore a caller (or a test) that monkeypatches `OUTPUT_DIR`
+    afterward, exactly the footgun `adapters.trees.targets.load`'s own `path: "Path | None" = None`
+    already avoids for the identical reason. Caught by this module's own test while writing it."""
+    path = (output_dir if output_dir is not None else OUTPUT_DIR) / filename
     if not path.exists():
         return {}
     doc = json.loads(path.read_text(encoding="utf-8"))
@@ -204,6 +231,7 @@ def run_voted_draws(
     call: "Callable[..., str] | None" = None,
     config: LlmCallerConfig = DEFAULT_CONFIG,
     workers: int = MAX_WORKERS,
+    id_prefix: "str | None" = None,
 ) -> "tuple[dict[str, dict], dict[str, dict], dict[str, dict]]":
     """Draws `count` affix bundles, THREE permuted samples each: `name` voted scalar via
     `vote.resolve_vote` (`demon-seed`'s own `run_one_species` machinery, 2026-09-02), the ref bundle
@@ -230,6 +258,12 @@ def run_voted_draws(
     `call` is injected (never imported directly) so a test proves the exact number of model calls
     made without reaching the network — the same contract every graph in this program already
     honours.
+
+    `id_prefix=None` (the default) resolves the CURRENT module-level `ID_PREFIX` at call time, the
+    same late-binding reason `load_existing`'s own `output_dir` parameter above uses `None` rather
+    than `= ID_PREFIX` directly. Task J7's own `--species-id` CLI flag is what overrides it to
+    `"affix.species.<speciesId>."`, never a caller hand-typing a prefix that could drift from
+    `SpeciesUniquenessMetric`'s own U3 pattern.
     """
     from ....workflow.graphs.effect_affix import build_affix_authoring_graph
     from ....workflow.runner import run_many
@@ -323,7 +357,7 @@ def run_voted_draws(
         if minority:
             provenance["voteMinority"] = minority
 
-        affix_id = f"{ID_PREFIX}{draw_id}"
+        affix_id = f"{id_prefix if id_prefix is not None else ID_PREFIX}{draw_id}"
         draft = {"name": name_vote.value, "refs": winning_refs}
         fresh[affix_id] = entry_for(
             draft, affix_id=affix_id, affix_class=affix_class, provenance=provenance)
@@ -343,7 +377,25 @@ def main(argv=None) -> int:
     ap.add_argument("--endpoint", default="http://localhost:1234/v1/chat/completions")
     ap.add_argument("--model", default="google/gemma-4-26b-a4b-qat")
     ap.add_argument("--workers", type=int, default=MAX_WORKERS)
+    ap.add_argument(
+        "--species-id", default="",
+        help="task J7: author into affix.species.<speciesId>.* / "
+             "data/seed/effects/affixes/species/<speciesId>.json instead of the shared "
+             "affix.authored.* / all.json corpus — one flag, so the id prefix and the U3 "
+             "namespace pattern (metrics/passive_tree.py) can never drift apart")
     args = ap.parse_args(argv)
+
+    species_id = args.species_id.strip()
+    if species_id:
+        id_prefix = f"affix.species.{species_id}."
+        output_dir = OUTPUT_DIR / "species"
+        output_filename = f"{species_id}.json"
+        partition = species_id
+    else:
+        id_prefix = ID_PREFIX
+        output_dir = OUTPUT_DIR
+        output_filename = "all.json"
+        partition = "all"
 
     only = [a.strip() for a in args.only.split(",") if a.strip()] or None
     atom_triggers = load_eligible_atoms(ATOMS_ROOT, only)
@@ -370,21 +422,21 @@ def main(argv=None) -> int:
         "generatedUtc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
-    existing = load_existing()
+    existing = load_existing(output_dir, output_filename)
     start_index = next_draw_start_index(existing)
 
     fresh, unresolved, results = run_voted_draws(
         count=args.count, eligible=eligible, atom_triggers=atom_triggers,
         provenance_base=provenance_base, theme_hint=args.theme, start_index=start_index,
-        config=config, workers=args.workers)
+        config=config, workers=args.workers, id_prefix=id_prefix)
 
     merged = {**existing, **fresh}
     entries = [merged[k] for k in sorted(merged)]
 
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUTPUT_DIR / "all.json").write_text(
-        json.dumps({"schemaVersion": 1, "kind": "affix", "_meta": {"partition": "all"}, "entries": entries},
-                   ensure_ascii=False, indent=2) + "\n",
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / output_filename).write_text(
+        json.dumps({"schemaVersion": 1, "kind": "affix", "_meta": {"partition": partition},
+                   "entries": entries}, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
 
     by_outcome: "dict[str, int]" = {}
@@ -392,6 +444,8 @@ def main(argv=None) -> int:
         by_outcome[r.get("outcome", "?")] = by_outcome.get(r.get("outcome", "?"), 0) + 1
 
     print(json.dumps({
+        "partition": partition,
+        "outputPath": str(output_dir / output_filename),
         "eligibleAtoms": len(eligible),
         "draws": args.count,
         "samplesPerDraw": SAMPLES_PER_DRAW,

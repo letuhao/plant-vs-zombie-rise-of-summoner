@@ -13,7 +13,7 @@ namespace FusionRpg.Core.Tests.PassiveTree.Binding;
 public class ChannelLegalityTests
 {
     static NodeAtom Atom(string channelId, NodeAtomOp op, ScaleAxis axis, UnitClass unitClass, long kMicro = 100) =>
-        new("stat.derived", AttachPoint.Stat, channelId, op, null, null, kMicro, axis, unitClass, null);
+        new("stat.derived", AttachPoint.Stat, channelId, op, null, null, kMicro, axis, unitClass);
 
     // ---- 1. Thirteen classes, enumerated, never counted -----------------------------------
 

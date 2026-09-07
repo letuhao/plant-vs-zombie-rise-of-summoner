@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "finesse-defence-force-breaks-aggro",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "breakpoint",
+    "retinue": 0,
+    "signatureAction": "elemental-cascade"
+  },
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.boss-rainbow-002",
+  "formation": "boss",
+  "name": "The Prismatic Arbiter",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-tempo elemental master utilizing a shifting defensive pattern to protect its agile retinue.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "swarm"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}
