@@ -20,7 +20,7 @@ public static class DungeonTestFiles
     }
 
     public static string RegistryDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "_registry");
-    public static string DungeonTuningPath() => Path.Combine(RepoRoot(), "data", "tuning", "dungeon.v1.json");
+    public static string DungeonTuningPath() => Path.Combine(RepoRoot(), "data", "tuning", "dungeon.v3.json");
     public static string EncounterTuningPath() => Path.Combine(RepoRoot(), "data", "tuning", "encounter.v1.json");
     public static string NerveContainerPath() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "_containers", "nerve.v1.json");
     public static string LayoutsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "layouts");

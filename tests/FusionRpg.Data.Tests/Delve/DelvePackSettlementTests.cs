@@ -32,7 +32,7 @@ public class DelvePackSettlementTests : IDisposable
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
         _rooms = new RoomTypeCatalog(registries.RoomKinds);
         _doors = new DoorTypeCatalog(registries.DoorKinds);
-        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v1.json")), registries);
+        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
     public void Dispose()

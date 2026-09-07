@@ -212,18 +212,22 @@ public class QuestPreflightTests
     /// <summary>
     /// `Run` reads `rewardBandsByMember` straight off the `tuning` PARAMETER
     /// (`tuning.QuestsRewardBand`), never from the corpus -- and every test below needs the REAL
-    /// `Tuning` for graph rolling (real raid modes / countBand / PreflightSampleSeeds), so there is no
-    /// way for these tests to swap in this file's own pre-existing `staple/frequent/occasional` ladder
-    /// fixture. This ladder instead names the SAME ids the real shipped `dungeon.v1.json` actually
-    /// references (`Run_propagates_CheckFloorNotAboveCeil_through_the_real_entry_point` proves this is
-    /// real, reproduced content, not a guess) -- <b>not because that is the correct vocabulary</b> (item-
-    /// rarity ids per spec §12, `item-rarity.v1.json:7-18`) but purely so tests NOT about that separately-
-    /// named defect (`RewardBandRungUnresolvable`) can reach the sweep logic they actually exist to
-    /// prove, the same "isolate one concern, keep the rest working" discipline
-    /// `DomainEventPreflightBridgeTests` already applies.</summary>
+    /// `Tuning` for graph rolling (real raid modes / countBand / PreflightSampleSeeds), so this ladder
+    /// must actually resolve every one of the real `Tuning.QuestsRewardBand` rung ids or every test
+    /// below would spuriously hit `RewardBandRungUnresolvable` regardless of what it exists to prove.
+    ///
+    /// <para><b>2026-09-08: the real item-rarity ladder, not a difficulty-rung stand-in.</b> Until this
+    /// date, the real shipped `dungeon.v1.json`'s own `quests.rewardBand.*` values were themselves
+    /// difficulty-rung ids ("very-easy".."nightmare"), a genuine content defect this fixture used to
+    /// deliberately MATCH so tests not about that defect could reach the sweep logic they actually exist
+    /// to prove — that content is now fixed (`dungeon.v3.json`, `tools/tuning/publish.py`) to the real
+    /// item-rarity ladder ids spec §12 always meant (`item-rarity.v1.json:7-18`); this fixture now
+    /// carries the real ten-rung ladder for the identical isolation reason, not a workaround.</para>
+    /// </summary>
     static readonly IReadOnlyList<RarityRung> RewardBandShapedLadder = new[]
     {
-        Rung("very-easy", 1), Rung("easy", 2), Rung("medium", 3), Rung("hard", 4), Rung("very-hard", 5), Rung("nightmare", 6),
+        Rung("chaff", 0), Rung("sprout", 1), Rung("grafted", 2), Rung("cultivated", 3), Rung("fused", 4),
+        Rung("chimeric", 5), Rung("heirloom", 6), Rung("firstseed", 7), Rung("sunwoven", 8), Rung("almanac", 9),
     };
 
     /// <summary>A minimal, real-graph-rollable corpus: real rooms/palette/layout/tuning (so
@@ -283,16 +287,17 @@ public class QuestPreflightTests
 
     /// <summary>Real `rewardBand` ids ("modest"/"fair"/"rich") are never inverted in the shipped
     /// content, so proving `Run` propagates `FloorAboveCeil` needs a ladder whose OWN ordinal
-    /// assignment inverts a real window -- "modest" resolves to (`very-easy`, `easy`); this ladder
-    /// swaps their ordinals (`easy` &lt; `very-easy`) so `floorOrdinal &gt; ceilOrdinal` for real,
-    /// without touching the tuning content itself.</summary>
+    /// assignment inverts a real window -- "modest" resolves to (`sprout`, `grafted`) as of
+    /// `dungeon.v3.json` (2026-09-08's content fix); this ladder swaps their ordinals
+    /// (`grafted` &lt; `sprout`) so `floorOrdinal &gt; ceilOrdinal` for real, without touching the
+    /// tuning content itself.</summary>
     [Fact]
     public void Run_propagates_CheckFloorNotAboveCeil_through_the_real_entry_point()
     {
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
         var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
-        var invertedLadder = new[] { Rung("easy", 1), Rung("very-easy", 2) }; // swapped vs. real ordinal order -- inverts "modest"'s real window
+        var invertedLadder = new[] { Rung("grafted", 1), Rung("sprout", 2) }; // swapped vs. real ordinal order -- inverts "modest"'s real window
         var corpus = MinimalCorpus(domain, pool) with { Ladder = invertedLadder };
 
         var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
@@ -300,23 +305,58 @@ public class QuestPreflightTests
         Assert.Equal("q1", ex.QuestId);
     }
 
-    /// <summary>The real, reproduced finding, named precisely: the shipped `dungeon.v1.json`'s own
-    /// `quests.rewardBand.*` values are difficulty-rung ids, not item-rarity ids -- so a ladder that
-    /// only carries real item-rarity-shaped ids (this file's own pre-existing `Ladder` fixture,
-    /// `staple/frequent/occasional`) can never resolve them. Proves the 2026-09-07 hardening: a clean,
-    /// named `QuestRefusal`, never an uncaught `KeyNotFoundException`.</summary>
+    /// <summary>Proves the 2026-09-07 hardening: a clean, named `QuestRefusal`, never an uncaught
+    /// `KeyNotFoundException`, when the supplied ladder does not carry the real `dungeon.v3.json`
+    /// `quests.rewardBand.*` rung ids.
+    ///
+    /// <para><b>2026-09-08 correction: this is now a SYNTHETIC mismatch, not a reproduced bug.</b> The
+    /// real shipped `dungeon.v1.json` used to carry difficulty-rung ids (`"very-easy"`..`"nightmare"`)
+    /// under `quests.rewardBand.*` instead of the item-rarity ladder ids spec §12 names
+    /// (`item-rarity.v1.json:7-18`) — a genuine content defect, reproduced by this exact test at the
+    /// time. That content is now fixed (`dungeon.v3.json`, `tools/tuning/publish.py`): `modest` resolves
+    /// to `(sprout, grafted)`, `fair` to `(cultivated, fused)`, `rich` to `(chimeric, heirloom)` — three
+    /// adjacent two-rung windows climbing the real ten-rung ladder, exactly as spec §12's own citation
+    /// describes. This test still needs a ladder that cannot resolve `modest`'s real floor rung to prove
+    /// the refusal path stays real — this file's own pre-existing `Ladder` fixture
+    /// (`staple/frequent/occasional`) still does that, since none of its three members is `"sprout"`.</para>
+    /// </summary>
     [Fact]
     public void Run_refuses_reward_band_rung_unresolvable_rather_than_crashing_against_a_mismatched_ladder()
     {
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
         var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
-        var corpus = MinimalCorpus(domain, pool) with { Ladder = Ladder }; // this file's own staple/frequent/occasional fixture -- never resolves "very-easy"
+        var corpus = MinimalCorpus(domain, pool) with { Ladder = Ladder }; // this file's own staple/frequent/occasional fixture -- never resolves "sprout"
 
         var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
         Assert.Equal(QuestPreflightRules.RewardBandRungUnresolvable, ex.Rule);
         Assert.Equal("q1", ex.QuestId);
-        Assert.Contains("very-easy", ex.Message);
+        Assert.Contains("sprout", ex.Message);
+    }
+
+    /// <summary>2026-09-08, new — the real shipped content now resolves cleanly (the defect the test
+    /// above used to characterize is fixed), so this proves the POSITIVE case directly: `Run` against
+    /// the real `Tuning` and the real ten-rung item-rarity ladder raises neither
+    /// `RewardBandRungUnresolvable` nor `FloorAboveCeil` for any of the three real reward bands.</summary>
+    [Fact]
+    public void Run_resolves_all_three_real_reward_bands_against_the_real_item_rarity_ladder_without_refusing()
+    {
+        var domain = RealDomain();
+        var layouts = RealLayoutCatalog();
+        var realLadder = new[]
+        {
+            Rung("chaff", 0), Rung("sprout", 1), Rung("grafted", 2), Rung("cultivated", 3), Rung("fused", 4),
+            Rung("chimeric", 5), Rung("heirloom", 6), Rung("firstseed", 7), Rung("sunwoven", 8), Rung("almanac", 9),
+        };
+        var pool = new[]
+        {
+            Row("q1", "kill-boss", rewardBand: "modest"),
+            Row("q2", "bring-demon-home-alive", rewardBand: "fair"),
+            Row("q3", "survive-no-downed", rewardBand: "rich"),
+        };
+        var corpus = MinimalCorpus(domain, pool) with { Ladder = realLadder };
+
+        QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning); // does not throw
     }
 
     [Fact]

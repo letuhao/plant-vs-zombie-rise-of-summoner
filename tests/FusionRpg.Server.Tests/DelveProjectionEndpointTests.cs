@@ -55,7 +55,7 @@ public class DelveProjectionEndpointTests : IDisposable
     // Power/Aptitude/DerivedStat/Rung/Aura/Items/DemonSpeciesCatalog only -- DungeonTuningHub is
     // NOT among them (confirmed by reading that file directly), and DelveEndpoints.HandleGetDelve
     // reads it via DungeonTuningHub.Tuning. Configured here from the REAL shipped
-    // data/tuning/dungeon.v1.json, matching DungeonHubTestBootstrap's own established convention in
+    // data/tuning/dungeon.v3.json, matching DungeonHubTestBootstrap's own established convention in
     // FusionRpg.Core.Tests ("a fixture copy could drift from what ships") and
     // DelveWildEndpointsTests.cs's own ConfigureWildTuningOnce idiom for the identical situation.
     static bool _dungeonTuningConfigured;
@@ -65,7 +65,7 @@ public class DelveProjectionEndpointTests : IDisposable
         var repoRoot = FindRepoRoot();
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
         DungeonTuningHub.Configure(DungeonTuningLoader.Parse(
-            File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v1.json")), registries));
+            File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries));
         _dungeonTuningConfigured = true;
     }
 

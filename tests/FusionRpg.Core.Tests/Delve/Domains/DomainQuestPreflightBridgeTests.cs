@@ -15,12 +15,13 @@ namespace FusionRpg.Core.Tests.Delve.Domains;
 /// (`DomainRealPipelineTests.cs`). Rows 4/6/7 stubbed to always pass, matching
 /// `DomainEventPreflightBridgeTests`'s own established isolation style — this file's only job is row 8.
 ///
-/// <para><b>Uses a difficulty-rung-shaped `Ladder` fixture, not the real item-rarity one.</b> The real
-/// shipped `dungeon.v1.json`'s own `quests.rewardBand.*.floorRung`/`.ceilRung` values are difficulty-rung
-/// ids, not item-rarity ids (found and named precisely in `QuestPreflightTests.cs`'s own
-/// `Run_refuses_reward_band_rung_unresolvable...` test and the todo entry) — a SEPARATE, already-named
-/// defect this file deliberately works around (same technique) so its own tests isolate row 8's WIRING,
-/// not re-discover the same reward-band content gap a second time.</para>
+/// <para><b>2026-09-08: uses the real item-rarity `Ladder` fixture, not a difficulty-rung stand-in.</b>
+/// The real shipped `dungeon.v1.json` used to carry difficulty-rung ids under
+/// `quests.rewardBand.*.floorRung`/`.ceilRung` (found and named precisely in `QuestPreflightTests.cs`'s
+/// own `Run_refuses_reward_band_rung_unresolvable...` test and the todo entry) — this file's own
+/// `RewardBandShapedLadder` used to deliberately MATCH that defect so `CheckFloorNotAboveCeil` never
+/// refused, isolating row 8's own wiring. That content defect is now fixed (`dungeon.v3.json`); this
+/// fixture now carries the real item-rarity ladder for the same isolation reason, not a workaround.</para>
 /// </summary>
 public class DomainQuestPreflightBridgeTests
 {
@@ -90,10 +91,20 @@ public class DomainQuestPreflightBridgeTests
         return result;
     }
 
+    /// <summary>2026-09-08: the real item-rarity ladder, not a difficulty-rung stand-in. The shipped
+    /// `dungeon.v1.json`'s own `quests.rewardBand.*` values used to be difficulty-rung ids
+    /// ("very-easy".."nightmare"), a genuine content defect this fixture used to deliberately MATCH so
+    /// `CheckFloorNotAboveCeil` would not refuse and this file's own tests could isolate row 8's wiring
+    /// in peace (see `QuestPreflightTests.cs`'s own `Run_refuses_reward_band_rung_unresolvable...` for
+    /// where that defect was found and reproduced). That content is now fixed (`dungeon.v3.json`,
+    /// `tools/tuning/publish.py`) to the real item-rarity ladder ids spec §12 always meant
+    /// (`item-rarity.v1.json:7-18`) — this fixture now matches it directly for the same reason.</summary>
     static readonly IReadOnlyList<RarityRung> RewardBandShapedLadder = new RarityRung[]
     {
-        new("very-easy", 1, 0, 0, 0, 0, 100), new("easy", 2, 0, 0, 0, 0, 100), new("medium", 3, 0, 0, 0, 0, 100),
-        new("hard", 4, 0, 0, 0, 0, 100), new("very-hard", 5, 0, 0, 0, 0, 100), new("nightmare", 6, 0, 0, 0, 0, 100),
+        new("chaff", 0, 0, 0, 0, 0, 100), new("sprout", 1, 0, 0, 0, 0, 100), new("grafted", 2, 0, 0, 0, 0, 100),
+        new("cultivated", 3, 0, 0, 0, 0, 100), new("fused", 4, 0, 0, 0, 0, 100), new("chimeric", 5, 0, 0, 0, 0, 100),
+        new("heirloom", 6, 0, 0, 0, 0, 100), new("firstseed", 7, 0, 0, 0, 0, 100), new("sunwoven", 8, 0, 0, 0, 0, 100),
+        new("almanac", 9, 0, 0, 0, 0, 100),
     };
 
     static QuestPreflight.QuestPreflightCorpus RealCorpus()

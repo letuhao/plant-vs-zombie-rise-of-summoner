@@ -25,7 +25,7 @@ internal static class DungeonRegistryHubTestBootstrap
 
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(dir.FullName, "data", "seed", "dungeon", "_registry"));
         DungeonTuningHub.Configure(
-            DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", "dungeon.v1.json")), registries));
+            DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", "dungeon.v3.json")), registries));
         EncounterTuningHub.Configure(
             EncounterTuningLoader.Parse(File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", "encounter.v1.json")), registries));
         DungeonRegistryHub.Configure(registries);

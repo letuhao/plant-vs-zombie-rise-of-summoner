@@ -32,6 +32,7 @@ namespace FusionRpg.Server;
 public sealed class DelveBattleSessionManager
 {
     readonly RpgStore _store;
+    readonly IDelveLivePush? _push;
     readonly BattleSessionRegistry _registry = new();
 
     readonly object _gate = new();
@@ -42,7 +43,15 @@ public sealed class DelveBattleSessionManager
     readonly Dictionary<(long DelveId, int PartyIndex), string> _activeMatchKeyForParty = new();
     readonly Dictionary<string, string> _matchKeyForConnection = new(StringComparer.Ordinal);
 
-    public DelveBattleSessionManager(RpgStore store) => _store = store ?? throw new ArgumentNullException(nameof(store));
+    /// <param name="push">D5.11's live-push wave (2026-09-08) — optional so every existing caller
+    /// (including every test constructed before this wave) keeps compiling with no behaviour change:
+    /// a session with no push configured runs exactly as before, silently. See
+    /// <see cref="DelveLiveEventNames"/> for the wire vocabulary this manager pushes.</param>
+    public DelveBattleSessionManager(RpgStore store, IDelveLivePush? push = null)
+    {
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        _push = push;
+    }
 
     public static string MatchKeyFor(long delveId, int row, int col, int partyIndex) =>
         $"delve-{delveId}-{row}-{col}-p{partyIndex}";
@@ -121,6 +130,7 @@ public sealed class DelveBattleSessionManager
         DecisionTrace trace;
         BattleSetup effectiveSetup;
         ulong effectiveSeed;
+        var replayCount = 0;
         if (created)
         {
             trace = new DecisionTrace();
@@ -130,10 +140,15 @@ public sealed class DelveBattleSessionManager
         else
         {
             // Already logged (a retry, or a still-open session) -- the STORED row is authoritative,
-            // matching RunPlannedMatchAsync's own "on replay the STORED setup wins" precedent.
+            // matching RunPlannedMatchAsync's own "on replay the STORED setup wins" precedent. This
+            // branch is genuinely resume-shaped (this method's own doc comment: "rehydrates and resumes
+            // it, exactly like Resume does"), so it pushes the identical DelveResumed/DelveReplayConsumed
+            // events Resume() does, below.
             if (entry.RunId is not null) return null;   // already finished and ingested -- nothing to (re)start
             var rehydrated = DecisionTrace.FromJson(entry.DecisionsJson);
             trace = rehydrated ?? new DecisionTrace();
+            replayCount = trace.Count; // a freshly-rehydrated trace's own cursor starts at 0 -- the
+                                        // whole persisted prefix still needs replaying
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup is null) return null;
             effectiveSetup = storedSetup;
@@ -146,7 +161,16 @@ public sealed class DelveBattleSessionManager
             matchKey, delveId, partyIndex, playerId, effectiveSetup, effectiveSeed, trace,
             automated, steeredKeys, _registry, actionCatalog, containerResolver,
             onDecisionPersisted: t => _store.WriteWebMatchDecisions(entry.Id, t.ToJson()),
-            onFrozen: payload => AppendSteerLogEntry(delveId, payload));
+            onFrozen: payload => { AppendSteerLogEntry(delveId, payload); PushFrozen(matchKey, delveId, partyIndex); },
+            onDeclared: d => PushDeclared(matchKey, d),
+            onTurnStarted: (actorKey, dwellMs) => PushTurnStarted(matchKey, actorKey, dwellMs));
+
+        if (!created)
+        {
+            PushResumed(matchKey, replayCount);
+            for (var i = 0; i < replayCount; i++) PushReplayConsumed(matchKey);
+        }
+
         session.Start();
         Register(session, connectionId);
         return session;
@@ -171,15 +195,23 @@ public sealed class DelveBattleSessionManager
 
         var existing = _registry.Find(matchKey);
         DecisionTrace trace;
+        int replayCount;
         if (existing is { State: BattleSessionState.Disconnected } && existing.PlayerId == playerId)
         {
             trace = existing.Trace; // same process -- reuse, never fork a second trace object
+            // Live mode only ever starts once ReplayExhausted (InteractiveIntentSource.TryDeclare), and
+            // Freeze only ever fires from inside a live Ask() or an external Steer/disconnect -- never
+            // mid-replay (Replay() itself observes no cancellation token) -- so a session that got as
+            // far as freezing had already fully exhausted its own replay before this moment.
+            replayCount = 0;
         }
         else
         {
             var rehydrated = DecisionTrace.FromJson(entry.DecisionsJson);
             if (rehydrated is null) return null; // spec §9: an absent/incomplete trace refuses, never re-resolves blind
             trace = rehydrated;
+            replayCount = trace.Count; // a freshly-rehydrated trace's own cursor starts at 0 -- the
+                                        // whole persisted prefix still needs replaying
         }
 
         var setup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
@@ -193,7 +225,13 @@ public sealed class DelveBattleSessionManager
             matchKey, delveId, partyIndex, playerId, setup, entry.Seed, trace,
             automated, steeredKeys, _registry, actionCatalog, containerResolver,
             onDecisionPersisted: t => _store.WriteWebMatchDecisions(entry.Id, t.ToJson()),
-            onFrozen: payload => AppendSteerLogEntry(delveId, payload));
+            onFrozen: payload => { AppendSteerLogEntry(delveId, payload); PushFrozen(matchKey, delveId, partyIndex); },
+            onDeclared: d => PushDeclared(matchKey, d),
+            onTurnStarted: (actorKey, dwellMs) => PushTurnStarted(matchKey, actorKey, dwellMs));
+
+        PushResumed(matchKey, replayCount);
+        for (var i = 0; i < replayCount; i++) PushReplayConsumed(matchKey);
+
         session.Start();
         Register(session, connectionId);
         return session;
@@ -234,6 +272,28 @@ public sealed class DelveBattleSessionManager
         if (Find(matchKey) is { } session)
             session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(session.PartyIndex));
     }
+
+    // ---- live pushes (D5.11, 2026-09-08) -- see DelveLiveEventNames for the wire vocabulary ---------
+
+    void PushDeclared(string matchKey, TracedDecision decision) =>
+        _push?.Push(DelveLiveEventNames.Declared, new
+        {
+            matchKey,
+            actorKey = decision.ActorKey,
+            source = decision.Source == DecisionSource.Player ? "player" : "timeout"
+        });
+
+    void PushTurnStarted(string matchKey, string actorKey, int dwellMs) =>
+        _push?.Push(DelveLiveEventNames.TurnStarted, new { matchKey, actorKey, dwellMs });
+
+    void PushFrozen(string matchKey, long delveId, int partyIndex) =>
+        _push?.Push(DelveLiveEventNames.Frozen, new { matchKey, delveId, partyIndex });
+
+    void PushResumed(string matchKey, int replayCount) =>
+        _push?.Push(DelveLiveEventNames.Resumed, new { matchKey, replayCount });
+
+    void PushReplayConsumed(string matchKey) =>
+        _push?.Push(DelveLiveEventNames.ReplayConsumed, new { matchKey });
 
     void AppendSteerLogEntry(long delveId, SteerLogPayload payload)
     {

@@ -25,7 +25,7 @@ namespace FusionRpg.Data.Tests.Delve.Quests;
 /// domain via `DomainImportTests.cs`'s own established "fully-passing `DomainPreflightInputs` fixture"
 /// shape (rows 4-8 trivially satisfied by empty-refusal delegates) rather than real content. The reward
 /// ladder is likewise hand-corrected here (`SeedOneRarityRung`), NOT the real shipped
-/// `dungeon.v1.json`'s own `quests.rewardBand.*` — D4.13's own already-documented finding is that those
+/// `dungeon.v3.json`'s own `quests.rewardBand.*` — D4.13's own already-documented finding is that those
 /// values are difficulty-rung ids, not item-rarity-rung ids, so using them here would exercise a
 /// separate, already-tracked content bug instead of this task's own wiring.</para>
 /// </summary>
@@ -49,7 +49,7 @@ public class QuestRewardBankingCloseDelveTests : IDisposable
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
         _rooms = new RoomTypeCatalog(registries.RoomKinds);
         _doors = new DoorTypeCatalog(registries.DoorKinds);
-        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v1.json")), registries);
+        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
     public void Dispose()

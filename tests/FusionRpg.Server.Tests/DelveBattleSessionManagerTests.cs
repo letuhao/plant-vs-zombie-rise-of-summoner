@@ -115,6 +115,17 @@ public class DelveBattleSessionManagerTests : IDisposable
             BattleEngine.BasicAttackEnvelope);
     }
 
+    /// <summary>D5.11's live-push wave (2026-09-08) — a fake <see cref="IDelveLivePush"/> that records
+    /// every push verbatim, so a test can assert exactly which wire events fired, in what order, with
+    /// what payload, with no live SignalR server needed (matches this project's own callback-capture
+    /// style rather than reaching for a mocking library this test project does not depend on).</summary>
+    sealed class RecordingPush : IDelveLivePush
+    {
+        public readonly List<(string EventName, object Payload)> Pushes = new();
+        public void Push(string eventName, object payload) => Pushes.Add((eventName, payload));
+        public IEnumerable<object> PayloadsOf(string eventName) => Pushes.Where(p => p.EventName == eventName).Select(p => p.Payload);
+    }
+
     static async Task RespondToPendingAskOnceAsync(DelveBattleSession session)
     {
         if (session.PendingActorKey is { } pending)
@@ -130,6 +141,10 @@ public class DelveBattleSessionManagerTests : IDisposable
             await RespondToPendingAskOnceAsync(session);
         Assert.True(condition(), "condition never became true within the test timeout");
     }
+
+    /// <summary>Reads a named field off one of the anonymous-object push payloads
+    /// (`new { matchKey, actorKey, source }` etc.) without redeclaring their shape here.</summary>
+    static object? Prop(object payload, string name) => payload.GetType().GetProperty(name)?.GetValue(payload);
 
     // ==================================================================================================
     // Match key / correlation derivation
@@ -311,5 +326,171 @@ public class DelveBattleSessionManagerTests : IDisposable
         var manager = new DelveBattleSessionManager(_store);
         var session = manager.Resume("delve-42-0-0-p0", _playerId, automated: new FixedAttacker());
         Assert.Null(session);
+    }
+
+    // ==================================================================================================
+    // Live pushes (D5.11, 2026-09-08) -- DelveLiveEventNames, pushed via a fake IDelveLivePush so no
+    // live SignalR server is needed to prove the wiring.
+    // ==================================================================================================
+
+    [Fact]
+    public async Task A_live_fight_pushes_DelveTurnStarted_and_DelveDeclared_for_real_decisions()
+    {
+        var delveId = CreateDelve();
+        var push = new RecordingPush();
+        var manager = new DelveBattleSessionManager(_store, push);
+        var session = manager.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 777UL, automated: new FixedAttacker())!;
+
+        await DriveUntilAsync(session, () => session.Trace.Count >= 2);
+
+        var turnStarted = push.PayloadsOf(DelveLiveEventNames.TurnStarted).ToList();
+        Assert.True(turnStarted.Count >= 2, "onTurnStarted should push at least once per live ask");
+        Assert.All(turnStarted, p => Assert.Equal(session.MatchKey, Prop(p, "matchKey")));
+
+        var declared = push.PayloadsOf(DelveLiveEventNames.Declared).ToList();
+        Assert.True(declared.Count >= 2);
+        Assert.All(declared, p => Assert.Equal(session.MatchKey, Prop(p, "matchKey")));
+        Assert.All(declared, p => Assert.True(Prop(p, "source") is "player" or "timeout"));
+
+        session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session.RunTask!);
+    }
+
+    [Fact]
+    public async Task Steer_pushes_DelveFightFrozen_for_the_from_partys_live_session()
+    {
+        var delveId = CreateDelve();
+        var push = new RecordingPush();
+        var manager = new DelveBattleSessionManager(_store, push);
+        var session = manager.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 888UL, automated: new FixedAttacker())!;
+
+        manager.Steer(delveId, fromPartyIndex: 0, toPartyIndex: 1);
+        await Record.ExceptionAsync(() => session.RunTask!);
+
+        var frozen = Assert.Single(push.PayloadsOf(DelveLiveEventNames.Frozen));
+        Assert.Equal(session.MatchKey, Prop(frozen, "matchKey"));
+        Assert.Equal(delveId, Prop(frozen, "delveId"));
+        Assert.Equal(0, Prop(frozen, "partyIndex"));
+    }
+
+    [Fact]
+    public void Steer_with_no_live_session_pushes_no_DelveFightFrozen()
+    {
+        var delveId = CreateDelve();
+        var push = new RecordingPush();
+        var manager = new DelveBattleSessionManager(_store, push);
+
+        manager.Steer(delveId, fromPartyIndex: null, toPartyIndex: 0);
+
+        Assert.Empty(push.PayloadsOf(DelveLiveEventNames.Frozen)); // nobody was fighting there -- nothing to tell a client
+    }
+
+    /// <summary>Same in-memory manager, resumed right after its own freeze -- the trace it reuses was
+    /// already fully replay-exhausted (live mode never starts before that), so nothing needs replaying.</summary>
+    [Fact]
+    public async Task Resume_reusing_the_same_in_memory_trace_pushes_DelveResumed_with_zero_replayCount()
+    {
+        var delveId = CreateDelve();
+        var push = new RecordingPush();
+        var manager = new DelveBattleSessionManager(_store, push);
+        var session1 = manager.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 555UL, automated: new FixedAttacker())!;
+
+        await DriveUntilAsync(session1, () => session1.Trace.Count >= 2);
+        session1.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session1.RunTask!);
+
+        push.Pushes.Clear(); // isolate this assertion to the Resume call alone
+
+        var session2 = manager.Resume(session1.MatchKey, _playerId, automated: new FixedAttacker());
+        Assert.NotNull(session2);
+
+        var resumed = Assert.Single(push.PayloadsOf(DelveLiveEventNames.Resumed));
+        Assert.Equal(0, Prop(resumed, "replayCount"));
+        Assert.Empty(push.PayloadsOf(DelveLiveEventNames.ReplayConsumed));
+
+        session2!.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session2.RunTask!);
+    }
+
+    /// <summary>A BRAND NEW manager (a fresh in-memory registry, simulating a real process restart)
+    /// resuming from the persisted row alone: the rehydrated trace's own replay cursor starts at 0, so
+    /// the WHOLE recorded prefix needs replaying -- proven against the real decision count, not a
+    /// hardcoded number.</summary>
+    [Fact]
+    public async Task Resume_after_a_real_restart_pushes_the_full_persisted_prefix_then_one_ReplayConsumed_each_in_order()
+    {
+        var delveId = CreateDelve();
+        var manager1 = new DelveBattleSessionManager(_store);
+        var session1 = manager1.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 444UL, automated: new FixedAttacker())!;
+
+        await DriveUntilAsync(session1, () => session1.Trace.Count >= 3);
+        var decisionsBeforeFreeze = session1.Trace.Count;
+        session1.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session1.RunTask!);
+
+        var push = new RecordingPush();
+        var manager2 = new DelveBattleSessionManager(_store, push); // fresh registry -- no in-memory session survives
+        var session2 = manager2.Resume(session1.MatchKey, _playerId, automated: new FixedAttacker());
+        Assert.NotNull(session2);
+
+        var resumed = Assert.Single(push.PayloadsOf(DelveLiveEventNames.Resumed));
+        Assert.Equal(session1.MatchKey, Prop(resumed, "matchKey"));
+        var replayCount = (int)Prop(resumed, "replayCount")!;
+        Assert.Equal(decisionsBeforeFreeze, replayCount);
+        Assert.True(replayCount >= 3);
+
+        var replayConsumed = push.PayloadsOf(DelveLiveEventNames.ReplayConsumed).ToList();
+        Assert.Equal(replayCount, replayConsumed.Count);
+        Assert.All(replayConsumed, p => Assert.Equal(session1.MatchKey, Prop(p, "matchKey")));
+
+        // Order: DelveResumed always precedes every DelveReplayConsumed for the same resume.
+        var resumedIndex = push.Pushes.FindIndex(p => p.EventName == DelveLiveEventNames.Resumed);
+        var firstReplayConsumedIndex = push.Pushes.FindIndex(p => p.EventName == DelveLiveEventNames.ReplayConsumed);
+        Assert.True(resumedIndex < firstReplayConsumedIndex);
+
+        session2!.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session2.RunTask!);
+    }
+
+    /// <summary>StartSession's own "already logged, not yet finished" retry branch is resume-shaped
+    /// (this class's own doc comment: "rehydrates and resumes it, exactly like Resume does") -- proven
+    /// to push the identical DelveResumed/DelveReplayConsumed pair Resume() does.</summary>
+    [Fact]
+    public async Task StartSession_retried_over_an_existing_row_pushes_DelveResumed_like_a_genuine_resume()
+    {
+        var delveId = CreateDelve();
+        var manager1 = new DelveBattleSessionManager(_store);
+        var first = manager1.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 999UL, automated: new FixedAttacker())!;
+        await DriveUntilAsync(first, () => first.Trace.Count >= 2);
+        var decisionsBeforeRetry = first.Trace.Count;
+        first.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => first.RunTask!);
+
+        var push = new RecordingPush();
+        var manager2 = new DelveBattleSessionManager(_store, push); // fresh registry -- forces the rehydrate branch
+        var second = manager2.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 111UL, automated: new FixedAttacker());
+        Assert.NotNull(second);
+        Assert.Equal(first.MatchKey, second!.MatchKey);
+
+        var resumed = Assert.Single(push.PayloadsOf(DelveLiveEventNames.Resumed));
+        Assert.Equal(decisionsBeforeRetry, Prop(resumed, "replayCount"));
+        Assert.Equal(decisionsBeforeRetry, push.PayloadsOf(DelveLiveEventNames.ReplayConsumed).Count());
+
+        second.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => second.RunTask!);
+    }
+
+    [Fact]
+    public void A_fresh_StartSession_pushes_no_DelveResumed_at_all()
+    {
+        var delveId = CreateDelve();
+        var push = new RecordingPush();
+        var manager = new DelveBattleSessionManager(_store, push);
+        var session = manager.StartSession(delveId, 0, 0, 0, _playerId, Setup(), seed: 222UL, automated: new FixedAttacker())!;
+
+        Assert.Empty(push.PayloadsOf(DelveLiveEventNames.Resumed));
+        Assert.Empty(push.PayloadsOf(DelveLiveEventNames.ReplayConsumed));
+
+        session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
     }
 }

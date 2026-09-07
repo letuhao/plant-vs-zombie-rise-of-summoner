@@ -59,8 +59,22 @@ public class DelveBattleSessionTests
         BattleSessionRegistry registry, out List<TracedDecision> persisted, out List<SteerLogPayload> frozen,
         int dwellMs = 5)
     {
+        return NewSession(registry, out persisted, out frozen, out _, out _, dwellMs);
+    }
+
+    /// <summary>D5.11's live-push wave (2026-09-08) — the same fixture, additionally capturing
+    /// <c>onDeclared</c>/<c>onTurnStarted</c> so a test can assert exactly when and how often each new
+    /// hook fires without touching SignalR at all (<see cref="DelveBattleSessionManagerTests"/> covers
+    /// the actual wire push).</summary>
+    static DelveBattleSession NewSession(
+        BattleSessionRegistry registry, out List<TracedDecision> persisted, out List<SteerLogPayload> frozen,
+        out List<TracedDecision> declared, out List<(string ActorKey, int DwellMs)> turnsStarted,
+        int dwellMs = 5)
+    {
         var localPersisted = new List<TracedDecision>();
         var localFrozen = new List<SteerLogPayload>();
+        var localDeclared = new List<TracedDecision>();
+        var localTurnsStarted = new List<(string, int)>();
         var setup = Setup();
         var steeredKeys = RaidIntentSource.KeysForParty(setup, partyIndex: 0);
         var session = new DelveBattleSession(
@@ -69,9 +83,13 @@ public class DelveBattleSessionTests
             automated: new FixedAttacker(), steeredKeys, registry,
             onDecisionPersisted: t => localPersisted.Add(t.Decisions[^1]),
             onFrozen: p => localFrozen.Add(p),
+            onDeclared: d => localDeclared.Add(d),
+            onTurnStarted: (actorKey, ms) => localTurnsStarted.Add((actorKey, ms)),
             dwellMs: dwellMs);
         persisted = localPersisted;
         frozen = localFrozen;
+        declared = localDeclared;
+        turnsStarted = localTurnsStarted;
         return session;
     }
 
@@ -167,6 +185,69 @@ public class DelveBattleSessionTests
 
         // Clean up -- freeze so the background Task does not keep running past this test.
         session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session.RunTask!);
+    }
+
+    /// <summary>D5.11 (2026-09-08) — <c>onTurnStarted</c> fires once per <c>Ask</c> call: every live turn,
+    /// never zero times, and always with the SAME dwell this session was built with (a real, useful
+    /// diagnostic — a countdown UI needs the exact window, not just "some turn started").</summary>
+    [Fact]
+    public async Task OnTurnStarted_fires_once_per_ask_with_the_sessions_own_dwell()
+    {
+        var registry = new BattleSessionRegistry();
+        const int dwellMs = 2000;
+        var session = NewSession(registry, out var persisted, out _, out _, out var turnsStarted, dwellMs);
+
+        session.Start();
+        await DriveUntilAsync(session, () => persisted.Count(d => d.Source == DecisionSource.Player) >= 3);
+
+        Assert.True(turnsStarted.Count >= 3, "onTurnStarted should have fired at least once per live ask");
+        Assert.All(turnsStarted, t => Assert.Equal(dwellMs, t.DwellMs));
+        Assert.All(turnsStarted, t => Assert.True(t.ActorKey is "squad:p0:0" or "squad:p0:1" or "wave:0" or "wave:1"));
+
+        session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session.RunTask!);
+    }
+
+    /// <summary>D5.11 (2026-09-08) — <c>onDeclared</c> fires exactly once per NEW decision (matching
+    /// <c>onDecisionPersisted</c>'s own count 1:1) and carries the real <see cref="DecisionSource"/>, so
+    /// a timeout is never misreported as a player choice or vice versa.</summary>
+    [Fact]
+    public async Task OnDeclared_fires_once_per_new_decision_with_the_real_source()
+    {
+        var registry = new BattleSessionRegistry();
+        var session = NewSession(registry, out var persisted, out _, out var declared, out _, dwellMs: 2000);
+
+        session.Start();
+        await DriveUntilAsync(session, () => persisted.Count(d => d.Source == DecisionSource.Player) >= 3);
+
+        Assert.Equal(persisted.Count, declared.Count);
+        Assert.Equal(persisted, declared); // TracedDecision is a record struct -- sequence equality is real equality
+        Assert.Contains(declared, d => d.Source == DecisionSource.Player);
+
+        session.Freeze(LiveFreezeTrigger.FreezeAwayPayload(0));
+        await Record.ExceptionAsync(() => session.RunTask!);
+    }
+
+    /// <summary>D5.11 (2026-09-08) — a timeout-driven freeze still reports EVERY decision (including the
+    /// three timeouts that caused it) through <c>onDeclared</c>, each correctly tagged
+    /// <see cref="DecisionSource.Timeout"/> — the exact source `DelveLiveEventNames.Declared`'s wire push
+    /// needs to tell a client "you timed out," not just "something happened."</summary>
+    [Fact]
+    public async Task OnDeclared_reports_timeouts_as_timeouts_through_the_freeze()
+    {
+        var registry = new BattleSessionRegistry();
+        var session = NewSession(registry, out _, out var frozenLog, out var declared, out _);
+
+        session.Start();
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (!session.Frozen && DateTime.UtcNow < deadline) await Task.Delay(5);
+
+        Assert.True(session.Frozen);
+        Assert.Single(frozenLog);
+        Assert.True(declared.Count(d => d.Source == DecisionSource.Timeout) >= 3);
+        Assert.DoesNotContain(declared, d => d.Source == DecisionSource.Player);
+
         await Record.ExceptionAsync(() => session.RunTask!);
     }
 

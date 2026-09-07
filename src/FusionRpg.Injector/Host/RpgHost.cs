@@ -140,7 +140,7 @@ public static class RpgHost
         var dungeonRegistries = FusionRpg.Core.Dungeon.Registry.DungeonRegistryLoader.LoadAll(dungeonRegistryDir);
         FusionRpg.Core.Dungeon.Tuning.DungeonTuningHub.Configure(
             FusionRpg.Core.Dungeon.Tuning.DungeonTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "dungeon.v1.json")), dungeonRegistries));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "dungeon.v3.json")), dungeonRegistries));
         FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
             FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));

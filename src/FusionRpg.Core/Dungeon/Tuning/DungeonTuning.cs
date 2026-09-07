@@ -123,7 +123,7 @@ public sealed class DungeonTuningRejection : Exception
 /// </summary>
 public static class DungeonTuningLoader
 {
-    const string File = "dungeon.v1.json";
+    const string File = "dungeon.v3.json";
 
     // Plural forms included on purpose -- "downedRecoveryDays" is at least as plausible an
     // authoring choice as the singular, and R6's point is that NO real-time unit exists anywhere

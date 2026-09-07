@@ -17,7 +17,7 @@ namespace FusionRpg.Data.Tests.Delve;
 /// transaction), plus <c>CloseDelve</c>'s new 4th hook, `ApplyHaulMintUnlocked`, that turns a pending
 /// haul row into a real mint at `Extracted` and drops it at `Wiped`. Reads the real, shipped summoning
 /// tuning through this assembly's own `ContractTuningTestBootstrap` module initializer
-/// (`standard-rift`, `CostPerPull` 100) and the real, shipped `dungeon.v1.json` for `CloseDelve`'s own
+/// (`standard-rift`, `CostPerPull` 100) and the real, shipped `dungeon.v3.json` for `CloseDelve`'s own
 /// `DungeonTuning` parameter, mirroring `DelveAttritionSettlementTests.cs`'s own fixture shape exactly
 /// — a fixture copy of either could drift from what ships.</summary>
 public class DelveWildTransactionTests : IDisposable
@@ -40,7 +40,7 @@ public class DelveWildTransactionTests : IDisposable
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
         _rooms = new RoomTypeCatalog(registries.RoomKinds);
         _doors = new DoorTypeCatalog(registries.DoorKinds);
-        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v1.json")), registries);
+        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
     public void Dispose()

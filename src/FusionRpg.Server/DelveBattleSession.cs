@@ -81,6 +81,8 @@ public sealed class DelveBattleSession
     readonly LiveFreezeTrigger _freezeTrigger = new();
     readonly Action<DecisionTrace>? _onDecisionPersisted;
     readonly Action<SteerLogPayload>? _onFrozen;
+    readonly Action<TracedDecision>? _onDeclared;
+    readonly Action<string, int>? _onTurnStarted;
     readonly int _dwellMs;
     readonly CancellationTokenSource _cts = new();
 
@@ -96,6 +98,17 @@ public sealed class DelveBattleSession
     /// whatever reason (three timeouts, an explicit steer-away, a dropped connection). The natural
     /// caller appends the payload to the delve-level log via `RpgStore.AppendDecision` (§4a). Optional
     /// for the same reason as <paramref name="onDecisionPersisted"/>.</param>
+    /// <param name="onDeclared">D5.11's live-push wave (2026-09-08) — fires once, synchronously, right
+    /// after every NEW (never replayed) decision, exactly alongside <paramref name="onDecisionPersisted"/>
+    /// but carrying the actual <see cref="TracedDecision"/> (actor, action, and — the field
+    /// `onDecisionPersisted` cannot see — <see cref="DecisionSource"/>) rather than the whole trace. The
+    /// natural caller pushes `DelveDeclared{matchKey,actorKey,source}` over SignalR, the wire shape
+    /// `session.ts`'s own `SessionEvent{type:"declared",source}` mirrors verbatim.</param>
+    /// <param name="onTurnStarted">Fires once per <see cref="Ask"/> call, the instant a new actor's
+    /// dwell window opens (actorKey, the dwell in ms) — the "your turn" signal a live client needs to
+    /// accept a <see cref="Declare"/> call and show a countdown. Not one of `session.ts`'s own
+    /// `SessionEvent` variants (whose turn it is doesn't change that reducer's status/counts) — the
+    /// natural caller pushes a separate `DelveTurnStarted` message.</param>
     public DelveBattleSession(
         string matchKey, long delveId, int partyIndex, long playerId,
         BattleSetup setup, ulong seed, DecisionTrace trace,
@@ -103,6 +116,7 @@ public sealed class DelveBattleSession
         BattleSessionRegistry registry,
         ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null,
         Action<DecisionTrace>? onDecisionPersisted = null, Action<SteerLogPayload>? onFrozen = null,
+        Action<TracedDecision>? onDeclared = null, Action<string, int>? onTurnStarted = null,
         int dwellMs = DefaultDwellWindowMs)
     {
         MatchKey = string.IsNullOrWhiteSpace(matchKey) ? throw new ArgumentException("A session needs a match key.", nameof(matchKey)) : matchKey;
@@ -119,6 +133,8 @@ public sealed class DelveBattleSession
         _containerResolver = containerResolver;
         _onDecisionPersisted = onDecisionPersisted;
         _onFrozen = onFrozen;
+        _onDeclared = onDeclared;
+        _onTurnStarted = onTurnStarted;
         _dwellMs = dwellMs > 0 ? dwellMs : throw new ArgumentOutOfRangeException(nameof(dwellMs));
     }
 
@@ -176,6 +192,10 @@ public sealed class DelveBattleSession
     {
         var tcs = new TaskCompletionSource<PlayerChoice>(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_gate) { _pending = tcs; _pendingActorKey = actorKey; }
+        // Fired for EVERY ask, live turn only (replay never calls Ask at all — see the class doc
+        // comment) — the "your turn" signal a live client needs before the dwell window it names here
+        // actually elapses.
+        _onTurnStarted?.Invoke(actorKey, _dwellMs);
         try
         {
             // Task.WaitAny(tasks, timeout, token) throws OperationCanceledException the moment the
@@ -220,6 +240,7 @@ public sealed class DelveBattleSession
     void OnRecorded(TracedDecision decision)
     {
         _onDecisionPersisted?.Invoke(Trace);
+        _onDeclared?.Invoke(decision);
         if (_freezeTrigger.OnDecisionRecorded(decision.Source))
             Freeze(LiveFreezeTrigger.FreezeAwayPayload(PartyIndex));
     }

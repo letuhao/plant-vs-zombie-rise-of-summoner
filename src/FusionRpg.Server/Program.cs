@@ -94,7 +94,7 @@ var dungeonRegistryDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", 
 var dungeonRegistries = FusionRpg.Core.Dungeon.Registry.DungeonRegistryLoader.LoadAll(dungeonRegistryDir);
 FusionRpg.Core.Dungeon.Tuning.DungeonTuningHub.Configure(
     FusionRpg.Core.Dungeon.Tuning.DungeonTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "dungeon.v1.json")), dungeonRegistries));
+        File.ReadAllText(Path.Combine(tuningDir, "dungeon.v3.json")), dungeonRegistries));
 FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
     FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));
@@ -341,6 +341,7 @@ builder.Services.AddSingleton<UniqueActorService>();
 builder.Services.AddSingleton<PerfWindowBuffer>();
 builder.Services.AddSingleton<WebMatchService>();
 builder.Services.AddSingleton<ExpeditionService>();
+builder.Services.AddSingleton<IDelveLivePush, HubDelveLivePush>();
 builder.Services.AddSingleton<DelveBattleSessionManager>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<EventIngest>());
 builder.Services.AddHostedService(sp => sp.GetRequiredService<CompactionWorker>());
