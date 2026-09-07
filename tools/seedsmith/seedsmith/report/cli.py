@@ -32,7 +32,12 @@ from ..metrics.distribution import CellDeviation, Evenness, Inequality
 from ..metrics.constraint import Constraint
 from ..metrics.exemplar import ExemplarConformance
 from ..metrics.dedup import SemanticDedup
-from ..metrics.quality import FlavourGeneric, FlavourMissing
+from ..metrics.quality import FLAVOR_EXPECTED_KINDS, FlavourGeneric, FlavourMissing
+from ..metrics.content_completeness import (
+    CompletenessSpec, ContentFieldMissing, ContentFieldStale, ContentLanguageContamination,
+    register_completeness,
+)
+from ..adapters.actions.description_backfill import ACTIONS_COMPLETENESS_SPEC
 from ..metrics.corpus_coverage import BasisHistogramMetric, DumpCompletenessMetric
 from ..metrics.demon_coverage import DemonUncoveredMetric
 from ..metrics.demon_roster import ALL_DEMON_ROSTER_METRICS
@@ -69,6 +74,35 @@ def build_registry() -> MetricRegistry:
     registry.register(SemanticDedup())
     registry.register(FlavourMissing())
     registry.register(FlavourGeneric())
+    # Content/FieldMissing + Content/FieldStale (seedsmith-content-standard, content-completeness-
+    # core, Task 3): a generalized registry a domain adopts via `register_completeness`, rather
+    # than editing FLAVOR_EXPECTED_KINDS's own hardcoded frozenset for every new domain. Registered
+    # unconditionally here (same as every other metric in this function) — reporting zero findings
+    # when no domain has registered a spec yet is correct, not a bug (matches `gates=False`'s own
+    # measure-only-until-adopted posture).
+    #
+    # `content-completeness-items` (Task 6): items is the FIRST real domain adoption — a real gap
+    # found building this task: nothing outside `tests/test_content_completeness.py` ever called
+    # `register_completeness`, so `Content/FieldMissing` reported nothing at all on a real `check`
+    # run even though the registry/metric machinery was fully built in Phase 0. Registering here
+    # (not inside `metrics/quality.py` at import time) means every real invocation of `check` gets
+    # the items spec regardless of module import order, and `register_completeness`'s own
+    # idempotency (content_completeness.py) makes it safe that this function runs more than once in
+    # one process. `FlavourMissing` itself is left registered too, unchanged (Task 3's own
+    # byte-identical guarantee) — this is an ADDITIVE second reporting path onto the same real data,
+    # not a replacement.
+    register_completeness(CompletenessSpec(
+        domain="items", kinds=FLAVOR_EXPECTED_KINDS, field="flavor"))
+    # `content-completeness-actions` (Task 8): actions had NOTHING before this task (no ledger, no
+    # `_provenance`, no missing-field metric — `seedsmith-content-standard-ideal.md`'s own "Real
+    # gap" finding). `ACTIONS_COMPLETENESS_SPEC` (`adapters/actions/description_backfill/
+    # __init__.py`) names `description` — the AUTHORED flavour-text field this task added to
+    # `action-seed` (`adapters/actions/kinds.py`'s own `ACTION_SEED_OPTIONAL`), distinct from the
+    # already-existing `descriptionKey` (a minted, empty i18n key with nothing behind it yet).
+    register_completeness(ACTIONS_COMPLETENESS_SPEC)
+    registry.register(ContentFieldMissing())
+    registry.register(ContentFieldStale())
+    registry.register(ContentLanguageContamination())
     registry.register(DemonUncoveredMetric())
     registry.register(MotifSharingMetric())
     registry.register(DumpCompletenessMetric())
@@ -269,11 +303,38 @@ def cmd_check(args: argparse.Namespace) -> int:
               f"(known: {', '.join(known_adapter_names())})", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    try:
-        corpus = Corpus.load(Path(args.corpus_root))
-    except CorpusLoadError as e:
-        print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
-        return EXIT_CANNOT_RUN
+    if args.adapter == "dungeon":
+        # `Corpus.load()` requires a top-level `kind`/`entries` wrapper (`corpus/model.py:183-186`)
+        # -- dungeon's own real content is one bare object per file (`emit.py`'s own docstring), so
+        # the generic loader silently sees zero entries for this adapter. `load_dungeon_corpus`
+        # (`adapters/dungeon/completeness.py`) bridges that gap; `ensure_completeness_registered`
+        # wires the `Content/FieldMissing`/`Content/LanguageContamination` check for dungeon events
+        # into `content_completeness`'s own registry (`seedsmith-content-standard` Task 12).
+        from ..adapters.dungeon.completeness import ensure_completeness_registered, load_dungeon_corpus
+        ensure_completeness_registered()
+        corpus = load_dungeon_corpus(Path(args.corpus_root))
+    elif args.adapter == "demons":
+        # `demon`/`commander-effect` kind files under this root already are real `{kind, entries}`
+        # documents and load correctly via the generic path below -- but `species/**/*.json` is a
+        # bare JSON ARRAY per file (`anchor/emit.py`'s own `render_family_file`), the same shape gap
+        # dungeon has for ALL its kinds. `load_species_corpus` (`adapters/demons/completeness.py`)
+        # ADDS the one kind the generic loader cannot see on top of what it already loads correctly,
+        # rather than replacing the whole load the way dungeon's own bridge does (`seedsmith-
+        # content-standard` Task 10).
+        from ..adapters.demons.completeness import ensure_completeness_registered, load_species_corpus
+        ensure_completeness_registered()
+        try:
+            corpus = Corpus.load(Path(args.corpus_root))
+        except CorpusLoadError as e:
+            print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        load_species_corpus(Path(args.corpus_root), into=corpus)
+    else:
+        try:
+            corpus = Corpus.load(Path(args.corpus_root))
+        except CorpusLoadError as e:
+            print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
 
     numerics_ctx = _build_numerics_context(args.adapter, adapter)
     budget_rows = derive_all(corpus, adapter) if args.adapter == "items" else None

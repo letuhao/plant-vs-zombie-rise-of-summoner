@@ -195,42 +195,45 @@ public class DomainRealPipelineTests : IDisposable
         Assert.Empty(_store.ReadDomains());
 
         // The load-bearing assertion: EVERY one of the six real domains refuses, and every refusal
-        // traces to one of the two already-documented, independent root causes — never a different,
-        // newly-introduced defect this test would otherwise mask. `DomainPreflight.Run` concatenates
-        // ALL FIVE delegated rows (4-8) before checking the combined count, so a domain that fails
-        // BOTH row 6 (encounter) and row 7 (event) reports both refusals in one pass, not just the
-        // first — a real, independent DOUBLE confirmation of two previously-separately-proven content
-        // gaps (D4.17 row 6's threat-audit corpus thinness; row 7's event-pool-authoring-depth gap).
+        // traces to the one remaining, already-documented root cause — never a different,
+        // newly-introduced defect this test would otherwise mask.
         //
-        // Row 7's OWN shape changed 2026-09-08 (D4.17 row 7's cell-headroom fix): `curio`/`shrine`/
-        // `trap`/`merchant`/`rest`/`unknown` archetypes were widened to the full already-shipped
-        // same-kind event corpus (8 distinct themes each, well clear of `events.noRepeatRooms=3`) --
-        // zero new content generated, a room-content completeness fix over content that already
-        // existed. The refusal now traces to `wild`-kind archetypes instead: the whole shipped corpus
-        // has only 2 distinct-theme `story`-kind events, structurally below the >3 floor, and nothing
-        // already-shipped is left to widen with -- closing it needs NEW `story` content, which
-        // `dungeon-event`'s own D1.10 entry already named as blocked on undecided multi-chapter
-        // "sequencing infrastructure," not attempted here for that reason (see
-        // `DomainEventPreflightBridgeTests.cs`'s own updated doc comment for the full trail).
+        // Row 7's OWN shape changed twice in two dated updates. 2026-09-08 (first pass, same day):
+        // `curio`/`shrine`/`trap`/`merchant`/`rest`/`unknown` archetypes were widened to the full
+        // already-shipped same-kind event corpus (8 distinct themes each, well clear of
+        // `events.noRepeatRooms=3`) -- zero new content generated, a room-content completeness fix
+        // over content that already existed. That left `wild`-kind archetypes as the sole remaining
+        // refusal: the shipped corpus had only 2 distinct-theme `story`-kind events, structurally
+        // below the >3 floor, and nothing already-shipped was left to widen with.
+        //
+        // 2026-09-08 (second pass, same day, later window) -- CLOSED FOR REAL: re-read `briefs.py`'s
+        // own `_EVENT_KIND_HINT["story"]` doc comment directly ("a single, self-contained beat, not
+        // part of a longer chain") and confirmed the "needs sequencing infrastructure" deferral
+        // (`EVENT_KIND_FIRST_SHIP`'s own comment) is about a FUTURE multi-chapter arc design, not
+        // about shipping more standalone beats -- the two already-shipped story events are already
+        // exactly that shape. Generated 2 more standalone `story` events via the SAME real pipeline
+        // (`run_event_draws`, real local-model call, `event.story-demon.cactus-001` /
+        // `dolldiamond-001`, 4 distinct themes total now) and widened all 12 real `wild` rooms'
+        // `eventPool` to the full 4-event set (the identical "widen by union, zero new anchors, only
+        // wild left thin" pattern the first pass already used for the other six kinds). Row 7's
+        // `domain.event:cell-headroom` refusal is now GONE ENTIRELY for every one of the six real
+        // domains, proven directly below rather than assumed -- confirmed by dumping and reading
+        // every domain's real refusal list before writing this assertion (all six: exactly one
+        // `domain.encounter:*` refusal, zero `domain.event:*` refusals). Row 6 (threat-audit) is
+        // unrelated and unchanged -- an external, separately-tracked gap (D4.17 row 6 / D4.31),
+        // still the sole reason every domain correctly refuses today.
         var refusedDomainIds = outcome.Refusals.Select(r => r.DomainId).Distinct(StringComparer.Ordinal).ToList();
         Assert.Equal(domains.Select(d => d.DomainId).OrderBy(x => x, StringComparer.Ordinal),
             refusedDomainIds.OrderBy(x => x, StringComparer.Ordinal));
-        Assert.All(outcome.Refusals, r => Assert.True(r.Rule.StartsWith("domain.encounter:", StringComparison.Ordinal)
-                || r.Rule.StartsWith("domain.event:", StringComparison.Ordinal),
-            $"unexpected refusal rule '{r.Rule}' for {r.DomainId} — expected only the two already-documented root causes"));
-        // Each real domain fails BOTH independent checks, not just one — the precise, doubled shape
-        // this run actually produces, asserted exactly rather than loosely.
+        Assert.All(outcome.Refusals, r => Assert.StartsWith("domain.encounter:", r.Rule));
+        // Row 7 no longer contributes any refusal for any domain -- the load-bearing, precise
+        // assertion this closure adds (a bare rule-prefix check above would silently tolerate a
+        // `domain.event:*` refusal creeping back in without this test noticing).
         foreach (var domainId in domains.Select(d => d.DomainId))
         {
             var domainRefusals = outcome.Refusals.Where(r => r.DomainId == domainId).ToList();
             Assert.Contains(domainRefusals, r => r.Rule.StartsWith("domain.encounter:", StringComparison.Ordinal));
-            // Proves the fixed shape, not just the rule name: the cell-headroom refusal now names
-            // `wild` (never `curio`/`shrine`/`trap`/`merchant`/`rest`/`unknown` — all six widened
-            // 2026-09-08) -- if a future content change silently regresses the widening, this line
-            // catches it by naming the wrong kind, not just by losing the refusal entirely.
-            var cellHeadroom = domainRefusals.SingleOrDefault(r => r.Rule == "domain.event:cell-headroom");
-            Assert.NotNull(cellHeadroom);
-            Assert.Contains("kind=wild", cellHeadroom!.Detail);
+            Assert.DoesNotContain(domainRefusals, r => r.Rule.StartsWith("domain.event:", StringComparison.Ordinal));
         }
     }
 

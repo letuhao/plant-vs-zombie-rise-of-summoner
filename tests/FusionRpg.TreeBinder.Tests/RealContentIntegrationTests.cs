@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.PassiveTree.Binding;
+using FusionRpg.Core.PassiveTree.Catalog;
 using FusionRpg.Core.PassiveTree.State;
 using FusionRpg.Core.Power;
 using FusionRpg.Tools.TreeBinder;
@@ -78,5 +79,59 @@ public class RealContentIntegrationTests
         Assert.Equal("Fail", doc.RootElement.GetProperty("verdict").GetString());
         Assert.Equal("primary", doc.RootElement.GetProperty("category").GetString());
         Assert.Empty(doc.RootElement.GetProperty("nodes").EnumerateArray()); // every node refused, none bound
+    }
+
+    /// <summary>seedsmith-content-standard, content-completeness-passive-tree (2026-09-08) — the
+    /// real seed-to-DTO chain for name/flavor, using the exact real committed
+    /// `data/seed/passive-tree/nodes/ferocity.json` content (Task 14's own required real proof).
+    /// Deliberately does NOT go through `TreeBinderRun.BindTree`/`AffixComposer` — that layer
+    /// resolves `affixIds` into atoms and is orthogonal to name/flavor, which this test's own real
+    /// investigation found cannot currently run for `ferocity` at all: `AffixComposer.ParseAtom`
+    /// (`AffixComposer.cs:69`, `var channel = root.TryGetProperty("channel", ...).GetString()`) has
+    /// no handling for E30's own real, documented channel-POOL reference shape
+    /// (`AtomSeedFile.cs:76-78`: "an atom's `params.channel` may reference [a pool] instead of one
+    /// concrete channel") — a real, pre-existing integration gap between two independently-shipped
+    /// features, confirmed to predate this session (no atom/affix file appears in `git status`) and
+    /// confirmed unrelated to name/flavor (the throw site never touches either field). Named here,
+    /// not fixed — fixing `AffixComposer`'s channel resolution is a passive-tree/effects-atom
+    /// binder concern, outside this program's scope. `ReportWriterTests.cs`'s own
+    /// `The_real_ferocity_seeds_name_and_flavor_round_trip_through_PassiveTreeCatalogLoader` proves
+    /// the actual chain this task owns (seed -> PlanReader -> BindInputNode -> ReportWriter ->
+    /// PassiveTreeCatalogLoader -> NodeRecord) end to end against this same real file.</summary>
+    [Fact]
+    public void The_real_ferocity_seed_reads_via_ReadPlanNodesWithSeed_exactly_as_the_real_CLI_does()
+    {
+        var root = RepoRoot();
+        var treeTuning = PassiveTreeTuningLoader.Parse(
+            File.ReadAllText(Path.Combine(root, "data", "tuning", "passive-tree.v1.json")));
+
+        var planJson = File.ReadAllText(Path.Combine(root, "data", "seed", "passive-tree", "plan", "ferocity.v1.json"));
+        var seedPath = Path.Combine(root, "data", "seed", "passive-tree", "nodes", "ferocity.json");
+        var seedJson = File.Exists(seedPath) ? File.ReadAllText(seedPath) : null;
+        Assert.NotNull(seedJson); // this test's whole point depends on the real seed existing
+
+        var nodes = PlanReader.ReadPlanNodesWithSeed(planJson, seedJson, treeTuning);
+
+        var thickenedMarrow = nodes.SingleOrDefault(n => n.NodeId == "skill.ferocity-def-t1-n0");
+        Assert.NotNull(thickenedMarrow);
+        Assert.Equal("Thickened Marrow", thickenedMarrow!.Name);
+        Assert.Equal(
+            "The bone grows dense and heavy, a foundation that refuses to crack under the weight of the struggle.",
+            thickenedMarrow.Flavor);
+
+        // Every real node the seed carries content for overlays it — not just the one hand-picked
+        // example above. Compares against the seed file's OWN real count rather than a hardcoded
+        // number: ferocity.json is live content under active concurrent regeneration in this same
+        // repo (confirmed via git status — a real, unrelated session grew it from 39 to 40 nodes
+        // mid-session), so a hardcoded count here would be exactly the kind of stale corpus-count
+        // assertion this program's own evidence already documents repeatedly across other files.
+        using var seedDoc = System.Text.Json.JsonDocument.Parse(seedJson!);
+        var realNodeCountInSeed = seedDoc.RootElement.GetProperty("nodes").EnumerateArray()
+            .Count(n => n.TryGetProperty("name", out var nameEl)
+                       && nameEl.ValueKind == System.Text.Json.JsonValueKind.String
+                       && !string.IsNullOrEmpty(nameEl.GetString()));
+        var withRealContent = nodes.Where(n => n.Name is not null).ToList();
+        Assert.Equal(realNodeCountInSeed, withRealContent.Count);
+        Assert.All(withRealContent, n => Assert.False(string.IsNullOrWhiteSpace(n.Flavor)));
     }
 }

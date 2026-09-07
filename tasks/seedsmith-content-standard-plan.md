@@ -21,7 +21,7 @@ without re-deriving them five times — exactly the failure this whole program e
   regenerate it automatically on resume, no human approval step. **Resolved 2026-09-08**: this
   automatic path is missing-content only — a resumed run never touches content that already
   exists, even if it's detected as stale. Regenerating existing content is manual only, via an
-  explicit `--overwrite` parameter that regenerates everything it's pointed at (not a
+  explicit `--force` parameter that regenerates everything it's pointed at (not a
   selectively-diffed stale subset). Staleness is still detected and reported, never auto-acted on.
 - **Translation is explicitly deferred** to a different, later pipeline. This program's own job is
   to make the storage shape i18n-ready (a stable per-record key, room for a locale subtree later),
@@ -49,10 +49,10 @@ without re-deriving them five times — exactly the failure this whole program e
   stale-regeneration anywhere in this codebase (`generate_commander_effects.py`'s `--stale` path)
   is deliberately opt-in, for a stated reason (destroying already-good content); this program
   keeps that same caution rather than generalizing it into an automatic path. Regenerating
-  existing content (stale or not) happens only through an explicit, human-invoked `--overwrite`
+  existing content (stale or not) happens only through an explicit, human-invoked `--force`
   parameter that regenerates everything it's pointed at — not a selectively-diffed stale subset.
   The staleness-key machinery is still built (Task 2) and still reported as a `gates=False`
-  metric ("N records are stale, re-run with `--overwrite` to refresh"), it just never triggers
+  metric ("N records are stale, re-run with `--force` to refresh"), it just never triggers
   regeneration on its own.
 - **A general, bidirectional language-contamination check**, generalizing (and fixing) the real,
   already-proven `language_consistency` validator (`workflow/validators/language.py:26`, wired
@@ -72,7 +72,7 @@ decision).
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| ~~Automatic, no-opt-in regeneration of STALE (not merely missing) content destroys already-good or hand-corrected work~~ — **resolved 2026-09-08**: owner decided automatic backfill is missing-content only; existing content is never touched by an automatic run, regardless of staleness. Regeneration of existing content requires an explicit, manually-invoked `--overwrite` parameter | N/A — closed | Task 1's contract states this plainly: automatic path = missing only; `--overwrite` = manual, regenerates everything it's pointed at, not a diffed stale subset |
+| ~~Automatic, no-opt-in regeneration of STALE (not merely missing) content destroys already-good or hand-corrected work~~ — **resolved 2026-09-08**: owner decided automatic backfill is missing-content only; existing content is never touched by an automatic run, regardless of staleness. Regeneration of existing content requires an explicit, manually-invoked `--force` parameter | N/A — closed | Task 1's contract states this plainly: automatic path = missing only; `--force` = manual, regenerates everything it's pointed at, not a diffed stale subset |
 | `content-completeness-core`'s own shape is wrong in a way that only shows up once a real domain adopts it | High — 5 domains would inherit the same defect | Prove `core` against passive-tree's own real, already-generated content FIRST inside its own phase (a real fixture, not synthetic), before any domain module starts, even though domain adoption itself is parallel |
 | Automatic backfill regenerates a field that was deliberately left blank | Medium — compounds with the row above; named in the ideal doc as a reasoned, unverified failure mode | Each domain's own missing-field metric definition must state, in its own spec, what "missing" means for THAT domain's own schema (e.g. a `null` `flavor` vs. an intentionally-empty string) — not inherited blindly from `FlavourMissing`'s own item-shaped definition |
 | Actions has zero existing infrastructure — its own module is the least like the other four | Medium | Its own spec explicitly designs the ledger/provenance from scratch against `core`'s shape, never copies an existing bespoke implementation that doesn't exist for this domain |

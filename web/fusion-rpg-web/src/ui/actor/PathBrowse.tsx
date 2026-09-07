@@ -48,8 +48,16 @@ export function PathCard({ tree, onOpen }: { tree: TreeReport; onOpen?: (treeId:
   const content = (
     <>
       <div className="min-w-0">
-        <span className="font-display">{tree.treeId}</span>
+        {/* seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's own
+            real generated name, falling back to the raw id for any tree the identity stage has
+            not reached yet -- never a blank or fabricated label. */}
+        <span className="font-display" data-testid="path-card-name">{tree.name ?? tree.treeId}</span>
         <span className="ml-2 text-xs text-muted">{tree.category}</span>
+        {tree.description ? (
+          <p className="truncate text-2xs italic text-muted" data-testid="path-card-description">
+            {tree.description}
+          </p>
+        ) : null}
       </div>
       <div className="shrink-0 text-xs text-muted">
         tier {tree.tierReached} of {tree.tiers}

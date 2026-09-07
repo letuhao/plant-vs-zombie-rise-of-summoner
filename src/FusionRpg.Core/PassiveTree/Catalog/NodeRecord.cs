@@ -34,6 +34,14 @@ public enum ExclusionForm
 /// recomputed (R4) — it is the number the potency ceiling is checked against, never `kMicro`
 /// (§2.5's dimensional-error correction).
 /// </summary>
+/// <summary>
+/// <see cref="Name"/>/<see cref="Flavor"/> (seedsmith-content-standard, content-completeness-
+/// passive-tree, 2026-09-08): the player-facing name/flavor text `tree-language` already generates
+/// per node (real example: every one of `ferocity.json`'s 39 nodes) — nullable because a node
+/// `tree-language` has not reached yet is a real, valid state, never fabricated as a placeholder
+/// string. Wiring these through was the entire real gap this module closes; nothing about pricing,
+/// binding or gating reads either field.
+/// </summary>
 public sealed record NodeRecord(
     string NodeId,
     string TreeId,
@@ -49,4 +57,6 @@ public sealed record NodeRecord(
     ExclusionForm ExclusionForm,
     string? TagsJson,
     bool Enabled,
-    int? RetiredAtRevision);
+    int? RetiredAtRevision,
+    string? Name = null,
+    string? Flavor = null);

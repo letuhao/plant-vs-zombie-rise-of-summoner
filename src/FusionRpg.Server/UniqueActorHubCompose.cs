@@ -89,8 +89,8 @@ public static class UniqueActorHubCompose
                 var surface = FindSurface(surfaceEntries, kv.Key);
                 if (surface is not null)
                 {
-                    display = surface.DisplayName;
-                    reading = surface.Reading;
+                    display = surface.DisplayName.Resolve("en");
+                    reading = surface.Reading.Resolve("en");
                     if (string.IsNullOrEmpty(compose))
                         compose = surface.Compose.ToString();
                 }

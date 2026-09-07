@@ -64,9 +64,19 @@ FusionRpg.Core.Status.StatusPolicy.Configure(
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
-FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogHub.Configure(
+FusionRpg.Core.ActorSurface.ActorSurfaceCatalogHub.ConfigureAll(
+    FusionRpg.Core.ActorSurface.AptitudeSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "aptitude-catalog.v1.json"))),
     FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stat-catalog.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stat-catalog.v2.json"))),
+    FusionRpg.Core.ActorSurface.StatusSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "status-catalog.v1.json"))),
+    FusionRpg.Core.ActorSurface.ResourceSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "resource-catalog.v1.json"))),
+    FusionRpg.Core.ActorSurface.ElementSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "element-catalog.v1.json"))),
+    FusionRpg.Core.ActorSurface.ActorSheetSurfaceCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "actor-sheet.v1.json"))));
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -757,6 +767,7 @@ app.MapGateCounters();
 app.MapSpeciesBuild();
 app.MapLoadout();
 app.MapAuraDerived();
+app.MapDerivedSurface();
 app.MapAuraRuntime();
 app.MapAuraCatalog();
 // item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing

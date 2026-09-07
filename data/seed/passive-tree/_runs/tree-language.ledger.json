@@ -51632,6 +51632,4880 @@
         "flavor": "The rhythm of impact becomes the pulse of protection.",
         "rationale": ""
       }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t1-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Inflated Malice",
+        "nameKey": "tree.node.inflated-malice",
+        "flavor": "The pressure within the membrane translates directly into raw, unbridled aggression.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t1-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Inflated Malice",
+        "nameKey": "tree.node.inflated-malice",
+        "flavor": "The pressure builds until the very air turns predatory.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t1-n2": {
+      "record": {
+        "id": "skill.balloonzombie-off-t1-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Inflated Malice",
+        "nameKey": "tree.node.inflated-malice",
+        "flavor": "The pressure within the membrane builds, turning every impact into a violent release of kinetic fury.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t1-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Layered Membrane",
+        "nameKey": "tree.node.layered-membrane",
+        "flavor": "The skin thickens with every impact, turning soft tissue into a rigid, protective shell.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t1-n2": {
+      "record": {
+        "id": "skill.balloonzombie-def-t1-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Inflated Resilience",
+        "nameKey": "tree.node.inflated-resilience",
+        "flavor": "The air within the membrane thickens, turning every impact into a buoyant bounce.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t2-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Punctured Aim",
+        "nameKey": "tree.node.punctured-aim",
+        "flavor": "A single, well-placed prick can deflate even the most bloated defenses.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t2-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bursting Spore",
+        "nameKey": "tree.node.bursting-spore",
+        "flavor": "The pressure within the membrane reaches a critical threshold, releasing a violent spray of caustic essence.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t2-n2": {
+      "record": {
+        "id": "skill.balloonzombie-off-t2-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Expanding Pressure",
+        "nameKey": "tree.node.expanding-pressure",
+        "flavor": "The internal gases swell, turning every strike into a forceful eruption.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t2-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Buoyant Membrane",
+        "nameKey": "tree.node.buoyant-membrane",
+        "flavor": "The air trapped within the skin provides a pressurized buffer, allowing energy to flow through the surface more freely.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t2-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Thickened Membrane",
+        "nameKey": "tree.node.thickened-membrane-2",
+        "flavor": "A layer of hardened, calloused skin that absorbs the brunt of the impact.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t3-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overcharged Pollen",
+        "nameKey": "tree.node.overcharged-pollen",
+        "flavor": "The air grows heavy with the scent of volatile nectar, turning every strike into a potential detonation.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t3-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Buoyant Reservoir",
+        "nameKey": "tree.node.buoyant-reservoir",
+        "flavor": "The internal gases expand against the shell, creating a pressurized buffer that replenishes as it holds.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t3-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Elastic Tension",
+        "nameKey": "tree.node.elastic-tension",
+        "flavor": "The more it stretches, the harder it snaps back.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t3-n2": {
+      "record": {
+        "id": "skill.balloonzombie-off-t3-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pressure Release",
+        "nameKey": "tree.node.pressure-release",
+        "flavor": "The internal tension of the balloon reaches a breaking point, converting raw force into explosive momentum.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t3-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Buoyant Plating",
+        "nameKey": "tree.node.buoyant-plating",
+        "flavor": "A layer of pressurized gas trapped beneath reinforced scales, providing both volume and structural integrity.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t3-n2": {
+      "record": {
+        "id": "skill.balloonzombie-def-t3-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Puffy Reinforcement",
+        "nameKey": "tree.node.puffy-reinforcement",
+        "flavor": "Layers of air-filled membranes provide a surprisingly dense barrier against impact.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t4-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pneumatic Recirculation",
+        "nameKey": "tree.node.pneumatic-recirculation",
+        "flavor": "The internal pressure shifts rhythmically, recycling kinetic energy into a protective surge.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t4-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Aggressive Inflation",
+        "nameKey": "tree.node.aggressive-inflation",
+        "flavor": "The pressure builds within, driving every strike with frantic intensity.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t4-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Buoyant Plating",
+        "nameKey": "tree.node.buoyant-plating-2",
+        "flavor": "The internal pressure stabilizes the outer membrane, allowing for rapid structural recovery.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t5-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Buoyancy",
+        "nameKey": "tree.node.kinetic-buoyancy",
+        "flavor": "The rapid expansion of internal gases propels the vessel forward with violent momentum.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t5-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Internal Pressure",
+        "nameKey": "tree.node.internal-pressure",
+        "flavor": "The core expands with violent intent, turning every breath into a strike.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t5-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Pneumatic Bulk",
+        "nameKey": "tree.node.pneumatic-bulk",
+        "flavor": "The internal pressure stabilizes the structural integrity of the membrane.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t6-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bursting Ascent",
+        "nameKey": "tree.node.bursting-ascent",
+        "flavor": "The sudden release of internal pressure propels the balloon forward with violent momentum.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t6-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Atmospheric Compression",
+        "nameKey": "tree.node.atmospheric-compression",
+        "flavor": "The internal pressure stabilizes the structural integrity of the membrane through rapid cycling.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t6-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rapid Expansion",
+        "nameKey": "tree.node.rapid-expansion",
+        "flavor": "The sudden release of internal pressure propels the vessel forward with unexpected velocity.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t7-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Overpressurized Glands",
+        "nameKey": "tree.node.overpressurized-glands",
+        "flavor": "The internal pressure reaches a critical threshold, forcing elemental energies to leak uncontrollably from every pore.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t7-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pneumatic Recirculation",
+        "nameKey": "tree.node.pneumatic-recirculation-2",
+        "flavor": "Internal gases are cycled through the protective membrane to maintain structural integrity under pressure.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t7-n1": {
+      "record": {
+        "id": "skill.balloonzombie-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Hyper-Pressurized Glands",
+        "nameKey": "tree.node.hyper-pressurized-glands",
+        "flavor": "The internal pressure reaches a critical threshold, turning every movement into a violent release of kinetic energy.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t7-n1": {
+      "record": {
+        "id": "skill.balloonzombie-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Membrane",
+        "nameKey": "tree.node.layered-membrane-2",
+        "flavor": "The skin thickens with every impact, layering itself like heavy canvas.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-off-t8-n0": {
+      "record": {
+        "id": "skill.balloonzombie-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.econ-bounty"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Decompression Rupture",
+        "nameKey": "tree.node.decompression-rupture",
+        "flavor": "When the pressure becomes too great, the vessel ceases to be a container and becomes a grenade.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t8-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pressure Valve",
+        "nameKey": "tree.node.pressure-valve",
+        "flavor": "When the internal pressure reaches a critical threshold, the excess is vented through the dermal layers to reinforce the protective barrier.",
+        "rationale": ""
+      }
+    },
+    "BalloonZombie:skill.balloonzombie-def-t9-n0": {
+      "record": {
+        "id": "skill.balloonzombie-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Pneumatic Reservoir",
+        "nameKey": "tree.node.pneumatic-reservoir",
+        "flavor": "A secondary internal bladder that stores atmospheric pressure to reinforce the structural integrity of the membrane.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t1-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splitter's Edge",
+        "nameKey": "tree.node.splitter-s-edge",
+        "flavor": "A razor-thin cut that finds the gap in the grain.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t2-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.swiftness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Rush",
+        "nameKey": "tree.node.splintering-rush",
+        "flavor": "A sudden, violent expansion of sharp edges that catches the unwary.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t2-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rooted Resilience",
+        "nameKey": "tree.node.rooted-resilience-8",
+        "flavor": "The deeper the roots, the harder the strike is to displace.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t3-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thorned Momentum",
+        "nameKey": "tree.node.thorned-momentum-2",
+        "flavor": "The rapid strike of a bamboo shoot carries a weight that tears through defenses.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t3-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thorned Momentum",
+        "nameKey": "tree.node.thorned-momentum-2",
+        "flavor": "The rapid strike of a bamboo shoot carries the weight of a predator's bite.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t3-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.sust-callus"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Thickened Culm",
+        "nameKey": "tree.node.thickened-culm",
+        "flavor": "The outer skin of the stalk hardens into a dense, fibrous layer that absorbs impact and resists tearing.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t4-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Surge",
+        "nameKey": "tree.node.verdant-surge",
+        "flavor": "The sap rises with a violent, uncontrolled rhythm, pushing the spirit beyond its natural limits.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t4-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Circuitry",
+        "nameKey": "tree.node.sap-fed-circuitry",
+        "flavor": "The internal moisture of the bamboo acts as a conductor, cycling protective layers with rhythmic precision.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t4-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thicket's Velocity",
+        "nameKey": "tree.node.thicket-s-velocity",
+        "flavor": "The rapid expansion of new shoots forces a frantic, unrelenting pace of combat.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t5-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.evd-seal"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignin Sealant",
+        "nameKey": "tree.node.lignin-sealant",
+        "flavor": "A viscous, hardening sap that fills the gaps between fibers, turning wounds into structural reinforcements.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t5-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.swiftness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Whiplash Shoot",
+        "nameKey": "tree.node.whiplash-shoot",
+        "flavor": "The rapid expansion of a new shoot carries enough force to shatter stone.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t5-n1": {
+      "record": {
+        "id": "skill.bamboo-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.sust-callus"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignin Reinforcement",
+        "nameKey": "tree.node.lignin-reinforcement",
+        "flavor": "The outer layers of the culm thicken with every impact, weaving together a dense, fibrous weave of protection.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t6-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Fanning Shoot",
+        "nameKey": "tree.node.fanning-shoot",
+        "flavor": "The hollow core of the stalk splits under pressure, releasing a spray of sharpened fibers.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t6-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Hollowed Culm",
+        "nameKey": "tree.node.hollowed-culm",
+        "flavor": "A flexible, air-filled structure that absorbs impact by shifting weight.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t6-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Whiplash Sprout",
+        "nameKey": "tree.node.whiplash-sprout",
+        "flavor": "A sudden, violent expansion of green that strikes before the eye can follow.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t6-n1": {
+      "record": {
+        "id": "skill.bamboo-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignin Reinforcement",
+        "nameKey": "tree.node.lignin-reinforcement-2",
+        "flavor": "The density of the stalk increases as the sap thickens, turning flexible shoots into unyielding pillars.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t7-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Spore",
+        "nameKey": "tree.node.splintering-spore",
+        "flavor": "The hollowed stalks release pressurized spores that bypass elemental resistances.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t7-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.swiftness"
+        ],
+        "affinity": [
+          "core",
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Might",
+        "nameKey": "tree.node.splintering-might",
+        "flavor": "The very fiber of the stalk hardens, turning every impact into a shattering force.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t7-n1": {
+      "record": {
+        "id": "skill.bamboo-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deep-rooting-14",
+        "flavor": "The strength of the grove is found in the depth of its foundation.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t8-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rushing Rhizome",
+        "nameKey": "tree.node.rushing-rhizome",
+        "flavor": "The momentum of the grove is felt before the strike is even landed.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t8-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calcified Node",
+        "nameKey": "tree.node.calcified-node",
+        "flavor": "Layers of hardened sap create a secondary skin that knits itself back together upon impact.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t8-n1": {
+      "record": {
+        "id": "skill.bamboo-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pithy Conduit",
+        "nameKey": "tree.node.pithy-conduit",
+        "flavor": "The hollow core acts as a pressurized vessel, cycling kinetic energy into a sudden surge of protection.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t9-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Shattered Culm",
+        "nameKey": "tree.node.shattered-culm",
+        "flavor": "The structural integrity of the stalk is sacrificed to release a sudden, overwhelming surge of essence.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t9-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rhizomatic Siphon",
+        "nameKey": "tree.node.rhizomatic-siphon",
+        "flavor": "The root system drinks from the very impact that seeks to break it.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t9-n1": {
+      "record": {
+        "id": "skill.bamboo-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resilient Pith",
+        "nameKey": "tree.node.resilient-pith",
+        "flavor": "The inner core hardens, forcing the flow of energy to pulse rhythmically through the stalk.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t9-n2": {
+      "record": {
+        "id": "skill.bamboo-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resilient Pith",
+        "nameKey": "tree.node.resilient-pith",
+        "flavor": "The inner core hardens, converting kinetic impact into a rhythmic surge of protective energy.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t10-n0": {
+      "record": {
+        "id": "skill.bamboo-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Overload",
+        "nameKey": "tree.node.photosynthetic-overload",
+        "flavor": "The bamboo drinks the light until the very cells vibrate with excess energy.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-off-t10-n1": {
+      "record": {
+        "id": "skill.bamboo-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Overgrowth Surge",
+        "nameKey": "tree.node.overgrowth-surge-6",
+        "flavor": "The bamboo's rapid expansion forces elemental energies to breach their natural constraints.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t10-n0": {
+      "record": {
+        "id": "skill.bamboo-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.evd-seal"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pithy Conduit",
+        "nameKey": "tree.node.pithy-conduit-2",
+        "flavor": "A hollowed channel within the stalk that directs the flow of protective resins.",
+        "rationale": ""
+      }
+    },
+    "Bamboo:skill.bamboo-def-t10-n2": {
+      "record": {
+        "id": "skill.bamboo-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Circuitry",
+        "nameKey": "tree.node.sap-fed-circuitry-2",
+        "flavor": "The internal pressure of the stalk creates a rhythmic pulse, cycling energy between the outer skin and the inner core.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t1-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Surge",
+        "nameKey": "tree.node.resonant-surge-2",
+        "flavor": "The air hums with the weight of gathering power.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t1-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Fury",
+        "nameKey": "tree.node.verdant-fury",
+        "flavor": "The very essence of the bamboo grove surges with primal aggression.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t1-n1": {
+      "record": {
+        "id": "skill.bamboodragon-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Verdant Bastion",
+        "nameKey": "tree.node.verdant-bastion",
+        "flavor": "The roots of the dragon run deep, anchoring the spirit against the shifting tides of battle.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t2-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Edge",
+        "nameKey": "tree.node.splintering-edge",
+        "flavor": "A sharp, focused strike that cuts through more than just flesh.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t2-n1": {
+      "record": {
+        "id": "skill.bamboodragon-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Thickened Bark",
+        "nameKey": "tree.node.thickened-bark-13",
+        "flavor": "Layers of dense, fibrous growth provide a natural layer of protection against physical impact.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t3-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Savage Growth",
+        "nameKey": "tree.node.savage-growth",
+        "flavor": "The more the beast hungers, the faster the vines strike.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t3-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Attunement",
+        "nameKey": "tree.node.primal-attunement",
+        "flavor": "The spirit of the grove flows through the caster, harmonizing with the natural elements.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t4-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sprouting Momentum",
+        "nameKey": "tree.node.sprouting-momentum",
+        "flavor": "The rapid expansion of new shoots forces a frantic, unstoppable rhythm upon the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t4-n0": {
+      "record": {
+        "id": "skill.bamboodragon-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rhythmic Shell",
+        "nameKey": "tree.node.rhythmic-shell",
+        "flavor": "The bamboo's hollow core vibrates with the impact, turning momentum into a protective pulse.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t4-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Resonance",
+        "nameKey": "tree.node.prismatic-resonance-6",
+        "flavor": "The dragon's breath harmonizes with the shifting currents of the world.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t4-n1": {
+      "record": {
+        "id": "skill.bamboodragon-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bamboo Bulwark",
+        "nameKey": "tree.node.bamboo-bulwark",
+        "flavor": "A dense, layered weave of bamboo fibers that hardens upon impact.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t5-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overgrowth Focus",
+        "nameKey": "tree.node.overgrowth-focus",
+        "flavor": "The bamboo bends not to break, but to channel the very essence of the storm through its core.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t5-n0": {
+      "record": {
+        "id": "skill.bamboodragon-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Hollow Stem",
+        "nameKey": "tree.node.hollow-stem",
+        "flavor": "A hollowed core that breathes with the rhythm of the forest, turning impact into momentum.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t5-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Overload",
+        "nameKey": "tree.node.resonant-overload-4",
+        "flavor": "The bamboo's hollow core vibrates with excessive elemental pressure, threatening to shatter the stem itself.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t6-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Gale",
+        "nameKey": "tree.node.splintering-gale",
+        "flavor": "The wind carries more than just scent; it carries the sharp edge of the grove's intent.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t6-n0": {
+      "record": {
+        "id": "skill.bamboodragon-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Callous Graft",
+        "nameKey": "tree.node.callous-graft",
+        "flavor": "The skin hardens into a layered weave, knitting itself back together even as it thickens.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t6-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Surge",
+        "nameKey": "tree.node.verdant-surge-2",
+        "flavor": "The sap flows with an unnatural intensity, feeding the elemental hunger of the grove.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t6-n1": {
+      "record": {
+        "id": "skill.bamboodragon-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Verdant Bastion",
+        "nameKey": "tree.node.verdant-bastion-2",
+        "flavor": "Layers of hardened bamboo weave into a living fortress.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t7-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Photosynthetic Conduit",
+        "nameKey": "tree.node.photosynthetic-conduit",
+        "flavor": "The marrow of the stalk drinks the light to fuel the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t7-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Savage Sprout",
+        "nameKey": "tree.node.savage-sprout",
+        "flavor": "The strength of the stalk is measured by the fury of its thorns.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t8-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thorned Conduit",
+        "nameKey": "tree.node.thorned-conduit",
+        "flavor": "The sap runs hot, turning every strike into a pressurized burst of elemental force.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t8-n0": {
+      "record": {
+        "id": "skill.bamboodragon-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Infused Capacitance",
+        "nameKey": "tree.node.sap-infused-capacitance",
+        "flavor": "The internal pressure of the stem dictates the rhythm of the shell's recovery.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t9-n0": {
+      "record": {
+        "id": "skill.bamboodragon-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rhythmic Sprout",
+        "nameKey": "tree.node.rhythmic-sprout",
+        "flavor": "The pulse of the forest dictates the pace of the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-off-t9-n1": {
+      "record": {
+        "id": "skill.bamboodragon-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Overload",
+        "nameKey": "tree.node.verdant-overload",
+        "flavor": "The sap flows with a violent, elemental rhythm, forcing the spirit to adapt or break.",
+        "rationale": ""
+      }
+    },
+    "BambooDragon:skill.bamboodragon-def-t9-n0": {
+      "record": {
+        "id": "skill.bamboodragon-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Saturated Core",
+        "nameKey": "tree.node.sap-saturated-core",
+        "flavor": "The very marrow of the bamboo becomes a reservoir of restorative fluid, cycling energy through the stem.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t1-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Searing Embers",
+        "nameKey": "tree.node.searing-embers",
+        "flavor": "The heat of the furnace leaves nothing but ash and fury.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t1-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Searing Embers",
+        "nameKey": "tree.node.searing-embers",
+        "flavor": "The heat of the furnace fuels a primal hunger for the kill.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t1-n2": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t1-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kindled Embers",
+        "nameKey": "tree.node.kindled-embers",
+        "flavor": "The heat of the furnace feeds the fury of the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t1-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Layered Bark",
+        "nameKey": "tree.node.layered-bark-7",
+        "flavor": "The outer layers of the furnace-wood thicken with every strike, forming a dense, protective rind.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t1-n2": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t1-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Thickened Bark",
+        "nameKey": "tree.node.thickened-bark-14",
+        "flavor": "Layers of seasoned wood provide a stubborn defense against the elements.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t2-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.firelining",
+          "atom.searing-strike"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thermal Draft",
+        "nameKey": "tree.node.thermal-draft",
+        "flavor": "The heat from the furnace creates a rising current that carries the strike further.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t2-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Kindled Embers",
+        "nameKey": "tree.node.kindled-embers-2",
+        "flavor": "The heat of the furnace breathes life into the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t2-n2": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t2-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Smoldering Core",
+        "nameKey": "tree.node.smoldering-core",
+        "flavor": "The heat within the furnace radiates outward, fueling both the strike and the strength behind it.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t2-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Lignin Reinforcement",
+        "nameKey": "tree.node.lignin-reinforcement-3",
+        "flavor": "The very fibers of the bamboo are infused with mineral deposits, hardening the outer layer against impact.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t2-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Lignin Shell",
+        "nameKey": "tree.node.lignin-shell",
+        "flavor": "A dense, fibrous layer that hardens as the sap thickens.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t3-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thermal Venting",
+        "nameKey": "tree.node.thermal-venting",
+        "flavor": "The heat within the furnace finds its way through the cracks, turning pressure into a torrent.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t3-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.warded"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ash-Cured Vessel",
+        "nameKey": "tree.node.ash-cured-vessel",
+        "flavor": "The heat of the furnace tempers the spirit, turning fragile wood into a vessel of unyielding containment.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t3-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.firelining",
+          "atom.searing-strike"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Convection Draft",
+        "nameKey": "tree.node.convection-draft",
+        "flavor": "The heat rises, pulling the air into a hungry, swirling vortex.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t3-n2": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t3-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kindled Embers",
+        "nameKey": "tree.node.kindled-embers-3",
+        "flavor": "The heat within the furnace feeds the spirit of the warrior.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t3-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Bamboo Lattice",
+        "nameKey": "tree.node.bamboo-lattice",
+        "flavor": "A woven structure of dense fibers that reinforces the integrity of protective barriers.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t3-n2": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t3-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Bark",
+        "nameKey": "tree.node.layered-bark-8",
+        "flavor": "The bark thickens in response to impact, layering itself into a natural plate.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t4-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Vessel of Embers",
+        "nameKey": "tree.node.vessel-of-embers",
+        "flavor": "A hollowed core that cycles heat into structural integrity.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t4-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.firelining",
+          "atom.searing-strike"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thermal Draft",
+        "nameKey": "tree.node.thermal-draft-2",
+        "flavor": "The furnace breathes, exhaling heat that fuels the next strike.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t5-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Thermal Overload",
+        "nameKey": "tree.node.thermal-overload-5",
+        "flavor": "The heat within the furnace reaches a critical state, forcing elemental energies to spill outward.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t5-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.mending"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Infused Sealant",
+        "nameKey": "tree.node.sap-infused-sealant",
+        "flavor": "A viscous, resinous coating that knits wounds and restores protective barriers with unnatural speed.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t5-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thickened Culm",
+        "nameKey": "tree.node.thickened-culm-2",
+        "flavor": "The density of the bamboo stalk increases, providing a sturdier foundation for protective layers.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t6-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Hardened Culm",
+        "nameKey": "tree.node.hardened-culm",
+        "flavor": "The density of the bamboo increases, making every impact feel like striking stone.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t7-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Convection Core",
+        "nameKey": "tree.node.convection-core",
+        "flavor": "The heat within the hollow stem begins to pulse, synchronizing the rhythm of the flame with the speed of the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t7-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Furious Growth",
+        "nameKey": "tree.node.furious-growth",
+        "flavor": "The heat of the furnace accelerates the very essence of the wood.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t7-n1": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooted Bastion",
+        "nameKey": "tree.node.deep-rooted-bastion-2",
+        "flavor": "The deeper the roots, the harder the core becomes to break.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t8-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thermal Venting",
+        "nameKey": "tree.node.thermal-venting-2",
+        "flavor": "The intense heat within the furnace forces elemental energies to breach the structural limits of the bamboo.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t8-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Caloric Graft",
+        "nameKey": "tree.node.caloric-graft",
+        "flavor": "The heat of the furnace fuses organic tissue with protective plating, creating a living barrier that refuses to fail.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t9-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sprouting Combustion",
+        "nameKey": "tree.node.sprouting-combustion",
+        "flavor": "The heat within the stalk forces a rapid, violent expansion of life.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t9-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge",
+          "atom.sust-freshgraft"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Embershell Graft",
+        "nameKey": "tree.node.embershell-graft",
+        "flavor": "A layer of calcified sap that pulses with heat, reinforcing the spirit as the shield falters.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-off-t10-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thermal Convection",
+        "nameKey": "tree.node.thermal-convection",
+        "flavor": "The heat within the hollow stalks creates a rising draft that fuels the flame.",
+        "rationale": ""
+      }
+    },
+    "BambooFurnace:skill.bamboofurnace-def-t10-n0": {
+      "record": {
+        "id": "skill.bamboofurnace-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pithy Recoil",
+        "nameKey": "tree.node.pithy-recoil",
+        "flavor": "The hollow core snaps back, turning impact into momentum.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t1-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintered Sprout",
+        "nameKey": "tree.node.splintered-sprout",
+        "flavor": "The sharpest shoots draw the most blood.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t1-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Thickened Bark",
+        "nameKey": "tree.node.thickened-bark-15",
+        "flavor": "The outer layer of the stalk hardens into a dense, fibrous shell that absorbs impact and stabilizes the core.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t2-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sharpened Shoot",
+        "nameKey": "tree.node.sharpened-shoot",
+        "flavor": "The edge of a bamboo shoot is finer than any steel blade.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t3-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.swiftness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Verdant Surge",
+        "nameKey": "tree.node.verdant-surge-3",
+        "flavor": "The sap runs thick and hot, fueling every strike with primal vigor.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t3-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.swiftness",
+          "atom.tempo-haste"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Rush",
+        "nameKey": "tree.node.verdant-rush",
+        "flavor": "The momentum of growing stalks accelerates the rhythm of the strike.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t3-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deep-rooting-15",
+        "flavor": "The strength of the bamboo is not in its flexibility, but in the unyielding grip of its foundation.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t4-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Sap",
+        "nameKey": "tree.node.resonant-sap",
+        "flavor": "The internal pressure of the wood begins to harmonize with the surrounding energies, turning elemental friction into a cascading surge.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t4-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignified Shell",
+        "nameKey": "tree.node.lignified-shell",
+        "flavor": "The bamboo's outer layer hardens into a dense, protective casing that expands with every impact.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t4-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision",
+          "atom.quickening"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thorned Overgrowth",
+        "nameKey": "tree.node.thorned-overgrowth",
+        "flavor": "The more the sap flows, the sharper the thorns become.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t4-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.sust-callus"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Fibrous Layering",
+        "nameKey": "tree.node.fibrous-layering",
+        "flavor": "Layers of dense, interlocking fibers provide a structural foundation that absorbs impact before it reaches the core.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t5-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overgrowth Surge",
+        "nameKey": "tree.node.overgrowth-surge-7",
+        "flavor": "The sap runs hot and thick, forcing the spirit to move faster than the body can endure.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t5-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resilient Sapling",
+        "nameKey": "tree.node.resilient-sapling",
+        "flavor": "The core of the shoot hardens as it bends, turning momentum into a protective pulse.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t5-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Savage Sprout",
+        "nameKey": "tree.node.savage-sprout-2",
+        "flavor": "The strength of the stem is found in the violence of its growth.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t5-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Bark",
+        "nameKey": "tree.node.layered-bark-9",
+        "flavor": "The outer skin thickens into a dense, overlapping lattice of wood and iron.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t6-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Gust",
+        "nameKey": "tree.node.splintering-gust",
+        "flavor": "The pressure of growing wood becomes a piercing gale.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t6-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sapwood Reservoir",
+        "nameKey": "tree.node.sapwood-reservoir",
+        "flavor": "The internal pressure of the stalk builds, ready to vent kinetic energy back into the protective layer.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t6-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-12",
+        "flavor": "The sap flows with an intensity that defies the natural cycle, forcing the elements to obey the gardener's will.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t6-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deepwood Bastion",
+        "nameKey": "tree.node.deepwood-bastion",
+        "flavor": "The weight of centuries settles into the marrow, turning every impact into a foundation for growth.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t7-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pruning Shear",
+        "nameKey": "tree.node.pruning-shear",
+        "flavor": "The sharpest edges do not care for the nature of the sap they sever.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t7-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bountiful Harvest",
+        "nameKey": "tree.node.bountiful-harvest",
+        "flavor": "The more you reap, the more the forest provides.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t7-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.arm-riveting"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Ironwood Graft",
+        "nameKey": "tree.node.ironwood-graft",
+        "flavor": "The bark thickens with mineral deposits, turning soft wood into something akin to forged steel.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t8-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Bountiful Sprout",
+        "nameKey": "tree.node.bountiful-sprout",
+        "flavor": "The more the forest thrives, the more the harvest pays in kind.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t8-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Sap",
+        "nameKey": "tree.node.resonant-sap-2",
+        "flavor": "The marrow of the wood vibrates in sympathy with the storm.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t8-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pithy Bulwark",
+        "nameKey": "tree.node.pithy-bulwark-2",
+        "flavor": "The core of the grove hardens against the weight of the world.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t8-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Circadian Sap",
+        "nameKey": "tree.node.circadian-sap",
+        "flavor": "The rhythm of the forest dictates the flow of the spirit.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t9-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge",
+          "atom.tempo-wildgrowth"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Overgrowth Surge",
+        "nameKey": "tree.node.overgrowth-surge-8",
+        "flavor": "When the sap runs thick, the very air becomes heavy with the weight of uncontained life.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t9-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overgrowth Surge",
+        "nameKey": "tree.node.overgrowth-surge-8",
+        "flavor": "The sap runs hot and thick, forcing the wood to expand faster than the grain can hold.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t9-n2": {
+      "record": {
+        "id": "skill.bamboospruce-off-t9-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Momentum",
+        "nameKey": "tree.node.verdant-momentum",
+        "flavor": "The forest does not wait for the slow to catch up; it simply grows over them.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t9-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignified Bastion",
+        "nameKey": "tree.node.lignified-bastion",
+        "flavor": "The very grain of the wood thickens, turning flexible sap into unyielding structural support.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t9-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rooted Resilience",
+        "nameKey": "tree.node.rooted-resilience-9",
+        "flavor": "The deeper the roots, the harder the surface to break.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t9-n2": {
+      "record": {
+        "id": "skill.bamboospruce-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.sust-callus",
+          "atom.sust-husk"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lignin Suture",
+        "nameKey": "tree.node.lignin-suture-3",
+        "flavor": "The wood does not merely break; it knits itself back together with the density of stone.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t10-n0": {
+      "record": {
+        "id": "skill.bamboospruce-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Focus",
+        "nameKey": "tree.node.splintering-focus",
+        "flavor": "The very essence of the wood is forced into a singular, piercing intent.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t10-n1": {
+      "record": {
+        "id": "skill.bamboospruce-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Overgrowth",
+        "nameKey": "tree.node.primal-overgrowth-2",
+        "flavor": "The sap runs hot with elemental fury, forcing the essence to adapt or shatter.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-off-t10-n2": {
+      "record": {
+        "id": "skill.bamboospruce-off-t10-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus",
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Flux",
+        "nameKey": "tree.node.primal-flux-2",
+        "flavor": "The sap runs hot, unbinding the laws of the forest to favor raw, chaotic release.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t10-n0": {
+      "record": {
+        "id": "skill.bamboospruce-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Capacitor",
+        "nameKey": "tree.node.sap-fed-capacitor",
+        "flavor": "The internal pressure of the wood acts as a hydraulic spring, snapping shields back into place the moment they are struck.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t10-n1": {
+      "record": {
+        "id": "skill.bamboospruce-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Capacitor",
+        "nameKey": "tree.node.sap-fed-capacitor",
+        "flavor": "The internal pressure of the wood acts as a hydraulic pump for the protective layer.",
+        "rationale": ""
+      }
+    },
+    "BambooSpruce:skill.bamboospruce-def-t10-n2": {
+      "record": {
+        "id": "skill.bamboospruce-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Driven Recirculation",
+        "nameKey": "tree.node.sap-driven-recirculation",
+        "flavor": "The internal pressure of the grove forces vitality back into the protective layers as quickly as it is spent.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t1-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Hunger",
+        "nameKey": "tree.node.primal-hunger-6",
+        "flavor": "The hunger of the earth meets the fury of the hunt.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t1-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Might",
+        "nameKey": "tree.node.permafrost-might",
+        "flavor": "The very ground hardens with the weight of a thousand frozen winters.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t1-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Permafrost Shell",
+        "nameKey": "tree.node.permafrost-shell-3",
+        "flavor": "A layer of ice-hardened sediment that refuses to crack under pressure.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t2-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Glacial Impact",
+        "nameKey": "tree.node.glacial-impact",
+        "flavor": "The weight of the frost crushes the spirit before the ice even settles.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t2-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.evd-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Permafrost Bastion",
+        "nameKey": "tree.node.permafrost-bastion",
+        "flavor": "The frozen earth hardens around the survivor, turning every impact into a shattering echo.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t2-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.carapace",
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Permafrost Bastion",
+        "nameKey": "tree.node.permafrost-bastion",
+        "flavor": "The frozen earth hardens around the survivor, turning skin to stone.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t3-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Tectonic Might",
+        "nameKey": "tree.node.tectonic-might-2",
+        "flavor": "The very earth trembles with the weight of your fury.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t3-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Bedrock",
+        "nameKey": "tree.node.permafrost-bedrock",
+        "flavor": "The very earth beneath the frost hardens into an unyielding layer of stone.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t4-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.freezing"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Frostbound Surge",
+        "nameKey": "tree.node.frostbound-surge",
+        "flavor": "The biting cold does not merely chill; it amplifies the very essence of the storm.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t4-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Suture",
+        "nameKey": "tree.node.permafrost-suture-2",
+        "flavor": "The frost binds the cracks in the stone, sealing wounds with a layer of unyielding ice.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t4-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Tectonic Rupture",
+        "nameKey": "tree.node.tectonic-rupture",
+        "flavor": "The very earth trembles beneath the weight of a thousand frozen footsteps.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t5-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Permafrost Aegis",
+        "nameKey": "tree.node.permafrost-aegis-3",
+        "flavor": "A layer of frost crystallizes upon the shield, thickening its edge and accelerating its recovery.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t5-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Substratum",
+        "nameKey": "tree.node.permafrost-substratum",
+        "flavor": "The very earth beneath the frost hardens into an unyielding foundation.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t6-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Permafrost Breach",
+        "nameKey": "tree.node.permafrost-breach",
+        "flavor": "The frost does not merely coat the surface; it ignores the barrier entirely to strike the core.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t6-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Suture",
+        "nameKey": "tree.node.permafrost-suture-3",
+        "flavor": "The frost binds the cracks in the stone, turning every impact into a structural reinforcement.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t6-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Glacial Shell",
+        "nameKey": "tree.node.glacial-shell-5",
+        "flavor": "Layers of permafrost thicken the protective barrier, turning skin into unyielding ice.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t7-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Glacial Permafrost",
+        "nameKey": "tree.node.glacial-permafrost",
+        "flavor": "The very air crystallizes around the impact, locking movement in a tomb of ice.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t7-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-welding",
+          "atom.sust-callus"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Sunder-Skin",
+        "nameKey": "tree.node.permafrost-sunder-skin",
+        "flavor": "The frozen earth does not merely coat the skin; it becomes the skin, unyielding and ancient.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t7-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Permafrost Foundation",
+        "nameKey": "tree.node.permafrost-foundation-2",
+        "flavor": "The very earth beneath the frost hardens into an unbreakable foundation of life and stone.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t8-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ossified Harvest",
+        "nameKey": "tree.node.ossified-harvest",
+        "flavor": "The frozen earth yields more than just stone; it yields the marrow of the fallen.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-off-t8-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Glacial Resonance",
+        "nameKey": "tree.node.glacial-resonance",
+        "flavor": "The very air vibrates with the frequency of the frost, turning every strike into a conduit for the storm.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t8-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.sust-husk",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Permafrost Suture",
+        "nameKey": "tree.node.permafrost-suture-4",
+        "flavor": "A layer of frozen organic matter that knits wounds shut even as it hardens into stone.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t8-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-riveting",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Glacial Bastion",
+        "nameKey": "tree.node.glacial-bastion-8",
+        "flavor": "The weight of the mountain settles into the very marrow of the bone.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t9-n0": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Glacial Bulwark",
+        "nameKey": "tree.node.glacial-bulwark-6",
+        "flavor": "A frozen barrier that thickens with every impact, turning momentum into a solid wall of ice.",
+        "rationale": ""
+      }
+    },
+    "BedRockSnowZombie:skill.bedrocksnowzombie-def-t9-n1": {
+      "record": {
+        "id": "skill.bedrocksnowzombie-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.mending",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Permafrost Marrow",
+        "nameKey": "tree.node.permafrost-marrow-5",
+        "flavor": "The frost seeps into the very core, knitting bone to ice.",
+        "rationale": ""
+      }
     }
   }
 }

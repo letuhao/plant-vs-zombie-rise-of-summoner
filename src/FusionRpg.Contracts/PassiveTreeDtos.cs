@@ -37,6 +37,13 @@ public sealed class TreeNodeSummaryDto
     [JsonPropertyName("branch")] public string Branch { get; set; } = "";
     [JsonPropertyName("tier")] public int Tier { get; set; }
     [JsonPropertyName("nodeClass")] public string NodeClass { get; set; } = "";
+    /// <summary>seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): the
+    /// real player-facing content already generated for some nodes (`tree-language`'s own output,
+    /// e.g. every node in `data/seed/passive-tree/nodes/ferocity.json`). Null for any node that
+    /// stage has not reached yet — the FE renders the existing node-id fallback for those, never a
+    /// fabricated placeholder.</summary>
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("flavor")] public string? Flavor { get; set; }
 }
 
 public sealed class TreeResolveReportDto
@@ -62,6 +69,13 @@ public sealed class TreeResolveReportDto
     [JsonPropertyName("herfindahlMilli")] public long HerfindahlMilli { get; set; }
     [JsonPropertyName("focusMilli")] public long FocusMilli { get; set; }
     [JsonPropertyName("excludedNodes")] public List<ExcludedNodeDto> ExcludedNodes { get; set; } = new();
+    /// <summary>seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the
+    /// tree's own real generated display name/description (`FusionRpg.Core.PassiveTree.Catalog.
+    /// TreeRecord.Name`/`.Description`). Null for any tree the identity stage has not reached
+    /// yet — the FE renders the existing raw `treeId` fallback for those, never a fabricated
+    /// placeholder.</summary>
+    [JsonPropertyName("name")] public string? Name { get; set; }
+    [JsonPropertyName("description")] public string? Description { get; set; }
     /// <summary>I6 — every ENABLED node's (branch, tier) slot, retired nodes excluded exactly like
     /// <see cref="TreeResolveReport.Build"/> already excludes them from its own bookkeeping. Ordered
     /// by (tier, branch) so a client never has to re-sort the lattice.</summary>

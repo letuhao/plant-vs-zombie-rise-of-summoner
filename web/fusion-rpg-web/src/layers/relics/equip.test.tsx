@@ -191,6 +191,14 @@ describe("Paperdoll — both flows, one screen", () => {
     expect(cells.find((c) => c.role === "footing")!.source).toBeNull();
   });
 
+  it("R3, fixed 2026-09-08: a 'trinket' relic draws at jewel-minor-a (ring-1), matching Core's own LegacyEquipSlots alias — not jewel-major (neck), which is what this table said before the fix", () => {
+    const cells = paperdollCells([
+      { slot: "trinket", instanceId: "relic.cracked_seal", itemName: "Cracked Seal", rarity: null, source: "relic" }
+    ]);
+    expect(cells.find((c) => c.role === "jewel-minor-a")!.source).toBe("relic");
+    expect(cells.find((c) => c.role === "jewel-major")!.source).toBeNull();
+  });
+
   it("offers Take off only on an item cell — a relic's own flow rebuilds mods it cannot see from here", () => {
     renderWithProviders(
       <Paperdoll

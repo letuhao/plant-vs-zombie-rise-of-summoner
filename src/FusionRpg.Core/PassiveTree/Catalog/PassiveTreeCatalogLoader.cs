@@ -100,8 +100,15 @@ public static class PassiveTreeCatalogLoader
             var catalogVersion = GetInt(root, "catalogVersion");
             var enabled = root.TryGetProperty("enabled", out var enEl) ? enEl.GetBoolean() : true;
 
+            // seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's
+            // own real generated identity content — nullable, TryGetProperty read, never required.
+            var treeName = root.TryGetProperty("name", out var treeNameEl) && treeNameEl.ValueKind == JsonValueKind.String
+                ? treeNameEl.GetString() : null;
+            var treeDescription = root.TryGetProperty("description", out var treeDescEl) && treeDescEl.ValueKind == JsonValueKind.String
+                ? treeDescEl.GetString() : null;
+
             var tree = new TreeRecord(treeId, category, gateQuantity, shapeArchetype, tiers, branches,
-                nodesPerTier, catalogVersion, enabled);
+                nodesPerTier, catalogVersion, enabled, treeName, treeDescription);
 
             var nodes = new List<NodeRecord>();
             var knownNodeIds = new HashSet<string>(StringComparer.Ordinal);
@@ -233,8 +240,18 @@ public static class PassiveTreeCatalogLoader
         var retiredAt = el.TryGetProperty("retiredAtRevision", out var raEl) && raEl.ValueKind != JsonValueKind.Null
             ? raEl.GetInt32() : (int?)null;
 
+        // seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): the real
+        // player-facing content `tree-language` already generates per node. Nullable, TryGetProperty
+        // read (never required) — a tree/node this generation stage has not reached yet loads exactly
+        // as before, both fields null, never a refusal and never a fabricated placeholder.
+        var name = el.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String
+            ? nameEl.GetString() : null;
+        var flavor = el.TryGetProperty("flavor", out var flavorEl) && flavorEl.ValueKind == JsonValueKind.String
+            ? flavorEl.GetString() : null;
+
         return new NodeRecord(nodeId, treeId, branch, tier, nodeKey, prereqs, nodeClass, affixIds,
-            budgetShareMilli, atoms, excludeProps, exclusionForm, tagsJson, enabled, retiredAt);
+            budgetShareMilli, atoms, excludeProps, exclusionForm, tagsJson, enabled, retiredAt,
+            name, flavor);
     }
 
     static readonly DerivedStatRegistry DerivedRegistry = DerivedStatRegistry.CreateDefault();

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 import sys
 import tempfile
 import unittest
@@ -15,8 +16,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from seedsmith.adapters.dungeon.emit import render_entry, render_index, write_corpus  # noqa: E402
+from seedsmith.adapters.dungeon.emit import (  # noqa: E402
+    build_provenance, render_entry, render_index, write_corpus, write_entry,
+)
 from seedsmith.adapters.dungeon.provenance import DungeonProvenance, stale_ids, staleness_key  # noqa: E402
+from seedsmith.pipeline.staleness import staleness_key as core_staleness_key  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DUNGEON_ADAPTER_DIR = REPO_ROOT / "tools" / "seedsmith" / "seedsmith" / "adapters" / "dungeon"
@@ -91,6 +95,62 @@ class StalenessTests(unittest.TestCase):
         prov_a = DungeonProvenance(plan_hash="p1", brief_hash="b1").to_dict()
         prov_b = DungeonProvenance(plan_hash="p999", brief_hash="b1").to_dict()
         self.assertEqual(staleness_key(prov_a), staleness_key(prov_b))
+
+
+class ProvenanceStampingTests(unittest.TestCase):
+    """`seedsmith-content-standard` Task 12: `write_entry`/`write_corpus` previously had no way to
+    attach `_provenance` at all — the real, precise reason no committed dungeon content ever
+    carried the field despite `DungeonProvenance`/`stale_ids` existing as real code. Proves the fix
+    is additive (no-provenance calls unaffected, matching `RerunIsByteIdenticalTests` above
+    unchanged) and that `build_provenance` reuses `content-completeness-core`'s own shared
+    `pipeline.staleness.staleness_key`, not a re-derived dungeon-local one."""
+
+    def test_write_entry_with_no_provenance_is_unaffected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "events"
+            path = write_entry(directory, "event.a-001", {"eventId": "event.a-001"})
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertNotIn("_provenance", data)
+
+    def test_write_entry_with_provenance_stamps_it_onto_the_written_file(self) -> None:
+        prov = build_provenance(brief_hash="b1", prompt_version="event/1",
+                                schema_version="dungeon-event.v1", model_id="m1")
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "events"
+            path = write_entry(directory, "event.a-001", {"eventId": "event.a-001"}, provenance=prov)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(data["_provenance"]["briefHash"], "b1")
+            self.assertEqual(data["_provenance"]["promptVersion"], "event/1")
+            self.assertIn("stalenessKey", data["_provenance"])
+
+    def test_build_provenance_reuses_the_shared_core_staleness_key(self) -> None:
+        prov = build_provenance(brief_hash="b1", prompt_version="event/1",
+                                schema_version="dungeon-event.v1", model_id="m1")
+        expected = core_staleness_key(brief_hash="b1", prompt_version="event/1",
+                                      schema_version="dungeon-event.v1", model_id="m1")
+        self.assertEqual(prov["stalenessKey"], expected)
+
+    def test_a_changed_prompt_version_changes_the_staleness_key(self) -> None:
+        prov_v1 = build_provenance(brief_hash="b1", prompt_version="event/1",
+                                   schema_version="s1", model_id="m1")
+        prov_v2 = build_provenance(brief_hash="b1", prompt_version="event/2",
+                                   schema_version="s1", model_id="m1")
+        self.assertNotEqual(prov_v1["stalenessKey"], prov_v2["stalenessKey"])
+
+    def test_write_corpus_stamps_only_the_ids_given_a_provenance(self) -> None:
+        prov = build_provenance(brief_hash="b1", prompt_version="event/1",
+                                schema_version="s1", model_id="m1")
+        entries = {
+            "event.a-001": {"eventId": "event.a-001"},
+            "event.b-001": {"eventId": "event.b-001"},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "events"
+            write_corpus(directory, entries, provenance_by_id={"event.a-001": prov})
+            a = json.loads((directory / "event.a-001.json").read_text(encoding="utf-8"))
+            b = json.loads((directory / "event.b-001.json").read_text(encoding="utf-8"))
+            self.assertIn("_provenance", a)
+            self.assertNotIn("_provenance", b)
 
 
 class OfflineGuaranteeTests(unittest.TestCase):

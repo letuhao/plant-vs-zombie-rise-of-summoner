@@ -240,6 +240,8 @@ public static class PassiveTreeEndpoints
             {
                 TreeId = report.TreeId,
                 Category = tree.Tree.Category.ToString(),
+                Name = tree.Tree.Name,
+                Description = tree.Tree.Description,
                 GateState = report.GateState == TreeGateState.Wired ? "wired" : "unproduced",
                 TierReached = report.TierReached,
                 Tiers = tree.Tree.Tiers,
@@ -274,7 +276,9 @@ public static class PassiveTreeEndpoints
                         NodeId = n.NodeId,
                         Branch = n.Branch.ToString(),
                         Tier = n.Tier,
-                        NodeClass = n.NodeClass.ToString()
+                        NodeClass = n.NodeClass.ToString(),
+                        Name = n.Name,
+                        Flavor = n.Flavor
                     }).ToList()
             });
         }

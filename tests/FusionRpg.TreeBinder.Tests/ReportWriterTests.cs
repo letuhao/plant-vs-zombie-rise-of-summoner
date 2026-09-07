@@ -17,15 +17,17 @@ namespace FusionRpg.TreeBinder.Tests;
 /// loader could accept, only test fixtures ever hand-built one.</summary>
 public class ReportWriterTests
 {
-    static TreeCatalogMeta Meta(string archetype = "broad-and-flat") =>
-        new("primary", "aptitude.Might@Commander", archetype, 10, 2, new[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }, 1);
+    static TreeCatalogMeta Meta(string archetype = "broad-and-flat", string? name = null,
+        string? description = null) =>
+        new("primary", "aptitude.Might@Commander", archetype, 10, 2,
+            new[] { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 }, 1, name, description);
 
     static BindInputNode Input(string nodeId, TreeBranch branch = TreeBranch.Off, int tier = 5,
         string nodeKey = "n0", NodeClass nodeClass = NodeClass.Magnitude,
         IReadOnlyList<string>? affixIds = null, ExclusionForm exclusionForm = ExclusionForm.None,
-        IReadOnlyList<string>? excludeProps = null) =>
+        IReadOnlyList<string>? excludeProps = null, string? name = null, string? flavor = null) =>
         new(nodeId, 1000, 500, 9, 2, affixIds ?? new[] { "atom.might" }, exclusionForm,
-            DeliberateHole: false, branch, tier, nodeKey, nodeClass, excludeProps);
+            DeliberateHole: false, branch, tier, nodeKey, nodeClass, excludeProps, name, flavor);
 
     [Fact]
     public void Serialize_carries_verdict_bound_and_refused_with_unspent_budget()
@@ -185,6 +187,130 @@ public class ReportWriterTests
         Assert.Equal("skill.might-off-t5-n0", node.NodeId);
         var atom = Assert.Single(node.Atoms);
         Assert.Equal(3038L, atom.KMicro);
+    }
+
+    [Fact]
+    public void The_tree_level_identity_is_emitted_when_meta_carries_it()
+    {
+        var report = BinderRunReport.From(Array.Empty<BoundNode>(), Array.Empty<RefusedSlot>());
+        var json = ReportWriter.Serialize("ferocity",
+            Meta(name: "Unyielding Bastion", description: "Rewards steady defense."),
+            Array.Empty<BindInputNode>(), report);
+        using var doc = JsonDocument.Parse(json);
+
+        Assert.Equal("Unyielding Bastion", doc.RootElement.GetProperty("name").GetString());
+        Assert.Equal("Rewards steady defense.", doc.RootElement.GetProperty("description").GetString());
+    }
+
+    [Fact]
+    public void The_tree_level_identity_is_null_never_a_placeholder_when_the_stage_has_not_reached_it()
+    {
+        var report = BinderRunReport.From(Array.Empty<BoundNode>(), Array.Empty<RefusedSlot>());
+        var json = ReportWriter.Serialize("ferocity", Meta(), Array.Empty<BindInputNode>(), report);
+        using var doc = JsonDocument.Parse(json);
+
+        Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("name").ValueKind);
+        Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("description").ValueKind);
+    }
+
+    [Fact]
+    public void The_tree_level_identity_round_trips_through_PassiveTreeCatalogLoader()
+    {
+        var report = BinderRunReport.From(Array.Empty<BoundNode>(), Array.Empty<RefusedSlot>());
+        var json = ReportWriter.Serialize("ferocity",
+            Meta(name: "Unyielding Bastion", description: "Rewards steady defense."),
+            Array.Empty<BindInputNode>(), report);
+
+        var tuning = PassiveTreeTuningLoader.Parse(File.ReadAllText(
+            Path.Combine(FindRepoRoot(), "data", "tuning", "passive-tree.v1.json")));
+        var (loaded, importReport) = PassiveTreeCatalogLoader.Load(json, tuning);
+
+        Assert.True(importReport.IsOk, string.Join("; ", importReport.Refusals));
+        Assert.Equal("Unyielding Bastion", loaded!.Tree.Name);
+        Assert.Equal("Rewards steady defense.", loaded.Tree.Description);
+    }
+
+    [Fact]
+    public void A_bound_node_carries_its_name_and_flavor_when_the_input_has_them()
+    {
+        var bound = new BoundNode("skill.ferocity-def-t1-n0", new[]
+        {
+            new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire", NodeAtomOp.Flat,
+                null, null, 3038L, ScaleAxis.PTheta, UnitClass.GameUnits),
+        });
+        var report = BinderRunReport.From(new[] { bound }, Array.Empty<RefusedSlot>());
+        var input = Input("skill.ferocity-def-t1-n0", name: "Thickened Marrow",
+            flavor: "The bone grows dense and heavy under the weight of the struggle.");
+
+        var json = ReportWriter.Serialize("ferocity", Meta(), new[] { input }, report);
+        using var doc = JsonDocument.Parse(json);
+        var nodeEl = Assert.Single(doc.RootElement.GetProperty("nodes").EnumerateArray());
+
+        Assert.Equal("Thickened Marrow", nodeEl.GetProperty("name").GetString());
+        Assert.Equal("The bone grows dense and heavy under the weight of the struggle.",
+            nodeEl.GetProperty("flavor").GetString());
+    }
+
+    [Fact]
+    public void A_node_with_no_generated_content_yet_writes_null_name_and_flavor_never_a_placeholder()
+    {
+        var bound = new BoundNode("skill.ferocity-def-t9-n1", Array.Empty<NodeAtom>());
+        var report = BinderRunReport.From(new[] { bound }, Array.Empty<RefusedSlot>());
+        var input = Input("skill.ferocity-def-t9-n1"); // no name/flavor passed
+
+        var json = ReportWriter.Serialize("ferocity", Meta(), new[] { input }, report);
+        using var doc = JsonDocument.Parse(json);
+        var nodeEl = Assert.Single(doc.RootElement.GetProperty("nodes").EnumerateArray());
+
+        Assert.Equal(JsonValueKind.Null, nodeEl.GetProperty("name").ValueKind);
+        Assert.Equal(JsonValueKind.Null, nodeEl.GetProperty("flavor").ValueKind);
+    }
+
+    [Fact]
+    public void The_real_ferocity_seeds_name_and_flavor_round_trip_through_PassiveTreeCatalogLoader()
+    {
+        // Task 14's own real proof, end to end: the exact real content committed in
+        // data/seed/passive-tree/nodes/ferocity.json survives ReportWriter -> the generated catalog
+        // JSON -> PassiveTreeCatalogLoader -> NodeRecord, unchanged.
+        var bound = new BoundNode("skill.ferocity-def-t1-n0", new[]
+        {
+            new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire", NodeAtomOp.Flat,
+                null, null, 3038L, ScaleAxis.PTheta, UnitClass.GameUnits),
+        });
+        var report = BinderRunReport.From(new[] { bound }, Array.Empty<RefusedSlot>());
+        var input = Input("skill.ferocity-def-t1-n0", branch: TreeBranch.Def, tier: 1,
+            name: "Thickened Marrow",
+            flavor: "The bone grows dense and heavy, a foundation that refuses to crack under the weight of the struggle.");
+        var json = ReportWriter.Serialize("ferocity", Meta(), new[] { input }, report);
+
+        var tuning = PassiveTreeTuningLoader.Parse(File.ReadAllText(
+            Path.Combine(FindRepoRoot(), "data", "tuning", "passive-tree.v1.json")));
+        var (loaded, importReport) = PassiveTreeCatalogLoader.Load(json, tuning);
+
+        Assert.True(importReport.IsOk, string.Join("; ", importReport.Refusals));
+        var node = Assert.Single(loaded!.Nodes);
+        Assert.Equal("Thickened Marrow", node.Name);
+        Assert.Equal(
+            "The bone grows dense and heavy, a foundation that refuses to crack under the weight of the struggle.",
+            node.Flavor);
+    }
+
+    [Fact]
+    public void A_node_with_no_name_or_flavor_loads_cleanly_with_both_null_never_a_refusal()
+    {
+        var bound = new BoundNode("skill.ferocity-def-t9-n1", Array.Empty<NodeAtom>());
+        var report = BinderRunReport.From(new[] { bound }, Array.Empty<RefusedSlot>());
+        var input = Input("skill.ferocity-def-t9-n1", branch: TreeBranch.Def, tier: 9, nodeKey: "n1");
+        var json = ReportWriter.Serialize("ferocity", Meta(), new[] { input }, report);
+
+        var tuning = PassiveTreeTuningLoader.Parse(File.ReadAllText(
+            Path.Combine(FindRepoRoot(), "data", "tuning", "passive-tree.v1.json")));
+        var (loaded, importReport) = PassiveTreeCatalogLoader.Load(json, tuning);
+
+        Assert.True(importReport.IsOk, string.Join("; ", importReport.Refusals));
+        var node = Assert.Single(loaded!.Nodes);
+        Assert.Null(node.Name);
+        Assert.Null(node.Flavor);
     }
 
     static string FindRepoRoot()

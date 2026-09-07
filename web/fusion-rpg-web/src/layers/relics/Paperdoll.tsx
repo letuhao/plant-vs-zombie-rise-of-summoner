@@ -48,16 +48,19 @@ export const ROLE_REGISTRY: { role: ItemRoleId; humanoidName: string; plantName:
  * thing as. A narrow, honest bridge while the payload still carries three slot words instead of
  * the fifteen roles — widening it moves the wire and this table together, not one of them alone.
  *
- * ⚠ **`trinket` disagrees with the server's own alias map and is left alone deliberately.**
- * `LegacyEquipSlots` (Core) maps `trinket → jewel-minor-a`; this table says `jewel-major`. The two
- * have to agree, and reconciling them moves stored data (the migration already wrote
- * `jewel-minor-a` rows), so it is a named defect for the owner of D1's `M3` — not a one-word edit
- * to make from here.
+ * ⚠ **R3, corrected 2026-09-08 — `trinket` now agrees with the server's own alias map.**
+ * `LegacyEquipSlots` (Core, `ssot-equip-slots.md` §5.7 step 1's own named decision) maps
+ * `trinket → jewel-minor-a`; this table previously said `jewel-major`, disagreeing with it.
+ * Reconciling moves NO stored data — `LegacyEquipSlots` is what module 4's migration actually wrote
+ * to `rpg_item_assignment` (real `jewel-minor-a` rows), so this table was the one out of step with
+ * reality, not the other way around. Left unreconciled, a real item equipped at `jewel-minor-a`
+ * (ring-1) would collide in storage with a "trinket" relic the paperdoll was drawing at a different
+ * cell (neck) — a correctness bug, not just a cosmetic mismatch.
  */
 const RELIC_SLOT_TO_ROLE: Record<string, ItemRoleId> = {
   weapon: "armament-primary",
   armor: "core-guard",
-  trinket: "jewel-major"
+  trinket: "jewel-minor-a"
 };
 
 /**

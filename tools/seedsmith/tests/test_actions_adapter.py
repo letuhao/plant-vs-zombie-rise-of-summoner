@@ -82,9 +82,14 @@ class KindSpecTests(unittest.TestCase):
             "id", "scope", "category", "rungBand", "targetMode", "relation", "atomFamilies",
             "pairingRole",
         })
+        # `description` added 2026-09-08 (`seedsmith-content-standard`, `content-completeness-
+        # actions`, Task 8) -- a real, additive widening of spec-corpus-loader.md §3 step 4's own
+        # transcribed shape, not a drift from it: `kinds.py`'s own comment on the field cites the
+        # reviewed-change precedent (`candidate_assembly/derive.py`'s 2026-09-04 note that a
+        # `flavor`/`flavorKey`-style split for actions would need exactly this).
         self.assertEqual(action_seed.optional, {
             "scopeKey", "areaShape", "tags", "kindHint", "structureAxes", "pairedPayoffFamily",
-            "motifsUsed", "name",
+            "motifsUsed", "name", "description",
         })
         self.assertEqual(action_seed.reference_fields, {"atomFamilies", "pairedPayoffFamily", "scopeKey"})
 

@@ -105,4 +105,25 @@ internal static class ActorSurfaceJson
         }
         return list;
     }
+
+    /// <summary>Locale object — every player string requires <c>en</c>.</summary>
+    public static LocaleMap Locale(JsonElement parent, string key, string path, string catalog)
+    {
+        var obj = Obj(parent, key, path, catalog);
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var prop in obj.EnumerateObject())
+        {
+            if (prop.Value.ValueKind != JsonValueKind.String)
+                throw new ActorSurfaceCatalogRejection($"{catalog}: non-string '{path}.{key}.{prop.Name}'");
+            var s = prop.Value.GetString();
+            if (string.IsNullOrWhiteSpace(s))
+                throw new ActorSurfaceCatalogRejection($"{catalog}: empty '{path}.{key}.{prop.Name}'");
+            dict[prop.Name] = s.Trim();
+        }
+
+        if (!dict.ContainsKey("en"))
+            throw new ActorSurfaceCatalogRejection($"{catalog}: missing required 'en' on '{path}.{key}'");
+
+        return new LocaleMap(dict);
+    }
 }

@@ -140,6 +140,25 @@ public static class PlanReader
             (int)Branches, nodesPerTier, catalogVersion);
     }
 
+    /// <summary>seedsmith-content-standard, passive-tree-identity-content (2026-09-08): reads the
+    /// tree's own real generated display name/description from its committed identity file
+    /// (`data/seed/passive-tree/identity/&lt;treeId&gt;.json`) — a SEPARATE per-tree file, matching
+    /// this program's own existing `plan/&lt;treeId&gt;.v1.json`/`nodes/&lt;treeId&gt;.json`
+    /// convention, since identity content is a genuinely different generation stage from either.
+    /// `identityJson` is `null` for a tree the identity stage has not reached yet — returns
+    /// `(null, null)`, never a refusal and never a fabricated placeholder.</summary>
+    public static (string? Name, string? Description) ReadTreeIdentity(string? identityJson)
+    {
+        if (string.IsNullOrEmpty(identityJson)) return (null, null);
+        using var doc = JsonDocument.Parse(identityJson);
+        var root = doc.RootElement;
+        var name = root.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String
+            ? nameEl.GetString() : null;
+        var description = root.TryGetProperty("description", out var descEl) && descEl.ValueKind == JsonValueKind.String
+            ? descEl.GetString() : null;
+        return (name, description);
+    }
+
     /// <summary>The real production path (`Program.cs`'s own CLI run): the plan read exactly as
     /// `ReadPlanNodes` already does, with each node's `affixIds`/`exclusionForm` overridden from
     /// `seedJson` (`nodes/&lt;treeId&gt;.json`'s own content) wherever that node id has been
@@ -156,18 +175,18 @@ public static class PlanReader
             ? node with
             {
                 AffixIds = seed.AffixIds, ExclusionForm = seed.ExclusionForm,
-                ExcludeProps = seed.ExcludeProps,
+                ExcludeProps = seed.ExcludeProps, Name = seed.Name, Flavor = seed.Flavor,
             }
             : node);
     }
 
     static Dictionary<string, (IReadOnlyList<string> AffixIds, ExclusionForm ExclusionForm,
-        IReadOnlyList<string> ExcludeProps)> ReadSeedOverrides(string seedJson)
+        IReadOnlyList<string> ExcludeProps, string? Name, string? Flavor)> ReadSeedOverrides(string seedJson)
     {
         using var doc = JsonDocument.Parse(seedJson);
         var nodesEl = doc.RootElement.TryGetProperty("nodes", out var n) ? n : default;
         var result = new Dictionary<string,
-            (IReadOnlyList<string>, ExclusionForm, IReadOnlyList<string>)>(StringComparer.Ordinal);
+            (IReadOnlyList<string>, ExclusionForm, IReadOnlyList<string>, string?, string?)>(StringComparer.Ordinal);
         if (nodesEl.ValueKind != JsonValueKind.Array) return result;
 
         foreach (var nodeEl in nodesEl.EnumerateArray())
@@ -192,7 +211,16 @@ public static class PlanReader
                 ? pkEl.EnumerateArray().Select(e => e.GetString()!).ToList()
                 : new List<string>();
 
-            result[nodeId] = (affixIds, exclusionForm, excludeProps);
+            // seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): the real
+            // player-facing content tree-language already writes per node (real example: every one
+            // of ferocity.json's 39 nodes) — read here for the first time; previously dropped even
+            // though this same parsed document already carried it, right next to affixIds above.
+            var name = nodeEl.TryGetProperty("name", out var nameEl) && nameEl.ValueKind == JsonValueKind.String
+                ? nameEl.GetString() : null;
+            var flavor = nodeEl.TryGetProperty("flavor", out var flavorEl) && flavorEl.ValueKind == JsonValueKind.String
+                ? flavorEl.GetString() : null;
+
+            result[nodeId] = (affixIds, exclusionForm, excludeProps, name, flavor);
         }
         return result;
     }
@@ -209,4 +237,9 @@ public sealed record TreeCatalogMeta(
     int Tiers,
     int Branches,
     IReadOnlyList<int> NodesPerTier,
-    int CatalogVersion);
+    int CatalogVersion,
+    // seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's own real
+    // generated display name/description, read separately via ReadTreeIdentity and merged in by
+    // Program.cs — additive, nullable, never required.
+    string? Name = null,
+    string? Description = null);

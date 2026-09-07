@@ -130,8 +130,19 @@ export function TraitDetail({
         >
           ← {report.treeId}
         </button>
-        <span className="font-display text-text">{node.nodeId}</span>
+        <span className="font-display text-text" data-testid="passives-trait-name">
+          {node.name ?? node.nodeId}
+        </span>
       </div>
+
+      {/* seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): the real
+          generated flavor text once tree-language has reached this node -- omitted entirely
+          (never a placeholder) when it hasn't. */}
+      {node.flavor ? (
+        <p className="text-2xs italic text-muted" data-testid="passives-trait-flavor">
+          {node.flavor}
+        </p>
+      ) : null}
 
       <p className="text-xs text-muted" data-testid="passives-trait-state" data-state={state}>
         {state === "owned"

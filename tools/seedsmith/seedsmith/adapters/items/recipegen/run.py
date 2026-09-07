@@ -395,8 +395,11 @@ def main(argv=None) -> int:
     ap.add_argument("--count", type=int, default=0,
                     help="how many new recipes to draw this run (0 == reconcile only, the default)")
     ap.add_argument("--write", action="store_true", help="write the merged corpus back to disk")
-    ap.add_argument("--overwrite", default="",
-                    help="comma-separated recipe ids to regenerate, or the literal 'all'")
+    ap.add_argument("--overwrite", "--force", default="",
+                    help="comma-separated recipe ids to regenerate, or the literal 'all' "
+                         "(--force is an accepted alias, matching content-completeness-core's "
+                         "own naming convention -- RunLedger.force()/generate_commander_effects.py "
+                         "--force)")
     ap.add_argument("--backfill", action="store_true",
                     help="mint any missing container (forge) target before writing")
     args = ap.parse_args(argv)

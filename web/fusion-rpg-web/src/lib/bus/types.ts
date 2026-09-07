@@ -509,15 +509,20 @@ export type ExcludedNode = {
 };
 
 /** I6 (spec-tree-surface.md §2.3/§9) — the wire twin of `FusionRpg.Contracts.TreeNodeSummaryDto`:
- * the catalog's own STRUCTURAL (branch, tier) slot for one node, never its authored copy. No node in
- * the corpus has a player-facing name or effect sentence yet (`tree-language`, H1-H2, hasn't run for
- * any shared tree) -- this is what lets Level 2's lattice mount a real cell for a trait nobody has
- * bought, which `TreeResolveReport`'s own owned-only node lists (below) cannot describe. */
+ * the catalog's own STRUCTURAL (branch, tier) slot for one node, never its authored copy.
+ *
+ * `name`/`flavor` (seedsmith-content-standard, content-completeness-passive-tree, 2026-09-08): the
+ * real player-facing content `tree-language` generates per node once it reaches that node — optional
+ * because most nodes in the corpus still have neither yet (`tree-language` has only reached 12 of 42
+ * trees so far). A node with neither field renders its existing id-based fallback, never a fabricated
+ * placeholder. */
 export type TreeNodeSummary = {
   nodeId: string;
   branch: string;
   tier: number;
   nodeClass: string;
+  name?: string;
+  flavor?: string;
 };
 
 /** The wire twin of `FusionRpg.Contracts.TreeResolveReportDto` — one per shared-corpus tree.
@@ -545,6 +550,11 @@ export type TreeResolveReport = {
   focusMilli: number;
   excludedNodes: ExcludedNode[];
   nodes?: TreeNodeSummary[];
+  /** seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's own real
+   * generated display name/description. Optional/null for any tree the identity stage has not
+   * reached yet — render the existing raw `treeId` fallback for those, never a fabricated name. */
+  name?: string | null;
+  description?: string | null;
 };
 
 /** GET /api/passive-tree/{playerId} — the wire twin of `FusionRpg.Contracts.PassiveTreeStateDto`.

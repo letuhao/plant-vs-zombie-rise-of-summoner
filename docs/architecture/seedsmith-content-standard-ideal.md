@@ -89,7 +89,7 @@ localization) that no domain has today, generalized once instead of five times.
   stochastic, so regenerating an entry that is already correct DESTROYS good content and costs
   model time for nothing."* This is the precedent the "Automatic-backfill scope" owner decision
   below is built on — resolved by keeping this program's own automatic path missing-only and
-  putting existing-content regeneration behind an explicit, human-invoked `--overwrite` flag,
+  putting existing-content regeneration behind an explicit, human-invoked `--force` flag,
   matching this file's own caution rather than overriding it.
 - **A real, working, general language-contamination validator already exists — audit correction,
   found 2026-09-08.** `workflow/validators/language.py:26`'s `language_consistency` (added
@@ -157,7 +157,7 @@ localization) that no domain has today, generalized once instead of five times.
   (destroying already-good content). **Resolved** (see "Automatic-backfill scope" under Owner
   decisions): this program's own shared engine does not attempt to make stale-content
   regeneration automatic either — it keeps the commander-effects precedent's own caution by never
-  touching existing content automatically, and exposes an explicit `--overwrite` parameter for a
+  touching existing content automatically, and exposes an explicit `--force` parameter for a
   person to trigger a full regeneration on demand.
 - **A bidirectional language-contamination check does not exist anywhere** — `language_consistency`
   (above) covers one direction only; nothing checks the other. A general fix belongs in `core`.
@@ -231,7 +231,7 @@ Not decided here (see Open questions) — the real candidates, narrowed by the i
    key is computed and used for **reporting** (a stale-count metric), not for triggering
    regeneration — per the resolved "Automatic-backfill scope" decision, an automatic run only ever
    fills MISSING records; regenerating existing (stale or not) records happens only through an
-   explicit `--overwrite` parameter, which regenerates everything it's pointed at rather than a
+   explicit `--force` parameter, which regenerates everything it's pointed at rather than a
    selectively-diffed stale subset.
 2. **One shared `Content/FieldMissing`-style metric family**, generalizing `Quality/FlavourMissing`
    the way `FLAVOR_EXPECTED_KINDS` already narrows it per-domain today — turning that same
@@ -286,10 +286,10 @@ standard, never a `const` — the same rule `spec-pipeline.md` §7 already state
   never touched by an automatic run, regardless of whether its staleness key has changed** — a
   resumed run treats "exists" as "done," full stop, matching the commander-effects precedent's own
   caution rather than overriding it. Regenerating existing content (stale or not) is never
-  automatic: it happens only through an explicit `--overwrite` parameter a person invokes by hand,
+  automatic: it happens only through an explicit `--force` parameter a person invokes by hand,
   which regenerates everything it's pointed at, not a selectively-diffed stale subset. This is
   simpler than either the "fully automatic for both" or the "guarded/locked-record" shape
   considered during the audit — there is no silent-regeneration risk to guard against, because
   nothing existing ever regenerates without an explicit, human-invoked flag. The staleness-key
   machinery (`stale_ids`-style hashing) is kept for **reporting** ("N records are stale, run with
-  `--overwrite` to refresh them") — a `gates=False` metric, never an auto-trigger.
+  `--force` to refresh them") — a `gates=False` metric, never an auto-trigger.

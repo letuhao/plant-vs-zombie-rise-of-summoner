@@ -145,7 +145,7 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     {
         FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogHub.Configure(
             FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
-                File.ReadAllText(Path.Combine(RepoTuningDir(), "derived-stat-catalog.v1.json"))));
+                File.ReadAllText(Path.Combine(RepoTuningDir(), "derived-stat-catalog.v2.json"))));
 
         var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 3);
         _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId),

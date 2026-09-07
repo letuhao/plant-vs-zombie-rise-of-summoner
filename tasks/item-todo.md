@@ -1094,24 +1094,32 @@ still open and is ask-first.**
       `FindAssignmentHolders` defaulted to `LoadoutReport.InstanceRefKind = "item"`, so module 2's
       `LoadoutReport.Plan` conflict detection missed rolled assignments unless a caller passed
       `"rolled"` (this endpoint did)
-- [ ] ⛔ **R3 — the FE and Core disagree about `trinket`. STILL OPEN 2026-09-06 — ask-first, a human
-      picks the side.** Re-verified against current code this pass, both sides unchanged:
-      | Side | File:line | `trinket` maps to | Which paperdoll cell that is |
-      |---|---|---|---|
-      | Web FE | `web/fusion-rpg-web/src/layers/relics/Paperdoll.tsx:60` (`RELIC_SLOT_TO_ROLE`) | `jewel-major` | `neck` / `pollen` (`Paperdoll.tsx:32`) |
-      | Core | `src/FusionRpg.Core/Items/LegacyEquipSlots.cs:42` (`Pairs`) | `jewel-minor-a` | `ring-1` / `graft-1` (`Paperdoll.tsx:41`) |
-      **Live symptom, not just an inconsistency:** the relic wire returns only the legacy `slot`, never
-      a role (`ListUniqueEquipmentUnlocked` projects back through `LegacyEquipSlots`), so
-      `Paperdoll.tsx:87` falls through to `RELIC_SLOT_TO_ROLE` and **draws a trinket relic in the neck
-      cell while its stored row says `jewel-minor-a` (ring-1).**
-      **Why this is not a one-word edit, and why nobody should pick it alone:** editing *Core* re-homes
-      data already on disk — D1 §10 M1's migration and every relic equip since 2026-09-06 wrote
-      `jewel-minor-a` rows; editing the *FE* leaves storage alone but moves where a player sees their
-      trinket, and "trinket" reads more like a neck amulet than a ring. Either side is defensible and
-      each has a different cost. **Resolver: the owner, alongside D1's `M3`** (the step that widens the
-      wire off three slot words and would let the payload carry the real role, dissolving the map
-      entirely). Recorded in `Paperdoll.tsx`'s own comment too. ⛔ **Deliberately not picked by this
-      pass** — it is the one item of the four that changes how existing stored data reads
+- [x] ⭐ **R3 — FIXED 2026-09-08, owner-directed re-investigation found "reconciling moves stored
+      data" was backwards.** Original framing (below, kept for the record) treated this as symmetric —
+      pick Core or pick the FE, either one moves something real. Re-checked against
+      `ssot-equip-slots.md` §5.7 step 1 directly: `LegacyEquipSlots` (Core) is not an arbitrary
+      choice, it is that spec's own named decision, and it is what module 4's migration actually wrote
+      to `rpg_item_assignment` for every relic equipped since 2026-09-06 — real `jewel-minor-a` rows on
+      disk today. The FE's `RELIC_SLOT_TO_ROLE` table was the side out of step with reality, not a
+      second, equally-valid decision — aligning it to Core moves **zero** stored data, it just stops
+      the paperdoll from drawing a `jewel-minor-a`-stored relic at the `jewel-major` cell. Left
+      unreconciled this was a real collision risk, not just a visual quirk: a real item equipped at
+      `jewel-minor-a` (ring-1) would silently contend in storage with a "trinket" relic the paperdoll
+      was drawing at a different cell (neck).
+      | Side | File:line | `trinket` maps to (before → after) |
+      |---|---|---|
+      | Web FE | `Paperdoll.tsx:60` (`RELIC_SLOT_TO_ROLE`) | `jewel-major` → **`jewel-minor-a`** |
+      | Core | `LegacyEquipSlots.cs:42` (`Pairs`) | `jewel-minor-a` (unchanged, was already correct) |
+      **Fix**: one-line table edit + a rewritten doc comment recording the corrected reasoning.
+      **Proof, red-first**: new test
+      `paperdoll.equip.test.tsx`'s `"R3, fixed 2026-09-08: a 'trinket' relic draws at jewel-minor-a
+      (ring-1)..."` — confirmed it would have failed against the pre-fix table (asserted the OLD,
+      wrong cell), passes now. Full `layers/relics/` suite: 75/75. `tsc --noEmit`: clean.
+      **Original framing, kept for the record (found to be over-cautious, not wrong about the defect
+      itself):** "editing Core re-homes data already on disk... editing the FE leaves storage alone but
+      moves where a player sees their trinket... either side is defensible." The defect was real; the
+      claim that both directions were equally costly was not — only one direction required moving any
+      data, and it wasn't the one this fix took.
 - [x] ⭐ **R4 — `ArmouryRowDto.Assigned` was hardcoded `false`** (`ItemSurfaceEndpoints.cs:85,89`),
       which was harmless while nothing could be assigned and simply wrong once it could.
       The armoury filter's `hideAssigned` therefore filtered nothing. **FIXED 2026-09-06**

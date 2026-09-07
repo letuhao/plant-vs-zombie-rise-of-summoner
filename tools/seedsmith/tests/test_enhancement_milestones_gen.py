@@ -442,3 +442,21 @@ def test_cli_overwrite_all_and_by_id_both_route_through_the_real_ledger(tmp_path
     exit_code = run_mod.main(["--overwrite", "all"])
     assert exit_code == 0
     assert "milestone-draw-000" in capsys.readouterr().out
+
+
+def test_cli_force_is_an_accepted_alias_for_overwrite(tmp_path, monkeypatch, capsys):
+    """seedsmith-content-standard Task 6: `--force` is `content-completeness-core`'s own naming
+    convention (`RunLedger.force()`, `generate_commander_effects.py --force`); this CLI's real,
+    already-shipped flag is `--overwrite` (spec-enhancement-milestones-gen.md). Added as a second
+    flag string on the same argument rather than a rename, so nothing already typing `--overwrite`
+    breaks."""
+    ledger_path = tmp_path / "ledger.json"
+    monkeypatch.setattr(run_mod, "OUTPUT_PATH", tmp_path / "milestones.json")
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", ledger_path)
+
+    ledger = RunLedger(ledger_path)
+    ledger.mark_done("milestone-draw-000", {"entryId": "enh.011", "runtimeFamily": "atom.enhance-a"})
+
+    exit_code = run_mod.main(["--force", "milestone-draw-000"])
+    assert exit_code == 0
+    assert "milestone-draw-000" in capsys.readouterr().out

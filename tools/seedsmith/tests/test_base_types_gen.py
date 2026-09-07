@@ -531,3 +531,18 @@ def test_cli_overwrite_routes_through_the_real_ledger(tmp_path, monkeypatch):
     exit_code = run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
                              "--overwrite", "basetype-draw-armament-primary-humanoid-a-000"])
     assert exit_code == 0
+
+
+def test_cli_force_is_an_accepted_alias_for_overwrite(tmp_path, monkeypatch, capsys):
+    """seedsmith-content-standard Task 6: `--force` is `content-completeness-core`'s own naming
+    convention (`RunLedger.force()`, `generate_commander_effects.py --force`); this CLI's real,
+    already-shipped flag is `--overwrite` (spec-base-types-gen.md). Added as a second flag string on
+    the same argument rather than a rename, so nothing already typing `--overwrite` breaks."""
+    ledger_path = tmp_path / "ledger.json"
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", ledger_path)
+    ledger = RunLedger(ledger_path)
+    ledger.mark_done("basetype-draw-armament-primary-humanoid-a-000",
+                     {"entryId": "item.humanoid-main-hand-a-001"})
+    exit_code = run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
+                             "--force", "basetype-draw-armament-primary-humanoid-a-000"])
+    assert exit_code == 0

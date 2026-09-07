@@ -75,7 +75,8 @@ python tools\tuning\publish.py aptitude-catalog displayName.Might="Might"
 
 ```text
 data/tuning/aptitude-catalog.v1.json
-data/tuning/derived-stat-catalog.v1.json
+data/tuning/derived-stat-catalog.v2.json
+data/tuning/derived-stat-catalog.v1.json   # history only; boot uses v2
 data/tuning/status-catalog.v1.json
 data/tuning/resource-catalog.v1.json
 data/tuning/element-catalog.v1.json

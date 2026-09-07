@@ -8,14 +8,14 @@ import { PASSIVE_TREE_VOCABULARY } from "./passiveTreeVocabulary";
  * shape `passivesYours.ts`/`passivesBrowse.ts` already use so `PathLattice.tsx` stays a thin render
  * layer (contractGuard.test.ts: no DTO binding and no derivation logic lives under `ui/`).
  *
- * **A real, disclosed content gap this module works around rather than hides**: no node anywhere in
- * the shared corpus has an authored player-facing name or effect sentence yet -- `tree-language`
- * (H1-H2) has not run for any shared tree (passive-tree-todo.md's own H9 status; `tree-plan`'s CLI
- * "honestly reports all 40 ... affixIds yet, since tree-language hasn't emitted them"). This is the
- * SAME gap `passivesYours.ts`'s own `NotWorkingTrait.winnerNodeId` doc comment already names ("the
- * catalog has no display-name field on the wire yet... a content gap, not something this surface can
- * fabricate a name around") -- this module renders real, structural node identity (branch/tier/node
- * id) and leaves the authored copy for the moment `tree-language` ships it.
+ * **A real, disclosed content gap this module works around, not hides — updated 2026-09-08**:
+ * `tree-language` (H1-H2) has generated real player-facing name/flavor text for 12 of 42 shared
+ * trees so far (passive-tree-todo.md's own H9 status); the rest have neither yet. Since
+ * `seedsmith-content-standard`'s content-completeness-passive-tree module, `TreeNodeSummary` carries
+ * optional `name`/`flavor` wired straight through from the catalog (`PathLattice.tsx`/
+ * `TraitDetail.tsx` render them when present) — this module still renders real, structural node
+ * identity (branch/tier/node id) as the fallback for any node `tree-language` hasn't reached, never
+ * a fabricated name.
  */
 
 export type LatticeCellState = "owned" | "available" | "locked";

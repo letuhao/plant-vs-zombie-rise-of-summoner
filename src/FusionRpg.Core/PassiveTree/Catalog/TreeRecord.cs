@@ -32,4 +32,9 @@ public sealed record TreeRecord(
     int Branches,
     IReadOnlyList<int> NodesPerTier,
     int CatalogVersion,
-    bool Enabled);
+    bool Enabled,
+    // seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's own
+    // real generated display name/description (adapters/trees/identity), additive and nullable —
+    // a tree the identity stage has not reached yet is a real, valid state, never fabricated.
+    string? Name = null,
+    string? Description = null);

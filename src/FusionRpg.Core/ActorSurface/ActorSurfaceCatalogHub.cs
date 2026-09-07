@@ -30,7 +30,7 @@ public sealed record AptitudeSurfaceEntryDto(
 
 public sealed record DerivedStatSurfaceEntryDto(
     string Family,
-    string Axis,
+    [property: JsonPropertyName("expand")] string Expand,
     [property: JsonPropertyName("compose")] string Compose,
     [property: JsonPropertyName("unitClass")] string UnitClass,
     string DisplayName,
@@ -120,11 +120,11 @@ public static class ActorSurfaceCatalogHub
                 Reading: a.Reading)).ToList(),
             Families: derived.Entries.Select(f => new DerivedStatSurfaceEntryDto(
                 Family: f.Family,
-                Axis: f.Axis,
+                Expand: DerivedStatSurfaceCatalogLoader.ExpandWire(f.Expand),
                 Compose: f.Compose.ToString(),
                 UnitClass: f.UnitClass.ToString(),
-                DisplayName: f.DisplayName,
-                Reading: f.Reading,
+                DisplayName: f.DisplayName.Resolve("en"),
+                Reading: f.Reading.Resolve("en"),
                 Icon: f.Icon,
                 Gauge: f.Gauge,
                 SheetGroup: f.SheetGroup,

@@ -73,6 +73,24 @@ describe("PathLattice — test 5: opens scrolled to the player's own depth, neve
   });
 });
 
+describe("PathLattice — seedsmith-content-standard, content-completeness-passive-tree (2026-09-08)", () => {
+  it("renders a node's real generated name instead of its raw id when the wire sends one", () => {
+    const nodes = fortyNodes();
+    nodes[0] = { ...nodes[0], name: "Thickened Marrow" };
+    render(<PathLattice tree={tree({ nodes })} soulLevelByNodeId={{}} reqScalePoints={5} onBack={() => {}} />);
+    const cell = screen.getByTestId(`lattice-cell-${nodes[0].nodeId}`);
+    expect(cell).toHaveTextContent("Thickened Marrow");
+    expect(cell).not.toHaveTextContent(nodes[0].nodeId);
+  });
+
+  it("falls back to the raw node id, never a blank cell, when no name has been generated yet", () => {
+    render(<PathLattice tree={tree()} soulLevelByNodeId={{}} reqScalePoints={5} onBack={() => {}} />);
+    const nodes = fortyNodes();
+    const cell = screen.getByTestId(`lattice-cell-${nodes[0].nodeId}`);
+    expect(cell).toHaveTextContent(nodes[0].nodeId);
+  });
+});
+
 describe("PathLattice — test 29/§9.1: a gate-less tree takes the CONDITION presentation", () => {
   it("shows the condition once, and on every tier row -- never a price or an Unlock verb", () => {
     render(<PathLattice tree={tree({ gateState: "unproduced" })} soulLevelByNodeId={{}} reqScalePoints={5} onBack={() => {}} />);

@@ -417,13 +417,13 @@
             },
             {
               "entryKind": "equipment",
-              "role": "standard",
+              "role": "core-guard",
               "frame": "humanoid",
               "dropBand": "occasional"
             },
             {
               "entryKind": "equipment",
-              "role": "standard",
+              "role": "girdle",
               "frame": "plant",
               "dropBand": "occasional"
             }
@@ -1398,7 +1398,7 @@
             },
             {
               "entryKind": "equipment",
-              "role": "standard",
+              "role": "sense",
               "frame": "humanoid",
               "dropBand": "seldom"
             },

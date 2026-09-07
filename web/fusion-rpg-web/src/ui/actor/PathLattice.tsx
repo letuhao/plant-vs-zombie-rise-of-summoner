@@ -313,10 +313,11 @@ function TraitCell({
 
   const content = (
     <>
-      {/* No authored name/effect exists yet for any node in the corpus (see the module doc comment)
-          -- the real node id stands in, matching the honest placeholder `passivesYours.ts` already
-          uses for `winnerNodeId`. */}
-      <p className="truncate font-display">{cell.node.nodeId}</p>
+      {/* seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): renders the
+          real generated name once tree-language has reached this node; falls back to the node id
+          for the (still-common) case it hasn't yet, matching the honest placeholder
+          `passivesYours.ts` already uses for `winnerNodeId` -- never a fabricated name. */}
+      <p className="truncate font-display">{cell.node.name ?? cell.node.nodeId}</p>
       {cell.state === "owned" ? (
         <p className="text-muted">
           {PASSIVE_TREE_VOCABULARY.track.depthLabel} {cell.soulLevel}

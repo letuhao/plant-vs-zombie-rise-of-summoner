@@ -49,6 +49,22 @@ function renderDetail(props: Partial<Parameters<typeof TraitDetail>[0]> = {}) {
   return { onSaveNodes, onBack };
 }
 
+describe("TraitDetail — seedsmith-content-standard, content-completeness-passive-tree (2026-09-08)", () => {
+  it("renders the real generated name and flavor when the wire sends them", () => {
+    renderDetail({
+      node: { ...ownedNode, name: "Thickened Marrow", flavor: "The bone grows dense and heavy." }
+    });
+    expect(screen.getByTestId("passives-trait-name")).toHaveTextContent("Thickened Marrow");
+    expect(screen.getByTestId("passives-trait-flavor")).toHaveTextContent("The bone grows dense and heavy.");
+  });
+
+  it("falls back to the raw node id and omits the flavor block entirely when neither exists yet", () => {
+    renderDetail(); // ownedNode has no name/flavor
+    expect(screen.getByTestId("passives-trait-name")).toHaveTextContent(ownedNode.nodeId);
+    expect(screen.queryByTestId("passives-trait-flavor")).not.toBeInTheDocument();
+  });
+});
+
 describe("TraitDetail — three states, one shared cellStateFor", () => {
   it("owned: shows the current depth and a deepen control", () => {
     renderDetail();

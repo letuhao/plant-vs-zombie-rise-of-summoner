@@ -499,6 +499,25 @@ def test_overwrite_by_id_bypasses_validity_for_named_ids_only(tmp_path):
     assert forced == ["recipe-draw-000"]
 
 
+def test_cli_force_is_an_accepted_alias_for_overwrite(tmp_path, monkeypatch, capsys):
+    """seedsmith-content-standard Task 6: `content-completeness-core`'s own naming convention is
+    `--force` (matching `RunLedger.force()` and `generate_commander_effects.py --force`), while this
+    CLI's own real, already-shipped flag is `--overwrite` -- an audit finding, not a placeholder
+    (docs/architecture/item-seedgen/spec-recipes-gen.md already documents `--overwrite`). Renaming
+    the shipped flag outright would break every doc/script referencing it for a cosmetic win; adding
+    `--force` as a second flag string onto the SAME `argparse` argument (both set `args.overwrite`)
+    gives the naming parity Task 6 asks for without breaking anything that already types
+    `--overwrite`."""
+    ledger_path = tmp_path / "ledger.json"
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", ledger_path)
+    ledger = RunLedger(ledger_path)
+    ledger.mark_done("recipe-draw-000", {"entryId": "recipe.001"})
+
+    exit_code = run_mod.main(["--force", "recipe-draw-000"])
+    assert exit_code == 0
+    assert "recipe-draw-000" in capsys.readouterr().out
+
+
 def test_cli_reconcile_default_prints_a_summary_and_makes_no_model_calls(capsys, monkeypatch):
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", run_mod.DEFAULT_LEDGER_PATH)
     exit_code = run_mod.main([])

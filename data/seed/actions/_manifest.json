@@ -46,6 +46,12 @@
       "type": "prefix",
       "disposition": "exclude",
       "reason": "A-P1/A-P2/A-P3's own pre-acceptance scratch rows (spec: 'Never write into data/seed/actions/ -- acceptance is A-S3's; persistence is A-S6's'). Rows key on candidateId, not this corpus's own id grammar, and carry no cross-reference another committed entry resolves against -- the same 'safer to exclude than to guess' default `_load_committed_corpus` already states for any undeclared prefix, made explicit here now that a real run has populated this directory for the first time."
+    },
+    {
+      "id": "_runs/",
+      "type": "prefix",
+      "disposition": "exclude",
+      "reason": "seedsmith-content-standard's shared `RunLedger` bookkeeping for the description-backfill generator (description_backfill/, Task 8) -- `data/seed/actions/_runs/description-backfill.ledger.json`, matching passive-tree's own `_runs/tree-language.ledger.json` convention. A `{schemaVersion, done: {actionId: {...}}}` document, not a `kind`+`entries` envelope, and its keys are already-committed action ids, not new ones -- it would either fail Corpus.load's own kind+entries check (silently skipped, harmless) or, if ever reshaped into an envelope, mint no `action.*`/`reject.*`/`review.*` ids of its own. Declared explicitly rather than left to the silent-skip case, same discipline `_generated/family-map.json` already gets as a config-file."
     }
   ]
 }

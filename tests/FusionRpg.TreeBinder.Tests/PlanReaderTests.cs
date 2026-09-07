@@ -191,6 +191,79 @@ public class ReadPlanNodesWithSeedTests
         Assert.Equal(new[] { "atom.a" }, node.AffixIds);
     }
 
+    [Fact]
+    public void A_generated_nodes_real_name_and_flavor_overlay_from_the_seed()
+    {
+        // seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): the real gap
+        // this closes — name/flavor sat right next to affixIds in the same seed document and were
+        // never read. Proven with the exact shape a real seed file carries.
+        var seedJson = """
+        {"nodes":[{"id":"skill.t-off-t1-n0","affixIds":["atom.a"],
+                   "name":"Thickened Marrow",
+                   "flavor":"The bone grows dense and heavy under the weight of the struggle."}]}
+        """;
+
+        var nodes = PlanReader.ReadPlanNodesWithSeed(PlanTwoNodes, seedJson, Tuning());
+
+        var generated = nodes.Single(n => n.NodeId == "skill.t-off-t1-n0");
+        Assert.Equal("Thickened Marrow", generated.Name);
+        Assert.Equal("The bone grows dense and heavy under the weight of the struggle.", generated.Flavor);
+
+        var ungenerated = nodes.Single(n => n.NodeId == "skill.t-off-t1-n1");
+        Assert.Null(ungenerated.Name);
+        Assert.Null(ungenerated.Flavor);
+    }
+
+    [Fact]
+    public void The_real_committed_ferocity_seed_overlays_its_own_real_name_and_flavor()
+    {
+        // The real proof Task 14 asks for: an actual committed node from
+        // data/seed/passive-tree/nodes/ferocity.json round-trips through ReadPlanNodesWithSeed with
+        // its exact real content, not a hand-typed stand-in.
+        var repoRoot = FindRepoRoot();
+        var seedJson = File.ReadAllText(Path.Combine(repoRoot, "data", "seed", "passive-tree",
+            "nodes", "ferocity.json"));
+        var plan = """{"nodes":[{"id":"skill.ferocity-def-t1-n0","budgetShareMilli":10}]}""";
+
+        var node = Assert.Single(PlanReader.ReadPlanNodesWithSeed(plan, seedJson, Tuning()));
+
+        Assert.Equal("Thickened Marrow", node.Name);
+        Assert.Equal(
+            "The bone grows dense and heavy, a foundation that refuses to crack under the weight of the struggle.",
+            node.Flavor);
+    }
+
+    [Fact]
+    public void ReadTreeIdentity_returns_null_null_for_a_tree_the_identity_stage_has_not_reached()
+    {
+        var (name, description) = PlanReader.ReadTreeIdentity(null);
+        Assert.Null(name);
+        Assert.Null(description);
+    }
+
+    [Fact]
+    public void ReadTreeIdentity_reads_a_real_shaped_identity_document()
+    {
+        var identityJson = """
+        {"treeId":"ferocity","name":"Unyielding Bastion",
+         "description":"Rewards those who turn their body into a living fortress."}
+        """;
+        var (name, description) = PlanReader.ReadTreeIdentity(identityJson);
+        Assert.Equal("Unyielding Bastion", name);
+        Assert.Equal("Rewards those who turn their body into a living fortress.", description);
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+        while (dir is not null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "AGENTS.md"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new InvalidOperationException("could not locate the repo root (AGENTS.md not found upward)");
+    }
+
     // ---- TreeIdFromPlanFileName (J1, 2026-09-07): the real silent-data-loss bug --------------------
 
     [Theory]

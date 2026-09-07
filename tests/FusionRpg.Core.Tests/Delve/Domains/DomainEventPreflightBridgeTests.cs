@@ -76,36 +76,37 @@ public class DomainEventPreflightBridgeTests
     /// <summary>
     /// The real end-to-end proof, through the actual `DomainPreflight.Run` entry point.
     ///
-    /// <para><b>Updated 2026-09-08 (party-dungeon-todo.md D4.17 row 7) — the ORIGINAL `curio`
-    /// cell-headroom finding this test used to pin is FIXED, by widening room content, not by
-    /// generating new events.</b> Investigation found the real 52-event corpus already has 8
+    /// <para><b>2026-09-08 (party-dungeon-todo.md D4.17 row 7, first pass, same day) — the ORIGINAL
+    /// `curio` cell-headroom finding this test used to pin was FIXED, by widening room content, not
+    /// by generating new events.</b> Investigation found the real 52-event corpus already had 8
     /// distinct themes for every one of `curio`/`shrine`/`trap`/`bargain`/`encounter-event` — the
     /// gap was never a content-VOLUME shortfall, it was that each individual room's own `eventPool`
     /// array (model-authored, D1.10) referenced only 1-2 of those already-existing, already-valid
     /// events, satisfying the schema's `minItems: 1` but nothing pushing for more. Since
     /// `climateAffinity` never gates pool membership (spec-event-deck.md §2, only weights the draw)
     /// and kind-fit is the only real legality rule, widening every non-`wild` archetype's own
-    /// `eventPool` to the full same-kind corpus is a content-completeness fix over ALREADY-SHIPPED,
+    /// `eventPool` to the full same-kind corpus was a content-completeness fix over ALREADY-SHIPPED,
     /// ALREADY-VALIDATED content — zero new anchors generated, zero model calls, mechanically
-    /// reversible. See `data/seed/dungeon/rooms/*.json` (48 files touched, `wild`-kind rooms
-    /// untouched) and `tools/seedsmith/tests/test_dungeon_room_content.py` (still 13/13 green).</para>
+    /// reversible. That first pass left `wild`-kind rooms (event kind `story`) as the sole remaining
+    /// gap: only 2 distinct-theme `story` events existed, below the >3 floor, with nothing
+    /// already-shipped left to widen with.
     ///
-    /// <para><b>A DIFFERENT, genuinely unfixed gap now surfaces in its place: `wild`-kind rooms
-    /// (event kind `story`).</b> The whole shipped corpus carries only 2 distinct-theme `story`
-    /// events (`event.story-demon.allpeater-001`/`ashthreepeater-001`, chained to each other) — below
-    /// the >3 floor `events.noRepeatRooms` sets, and unlike the five kinds above, there is NOTHING
-    /// already-shipped left to widen with: every wild room already references every real story event
-    /// its own pool can legally hold. Closing this needs NEW `story`-kind content, and `dungeon-event`'s
-    /// own D1.10 entry already named exactly why that was deliberately deferred rather than attempted
-    /// as a mechanical batch: "a real multi-chapter chain needs sequencing infrastructure this pass
-    /// does not build" — a real, pre-existing, unresolved design/infra question, not a volume gap this
-    /// test's own fix pattern (widen with existing content) can answer. Not attempted here for that
-    /// reason — forcing it would mean either re-deciding that already-deferred infra question alone,
-    /// or shipping content that clears this static check without the runtime chain-traversal guarantee
-    /// the deferred infra work was meant to provide.</para>
+    /// <b>2026-09-08 (second pass, same day, later window) — CLOSED FOR REAL, not deferred.</b> The
+    /// "needs sequencing infrastructure" citation this test used to repeat (`dungeon-event`'s own
+    /// D1.10 entry) was re-read directly against `briefs.py`'s own `_EVENT_KIND_HINT["story"]` doc
+    /// comment ("a single, self-contained beat, not part of a longer chain") and `EVENT_KIND_FIRST_
+    /// SHIP`'s own comment: the deferred question is about a FUTURE multi-chapter arc, not about
+    /// shipping more standalone beats in the ALREADY-ESTABLISHED shape the first 2 story events
+    /// already used. Generated 2 more standalone `story` events via the real pipeline
+    /// (`run_event_draws`, real local-model call — `event.story-demon.cactus-001` /
+    /// `dolldiamond-001`, chained the same planner-assigned way `EventCatalog.Load`'s
+    /// `ChainRefRequiredForStory` rule requires), reaching 4 distinct themes, and widened all 12 real
+    /// `wild` rooms' own `eventPool` to the full 4-event set (the identical widen-by-union pattern
+    /// the first pass used for the other six kinds). `wild` now clears cell-headroom exactly like
+    /// every other kind — proven below directly, not assumed.</para>
     /// </summary>
     [Fact]
-    public void Every_real_shipped_domain_now_refuses_row7s_cell_headroom_on_wild_not_curio()
+    public void Every_real_shipped_domain_clears_row7s_cell_headroom_for_every_archetype_including_wild()
     {
         var domains = DomainSeedFile.LoadAll(DungeonTestFiles.DomainsDir());
         var palettes = DomainSeedFile.LoadRoomPalettes(DungeonTestFiles.DomainsDir());
@@ -115,32 +116,24 @@ public class DomainEventPreflightBridgeTests
 
         Assert.Equal(6, domains.Count);
 
-        // The fixed content directly: every non-wild kind's own real room pools now clear cell
-        // headroom on their own (no DomainPreflight plumbing needed for this half of the proof).
+        // The fixed content directly: EVERY archetype's own real room pools clear cell headroom on
+        // their own, `wild` included now (no DomainPreflight plumbing needed for this half of the
+        // proof).
         foreach (var (roomId, poolIds) in pools)
         {
-            if (!rooms.TryGetValue(roomId, out var room) || room.Kind == "wild" || poolIds.Count == 0) continue;
+            if (!rooms.TryGetValue(roomId, out var room) || poolIds.Count == 0) continue;
             var distinctCells = poolIds.Select(id => catalog.Resolve(id)!)
                 .Select(e => new EventFilters.EventCell(e.Kind, e.Theme)).Distinct().Count();
             Assert.True(distinctCells > Tuning.EventsNoRepeatRooms,
                 $"{roomId} (kind={room.Kind}) only has {distinctCells} distinct cells after the widening fix");
         }
 
-        // The real end-to-end run: still refuses, now on `wild` alone, never `curio`/`shrine`/`trap`/
-        // `merchant`/`rest`/`unknown` — the fix moved the frontier, it did not paper over it.
+        // The real end-to-end run, row 7 isolated (rows 1-6/9/10 stubbed to pass): zero refusals for
+        // every one of the six real domains — the frontier this row-7 chain used to stop at is gone.
         var checkEvents = DomainEventPreflight.Build(palettes, rooms, pools, catalog, Tuning);
         var refusals = DomainPreflight.Run(domains, InputsIsolatingRow7(checkEvents));
 
-        Assert.Equal(domains.Count, refusals.Count);
-        var realDomainIds = domains.Select(d => d.DomainId).ToHashSet(StringComparer.Ordinal);
-        foreach (var r in refusals)
-        {
-            Assert.Equal("domain.event:cell-headroom", r.Rule);
-            Assert.Contains(r.DomainId, realDomainIds);
-            Assert.Contains("kind=wild", r.Detail);
-            Assert.DoesNotContain("kind=curio", r.Detail);
-            Assert.Contains("events.noRepeatRooms (3)", r.Detail);
-        }
+        Assert.Empty(refusals);
     }
 
     /// <summary>Negative control 1: an eventPool naming an unreal event id refuses `pool-ref-missing`.</summary>

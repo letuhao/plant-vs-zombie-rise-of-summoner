@@ -3,7 +3,10 @@
   "dispositionBase": "hostile",
   "encounterRef": "encounter.pack-rainbow-001",
   "eventPool": [
-    "event.story-demon.allpeater-001"
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
   ],
   "flavor": "Thick, yellow smoke curls around the obsidian pillars, obscuring the floor in a low-hanging haze. At the center, a massive iron cage glows a dull, angry red, containing a flickering silhouette that pulses in time with the heat radiating from the cracked stone walls.",
   "hazardBand": "heavy",

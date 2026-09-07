@@ -27,6 +27,16 @@ ACTION_SEED_REQUIRED = frozenset({
 ACTION_SEED_OPTIONAL = frozenset({
     "scopeKey", "areaShape", "tags", "kindHint", "structureAxes", "pairedPayoffFamily",
     "motifsUsed", "name",
+    # `description` (seedsmith-content-standard, content-completeness-actions, Task 8) — the
+    # AUTHORED player-facing flavour text this domain never had a field for at all
+    # (`spec-content-completeness-actions.md` §2: `candidate_assembly/derive.py`'s own 2026-09-04
+    # comment flagged this exact split as "a real, separate, reviewed schema change... not
+    # something to smuggle in here" — this is that reviewed change). Mirrors `items/kinds.py`'s
+    # `flavor`/`flavorKey` pair exactly: `descriptionKey` (already minted, above, in
+    # ACTION_SEED_OPTIONAL) is the stable i18n-ready identifier; `description` is the real English
+    # text that identifier will eventually resolve to. Optional, not required, matching `name`'s
+    # own optionality — the completeness *metric* (not the schema) is what reports a real gap.
+    "description",
 })
 ACTION_SEED_REFERENCES = frozenset({"atomFamilies", "pairedPayoffFamily", "scopeKey"})
 

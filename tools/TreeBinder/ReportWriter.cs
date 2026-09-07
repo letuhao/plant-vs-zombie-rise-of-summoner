@@ -80,6 +80,11 @@ public static class ReportWriter
             nodesPerTier = meta.NodesPerTier,
             catalogVersion = meta.CatalogVersion,
             enabled = true,
+            // seedsmith-content-standard, passive-tree-identity-content (2026-09-08): the tree's
+            // own real generated display name/description — null when the identity stage has not
+            // reached this tree yet, never fabricated.
+            name = meta.Name,
+            description = meta.Description,
             nodes = report.Bound.Select(b =>
             {
                 var input = inputsById[b.NodeId];
@@ -100,6 +105,12 @@ public static class ReportWriter
                     tagsJson = (string?)null,
                     enabled = true,
                     retiredAtRevision = (int?)null,
+                    // seedsmith-content-standard, content-completeness-passive-tree (2026-09-08):
+                    // the real player-facing content already sitting in the seed corpus, carried
+                    // through PlanReader -> BindInputNode -> here. Null when tree-language has not
+                    // reached this node yet — never fabricated.
+                    name = input.Name,
+                    flavor = input.Flavor,
                 };
             }),
             verdict = report.Verdict.ToString(),

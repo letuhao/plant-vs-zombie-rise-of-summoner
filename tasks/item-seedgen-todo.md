@@ -402,9 +402,10 @@ originally-assumed `affix-families-gen`) are materials/sockets/consumables/base-
       re-edit after the fact).
 - [x] **T30** — ⭐ **Checkpoint E (final), CLOSED 2026-09-07.** All five checkpoints (A-E) now pass. All
       11 item-seedgen modules are built and tested. T0's 11th-corpus decision is resolved (module 11,
-      enhancement-milestones-gen). Real, named, still-open items (not silently skipped): the confirmed
-      `frame: "hybrid"` dangling categorical reference; the `role: "standard"` drop-table content bug
-      (naming a D14-retired role, distinct from and more precisely diagnosed than the `hybrid` gap).
+      enhancement-milestones-gen). Real, named items at the time (not silently skipped): the confirmed
+      `frame: "hybrid"` dangling categorical reference (still genuinely open, X1-gated); the
+      `role: "standard"` drop-table content bug (naming a D14-retired role) — **✅ FIXED 2026-09-08**,
+      see this row's own addendum below for the real replacement roles and evidence.
       **`hybrid` re-verified against its primary source 2026-09-07** (Stop-hook-driven re-check, same
       rigor that caught T21/T24/T26's false positives — this one held up, and turned out deeper than
       first described): `docs/architecture/item/spec-base-types.md`'s D11 section shows `frame: "hybrid"`
@@ -424,7 +425,26 @@ originally-assumed `affix-families-gen`) are materials/sockets/consumables/base-
       rows are dead-weight content, not a defect; fixing them means picking a replacement role, which
       is content authoring, not a mechanical correction — correctly left as an owner content decision,
       distinct from the newly-generated `droptable.d1-013` row (a fresh, this-session bug), which WAS
-      fixed directly. Consumables' `grantsActionId`/`cooldownKey` backfill was also re-verified against
+      fixed directly.
+
+      ✅ **FIXED 2026-09-08, owner-directed content pass, base-corpus-verified not guessed.** Traced
+      all 3 occurrences (not 2 — a fresh count found one more) to their exact source rows in
+      `data/seed/items/drop-tables/d1.json`: `droptable.d1-001` "Compost Cache" (group
+      `r2-equipment`, 2 of its 7 equipment picks both said `standard` — the only role duplicated in
+      an otherwise all-distinct list) → replaced with `core-guard`(humanoid)/`girdle`(plant), both
+      confirmed to have real, `enabled` base-types via a full recursive scan of
+      `data/seed/items/base-types/**` (the flat legacy files AND the newer nested
+      `<role>/<frame>/<band>.json` tree `base-types-gen` — Checkpoint C — added, which a
+      non-recursive first pass missed and had to be corrected before trusting the pick, the same
+      class of measurement error T21 already made once in this file). `droptable.d1-012` "Banner
+      Offering" (group `banner-offering-gear`) → replaced with `sense`(humanoid), pairing with the
+      group's existing `sense`(plant) pick, also confirmed enabled. Verified via
+      `dotnet run --project tools/ItemSeedValidator -- --validate`: zero new errors on `d1.json`
+      beyond a pre-existing, unrelated `MetaRegistryVersionMismatch` note shared by all 4 drop-table
+      files; `dotnet test --filter "FullyQualifiedName~DropVolumeCorpusTests|FullyQualifiedName~LootPipelineTests"`
+      57/57. No `role: "standard"` references remain anywhere under `data/seed/items/drop-tables/`.
+
+      Consumables' `grantsActionId`/`cooldownKey` backfill was also re-verified against
       its own spec text (`docs/architecture/item-seedgen/spec-consumables-gen.md` Boundaries, "Ask
       first" — quoted verbatim, not paraphrased): a genuine, written spec boundary, correctly untouched. `combination-write-unblock`'s
       own registry-gate outcome is CLOSED, not open — a genuine registryVersion 4→5 bump, paired with a

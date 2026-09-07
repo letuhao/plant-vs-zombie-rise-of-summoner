@@ -76,6 +76,9 @@ if (planFiles.Length == 0)
 }
 
 var nodesDir = Path.Combine(seedRoot, "nodes");
+// seedsmith-content-standard, passive-tree-identity-content (2026-09-08): a SEPARATE per-tree
+// file from nodes/plan, matching this program's own established per-stage-per-file convention.
+var identityDir = Path.Combine(seedRoot, "identity");
 var allNodesByTree = new Dictionary<string, List<BindInputNode>>(StringComparer.Ordinal);
 var allMetaByTree = new Dictionary<string, TreeCatalogMeta>(StringComparer.Ordinal);
 foreach (var planFile in planFiles)
@@ -85,7 +88,11 @@ foreach (var planFile in planFiles)
     var seedJson = File.Exists(seedFile) ? File.ReadAllText(seedFile) : null;
     var planJson = File.ReadAllText(planFile);
     allNodesByTree[treeId] = PlanReader.ReadPlanNodesWithSeed(planJson, seedJson, treeTuning);
-    allMetaByTree[treeId] = PlanReader.ReadTreeMeta(planJson);
+
+    var identityFile = Path.Combine(identityDir, $"{treeId}.json");
+    var identityJson = File.Exists(identityFile) ? File.ReadAllText(identityFile) : null;
+    var (treeName, treeDescription) = PlanReader.ReadTreeIdentity(identityJson);
+    allMetaByTree[treeId] = PlanReader.ReadTreeMeta(planJson) with { Name = treeName, Description = treeDescription };
 }
 
 if (mode == "explain")

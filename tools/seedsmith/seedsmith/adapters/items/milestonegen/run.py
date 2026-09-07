@@ -215,8 +215,11 @@ def main(argv=None) -> int:
     ap.add_argument("--count", type=int, default=1, help="how many new families to draw this run")
     ap.add_argument("--theme", default="", help="an optional theme hint in the brief")
     ap.add_argument("--write", action="store_true", help="write the merged corpus back to disk")
-    ap.add_argument("--overwrite", default="",
-                     help="comma-separated draw ids to regenerate, or the literal 'all'")
+    ap.add_argument("--overwrite", "--force", default="",
+                     help="comma-separated draw ids to regenerate, or the literal 'all' "
+                          "(--force is an accepted alias, matching content-completeness-core's "
+                          "own naming convention -- RunLedger.force()/generate_commander_effects.py "
+                          "--force)")
     args = ap.parse_args(argv)
 
     ledger = RunLedger(DEFAULT_LEDGER_PATH)

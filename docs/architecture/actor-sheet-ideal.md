@@ -95,7 +95,8 @@ still forbids `idWords` on a player band; the file path is now the tuning catalo
 | File | Owns | Does not own |
 |---|---|---|
 | `data/tuning/aptitude-catalog.v1.json` | Rows: id, posture, ordinal, displayName, role, reading | Edges / pointEconomy (`aptitudes.v7.json`) |
-| `data/tuning/derived-stat-catalog.v1.json` | Families, expand axis, compose, unitClass, displayName, reading, icon, gauge, sheet group, cap **ref** | `categoryResistCap`, `turnDefaultSpeed` (`derived-stats.v2.json`) |
+| `data/tuning/derived-stat-catalog.v2.json` | Families, **expand** (not overloaded axis), sheetGroup, compose, unitClass, locale `displayName`/`reading`, icon, gauge, cap **ref**; tabs + status/action category variants | Caps/numbers stay in `derived-stats.v2.json` |
+| ~~`derived-stat-catalog.v1.json`~~ | Kept on disk for history; **boot uses v2** | Leaf status rows were a defect — rejected by v2 loader |
 | `data/tuning/status-catalog.v1.json` | Ids: kind, categories, stacking, payload kinds, displayName, reading, hudToken, color | Policy numbers (`status.v1.json`) |
 | `data/tuning/resource-catalog.v1.json` | Ids, class, exhaustion, actionCost, plant/zombie labels, icon, color, meter kind | Pool math |
 | `data/tuning/element-catalog.v1.json` | Concrete roster + omni presentation (name, ordinal, color). Matchup **completeness** checked at load | Shield vs combat matrix *values* |
@@ -237,14 +238,14 @@ already reads the derived channel.
 | Lawn HUD fold has meters unused by Inspector/Phaser | [foldActorHud.ts:66-78](../../web/fusion-rpg-web/src/features/lawn/foldActorHud.ts) |
 | `unitClass` / `cap` / `composeSentence` have no server producer on `ActorChannelDetail` | DerivedStatsTab comment `:16-18` |
 | Rosters still C#-first; seed lexicon unread | AptitudeCatalog / StatusCatalogBootstrap / ElementRoster / DerivedStatChannels |
-| No `GET /api/catalogs/actor-surface` | — |
+| No `GET /api/catalogs/actor-surface` | Fan-in still open; **`GET /api/catalogs/derived-surface` shipped** (tabbed cook) — [actor-sheet-derived-plan.md](../../tasks/actor-sheet-derived-plan.md) |
 
 ### Real gap
 
 | Finding | What would have to be built |
 |---|---|
 | Host inject + CatalogHubs for the six catalog files | Same pattern as `AptitudeTuningHub` / `ActorHudTuningHub` |
-| `GET /api/catalogs/actor-surface` fan-in DTO | Server projection; FE caches once per session |
+| `GET /api/catalogs/actor-surface` fan-in DTO | Server projection; FE caches once per session. **Partial:** derived cook is live on `/api/catalogs/derived-surface`; full fan-in can embed it. |
 | React `StatRow`, `InspectSplit`, leftover meter, shield radials, status glyphs as **shared kit** | New components. Kit CSS on the plate is not React. |
 | `ActorView` has no `resources`, `statuses`, or `actions` | Type + adapter + a projection. Not a Unity rewrite. |
 | Regular action slots | Action corpus + `ActionSlot` bind. Plate 13 Kit loadout is the **slot chrome**; [action-ideal.md](action-ideal.md) is sealed. Placeholder Strike/Firebolt stay forbidden (GG-23). |
@@ -333,9 +334,10 @@ Meters and icons use the locked presentation libs — **`recharts`**, **`react-t
 - Allocation is the **sum of scopes**; `share` is on the sum. Aspect scope is **reverted**.
 - Combat families expand over the injected element axis the same way the generator does.
 - `derived-stat-catalog` is a **family** list (~tens of entries). Live registry is **269** channels
-  today (`CatalogResolves269`). The sheet joins expand(family) → `/api/actors/{id}/derived`
-  `Channels` — it does not require one catalog row per channel, and must not truncate the matrix
-  because “200+ is too many for the backend.”
+  today (`CatalogResolves269`). The sheet joins expand(family) → `/api/actors/{id}/sheet`
+  (or lean `/derived`). Tabbed cook: `GET /api/catalogs/derived-surface` — see
+  [actor-sheet-derived-plan.md](../../tasks/actor-sheet-derived-plan.md). It does not require one
+  catalog row per channel, and must not truncate the matrix because “200+ is too many for the backend.”
 - `omni` column is visually first and separated.
 - Spark fill-to-100% only for pools, bounded ratios, and registry caps (D14 / GG-64).
 

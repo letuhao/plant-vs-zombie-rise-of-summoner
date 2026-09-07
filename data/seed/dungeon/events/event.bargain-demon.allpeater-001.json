@@ -1,9 +1,16 @@
 {
+  "_provenance": {
+    "briefHash": "93758af517469770d8411c41f592c5234b65fc00327d3536a0db04c7d61a500c",
+    "modelId": "google/gemma-4-26b-a4b-qat",
+    "promptVersion": "dungeon-event-flavor-repair/1",
+    "schemaVersion": "dungeon-event.v1",
+    "stalenessKey": "41213d4cd1fabd2e7236dd2ba4f53f94a41e343f10d888fa5878db3315cbafa6"
+  },
   "chainRef": "none",
   "climateAffinity": "fire",
   "eligibility": null,
   "eventId": "event.bargain-demon.allpeater-001",
-  "flavor": "A towering silhouette of smoke and embers coalesces in the center of the chamber. It offers to bolster your party's offensive火力, turning your strikes into torrents of hellfire, but it demands a portion of your vitality as a permanent 分配 of your life force to its own furnace.",
+  "flavor": "A towering silhouette of smoke and embers coalesces in the center of the chamber. It offers to bolster your party's offensive firepower, turning your strikes into torrents of hellfire, but it demands a portion of your vitality as a permanent tribute of your life force to its own furnace.",
   "kind": "bargain",
   "name": "The Cinder-Soul Pact",
   "outcomes": [

@@ -397,6 +397,21 @@ class TestHarness:
         with pytest.raises(SystemExit):
             run_mod.main(["--slot", "1", "--count", "1"])
 
+    def test_cli_force_is_an_accepted_alias_for_overwrite(self, tmp_path, monkeypatch, capsys):
+        """seedsmith-content-standard Task 6: `--force` is `content-completeness-core`'s own naming
+        convention (`RunLedger.force()`, `generate_commander_effects.py --force`); this CLI's real,
+        already-shipped flag is `--overwrite` (spec-drop-tables-gen.md). Added as a second flag
+        string on the same argument rather than a rename, so nothing already typing `--overwrite`
+        breaks."""
+        ledger_path = tmp_path / "ledger.json"
+        monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", ledger_path)
+        ledger = RunLedger(ledger_path)
+        ledger.mark_done("droptable-draw-d1-000", {"entryId": "droptable.d1-001", "name": "X"})
+
+        exit_code = run_mod.main(["--slot", "1", "--force", "droptable-draw-d1-000"])
+        assert exit_code == 0
+        assert "droptable-draw-d1-000" in capsys.readouterr().out
+
 
 # ------------------------------------------------------------------------------------------------
 # 5. Real corpus -- the four reference-manifest rows, one assertion each, against the REAL corpus

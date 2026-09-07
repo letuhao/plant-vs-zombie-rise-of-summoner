@@ -51,7 +51,12 @@ public sealed record BindInputNode(
     int Tier = 0,
     string NodeKey = "",
     NodeClass NodeClass = NodeClass.Magnitude,
-    IReadOnlyList<string>? ExcludeProps = null)
+    IReadOnlyList<string>? ExcludeProps = null,
+    // seedsmith-content-standard, content-completeness-passive-tree (2026-09-08): carried through
+    // UNUSED by the pricing path, same reasoning as Branch/Tier/NodeKey/NodeClass/ExcludeProps
+    // above — one caller carries a node's full identity rather than a second, near-duplicate shape.
+    string? Name = null,
+    string? Flavor = null)
 {
     public IReadOnlyList<string> ExcludeProps { get; init; } = ExcludeProps ?? Array.Empty<string>();
 }
