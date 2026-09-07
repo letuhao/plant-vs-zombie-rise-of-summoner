@@ -12,9 +12,20 @@
 - [x] Expand ↔ registry parity tests (269 unchanged)
 - [x] Gap table in plan; map/ideal/spec pointers
 
+## Completeness audit (2026-09-08)
+
+- [x] Fix six catalog `unitClass` mismatches vs `CombatFamilyUnitClass` + loader parity reject
+- [x] Cook: status `presentationOnly` passthrough; resource ordinals from `ResourceIds`
+- [x] `FindSurface` family-boundary match; sheet DisplayName asserts
+- [x] Injector `RpgHost` `ConfigureAll` (HUD catalogs)
+- [x] FE fixture on v2 + `expandDerivedFamily` by expand kind (not plate redesign)
+- [x] Rejection matrix + unitClass mirror tests
+- [x] Doc errata (hosts-inject, 269, expand/sheetGroup)
+
 ## Follow-ons (not this plan)
 
 - [ ] FE Derived rewrite / plate 13 InspectSplit join to cook + `/sheet`
 - [ ] Sparse open-prefix status live join on sheet
 - [ ] Embed cook on full `GET /api/catalogs/actor-surface` when that endpoint ships
 - [ ] Hub §6.1 unattributed producers
+- [ ] Sheet `?lang=` (cook already localizes; sheet still resolves `en`)

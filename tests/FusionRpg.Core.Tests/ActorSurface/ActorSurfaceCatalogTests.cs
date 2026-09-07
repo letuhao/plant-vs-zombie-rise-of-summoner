@@ -272,6 +272,8 @@ public sealed class ActorSurfaceCatalogTests
             Assert.Single(zombie.Tabs, t => t.Id == "resources").Variants,
             v => v.Id == "hunger");
         Assert.Equal("Hunger", hungerZ.DisplayName);
+
+        Assert.Contains("derived-stat-catalog.v2", en.VersionStamp, StringComparison.Ordinal);
     }
 
     static void ConfigureAllSurfaceCatalogs()

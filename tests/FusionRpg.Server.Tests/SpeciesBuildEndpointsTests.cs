@@ -79,6 +79,7 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
         builder.Services.AddSingleton<CompactionWorker>();
         builder.Services.AddSingleton<UniqueActorService>();
         builder.Services.AddSingleton<EventIngest>();
+        builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();

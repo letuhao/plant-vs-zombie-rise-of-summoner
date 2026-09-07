@@ -242,4 +242,101 @@ public class OutcomeResolverTests
             OutcomeResolver.PickOutcome(outcomes, 0, Order, zeroWeights, 2, 5, seed: 1));
         Assert.Contains("(2,5)", ex.Message);
     }
+
+    // ---- TryForcedOutcome / Resolve: spec §5 "Forced outcome", 2026-09-08 ----
+
+    static EventRow EventRowWithSupplyOverride(string? supplyOverride, params EventOutcomeRow[] outcomes) => new(
+        EventId: "event.test-fixture", Kind: "curio", Theme: null, ClimateAffinity: null,
+        RepeatScope: "per-delve", Eligibility: null, Outcomes: outcomes,
+        SupplyOverride: supplyOverride, ChainRef: null);
+
+    [Fact]
+    public void TryForcedOutcome_null_outcomes_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => OutcomeResolver.TryForcedOutcome(null!, holdsOverrideStock: true));
+    }
+
+    [Fact]
+    public void TryForcedOutcome_empty_outcomes_throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            OutcomeResolver.TryForcedOutcome(Array.Empty<EventOutcomeRow>(), holdsOverrideStock: true));
+    }
+
+    [Fact]
+    public void TryForcedOutcome_red_not_holding_the_override_stock_never_forces_anything()
+    {
+        var outcomes = new[] { Outcome("good", "staple"), Outcome("bad", "staple") };
+        Assert.Null(OutcomeResolver.TryForcedOutcome(outcomes, holdsOverrideStock: false));
+    }
+
+    [Fact]
+    public void TryForcedOutcome_green_holding_the_override_stock_forces_the_good_ordinal()
+    {
+        // The verify line's own headline: a real supplyOverride/HoldsStock red/green pair.
+        var outcomes = new[] { Outcome("bad", "staple"), Outcome("good", "exceptional") };
+        var forced = OutcomeResolver.TryForcedOutcome(outcomes, holdsOverrideStock: true);
+        Assert.NotNull(forced);
+        Assert.Equal("good", forced!.Ordinal);
+        Assert.Equal("exceptional", forced.DropBand);
+    }
+
+    [Theory]
+    [InlineData(new[] { "bad", "mixed" }, "mixed")]      // no "good" present: next-best is "mixed"
+    [InlineData(new[] { "bad", "nothing" }, "bad")]      // no "good"/"mixed": next-best is "bad"
+    [InlineData(new[] { "nothing", "bad", "mixed", "good" }, "good")]
+    public void TryForcedOutcome_falls_through_the_preference_order_to_the_best_ordinal_actually_present(
+        string[] ordinals, string expectedForced)
+    {
+        var outcomes = ordinals.Select(o => Outcome(o, "staple")).ToArray();
+        var forced = OutcomeResolver.TryForcedOutcome(outcomes, holdsOverrideStock: true);
+        Assert.Equal(expectedForced, forced!.Ordinal);
+    }
+
+    [Fact]
+    public void TryForcedOutcome_two_outcomes_tied_on_the_top_ranked_ordinal_refuses_rather_than_guessing()
+    {
+        var outcomes = new[] { Outcome("good", "staple"), Outcome("good", "exceptional"), Outcome("bad", "staple") };
+        var ex = Assert.Throws<EventDeckRefusal>(() => OutcomeResolver.TryForcedOutcome(outcomes, holdsOverrideStock: true));
+        Assert.Contains("ambiguous", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("'good'", ex.Message);
+    }
+
+    [Fact]
+    public void Resolve_null_eventRow_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            OutcomeResolver.Resolve(null!, holdsOverrideStock: true, 0, Order, Weights, 0, 0, seed: 1));
+    }
+
+    [Fact]
+    public void Resolve_red_no_real_supplyOverride_always_draws_the_ordinary_weighted_outcome()
+    {
+        var row = EventRowWithSupplyOverride(null, Outcome("good", "staple"));
+        var result = OutcomeResolver.Resolve(row, holdsOverrideStock: true, 0, Order, Weights, 0, 0, seed: 7);
+        Assert.Equal("good", result.Ordinal); // the only outcome -- proves this went through PickOutcome, not a short-circuit
+    }
+
+    [Fact]
+    public void Resolve_red_a_real_supplyOverride_without_the_stock_still_draws_the_ordinary_weighted_outcome()
+    {
+        var row = EventRowWithSupplyOverride("herbs", Outcome("bad", "staple"), Outcome("good", "exceptional"));
+        // At severity 0 with equal-ish odds, run many seeds and confirm BOTH ordinals are reachable --
+        // proving the draw is genuinely happening, not silently forced despite holdsOverrideStock: false.
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (ulong seed = 0; seed < 50; seed++)
+            seen.Add(OutcomeResolver.Resolve(row, holdsOverrideStock: false, 0, Order, Weights, 0, 0, seed).Ordinal);
+        Assert.Contains("bad", seen);
+    }
+
+    [Fact]
+    public void Resolve_green_a_real_supplyOverride_with_the_stock_short_circuits_straight_to_the_best_outcome()
+    {
+        // "bad" is authored at "staple" (weight 1000, overwhelmingly favoured by the ordinary draw) and
+        // "good" at "exceptional" (weight 7) -- if the forced path were NOT short-circuiting the draw,
+        // "bad" would win almost every one of these 50 seeds. It never does, because Resolve forces "good".
+        var row = EventRowWithSupplyOverride("herbs", Outcome("bad", "staple"), Outcome("good", "exceptional"));
+        for (ulong seed = 0; seed < 50; seed++)
+            Assert.Equal("good", OutcomeResolver.Resolve(row, holdsOverrideStock: true, 0, Order, Weights, 0, 0, seed).Ordinal);
+    }
 }

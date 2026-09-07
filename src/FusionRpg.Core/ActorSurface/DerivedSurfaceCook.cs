@@ -1,5 +1,6 @@
 using System.Globalization;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.ActorSurface;
 
@@ -75,18 +76,10 @@ public static class DerivedSurfaceCook
                     Id = v.Id,
                     DisplayName = v.DisplayName.Resolve(lang),
                     Ordinal = v.Ordinal,
-                    PresentationOnly = false
+                    PresentationOnly = v.PresentationOnly
                 })
                 .ToList(),
-            "resources" => resources.Entries
-                .Select((r, i) => new DerivedSurfaceVariantDto
-                {
-                    Id = r.Id,
-                    DisplayName = side == "zombie" ? r.Labels.Zombie : r.Labels.Plant,
-                    Ordinal = i,
-                    PresentationOnly = false
-                })
-                .ToList(),
+            "resources" => CookResourceVariants(resources, side),
             _ => new List<DerivedSurfaceVariantDto>()
         };
 
@@ -147,6 +140,31 @@ public static class DerivedSurfaceCook
             ActionCategoryVariants = actionCategoryVariants,
             Categories = categories
         };
+    }
+
+    static List<DerivedSurfaceVariantDto> CookResourceVariants(ResourceSurfaceCatalog resources, string side)
+    {
+        var byId = resources.Entries.ToDictionary(r => r.Id, StringComparer.Ordinal);
+        var list = new List<DerivedSurfaceVariantDto>(DerivedStatChannels.ResourceIds.Count);
+        for (var i = 0; i < DerivedStatChannels.ResourceIds.Count; i++)
+        {
+            var id = DerivedStatChannels.ResourceIds[i];
+            if (!byId.TryGetValue(id, out var r))
+            {
+                throw new ActorSurfaceCatalogRejection(
+                    $"derived-surface cook: resource-catalog missing id '{id}' required by ResourceIds");
+            }
+
+            list.Add(new DerivedSurfaceVariantDto
+            {
+                Id = r.Id,
+                DisplayName = side == "zombie" ? r.Labels.Zombie : r.Labels.Plant,
+                Ordinal = i,
+                PresentationOnly = false
+            });
+        }
+
+        return list;
     }
 
     static string NormalizeSide(string? side)

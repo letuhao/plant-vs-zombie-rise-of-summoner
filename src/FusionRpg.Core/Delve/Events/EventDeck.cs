@@ -92,11 +92,18 @@ public sealed record EventAnswerResult(
 /// (<c>EventOutcomeDispatch.ApplyUiPresent</c>'s own <see cref="IUiPresentSink.ShowBanner"/> call), which
 /// has not run yet at <see cref="Resolve"/> time — so it moves to <see cref="EventAnswerResult"/> instead,
 /// named here as a correction rather than dropped silently. (3) The forced-outcome/`supplyOverride` path
-/// (§5's own "Forced outcome" paragraph) is NOT built: no field anywhere in the seed contract names which
-/// outcome a `use:{tag}` choice forces (D3.5's own already-confirmed, standing gap) — <see cref="Resolve"/>
-/// always draws the ordinary weighted `:outcome`, and `use:{tag}` applies that SAME drawn outcome exactly
-/// like `interact` does, a deliberate simplification named here and in the todo rather than either
-/// inventing a forcing rule or silently ignoring the gap.</para>
+/// (§5's own "Forced outcome" paragraph) is STILL NOT WIRED HERE, but for a narrower reason than
+/// before: the resolver-level logic now exists and is tested
+/// (<see cref="OutcomeResolver.TryForcedOutcome"/>/<see cref="OutcomeResolver.Resolve"/>, 2026-09-08 —
+/// no seed-contract field was ever needed, see that method's own doc comment for the citations). What
+/// remains is a live `holdsOverrideStock` boolean sourced from the party's own PACK
+/// (`spec-event-deck.md:161`: "`HoldsStock` facts are loaded from the pack") — cross-cutting
+/// `event-deck`+`loot-pack`+`supplies-and-objects`, none of which has built the connecting glue
+/// (`EventFacts.BuildSelf`'s own doc comment: "0 is the honest 'no pack yet' default" even after
+/// `loot-pack` itself shipped) — a wiring gap between three already-real modules, not a missing
+/// capability in any one of them. <see cref="Resolve"/> still always draws the ordinary weighted
+/// `:outcome` here, and `use:{tag}` still applies that SAME drawn outcome exactly like `interact`
+/// does, until a real pack-backed fact is threaded through this call.</para>
 /// </summary>
 public sealed class EventDeck
 {
@@ -273,8 +280,10 @@ public sealed class EventDeck
             filtered, room.Row, room.Col, roomClimate,
             climateAffinityMatchMilli, climateAffinityNoneMilli, climateAffinityOffMilli, seed);
 
-        // Forced outcome / supplyOverride (§5): NOT built here -- see this type's own doc comment,
-        // correction (3). Always the ordinary weighted :outcome draw, for every choice including use:{tag}.
+        // Forced outcome / supplyOverride (§5): the resolver logic exists (OutcomeResolver.Resolve) but
+        // is not called here yet -- no real holdsOverrideStock fact reaches this call (see this type's
+        // own doc comment, correction (3)). Always the ordinary weighted :outcome draw for now, for
+        // every choice including use:{tag}.
         var pickedOutcome = OutcomeResolver.PickOutcome(
             pickedEvent.Outcomes, rung.EventSeverityTier, dropBandOrder, dropBandWeightTable,
             room.Row, room.Col, seed);
@@ -312,7 +321,8 @@ public sealed class EventDeck
     /// matching §5's own "no event gates the boss / a dominant choice is priced" framing that a walk-away
     /// must be a genuinely free, effect-free choice. `interact` and `use:{tag}` both dispatch the SAME
     /// already-drawn <paramref name="resolution"/>.Instance (see this type's own doc comment, correction
-    /// (3) — the forced-outcome path is unbuilt, so `use` never diverges from `interact` here); spending
+    /// (3) — the forced-outcome path is built but not wired into <see cref="Resolve"/> yet, so `use`
+    /// never diverges from `interact` here); spending
     /// the tagged supply itself is `supplies-and-objects`' own `SupplyUse.Use` call, a DIFFERENT
     /// transaction this method does not attempt (spec §5: "a `talk` row and the spend a `supply.use` row
     /// — two entries, one transaction" — this method produces the talk half only).

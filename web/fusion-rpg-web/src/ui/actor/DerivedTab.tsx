@@ -14,17 +14,35 @@ export type ExpandedDerivedChannel = {
   element: ElementCatalogRow | null;
 };
 
+const STATUS_CATEGORY_VARIANTS = ["omni", "dot", "cc", "contagion"] as const;
+const ACTION_CATEGORY_VARIANTS = ["attack", "defense", "support", "movement", "status"] as const;
+
 export function expandDerivedFamily(
   family: DerivedFamilyCatalogRow,
-  elements: ElementCatalogRow[]
+  elements: ElementCatalogRow[],
+  resources: { id: string }[] = []
 ): ExpandedDerivedChannel[] {
-  if (!family.family.startsWith("combat.")) {
-    return [{ channelId: family.family, element: null }];
+  switch (family.expand) {
+    case "element":
+      return [...elements]
+        .sort((a, b) => a.ordinal - b.ordinal)
+        .map((element) => ({ channelId: `${family.family}.${element.id}`, element }));
+    case "status-category":
+      return STATUS_CATEGORY_VARIANTS.map((id) => ({
+        channelId: `${family.family}.${id}`,
+        element: null
+      }));
+    case "resource":
+      return resources.map((r) => ({ channelId: `${family.family}.${r.id}`, element: null }));
+    case "action-category":
+      return ACTION_CATEGORY_VARIANTS.map((id) => ({
+        channelId: `${family.family}.${id}`,
+        element: null
+      }));
+    case "none":
+    default:
+      return [{ channelId: family.family, element: null }];
   }
-  // Omni first (ordinal -1), then concrete elements — mirrors Core registry expand.
-  return [...elements]
-    .sort((a, b) => a.ordinal - b.ordinal)
-    .map((element) => ({ channelId: `${family.family}.${element.id}`, element }));
 }
 
 export function DerivedTab({
@@ -73,7 +91,7 @@ export function DerivedTab({
             <DerivedFamilyRow
               key={family.family}
               family={family}
-              expanded={expandDerivedFamily(family, surface.elements)}
+              expanded={expandDerivedFamily(family, surface.elements, surface.resources)}
               byId={byId}
             />
           ))}

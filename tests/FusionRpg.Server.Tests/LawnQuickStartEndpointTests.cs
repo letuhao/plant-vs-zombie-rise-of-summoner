@@ -44,6 +44,7 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         builder.Services.AddSingleton<EffectGrantSession>();
         builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequiredService<RpgStore>()));
         builder.Services.AddSingleton<EventIngest>();
+        builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();

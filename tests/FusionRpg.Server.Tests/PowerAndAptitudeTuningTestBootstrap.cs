@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Aura;
+using FusionRpg.Core.Battle;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -36,6 +37,26 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
         // own identical comment (tests/FusionRpg.Core.Tests/ContractTuningTestBootstrap.cs).
         DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // D2.16 (party-dungeon) — DelveBattleSessionTests/DelveBattleSessionManagerTests resolve real
+        // battles under the `delve` profile (`BattleModeProfileCatalog.Delve`), which throws unless
+        // `BattleModeProfileCatalog.Configure` has run. Mirrors Core.Tests' own `ContractTuningTest
+        // Bootstrap.DefaultBattle` (tunables-ssot.md §7.2's "construct one inline") — not the shipped
+        // file, minimal enough to cover the two rows this assembly's tests actually resolve.
+        BattleTuningHub.Configure(DefaultBattle);
+        // Same reason: BattleRunState's constructor unconditionally reads ActionTimingPolicy.Tuning.
+        // Values transcribed from the real, shipped data/tuning/action-timing.v1.json, matching Core
+        // .Tests' own ContractTuningTestBootstrap.DefaultActionTiming exactly.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(DefaultActionTiming);
+        // Same reason: BattleStatComposer.Compose unconditionally reads BattleRuleset.ResourceTuning
+        // for every actor. Transcribed from the real, shipped data/tuning/battle-resources.v1.json,
+        // matching Core.Tests' own DefaultBattleResources exactly.
+        BattleRuleset.ConfigureResources(DefaultBattleResources);
+        // The rest of the real-combat-resolve cascade a delve battle test actually walks through
+        // OverlayCombatCalculator.Compute -> ApplyBasicAttack. Values match Core.Tests'
+        // ContractTuningTestBootstrap exactly (tunables-ssot.md §7.2's "construct one inline").
+        FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(DefaultStats);
+        FusionRpg.Core.Combat.CombatPolicy.Configure(DefaultCombat);
+        FusionRpg.Core.Status.StatusPolicy.Configure(DefaultStatus);
     }
 
     /// <summary>
@@ -104,6 +125,72 @@ internal static class PowerAndAptitudeTuningTestBootstrap
     // Minimal, hand-authored -- not the 486-edge shipped file (tunables-ssot.md's "construct one
     // inline" convention). Enough to exercise AptitudeChannelMods' plumbing; the real coefficients are
     // proven elsewhere (AptitudeTuningTests.ParsesTheShippedFile in FusionRpg.Core.Tests).
+    // Minimal, hand-authored (tunables-ssot.md §7.2) -- only the rows/keys this assembly's tests
+    // actually resolve: `classic-round` (the engine's own no-profile default) and `delve`
+    // (DelveBattleSessionTests/DelveBattleSessionManagerTests). W/WReact/PassQuantum/MaxPoints copy
+    // the real shipped battle.v{n}.json's `delve` row shape (spec-delve-battle-profile.md §1).
+    public static readonly BattleTuning DefaultBattle = new(
+        SchemaVersion: 1, Version: 1,
+        RoundDurationMs: 1000, MaxRounds: 50,
+        PrimaryAffinityDivisor: 4, SecondaryAffinityDivisor: 8,
+        Traits: new Dictionary<string, TraitMagnitudes>(StringComparer.Ordinal),
+        TimelineProfiles: new Dictionary<string, TimelineProfileTuning>(StringComparer.Ordinal)
+        {
+            ["classic-round"] = new(W: 1, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+        },
+        HybridSecondaryWeightMilli: 300,
+        LoopGuardRoundMultiple: 4000,
+        SpeciesTempoReferenceIntervalMs: 1500);
+
+    // Matches Core.Tests' ContractTuningTestBootstrap.DefaultActionTiming exactly (transcribed from
+    // the real, shipped data/tuning/action-timing.v1.json).
+    public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(
+        WindupPerPowerMilli: 20,
+        WindupCapReferenceMilli: 300,
+        RecoveryPerPowerMilli: 8,
+        BasicAttack: new FusionRpg.Core.Actions.BasicAttackTimingTuning(WindupTicks: 150, RecoveryTicks: 50),
+        Categories: new Dictionary<FusionRpg.Core.Actions.ActionCategory, FusionRpg.Core.Actions.ActionTimingCategoryTuning>
+        {
+            [FusionRpg.Core.Actions.ActionCategory.Attack] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 200),
+            [FusionRpg.Core.Actions.ActionCategory.Defense] = new(TimeCostBaseTicks: 120, CooldownBaseTicks: 150),
+            [FusionRpg.Core.Actions.ActionCategory.Support] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 250),
+            [FusionRpg.Core.Actions.ActionCategory.Movement] = new(TimeCostBaseTicks: 80, CooldownBaseTicks: 100),
+            [FusionRpg.Core.Actions.ActionCategory.Status] = new(TimeCostBaseTicks: 90, CooldownBaseTicks: 180),
+        });
+
+    // Matches the real, shipped data/tuning/battle-resources.v1.json exactly (Core.Tests' own
+    // DefaultBattleResources). `hp` is absent on purpose -- its max mirrors BattleActorSetup.MaxHp.
+    public static readonly FusionRpg.Core.Battle.BattleResourceTuning DefaultBattleResources = new(
+        SchemaVersion: 1, Version: 1,
+        PoolShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 500, ["hunger"] = 500, ["spirit"] = 500, ["qi"] = 500, ["poise"] = 500,
+        });
+
+    public static readonly StatsTuning DefaultStats = new(
+        SchemaVersion: 1, Version: 1,
+        MinimumInterval: 0.01, MatchupShareK: 0.25,
+        AccuracyScale: 100.0, CritRateScale: 100.0, CritDamageScale: 100.0, Steepness: 1.0);
+
+    public static readonly FusionRpg.Core.Combat.CombatTuning DefaultCombat = new(
+        SchemaVersion: 1, Version: 1,
+        ProcDepthLimit: 6, DefaultMaxTargets: 8,
+        AreaDefaultSquareSize: 3, AreaDefaultRectangleWidth: 3, AreaDefaultRectangleHeight: 3,
+        DotDefaultPeriodMs: 1000, DotDefaultDurationMs: 5000,
+        PierceScale: 10.0, AmpScale: 10.0,
+        BlockCapPermille: 950, ParryCapPermille: 950, AvoidanceBandCapPermille: 950,
+        ReflectRateScale: 10.0, ReflectShareScale: 100.0, ParryNeutralShareKPm: 500,
+        DefenseShape: FusionRpg.Core.Combat.DefenseShape.Divisive, DefenseDivisorK: 0.45,
+        ReflectReadsPostShield: true, AmpShape: FusionRpg.Core.Combat.AmpShape.Reciprocal);
+
+    public static readonly FusionRpg.Core.Status.StatusTuning DefaultStatus = new(
+        SchemaVersion: 1, Version: 1,
+        ApplyScaleK: 100.0, ApplyScaleFloor: 1.0,
+        ResistFromPowerRatio: 1.0, MinNetFactor: 0.0, MaxNetFactor: 10_000.0, NetFactorScale: 10.0,
+        ProgressionPowerStubDefault: 1.0, ProcDepthLimitDefault: 6, ApplySteepnessDefault: 1.0,
+        ApplyShape: FusionRpg.Core.Status.StatusApplyShape.Sigmoid, ApplyOffsetK: 0.0);
+
     public static readonly AptitudeTuning DefaultAptitudes = AptitudeTuningLoader.Parse("""
         {
           "schemaVersion": 1, "version": 1,

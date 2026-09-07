@@ -71,6 +71,7 @@ public class ReforgeWorldEndpointTests : IAsyncLifetime
         builder.Services.AddSingleton<CompactionWorker>();
         builder.Services.AddSingleton<UniqueActorService>();
         builder.Services.AddSingleton<EventIngest>();
+        builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<EventIngest>()); // Program.cs:127's own pairing — the singleton is also the drain loop
         builder.WebHost.UseUrls(baseUrl);
         var app = builder.Build();

@@ -53,6 +53,7 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         builder.Services.AddSingleton<CompactionWorker>();
         builder.Services.AddSingleton<UniqueActorService>();
         builder.Services.AddSingleton<EventIngest>();
+        builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
         builder.Services.AddHostedService(sp => sp.GetRequiredService<EventIngest>());
         builder.WebHost.UseUrls(baseUrl);
         var app = builder.Build();

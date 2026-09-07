@@ -63,9 +63,6 @@ nunit-*.xml
 # Live DB is next to the server exe: {exe}/data/rpg-hot.sqlite + rpg-media.sqlite
 dist/
 data/icons/
-data/rpg.sqlite
-data/rpg.sqlite-shm
-data/rpg.sqlite-wal
 
 web/fusion-rpg-web/node_modules/
 web/fusion-rpg-web/dist/
@@ -119,10 +116,6 @@ node_modules/
 .pytest_cache/
 .remember/
 artifacts/
-src/FusionRpg.Server/data/rpg-hot.sqlite
-src/FusionRpg.Server/data/rpg-hot.sqlite-shm
-src/FusionRpg.Server/data/rpg-hot.sqlite-wal
-src/FusionRpg.Server/data/rpg-media.sqlite
 
 /data/seed/demons/_runs/
 
@@ -140,3 +133,4 @@ src/FusionRpg.Server/data/rpg-media.sqlite
 data-out.txt
 *.bak-*
 /web/fusion-rpg-web/tmp/
+package-lock.json

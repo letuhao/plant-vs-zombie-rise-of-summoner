@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import aptitudeCatalogJson from "../../../../../data/tuning/aptitude-catalog.v1.json";
-import derivedCatalogJson from "../../../../../data/tuning/derived-stat-catalog.v1.json";
+import derivedCatalogJson from "../../../../../data/tuning/derived-stat-catalog.v2.json";
 import elementCatalogJson from "../../../../../data/tuning/element-catalog.v1.json";
 import resourceCatalogJson from "../../../../../data/tuning/resource-catalog.v1.json";
 import statusCatalogJson from "../../../../../data/tuning/status-catalog.v1.json";
@@ -17,6 +17,13 @@ export type ActorSheetTabKind =
   | "elements"
   | "kit"
   | "paths";
+
+export type DerivedExpandKind =
+  | "none"
+  | "element"
+  | "status-category"
+  | "resource"
+  | "action-category";
 
 export type ActorSurfaceTab = {
   kind: ActorSheetTabKind;
@@ -36,7 +43,7 @@ export type AptitudeCatalogRow = {
 
 export type DerivedFamilyCatalogRow = {
   family: string;
-  axis: string;
+  expand: DerivedExpandKind;
   compose: string;
   unitClass: string;
   displayName: string;
@@ -91,11 +98,31 @@ export type ActorSurfaceCatalog = {
   versionStamp: string;
 };
 
+type LocaleMap = Record<string, string>;
+
+function localeEn(value: string | LocaleMap): string {
+  if (typeof value === "string") return value;
+  return value.en ?? Object.values(value)[0] ?? "";
+}
+
+const derivedFamilies: DerivedFamilyCatalogRow[] = derivedCatalogJson.entries.map((entry) => ({
+  family: entry.family,
+  expand: entry.expand as DerivedExpandKind,
+  compose: entry.compose,
+  unitClass: entry.unitClass,
+  displayName: localeEn(entry.displayName as string | LocaleMap),
+  reading: localeEn(entry.reading as string | LocaleMap),
+  icon: entry.icon,
+  gauge: entry.gauge,
+  sheetGroup: entry.sheetGroup,
+  capRef: entry.capRef ?? null
+}));
+
 const fixtureCatalog: ActorSurfaceCatalog = {
   tabs: actorSheetJson.tabs as ActorSurfaceTab[],
   defaultOpen: actorSheetJson.defaultOpen as ActorSheetTabKind,
   aptitudes: aptitudeCatalogJson.entries,
-  families: derivedCatalogJson.entries,
+  families: derivedFamilies,
   resources: resourceCatalogJson.entries,
   elements: elementCatalogJson.entries,
   statuses: statusCatalogJson.entries,

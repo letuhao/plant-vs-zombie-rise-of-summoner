@@ -88,12 +88,25 @@ public static class ActorSurfaceCatalogHub
         ActorSheetSurfaceCatalog sheet)
     {
         RejectAptitudeChannelCollisions(aptitudes, derived);
+        RejectResourceIdParity(resources);
         AptitudeSurfaceCatalogHub.Configure(aptitudes);
         DerivedStatSurfaceCatalogHub.Configure(derived);
         StatusSurfaceCatalogHub.Configure(statuses);
         ResourceSurfaceCatalogHub.Configure(resources);
         ElementSurfaceCatalogHub.Configure(elements);
         ActorSheetSurfaceCatalogHub.Configure(sheet);
+    }
+
+    static void RejectResourceIdParity(ResourceSurfaceCatalog resources)
+    {
+        var catalogIds = resources.Entries.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
+        var codeIds = FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds
+            .ToHashSet(StringComparer.Ordinal);
+        if (!catalogIds.SetEquals(codeIds))
+        {
+            throw new ActorSurfaceCatalogRejection(
+                "resource-catalog: entry ids must equal DerivedStatChannels.ResourceIds exactly");
+        }
     }
 
     public static ActorSurfaceCatalogDto BuildDto()

@@ -86,6 +86,19 @@ public static class RpgHost
         FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
             FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v2.json"))));
+        FusionRpg.Core.ActorSurface.ActorSurfaceCatalogHub.ConfigureAll(
+            FusionRpg.Core.ActorSurface.AptitudeSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitude-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stat-catalog.v2.json"))),
+            FusionRpg.Core.ActorSurface.StatusSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ResourceSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "resource-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ElementSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "element-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ActorSheetSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-sheet.v1.json"))));
         // catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06): both of step 5's own
         // preconditions are now satisfied and evidenced — the 829-species real classification run
         // (T2.11, 2026-09-04) and the live-lawn/diff-test proof (Checkpoint 4; re-proven this session

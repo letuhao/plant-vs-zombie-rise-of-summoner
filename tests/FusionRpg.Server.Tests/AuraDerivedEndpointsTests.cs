@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using FusionRpg.Core.ActorSurface;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Power;
@@ -143,9 +144,13 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task Get_sheet_returns_full_registry_channels_with_composeKind_and_fiction_labels()
     {
-        FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogHub.Configure(
-            FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
-                File.ReadAllText(Path.Combine(RepoTuningDir(), "derived-stat-catalog.v2.json"))));
+        ActorSurfaceCatalogHub.ConfigureAll(
+            AptitudeSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "aptitude-catalog.v1.json"))),
+            DerivedStatSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "derived-stat-catalog.v2.json"))),
+            StatusSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "status-catalog.v1.json"))),
+            ResourceSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "resource-catalog.v1.json"))),
+            ElementSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "element-catalog.v1.json"))),
+            ActorSheetSurfaceCatalogLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "actor-sheet.v1.json"))));
 
         var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 3);
         _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId),
@@ -160,9 +165,13 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
 
         var power = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.power");
         Assert.Equal("FlatReplace", power.ComposeKind);
+        Assert.Equal("Power index", power.DisplayName);
         var prog = Assert.Single(power.Contributions);
         Assert.Equal("rpg.progression", prog.SourceId);
         Assert.Equal("Progression", prog.Label);
+
+        var firePower = Assert.Single(sheet.Derived, c => c.ChannelId == "combat.power.omni");
+        Assert.Equal("Power", firePower.DisplayName);
 
         Assert.Contains(sheet.Derived, c =>
             c.Contributions.Any(x => x.SourceId == "aptitude.Might" && (x.Label?.StartsWith("Aptitude", StringComparison.Ordinal) ?? false)));

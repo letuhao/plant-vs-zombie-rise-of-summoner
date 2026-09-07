@@ -148,7 +148,9 @@ public static class UniqueActorHubCompose
         var bestLen = -1;
         foreach (var e in entries)
         {
-            if (channelId.StartsWith(e.Family, StringComparison.Ordinal) && e.Family.Length > bestLen)
+            var matches = string.Equals(channelId, e.Family, StringComparison.Ordinal)
+                || channelId.StartsWith(e.Family + ".", StringComparison.Ordinal);
+            if (matches && e.Family.Length > bestLen)
             {
                 best = e;
                 bestLen = e.Family.Length;

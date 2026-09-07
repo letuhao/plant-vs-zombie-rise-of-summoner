@@ -45,6 +45,7 @@ public class DistrictAssaultCommandWireTests : IAsyncLifetime
         builder.Logging.ClearProviders();
         builder.Services.AddSignalR();
         builder.Services.AddSingleton(_store);
+        builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();

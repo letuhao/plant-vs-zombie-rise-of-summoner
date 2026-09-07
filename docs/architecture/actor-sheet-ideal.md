@@ -244,7 +244,7 @@ already reads the derived channel.
 
 | Finding | What would have to be built |
 |---|---|
-| Host inject + CatalogHubs for the six catalog files | Same pattern as `AptitudeTuningHub` / `ActorHudTuningHub` |
+| Host inject + CatalogHubs for the six catalog files | **Done** on Server + Injector (`ConfigureAll`). Full fan-in `GET /api/catalogs/actor-surface` MapGet still open; derived cook is on `/api/catalogs/derived-surface`. |
 | `GET /api/catalogs/actor-surface` fan-in DTO | Server projection; FE caches once per session. **Partial:** derived cook is live on `/api/catalogs/derived-surface`; full fan-in can embed it. |
 | React `StatRow`, `InspectSplit`, leftover meter, shield radials, status glyphs as **shared kit** | New components. Kit CSS on the plate is not React. |
 | `ActorView` has no `resources`, `statuses`, or `actions` | Type + adapter + a projection. Not a Unity rewrite. |

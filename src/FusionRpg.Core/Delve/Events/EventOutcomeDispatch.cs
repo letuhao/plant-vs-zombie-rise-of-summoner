@@ -37,10 +37,11 @@ public sealed record EventOutcomeDispatchResult(
     IReadOnlyList<StatDerivedGrant> StatDerivedGrants);
 
 /// <summary>
-/// `event-deck` D3.3/D3.5 (spec-event-deck.md §5) — the five-way atom-kind dispatch table, the LAST of
-/// D3.5's own three named blockers to close (the `EventEffectRef -> ContainerRow` resolver
-/// (<see cref="EventEffectContainerBuild"/>) and the forced-outcome/`supplyOverride` field are the other
-/// two; the field stays open, a genuine seed-contract gap this module has no authority to invent).
+/// `event-deck` D3.3/D3.5 (spec-event-deck.md §5) — the five-way atom-kind dispatch table, the second
+/// of D3.5's own three named blockers to close (the `EventEffectRef -> ContainerRow` resolver
+/// (<see cref="EventEffectContainerBuild"/>) was the first; the forced-outcome/`supplyOverride` path is
+/// now also closed — see <see cref="OutcomeResolver.TryForcedOutcome"/>'s own doc comment — leaving only
+/// `EventDeck.Build`'s own end-to-end orchestrator, D3.3, as the real remaining integration gap).
 ///
 /// <para><b>Takes an already-real <see cref="InstanceRow"/></b> (the output of
 /// <c>Instantiator.TryInstantiate</c>) and parses each atom's own frozen `ValuesJson` — the exact

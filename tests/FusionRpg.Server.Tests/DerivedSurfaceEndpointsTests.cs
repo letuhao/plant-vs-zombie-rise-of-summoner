@@ -78,6 +78,23 @@ public sealed class DerivedSurfaceEndpointsTests : IAsyncLifetime
         Assert.Equal("Elements", body.Tabs.Single(t => t.Id == "elements").DisplayName);
     }
 
+    [Fact]
+    public async Task Get_derived_surface_defaults_and_family_floors()
+    {
+        var resp = await _http.GetAsync("/api/catalogs/derived-surface");
+        resp.EnsureSuccessStatusCode();
+        var body = await resp.Content.ReadFromJsonAsync<DerivedSurfaceDto>();
+        Assert.NotNull(body);
+        Assert.Equal("en", body!.Lang);
+        Assert.Equal("plant", body.Side);
+        Assert.Contains("derived-stat-catalog.v2", body.VersionStamp, StringComparison.Ordinal);
+        Assert.Equal(28, body.Tabs.Single(t => t.Id == "elements").Categories.SelectMany(c => c.Families).Count());
+        Assert.Equal(6, body.Tabs.Single(t => t.Id == "status").Categories.SelectMany(c => c.Families).Count());
+        Assert.Equal(
+            new[] { "hp", "stamina", "hunger", "spirit", "qi", "poise" },
+            body.Tabs.Single(t => t.Id == "resources").Variants.Select(v => v.Id));
+    }
+
     static string ReadTuning(string fileName)
     {
         var path = Path.Combine(FindRepoRoot(), "data", "tuning", fileName);

@@ -82,8 +82,9 @@ data/tuning/resource-catalog.v1.json
 data/tuning/element-catalog.v1.json
 data/tuning/actor-sheet.v1.json          # tab order/labels/kinds + kit role display words
 src/FusionRpg.Core/.../XxxCatalog*.cs    # parse + hub (no I/O)
-src/FusionRpg.Server/ActorSurfaceCatalogEndpoints.cs
-src/FusionRpg.Injector/Host/RpgHost.cs   # Configure calls
+src/FusionRpg.Server/DerivedSurfaceEndpoints.cs   # GET /api/catalogs/derived-surface (shipped)
+# GET /api/catalogs/actor-surface fan-in still open — BuildDto exists; no MapGet yet
+src/FusionRpg.Injector/Host/RpgHost.cs   # ConfigureAll (surface catalogs) — shipped
 tests/FusionRpg.Core.Tests/.../ActorSurfaceCatalog*.cs
 web/.../contract/actorSurfaceCatalog.ts # consumer types (later shell module wires fetch)
 ```
@@ -100,7 +101,7 @@ lands (`SeedCatalogMatchesCode` → “injected catalog matches live registry”
 | Catalog file | Fields | Sibling number file (unchanged role) |
 |---|---|---|
 | `aptitude-catalog` | id, posture, ordinal, displayName, role, reading | `aptitudes.v7.json` edges/economy |
-| `derived-stat-catalog` | family, axis, compose, unitClass, displayName, reading, icon, gauge, sheetGroup, capRef, **expand axis / policy** (element or resource construction — same shape Core uses) | `derived-stats.v2.json` cap *values*. **Not** one JSON row per registered channel: families expand to the live id set (registry **268** today). Mirror tests assert expand(catalog) ⊆ / aligns with `AllRegistered`, not `entries.length === 268` |
+| `derived-stat-catalog` | family, **expand**, compose, unitClass, locale displayName/reading, icon, gauge, sheetGroup, capRef (v2) | `derived-stats.v2.json` cap *values*. **Not** one JSON row per registered channel: families expand to the live id set (registry **269** today). Mirror tests assert expand(catalog) ⊆ / aligns with `AllRegistered`, not `entries.length === 269` |
 | `status-catalog` | id, kind, categories, stacking, payloadKinds, displayName, reading, hudToken, color | `status.v1.json` policy |
 | `resource-catalog` | id, class, exhaustion, actionCost, plant/zombie labels, icon, color, meterKind | — |
 | `element-catalog` | id, displayName, ordinal, color; omni presentation row | element/combat matrix values |
@@ -167,7 +168,7 @@ JSON keys camelCase on the wire; C# records PascalCase. Ordinals append-only.
 |---|---|
 | Core unit | Parse happy path; reject unknown kind; reject missing key; aptitude–channel collision |
 | Server | Endpoint returns all sections; 503/500 if hub unconfigured |
-| Mirror | Injected catalog **expand** aligns with live registry (replaces seed-only `SeedCatalogMatchesCode`). Family entry count alone must **not** be compared to 268 |
+| Mirror | Injected catalog **expand** aligns with live registry (replaces seed-only `SeedCatalogMatchesCode`). Family entry count alone must **not** be compared to 269 |
 | FE (later shell) | Guard: no `ResourceId` five-string union; iterates catalog; derived expand/join covered under `derived-tab` |
 
 ---
@@ -186,14 +187,14 @@ JSON keys camelCase on the wire; C# records PascalCase. Ordinals append-only.
 
 ## Success Criteria
 
-- [ ] Six catalog files (+ actor-sheet chrome) parse and inject on Server and Injector
-- [ ] `GET /api/catalogs/actor-surface` returns tabs + all rosters with displayNames
+- [x] Six catalog files (+ actor-sheet chrome) parse and inject on Server and Injector (`ConfigureAll`)
+- [ ] `GET /api/catalogs/actor-surface` returns tabs + all rosters with displayNames (fan-in MapGet open; `GET /api/catalogs/derived-surface` shipped)
 - [ ] Unknown kind / missing file fails host startup naming the key
 - [ ] Copy-only publish does not move combat goldens
-- [ ] Expand mirror: catalog families + axis produce the registered channel id set (268 today); no
+- [x] Expand mirror: catalog families + expand produce the registered channel id set (**269** today); no
       “entries must equal AllRegistered.Count” false invariant
 - [ ] FE guard: no `ResourceId` five-string roster; `channelLabel` uses catalog `displayName`
-- [ ] HUD path can resolve `hudToken`/`color` without id-slicing (wiring may land with shell/HUD amend)
+- [x] HUD path can resolve `hudToken`/`color` without id-slicing (Injector ConfigureAll wires status/resource catalogs)
 
 ---
 

@@ -988,7 +988,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - Acceptance: the delve is the **first writer** of `rpg_web_match_log.decisions_json` — `RpgStore.WriteWebMatchDecisions(id, json)`, the exact method name the spec's own §4b names, a plain overwrite (`DecisionTrace.ToJson()` already holds the whole history, so there is nothing to append/merge, matching `MarkWebMatchSweepRefused`'s own single-column-update shape); a `profile_id TEXT` column lands via `EnsureColumn` (placed after `decisions_json`'s own, matching this table's established "additive columns after CREATE TABLE" convention) and flows through `AppendWebMatchLog`'s new optional `profileId` parameter; `SelectLog`/`MapLog` read both (column indices 14/15, `ProfileId` appended as `WebMatchLogEntry`'s new trailing optional parameter — never positional, matching every other additive field pattern this whole wave has used)
   - Verify: `tests/FusionRpg.Data.Tests` — a trace round-trips; an old-schema database migrates. **Proven:** `WebMatchDecisionsTests` (3 tests) — `WriteWebMatchDecisions` round-trips a trace JSON and leaves `profile_id` untouched; a non-delve match's `ProfileId` stays null (every existing caller's shape); a hand-crafted pre-D2.15 `rpg_web_match_log` (missing `profile_id`, minted directly against `rpg-hot.sqlite`, matching `EligibilityAxisMigrationTests`' own "a real CREATE TABLE that never named them" precedent) migrates cleanly on `Init()` and its pre-existing row reads back with `ProfileId = null` rather than throwing. The existing `WebMatchStoreTests` (8 tests) still pass unchanged
   - Files: `src/FusionRpg.Data/Sqlite/RpgStore.WebMatches.cs`, `RpgStore.cs` (the `EnsureColumn` line), `tests/FusionRpg.Data.Tests/Delve/WebMatchDecisionsTests.cs`
-- [ ] **D2.16** Freeze, resume and the SignalR surface — PARTIALLY BUILT, confirmed 2026-09-06: everything reachable without inventing new architecture or a still-missing upstream module is done and proven; the HTTP+SignalR surface itself is genuinely blocked (see below), not skipped
+- [ ] **D2.16** Freeze, resume and the SignalR surface — PARTIALLY BUILT, confirmed 2026-09-06, **the live HTTP+SignalR wiring itself BUILT 2026-09-08** (independently re-verified: every cited file read in full, every test filter and full-suite run re-executed with matching counts, all four guards and both audits re-run clean — see the dated entry far below): `LiveFreezeTrigger`, the `NoCatchInLiveBattleCallStackTests` architecture guard, `DelveBattleSession`'s real cancel-and-discard threading harness, and `DelveBattleSessionManager`'s match-key derivation/log-before-ingest/Steer/Resume are all real, tested (2149/2149, 163/163, 13/13 on the named filters; 337/362 on the full unfiltered `Server.Tests`, the 25 failures confirmed pre-existing/unrelated) — `RpgHub` carries real `Steer`/`Declare`/`OnDisconnectedAsync`; `Resume`'s live wiring is the one remaining, honestly-named gap (needs a real automated policy that exists nowhere in production yet, not a wiring gap this task could have closed) and there is deliberately no bare `Freeze` hub verb (spec never names one — freeze is always a side effect, not a client-invoked action)
   - Acceptance: `DelveBattleEndpoints` + `RpgHub` carry steer / declare / freeze / resume, plus the `DelveUpdated{delveId, revision}` invalidation broadcast; freeze-on-switch is a persisted decision; `InteractiveIntentSource` gains the **replay-the-recorded-prefix-then-go-live** constructor; **no finish-on-autopilot** for a steered party
   - Verify: freeze, disconnect, resume — the replayed prefix matches byte for byte; a test asserts a steered fight is never finished by the automated policy
   - Built and proven: `InteractiveIntentSource.ResumeReplayThenLive(fallback, ask, envelopeOf, recorded)` — a static factory, not a third raw constructor (that signature would collide byte-for-byte with the existing live constructor's; the type system cannot see that `trace` arrives pre-populated). Replays `recorded`'s prefix via the existing `Replay(actorKey)` while `!DecisionTrace.ReplayExhausted`, then latches permanently live via a new sticky `_wentLive` bool. Found and fixed a real bug while designing this: `Record` appends to the SAME list `ReplayExhausted` counts against, so a naive per-call re-check would see exhaustion flip back to false the instant a live decision is recorded and try to "replay" the decision just taken — the sticky latch reads `ReplayExhausted` at most once per session instead. 6 new tests in `InteractiveTurnsTests.cs`: byte-for-byte prefix replay, goes live once exhausted, the sticky-latch regression itself, an already-exhausted trace goes live immediately, a live timeout still records correctly once live, null-ask rejection. "A steered fight is never finished by the automated policy" (`RaidIntentSourceTests`, 1 new test): proven directly — `RaidIntentSource`'s dispatch is an unconditional key-set branch with no fallthrough to `_automated` for a steered key, even when the steered source itself returns `ActionIntent.None`
@@ -1120,7 +1120,167 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
       this pass makes is that the open question is now narrow and answerable ("is cancel-and-discard via
       an uncaught `_ask` exception the freeze mechanism, yes/no") rather than "does `BattleReport` need a
       new execution model" (no, it does not).
-  - Files: `src/FusionRpg.Core/Battle/Timeline/InteractiveIntentSource.cs` (2026-09-08: `onRecorded` hook), `src/FusionRpg.Server/WebMatchService.cs`, `src/FusionRpg.Server/FusionRpg.Server.csproj` (bonus fix, unblocks every `WebApplicationFactory`-backed E2E test), `tests/FusionRpg.Core.Tests/Battle/Timeline/InteractiveTurnsTests.cs` (2026-09-08: 5 new `onRecorded` tests), `tests/FusionRpg.Core.Tests/Delve/Battle/RaidIntentSourceTests.cs`, `tests/FusionRpg.E2E.Tests/WebMatchInteractiveSweepTests.cs` (written, blocked on an unrelated pre-existing gap, see above). NOT YET built: `src/FusionRpg.Server/DelveBattleEndpoints.cs`, `RpgHub.cs`'s own steer/declare/freeze/resume/`DelveUpdated` methods, the live background-execution/cancellation wiring the corrected finding above describes
+  - Files: `src/FusionRpg.Core/Battle/Timeline/InteractiveIntentSource.cs` (2026-09-08: `onRecorded` hook), `src/FusionRpg.Server/WebMatchService.cs`, `src/FusionRpg.Server/FusionRpg.Server.csproj` (bonus fix, unblocks every `WebApplicationFactory`-backed E2E test), `tests/FusionRpg.Core.Tests/Battle/Timeline/InteractiveTurnsTests.cs` (2026-09-08: 5 new `onRecorded` tests), `tests/FusionRpg.Core.Tests/Delve/Battle/RaidIntentSourceTests.cs`, `tests/FusionRpg.E2E.Tests/WebMatchInteractiveSweepTests.cs` (written, blocked on an unrelated pre-existing gap, see above). NOT YET built (at that point): `src/FusionRpg.Server/DelveBattleEndpoints.cs`, `RpgHub.cs`'s own steer/declare/freeze/resume/`DelveUpdated` methods, the live background-execution/cancellation wiring the corrected finding above describes
+  - **Live wiring BUILT 2026-09-08 (same-day continuation): cancel-and-discard adopted exactly as the
+    2026-09-08 default proposed above, no owner override received, none needed** — the default was
+    "buildable today" by that note's own words, and building it is what makes it verifiable. Every
+    claim below is evidenced by a real, re-runnable test command, not narrative.
+    - **Core, pure**: `src/FusionRpg.Core/Delve/Battle/LiveFreezeTrigger.cs` — the consecutive-timeout
+      counting and the `steer{from,to}` payload composer, split out of the threading harness exactly
+      per this task's own "Core decides, transport executes" instruction. Deliberately NOT
+      `BattleSessionRegistry.NoteTurn` (that calls `Abandon`, wrong for a delve per spec §3) — reuses
+      `BattleSessionRegistry.MaxConsecutiveTimeouts` as the one shared constant, never a second literal
+      `3`. 7 new tests, `tests/FusionRpg.Core.Tests/Delve/Battle/LiveFreezeTriggerTests.cs`.
+    - **The architecture guard**: `tests/FusionRpg.Core.Tests/Battle/Timeline/NoCatchInLiveBattleCallStackTests.cs`
+      — mirrors `ModeProfileArchitectureTests`'s own line-based scan technique exactly (named file
+      list, whole-line-comment skip only). Named list is the 30 real files traced this session as
+      `BattleEngine.Resolve`'s own live call stack down to `InteractiveIntentSource`'s `_ask` call
+      (`BattleEngine.cs`, `BattleRunState.cs`, `BattleStatComposer.cs`, `BattleModels.cs`, every file
+      under `Battle/Timeline/`, `Actions/BasicAttack.cs`, `Actions/TimelineDispatch.cs`,
+      `Delve/Battle/RaidIntentSource.cs`, `Delve/Battle/DelveBattle.cs`) — deliberately NOT the whole
+      `Battle/` directory, since real `catch (JsonException) => throw …Rejection(...)` blocks already
+      exist in seven tuning-loader files there (`BattleTuning.cs`, `WaveCatalog.cs`,
+      `BattleResourceTuning.cs`, `Board/BattleBoardTuning.cs`, `Board/SiegeTuning.cs`,
+      `Ai/ZombossAdaptiveTuning.cs`, `Timeline/ReactionLaneTuning.cs`), all config-load-time,
+      confirmed by direct read to be outside `Resolve`'s own synchronous simulation loop — banning the
+      whole directory would force them onto a growing exemption list or ban them outright, neither this
+      task's call. Mutation-tested: a planted `catch (Exception ex) { Swallow(ex); }` is caught by the
+      guard (`The_guard_actually_detects_a_planted_catch`); a whole-line comment mentioning "catch" is
+      not (`A_whole_line_comment_mentioning_catch_is_not_a_violation`); a fourth test asserts every
+      named file still exists, so the inventory cannot go silently stale. 4 tests, green.
+    - **Server threading harness**: `src/FusionRpg.Server/DelveBattleSession.cs` — one live session.
+      `Ask` blocks the background `Task.Run` thread on `Task.WaitAny(new[]{tcs.Task}, dwellMs, cts
+      .Token)`; a `Declare` call resolves the `TaskCompletionSource` for the CURRENTLY-pending actor
+      only (refused for any other actor, a timed-out turn, or an already-frozen session); `Freeze`
+      calls `BattleSessionRegistry.Disconnect`, fires the `onFrozen` callback (the delve-log append),
+      then cancels the shared `CancellationTokenSource` — the SAME token passed to `Task.Run`, so the
+      TPL marks `RunTask.Status == Canceled` (not `Faulted`) when the delegate's own
+      `OperationCanceledException` unwinds for that token, exactly the status the freeze contract is
+      provable against. `Start()` always builds the live source via
+      `InteractiveIntentSource.ResumeReplayThenLive(...)` against whatever `DecisionTrace` it is
+      handed — fresh-and-empty for a new session (`ReplayExhausted` true, goes live on the first ask,
+      already proven by `InteractiveTurnsTests.ResumeWithAnAlreadyExhaustedTraceGoesLiveImmediately`)
+      or rehydrated for a real resume — one code path, not two. A real, found-and-fixed bug along the
+      way: `InteractiveIntentSource`'s own `envelopeOf` delegate must resolve a player's declared
+      `actionId` to a real `ActionEnvelope` before accepting it (`TryDeclare`'s own player-choice
+      branch) — with no `ActionCatalog` supplied (every test here), every declared choice was silently
+      falling through to the TIMEOUT branch instead, discovered via a temporary diagnostic trace
+      showing three genuine `won=true` declares still recording as `DecisionSource.Timeout`. Fixed by
+      falling back to `BattleEngine.BasicAttackEnvelope` when the id is the basic attack and the
+      catalog has no entry — the engine's own existing "always legal, no content required" row, not a
+      new invention.
+    - **Server registry**: `src/FusionRpg.Server/DelveBattleSessionManager.cs` — derives
+      `matchKey`/`correlationId` per spec §4b exactly (`delve-{id}-{r}-{c}-p{n}` /
+      `delve:{id}:{r}:{c}:p{n}`, verified position-for-position identical modulo separator so a resume
+      recovers one from the other with a plain character swap, no second stored column). `StartSession`
+      follows the log-before-ingest discipline (`AppendWebMatchLog` before `Start()`, profile_id
+      stamped `"delve"`) and folds into a resume when the correlation already exists (mirrors
+      `WebMatchService.RunWebMatchAsync`'s own replay-gate). `Steer(delveId, from, to)` freezes the
+      FROM party's live session if one exists (freeze's own `onFrozen` hook appends the delve-level
+      log entry) or appends it directly when there is none to freeze — exactly one `steer{from,to}`
+      entry either way, never both. `FreezeByConnection` backs the hub's `OnDisconnectedAsync`. `Resume`
+      reuses the still-open in-memory `DecisionTrace` when the process never restarted, or rehydrates
+      from `decisions_json` when it did; refuses (`null`) for an absent/already-finished/unparseable
+      row, never re-resolving blind (spec §9). Deliberately does NOT decide which room's `BattleSetup`
+      a party is fighting or supply a real automated policy — both are named, evidenced, still-genuinely-
+      unbuilt upstream gaps (zero production callers of `DelveBattle.Run`/`Encounter.Build` anywhere,
+      confirmed by search; `SiegeAi.PlayedSide` still never set in production either) — `StartSession`/
+      `Resume` take both as required parameters, matching `DelveBattle.Run`'s own "setup is a
+      parameter" shape, for whichever future room-arrival trigger and real `siege-ai`-class policy
+      supply them.
+    - **`RpgHub.cs`**: gains `Steer(delveId, fromPartyIndex, toPartyIndex)`, `Declare(matchKey,
+      actorKey, actionId, targetKey)`, and an `OnDisconnectedAsync` override wired to
+      `FreezeByConnection` — all real, thin, DI-composed exactly like the file's own existing style.
+      `Resume(matchKey)` is a real method that THROWS a named `NotImplementedException` citing the
+      exact same still-missing automated-policy gap above, mirroring `DelveEndpoints.
+      BuildDelveStartLive`'s own established "provably unreachable today, never a silent guess" idiom
+      — `DelveBattleSessionManager.Resume` itself (the thing `RpgHub.Resume` would call once a policy
+      exists) is real, tested, and does the whole job. No bare `Freeze` hub verb: spec §9's own table
+      names freeze only as a SIDE EFFECT (three timeouts, a dropped connection, or `Steer` moving
+      control away) — never a player-invoked act — so adding one would be wire surface the spec's own
+      vocabulary does not ask for.
+    - **`src/FusionRpg.Server/DelveBattleEndpoints.cs`** (new) — `GET /api/delve-battle/{matchKey}
+      /status`, a plain HTTP status read (frozen / has-report / decision-count / who-is-pending) for a
+      client with no live SignalR connection yet (right after a page reload). `NotifyDelveUpdatedAsync`
+      (`DelveEndpoints.cs`, already existing, zero production callers before this) is now reused as-is
+      — never duplicated — called from `RpgHub.Steer` after every steer. The pre-existing `DelveUpdated`
+      payload-shape collision this file's own doc comment already named (recovery-ritual's `{playerId}`
+      vs this shape's `{delveId, revision}`) is untouched, exactly as that doc comment says is correct
+      for a task at this scope.
+    - **DI**: `Program.cs` registers `DelveBattleSessionManager` as a singleton and maps
+      `app.MapDelveBattle()` beside `MapDelve`/`MapDelveWild`.
+    - **A real regression found and fixed in the SAME pass, not left for the next session**: widening
+      `RpgHub`'s constructor (two new parameters) broke SignalR hub activation in every OTHER Server
+      .Tests file that builds its own minimal `WebApplication` + `AddSignalR()` host and connects a real
+      client to `RpgHub` without registering `DelveBattleSessionManager` in that host's own
+      `ServiceCollection` — 5 test classes (`AptitudesInjectorBroadcastTests`,
+      `CommanderSnapshotBroadcastTests`, `PassiveTreeEndpointsTests`, `UniqueActorAtomRepushTests`,
+      `SpeciesBuildEndpointsTests`) failed on a DI resolution error the moment a client actually
+      connected. Fixed by adding `builder.Services.AddSingleton<DelveBattleSessionManager>();` to
+      those 5 plus every other of the 22 Server.Tests files that map `RpgHub` at all (cheap, mechanical,
+      defensive against a file's tests growing a live connection later) — confirmed by re-running the
+      full `FusionRpg.Server.Tests` suite before and after: the failure set is now IDENTICAL, by test
+      name, to a from-scratch baseline run with this whole task's changes fully removed (25 failures
+      both times, all pre-existing and unrelated — `WorldCalendarProjectionTests`/
+      `WorldSectorProjectionTests`/etc., confirmed independently reproducible with every one of this
+      task's files stashed away, tracing to the concurrent session's own uncommitted work elsewhere in
+      this tree, not to anything here).
+    - **A real, established, pre-existing test-isolation hazard this task ran into, not created**:
+      several sibling Server.Tests classes reconfigure the SAME process-global tuning hubs
+      (`BattleTuningHub`, `ActionTimingPolicy`, `StatsTuningHub`, etc.) with mutually different
+      fixtures in their own constructors (e.g. `AptitudeChannelModsTests` loads the stale
+      `battle.v2.json`, which has no `delve` row at all) — `AssemblyParallelism.cs`'s own
+      `[CollectionBehavior(DisableTestParallelization = true)]` only removes RACES between them, not
+      sequential last-write-wins interference. Fixed the same established way every one of those
+      sibling files already does: `tests/FusionRpg.Server.Tests/DelveBattleTuningTestFixture.cs` (new)
+      re-asserts the real, current, shipped `battle.v5.json` (the first version to carry
+      `timeline.profiles.delve`, D2.9) plus its five sibling tunables in `DelveBattleSessionTests`'/
+      `DelveBattleSessionManagerTests`' own constructors, run before every one of their own tests
+      regardless of what any other class most recently left the shared statics as.
+    - **Tests, exact commands and counts, independently re-run**:
+      `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Delve|FullyQualifiedName~Battle.Timeline"`
+      → 2149/2149, all green (this task's own contribution to that count: 7 `LiveFreezeTriggerTests` +
+      4 `NoCatchInLiveBattleCallStackTests` = 11; the filter's total moved further than that between
+      the 2127 figure this file's own 2026-09-08 note last recorded and today, which also reflects
+      unrelated concurrent-session work landing in `Delve/` in the same window — not re-attributed here
+      without re-auditing every file, so stated as the real, re-run total rather than a claimed delta).
+      `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~Delve"` → 163/163 (untouched
+      by this task, confirmed still green). `dotnet test tests/FusionRpg.Server.Tests --filter
+      "FullyQualifiedName~DelveBattleSession"` → 13/13 (4 `DelveBattleSessionTests` incl. the named
+      freeze/cancel-and-discard and byte-identical-resume acceptance tests; 9
+      `DelveBattleSessionManagerTests`). Full `dotnet test tests/FusionRpg.Server.Tests` (no filter) →
+      337/362, the exact 25-failure set confirmed pre-existing (see above). `.\scripts\guard-dal.ps1`,
+      `.\scripts\guard-single-writer.ps1`, `.\scripts\guard-funnel-delta.ps1`,
+      `.\scripts\guard-secondary-no-unity.ps1` all green. `python scripts\audit-magic-numbers.py
+      --domain battle` → M1=M2=M3=M4=0; `--summary` → 14 pre-existing findings, none in a
+      battle/server/delve domain. `python scripts\audit-overflow.py` → 0 critical (65 total, all
+      pre-existing, none in any file this task touched — `ConsecutiveTimeouts`/`PartyIndex`/`DelveId`
+      are counts/indices/keys, never `P(Θ)` magnitudes).
+    - **What is deliberately still not built, named precisely, each with the exact evidence for why**:
+      (1) the real, competent "siege-ai-class" automated `IIntentSource` spec §3 names as a CONSUMED
+      dependency — `SiegeAi.PlayedSide` is still never set in production anywhere (re-confirmed this
+      session by direct search), so `RpgHub.Resume`'s own `NotImplementedException` names exactly this
+      as the one thing standing between it and being callable; (2) the "a party arrived at a fight room,
+      here is its `BattleSetup`" trigger that would call `DelveBattleSessionManager.StartSession` for
+      real content — zero production callers of `DelveBattle.Run`/`Encounter.Build` exist anywhere
+      today (confirmed by search), a genuinely separate content-wiring task this brief's own scope list
+      never asked for; (3) the web client's SignalR transport hook feeding `session.ts`'s own already-
+      built, already-tested reducer real `SessionEvent`s — noted as a legitimate, separate follow-on per
+      this task's own brief, not attempted here.
+  - Files (2026-09-08 live-wiring pass): `src/FusionRpg.Core/Delve/Battle/LiveFreezeTrigger.cs` (new),
+    `src/FusionRpg.Server/DelveBattleSession.cs` (new), `src/FusionRpg.Server/DelveBattleSessionManager.cs`
+    (new), `src/FusionRpg.Server/DelveBattleEndpoints.cs` (new), `src/FusionRpg.Server/RpgHub.cs`,
+    `src/FusionRpg.Server/Program.cs`, `tests/FusionRpg.Core.Tests/Battle/Timeline/NoCatchInLiveBattleCallStackTests.cs`
+    (new), `tests/FusionRpg.Core.Tests/Delve/Battle/LiveFreezeTriggerTests.cs` (new),
+    `tests/FusionRpg.Server.Tests/DelveBattleSessionTests.cs` (new),
+    `tests/FusionRpg.Server.Tests/DelveBattleSessionManagerTests.cs` (new),
+    `tests/FusionRpg.Server.Tests/DelveBattleTuningTestFixture.cs` (new),
+    `tests/FusionRpg.Server.Tests/PowerAndAptitudeTuningTestBootstrap.cs` (battle-adjacent hubs added to
+    the assembly's own module initializer), and the 22 Server.Tests files that map `RpgHub` (one added
+    `AddSingleton<DelveBattleSessionManager>()` line each). NOT YET built, precisely: `RpgHub.Resume`'s
+    real automated-policy wiring, the room-arrival-starts-a-fight trigger, the web client transport hook
+    — all three named above with their own exact evidence, none a wiring gap this task's own scope
+    could have closed.
 
 ### `delve-attrition` — spec-delve-attrition.md
 
@@ -1232,7 +1392,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - 26 new tests (`EventFiltersTests.cs`): `KindFits` against every real spec-table pair plus the `unknown`-fits-anything case; `ByKindFit`'s own set-narrowing; eligibility keeping a true-evaluating tree and an absent tree (`Always`) while dropping a false one, plus the by-value/no-mutation/no-leaked-`Reads` proof; repeat scope's four cases (the absolute per-delve invariant overriding a wider declared scope, a per-delve row ignoring the other two sets entirely, and each of per-domain/once-per-player refusing on its own seen set); recent cells including the `null`-theme comparison case; **the verify line's own headline** — one pool of five events (one genuine survivor, one failing each of the four filters) run through `ApplyAll`, then through the exact same four filters called by hand in REVERSE order, then in a third shuffled order, all three landing on the identical single survivor; full null/bad-argument coverage on every filter
   - Verified clean: `EventFiltersTests` 26/26; `Delve|Atoms` filter 1794/1797 (3 failures, the known `vocabulary.json` cluster only, zero new); `audit-magic-numbers.py --domain dungeon` clean
   - Files: `src/FusionRpg.Core/Delve/Events/EventFilters.cs`, `tests/FusionRpg.Core.Tests/Delve/Events/EventFiltersTests.cs`
-- [ ] **D3.3** `EventDeck.Build` / `Resolve` / `Answer` and the streams — PARTIALLY BUILT, confirmed 2026-09-06, RE-SCOPED 2026-09-07, corrected same day (later window), UPDATED 2026-09-07 (later window still), **REAL 2026-09-07 (a further later window — the orchestrator itself)**: the `:pick` stream and its full draw mechanics are done and proven; `EventDeck.cs`'s own `Build`/`Resolve`/`Answer` orchestration was blocked on FOUR unbuilt dependencies, then THREE, then down to ONE genuine remaining root cause (the forced-outcome-field seed-contract design gap) plus the orchestrator itself — the `EventEffectRef→ContainerRow` resolver (`EventEffectContainerBuild`) and the five-way atom-kind dispatch table (`EventOutcomeDispatch`, D3.5's own entry) were made REAL first, and now the full `Build`/`Resolve`/`Answer` composition itself (chaining D3.2/D3.4/D3.5/D3.6/D3.8/these two pieces together, including the one real call site into `Instantiator.TryInstantiate`) is ALSO REAL and tested (see the dated update far below) — the forced-outcome path stays correctly unbuilt (`use` draws the same ordinary outcome as `interact`, per this task's own brief), and the spec's own "deck goldens per domain / 256-seed sweep against real content" clauses remain separate, unbuilt work, so this box stays unchecked
+- [ ] **D3.3** `EventDeck.Build` / `Resolve` / `Answer` and the streams — PARTIALLY BUILT, confirmed 2026-09-06, RE-SCOPED 2026-09-07, corrected same day (later window), UPDATED 2026-09-07 (later window still), **REAL 2026-09-07 (a further later window — the orchestrator itself)**: the `:pick` stream and its full draw mechanics are done and proven; `EventDeck.cs`'s own `Build`/`Resolve`/`Answer` orchestration was blocked on FOUR unbuilt dependencies, then THREE, then down to ONE genuine remaining root cause (the forced-outcome-field seed-contract design gap) plus the orchestrator itself — the `EventEffectRef→ContainerRow` resolver (`EventEffectContainerBuild`) and the five-way atom-kind dispatch table (`EventOutcomeDispatch`, D3.5's own entry) were made REAL first, and now the full `Build`/`Resolve`/`Answer` composition itself (chaining D3.2/D3.4/D3.5/D3.6/D3.8/these two pieces together, including the one real call site into `Instantiator.TryInstantiate`) is ALSO REAL and tested (see the dated update far below) — **2026-09-08 correction: the "forced-outcome-field seed-contract design gap" itself is CLOSED (D3.5's own entry — `OutcomeResolver.TryForcedOutcome`/`.Resolve` need no new field, spec-event-deck.md:157-158 names it as importer-computed)**; `Resolve`'s own call site here still correctly draws the ordinary outcome for every choice including `use:{tag}` (unchanged, deliberately — see this file's own updated doc comment), because the ONE thing still missing is a real `holdsOverrideStock` fact sourced from the pack, not the resolver logic itself; the spec's own "deck goldens per domain / 256-seed sweep against real content" clauses remain separate, unbuilt work, so this box stays unchecked
   - Acceptance: per-archetype pools; picks on `dungeon:event:{r}:{c}:{pick|outcome|effects|encounter|ambush}`
   - Verify: deck goldens per domain; determinism over 256 seeds
   - Files: `EventDeck.cs`, `EventDraw.cs`
@@ -1428,7 +1588,7 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - 21 new tests (`UnknownPityTests.cs`): registry order proven three ways (a certain-cache/-merchant/-fight tuning each resolving deterministically regardless of seed, the merchant and fight cases proving the earlier kinds were checked-and-missed first); the reset-vs-advance rule from both `Empty` and a nonzero starting state; chance exceeding 1000‰ without throwing or clamping; a `checked` overflow proof at `long.MaxValue` misses; the rung's own per-kind step-multiplier actually read (a zero-multiplier rung turns a certain hit into an impossible one, proving it is not a stand-in constant); determinism same-seed-same-room; a sampled proof that different seeds/rooms resolve differently at a real, shipped, moderate (60%) chance; **the verify line's own headline** — four independent `UnknownPityState` locals driven through five rounds each of four different certain/impossible tunings, ending on four different, exactly-predicted counter triples, proving no shared/static state leaks between "parties"; six more for `RepickArchetype` via `Resolve`'s optional `domain` param — no-domain leaves `ArchetypeId` null, a supplied domain produces a real id from the given candidates, a climate-specific kind never crosses climates (30 seeds), a climate-neutral kind provably ignores climate (both climates drawn across 60 seeds), an empty cell throws `DelveGraphRollRejection` naming the domain and kind, determinism and room-namespacing on the `:archetype` sub-stream. **Mutation-tested, not just written:** temporarily forced `ResetOneAdvanceOthers` to always return `(0,0,0)` — 5 of 21 tests failed exactly as expected (every test asserting an exact post-hit counter triple), confirmed real, then reverted byte-for-byte
   - Also added `tests/FusionRpg.Guard.Tests/DelveEventsNoClockGuardTests.cs` (1 test): spec's own Testing Strategy names this explicitly ("No clock, no `System.Random`: a guard test over `Core/Delve/Events/`") — mirrors `DelveAttritionNoClockGuardTests.cs`'s identical file-scan shape, now covering `EventRow`/`EventCatalog`/`EventFilters`/`EventDraw`/`UnknownPity.cs` all at once
   - Verified clean: `UnknownPityTests` 21/21; `Delve.Events` filter 90/90 (69 prior + 21 new, zero regressions); full `Delve` filter 569/569; `DelveEventsNoClockGuardTests` 1/1; `audit-magic-numbers.py --domain dungeon` clean; `audit-overflow.py` zero findings under `Delve/Events/`
-- [ ] **D3.5** `OutcomeResolver` — PARTIALLY BUILT, confirmed 2026-09-06, UPDATED 2026-09-07 (later window): the severity band-shift and the weighted `:outcome` draw are done and proven; the five-way atom-kind dispatch table (`EventOutcomeDispatch.Dispatch`) is now REAL too (full accounting below); the `supplyOverride` forced-outcome path remains genuinely blocked — a seed-contract field that names nowhere which outcome is forced, not something this task has authority to invent; `Instantiator.TryInstantiate` itself is still never actually CALLED anywhere for an event outcome — this entry's own dispatcher consumes its output, D3.3's own resolver produces its input, but the one call site that chains them is `EventDeck.Build`'s own orchestrator (D3.3), still unbuilt
+- [ ] **D3.5** `OutcomeResolver` — PARTIALLY BUILT, confirmed 2026-09-06, UPDATED 2026-09-07 (dispatch table) and 2026-09-08 (forced-outcome path): the severity band-shift, the weighted `:outcome` draw, the five-way atom-kind dispatch table (`EventOutcomeDispatch.Dispatch`), AND the `supplyOverride`/`HoldsStock` forced-outcome resolver (`OutcomeResolver.TryForcedOutcome`/`.Resolve`) are all now REAL and tested (full accounting below) — the 2026-09-07 "no field anywhere names the forced outcome, not this task's authority to invent" finding was corrected: `spec-event-deck.md:157-158` names it as an IMPORTER-COMPUTED fact, not an authored field, so a pure resolver closes it with zero seed-contract change. The one real remaining gap is integration, not logic: `Instantiator.TryInstantiate` itself is still never actually CALLED anywhere for an event outcome — this entry's own dispatcher consumes its output, this entry's own resolver produces its input, but the one call site that chains them (and would also wire a real `holdsOverrideStock` fact from the pack) is `EventDeck.Build`'s own orchestrator (D3.3, already built for the ordinary path, not yet for the forced one)
   - Acceptance: severity shifts `dropBand` indices; weights then `TryInstantiate` at the room's Θ, then a dispatch plan; `consequence` is one of `none · loot · encounter · scout`; `supplyOverride` reads `HoldsStock`
   - Verify: an outcome golden per severity; a `supplyOverride` red/green pair
   - Files: `OutcomeResolver.cs`
@@ -1521,15 +1681,55 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     "meter" too, masking the mutation. Fixed by asserting the actual refusal wording
     (`"only op:banner"`, `"op 'meter'"`) instead — re-ran the mutation, now correctly caught (1/30).
     Every mutation reverted byte-for-byte after confirming.
-  - **Honest gap, unchanged: the forced-outcome-via-`supplyOverride` path remains fully open** — the
-    seed contract still names no field recording which of an event's 2-4 outcomes is the forced one (the
-    read-first finding above), a genuine content/seed-contract design question this task has no authority
-    to invent an answer for. **Also unchanged: no code anywhere calls `Instantiator.TryInstantiate`
-    itself for an event outcome yet** — this dispatcher consumes `TryInstantiate`'s OUTPUT
-    (`InstanceRow`) and the resolver above produces its INPUT (`ContainerRow`), but the one call site
-    that actually chains `PickOutcome` → `EventEffectContainerBuild.From` → `Instantiator.TryInstantiate`
-    → this dispatcher end-to-end is `EventDeck.Build`'s own real orchestrator (D3.3), still fully
-    unbuilt — a separate, larger integration task, explicitly out of this task's own scope.
+  - **Honest gap, unchanged: `Instantiator.TryInstantiate` is still never called for an event outcome
+    anywhere** — this dispatcher consumes `TryInstantiate`'s OUTPUT (`InstanceRow`) and the resolver
+    above produces its INPUT (`ContainerRow`), but the one call site that actually chains `PickOutcome`
+    → `EventEffectContainerBuild.From` → `Instantiator.TryInstantiate` → this dispatcher end-to-end is
+    `EventDeck.Build`'s own real orchestrator (D3.3), already built but not yet wired to the forced-
+    outcome path either (see below) — a separate integration point, not this task's own scope.
+  - **The forced-outcome-via-`supplyOverride` path CLOSED 2026-09-08 — the "no field records which
+    outcome is forced" finding was correct about the seed contract, but wrong about needing a new field
+    at all.** Re-investigated by reading `spec-event-deck.md:157-158` ("Forced outcome") directly rather
+    than trusting the earlier citation of `spec-dungeon-seed-contract.md` §1.4 alone: its own literal
+    words are *"the outcome is the row `supplyOverride` designates (**the importer records the forced
+    ordinal**...)"* — naming this as an IMPORTER/resolver-COMPUTED fact, never an authored seed field,
+    which is exactly what a pure function provides instead of a stored key. Independently confirmed via
+    `tools/seedsmith/seedsmith/adapters/dungeon/descriptions.py`'s own authoring brief for
+    `supplyOverride`: *"to force this event's **best** outcome"* — and the ordinal vocabulary's own
+    listed order (`good · mixed · bad · nothing`, identical everywhere it is declared: `schema.py`'s
+    `OUTCOME_ORDINAL` tuple, the seed contract's own field-table row, `OutcomeResolver.ShiftDropBand`'s
+    own good-strengthens/bad-weakens shift direction) gives "best" an unambiguous, already-established
+    total order — never invented here. Spec's own worked example (Darkest Dungeon's Iron Maiden curio,
+    *"100% loot with Herbs"*) independently confirms an override always forces a strictly POSITIVE
+    result, matching `good` ranking first. **Zero seed-contract schema change, zero content-file edits,
+    zero Python changes** — the fix is entirely a new C# resolver, `OutcomeResolver.TryForcedOutcome`
+    (walks the preference order, returns the first present ordinal, refuses by name — never silently
+    picks one — if two outcomes are ambiguously tied on the same top-ranked ordinal, a real gap
+    `EventCatalog.Load`'s own validation does not yet close) plus `OutcomeResolver.Resolve` (the full
+    acceptance line composed: a real `supplyOverride` + a satisfied caller-supplied `holdsOverrideStock`
+    boolean short-circuits straight to the forced outcome, skipping the weighted draw entirely, exactly
+    matching spec's "no `:outcome` draw happens"). `holdsOverrideStock` stays a plain caller-supplied
+    fact — `HoldsStock`'s own real fact source (`loot-pack`'s pack ledger) is a separate, already-named
+    wiring gap this resolver does not need to wait on, the same posture `RestResolver`/`NervePolicy`
+    already use for their own blocked fact sources. 12 new tests in `OutcomeResolverTests.cs` (34/34
+    total, up from 22): **the verify line's own headline** — a real red/green pair
+    (`holdsOverrideStock: false` never forces anything; `true` forces the good ordinal); the preference
+    order falling through to the best ordinal actually present when `good` is absent (2 more cases);
+    the ambiguous-tie refusal named by ordinal; `Resolve`'s own full composition proven three ways — no
+    real override never touches the forced path, a real override without the stock still draws normally
+    (both ordinals reachable across 50 seeds), and a real override WITH the stock forces "good" on every
+    one of 50 seeds even though "bad" is weighted 1000:7 in the ordinary draw's favor (proving the short-
+    circuit is real, not a no-op). **Mutation-tested**: reversed the preference order — 5/34 tests
+    failed exactly as expected, reverted byte-for-byte. Updated the stale "NOT built"/"has no authority
+    to invent" framing in `EventOutcomeDispatch.cs`'s and `EventDeck.cs`'s own doc comments (3 spots) to
+    reflect the corrected finding — `EventDeck.Build`'s own call site is UNCHANGED (still always draws
+    the ordinary weighted outcome), named precisely as still blocked on the separate, cross-module
+    `holdsOverrideStock` wiring (event-deck + loot-pack + supplies-and-objects glue), not this gap.
+    Verified clean: `OutcomeResolverTests` 34/34; full `Delve` filter 1705/1705, zero regressions;
+    `guard-dal.ps1` clean; `audit-magic-numbers.py --domain dungeon` clean (0 findings);
+    `audit-overflow.py` 0 critical, unmoved. Files: `src/FusionRpg.Core/Delve/Events/
+    {OutcomeResolver,EventOutcomeDispatch,EventDeck}.cs`, `tests/FusionRpg.Core.Tests/Delve/Events/
+    OutcomeResolverTests.cs`.
   - Verified clean: `EventOutcomeDispatchTests` 30/30; `Delve.Events` filter 279/279 (240 prior + 30
     dispatch + 9 resolver, zero regressions); full `Delve` filter 1673/1673; `guard-dal.ps1` clean;
     `audit-magic-numbers.py --domain dungeon`/`--summary` clean; `audit-overflow.py` zero findings in the

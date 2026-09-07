@@ -5,9 +5,10 @@ import { expandDerivedFamily } from "./DerivedTab";
 describe("expandDerivedFamily", () => {
   const surface = actorSurfaceFixture();
 
-  it("expands combat families over omni + every concrete element", () => {
+  it("expands element families over omni + every concrete element", () => {
     const family = surface.families.find((row) => row.family === "combat.power")!;
-    const expanded = expandDerivedFamily(family, surface.elements);
+    expect(family.expand).toBe("element");
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources);
     expect(expanded.map((row) => row.channelId)).toEqual([
       "combat.power.omni",
       "combat.power.fire",
@@ -19,9 +20,31 @@ describe("expandDerivedFamily", () => {
     ]);
   });
 
-  it("leaves non-combat families as a single channel id", () => {
-    const family = surface.families.find((row) => !row.family.startsWith("combat."))!;
-    const expanded = expandDerivedFamily(family, surface.elements);
-    expect(expanded).toEqual([{ channelId: family.family, element: null }]);
+  it("expands status-category families over omni/dot/cc/contagion", () => {
+    const family = surface.families.find((row) => row.family === "status.resist")!;
+    expect(family.expand).toBe("status-category");
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources);
+    expect(expanded.map((row) => row.channelId)).toEqual([
+      "status.resist.omni",
+      "status.resist.dot",
+      "status.resist.cc",
+      "status.resist.contagion"
+    ]);
+  });
+
+  it("expands resource families over resource-catalog ids", () => {
+    const family = surface.families.find((row) => row.family === "resource.max")!;
+    expect(family.expand).toBe("resource");
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources);
+    expect(expanded.map((row) => row.channelId)).toEqual(
+      surface.resources.map((r) => `resource.max.${r.id}`)
+    );
+  });
+
+  it("leaves expand:none families as a single channel id", () => {
+    const family = surface.families.find((row) => row.family === "progression.power")!;
+    expect(family.expand).toBe("none");
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources);
+    expect(expanded).toEqual([{ channelId: "progression.power", element: null }]);
   });
 });

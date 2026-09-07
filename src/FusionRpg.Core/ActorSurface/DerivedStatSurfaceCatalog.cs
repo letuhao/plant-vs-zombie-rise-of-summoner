@@ -143,8 +143,10 @@ public static class DerivedStatSurfaceCatalogLoader
         RejectExpandedLeaves(entries);
         RejectSheetGroupTabMismatch(entries, sheetGroups, tabs);
         RejectCombatParity(entries);
+        RejectCombatUnitClassParity(entries);
         RejectStatusParity(entries);
         RejectResourceParity(entries);
+        RejectActionCategoryParity(entries);
 
         return new DerivedStatSurfaceCatalog(
             schemaVersion,
@@ -401,6 +403,22 @@ public static class DerivedStatSurfaceCatalogLoader
         }
     }
 
+    static void RejectCombatUnitClassParity(IReadOnlyList<DerivedStatSurfaceEntry> entries)
+    {
+        foreach (var e in entries)
+        {
+            if (e.Expand != DerivedExpandKind.Element)
+                continue;
+            if (!DerivedStatChannels.CombatFamilyUnitClass.TryGetValue(e.Family, out var expected))
+                continue;
+            if (e.UnitClass != expected)
+            {
+                throw new ActorSurfaceCatalogRejection(
+                    $"{Catalog}: family '{e.Family}' unitClass '{e.UnitClass}' does not match CombatFamilyUnitClass '{expected}'");
+            }
+        }
+    }
+
     static void RejectStatusParity(IReadOnlyList<DerivedStatSurfaceEntry> entries)
     {
         var statusFamilies = entries
@@ -426,6 +444,26 @@ public static class DerivedStatSurfaceCatalogLoader
         {
             throw new ActorSurfaceCatalogRejection(
                 $"{Catalog}: resource expand families must be exactly resource.max/regen/efficiency/restore");
+        }
+    }
+
+    static readonly HashSet<string> ActionCategoryFamilyIds = new(StringComparer.Ordinal)
+    {
+        "skill.cooldown",
+        "skill.effectiveness"
+    };
+
+    static void RejectActionCategoryParity(IReadOnlyList<DerivedStatSurfaceEntry> entries)
+    {
+        var actionFamilies = entries
+            .Where(e => e.Expand == DerivedExpandKind.ActionCategory)
+            .Select(e => e.Family)
+            .ToHashSet(StringComparer.Ordinal);
+
+        if (!ActionCategoryFamilyIds.SetEquals(actionFamilies))
+        {
+            throw new ActorSurfaceCatalogRejection(
+                $"{Catalog}: action-category families must be exactly skill.cooldown and skill.effectiveness");
         }
     }
 
