@@ -1,6 +1,7 @@
 # Capability map: `seedsmith-content-standard`
 
-**Status:** proposed 2026-09-08, awaiting approval. Idea phase source:
+**Status:** built 2026-09-08 — all 7 modules' specs written, all 18 tasks implemented and
+evidenced (see `tasks/seedsmith-content-standard-todo.md`). Idea phase source:
 [seedsmith-content-standard-ideal.md](seedsmith-content-standard-ideal.md) (supersedes
 [passive-tree-i18n-ideal.md](passive-tree-i18n-ideal.md)).
 

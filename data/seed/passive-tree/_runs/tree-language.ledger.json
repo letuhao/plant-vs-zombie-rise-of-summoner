@@ -56506,6 +56506,1838 @@
         "flavor": "The frost seeps into the very core, knitting bone to ice.",
         "rationale": ""
       }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t1-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Hardened Nut",
+        "nameKey": "tree.node.hardened-nut",
+        "flavor": "The shell thickens with every impact, turning defense into momentum.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t1-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thorned Vitality",
+        "nameKey": "tree.node.thorned-vitality",
+        "flavor": "The harder the nut is struck, the more the inner life surges forth.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t1-n2": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t1-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Crushing Husk",
+        "nameKey": "tree.node.crushing-husk",
+        "flavor": "The weight of the shell is matched only by the violence of its impact.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t1-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Deep Rooted Shell",
+        "nameKey": "tree.node.deep-rooted-shell",
+        "flavor": "The nut's outer layer thickens with every passing season, becoming an impenetrable barrier of organic stone.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t1-n2": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t1-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Deep Rooted",
+        "nameKey": "tree.node.deep-rooted-10",
+        "flavor": "The strength of the nut lies in the depth of its connection to the earth.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t2-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Bedrock Core",
+        "nameKey": "tree.node.bedrock-core",
+        "flavor": "The foundation of the nut becomes as unyielding as the earth itself.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t2-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.evd-harden",
+          "atom.sust-husk"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Layered Bark",
+        "nameKey": "tree.node.layered-bark-10",
+        "flavor": "The outer layers thicken with every impact, turning scars into armor.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t2-n2": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t2-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.carapace",
+          "atom.plating",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core",
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Layered Bark",
+        "nameKey": "tree.node.layered-bark-10",
+        "flavor": "The outer skin thickens into overlapping plates of dense fiber.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t3-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Sap",
+        "nameKey": "tree.node.resonant-sap-3",
+        "flavor": "The internal pressure of the nut vibrates in harmony with the surrounding currents.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t3-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Resonant Shell",
+        "nameKey": "tree.node.resonant-shell-6",
+        "flavor": "The impact of a blow vibrates through the hull, feeding the next layer of defense.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t3-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.precision"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Splintered Focus",
+        "nameKey": "tree.node.splintered-focus",
+        "flavor": "The structural integrity of the nut yields to the necessity of the strike.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t3-n2": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t3-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Tectonic Impact",
+        "nameKey": "tree.node.tectonic-impact-4",
+        "flavor": "The weight of the earth descends with every strike.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t3-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooted Shell",
+        "nameKey": "tree.node.deep-rooted-shell-2",
+        "flavor": "A dense, unyielding layer of organic mineral that reinforces the core structure.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t3-n2": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t3-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Nutrient-Dense Shell",
+        "nameKey": "tree.node.nutrient-dense-shell",
+        "flavor": "The density of the outer layer increases the capacity and structural integrity of the internal reserves.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t4-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Fractured Vein",
+        "nameKey": "tree.node.fractured-vein",
+        "flavor": "The structural integrity of the shell is compromised, allowing raw elemental pressure to bleed through the cracks.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t4-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pulsing Sap",
+        "nameKey": "tree.node.pulsing-sap-3",
+        "flavor": "The rhythmic flow of nutrients through the vascular system creates a secondary layer of kinetic protection.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t4-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Hardened Husk",
+        "nameKey": "tree.node.hardened-husk-3",
+        "flavor": "The outer layer thickens, turning impact into momentum.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t4-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Tectonic Plating",
+        "nameKey": "tree.node.tectonic-plating",
+        "flavor": "Layers of mineralized bark fuse into a dense, unyielding shell.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t5-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-stampede"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Seismic Fracture",
+        "nameKey": "tree.node.seismic-fracture",
+        "flavor": "The weight of the nut cracks the very foundation of the enemy's defense.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t5-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Nutrient-Dense Graft",
+        "nameKey": "tree.node.nutrient-dense-graft",
+        "flavor": "A thick, fibrous layer that absorbs impact and converts the strain into raw endurance.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t5-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Crushing Nut",
+        "nameKey": "tree.node.crushing-nut",
+        "flavor": "The weight of the shell is matched only by the force of the impact.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t5-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Deep-Rooted Core",
+        "nameKey": "tree.node.deep-rooted-core",
+        "flavor": "The very essence of the nut, dense and unyielding, drawing strength from the earth itself.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t6-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Resonant Sap",
+        "nameKey": "tree.node.resonant-sap-4",
+        "flavor": "The internal pressure of the nut forces elemental energies to harmonize within the shell.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t6-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.sust-callus"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Nutrient-Dense Cycle",
+        "nameKey": "tree.node.nutrient-dense-cycle",
+        "flavor": "The shell pulses with a rhythmic, restorative pressure.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t6-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Splintering Impact",
+        "nameKey": "tree.node.splintering-impact",
+        "flavor": "The shell cracks with such violence that the momentum carries through the target.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t6-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Lignified Plate",
+        "nameKey": "tree.node.lignified-plate",
+        "flavor": "Layers of dense, fossilized cellulose provide a secondary layer of protection against physical impact.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t7-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Overgrowth",
+        "nameKey": "tree.node.primal-overgrowth-3",
+        "flavor": "The very essence of the nut's vitality refuses to be contained by natural laws.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t7-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Subterranean Reservoir",
+        "nameKey": "tree.node.subterranean-reservoir",
+        "flavor": "Deep within the strata, the pressure of the earth itself becomes a protective layer.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t7-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Crushing Nut",
+        "nameKey": "tree.node.crushing-nut-2",
+        "flavor": "The weight of the shell is matched only by the force of the impact.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t7-n1": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Deep-Rooted Vitality",
+        "nameKey": "tree.node.deep-rooted-vitality-4",
+        "flavor": "The very essence of the nut draws strength from the crushing weight of the earth itself.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t8-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Circulatory Sap",
+        "nameKey": "tree.node.circulatory-sap-4",
+        "flavor": "The internal pressure of the nut shifts rhythmically, pushing nutrients toward the shell just as the impact arrives.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t9-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Porous Husk",
+        "nameKey": "tree.node.porous-husk",
+        "flavor": "The shell yields its structural integrity to allow the essence to bleed through the cracks.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t9-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.evd-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Nutrient-Dense Shell",
+        "nameKey": "tree.node.nutrient-dense-shell-2",
+        "flavor": "A thick, calcified layer that absorbs impact before it can reach the soft pulp within.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-off-t10-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Gilded Husk",
+        "nameKey": "tree.node.gilded-husk",
+        "flavor": "The shell cracks not to release life, but to harvest the essence of the fallen.",
+        "rationale": ""
+      }
+    },
+    "BedRockTallNut:skill.bedrocktallnut-def-t10-n0": {
+      "record": {
+        "id": "skill.bedrocktallnut-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Lithic Marrow",
+        "nameKey": "tree.node.lithic-marrow",
+        "flavor": "The very essence of the nut calcifies, turning marrow into stone.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t1-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-13",
+        "flavor": "The very air thickens with the scent of impending violence.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t1-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Unyielding Bark",
+        "nameKey": "tree.node.unyielding-bark",
+        "flavor": "The skin thickens with every blow, turning scars into impenetrable layers.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t2-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sunder-Strike",
+        "nameKey": "tree.node.sunder-strike",
+        "flavor": "The weight of the blow is matched only by the fury behind it.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t3-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "Inert while atomTrigger is active — atomTrigger wins."
+        },
+        "name": "Serrated Focus",
+        "nameKey": "tree.node.serrated-focus",
+        "flavor": "A razor-sharp focus that turns every calculated strike into a deep, unyielding laceration.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t3-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Deep Rooted",
+        "nameKey": "tree.node.deep-rooted-11",
+        "flavor": "The weight of the earth becomes a second skin, unyielding and absolute.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t3-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Ironclad Shell",
+        "nameKey": "tree.node.ironclad-shell-3",
+        "flavor": "A thick, unyielding layer of reinforced plating that absorbs the brunt of the impact.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t4-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Resonant Aperture",
+        "nameKey": "tree.node.resonant-aperture",
+        "flavor": "The strike does not merely hit; it vibrates through the very essence of the target's defenses.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t4-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recoil",
+        "nameKey": "tree.node.kinetic-recoil-13",
+        "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the ward.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t4-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator-14",
+        "flavor": "The scent of blood fuels the hunger of the hunt.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t5-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Reaping Momentum",
+        "nameKey": "tree.node.reaping-momentum-2",
+        "flavor": "The weight of the fallen fuels the next strike.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t5-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Capacitor",
+        "nameKey": "tree.node.kinetic-capacitor-7",
+        "flavor": "Energy absorbed from impact is immediately redirected into the next defensive rotation.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t5-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.keen-edge",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Surgical Edge",
+        "nameKey": "tree.node.surgical-edge",
+        "flavor": "A single, perfect incision dictates the end of the struggle.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t5-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thickened Sap",
+        "nameKey": "tree.node.thickened-sap-4",
+        "flavor": "A viscous, hardening resin that coats the skin, turning every wound into a reinforced seal.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t6-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Conduit",
+        "nameKey": "tree.node.prismatic-conduit-4",
+        "flavor": "The flow of energy becomes a chaotic torrent, defying the singular path.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t6-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reservoir",
+        "nameKey": "tree.node.kinetic-reservoir-6",
+        "flavor": "The rhythm of the impact feeds the rhythm of the defense.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t6-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-14",
+        "flavor": "The very essence of the hunt flows through the veins, turning every strike into a tidal wave of raw power.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t7-n0": {
+      "record": {
+        "id": "skill.bigchomper-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Overload",
+        "nameKey": "tree.node.prismatic-overload-6",
+        "flavor": "The raw essence of the elements becomes too volatile to contain, bleeding through the cracks of reality.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t7-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Feedback Loop",
+        "nameKey": "tree.node.kinetic-feedback-loop-2",
+        "flavor": "The rhythm of impact fuels the rhythm of defense.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t7-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator-15",
+        "flavor": "The hunt is not a pursuit, but a conclusion.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t7-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "While tier holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep-Rooted Bastion",
+        "nameKey": "tree.node.deep-rooted-bastion-3",
+        "flavor": "The weight of the earth settles into the marrow, turning bone to stone.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t8-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-focus"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Overgrowth Resonance",
+        "nameKey": "tree.node.overgrowth-resonance",
+        "flavor": "The sheer density of elemental energy forces a violent, uncontrolled release upon impact.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t8-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocation",
+        "nameKey": "tree.node.kinetic-reciprocation-11",
+        "flavor": "The rhythm of the impact dictates the strength of the recovery.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t8-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sap-Fed Reservoir",
+        "nameKey": "tree.node.sap-fed-reservoir-4",
+        "flavor": "The sap flows through the plating, reinforcing the barrier with every rhythmic pulse of the heart.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t9-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sunder-Bloom",
+        "nameKey": "tree.node.sunder-bloom",
+        "flavor": "The very essence of the blossom tears through the defenses of the unyielding.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t9-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Osmosis",
+        "nameKey": "tree.node.kinetic-osmosis-6",
+        "flavor": "The impact of a blow is not lost, but absorbed and recirculated through the internal conduits.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t9-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Osmosis",
+        "nameKey": "tree.node.kinetic-osmosis-6",
+        "flavor": "The rhythm of impact becomes the fuel for the barrier's expansion.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t9-n2": {
+      "record": {
+        "id": "skill.bigchomper-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Osmotic Shell",
+        "nameKey": "tree.node.osmotic-shell-3",
+        "flavor": "The boundary between self and world becomes a permeable membrane, drinking from the very impact that seeks to break it.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t10-n1": {
+      "record": {
+        "id": "skill.bigchomper-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Reaping Momentum",
+        "nameKey": "tree.node.reaping-momentum-3",
+        "flavor": "The rhythm of the harvest dictates the speed of the scythe.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-off-t10-n2": {
+      "record": {
+        "id": "skill.bigchomper-off-t10-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-pierce"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Prismatic Rupture",
+        "nameKey": "tree.node.prismatic-rupture-3",
+        "flavor": "The sheer density of elemental energy forces a breach in the very fabric of the target's essence.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t10-n0": {
+      "record": {
+        "id": "skill.bigchomper-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Osmosis",
+        "nameKey": "tree.node.kinetic-osmosis-7",
+        "flavor": "The rhythm of impact becomes the fuel for the next defense.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t10-n1": {
+      "record": {
+        "id": "skill.bigchomper-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Osmosis",
+        "nameKey": "tree.node.kinetic-osmosis-7",
+        "flavor": "The rhythm of impact feeds the flow of protection.",
+        "rationale": ""
+      }
+    },
+    "BigChomper:skill.bigchomper-def-t10-n2": {
+      "record": {
+        "id": "skill.bigchomper-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Osmosis",
+        "nameKey": "tree.node.kinetic-osmosis-7",
+        "flavor": "The rhythm of impact feeds the flow of protection.",
+        "rationale": ""
+      }
     }
   }
 }

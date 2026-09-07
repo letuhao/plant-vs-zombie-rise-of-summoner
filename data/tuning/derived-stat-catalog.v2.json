@@ -439,7 +439,7 @@
       "expand": "element",
       "sheetGroup": "reflect",
       "compose": "FlatSum",
-      "unitClass": "SigmoidPoints",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Reflect chance"
       },
@@ -447,14 +447,14 @@
         "en": "Chance that hitting you sends damage back."
       },
       "icon": "reflect",
-      "gauge": "sigmoid"
+      "gauge": "ratio"
     },
     {
       "family": "combat.reflect.damage",
       "expand": "element",
       "sheetGroup": "reflect",
       "compose": "FlatSum",
-      "unitClass": "GameUnits",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Reflect damage"
       },
@@ -462,14 +462,14 @@
         "en": "How hard the reflected hit is."
       },
       "icon": "reflect-dmg",
-      "gauge": "relative"
+      "gauge": "ratio"
     },
     {
       "family": "combat.reflect.resist.rate",
       "expand": "element",
       "sheetGroup": "reflect",
       "compose": "FlatSum",
-      "unitClass": "SigmoidPoints",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Reflect chance resist"
       },
@@ -477,14 +477,14 @@
         "en": "Pushes back against their reflect chance."
       },
       "icon": "reflect-resist",
-      "gauge": "sigmoid"
+      "gauge": "ratio"
     },
     {
       "family": "combat.reflect.resist.damage",
       "expand": "element",
       "sheetGroup": "reflect",
       "compose": "FlatSum",
-      "unitClass": "GameUnits",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Reflect damage resist"
       },
@@ -492,7 +492,7 @@
         "en": "Shrinks reflected damage that would hit you."
       },
       "icon": "reflect-taken",
-      "gauge": "relative"
+      "gauge": "ratio"
     },
     {
       "family": "combat.parry.rate",
@@ -529,7 +529,7 @@
       "expand": "element",
       "sheetGroup": "guard",
       "compose": "FlatSum",
-      "unitClass": "GameUnits",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Parry break"
       },
@@ -537,7 +537,7 @@
         "en": "How much of their parry you ignore."
       },
       "icon": "parry-break",
-      "gauge": "relative"
+      "gauge": "ratio"
     },
     {
       "family": "combat.parry.shred",
@@ -589,7 +589,7 @@
       "expand": "element",
       "sheetGroup": "guard",
       "compose": "FlatSum",
-      "unitClass": "GameUnits",
+      "unitClass": "PerMilleRatio",
       "displayName": {
         "en": "Block break"
       },
@@ -597,7 +597,7 @@
         "en": "How much of their block you ignore."
       },
       "icon": "block-break",
-      "gauge": "relative"
+      "gauge": "ratio"
     },
     {
       "family": "combat.block.shred",

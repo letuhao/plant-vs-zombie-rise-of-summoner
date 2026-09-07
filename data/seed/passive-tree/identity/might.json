@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Unyielding Earthbound",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "Transform your very essence into an immovable fortress of stone and iron to endure the heaviest struggles.",
+  "name": "Unyielding Marrow",
+  "treeId": "might"
+}

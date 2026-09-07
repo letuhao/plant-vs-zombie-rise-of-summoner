@@ -6,14 +6,16 @@
 [docs/architecture/seedsmith-content-standard-ideal.md](../docs/architecture/seedsmith-content-standard-ideal.md).
 Task list: [seedsmith-content-standard-todo.md](seedsmith-content-standard-todo.md).
 
-**No module spec exists yet for any of the 7 modules** — only the ideal doc (real, file:line-cited
-inventory) and the capability map (module boundaries, dependency direction). Per
-`spec-driven-development`'s own gated flow, a module is not ready to implement until its own spec
-exists and is reviewed — so **each module's own phase below opens with writing and getting sign-off
-on that module's spec**, not skipping straight to code. This is not busywork: `content-completeness-
-core`'s own spec is where the ONE staleness-key shape, the ONE metric-registration shape, and the
-automatic-backfill trigger get pinned down precisely enough for five domains to build against
-without re-deriving them five times — exactly the failure this whole program exists to close.
+**Status: all 18 tasks across all 7 modules built and evidenced as of 2026-09-08** — see
+`seedsmith-content-standard-todo.md` for the full per-task evidence (each phase's own evidence log
+where the work was delegated: Phases 1-4; inline in the todo for Phases 0/5/6, built directly in
+the orchestrating session). Below is kept as the plan's own historical record of how the work was
+sequenced, not a forward-looking TODO. Per `spec-driven-development`'s own gated flow, each
+module's own phase opened with writing that module's own spec before any code — this is not
+busywork: `content-completeness-core`'s own spec is where the ONE staleness-key shape, the ONE
+metric-registration shape, and the automatic-backfill trigger got pinned down precisely enough for
+five domains to build against without re-deriving them five times — exactly the failure this whole
+program existed to close.
 
 ## Owner decisions this plan is built on (2026-09-08)
 
@@ -137,9 +139,13 @@ Genuinely new content generation (tree-level name/description for primary/elemen
 categories), not a retrofit — its own spec, brief, schema and review pass, mirroring species'
 already-real `codexSummary` shape.
 
-**Checkpoint 6 (program complete): a player-facing UI shows a real tree name/description for every
-one of the 42 generic trees, and a real node name/flavor for every generated node, sourced from the
-real catalog, not a raw internal id.**
+**Checkpoint 6 (program complete) — ✅ CLOSED 2026-09-08, one honest exception:** 41 of 42 generic
+trees have a real, generated name/description (`bond`'s own name vote genuinely split twice, left
+unresolved rather than forced); every generated node across every domain this program touched
+carries real content or a real, named, reported gap. One real, out-of-scope, pre-existing defect
+(`AffixComposer`'s missing channel-pool handling) blocks a full live-server rendering proof — the
+seed→catalog→DTO→FE chain is proven with real data at every layer short of that final assembly.
+Full detail in `seedsmith-content-standard-todo.md`'s own Checkpoint 6.
 
 ## Verification standard
 

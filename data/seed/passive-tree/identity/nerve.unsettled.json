@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Reactive Fortification",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn their own physical instability into a sudden, hardening shell that stiffens against incoming blows.",
+  "name": "Reactive Resilience",
+  "treeId": "nerve.unsettled"
+}

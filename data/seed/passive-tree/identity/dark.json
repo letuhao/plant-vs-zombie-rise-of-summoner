@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "The Ossified Husk",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who grow stronger and more resilient by absorbing the essence of the fallen and enduring through layers of calcified suffering.",
+  "name": "The Hollowed Husk",
+  "treeId": "dark"
+}

@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn their very body into a living fortress that grows harder and more resilient with every strike they endure.",
+  "name": "Unyielding Bastion",
+  "treeId": "ferocity"
+}

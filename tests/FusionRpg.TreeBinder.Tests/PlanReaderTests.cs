@@ -253,6 +253,26 @@ public class ReadPlanNodesWithSeedTests
         Assert.Equal("Rewards those who turn their body into a living fortress.", description);
     }
 
+    [Theory]
+    [InlineData("ferocity", "Unyielding Bastion")]
+    [InlineData("fire", "Cinderheart Bastion")]
+    [InlineData("poison", "The Rotting Husk")]
+    public void ReadTreeIdentity_reads_the_real_committed_identity_files_from_the_real_poc_run(
+        string treeId, string expectedName)
+    {
+        // Task 17/18's own real proof: these 3 files are the actual, committed output of a real
+        // PoC run against the live local model (spec-passive-tree-identity-content.md), not
+        // hand-typed fixtures.
+        var repoRoot = FindRepoRoot();
+        var identityPath = Path.Combine(repoRoot, "data", "seed", "passive-tree", "identity", $"{treeId}.json");
+        Assert.True(File.Exists(identityPath), $"real committed identity file missing: {identityPath}");
+
+        var (name, description) = PlanReader.ReadTreeIdentity(File.ReadAllText(identityPath));
+
+        Assert.Equal(expectedName, name);
+        Assert.False(string.IsNullOrWhiteSpace(description));
+    }
+
     static string FindRepoRoot()
     {
         var dir = new DirectoryInfo(Directory.GetCurrentDirectory());

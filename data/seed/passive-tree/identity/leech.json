@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Sanguine Osmosis",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "Turn every wound into a source of nourishment to mend your body and grow stronger as you feast upon the essence of your enemies.",
+  "name": "Sanguine Siphon",
+  "treeId": "leech"
+}

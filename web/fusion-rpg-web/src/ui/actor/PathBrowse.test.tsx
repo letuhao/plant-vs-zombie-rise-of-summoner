@@ -35,6 +35,26 @@ function Controlled({ trees, elementIds = [] }: { trees: TreeResolveReport[]; el
   return <PathBrowse trees={trees} elementIds={elementIds} query={EMPTY_PATH_BROWSE_QUERY} onQueryChange={() => {}} />;
 }
 
+describe("PathBrowse — seedsmith-content-standard, passive-tree-identity-content (2026-09-08)", () => {
+  it("renders a tree's real generated name and description instead of the raw id", () => {
+    render(<Controlled trees={[tree({
+      treeId: "ferocity", name: "Unyielding Bastion",
+      description: "Rewards those who turn their body into a living fortress."
+    })]} />);
+    const card = screen.getByTestId("path-card-ferocity");
+    expect(card).toHaveTextContent("Unyielding Bastion");
+    expect(screen.getByTestId("tree-identity-description")).toHaveTextContent(
+      "Rewards those who turn their body into a living fortress.");
+  });
+
+  it("falls back to the raw tree id and omits the description line for a tree with no identity yet", () => {
+    render(<Controlled trees={[tree({ treeId: "fire" })]} />);
+    const card = screen.getByTestId("path-card-fire");
+    expect(card).toHaveTextContent("fire");
+    expect(screen.queryByTestId("tree-identity-description")).not.toBeInTheDocument();
+  });
+});
+
 describe("PathBrowse — ordering (§2.2 Level 1, §7.3)", () => {
   it("orders invested -> stance mates -> element match -> everything else", () => {
     const trees = [

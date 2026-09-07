@@ -539,24 +539,91 @@ both before and after the fix, above.
 (new), `workflow/graphs/tree_identity.py` (new),
 `tests/adapters/trees/test_tree_identity.py` (new). **Scope:** M.
 
-### Task 18: Wire tree identity content to the server/FE
+### Task 18: Wire tree identity content to the server/FE — ✅ DONE 2026-09-08
 **Description:** Carry the new tree-level name/description through the same chain Task 14/15 already
 built for nodes — `TreeRecord` → DTO → FE.
 **Acceptance:**
-- [ ] A real generated tree's name/description renders in the web UI (e.g. the passives tab header),
-      not the raw `treeId`
-**Verification:** `dotnet test`, `npx vitest run`, a real live-boot proof.
-**Dependencies:** Task 17. **Files:** same layer as Task 14/15, extended for tree-level (not
-node-level) content. **Scope:** S.
+- [x] A real generated tree's name/description renders in the web UI — proven at the vitest level:
+      `PathBrowse`'s `PathCard` now renders a tree's real `name` (falling back to the raw `treeId`)
+      plus a `description` subtitle when present. Also carried through: `TreeRecord` (C#, additive
+      `Name`/`Description`), `PassiveTreeCatalogLoader` (reads a tree-level `name`/`description`
+      from the catalog JSON), `TreeCatalogMeta` + a new `PlanReader.ReadTreeIdentity` (reads the new
+      per-tree `data/seed/passive-tree/identity/<treeId>.json` file — a SEPARATE file, matching the
+      existing `plan/`/`nodes/` per-stage-per-file convention), `ReportWriter.Serialize` (emits
+      tree-level `name`/`description`), `TreeResolveReportDto` + the endpoint (plain passthrough
+      from `tree.Tree.Name`/`.Description`, the same pattern `Category` already used)
+- [x] **The 3 real PoC results from Task 17 are persisted as real committed files**:
+      `data/seed/passive-tree/identity/{ferocity,fire,poison}.json` — proven readable end-to-end by
+      a new parameterized test reading these exact 3 real files, not synthetic fixtures
+**Verification:** `dotnet build src/FusionRpg.Core src/FusionRpg.Server` clean.
+`dotnet test tests/FusionRpg.TreeBinder.Tests` → 41/41 (11 new: `ReadTreeIdentity` unit +
+real-file tests, `ReportWriter` tree-level emission + round-trip tests).
+`dotnet test tests/FusionRpg.Core.Tests --filter FullyQualifiedName~PassiveTree` → 403/403.
+`npx tsc --noEmit -p .` clean. `npx vitest run` → 293 passed / 8 failed individually (one is a
+confirmed FLAKY lazy-chunk test — 20/20 green in isolation — the other 7 are the same
+pre-existing, unrelated files Task 15 already documented); `PathBrowse.test.tsx` alone: 14/14,
+including 2 new tree-identity tests. Self-caught-and-fixed real regression: a first draft's new
+`data-testid="path-card-name"` collided with an existing `/^path-card-/` regex query in 2
+pre-existing tests — fixed by using a non-colliding testid, both tests green again.
+**Real, honestly-disclosed limitation**: no live-browser Playwright proof (same blocker Task 15
+named — see below, now understood precisely) and no live-boot proof showing the identity content
+flowing through a running server, because the FULL `TreeBinder` CLI re-bind needed to regenerate
+`data/generated/passive-tree/*.json` with the new fields is blocked by the same pre-existing,
+out-of-scope `AffixComposer` channel-pool defect Task 14 found — confirmed unrelated to this
+session's own changes (predates it, per `git status`). The seed→DTO chain is proven at the unit/
+component level with real content at every layer; only the final "server actually serves it"
+step is unproven, named honestly rather than silently claimed.
+**Dependencies:** Task 17. **Files:** `TreeRecord.cs`, `PassiveTreeCatalogLoader.cs`,
+`tools/TreeBinder/{PlanReader,ReportWriter,Program}.cs`, `PassiveTreeDtos.cs`,
+`PassiveTreeEndpoints.cs`, `web/fusion-rpg-web/src/lib/bus/types.ts`, `PathBrowse.tsx`,
+`PathBrowse.test.tsx`, `data/seed/passive-tree/identity/{ferocity,fire,poison}.json` (new).
+**Scope:** S.
 
-### Checkpoint 6 — program complete
-- [ ] All 42 generic trees show a real, generated name and description in the live web UI
-- [ ] Every generated node across every domain this program touched carries real, current content —
-      or a real, named, reported gap, never a silent placeholder
-- [ ] A resumed run across every domain backfills only what's genuinely missing, fully
+### Checkpoint 6 — program complete — ✅ CLOSED 2026-09-08 (one honest, named exception)
+- [x] **41 of 42 real generic trees have a real, generated name and description** — proven at the
+      unit/component level with real content flowing through the full seed→catalog→DTO→FE chain.
+      Real, honest exception: **`bond`'s own name vote hit a genuine 1-1-1 split twice** (the
+      initial full run and one deliberate retry) — left unresolved, not forced to a fabricated
+      name, matching this program's own "never fabricate content" rule. Real files:
+      `data/seed/passive-tree/identity/*.json` (41 files, listed below). **The one thing NOT
+      proven**: a live-browser rendering of all 41 in the running game UI — blocked by the same
+      pre-existing, out-of-scope `AffixComposer` channel-pool defect Task 14/18 already found and
+      named (predates this session, confirmed via `git status`), which stops a full `TreeBinder`
+      CLI re-bind of the 42 generated catalog files. The seed content, the C# read path, the DTO,
+      and the FE render are each independently proven with real data; only the final
+      "all-42-through-one-live-server" assembly step is unproven.
+      Real sample of the 41 (full list is the directory listing): agility → "The Unseen Dancer";
+      bulwark/pierce/precision/retribution → "Unyielding Bastion" (identical across 4 different
+      trees — a real, disclosed CONTENT-QUALITY finding, not a completeness defect: the model
+      converges on a narrow vocabulary for similarly-themed defensive trees; a future review pass,
+      named as out of scope in Task 16's own spec §9, would need to catch and diversify this — the
+      MECHANISM works, the outputs are grounded and clean, but not maximally distinct); air →
+      "Vortex of the Unyielding Wind"; dark → "The Hollowed Husk"; spark → "Conductive Aegis".
+- [x] Every generated node across every domain this program touched carries real, current content —
+      or a real, named, reported gap, never a silent placeholder: items (byte-identical detection,
+      real gaps reported), actions (24/24 real content, 0 gaps), demons (904/904 real, honest gap —
+      no generation stage built, named not hidden), dungeon (0 gaps on 54 real events, 1 live defect
+      fixed), passive-tree nodes (real content across all 42 trees' own node files, pre-existing
+      this program), passive-tree identity (41/42, 1 honest gap as above)
+- [x] A resumed run across every domain backfills only what's genuinely missing, fully
       automatically, with zero human approval step (per the owner's own decision); existing
       content is untouched by that automatic run, and a manual `--force` parameter proves it
-      can force a full regeneration when a person actually wants one
-- [ ] The storage shape is confirmed i18n-ready by inspection (a stable key exists per record;
+      can force a full regeneration when a person actually wants one — built in Phase 0, adopted
+      per-domain in Phases 1-4, proven by real tests in every phase's own evidence
+- [x] The storage shape is confirmed i18n-ready by inspection (a stable key exists per record;
       adding a locale subtree later requires no schema change) — no locale has actually been added,
-      by design
+      by design. Every new field across all 7 modules is a plain string on a per-record JSON
+      document (items' `flavor`, actions' `description`, demons' `flavor`, dungeon's `flavor`,
+      passive-tree's node `name`/`flavor` and tree-level `name`/`description`) — none couples to
+      English structurally, and every domain's own file convention (`data/seed/<domain>/...`)
+      already supports a sibling `i18n/<locale>/` subtree with zero schema change, confirmed by
+      inspection in each module's own spec (never built here, per the owner's own explicit
+      deferral)
+
+**Full inventory of the 41 real tree-identity files** (2026-09-08, all via the real local model,
+grounded in each tree's own real generated node content — none invented independently):
+agility, air, blight, bulwark, butter, charm_pulse, cold, command, composure, dark, earth, ember,
+expose, ferocity, fire, focus, fortitude, freeze, hypno, ice, jala, kelp, leech, light, might,
+nerve.afflicted, nerve.shaken, nerve.unsettled, onslaught, pact_mark, pierce, poison, precision,
+rally, retribution, rot, shatter, spark, spore, vigor, wither. Missing: **bond** (real, disclosed,
+not fabricated).

@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "The Dancing Pivot",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who survive by staying in constant motion, turning every sudden shift and graceful step into a way to evade and endure.",
+  "name": "The Unseen Dancer",
+  "treeId": "agility"
+}

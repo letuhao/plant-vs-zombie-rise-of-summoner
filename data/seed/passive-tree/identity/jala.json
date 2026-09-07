@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn the force of incoming strikes and the flow of their own lifeblood into a thickening, impenetrable layer of protection.",
+  "name": "The Resinous Shell",
+  "treeId": "jala"
+}
