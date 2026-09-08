@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rail-primary — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>rail-primary</code></h1>
+  <p class="lede">Cook tablist — Elements / Status / Resources / Other. Spec: <code>docs/architecture/gui-lego/spec-rail-primary.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><nav class="cat-bar" aria-label="Cook tabs">
+    <button type="button" class="chip is-on">Elements</button>
+    <button type="button" class="chip">Status</button>
+    <button type="button" class="chip">Resources</button>
+    <button type="button" class="chip">Other</button>
+  </nav></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "rail-primary",
+  "instanceId": "rail:primary",
+  "selectedId": "elements",
+  "chips": [
+    {
+      "id": "elements",
+      "label": "Elements",
+      "selected": true
+    },
+    {
+      "id": "status",
+      "label": "Status",
+      "selected": false
+    }
+  ],
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

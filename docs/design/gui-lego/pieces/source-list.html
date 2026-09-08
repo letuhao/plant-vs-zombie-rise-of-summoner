@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>source-list — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>source-list</code></h1>
+  <p class="lede">GG-49 attribution sources. Spec: <code>docs/architecture/gui-lego/spec-source-list.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><ul class="sources">
+    <li><span>Weapon</span><span>+1,083</span></li>
+    <li><span>Base</span><span>+1,764</span></li>
+  </ul></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "source-list",
+  "instanceId": "inspect:sources",
+  "items": [
+    {
+      "sourceId": "gear:weapon",
+      "label": "Weapon",
+      "valueText": "+1,083"
+    },
+    {
+      "sourceId": "base",
+      "label": "Base",
+      "valueText": "+1,764"
+    }
+  ],
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gauge-stack — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>gauge-stack</code></h1>
+  <p class="lede">Contribution stack bars — width from sharePm; color from theme css. Spec: <code>docs/architecture/gui-lego/spec-gauge-stack.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><div class="stack" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)">
+    <div class="stack-row"><span>Base</span><span>+1,764</span><div class="bar"><span style="width:62%"></span></div></div>
+    <div class="stack-row"><span>Gear</span><span>+1,083</span><div class="bar"><span style="width:38%"></span></div></div>
+  </div></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "gauge-stack",
+  "instanceId": "inspect:stack",
+  "rows": [
+    {
+      "id": "base",
+      "label": "Base",
+      "valueText": "+1,764",
+      "sharePm": 620
+    },
+    {
+      "id": "gear",
+      "label": "Gear",
+      "valueText": "+1,083",
+      "sharePm": 380
+    }
+  ],
+  "themeRef": {
+    "kind": "element",
+    "id": "fire"
+  },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

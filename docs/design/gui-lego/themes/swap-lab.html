@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme swap lab — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="../pieces/_piece-kit.css">
+<script>
+const PACKS = {
+  fire: {"themeId": "element.fire", "kind": "element", "id": "fire", "css": {"--piece-accent": "var(--el-fire)", "--piece-rail-edge": "var(--el-fire)", "--piece-select-glow": "rgb(224 112 60 / 0.35)"}, "paint": {"accent": "#e0703c", "accentMuted": "#a04a28", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.ember-pulse", "idle": null}},
+  ice: {"themeId": "element.ice", "kind": "element", "id": "ice", "css": {"--piece-accent": "var(--el-ice)", "--piece-rail-edge": "var(--el-ice)", "--piece-select-glow": "rgb(111 196 217 / 0.35)"}, "paint": {"accent": "#6fc4d9", "accentMuted": "#3a7a8a", "onAccent": "#0e181c"}, "vfx": {"select": "vfx.frost-pulse", "idle": null}},
+  dot: {"themeId": "status-category.dot", "kind": "status-category", "id": "dot", "css": {"--piece-accent": "var(--sun)", "--piece-rail-edge": "var(--sun)", "--piece-select-glow": "rgb(224 180 75 / 0.3)"}, "paint": {"accent": "#e0b44b", "accentMuted": "#8a6c28", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}}
+};
+function applyPack(name) {
+  const pack = PACKS[name];
+  const root = document.getElementById('stage');
+  Object.entries(pack.css).forEach(([k,v]) => root.style.setProperty(k, v));
+  const rings = root.querySelectorAll('[data-ring]');
+  rings[0].setAttribute('stroke', pack.paint.accent);
+  rings[1].setAttribute('stroke', pack.paint.accentMuted);
+  root.querySelectorAll('[data-swatch]').forEach((el, i) => {
+    el.style.background = i === 0 ? pack.paint.accent : pack.paint.accentMuted;
+  });
+  document.getElementById('packJson').textContent = JSON.stringify(pack, null, 2);
+}
+</script>
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1>Theme swap lab</h1>
+  <p class="lede">Identical markup. Buttons only rebind theme packs (css + paint). Proves pieces never hard-code element colors.</p>
+  <p>
+    <button type="button" class="chip is-on" onclick="applyPack('fire')">Fire</button>
+    <button type="button" class="chip" onclick="applyPack('ice')">Ice</button>
+    <button type="button" class="chip" onclick="applyPack('dot')">Status · Dot</button>
+  </p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Piece stage</h2>
+      <div id="stage" class="piece-stage" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)">
+        <button type="button" class="chip is-on">Variant</button>
+        <button type="button" class="row is-selected" style="margin-top:10px;width:100%">
+          <span class="glyph">*</span>
+          <span><span class="nm">Power</span><div class="rd">themed</div></span>
+          <span class="val">2,847</span>
+          <span class="rd">active</span>
+        </button>
+        <div class="share-donut" style="margin-top:12px">
+          <svg width="80" height="80" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#2a241c" stroke-width="6"/>
+            <circle data-ring cx="21" cy="21" r="15.5" fill="none" stroke="#e0703c" stroke-width="6" stroke-dasharray="62 38" stroke-dashoffset="25"/>
+            <circle data-ring cx="21" cy="21" r="15.5" fill="none" stroke="#a04a28" stroke-width="6" stroke-dasharray="38 62" stroke-dashoffset="-37"/>
+          </svg>
+          <ul class="share-legend">
+            <li><i data-swatch style="background:#e0703c"></i> accent</li>
+            <li><i data-swatch style="background:#a04a28"></i> muted</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Active pack</h2>
+      <pre id="packJson">{
+  "themeId": "element.fire",
+  "kind": "element",
+  "id": "fire",
+  "css": {
+    "--piece-accent": "var(--el-fire)",
+    "--piece-rail-edge": "var(--el-fire)",
+    "--piece-select-glow": "rgb(224 112 60 / 0.35)"
+  },
+  "paint": {
+    "accent": "#e0703c",
+    "accentMuted": "#a04a28",
+    "onAccent": "#1a1410"
+  },
+  "vfx": {
+    "select": "vfx.ember-pulse",
+    "idle": null
+  }
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

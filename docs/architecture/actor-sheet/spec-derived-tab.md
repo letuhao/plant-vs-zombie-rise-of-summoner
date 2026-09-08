@@ -26,6 +26,10 @@
 5. Icons = **`lucide-react`** via CatalogIcon in the draft `.glyph` slot. Contribution gauges follow
    the HTML SSOT (`.share-donut` / `.stack-row` / `.sources`) — not plate-13 StatRow sparks.
 6. `channelLabel` / adapt **must** read catalog `displayName` — never `idWords`.
+7. **Composable kit (design):** after owner accepts
+   [gui-lego](../gui-lego-map.md), this tab mounts the `derived-console` recipe rather than growing
+   the stop-gap `ui/actor/derived/*` god path. Until then, visual SSOT remains
+   [derived-combat-console.html](../../design/derived-combat-console.html).
 
 → Correct these now or this spec proceeds as written.
 

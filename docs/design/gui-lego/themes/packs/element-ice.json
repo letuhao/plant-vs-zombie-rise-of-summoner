@@ -1,0 +1,19 @@
+{
+  "themeId": "element.ice",
+  "kind": "element",
+  "id": "ice",
+  "css": {
+    "--piece-accent": "var(--el-ice)",
+    "--piece-rail-edge": "var(--el-ice)",
+    "--piece-select-glow": "rgb(111 196 217 / 0.35)"
+  },
+  "paint": {
+    "accent": "#6fc4d9",
+    "accentMuted": "#3a7a8a",
+    "onAccent": "#0e181c"
+  },
+  "vfx": {
+    "select": "vfx.frost-pulse",
+    "idle": null
+  }
+}

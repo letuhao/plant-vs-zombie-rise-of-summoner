@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>status-dot — gui-lego theme</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="../pieces/_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1>Theme <code>status-category.dot</code></h1>
+  <p class="lede">Status-category dot pack.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Bound pieces (same markup pattern)</h2>
+      <div class="piece-stage" style="--piece-accent:var(--sun); --piece-rail-edge:var(--sun); --piece-select-glow:rgb(224 180 75 / 0.3)">
+        <button type="button" class="chip is-on">dot</button>
+        <button type="button" class="row is-selected" style="margin-top:10px;width:100%">
+          <span class="glyph">D</span>
+          <span><span class="nm">Sample</span><div class="rd">theme demo</div></span>
+          <span class="val">1,000</span>
+          <span class="rd">active</span>
+        </button>
+        <div class="share-donut" style="margin-top:12px">
+          <svg width="72" height="72" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#2a241c" stroke-width="6"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#e0b44b" stroke-width="6" stroke-dasharray="70 30" stroke-dashoffset="25"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#8a6c28" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="-45"/>
+          </svg>
+          <ul class="share-legend">
+            <li><i style="background:#e0b44b"></i> paint.accent</li>
+            <li><i style="background:#8a6c28"></i> paint.accentMuted</li>
+          </ul>
+        </div>
+      </div>
+      <div class="theme-swatches">
+        <span><i style="background:#e0b44b"></i> accent #e0b44b</span>
+        <span><i style="background:#8a6c28"></i> muted #8a6c28</span>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Pack JSON</h2>
+      <pre>{
+  "themeId": "status-category.dot",
+  "kind": "status-category",
+  "id": "dot",
+  "css": {
+    "--piece-accent": "var(--sun)",
+    "--piece-rail-edge": "var(--sun)",
+    "--piece-select-glow": "rgb(224 180 75 / 0.3)"
+  },
+  "paint": {
+    "accent": "#e0b44b",
+    "accentMuted": "#8a6c28",
+    "onAccent": "#1a1410"
+  },
+  "vfx": {
+    "select": null,
+    "idle": null
+  }
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>
