@@ -120,7 +120,13 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
         Assert.Equal(269, root.GetProperty("registryCount").GetInt32());
         Assert.True(root.GetProperty("presentCount").GetInt32() > 0);
         Assert.True(root.GetProperty("touchedCount").GetInt32() > 0);
-        Assert.Equal(0, root.GetProperty("missingCook").GetArrayLength());
+        // The cook expands sparse status.{id} joins that are intentionally session-only. They are
+        // expected to be absent from a cold server sheet; the registry itself must still be complete.
+        var missingCook = root.GetProperty("missingCook").EnumerateArray()
+            .Select(e => e.GetString()!).ToList();
+        Assert.NotEmpty(missingCook);
+        Assert.All(missingCook, id => Assert.True(
+            DerivedAuditCoverage.IsStatusSessionChannel(id), "unexpected cold-sheet cook gap: " + id));
         Assert.Equal(0, root.GetProperty("missingRegistry").GetArrayLength());
 
         // First ship may keep a non-empty gap.unwired allowlist — that IS the audit product.

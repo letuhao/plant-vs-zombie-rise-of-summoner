@@ -56,6 +56,41 @@ class FillLimits:
     batch_size: int = 1     # gem partition batch
     max_partitions: int = 1  # cap discovered partition jobs (0 = all when full)
     full: bool = False      # unbounded closed grids + all partitions
+    # When --full and the operator did not pass --count / --batch-size, open kinds drain
+    # (gem: remaining unauthored families) or use an elevated pass size (open-ended draws).
+    count_explicit: bool = False
+    batch_size_explicit: bool = False
+
+
+#: Open-ended generators (base-type / milestone / drop / recipe) have no corpus "empty"; under
+#: --full without an explicit --count, one meaningful pass is this many draws per step.
+_FULL_OPEN_PASS = 8
+
+#: Upper probe for gem unauthored-family drain under --full (pool is closed and far smaller).
+_GEM_DRAIN_PROBE = 50_000
+
+
+def _effective_open_count(limits: FillLimits) -> int:
+    if limits.full and not limits.count_explicit:
+        return _FULL_OPEN_PASS
+    return max(limits.count, 1)
+
+
+def _gem_remaining(slot: int) -> int:
+    """How many unauthored gem families remain for this slot (0 = nothing to draw)."""
+    from .gemgen.run import plan_partition
+    try:
+        plan = plan_partition(f"gems/{slot}", batch_size=_GEM_DRAIN_PROBE)
+        return len(plan.subjects)
+    except Exception:
+        return -1  # unknown — treat as has work
+
+
+def _effective_gem_batch(limits: FillLimits, slot: int) -> int:
+    if limits.full and not limits.batch_size_explicit:
+        remaining = _gem_remaining(slot)
+        return max(remaining, 1) if remaining else 1
+    return max(limits.batch_size, 1)
 
 
 @dataclass
@@ -199,12 +234,10 @@ def _affix_has_free_pairs(group_id: str, affix_kind: str) -> bool:
 
 def _gem_slot_has_work(slot: int, batch_size: int) -> bool:
     """True when gemgen plan_partition still has subjects for this slot."""
-    from .gemgen.run import plan_partition
-    try:
-        plan = plan_partition(f"gems/{slot}", batch_size=batch_size)
-        return bool(plan.subjects)
-    except Exception:
+    remaining = _gem_remaining(slot)
+    if remaining < 0:
         return True
+    return remaining > 0
 
 
 def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
@@ -219,6 +252,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
     selected = set(kinds) if kinds is not None else set(FILL_KIND_ORDER)
     steps: "list[FillStep]" = []
     seq = 0
+    open_count = _effective_open_count(limits)
 
     def want(kind: str) -> bool:
         return kind in selected
@@ -260,8 +294,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
 
     if want("gem"):
         all_slots = discover_gem_slots()
-        runnable_slots = [s for s in all_slots
-                          if _gem_slot_has_work(s, limits.batch_size)]
+        runnable_slots = [s for s in all_slots if _gem_slot_has_work(s, limits.batch_size)]
         empty_count = len(all_slots) - len(runnable_slots)
         slots = _cap_partitions(runnable_slots, limits)
         if not all_slots:
@@ -271,13 +304,14 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
                 "SKIPPED — every gems/N partition alreadyDone (toGenerate=0)")
         else:
             for slot in slots:
+                batch = _effective_gem_batch(limits, slot)
                 # Outer `items generate` accepts shared `--count`; cli remaps to
                 # gemgen `--batch-size`. Emitting `--batch-size` here makes
                 # argparse SystemExit → refused.
                 add("gem",
                     ["--kind", "gem", "--slot", str(slot),
-                     "--count", str(limits.batch_size), "--write"],
-                    f"slot={slot}")
+                     "--count", str(batch), "--write"],
+                    f"slot={slot} batch={batch}")
             if empty_count and limits.max_partitions > 0 and not limits.full:
                 add("gem", [],
                     f"SKIPPED — {empty_count} slot(s) alreadyDone (toGenerate=0)")
@@ -288,7 +322,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
 
     if want("enhancement-milestone"):
         add("enhancement-milestone",
-            ["--kind", "enhancement-milestone", "--count", str(limits.count), "--write"])
+            ["--kind", "enhancement-milestone", "--count", str(open_count), "--write"])
 
     if want("base-type"):
         parts = _cap_partitions(discover_base_type_partitions(), limits)
@@ -297,22 +331,30 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
         for role, frame, band in parts:
             add("base-type",
                 ["--kind", "base-type", "--role", role, "--frame", frame,
-                 "--band", band, "--count", str(limits.count), "--write"],
+                 "--band", band, "--count", str(open_count), "--write"],
                 f"{frame}/{role}/{band}")
 
-    for kind in ("set", "charm"):
-        if want(kind):
-            argv = ["--kind", kind, "--population", "species", "--write"]
+    if want("set"):
+        for population in ("species", "build"):
+            argv = ["--kind", "set", "--population", population, "--write"]
             if not limits.full:
                 argv += ["--limit", str(limits.limit)]
             if allow_production:
                 argv.append("--allow-production-tree")
-            add(kind, argv)
+            add("set", argv, f"population={population}")
+
+    if want("charm"):
+        argv = ["--kind", "charm", "--population", "species", "--write"]
+        if not limits.full:
+            argv += ["--limit", str(limits.limit)]
+        if allow_production:
+            argv.append("--allow-production-tree")
+        add("charm", argv, "population=species")
 
     if want("recipe"):
         # count>0 is required for --write/--backfill to run past reconcile in recipegen.
         add("recipe",
-            ["--kind", "recipe", "--count", str(max(limits.count, 1)),
+            ["--kind", "recipe", "--count", str(open_count),
              "--write", "--backfill"],
             "reconcile + forge backfill")
 
@@ -332,7 +374,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
         for slot in slots:
             add("drop-table",
                 ["--kind", "drop-table", "--slot", str(slot),
-                 "--count", str(limits.count), "--write"],
+                 "--count", str(open_count), "--write"],
                 f"slot={slot}")
 
     # Cross-kind order only — within-kind order is append/seq (stable).

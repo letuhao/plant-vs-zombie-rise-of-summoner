@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-polevaulterzombie",
+    "partition": "sets/polevaulterzombie",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.polevaulterzombie-001",
+      "nameKey": "set.pole-vaulting-corpse",
+      "name": "Pole-Vaulting Corpse",
+      "themeKey": "demon.polevaulterzombie",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.regeneration",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.tempo-surge",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A long, weathered bamboo pole used to launch the restless dead into sudden, violent motion.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

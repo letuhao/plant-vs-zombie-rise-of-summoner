@@ -347,12 +347,12 @@ reported `injectorConnected=true` with `simEnabled=false`, and `POST /api/debug/
 `ok=true`, `levelType=Advanture`, plus live target and plant pointers. A fresh run emitted real
 `zombie.spawn` rows carrying `sourceKind=demon.progression.v1` and `sourceId=general:normalzombie`,
 followed by `debug.run-steps.done` and `debug.effect.board-snapshot`. The simulator now covers the
-game-driven `match.result` settlement path; a real victory settlement and its three onboarding
-checkpoints still require driving the game through its win state.
+game-driven `match.result` settlement path and the durable checkpoint sequence; a real victory window
+remains optional smoke coverage.
 
 **Dependencies:** Tasks 11–13.
 
-**Estimated scope:** Medium (live verification only; no new product behavior).
+**Estimated scope:** Medium (live smoke plus simulator verification; no new player-facing loop).
 
 ### Task 15: full regression and closeout audit
 
@@ -369,7 +369,8 @@ record the final evidence and leave no unchecked implementation blocker in the s
 
 **Regression evidence (2026-09-09):** Atom importer 33/33 tests pass; the onboarding, quick-start, and
 stale-board Server slice passes 16/16; the onboarding reveal component passes 3/3; and the Web
-production build passes. The full Web run before the final accessibility fix was 2,460 passed / 13
+production build passes. The simulator onboarding E2E passes 1/1. The full Web run before the final
+accessibility fix was 2,460 passed / 13
 failed; its remaining guard/Phaser failures are pre-existing, and the focused guard now reports only
 11 legacy violations (the onboarding control is clean). The complete Server run is 352 passed / 25
 failed, with failures in

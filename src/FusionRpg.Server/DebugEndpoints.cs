@@ -102,6 +102,36 @@ public static class DebugEndpoints
             return Results.Ok(new { items });
         });
 
+        g.MapPost("/setup/skip", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            var method = (StrProp(b, "method") ?? "quick").Trim().ToLowerInvariant();
+            if (method is not ("quick" or "button"))
+                return Results.BadRequest(new { ok = false, error = "unknown method — expected quick or button" });
+
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            const int defaultTimeoutSec = 15; // structural acknowledgement wait, not a balance value
+            var timeoutSec = IntProp(b, "timeoutSec", defaultTimeoutSec);
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.skip-setup", new { method });
+            var ack = await PollForKind(store, before, "debug.setup.skip", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, method, error = $"debug.setup.skip did not ack within {timeoutSec}s" });
+
+            var ok = PayloadBool(ack.Payload, "ok");
+            if (!ok)
+                return Results.Conflict(new
+                {
+                    ok = false,
+                    method,
+                    error = PayloadString(ack.Payload, "error") ?? "injector refused setup skip"
+                });
+
+            return Results.Ok(new { ok = true, method, acknowledgement = ack.Payload });
+        });
+
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));
 
         g.MapPost("/scenario/{id}", async (string id, JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>

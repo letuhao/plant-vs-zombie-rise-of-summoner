@@ -1013,12 +1013,19 @@ def _cmd_items_fill(args: argparse.Namespace) -> int:
               file=sys.stderr)
         return EXIT_REFUSED
 
+    count_raw = getattr(args, "count", None)
+    batch_raw = getattr(args, "batch_size", None)
+    # argparse defaults are None so --full can drain; smoke still gets 1 when omitted.
+    count_explicit = count_raw is not None
+    batch_explicit = batch_raw is not None
     limits = fill_mod.FillLimits(
         limit=int(getattr(args, "limit", 0) or 0),
-        count=int(getattr(args, "count", 1) or 1),
-        batch_size=int(getattr(args, "batch_size", 1) or 1),
+        count=int(count_raw) if count_explicit else 1,
+        batch_size=int(batch_raw) if batch_explicit else 1,
         max_partitions=int(getattr(args, "max_partitions", 1) or 0),
         full=bool(getattr(args, "full", False)),
+        count_explicit=count_explicit,
+        batch_size_explicit=batch_explicit,
     )
     # When not --full, default max_partitions stays 1 (smoke). --full means all partitions
     # (max_partitions 0 = uncapped in plan_fill_steps).
@@ -2434,16 +2441,18 @@ def build_parser() -> argparse.ArgumentParser:
     ifill.add_argument("--limit", type=int, default=0,
                        help="set/charm/combination: plan only the first N subjects (required "
                             "unless --full)")
-    ifill.add_argument("--count", type=int, default=1,
+    ifill.add_argument("--count", type=int, default=None,
                        help="base-type/enhancement-milestone/recipe/drop-table draws per step "
-                            "(default 1)")
-    ifill.add_argument("--batch-size", dest="batch_size", type=int, default=1,
-                       help="gem: subjects per partition step (default 1)")
+                            "(default 1; under --full without this flag, uses an elevated pass)")
+    ifill.add_argument("--batch-size", dest="batch_size", type=int, default=None,
+                       help="gem: subjects per partition step (default 1; under --full without "
+                            "this flag, drains remaining unauthored families in the slot)")
     ifill.add_argument("--max-partitions", dest="max_partitions", type=int, default=1,
                        help="cap discovered affix/base-type/gem/drop-table jobs (default 1; "
                             "ignored under --full)")
     ifill.add_argument("--full", action="store_true",
-                       help="unbounded closed grids + all discovered partitions (explicit opt-in)")
+                       help="unbounded closed grids + all discovered partitions; open kinds "
+                            "drain/elevated pass unless --count/--batch-size set (explicit opt-in)")
     ifill.add_argument("--allow-production-tree", dest="allow_production_tree",
                        action="store_true",
                        help="permit data/seed/items/ writes for set/charm/combination (also "

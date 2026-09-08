@@ -307,6 +307,23 @@ class AuthoredBatchTests(unittest.TestCase):
         needing = authored_mod.plan_needing_work(self.plan, ledger)
         self.assertEqual([s.subject_id for s in needing], [])
 
+    def test_an_escalated_answer_is_ledgered_so_resume_advances(self) -> None:
+        answers = self._answers_for_plan()
+        first_id = self.plan.subjects[0].subject_id
+        # Exhaust attempts → escalate (ReplayTransport runs out of authored answers).
+        answers.by_subject[first_id] = ()
+        result = authored_mod.run_batch(
+            plan=self.plan, answers=answers, tuning=self.tuning, out_dir=self.out_dir,
+            authored_utc="1970-01-01T00:00:00Z", model="test/1", ledger_path=self.ledger_path)
+        escalated = [o for o in result.outcomes if o.subject_id == first_id]
+        self.assertEqual(escalated[0].outcome, "escalated")
+        self.assertEqual(cli_mod._exit_for_graph_batch(result), cli_mod.EXIT_GAP)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        self.assertNotIn(first_id, [s.subject_id for s in needing])
+        row = ledger.read_done()[first_id]
+        self.assertEqual(row["outcome"], "escalated")
+
     def test_blocked_only_batch_exits_clean_and_escalated_exits_gap(self) -> None:
         blocked = SimpleNamespace(outcomes=[
             SimpleNamespace(outcome="blocked"),

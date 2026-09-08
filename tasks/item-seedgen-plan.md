@@ -14,13 +14,23 @@ combination cannot bind a gem family or host role nothing satisfies. The resume/
 must be a deterministic engine that finds missing dependencies and can trigger the owning generator to
 backfill them — never guessing, never silently skipping.
 
-## ✅ All 5 checkpoints (A-E) CLOSED, 2026-09-07 — all 11 modules built and tested
+## ✅ All 5 checkpoints (A-E) CLOSED, 2026-09-07 — all 11 content modules built and tested
 
 Checkpoint A (`generator-harness`), B (affix-families/materials/sockets/consumables/enhancement-
 milestones), C (`base-types-gen`), D (`set-charm-live-endpoint`/`recipes-gen`/`combination-write-
 unblock`) and E (`drop-tables-gen`, final) all pass. Full detail, evidence, and every real finding along
 the way: `tasks/item-seedgen-todo.md`. The 11th-corpus decision below (once genuinely open) is resolved:
 folded in as module 11 (`enhancement-milestones-gen`), owner-decided 2026-09-07.
+
+## Post-build operational repair — `fill-runner`
+
+The completed generators need one cross-kind execution contract before a real full fill is called
+runnable. [`spec-fill-runner.md`](../docs/architecture/item-seedgen/spec-fill-runner.md) defines module
+12: recorded escalations advance resume without masquerading as persisted content; the default walk
+continues past that classified result but still fails closed for genuine errors; `--full` covers both
+set populations, all discovered partitions, gem's deterministic remaining-family count, and one
+documented elevated pass for open-ended kinds. Socket-word retirement and consumable field backfill
+remain outside this repair.
 
 ~~## ⛔ One decision needed before Phase 3 can finish: the 11th corpus~~ — **RESOLVED 2026-09-07**,
 kept below for history.

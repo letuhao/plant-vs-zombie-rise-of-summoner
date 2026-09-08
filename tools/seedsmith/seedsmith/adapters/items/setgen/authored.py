@@ -181,10 +181,18 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             # batch. A transport error that aborts the loop loses every row already priced and
             # tells the caller nothing about the other subjects — the same reason `run_many`
             # catches per-subject rather than letting one failure end the fan-out.
+            defects = list(getattr(exc, "defects", ())) or [str(exc)]
+            attempts = len(answers.attempts_for(subject.subject_id))
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
-                attempts=len(answers.attempts_for(subject.subject_id)),
-                defects=list(getattr(exc, "defects", ())) or [str(exc)]))
+                attempts=attempts, defects=defects))
+            # Presence alone advances set/charm resume — escalate must not re-hit forever.
+            done[subject.subject_id] = {
+                "outcome": "escalated",
+                "entryId": subject.entry_id,
+                "attempts": attempts,
+                "defects": defects,
+            }
             continue
         draft = drafts.pop(subject.subject_id, None)
         attempts = int(final.get("attempts", 0))
@@ -194,6 +202,12 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="escalated", attempts=attempts, defects=defects))
+            done[subject.subject_id] = {
+                "outcome": "escalated",
+                "entryId": subject.entry_id,
+                "attempts": attempts,
+                "defects": defects,
+            }
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
             reason = draft["blocked"].strip()

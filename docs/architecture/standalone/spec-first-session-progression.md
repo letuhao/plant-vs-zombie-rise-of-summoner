@@ -2,7 +2,7 @@
 
 **Module id:** `first-session-progression` · **Program:** [../standalone-rpg-map.md](../standalone-rpg-map.md)  
 **Depends on:** `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip  
-**Status:** implemented in code; live deploy path is operational, final reward acceptance remains pending
+**Status:** implemented in code; simulator acceptance is green and live deploy smoke is operational
 
 ## Purpose
 
@@ -97,8 +97,8 @@ persisted owned specimen); missing or contradictory claims are stored as `untrus
 award species XP (`src/FusionRpg.Data/Sqlite/RpgStore.cs`). The normal PvZ spawn producer
 now carries the typed `EmpireGeneral` claim as `sourceKind`/`sourceId`
 transport fields; capture verifies the claim against side/type before applying it. Injector
-restore/build and real-game acceptance use the deployed MelonLoader path; final reward acceptance remains
-dependent on completing a real victory sequence.
+restore/build and live smoke use the deployed MelonLoader path; simulator E2E covers the game-driven
+`match.result` settlement without requiring a real victory window.
 
 The species reveal reports the actual applied ledger delta and the post-apply allocation. Automatic
 allocation is a projection of the species level (`src/FusionRpg.Core/Stats/Aptitudes/SpeciesAllocation.cs:15-36`), not a second manually persisted build. The later allocation/respec surface remains optional.
@@ -167,8 +167,8 @@ checkpoint response, Souls ledger, XP ledger, species row, allocation, item row,
 The Dave ownership prerequisite, concrete item path, species event, onboarding API, and checkpoint
 transaction are implemented in the server/Data slice. The deployed server now imports the atom corpus
 without attempting to parse dungeon-specific envelopes, and `lawn/quick-start` returns a live board with
-target and plant pointers. The remaining acceptance work is to drive a real lawn victory and verify the
-three durable checkpoints; no game binary is patched and no HP polling is used as onboarding evidence.
+target and plant pointers. Simulator and focused Data tests now verify the durable settlement path for
+the three checkpoints; no game binary is patched and no HP polling is used as onboarding evidence.
 The simulator E2E path now drives the same `match.result` settlement and verifies the persisted first-win
 and level-3 checkpoints without depending on a PVZ window; the focused Data harness covers the level-4
 item transaction and replay. A real victory window remains optional smoke coverage rather than a release

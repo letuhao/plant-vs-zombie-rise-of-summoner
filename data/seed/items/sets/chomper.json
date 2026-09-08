@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-chomper",
+    "partition": "sets/chomper",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.chomper-001",
+      "nameKey": "set.the-maw-s-hunger",
+      "name": "The Maw's Hunger",
+      "themeKey": "demon.chomper",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.rotting",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.affliction",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.arm-riveting",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A collection of jagged, pulsating flora that seems to chew upon the very air it inhabits.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

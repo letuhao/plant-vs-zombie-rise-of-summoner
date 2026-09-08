@@ -96,9 +96,11 @@ depends on IT, reversing the first draft's "run in the same parallel phase" grou
 | 8 | `recipes-gen` | The 30-entry crafting-recipe corpus | 1, **6** (hard, `container` outputs), **3** (hard, `material` outputs + all `costLines`) | 4 |
 | 9 | `combination-write-unblock` | Unblocks module 21's `combination` `--write` refusal | 1, **6** (categorical `hostRole`), **4** (categorical `ingredients`); `grants` is `external` | 4 |
 | 10 | `drop-tables-gen` | The symbolic drop-table corpus | 1, **6** (categorical), **3, 4, 5** (all hard) | **5 — last, now depends on the most other modules** |
+| 12 | `fill-runner` | Safe full-corpus orchestration, terminal escalation checkpoints, deterministic depth | 1, 2–11 | **post-build operational repair** |
 
-Eleven modules now (was ten) — module 11 is numbered for when it was found, not its build phase; it
-runs in Phase 2 alongside modules 2-5.
+Twelve modules now (was ten) — module 11 is numbered for when it was found, not its build phase; it
+runs in Phase 2 alongside modules 2-5. Module 12 is a post-build orchestration repair; its contract is
+[`spec-fill-runner.md`](item-seedgen/spec-fill-runner.md), not a new content dependency.
 
 ## 3. Dependency graph (corrected, second pass)
 

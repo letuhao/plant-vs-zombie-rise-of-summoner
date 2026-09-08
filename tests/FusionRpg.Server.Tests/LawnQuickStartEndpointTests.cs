@@ -130,6 +130,66 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         Assert.Contains("debug.level.enter did not ack", body!["error"].ToString());
     }
 
+    [Fact]
+    public async Task Post_setupSkip_injectorNotConnected_refusesBeforeQueueing()
+    {
+        var resp = await _http.PostAsJsonAsync("/api/debug/setup/skip", new { });
+
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Contains("injector not connected", body!["error"].ToString());
+    }
+
+    [Fact]
+    public async Task Post_setupSkip_connected_timesOutHonestlyWhenNoUnityAckArrives()
+    {
+        _store.Heartbeat(RpgConstants.SourceInjector);
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/setup/skip",
+            new { method = "quick", timeoutSec = 1 });
+
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Contains("debug.setup.skip did not ack", body!["error"].ToString());
+    }
+
+    [Fact]
+    public async Task Post_setupSkip_acknowledgement_returns_success()
+    {
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+        var request = _http.PostAsJsonAsync("/api/debug/setup/skip",
+            new { method = "quick", timeoutSec = 5 });
+
+        for (var i = 0; i < 40 && inbox.Count == 0; i++)
+            await Task.Delay(25);
+
+        Assert.True(inbox.Count > 0);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = true, method = "quick", ready = true })
+        });
+
+        var resp = await request;
+
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("quick", body!["method"].ToString());
+    }
+
+    [Fact]
+    public async Task Post_setupSkip_unknownMethod_refusesBeforeQueueing()
+    {
+        _store.Heartbeat(RpgConstants.SourceInjector);
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/setup/skip",
+            new { method = "hide-panel" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
     static int GetFreeTcpPort()
     {
         var l = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);

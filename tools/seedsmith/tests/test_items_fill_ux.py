@@ -247,9 +247,52 @@ class ItemsFillTests(unittest.TestCase):
             allow_production=True, limits=self._smoke_limits())
         self.assertEqual(reason, "")
         planned = [s for s in steps if s.argv]
-        # 1 per phase-2 kind + 1 base-type + set + charm + recipe + 2 combo + 1 drop ≈ ≤ 15
-        self.assertLessEqual(len(planned), 15)
+        # 1 per phase-2 kind + 1 base-type + species set + build set + charm + recipe + 2 combo + 1 drop
+        self.assertLessEqual(len(planned), 16)
         self.assertGreaterEqual(len(planned), 8)
+        set_notes = [s.note for s in planned if s.kind == "set"]
+        self.assertEqual(set_notes, ["population=species", "population=build"])
+
+    def test_full_plan_uses_elevated_open_counts_and_no_grid_limit(self) -> None:
+        steps, reason = fill_mod.plan_fill_steps(
+            kinds=("enhancement-milestone", "base-type", "set", "combination", "recipe"),
+            allow_production=True,
+            limits=fill_mod.FillLimits(full=True, max_partitions=1))
+        self.assertEqual(reason, "")
+        milestone = next(s for s in steps if s.kind == "enhancement-milestone" and s.argv)
+        self.assertEqual(milestone.argv[milestone.argv.index("--count") + 1],
+                         str(fill_mod._FULL_OPEN_PASS))
+        recipe = next(s for s in steps if s.kind == "recipe" and s.argv)
+        self.assertEqual(recipe.argv[recipe.argv.index("--count") + 1],
+                         str(fill_mod._FULL_OPEN_PASS))
+        sets = [s for s in steps if s.kind == "set" and s.argv]
+        self.assertEqual(len(sets), 2)
+        for step in sets + [s for s in steps if s.kind == "combination" and s.argv]:
+            self.assertNotIn("--limit", step.argv)
+
+    def test_full_with_explicit_count_keeps_operator_value(self) -> None:
+        steps, _ = fill_mod.plan_fill_steps(
+            kinds=("recipe",), allow_production=True,
+            limits=fill_mod.FillLimits(full=True, count=3, count_explicit=True))
+        argv = steps[0].argv
+        self.assertEqual(argv[argv.index("--count") + 1], "3")
+
+    def test_fill_continues_past_gap_when_stop_on_error_false(self) -> None:
+        calls: list[str] = []
+
+        def dispatch(argv: list[str]) -> int:
+            calls.append(argv[argv.index("--kind") + 1])
+            if argv[argv.index("--kind") + 1] == "material":
+                return cli_mod.EXIT_GAP
+            return cli_mod.EXIT_CLEAN
+
+        report = fill_mod.run_fill(
+            kinds=("material", "consumable"), dry_run=False, allow_production=True,
+            limits=self._smoke_limits(), dispatch=dispatch, stop_on_error=False)
+        self.assertEqual(calls, ["material", "consumable"])
+        self.assertEqual(report.steps[0].status, "gap")
+        self.assertEqual(report.steps[1].status, "ran")
+        self.assertEqual(report.worst_exit_code, cli_mod.EXIT_GAP)
 
     def test_fill_kind_order_is_valid_topo_of_map_edges(self) -> None:
         order = {k: i for i, k in enumerate(defaults_mod.FILL_KIND_ORDER)}

@@ -126,7 +126,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
-            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v2.json")));
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v5.json")));
 
         // A real IHubContext<RpgHub>, not a hand-rolled fake -- SignalR's own DI wiring, the same
         // production type RunWebMatchAsync's own hub.Clients.Group(...).SendAsync(...) call needs.
@@ -148,7 +148,7 @@ public class AptitudeChannelModsTests : IDisposable
         var payload = Assert.IsType<System.Text.Json.JsonElement>(
             System.Text.Json.JsonSerializer.SerializeToElement(snapshot.Payload));
         var shares = payload.GetProperty("shares");
-        Assert.Equal("commander", payload.GetProperty("scope").GetString());
+        Assert.Equal("commander+unique", payload.GetProperty("scope").GetString());
         Assert.Equal(0.75, shares.GetProperty("Might").GetDouble(), precision: 6);
         Assert.Equal(0.25, shares.GetProperty("Vigor").GetDouble(), precision: 6);
         Assert.Equal(0.0, shares.GetProperty("Ferocity").GetDouble(), precision: 6);

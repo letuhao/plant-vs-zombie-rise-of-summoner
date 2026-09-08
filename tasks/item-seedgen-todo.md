@@ -37,6 +37,16 @@ suite: 3105 passed (up from 3094), 12 failed (all pre-existing, unrelated "100 v
 drift spanning trees/actions/distribution-planner/usage-stats — confirmed already true before this
 session touched anything, well outside item-seedgen's own scope).
 
+## Post-build operational repair — `fill-runner`
+
+- [ ] **T31** — Implement [`spec-fill-runner.md`](../docs/architecture/item-seedgen/spec-fill-runner.md):
+      classify a recorded escalation separately from a corpus gap, persist it as a typed terminal
+      ledger outcome, continue the default fill walk past it, and prove a resume does not re-call it.
+- [ ] **T32** — Complete the full-depth contract tests: both set populations, all discovered
+      partitions, gem remaining-family drain, elevated open-kind pass, explicit depth override, and
+      stable dry-run order. Socket-word retirement and consumable action/cooldown fields stay out of
+      scope.
+
 ## T0 — ✅ Resolved 2026-09-07 (owner decision)
 
 - [x] **T0** — `enhancement-milestones` folded in as module 11 (`enhancement-milestones-gen`), spec at

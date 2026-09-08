@@ -124,6 +124,86 @@
     "set-species-demon.cherrythreepeater": {
       "entryId": "set.cherrythreepeater-001",
       "attempts": 1
+    },
+    "set-species-demon.chomper": {
+      "entryId": "set.chomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.conezombie": {
+      "entryId": "set.conezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.dancepolzombie": {
+      "entryId": "set.dancepolzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.dolldiamond": {
+      "entryId": "set.dolldiamond-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomcactus": {
+      "entryId": "set.doomcactus-001",
+      "attempts": 2
+    },
+    "set-species-demon.flagzombie": {
+      "entryId": "set.flagzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.footballzombie": {
+      "entryId": "set.footballzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlic": {
+      "entryId": "set.garlic-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicpea": {
+      "entryId": "set.garlicpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnochomper": {
+      "entryId": "set.hypnochomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalapeno": {
+      "entryId": "set.jalapeno-001",
+      "attempts": 2
+    },
+    "set-species-demon.marigold": {
+      "entryId": "set.marigold-001",
+      "attempts": 1
+    },
+    "set-species-demon.normalzombie": {
+      "entryId": "set.normalzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.polevaulterzombie": {
+      "entryId": "set.polevaulterzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.pot": {
+      "entryId": "set.pot-001",
+      "attempts": 1
+    },
+    "set-species-demon.pumpkin": {
+      "entryId": "set.pumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredyshroom": {
+      "entryId": "set.scaredyshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.squash": {
+      "entryId": "set.squash-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunchomper": {
+      "entryId": "set.sunchomper-001",
+      "attempts": 2
+    },
+    "set-species-demon.wallnut": {
+      "entryId": "set.wallnut-001",
+      "attempts": 1
     }
   }
 }
