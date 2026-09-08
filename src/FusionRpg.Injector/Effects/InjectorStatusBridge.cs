@@ -11,7 +11,7 @@ public static class InjectorStatusBridge
     public static StatusRuntime CreateRuntime()
     {
         return new StatusRuntime(
-            StatusCatalogBootstrap.CreateDefault(),
+            StatusCatalogHub.Current,
             ResolveDerived);
     }
 

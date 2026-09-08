@@ -79,7 +79,7 @@ async function ensureShowUnchanged(page: Page) {
   const checked = await toggle.isChecked();
   if (!checked) {
     // HTML SSOT uses a track/knob label — the opacity-0 checkbox is covered; click the label.
-    await page.locator(".derived-combat-console label.toggle").click();
+    await page.locator(".derived-combat-console button.toggle").click();
     await expect(toggle).toBeChecked();
   }
 }
@@ -144,7 +144,7 @@ test.describe("Derived sheet visual (live Server Hub)", () => {
     await ensureShowUnchanged(page);
 
     // Contract: cook primary tabs present; sheetGroup Offense/Pools must not be primary rail.
-    const primary = page.getByTestId("derived-primary-tablist");
+    const primary = page.getByTestId("derived-tab");
     await expect(primary.getByTestId("derived-tab-elements")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-status")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-resources")).toBeVisible();

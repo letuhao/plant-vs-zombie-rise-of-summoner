@@ -216,7 +216,31 @@ class ItemsFillTests(unittest.TestCase):
             limits=fill_mod.FillLimits(max_partitions=1, batch_size=1))
         planned = [s for s in steps if s.argv]
         self.assertEqual(len(planned), 1)
-        self.assertIn("--batch-size", planned[0].argv)
+        # Outer items generate CLI takes --count; remaps to gemgen --batch-size.
+        self.assertIn("--count", planned[0].argv)
+        self.assertNotIn("--batch-size", planned[0].argv)
+        self.assertEqual(planned[0].argv[planned[0].argv.index("--count") + 1], "1")
+
+    def test_affix_full_partition_planned_as_skipped(self) -> None:
+        with patch.object(fill_mod, "discover_affix_family_jobs",
+                          return_value=[("g.life", "stat.modify")]), \
+             patch.object(fill_mod, "_affix_has_free_pairs", return_value=False):
+            steps, reason = fill_mod.plan_fill_steps(
+                kinds=("affix-family",), allow_production=True,
+                limits=fill_mod.FillLimits(max_partitions=1))
+        self.assertEqual(reason, "")
+        self.assertTrue(all(not s.argv for s in steps))
+        self.assertTrue(any("no free" in s.note for s in steps))
+
+    def test_gem_empty_slot_planned_as_skipped(self) -> None:
+        with patch.object(fill_mod, "discover_gem_slots", return_value=[1]), \
+             patch.object(fill_mod, "_gem_slot_has_work", return_value=False):
+            steps, reason = fill_mod.plan_fill_steps(
+                kinds=("gem",), allow_production=True,
+                limits=fill_mod.FillLimits(max_partitions=1, batch_size=1))
+        self.assertEqual(reason, "")
+        self.assertTrue(all(not s.argv for s in steps))
+        self.assertTrue(any("alreadyDone" in s.note for s in steps))
 
     def test_smoke_dry_run_step_count_is_small(self) -> None:
         steps, reason = fill_mod.plan_fill_steps(

@@ -1,5 +1,34 @@
 {
   "done": {
+    "gem-gems/1-atom.arm-op": {
+      "entry": {
+        "family": "atom.arm-op",
+        "iconKey": "icon.gem.reinforced-plating",
+        "id": "gem.g1-022",
+        "name": "Reinforced Plating",
+        "nameKey": "gem.reinforced-plating",
+        "powerBand": "medium",
+        "tags": [
+          "sturdy",
+          "metal"
+        ]
+      },
+      "entryId": "gem.g1-022"
+    },
+    "gem-gems/1-atom.entangling": {
+      "entry": {
+        "family": "atom.entangling",
+        "iconKey": "icon.gem.entangling-spore",
+        "id": "gem.g1-021",
+        "name": "Entangling Spore",
+        "nameKey": "gem.entangling-spore",
+        "powerBand": "medium",
+        "tags": [
+          "offensive"
+        ]
+      },
+      "entryId": "gem.g1-021"
+    },
     "gem-gems/2-atom.affliction": {
       "entry": {
         "family": "atom.affliction",

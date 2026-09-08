@@ -104,6 +104,10 @@
     "charm-species-demon.allpeater": {
       "entryId": "charm.off-ctrl-038",
       "attempts": 2
+    },
+    "charm-species-demon.bucketzombie": {
+      "entryId": "charm.surv-util-029",
+      "attempts": 1
     }
   }
 }

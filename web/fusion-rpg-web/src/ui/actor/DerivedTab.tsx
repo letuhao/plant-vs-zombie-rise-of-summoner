@@ -69,7 +69,8 @@ export function DerivedTab({
   const [query, setQuery] = useState("");
   const [tabId, setTabId] = useState("elements");
   const [variantId, setVariantId] = useState<string | null>(null);
-  const [revision, setRevision] = useState(1);
+  const [retryTick, setRetryTick] = useState(0);
+  const revisionRef = useRef(0);
   const searchFocused = useRef(false);
 
   const typedBus = useMemo(() => createDerivedSurfaceBus(), []);
@@ -101,11 +102,13 @@ export function DerivedTab({
         if (typeof id === "string") setSelectedId(id);
       }),
       typedBus.on("derived.retry", () => {
-        setRevision((r) => r + 1);
+        void sheet.refetch();
+        void derived.refetch();
+        setRetryTick((t) => t + 1);
       })
     ];
     return () => offs.forEach((off) => off());
-  }, [typedBus]);
+  }, [typedBus, sheet, derived]);
 
   const tabs = useMemo(() => {
     const cooked = cook.data?.tabs?.length
@@ -114,11 +117,31 @@ export function DerivedTab({
     return [...cooked].sort((a, b) => a.order - b.order);
   }, [cook.data, surface, data.side]);
 
-  const loading = sheet.isLoading && derived.isLoading;
-  const errored = sheet.isError && derived.isError;
+  const loading = sheet.isLoading || derived.isLoading;
+  const errored = (sheet.isError || derived.isError) && !loading;
   const availability = loading ? "loading" : errored ? "error" : "ready";
 
   const displayName = isKnown(data.displayName) ? data.displayName.value : data.instanceId;
+
+  const revision = useMemo(() => {
+    revisionRef.current += 1;
+    return revisionRef.current;
+  }, [
+    displayName,
+    data.level,
+    data.side,
+    tabs,
+    sheet.data,
+    derived.data,
+    surface.elements,
+    tabId,
+    variantId,
+    query,
+    showUnchanged,
+    selectedId,
+    availability,
+    retryTick
+  ]);
 
   const vm = useMemo(
     () =>
@@ -173,9 +196,9 @@ export function DerivedTab({
     [recipe, vm]
   );
 
-  // GG-19 — focus search when surface becomes ready
+  // GG-19 — focus search when surface becomes ready (or empty chrome with search)
   useEffect(() => {
-    if (vm.phase !== "ready" || searchFocused.current) return;
+    if ((vm.phase !== "ready" && vm.phase !== "empty") || searchFocused.current) return;
     const el = document.querySelector<HTMLInputElement>(
       '[data-testid="derived-combat-console"] [data-testid="derived-search"]'
     );
@@ -192,7 +215,11 @@ export function DerivedTab({
   // Loading/error full overlay — still wrap so ActorPanel has a root testid if needed
   if (!plan.root && plan.overlay) {
     return (
-      <div className="derived-combat-console console" data-testid="derived-combat-console" data-derived-root="1">
+      <div
+        className="derived-combat-console console"
+        data-testid="derived-combat-console"
+        data-derived-root="1"
+      >
         <RecipeMount plan={plan} bus={bus} />
       </div>
     );

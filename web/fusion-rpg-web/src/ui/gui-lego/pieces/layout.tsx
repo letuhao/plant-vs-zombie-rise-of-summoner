@@ -3,7 +3,7 @@ import type { PieceFactory } from "@/features/gui-lego/types";
 import { themeStyle, vfxClass } from "@/ui/gui-lego/RecipeMount";
 import "../derivedConsole.css";
 
-/** Outer Derived console — landmark `.console` with direct header/nav/split/foot children. */
+/** Outer Derived console — landmark `.console` with direct nav/split/foot children (no identity header). */
 export const surfaceShellFactory: PieceFactory = ({ payload, slots }) => {
   const style = themeStyle(payload);
   const vfx = vfxClass(payload);
@@ -15,10 +15,6 @@ export const surfaceShellFactory: PieceFactory = ({ payload, slots }) => {
       data-phase={payload.phase}
       style={style}
     >
-      <header className="console-hd" data-testid="derived-tab">
-        {slots.identity}
-        <div className="hd-tools">{slots.tools}</div>
-      </header>
       {slots.railPrimary}
       {slots.railVariant}
       {slots.main}
@@ -61,17 +57,18 @@ export const scrollRegionFactory: PieceFactory = ({ payload, slots }) => {
   );
 };
 
-/** Fragment of family-block children only — list-pane owned by scroll-region. */
+/** Fragment of family-block children; empty filter shows phase-empty in dock. */
 export const familyListFactory: PieceFactory = ({ payload, slots }) => {
-  const empty =
-    payload._arrayLen === 0 ||
-    (typeof payload._arrayLen === "number" && payload._arrayLen === 0);
-  return (
-    <Fragment>
-      {slots.blocks}
-      {empty ? <p className="rd">No channels in this filter.</p> : null}
-    </Fragment>
-  );
+  const count = typeof payload.count === "number" ? payload.count : null;
+  const empty = count === 0 || payload.phase === "empty";
+  if (empty) {
+    return (
+      <div className="phase phase-empty" data-phase="empty" role="status" data-testid="derived-phase-empty">
+        <span>{String(payload.message ?? "No channels in this filter.")}</span>
+      </div>
+    );
+  }
+  return <Fragment>{slots.blocks}</Fragment>;
 };
 
 /** Section header (payload) + channel rows. */
@@ -90,7 +87,7 @@ export const familyBlockFactory: PieceFactory = ({ payload, slots }) => {
 };
 
 export const LAYOUT_SLOT_MAP: Record<string, readonly string[]> = {
-  "surface-shell": ["identity", "tools", "railPrimary", "railVariant", "main", "foot"],
+  "surface-shell": ["railPrimary", "railVariant", "main", "foot"],
   "split-inspect": ["dock", "inspect"],
   "scroll-region": ["content"],
   "family-list": ["blocks"],

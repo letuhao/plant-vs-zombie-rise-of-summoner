@@ -184,8 +184,13 @@ class AffixFamilyBrief:
             raise ValueError(
                 f"partition {self.partition.group_id!r} has no existing channels — a brief cannot "
                 f"offer an empty channel choice (see brief.py's own 'why channel is closed' note)")
+        free = free_channel_ops(self.partition, self.kind_id)
+        if not free and not self.schema:
+            raise ValueError(
+                f"partition {self.partition.group_id!r}/{self.kind_id!r} has no free "
+                f"(channel, op) pair — refuse before building a schema")
         schema = self.schema or affix_family_schema(
-            self.kind_id, channels=self.partition.channels, roles=self.roles,
+            self.kind_id, free_pairs=free, roles=self.roles,
             tags=self.tags, power_bands=self.power_bands)
         defects = audit_schema(schema)
         if defects:
@@ -195,31 +200,28 @@ class AffixFamilyBrief:
         object.__setattr__(self, "schema", schema)
 
     def render(self) -> str:
-        legal_ops = opvocab.legal_ops(self.kind_id)
+        free = free_channel_ops(self.partition, self.kind_id)
+        free_lines = ", ".join(f"{c}|{o}" for c, o in free)
         existing = ", ".join(f"{c!r} (used with {', '.join(ops)})"
                              for c, ops in sorted(self.partition.channel_ops.items()))
         theme_line = f"\nTheme: {self.theme_note}" if self.theme_note else ""
         return f"""Author ONE NEW affix family for partition {self.partition.group_id!r}
 (reserved id stem: {self.partition.stem!r}).{theme_line}
 
-This family's kind is fixed: `{self.kind_id}`. Its legal ops are {legal_ops} — pick exactly one,
-never any other value (a permanent Override/More-on-the-derived-side/etc. is not resolvable and
-will be refused).
+This family's kind is fixed: `{self.kind_id}`.
 
 Choose, and nothing else:
 1. `word` — a SHORT MECHANICAL identifier, not a display word (`naming.v1.json`'s own family-id
    rule: family ids are mechanical, distinct from the flavour vocabulary). The full id will be
    minted as `atom.{self.partition.stem}-{{word}}`.
-2. `channel` — one of this partition's own already-registered channels:
-   {existing}
-   A channel not in this list is out of scope for this brief; do not invent one.
-3. `op` — one of {legal_ops}, and it must not repeat a (channel, op) pair this partition already
-   ships (listed above per channel).
-4. `roles` — one or more of the closed role vocabulary below.
-5. `tags` — one or more of the closed tag vocabulary below.
-6. `powerBand` — one of {self.power_bands} (a RELATIVE category, never a number — bands.v1.json's
+2. `channelOp` — exactly ONE free token from this closed list (channel|op):
+   {free_lines}
+   Already used in this partition (do not repeat): {existing}
+3. `roles` — one or more of the closed role vocabulary below.
+4. `tags` — one or more of the closed tag vocabulary below.
+5. `powerBand` — one of {self.power_bands} (a RELATIVE category, never a number — bands.v1.json's
    own words for "what an author writes instead of a magnitude").
-7. `name`, `nameKey`, `displayTemplate`.
+6. `name`, `displayTemplate` — display identity only. Do NOT invent a nameKey; code derives it.
 
 Never choose a number, an amount, a tier or a per-mille value. Those are resolved after you answer,
 by `seedsmith.numerics`, from the tier-band curve — never from this call.
@@ -228,7 +230,8 @@ Legal roles ({len(self.roles)}): {', '.join(self.roles)}
 
 Legal tags ({len(self.tags)}): {', '.join(self.tags)}
 
-If this partition cannot carry a new family you would be happy to ship, set `blocked` and say why."""
+If this partition cannot carry a new family you would be happy to ship, set `blocked` to a reason
+string and set every other field to null."""
 
 
 def build_affix_family_brief(group_id: str, kind_id: str, *, theme_note: str = "",

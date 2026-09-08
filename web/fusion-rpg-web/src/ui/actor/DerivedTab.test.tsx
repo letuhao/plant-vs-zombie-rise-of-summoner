@@ -39,8 +39,20 @@ vi.mock("@/lib/bus/actorSurface", async () => {
   };
 });
 
-let sheetQuery: { data: unknown; isLoading: boolean; isError: boolean };
-let derivedQuery: { data: unknown; isLoading: boolean; isError: boolean };
+let sheetQuery: {
+  data: unknown;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => Promise<unknown>;
+};
+let derivedQuery: {
+  data: unknown;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => Promise<unknown>;
+};
+const sheetRefetch = vi.fn(async () => ({}));
+const derivedRefetch = vi.fn(async () => ({}));
 
 function live(
   channelId: string,
@@ -86,7 +98,7 @@ function minimalActor(): ActorView {
 describe("joinDerivedChannelId", () => {
   it("joins variant axes and leaves expand:none bare", () => {
     expect(joinDerivedChannelId("combat.power", "element", "fire")).toBe("combat.power.fire");
-    expect(joinDerivedChannelId("status.resist", "status-category", "dot")).toBe("status.resist.dot");
+    expect(joinDerivedChannelId("status.resist", "status-id", "butter")).toBe("status.resist.butter");
     expect(joinDerivedChannelId("progression.power", "none", "attack")).toBe("progression.power");
   });
 });
@@ -109,16 +121,19 @@ describe("expandDerivedFamily", () => {
     ]);
   });
 
-  it("expands status-category families over omni/dot/cc/contagion", () => {
+  it("expands status-id families over Omni + status-catalog ids", () => {
     const family = surface.families.find((row) => row.family === "status.resist")!;
-    expect(family.expand).toBe("status-category");
-    const expanded = expandDerivedFamily(family, surface.elements, surface.resources);
-    expect(expanded.map((row) => row.channelId)).toEqual([
-      "status.resist.omni",
-      "status.resist.dot",
-      "status.resist.cc",
-      "status.resist.contagion"
-    ]);
+    expect(family.expand).toBe("status-id");
+    const expanded = expandDerivedFamily(
+      family,
+      surface.elements,
+      surface.resources,
+      surface.statuses
+    );
+    expect(expanded[0]?.channelId).toBe("status.resist.omni");
+    expect(expanded).toHaveLength(1 + surface.statuses.length);
+    expect(expanded.map((row) => row.channelId)).toContain("status.resist.butter");
+    expect(expanded.map((row) => row.channelId)).toContain("status.resist.nerve.afflicted");
   });
 
   it("expands resource families over resource-catalog ids", () => {
@@ -220,6 +235,7 @@ describe("DerivedTab UI", () => {
     sheetQuery = {
       isLoading: false,
       isError: false,
+      refetch: sheetRefetch,
       data: {
         instanceId: "actor-1",
         playerId: 1,
@@ -250,15 +266,15 @@ describe("DerivedTab UI", () => {
             ]
           },
           {
-            channelId: "status.resist.dot",
+            channelId: "status.resist.butter",
             displayName: "Resist",
-            reading: "DOT",
+            reading: "Butter",
             composeKind: "SumIncreased",
             value: 0.95,
             contributions: [
               {
-                sourceId: "tree.ward.dot",
-                label: "Tree · ward/dot",
+                sourceId: "tree.ward.butter",
+                label: "Tree · ward/butter",
                 op: "Increased",
                 value: 0.95
               }
@@ -293,7 +309,14 @@ describe("DerivedTab UI", () => {
         primary: []
       }
     };
-    derivedQuery = { data: undefined, isLoading: false, isError: false };
+    derivedQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      refetch: derivedRefetch
+    };
+    sheetRefetch.mockClear();
+    derivedRefetch.mockClear();
   });
 
   it("renders cook tabs + element sub-tabs without matrix bloat", () => {
@@ -312,10 +335,15 @@ describe("DerivedTab UI", () => {
     expect(screen.queryByTestId("derived-channel-combat.power.ice")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("derived-tab-status"));
-    fireEvent.click(screen.getByTestId("derived-variant-dot"));
-    expect(screen.getByTestId("derived-channel-status.resist.dot")).toHaveAttribute(
+    const statusVariants = screen.getByTestId("derived-variant-rail");
+    // Omni + 24 status-catalog chips (not L2b category rail).
+    expect(statusVariants.querySelectorAll('[data-testid^="derived-variant-"]').length).toBe(
+      1 + actorSurfaceFixture().statuses.length
+    );
+    fireEvent.click(screen.getByTestId("derived-variant-butter"));
+    expect(screen.getByTestId("derived-channel-status.resist.butter")).toHaveAttribute(
       "data-state",
-      "capped"
+      "active"
     );
     fireEvent.click(screen.getByTestId("derived-variant-omni"));
     expect(screen.getByTestId("derived-channel-status.resist.omni")).toHaveAttribute(
@@ -333,5 +361,63 @@ describe("DerivedTab UI", () => {
       "data-state",
       "no-producer"
     );
+  });
+
+  it("GG-19 focuses search once when ready", () => {
+    wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
+    expect(screen.getByTestId("derived-search")).toHaveFocus();
+  });
+
+  it("empty filter shows phase-empty in dock", () => {
+    wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
+    fireEvent.change(screen.getByTestId("derived-search"), {
+      target: { value: "zzz-no-such-channel" }
+    });
+    const empty = screen.getByTestId("derived-phase-empty");
+    expect(empty).toBeInTheDocument();
+    expect(empty.textContent ?? "").not.toMatch(/phase-empty/);
+    expect(empty).toHaveTextContent(/No channels in this filter/i);
+    expect(screen.getByTestId("derived-combat-console")).toBeInTheDocument();
+  });
+
+  it("Show unchanged switch toggles aria-checked and reveals join holes", () => {
+    wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
+    const toggle = screen.getByTestId("derived-show-unchanged");
+    expect(toggle).toHaveAttribute("role", "switch");
+    expect(toggle).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(toggle);
+    expect(screen.getByTestId("derived-show-unchanged")).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(screen.getByTestId("derived-tab-elements"));
+    fireEvent.click(screen.getByTestId("derived-variant-ice"));
+    expect(screen.getByTestId("derived-channel-combat.power.ice")).toHaveAttribute(
+      "data-state",
+      "no-producer"
+    );
+  });
+
+  it("one-side loading shows loading overlay", () => {
+    sheetQuery = { ...sheetQuery, isLoading: true, data: undefined };
+    derivedQuery = { ...derivedQuery, isLoading: false };
+    wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
+    expect(document.querySelector(".phase-loading")).toBeTruthy();
+  });
+
+  it("Retry on error refetches sheet and derived", () => {
+    sheetQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: sheetRefetch
+    };
+    derivedQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch: derivedRefetch
+    };
+    wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(sheetRefetch).toHaveBeenCalled();
+    expect(derivedRefetch).toHaveBeenCalled();
   });
 });

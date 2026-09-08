@@ -51,6 +51,9 @@ function asPayload(
       ? ({ ...(resolved as Record<string, unknown>) } as PiecePayload)
       : ({ phase: "ready" } as PiecePayload);
 
+  // Validate before overwrite — dead check if piece is replaced first.
+  validatePieceMatch(pieceId, base);
+
   base.piece = pieceId;
   base.instanceId = instanceId;
   if (!base.phase) base.phase = "ready";
@@ -92,12 +95,12 @@ function mountRef(
       : ref.piece);
 
   const payload = asPayload(ref.piece, instanceId, Array.isArray(resolved) ? undefined : resolved);
-  // When bind points at an array (e.g. family-list → vm.families), keep list phase from first item or ready
+  // When bind points at an array (legacy), stamp count; prefer object binds with count.
   if (Array.isArray(resolved)) {
     payload.phase = "ready";
-    (payload as PiecePayload & { _arrayLen?: number })._arrayLen = resolved.length;
+    payload.count = resolved.length;
   }
-  validatePieceMatch(ref.piece, payload);
+  // asPayload already validated
 
   const slots: MountNode["slots"] = {};
   if (ref.slots) {
@@ -147,7 +150,7 @@ function mountBindArray(
         : {};
     const instanceId = applyTemplate(spec.instanceIdTemplate, rec, index);
     const payload = asPayload(spec.piece, instanceId, item);
-    validatePieceMatch(spec.piece, payload);
+    // validated inside asPayload
 
     const slots: MountNode["slots"] = {};
     if (spec.slots) {
@@ -206,9 +209,6 @@ export function bindSurface(
   }
 
   const root = mountRef(recipe.root, vm, null);
-  return {
-    root,
-    overlay: phase === "empty" ? overlay : null,
-    revision
-  };
+  // Empty lives in dock (family-list / phase-empty) — do not attach unused surface overlay.
+  return { root, overlay: null, revision };
 }

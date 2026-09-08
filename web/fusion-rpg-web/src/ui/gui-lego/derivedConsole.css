@@ -25,35 +25,14 @@
     overflow: hidden;
   }
 
-  /* —— header —— */
-  .derived-combat-console .console-hd {
-    flex: none;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: end;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, var(--soil-raised), transparent);
-  }
-  .derived-combat-console .identity .who {
-    font-family: var(--font-display);
-    font-size: 18px;
-    line-height: 1.1;
-  }
-  .derived-combat-console .identity .meta {
-    margin-top: 2px;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-  .derived-combat-console .identity .meta b { color: var(--sun); font-weight: 700; }
+  /* —— tools (on primary cook rail) —— */
   .derived-combat-console .hd-tools {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     justify-content: flex-end;
     align-items: center;
+    margin-left: auto;
   }
   .derived-combat-console .search {
     width: min(220px, 40vw);
@@ -74,6 +53,11 @@
     color: var(--muted);
     cursor: pointer;
     user-select: none;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    padding: 0;
   }
   .derived-combat-console .toggle .track {
     width: 28px; height: 16px; border-radius: 999px;
@@ -120,8 +104,13 @@
     align-items: center;
     gap: 6px;
   }
+  .derived-combat-console .cat-bar .chip .chip-glyph {
+    width: 14px;
+    height: 14px;
+  }
   .derived-combat-console .cat-bar .chip:hover { border-color: var(--border-strong); color: var(--text); background: var(--panel); }
-  .derived-combat-console .cat-bar .chip.is-on {
+  /* Primary cook chips keep lawn language */
+  .derived-combat-console .cat-bar:not(.variant-bar) .chip.is-on {
     border-color: var(--lawn-hot);
     color: var(--text);
     background: rgb(61 107 69 / 0.28);
@@ -138,12 +127,17 @@
     padding-top: 8px;
     padding-bottom: 10px;
   }
-  .derived-combat-console .cat-bar.variant-bar .chip.is-on {
-    border-color: var(--sun);
-    background: rgb(224 180 75 / 0.14);
-  }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el] {
+  /* Variant chips: accent from themeStyle (--piece-accent) */
+  .derived-combat-console .cat-bar.variant-bar .chip {
     border-left-width: 3px;
+    border-left-color: var(--piece-rail-edge, var(--border-control));
+  }
+  .derived-combat-console .cat-bar.variant-bar .chip.is-on {
+    border-color: var(--piece-accent, var(--sun));
+    border-left-color: var(--piece-accent, var(--sun));
+    color: var(--text);
+    background: color-mix(in srgb, var(--piece-accent, var(--sun)) 16%, transparent);
+    box-shadow: 0 0 0 1px var(--piece-select-glow, transparent);
   }
   .derived-combat-console .cat-bar.variant-bar .chip[data-el="fire"] { border-left-color: var(--el-fire); }
   .derived-combat-console .cat-bar.variant-bar .chip[data-el="ice"] { border-left-color: var(--el-ice); }
@@ -152,6 +146,33 @@
   .derived-combat-console .cat-bar.variant-bar .chip[data-el="light"] { border-left-color: var(--el-light); }
   .derived-combat-console .cat-bar.variant-bar .chip[data-el="dark"] { border-left-color: var(--el-dark); }
   .derived-combat-console .cat-bar.variant-bar .chip[data-el="omni"] { border-left-color: var(--el-omni); }
+
+  /* Select VFX — class names from theme vfx.select (dots → hyphens) */
+  .derived-combat-console .chip.is-on.vfx-ember-pulse,
+  .derived-combat-console .chip.is-on.vfx-frost-pulse,
+  .derived-combat-console .chip.is-on.vfx-air-pulse,
+  .derived-combat-console .chip.is-on.vfx-earth-pulse,
+  .derived-combat-console .chip.is-on.vfx-light-pulse,
+  .derived-combat-console .chip.is-on.vfx-dark-pulse,
+  .derived-combat-console .chip.is-on.vfx-omni-pulse,
+  .derived-combat-console .chip.is-on.vfx-status-omni-pulse,
+  .derived-combat-console .chip.is-on.vfx-status-dot-pulse,
+  .derived-combat-console .chip.is-on.vfx-status-cc-pulse,
+  .derived-combat-console .chip.is-on.vfx-status-contagion-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-hp-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-stamina-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-hunger-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-spirit-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-qi-pulse,
+  .derived-combat-console .chip.is-on.vfx-resource-poise-pulse {
+    animation: piece-select-pulse 1.1s ease-out infinite alternate;
+  }
+  .derived-combat-console .chip.is-on.vfx-ember-pulse {
+    animation-name: piece-select-pulse-ember;
+  }
+  .derived-combat-console .chip.is-on.vfx-frost-pulse {
+    animation-name: piece-select-pulse-frost;
+  }
 
   /* Full remaining height: list LEFT | inspector RIGHT (kit inspect-split grammar). */
   .derived-combat-console.console > .inspect-split {
@@ -484,6 +505,18 @@
   @keyframes select-pulse {
     0% { box-shadow: 0 0 0 0 rgb(224 180 75 / 0.45); }
     100% { box-shadow: 0 0 0 1px rgb(224 180 75 / 0.15); }
+  }
+  @keyframes piece-select-pulse {
+    0% { box-shadow: 0 0 0 0 var(--piece-select-glow, rgb(224 180 75 / 0.4)); }
+    100% { box-shadow: 0 0 12px 1px var(--piece-select-glow, rgb(224 180 75 / 0.15)); }
+  }
+  @keyframes piece-select-pulse-ember {
+    0% { box-shadow: 0 0 0 0 rgb(224 112 60 / 0.5); }
+    100% { box-shadow: 0 0 14px 2px rgb(224 112 60 / 0.22); }
+  }
+  @keyframes piece-select-pulse-frost {
+    0% { box-shadow: 0 0 0 0 rgb(111 196 217 / 0.5); }
+    100% { box-shadow: 0 0 14px 2px rgb(111 196 217 / 0.22); }
   }
   @keyframes grow-bar {
     from { transform: scaleX(0); }

@@ -58,7 +58,7 @@ test.describe("Derived SSOT side-by-side (owner visual gate)", () => {
     await page.getByTestId("actor-sheet-tab-derived").click();
     await expect(page.getByTestId("derived-combat-console")).toBeVisible({ timeout: 30_000 });
 
-    const primary = page.getByTestId("derived-primary-tablist");
+    const primary = page.getByTestId("derived-tab");
     await expect(primary.getByTestId("derived-tab-elements")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-offense")).toHaveCount(0);
     await expect(page.getByTestId("derived-variant-rail")).toBeVisible();

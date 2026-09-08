@@ -79,7 +79,7 @@ RESONANCE_ROWS = [c for c in SHIPPED_CHARM_ROWS if c["id"].startswith("charm.res
 # --------------------------------------------------------------------------------------------
 class SchemaTests(unittest.TestCase):
     def test_the_schema_is_audit_schema_clean(self) -> None:
-        for name, schema in (("set", schema_mod.set_schema(TUNING)),
+        for name, schema in (("set", schema_mod.set_schema(TUNING, vocabulary=VOCAB)),
                              ("charm", schema_mod.charm_schema(TUNING))):
             with self.subTest(schema=name):
                 self.assertEqual(audit_schema(schema), [])
@@ -97,7 +97,7 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(bare)
 
     def test_a_bare_integer_magnitude_field_fails_pipeline_construction(self) -> None:
-        broken = schema_mod.set_schema(TUNING)
+        broken = schema_mod.set_schema(TUNING, vocabulary=VOCAB)
         broken["properties"]["strength"] = {"type": "integer"}
         with self.assertRaises(ValueError) as caught:
             Pipeline(metric="set-charm-gen", scope="test", schema=broken,
@@ -107,7 +107,7 @@ class SchemaTests(unittest.TestCase):
     def test_blocked_is_a_legal_answer_and_writes_nothing(self) -> None:
         written: "list[tuple[str, dict]]" = []
         pipeline = Pipeline(metric="set-charm-gen", scope="test",
-                            schema=schema_mod.set_schema(TUNING), gate=lambda _: [],
+                            schema=schema_mod.set_schema(TUNING, vocabulary=VOCAB), gate=lambda _: [],
                             on_persist=lambda k, v: written.append((k, v)))
         self.assertIn(BLOCKED_FIELD, pipeline.schema["properties"])
         self.assertEqual(written, [])
@@ -116,7 +116,7 @@ class SchemaTests(unittest.TestCase):
         """`tier` and `cost` are on `audit_schema`'s deny-list by NAME, whatever their type. The
         schema avoids them rather than allow-listing past them — a charm's AP cost is derived from
         its class, and tiers come from `numerics`."""
-        text = json.dumps([schema_mod.set_schema(TUNING), schema_mod.charm_schema(TUNING)])
+        text = json.dumps([schema_mod.set_schema(TUNING, vocabulary=VOCAB), schema_mod.charm_schema(TUNING)])
         for banned in ('"tier"', '"cost"', '"apCost"', '"powerBand"'):
             with self.subTest(field=banned):
                 self.assertNotIn(f"{banned}:", text)
@@ -132,7 +132,7 @@ class RoleCapTests(unittest.TestCase):
 
     def test_every_generated_member_role_is_in_the_twelve(self) -> None:
         """The cap is in the SCHEMA, so the model is never offered an illegal role."""
-        enum = schema_mod.set_schema(TUNING)["properties"]["members"]["items"]["properties"]["role"]["enum"]
+        enum = schema_mod.set_schema(TUNING, vocabulary=VOCAB)["properties"]["members"]["items"]["properties"]["role"]["enum"]
         self.assertEqual(enum, list(roles.HYBRID_CORE_ROLES))
 
     def test_a_generated_set_never_claims_head_guard_sense_or_ward_array(self) -> None:
@@ -265,6 +265,26 @@ class DistributionTests(unittest.TestCase):
             with self.subTest(family=family):
                 plan = self._plan(stats_by_threshold={4: (_pick(family, "stat.modify"),)})
                 self.assertTrue(any("More-op modifier" in p for p in plan.problems))
+
+    def test_legal_set_stat_pool_excludes_match_scope_and_more_op_families(self) -> None:
+        pool = distribute.legal_set_stat_pool(VOCAB, TUNING)
+        families = {p.family for p in pool}
+        self.assertTrue(families)
+        self.assertTrue(families.isdisjoint(distribute.MORE_OP_FAMILIES))
+        self.assertTrue(families.isdisjoint(distribute.MATCH_SCOPE_ONLY_FAMILIES))
+        brief = brief_mod.build_set_brief(
+            themes_mod.load_species_themes()[0], TUNING, VOCAB)
+        self.assertNotIn("atom.resilience", brief)
+        self.assertNotIn("atom.warding", brief)
+        schema = schema_mod.set_schema(TUNING, vocabulary=VOCAB)
+        enum = schema["properties"]["thresholds"]["items"]["properties"]["families"]["items"]["enum"]
+        self.assertNotIn("atom.resilience", enum)
+        self.assertNotIn("atom.warding", enum)
+        for family in distribute.MORE_OP_FAMILIES:
+            self.assertNotIn(family, enum)
+        cap_enum = schema["properties"]["capability"]["properties"]["family"]["enum"]
+        self.assertTrue(cap_enum)
+        self.assertIn("enum", schema["properties"]["capability"]["properties"]["family"])
 
     def test_a_capability_at_a_higher_threshold_is_refused(self) -> None:
         plan = self._plan(stats_by_threshold={4: (_pick("atom.venomous", "status.apply"),)})
@@ -524,15 +544,15 @@ class ThemeBridgeTests(unittest.TestCase):
 # --------------------------------------------------------------------------------------------
 class CharmTests(unittest.TestCase):
     def test_the_authored_charm_split_is_22_55_9_excluding_the_ten_resonance_rows(self) -> None:
-        """The restored corpus is 96 charm rows: the historical 71 plus 25 non-duplicate
-        continuation rows. These measurements deliberately pin the committed corpus rather than
+        """The restored corpus is 97 charm rows: the historical 71 plus continuation rows. These
+        measurements deliberately pin the committed corpus rather than
         preserving counts from before the overwrite recovery."""
-        self.assertEqual(len(SHIPPED_CHARM_ROWS), 96)
+        self.assertEqual(len(SHIPPED_CHARM_ROWS), 97)
         self.assertEqual(len(RESONANCE_ROWS), 10)
-        self.assertEqual(len(AUTHORED_CHARMS), 86)
+        self.assertEqual(len(AUTHORED_CHARMS), 87)
         split = {c: sum(1 for e in AUTHORED_CHARMS if e["charmClass"] == c)
                  for c in ("minor", "standard", "signet")}
-        self.assertEqual(split, {"minor": 22, "standard": 55, "signet": 9})
+        self.assertEqual(split, {"minor": 22, "standard": 56, "signet": 9})
 
     def test_the_charm_axis_gini_does_not_exceed_the_configured_ceiling(self) -> None:
         """The restored corpus measures 116 permille, below the configured 137-permille ceiling.
@@ -612,10 +632,10 @@ class NameDistinctnessTests(unittest.TestCase):
     def test_no_two_generated_entries_share_an_exact_name(self) -> None:
         """Zero tolerance, and the shipped population already meets it.
 
-        The restored committed population is 157 set and charm names. The count is pinned here as
+        The restored committed population is 158 set and charm names. The count is pinned here as
         an acceptance value; content additions must update it deliberately with their corpus."""
         report = dedup.dedup_report(SET_CHARM_NAMES)
-        self.assertEqual(report.population, 157)
+        self.assertEqual(report.population, 158)
         self.assertEqual(report.exact_duplicates, ())
         self.assertLessEqual(len(report.exact_duplicates), TUNING.exact_duplicate_names_max)
 
@@ -774,9 +794,16 @@ class RunTests(unittest.TestCase):
         for pick in VOCAB.capability:
             with self.subTest(capability=pick.pick_id):
                 self.assertIn(pick.pick_id, text)
-        for pick in VOCAB.stat:
+        # Stat pool is the distributor-legal subset (D14 / More banned), printed whole — never
+        # the raw vocabulary.stat list that included atoms distribute_set then refuses.
+        legal_stats = distribute.legal_set_stat_pool(VOCAB, TUNING)
+        self.assertTrue(legal_stats)
+        for pick in legal_stats:
             with self.subTest(stat=pick.pick_id):
                 self.assertIn(pick.pick_id, text)
+        for banned in (distribute.MATCH_SCOPE_ONLY_FAMILIES | distribute.MORE_OP_FAMILIES):
+            with self.subTest(banned=banned):
+                self.assertNotIn(banned, text)
         self.assertNotIn("more", text)
 
 

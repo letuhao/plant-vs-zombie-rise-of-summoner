@@ -212,6 +212,22 @@
         "defensive"
       ],
       "notes": "The core essence of the unit hardens, allowing it to withstand sudden impacts with greater composure."
+    },
+    {
+      "id": "enh.014",
+      "nameKey": "enh.enhance-vitality",
+      "name": "Enhancement Vitality",
+      "runtimeFamily": "atom.enhance-vitality",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "A surge of life essence that bolsters the physical vessel against the coming storm."
     }
   ]
 }

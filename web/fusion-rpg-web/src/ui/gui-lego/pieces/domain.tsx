@@ -175,7 +175,10 @@ export const inspectPaneFactory: PieceFactory = ({ payload, slots }) => {
       {slots.hero}
       {slots.meta}
       {slots.cap}
-      {slots.gauges}
+      <div className="contrib" data-testid="derived-contribution-chart">
+        <h4>Why this number</h4>
+        {slots.gauges}
+      </div>
       {slots.sources}
     </div>
   );
@@ -228,27 +231,23 @@ export const gaugeDonutFactory: PieceFactory = ({ payload }) => {
   const slices = asSlices(payload);
   if (slices.length === 0 || payload.phase === "empty") return null;
   const paths = donutPathsFromSlices(slices);
-  const title = String(payload.title ?? "Why this number");
   return (
-    <div className="contrib" data-testid="derived-contribution-chart">
-      <h4>{title}</h4>
-      <div className="share-donut" aria-hidden="true" data-testid="derived-share-donut">
-        <svg width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="34" fill="#1e1a14" stroke="#3a342c" strokeWidth="1" />
-          {paths.map((p) => (
-            <path key={p.key} d={p.d} fill={p.fill} />
-          ))}
-          <circle cx="40" cy="40" r="18" fill="#2a241c" />
-        </svg>
-        <ul className="share-legend">
-          {slices.map((s) => (
-            <li key={s.key}>
-              <i style={{ background: s.paint }} />
-              {s.label} · {s.share}%
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div className="share-donut" aria-hidden="true" data-testid="derived-share-donut">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="34" fill="#1e1a14" stroke="#3a342c" strokeWidth="1" />
+        {paths.map((p) => (
+          <path key={p.key} d={p.d} fill={p.fill} />
+        ))}
+        <circle cx="40" cy="40" r="18" fill="#2a241c" />
+      </svg>
+      <ul className="share-legend">
+        {slices.map((s) => (
+          <li key={s.key}>
+            <i style={{ background: s.paint }} />
+            {s.label} · {s.share}%
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

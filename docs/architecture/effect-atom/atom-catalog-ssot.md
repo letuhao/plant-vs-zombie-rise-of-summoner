@@ -204,32 +204,28 @@ Derived ops are a **different set**: `Flat` · `Increased` · `Replace` · `Flag
 > | `charm_pulse` is a **def error**, no vanilla method exists | Resolved as a **def correction** (`UnityCc` → `ModifyStat`), not left broken |
 > | `leech` — *"the heal half was never built"* | **Built** — `StatusEffectBridge.cs:93` |
 > | `poison` CC-locks in battle because the check tests `Kind` | **Fixed** — `BattleEngine.cs:398` tests `IsCrowdControl` (category); poison is `dot` |
-> | contagion **"cannot spread at all"** | **Half true.** Spreads on the lawn (`EffectBag.cs:655` passes a real board); cannot in battle (`BattleEngine.cs:275` passes `board: null`) |
+> | contagion **"cannot spread at all"** | **Half true historically.** Spreads on the lawn; battle passes `CombatBoardSnapshot` when a board exists (`BattleEngine` → `Status.Tick`, status-rail B4) — boardless battles still pass null |
 >
 > **What is still true, and is the more useful number: reach is uneven.**
 >
 > | | Statuses reachable |
 > |---|---|
-> | Battle `status.apply` | **21** — no id filter (`BattleEffects.cs:171-182`) |
-> | Lawn `status.apply` | **8** — the switch at `DebugActions.cs:869-912`; the other 13 hit no case and do nothing |
-> | Lawn `status.clear` | **4** — butter/freeze/cold/poison only (`InjectorEffectActionSink.cs:307-318`) |
+> | Battle `status.apply` | **24** — no id filter (`BattleEffects`); nerve.* included |
+> | Lawn `status.apply` | **8** UnityCc wraps — the switch at `DebugActions`; overlay statuses apply via StatusRuntime without Unity |
+> | Lawn `status.clear` | butter/freeze/cold/poison/ember/hypno/kelp — **jala** unclearable (status-rail B3); plant butter-only |
 > | Authored in a shipped atom | **4** — butter, freeze, cold, poison |
 >
-> ⛔ **`status.apply` and `status.clear` are asymmetric**, so `ember`/`jala`/`kelp` can be applied and
-> never removed — and `ember`/`jala` have no Unity-side expiry either (`DebugActions.cs:893-899`).
-> **Permanent once applied.**
+> ⛔ **`jala` has no Unity clear API** — RPG instance still ends on expire; Unity flag may linger (documented policy).
 >
-> ⛔ **Battle has no `StatMods` consumer** (`BattleEffects.cs:154-183` applies the status but never reads
-> `inst.StatMods`), so `rally`/`expose`/`command`/`shatter`/`charm_pulse` are inert *there* while working
-> on the lawn — the mirror image of the contagion split.
+> ✅ **Battle status-instance StatMods** project into `BattleStatModifierLedger` on apply/end (status-rail B2) — distinct from FA1 `EffectActions.ModifyStat`.
 
 Three further facts the catalog must carry:
 
 - **Only the `elemental` family mutex is implemented.** Every other "family" is a label with no runtime behaviour.
-- **`StatusDef.Tags` is unconditionally empty.** Immunity tags arrive per-grant, not from the def — the opposite of what `status-ssot.md` describes.
-- **`poison` is incoherent across three subsystems:** category `dot`, family `elemental`, kind `UnityCc`. It resists on the DoT channel, CC-locks in battle (the check tests `Kind`), and never pulses.
+- **`StatusDef.Tags` is unconditionally empty.** Immunity tags arrive per-grant, not from the def — **locked as grant-only** (status-ssot / status-rail B4).
+- **`poison` is category `dot`, family `elemental`, kind `UnityCc`.** It resists on the DoT channel; battle CC-lock uses `IsCrowdControl` (category), not Kind.
 
-Battle reachability is thinner still: once applied, only `wither`, `leech`, and the 5 contagions do anything; `rally`/`expose`/`command`/`shatter`/`bond` are inert; and contagion **cannot spread at all** because the engine passes `board: null`.
+Battle: OverTime/Contagion pulse; ModifyStat statuses move ledger channels while active; Contagion spreads when a combat board snapshot is present.
 
 ---
 

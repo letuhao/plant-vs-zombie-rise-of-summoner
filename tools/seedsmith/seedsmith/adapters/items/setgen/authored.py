@@ -147,7 +147,7 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
     # ⚠ The same `member_count` `run.plan_run` briefed. The schema's threshold ladder is derived
     # from it, so a schema built on a different size would refuse answers the brief asked for —
     # which is the shape of the defect this parameter closes.
-    schema = (set_schema(tuning, member_count=tuning.typical_members) if kind == "set"
+    schema = (set_schema(tuning, vocabulary=vocabulary, member_count=tuning.typical_members) if kind == "set"
               else charm_schema(tuning))
     briefs = {s.subject_id: s.brief for s in plan.subjects}
     caller = call if call is not None else replay_caller(briefs, answers)

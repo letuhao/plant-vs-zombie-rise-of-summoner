@@ -21,9 +21,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from .distribute import threshold_ladder
+from .distribute import capability_family_ids, legal_set_stat_pool, threshold_ladder
 from .roles import HYBRID_CORE_ROLES
 from .tuning import SetCharmGenTuning
+from .vocab import Vocabulary
 
 #: The exact spelling `audit_schema` allows: an enum of numbers is a vocabulary, not an invention.
 #: Built from tuning so the schema and the distributor cannot disagree about what is legal.
@@ -75,41 +76,26 @@ def _blocked() -> "dict[str, Any]":
     }
 
 
-def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("humanoid", "plant"),
+def set_schema(tuning: SetCharmGenTuning, *, vocabulary: Vocabulary,
+               frames: "tuple[str, ...]" = ("humanoid", "plant"),
                member_count: "int | None" = None) -> "dict[str, Any]":
     """The `set` output schema. Identity only — every magnitude is resolved afterwards.
 
-    `members[].role` is the twelve-role cap **inside the schema**, not a validation afterthought:
-    the model is never offered `head-guard`, so `SetRoleNotUniversal` cannot be produced by a
-    well-formed response at all. That is the whole reason the cap is a generator input
-    (ssot-sets §3.7 fires at LOAD, so ~1,000 sets checked after the fact is a re-run).
-
-    ⭐ **`thresholds` is sized from the ladder for the same reason.** `member_count` defaults to the
-    typical size, which is what `run.plan_run` briefs; the ladder it produces fixes both the legal
-    `pieces` values and how many threshold rows there are. Before this, `minItems` was a flat 2 and
-    a five-member set (ladder `(2,)`) could not satisfy the schema at all — nor could a two-member
-    one, at the other end.
-
-    ⛔ Real incident, 2026-09-08: `"required": []` (every field optional-by-omission) was the
-    ORIGINAL design, needed so a `blocked` answer legally carries none of the content fields.
-    A live 53-subject run — AFTER the brief-truncation and `resolve_capability` fixes closed two
-    other real defects — still escalated on the SAME remaining defect on every subject: the model
-    never emitted `name`/`flavor` at all, not even after 3 self-heal rounds that named the exact
-    missing keys. Direct isolation (calling the model once, outside the retry loop, with the
-    identical brief) proved it: LM Studio's grammar-from-JSON-Schema sampler, given `"required":
-    []`, treats every optional trailing free-text field as safely omittable and the model never
-    generates them — re-prompting with the field names does not help, because nothing at the
-    GRAMMAR level ever offers the tokens for those keys once the sampler has decided to skip them.
-    Making every property `required` and expressing "optional" via `"type": [X, "null"]` instead
-    (the actual OpenAI Structured Outputs `strict: true` contract this schema already opts into
-    via `call_model`'s own `response_format`, and was never actually honoring) fixed it: the SAME
-    live model, same brief, immediately started filling `name`/`flavor` with real content once the
-    schema asked for them this way. `answers.schema_defects` and `answer_declares_content` were
-    both updated the same day to treat an absent key and an explicit `null` identically, so this
-    is purely a wire-format concession to the constrained-decoding sampler, not a new semantic
-    requirement on hand-authored/replayed answers.
+    `capability.family` and threshold `families[]` are closed enums from `vocabulary`, filtered
+    by `legal_set_stat_pool` so D14 / More-op atoms cannot be sampled then refused by distribute.
     """
     ladder = threshold_ladder(tuning, member_count or tuning.typical_members)
+    cap_families = list(capability_family_ids(vocabulary))
+    if not cap_families:
+        raise ValueError("set_schema requires a non-empty capability vocabulary")
+    stat_ids: list[str] = []
+    for pick in legal_set_stat_pool(vocabulary, tuning):
+        if pick.pick_id not in stat_ids:
+            stat_ids.append(pick.pick_id)
+        if pick.family not in stat_ids:
+            stat_ids.append(pick.family)
+    if not stat_ids:
+        raise ValueError("set_schema requires a non-empty legal set-stat pool")
     return {
         "type": "object",
         "additionalProperties": False,
@@ -122,7 +108,7 @@ def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("human
                 "additionalProperties": False,
                 "required": ["family", "variant"],
                 "properties": {
-                    "family": {"type": "string",
+                    "family": {"type": "string", "enum": cap_families,
                                "description": "one capability family id from the brief's closed "
                                               "list — a non-stat.* kind (ssot-sets §3.2)"},
                     "variant": {"type": ["string", "null"],
@@ -158,11 +144,9 @@ def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("human
                             "type": ["array", "null"],
                             "minItems": 1,
                             "maxItems": 3,
-                            "items": {"type": "string",
-                                      "description": "a stat.modify / stat.derived family id from "
-                                                     "the brief's closed list; null on the lowest "
-                                                     "threshold, which carries the capability "
-                                                     "instead"},
+                            "items": {"type": "string", "enum": stat_ids,
+                                      "description": "a distributor-legal stat family id from "
+                                                     "the brief's closed list"},
                         },
                     },
                 },

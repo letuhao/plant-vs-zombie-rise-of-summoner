@@ -22,6 +22,7 @@ export type DerivedExpandKind =
   | "none"
   | "element"
   | "status-category"
+  | "status-id"
   | "resource"
   | "action-category";
 
@@ -270,15 +271,23 @@ export function derivedSurfaceFromFixture(
             presentationOnly: e.presentationOnly
           }));
       } else if (tab.id === "status") {
-        variants = raw.statusCategoryVariants
-          .slice()
-          .sort((a, b) => a.ordinal - b.ordinal)
-          .map((v) => ({
-            id: v.id,
-            displayName: localeEn(v.displayName),
-            ordinal: v.ordinal,
-            presentationOnly: v.presentationOnly ?? false
-          }));
+        variants = [
+          {
+            id: "omni",
+            displayName: "Omni",
+            ordinal: 0,
+            presentationOnly: true
+          },
+          ...surface.statuses
+            .slice()
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((s, i) => ({
+              id: s.id,
+              displayName: s.displayName,
+              ordinal: i + 1,
+              presentationOnly: false
+            }))
+        ];
       } else if (tab.id === "resources") {
         variants = surface.resources.map((r, i) => ({
           id: r.id,

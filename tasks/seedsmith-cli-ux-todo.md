@@ -26,3 +26,22 @@ Widen `--max-partitions` / `--limit` only after smoke is green. Use `--full` onl
 - Dry-run: 12 phase-ordered steps; strain before splice; affix jobs filtered to `stat.modify`/`stat.derived`.
 - Live (bounded): material / milestone / base-type / charm / recipe / drop-table **ran**; gem **refused**; set + combination **gap** (model escalate); affix first attempt failed on free-pair/schema (caught as `error`, no crash).
 - Exit contract: non-zero on gap/error; JSON report complete; no unbounded runaway.
+
+### Smoke resolve (2026-09-09, follow-up)
+
+- [x] Fill gem argv uses `--count` (not `--batch-size`) so outer CLI accepts it
+- [x] Affix partitions with no free `(channel, op)` planned as `skipped`; filter before `max_partitions`
+- [x] Gem slots with `toGenerate=0` planned as `skipped`; filter before `max_partitions`
+- [x] `tests/test_items_fill_ux.py` — 26 passed
+- Operator: gem `--slot 1 --count 1 --write` → **persisted** (fresh=1)
+- Operator: affix `g.armour` / `g.tempo` → model still fails identity fields / taken pairs (content, not fill argv)
+- Operator: set `--limit 1` → escalate (forbidden atom / bad capability pick)
+- Operator: `items validate --deps` → exit 0
+- Operator: combination strain `--limit 1` → `planned=0` (sockword / `gem.word-*` corpus debt)
+
+### Root-cause fixes (2026-09-09) — not hide
+
+- [x] Affix wire schema: `required` + nullable, free-pair `channelOp` enum, derive `nameKey` — live **persisted** `atom.arm-plate`
+- [x] Set brief/schema: `legal_set_stat_pool` drops D14/More; capability family enum — live **persisted** 1 set
+- [x] Combination: `--limit` after `plan_needing_work`; same required+null schema fix as setgen
+- [x] Bounded `items fill --limit 1 --max-partitions 1 --count 1 --batch-size 1 --continue-on-error`: affix/set/gem/material/…/strain **ran**; only splice **gap** (model/content), not empty-plan or argv refuse

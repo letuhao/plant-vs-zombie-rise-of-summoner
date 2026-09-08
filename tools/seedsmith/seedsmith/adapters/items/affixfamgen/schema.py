@@ -13,12 +13,15 @@ own note); `powerBand` is NOT on the deny list (it is a closed enum of category 
 the field name real shipped families already use, rather than inventing a different spelling to
 dodge a check it does not trigger.
 
-`op`'s enum is built from `opvocab.legal_ops(kind_id)` — the ONE place that vocabulary lives — so
-this schema and `AtomKindRegistry.cs`'s real per-kind op set cannot silently drift apart the way two
-hand-typed copies of the same list eventually do.
+`op`'s enum is built from the FREE `(channel, op)` pairs still available in the partition — never
+the full `opvocab.legal_ops` set alone — so constrained decoding cannot re-sample a taken pair.
+
+⛔ `nameKey` is not asked of the model (2026-09-09): derived in `emit.assemble_entry` from `name`,
+same incident class as `setgen/schema.py`'s 2026-09-08 removal.
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Mapping
 
 from seedsmith.pipeline.run import validate_against_schema
@@ -30,40 +33,65 @@ from . import opvocab
 #: lowercase kebab, 2-24 chars, matching the shipped `word` tokens already seen (`hardening`,
 #: `riveting`, `life-graft`'s own `graft`, `fixation`, `truesight`).
 WORD_PATTERN = r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+_NAME_KEY_SLUG_RE = re.compile(r"[^a-z0-9]+")
 
-NAME_KEY_PATTERN = r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$"
+
+def derive_name_key(name: str) -> str:
+    """`affix.<slug>` — mechanical transform of `name`; never asked of the model."""
+    slug = _NAME_KEY_SLUG_RE.sub("-", name.strip().lower()).strip("-")
+    return f"affix.{slug or 'family'}"
 
 
 def _identity_fields() -> "dict[str, Any]":
+    """`name` / `displayTemplate` only — `nameKey` is derived in emit (setgen 2026-09-08 precedent).
+
+    `type` is `["string", "null"]` so every content key can stay `required` while a `blocked`
+    answer still satisfies the grammar (setgen live-model fix, 2026-09-08).
+    """
     return {
-        "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        # ⛔ maxLength added 2026-09-08: same class of gap as setgen/schema.py's nameKey (a
-        # real incident there) — `pattern` alone is not enforced at decode time, so without a
-        # length bound this field was unconstrained during generation.
-        "nameKey": {"type": "string", "pattern": NAME_KEY_PATTERN, "maxLength": 96},
-        "displayTemplate": {"type": "string", "minLength": 3, "maxLength": 160},
+        "name": {"type": ["string", "null"], "minLength": 3, "maxLength": 48},
+        "displayTemplate": {"type": ["string", "null"], "minLength": 3, "maxLength": 160},
     }
 
 
 def _blocked() -> "dict[str, Any]":
     return {
-        "type": "string",
+        "type": ["string", "null"],
         "description": "Set this INSTEAD of the content fields if the brief cannot be satisfied — "
                        "say why. A blocked answer writes nothing and is reported, not retried "
-                       "forever.",
+                       "forever. When blocked is a non-empty string, every other field must be null.",
     }
 
 
-def affix_family_schema(kind_id: str, *, channels: "tuple[str, ...]", roles: "tuple[str, ...]",
-                        tags: "tuple[str, ...]", power_bands: "tuple[str, ...]") -> "dict[str, Any]":
+def _nullable_string_enum(values: "tuple[str, ...]", *, description: str = "") -> "dict[str, Any]":
+    node: "dict[str, Any]" = {
+        "type": ["string", "null"],
+        "enum": list(values) + [None],
+    }
+    if description:
+        node["description"] = description
+    return node
+
+
+def affix_family_schema(
+        kind_id: str, *,
+        free_pairs: "tuple[tuple[str, str], ...]",
+        roles: "tuple[str, ...]",
+        tags: "tuple[str, ...]",
+        power_bands: "tuple[str, ...]",
+        channels: "tuple[str, ...] | None" = None) -> "dict[str, Any]":
     """The `affix-family` answer schema for ONE partition + ONE declared `kindId`.
 
-    `channels` is the partition's own already-used channel set (see `brief.py`'s "why channel is
-    closed to the partition" note) — never the full C# `PrimaryChannels`/`DerivedChannels`
-    vocabulary, which this generator does not re-transcribe.
+    `free_pairs` is the mechanically free `(channel, op)` set from `brief.free_channel_ops` —
+    the only pairs constrained decoding may sample. The legacy `channels=` kwarg remains only so
+    older call sites that passed partition channels without free pairs fail loudly when free_pairs
+    is empty; prefer always passing `free_pairs`.
     """
-    if not channels:
-        raise ValueError("affix_family_schema requires at least one legal channel")
+    del channels  # superseded by free_pairs; kept in signature for call-site migration clarity
+    if not free_pairs:
+        raise ValueError(
+            "affix_family_schema requires at least one free (channel, op) pair — "
+            "call free_channel_ops first and skip the model when empty")
     if not roles:
         raise ValueError("affix_family_schema requires at least one legal role")
     if not tags:
@@ -71,64 +99,108 @@ def affix_family_schema(kind_id: str, *, channels: "tuple[str, ...]", roles: "tu
     if not power_bands:
         raise ValueError("affix_family_schema requires at least one legal powerBand")
 
-    ops = opvocab.legal_ops(kind_id)
+    free_channels = tuple(sorted({c for c, _ in free_pairs}))
+    pair_tokens = tuple(f"{c}|{o}" for c, o in free_pairs)
 
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": [],
+        "required": ["name", "displayTemplate", "blocked", "word", "channelOp",
+                     "roles", "tags", "powerBand"],
         "properties": {
             **_identity_fields(),
             "blocked": _blocked(),
-            "word": {"type": "string", "pattern": WORD_PATTERN, "minLength": 2, "maxLength": 24,
-                     "description": "a short MECHANICAL identifier, never a display word — the "
-                                    "family id is minted as atom.{stem}-{word}"},
-            "channel": {"type": "string", "enum": list(channels),
-                        "description": "one of this partition's own already-registered channels"},
-            "op": {"type": "string", "enum": list(ops),
-                   "description": f"the real, closed op vocabulary for kindId {kind_id!r}"},
+            "word": {
+                "type": ["string", "null"],
+                "pattern": WORD_PATTERN,
+                "minLength": 2,
+                "maxLength": 24,
+                "description": "a short MECHANICAL identifier, never a display word — the "
+                               "family id is minted as atom.{stem}-{word}",
+            },
+            "channelOp": _nullable_string_enum(
+                pair_tokens,
+                description=(
+                    f"exactly one free (channel|op) still open in this partition "
+                    f"(channels with free slots: {', '.join(free_channels)})")),
             "roles": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": 1,
                 "maxItems": len(roles),
                 "items": {"type": "string", "enum": list(roles)},
             },
             "tags": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": 1,
                 "maxItems": len(tags),
                 "items": {"type": "string", "enum": list(tags)},
             },
-            "powerBand": {"type": "string", "enum": list(power_bands)},
+            "powerBand": _nullable_string_enum(power_bands),
         },
     }
 
 
+def _is_blocked(answer: Mapping[str, Any]) -> bool:
+    blocked = answer.get("blocked")
+    return isinstance(blocked, str) and bool(blocked.strip())
+
+
 def validate_answer(answer: Mapping[str, Any], schema: Mapping[str, Any], *,
                     channel_ops: "Mapping[str, tuple[str, ...]] | None" = None,
-                    kind_id: str | None = None) -> "list[str]":
+                    kind_id: str | None = None,
+                    free_pairs: "tuple[tuple[str, str], ...] | None" = None) -> "list[str]":
     """Validate an affix answer locally, including the live partition's occupied mechanics."""
     defects = validate_against_schema(answer, schema)
-    blocked = answer.get("blocked")
-    if "blocked" in answer:
-        if not isinstance(blocked, str) or not blocked.strip():
-            defects.append("field 'blocked' must be a non-empty reason string")
-        if set(answer) != {"blocked"}:
-            defects.append("a blocked answer must not include content fields")
+
+    if _is_blocked(answer):
+        # Content keys must be null / absent — same XOR as setgen blocked answers.
+        for key, value in answer.items():
+            if key == "blocked":
+                continue
+            if value is not None:
+                defects.append(
+                    f"a blocked answer must null out content fields; {key!r} is {value!r}")
         return defects
 
-    required = ("name", "nameKey", "displayTemplate", "word", "channel", "op", "roles", "tags",
-                "powerBand")
-    defects.extend(f"missing required content field {name!r}" for name in required if name not in answer)
+    # Content path: blocked must be null/absent; identity + mechanics present.
+    if answer.get("blocked") not in (None, ""):
+        defects.append("field 'blocked' must be null when authoring content")
+
+    required = ("name", "displayTemplate", "word", "roles", "tags", "powerBand")
+    for name in required:
+        value = answer.get(name)
+        if value is None or value == "":
+            defects.append(f"missing required content field {name!r}")
+
+    channel, op = _resolve_channel_op(answer)
+    if channel is None or op is None:
+        defects.append("missing required free pair — set channelOp (or channel+op) to a free token")
+        return defects
+
+    try:
+        canonical = opvocab.canonical_op(kind_id or "", op)
+    except ValueError as error:
+        defects.append(str(error))
+        return defects
+
+    if free_pairs is not None and (channel, canonical) not in free_pairs:
+        defects.append(
+            f"(channel={channel!r}, op={canonical!r}) is not in the free-pair set for this brief")
+    elif channel_ops is not None and canonical in channel_ops.get(channel, ()):
+        defects.append(
+            f"partition already ships (channel={channel!r}, op={canonical!r}); choose a free pair")
+    return defects
+
+
+def _resolve_channel_op(answer: Mapping[str, Any]) -> "tuple[str | None, str | None]":
+    """Prefer joint `channelOp`; fall back to separate channel/op for hand-authored answers."""
+    token = answer.get("channelOp")
+    if isinstance(token, str) and "|" in token:
+        channel, _, op = token.partition("|")
+        if channel and op:
+            return channel, op
     channel = answer.get("channel")
     op = answer.get("op")
-    if channel_ops is not None and isinstance(channel, str) and isinstance(op, str):
-        try:
-            canonical = opvocab.canonical_op(kind_id or "", op)
-        except ValueError as error:
-            defects.append(str(error))
-        else:
-            if canonical in channel_ops.get(channel, ()):
-                defects.append(
-                    f"partition already ships (channel={channel!r}, op={canonical!r}); choose a free pair")
-    return defects
+    if isinstance(channel, str) and isinstance(op, str):
+        return channel, op
+    return None, None

@@ -186,6 +186,27 @@ def _cap_partitions(items: list, limits: FillLimits) -> list:
     return items[: limits.max_partitions]
 
 
+def _affix_has_free_pairs(group_id: str, affix_kind: str) -> bool:
+    """True when the partition still has a free (channel, op) for this kind."""
+    from .affixfamgen import brief as affix_brief
+    try:
+        built = affix_brief.build_affix_family_brief(group_id, affix_kind)
+        return bool(affix_brief.free_channel_ops(built.partition, affix_kind))
+    except Exception:
+        # Unreadable / illegal kind — let the generate step surface the real refuse.
+        return True
+
+
+def _gem_slot_has_work(slot: int, batch_size: int) -> bool:
+    """True when gemgen plan_partition still has subjects for this slot."""
+    from .gemgen.run import plan_partition
+    try:
+        plan = plan_partition(f"gems/{slot}", batch_size=batch_size)
+        return bool(plan.subjects)
+    except Exception:
+        return True
+
+
 def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
                     allow_production: bool = True,
                     limits: FillLimits | None = None) -> "tuple[list[FillStep], str]":
@@ -214,28 +235,52 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
             "(unbounded). A default fill without a bound is thousands of model calls.")
 
     if want("affix-family"):
-        jobs = _cap_partitions(discover_affix_family_jobs(), limits)
-        if not jobs:
+        all_jobs = discover_affix_family_jobs()
+        runnable = [(g, k) for g, k in all_jobs if _affix_has_free_pairs(g, k)]
+        full_count = len(all_jobs) - len(runnable)
+        jobs = _cap_partitions(runnable, limits)
+        if not all_jobs:
             add("affix-family", [],
                 "SKIPPED — no affix-family partition files with kindId to discover")
-        for group_id, affix_kind in jobs:
-            add("affix-family",
-                ["--kind", "affix-family", "--group", group_id,
-                 "--affix-kind", affix_kind, "--write"],
-                f"group={group_id} affix-kind={affix_kind}")
+        elif not runnable:
+            add("affix-family", [],
+                "SKIPPED — every discovered affix partition has no free (channel, op)")
+        else:
+            for group_id, affix_kind in jobs:
+                add("affix-family",
+                    ["--kind", "affix-family", "--group", group_id,
+                     "--affix-kind", affix_kind, "--write"],
+                    f"group={group_id} affix-kind={affix_kind}")
+            if full_count and limits.max_partitions > 0 and not limits.full:
+                add("affix-family", [],
+                    f"SKIPPED — {full_count} partition(s) have no free (channel, op)")
 
     if want("material"):
         add("material", ["--kind", "material", "--write"])
 
     if want("gem"):
-        slots = _cap_partitions(discover_gem_slots(), limits)
-        if not slots:
+        all_slots = discover_gem_slots()
+        runnable_slots = [s for s in all_slots
+                          if _gem_slot_has_work(s, limits.batch_size)]
+        empty_count = len(all_slots) - len(runnable_slots)
+        slots = _cap_partitions(runnable_slots, limits)
+        if not all_slots:
             add("gem", [], "SKIPPED — no gems/gN.json partitions discovered")
-        for slot in slots:
-            add("gem",
-                ["--kind", "gem", "--slot", str(slot),
-                 "--batch-size", str(limits.batch_size), "--write"],
-                f"slot={slot}")
+        elif not runnable_slots:
+            add("gem", [],
+                "SKIPPED — every gems/N partition alreadyDone (toGenerate=0)")
+        else:
+            for slot in slots:
+                # Outer `items generate` accepts shared `--count`; cli remaps to
+                # gemgen `--batch-size`. Emitting `--batch-size` here makes
+                # argparse SystemExit → refused.
+                add("gem",
+                    ["--kind", "gem", "--slot", str(slot),
+                     "--count", str(limits.batch_size), "--write"],
+                    f"slot={slot}")
+            if empty_count and limits.max_partitions > 0 and not limits.full:
+                add("gem", [],
+                    f"SKIPPED — {empty_count} slot(s) alreadyDone (toGenerate=0)")
 
     if want("consumable"):
         add("consumable", ["--kind", "consumable"],

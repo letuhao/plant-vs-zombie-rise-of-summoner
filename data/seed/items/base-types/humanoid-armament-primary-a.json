@@ -527,6 +527,42 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-015",
+      "nameKey": "base.serrated-falchion",
+      "name": "Serrated Falchion",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.serrated-falchion",
+      "flavorKey": "flavor.base.serrated-falchion",
+      "flavor": "A heavy, single-edged blade designed to catch and tear through thick layers of armor. Its weight is balanced perfectly for a wide, sweeping arc.",
+      "tags": [
+        "metal",
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

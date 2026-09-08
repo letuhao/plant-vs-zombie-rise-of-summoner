@@ -412,12 +412,18 @@ def live_answer_caller(config: LlmCallerConfig, *,
                     defects.append(f"field {field!r} is not in the schema")
                 continue
             declared = spec.get("type")
-            expected = type_map.get(declared)
+            types = (declared,) if isinstance(declared, str) else tuple(declared or ())
+            if value is None:
+                if "null" not in types and types:
+                    defects.append(f"field {field!r} is null but schema does not allow null")
+                continue
+            concrete = next((t for t in types if t != "null"), None)
+            expected = type_map.get(concrete) if concrete else None
             if expected is not None:
-                if declared in ("number", "integer") and isinstance(value, bool):
-                    defects.append(f"field {field!r} is a boolean, not {declared}")
+                if concrete in ("number", "integer") and isinstance(value, bool):
+                    defects.append(f"field {field!r} is a boolean, not {concrete}")
                 elif not isinstance(value, expected):
-                    defects.append(f"field {field!r} should be {declared}")
+                    defects.append(f"field {field!r} should be {concrete}")
             allowed = spec.get("enum")
             if allowed is not None and value not in allowed:
                 defects.append(f"field {field!r} value {value!r} is not one of {list(allowed)}")

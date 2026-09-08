@@ -1,7 +1,8 @@
 namespace FusionRpg.Core.Status;
 
-/// <summary>Register all 24 locked status ids — status-ssot.md §9 (21 -> 24, `delve-attrition` D2.19's
-/// `nerve.*` block, spec-delve-attrition.md §4).</summary>
+/// <summary>Migration golden / parity shim for the 24 locked status ids — status-ssot.md §9.
+/// Live hosts inject via <see cref="StatusCatalogFactory"/> + <see cref="StatusCatalogHub"/>
+/// (status-rail B1). Prefer the hub's <c>Current</c> in production paths.</summary>
 public static class StatusCatalogBootstrap
 {
     public static StatusCatalog CreateDefault()
@@ -25,7 +26,7 @@ public static class StatusCatalogBootstrap
 
         // 9.3 Overlay-authored
         Register(catalog, "wither", StatusKind.OverTime, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.PulseHp);
-        Register(catalog, "bond", StatusKind.Counter, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.PulseHp);
+        Register(catalog, "bond", StatusKind.Counter, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh);
         Register(catalog, "rally", StatusKind.Buff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
         // pulseHealsAttacker: true -- spec-healing-pair.md §3, finishing the half the catalog shipped
         // half-built ("damage half only — the heal half was never built").

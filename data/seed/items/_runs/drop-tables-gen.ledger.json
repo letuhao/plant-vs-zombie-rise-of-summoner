@@ -15,6 +15,10 @@
     "droptable-draw-d1-003": {
       "entryId": "droptable.d1-014",
       "name": "Verdant Echo Cache"
+    },
+    "droptable-draw-d1-004": {
+      "entryId": "droptable.d1-015",
+      "name": "Overgrowth Cache"
     }
   },
   "schemaVersion": 1

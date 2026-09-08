@@ -1,5 +1,6 @@
 import type { PieceFactory } from "@/features/gui-lego/types";
 import { SHOW_UNCHANGED_KEY } from "@/features/gui-lego/cook";
+import { CatalogIcon } from "@/ui/actor/CatalogIcon";
 import { themeStyle, vfxClass } from "@/ui/gui-lego/RecipeMount";
 
 export const identityHdFactory: PieceFactory = ({ payload }) => {
@@ -28,28 +29,29 @@ export const toolToggleFactory: PieceFactory = ({ payload, bus }) => {
   const value = Boolean(payload.value);
   const label = String(payload.label ?? "Show unchanged");
   return (
-    <label className={`toggle${value ? " is-on" : ""}`} title="Persist in localStorage">
-      <input
-        type="checkbox"
-        checked={value}
-        data-testid="derived-show-unchanged"
-        aria-label={label}
-        style={{ position: "absolute", opacity: 0, width: 1, height: 1 }}
-        onChange={(e) => {
-          const next = e.target.checked;
-          bus.emit("derived.showUnchanged.set", { value: next });
-          try {
-            localStorage.setItem(SHOW_UNCHANGED_KEY, next ? "1" : "0");
-          } catch {
-            /* ignore quota / private mode */
-          }
-        }}
-      />
+    <button
+      type="button"
+      role="switch"
+      className={`toggle${value ? " is-on" : ""}`}
+      title="Persist in localStorage"
+      aria-checked={value}
+      aria-label={label}
+      data-testid="derived-show-unchanged"
+      onClick={() => {
+        const next = !value;
+        bus.emit("derived.showUnchanged.set", { value: next });
+        try {
+          localStorage.setItem(SHOW_UNCHANGED_KEY, next ? "1" : "0");
+        } catch {
+          /* ignore quota / private mode */
+        }
+      }}
+    >
       <span className="track" aria-hidden="true">
         <span className="knob" />
       </span>
       {label}
-    </label>
+    </button>
   );
 };
 
@@ -58,9 +60,11 @@ export const railPrimaryFactory: PieceFactory = ({ payload, slots }) => (
     className="cat-bar"
     role="tablist"
     aria-label={String(payload.ariaLabel ?? "Derived surface tabs")}
-    data-testid="derived-primary-tablist"
+    data-testid="derived-tab"
+    data-primary-tablist="1"
   >
     {slots.chips}
+    {slots.tools ? <div className="hd-tools">{slots.tools}</div> : null}
   </nav>
 );
 
@@ -92,6 +96,13 @@ export const chipFactory: PieceFactory = ({ payload, bus }) => {
     payload.elementId != null && String(payload.elementId).length > 0
       ? String(payload.elementId)
       : undefined;
+  const glyphKey =
+    payload.themeResolved?.glyphDefault != null && String(payload.themeResolved.glyphDefault).length > 0
+      ? String(payload.themeResolved.glyphDefault)
+      : null;
+  const glyphColor = payload.themeResolved?.paint?.accent
+    ? String(payload.themeResolved.paint.accent)
+    : null;
 
   return (
     <button
@@ -109,6 +120,14 @@ export const chipFactory: PieceFactory = ({ payload, bus }) => {
         else bus.emit("derived.tab.set", { tabId: id });
       }}
     >
+      {glyphKey ? (
+        <CatalogIcon
+          icon={glyphKey}
+          fallbackToken={label.slice(0, 1)}
+          color={glyphColor}
+          className="chip-glyph"
+        />
+      ) : null}
       {label}
       {count != null ? (
         <>
@@ -142,7 +161,7 @@ export const CHROME_SLOT_MAP: Record<string, readonly string[]> = {
   "identity-hd": [],
   "tool-search": [],
   "tool-toggle": [],
-  "rail-primary": ["chips"],
+  "rail-primary": ["chips", "tools"],
   "rail-variant": ["chips"],
   chip: [],
   "surface-foot": []

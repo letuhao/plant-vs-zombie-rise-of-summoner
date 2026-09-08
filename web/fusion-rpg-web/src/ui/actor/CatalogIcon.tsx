@@ -1,15 +1,22 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
+  Ban,
+  CircleDot,
   Crosshair,
   Flame,
   Heart,
   Hexagon,
+  Moon,
+  Mountain,
   Shield,
+  Snowflake,
   Sparkles,
   Sun,
   Sword,
   Target,
+  Virus,
+  Wind,
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -25,8 +32,22 @@ const LUCIDE_BY_KEY: Record<string, LucideIcon> = {
   crit: Crosshair,
   "crit-resist": Target,
   fire: Flame,
+  flame: Flame,
   activity: Activity,
-  hexagon: Hexagon
+  hexagon: Hexagon,
+  snowflake: Snowflake,
+  ice: Snowflake,
+  wind: Wind,
+  air: Wind,
+  mountain: Mountain,
+  earth: Mountain,
+  moon: Moon,
+  dark: Moon,
+  light: Sun,
+  ban: Ban,
+  virus: Virus,
+  "yin-yang": CircleDot,
+  qi: CircleDot
 };
 
 /**

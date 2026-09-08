@@ -397,21 +397,16 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
     /// <summary>
     /// E28 fix #3 (spec-param-parity.md §3 row 3): the statuses <c>ApplyStatusToZombie</c> can apply
-    /// (<c>method: true</c> switch, <c>DebugActions.cs:867-913</c>) that this sink still cannot clear.
-    /// Ember and jala were the E17-documented case — <c>SetEmbered</c>/<c>SetJalaed</c> trigger a
-    /// one-shot explosion (<c>EmberExplode</c>/<c>JalaedExplode</c>), not a timed state with a wear-off,
-    /// so there is no Unity-side expiry to withdraw at all. Hypno and kelp reflect the same way against
-    /// the shipped <c>Assembly-CSharp.dll</c>: no <c>UnMindControl</c>/<c>ClearMindControl</c> or
-    /// <c>Unkelp</c>-shaped method exists — only raw settable properties
-    /// (<c>isMindControlled</c>, <c>kelpTimes</c>/<c>kelpLayer</c>/<c>kelpSpeed</c>) with no evidence
-    /// a bare property flip fully reverses what <c>SetMindControl</c>/<c>SetKelped</c> actually did
-    /// (mind control in particular is documented elsewhere as a side-swap, not a flag). Guessing at
-    /// that without a live check is exactly the class of defect this module exists to stop shipping —
-    /// so these four refuse by name instead, matching ember/jala's own already-established reasoning
-    /// rather than inventing a fifth and sixth unverified "fix".
+    /// <summary>
+    /// status-rail B3: only <c>jala</c> has no Unity clear API (<c>SetJalaed</c> is a one-shot).
+    /// Ember / hypno / kelp clear via <see cref="ClearZombieStatus"/>. Plant-side remains butter-only
+    /// (host limit — <c>DebugActions.ApplyStatusToPlant</c>). RPG instances still expire even when
+    /// Unity flags linger. See docs/research/status/status-coverage-audit.md.
     /// </summary>
     static readonly HashSet<string> UnclearableStatuses = new(StringComparer.Ordinal)
-        { "ember", "jala", "hypno", "kelp" };
+    {
+        "jala"
+    };
 
     static bool ExecClearStatus(EffectExecuteContext ctx, EffectActionPlanItem item)
     {
@@ -580,6 +575,23 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
             if (string.IsNullOrEmpty(status) || status == "poison")
                 try { z.KillDebuff(); } catch { }
+
+            // status-rail B3: clear paths for wraps that ApplyStatusToZombie can set.
+            if (string.IsNullOrEmpty(status) || status == "ember")
+                try { z.SetEmbered(false); } catch { }
+            if (string.IsNullOrEmpty(status) || status == "hypno")
+            {
+                try { z.SetMindControl(0); } catch { }
+                try { z.isMindControlled = false; } catch { }
+            }
+            if (string.IsNullOrEmpty(status) || status == "kelp")
+            {
+                try { z.kelpTimes = 0; } catch { }
+                // The Fusion interop exposes kelpLayer as a static field (the layer is
+                // shared by the vanilla status implementation), so qualify the write.
+                try { Zombie.kelpLayer = 0; } catch { }
+                try { z.kelpSpeed = 1f; } catch { }
+            }
         }
         catch { }
     }

@@ -1,5 +1,168 @@
 {
   "done": {
+    "combination-strain-agility-balance": {
+      "entry": {
+        "aptitudes": [
+          "Agility"
+        ],
+        "archetype": "balance",
+        "flavor": "A momentary lapse in physics where the user is simply no longer where the blow landed.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.evasion"
+        ],
+        "hostFrame": "humanoid",
+        "hostRole": "armament-primary",
+        "id": "combo.strain-agility-balance",
+        "ingredients": [
+          {
+            "family": "atom.evasion",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.precision",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.quickening",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.swiftness",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Weightless Pivot",
+        "nameKey": "combination.strain-agility-balance",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-agility-balance"
+    },
+    "combination-strain-bulwark-balance": {
+      "entry": {
+        "aptitudes": [
+          "Bulwark"
+        ],
+        "archetype": "balance",
+        "flavor": "A perfect equilibrium of weight and will that turns a collision into a standstill.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.retribution",
+          "atom.stalwart"
+        ],
+        "hostFrame": "humanoid",
+        "hostRole": "core-guard",
+        "id": "combo.strain-bulwark-balance",
+        "ingredients": [
+          {
+            "family": "atom.bulwark",
+            "minTier": 1,
+            "quantity": 2
+          },
+          {
+            "family": "atom.fortitude",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.plating",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "The Immovable Axis",
+        "nameKey": "combination.strain-bulwark-balance",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-bulwark-balance"
+    },
+    "combination-strain-bulwark-offense": {
+      "entry": {
+        "aptitudes": [
+          "Bulwark"
+        ],
+        "archetype": "offense",
+        "flavor": "The weight of the wall becomes a hammer.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.retribution"
+        ],
+        "hostFrame": "humanoid",
+        "hostRole": "armament-primary",
+        "id": "combo.strain-bulwark-offense",
+        "ingredients": [
+          {
+            "family": "atom.bulwark",
+            "minTier": 1,
+            "quantity": 2
+          },
+          {
+            "family": "atom.ferocity",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.might",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Bastion's Rebuttal",
+        "nameKey": "combination.strain-bulwark-offense",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-bulwark-offense"
+    },
+    "combination-strain-focus-offense": {
+      "entry": {
+        "aptitudes": [
+          "Focus"
+        ],
+        "archetype": "offense",
+        "flavor": "The rhythm of the strike dictates the rhythm of the soul; strike once, and the next is already halfway there.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.quickening"
+        ],
+        "hostFrame": "plant",
+        "hostRole": "armament-primary",
+        "id": "combo.strain-focus-offense",
+        "ingredients": [
+          {
+            "family": "atom.hit-followthrough",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.precision",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.precision",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.quickening",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Flow-State",
+        "nameKey": "combination.strain-focus-offense",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-focus-offense"
+    },
     "combination-strain-fortitude-defense": {
       "entry": {
         "aptitudes": [
@@ -41,6 +204,45 @@
       },
       "entryId": "combo.strain-fortitude-defense"
     },
+    "combination-strain-might-defense": {
+      "entry": {
+        "aptitudes": [
+          "Might"
+        ],
+        "archetype": "defense",
+        "flavor": "The force of the impact is not lost, but channeled through the frame to bolster the next strike.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.retribution",
+          "atom.might"
+        ],
+        "hostFrame": "humanoid",
+        "hostRole": "core-guard",
+        "id": "combo.strain-might-defense",
+        "ingredients": [
+          {
+            "family": "atom.bulwark",
+            "minTier": 1,
+            "quantity": 2
+          },
+          {
+            "family": "atom.hit-retort",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.might",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "Kinetic Redirection",
+        "nameKey": "combination.strain-might-defense",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-might-defense"
+    },
     "combination-strain-might-offense": {
       "entry": {
         "aptitudes": [
@@ -81,6 +283,49 @@
         "shape": "strain"
       },
       "entryId": "combo.strain-might-offense"
+    },
+    "combination-strain-retribution-balance": {
+      "entry": {
+        "aptitudes": [
+          "Retribution"
+        ],
+        "archetype": "balance",
+        "flavor": "Every blow dealt against the bastion is a debt that must be repaid in kind.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.retribution"
+        ],
+        "hostFrame": "humanoid",
+        "hostRole": "core-guard",
+        "id": "combo.strain-retribution-balance",
+        "ingredients": [
+          {
+            "family": "atom.arm-hardening",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.bulwark",
+            "minTier": 1,
+            "quantity": 1
+          },
+          {
+            "family": "atom.fortitude",
+            "minTier": 2,
+            "quantity": 1
+          },
+          {
+            "family": "atom.hit-retort",
+            "minTier": 2,
+            "quantity": 1
+          }
+        ],
+        "minSockets": 4,
+        "name": "The Weight of Reciprocity",
+        "nameKey": "combination.strain-retribution-balance",
+        "shape": "strain"
+      },
+      "entryId": "combo.strain-retribution-balance"
     }
   },
   "schemaVersion": 1

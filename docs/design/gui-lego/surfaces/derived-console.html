@@ -16,12 +16,8 @@
     background: linear-gradient(180deg, rgb(51 43 33 / 0.55), rgb(18 15 12 / 0.35)), var(--panel);
     overflow: hidden;
   }
-  .console > .console-hd {
-    flex: none; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;
-    padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
-  }
   .console > .cat-bar {
-    flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px;
+    flex: none; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 14px;
     border-bottom: 1px solid var(--border); background: rgb(18 15 12 / 0.35);
   }
   .console > .inspect-split {
@@ -36,7 +32,7 @@
   .console > .foot {
     flex: none; padding: 8px 14px; border-top: 1px solid var(--border);
   }
-  .hd-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+  .hd-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto; }
   .family-block + .family-block { margin-top: 14px; }
   .row + .row { margin-top: 6px; }
 </style>
@@ -45,29 +41,23 @@
 <main class="lego-page" style="max-width:min(1600px,96vw)">
   <h1>Surface <code>derived-console</code></h1>
   <p class="lede">Assembled from gui-lego pieces + recipe slots. Direct children of <code>.console</code> preserve CSS <code>&gt;</code> contracts.
+  No Derived identity header — ActorPanel owns who/level. Tools sit on the primary cook rail.
   Recipe: <code>recipes/derived-console.json</code>. Visual peer of <code>derived-combat-console.html</code>, Lego grammar.</p>
 
   <div class="console" data-surface="derived-console" style="--piece-accent:var(--el-fire);--piece-rail-edge:var(--el-fire);--piece-select-glow:rgb(224 112 60 / 0.35)">
-    <header class="console-hd">
-      <div class="identity">
-        <div class="who">Emberling</div>
-        <div class="meta">Lv <b>12</b> · Plant · Elements / Fire</div>
-      </div>
-      <div class="hd-tools">
-        <input class="search" type="search" placeholder="Search channels" aria-label="Search channels">
-        <label class="toggle"><span class="track"><span class="knob"></span></span> Show unchanged</label>
-      </div>
-    </header>
-
-    <nav class="cat-bar" aria-label="Cook tabs">
+    <nav class="cat-bar" aria-label="Cook tabs" data-testid="derived-tab">
       <button type="button" class="chip is-on">Elements</button>
       <button type="button" class="chip">Status</button>
       <button type="button" class="chip">Resources</button>
       <button type="button" class="chip">Other</button>
+      <div class="hd-tools">
+        <input class="search" type="search" placeholder="Search channels" aria-label="Search channels">
+        <button type="button" class="toggle" role="switch" aria-checked="false"><span class="track"><span class="knob"></span></span> Show unchanged</button>
+      </div>
     </nav>
 
     <nav class="cat-bar variant-bar" aria-label="Variants">
-      <button type="button" class="chip is-on">Fire</button>
+      <button type="button" class="chip is-on vfx-ember-pulse" style="--piece-accent:var(--el-fire);--piece-rail-edge:var(--el-fire)">Fire</button>
       <button type="button" class="chip" style="--piece-accent:var(--el-ice);--piece-rail-edge:var(--el-ice)">Ice</button>
       <button type="button" class="chip" style="--piece-accent:var(--el-air);--piece-rail-edge:var(--el-air)">Air</button>
       <button type="button" class="chip" style="--piece-accent:var(--el-earth);--piece-rail-edge:var(--el-earth)">Earth</button>
@@ -136,8 +126,8 @@
   <section class="lego-card" style="margin-top:20px">
     <h2>Lifecycle samples (same kit)</h2>
     <div class="lego-grid two">
-      <div class="phase"><strong>phase-empty</strong>No channels match this filter.</div>
-      <div class="phase"><strong>phase-error</strong>Sheet unavailable<button type="button">Retry</button></div>
+      <div class="phase" data-phase="empty">No channels match this filter.</div>
+      <div class="phase" data-phase="error">Sheet unavailable<button type="button">Retry</button></div>
     </div>
   </section>
 </main>

@@ -15,7 +15,7 @@ Two things this brief deliberately does NOT contain, each because putting it the
 """
 from __future__ import annotations
 
-from .distribute import threshold_ladder
+from .distribute import legal_set_stat_pool, threshold_ladder
 from .roles import HYBRID_CORE_ROLES
 from .themes import Theme
 from .tuning import SetCharmGenTuning
@@ -96,7 +96,7 @@ def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabul
     ladder = threshold_ladder(tuning, members)
     higher = ladder[1:]
     capability_pool = vocabulary.capability
-    stat_pool = vocabulary.stat
+    stat_pool = legal_set_stat_pool(vocabulary, tuning)
     identity = (f"the demon species '{theme.display_name}'" if theme.population == "species"
                 else f"the build '{theme.display_name}' ({theme.aptitude} / {theme.archetype})")
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")

@@ -14,6 +14,12 @@ import statusDot from "./themes/status-category-dot.json";
 import statusCc from "./themes/status-category-cc.json";
 import statusContagion from "./themes/status-category-contagion.json";
 import statusOmni from "./themes/status-category-omni.json";
+import resourceHp from "./themes/resource-hp.json";
+import resourceStamina from "./themes/resource-stamina.json";
+import resourceHunger from "./themes/resource-hunger.json";
+import resourceSpirit from "./themes/resource-spirit.json";
+import resourceQi from "./themes/resource-qi.json";
+import resourcePoise from "./themes/resource-poise.json";
 
 /**
  * FE copies of docs/design/gui-lego/themes/packs — design pack remains SSOT on conflict.
@@ -33,7 +39,13 @@ const PACKS: ThemePack[] = [
   statusDot as ThemePack,
   statusCc as ThemePack,
   statusContagion as ThemePack,
-  statusOmni as ThemePack
+  statusOmni as ThemePack,
+  resourceHp as ThemePack,
+  resourceStamina as ThemePack,
+  resourceHunger as ThemePack,
+  resourceSpirit as ThemePack,
+  resourceQi as ThemePack,
+  resourcePoise as ThemePack
 ];
 
 const byId = new Map(PACKS.map((p) => [p.themeId, p]));
@@ -55,7 +67,8 @@ export function resolveTheme(ref: ThemeRef | undefined | null): ThemeResolved {
     themeId: pack.themeId,
     css: { ...pack.css },
     paint: { ...pack.paint },
-    vfx: { ...pack.vfx }
+    vfx: { ...pack.vfx },
+    glyphDefault: pack.glyphDefault ?? null
   };
 }
 

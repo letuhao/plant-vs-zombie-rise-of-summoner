@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.ActorSurface;
 
@@ -92,6 +93,7 @@ public static class ActorSurfaceCatalogHub
         AptitudeSurfaceCatalogHub.Configure(aptitudes);
         DerivedStatSurfaceCatalogHub.Configure(derived);
         StatusSurfaceCatalogHub.Configure(statuses);
+        StatusCatalogHub.Configure(StatusCatalogFactory.FromSurface(statuses));
         ResourceSurfaceCatalogHub.Configure(resources);
         ElementSurfaceCatalogHub.Configure(elements);
         ActorSheetSurfaceCatalogHub.Configure(sheet);

@@ -11,6 +11,10 @@
     "milestone-draw-002": {
       "entryId": "enh.013",
       "runtimeFamily": "atom.enhance-resilience"
+    },
+    "milestone-draw-003": {
+      "entryId": "enh.014",
+      "runtimeFamily": "atom.enhance-vitality"
     }
   },
   "schemaVersion": 1

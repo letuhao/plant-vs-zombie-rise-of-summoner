@@ -27,6 +27,20 @@
 - [x] C3 switch DerivedTab; delete ui/actor/derived/*
 - [x] C4 contract + e2e SSOT retarget + queue P0 done
 
+## Wave D — P0 audit fixes + coverage
+
+- [x] formatDerivedMagnitude total|delta; fold totals unsigned
+- [x] Recipe phasePayload binds; empty dock phase-empty + count
+- [x] bind validate before overwrite; DerivedTab refetch/OR/contrib
+- [x] fold/bind/RecipeMount/piece/DerivedTab tests green
+
+## Wave E — Derived chrome trim + chip presentation
+
+- [x] Show unchanged `role=switch`; tools on primary cook rail
+- [x] Drop identity / `.console-hd`; empty copy without debug label
+- [x] Variant accent + Lucide glyphs + VFX; resource theme packs
+- [x] Contract / DerivedTab / fold / design SSOT synced
+
 ## Queue (after P0 React)
 
 - [ ] P1 Condition

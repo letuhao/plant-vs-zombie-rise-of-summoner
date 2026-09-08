@@ -74,6 +74,7 @@ public static class DerivedAuditCoverage
                                 ids.Add($"{fam.Family}.{v.Id}");
                             break;
                         case "status-category":
+                        case "status-id":
                             foreach (var v in statusVariants)
                                 ids.Add($"{fam.Family}.{v.Id}");
                             break;

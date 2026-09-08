@@ -703,6 +703,38 @@
       "tags": [],
       "flavor": "A thick, woody shell that absorbs the impact of the world.",
       "notes": "themeKey: demon.wallnut"
+    },
+    {
+      "id": "charm.surv-util-029",
+      "nameKey": "charm.iron-capped-hollow",
+      "name": "Iron-Capped Hollow",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A dented, heavy iron dome that has lost its luster, containing nothing but the echoes of failed strikes.",
+      "notes": "themeKey: demon.bucketzombie",
+      "uniqueCarry": true
     }
   ]
 }

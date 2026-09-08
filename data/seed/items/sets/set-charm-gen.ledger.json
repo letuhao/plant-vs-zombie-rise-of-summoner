@@ -108,6 +108,18 @@
     "set-species-demon.snowpeashooter": {
       "entryId": "set.snowpeashooter-001",
       "attempts": 1
+    },
+    "set-species-demon.bucketnutzombie": {
+      "entryId": "set.bucketnutzombie-001",
+      "attempts": 3
+    },
+    "set-species-demon.cabbagepult": {
+      "entryId": "set.cabbagepult-001",
+      "attempts": 1
+    },
+    "set-species-demon.caltrop": {
+      "entryId": "set.caltrop-001",
+      "attempts": 1
     }
   }
 }

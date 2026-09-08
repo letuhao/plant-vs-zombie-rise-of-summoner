@@ -18,7 +18,7 @@ public static class DerivedSurfaceCook
         var derived = DerivedStatSurfaceCatalogHub.Catalog;
         var elements = ElementSurfaceCatalogHub.Catalog;
         var resources = ResourceSurfaceCatalogHub.Catalog;
-        // Status hub is configured for ConfigureAll / version stamp; variants come from derived catalog.
+        // Status hub supplies Status rail variants (Omni + catalog ids).
         _ = StatusSurfaceCatalogHub.Catalog;
 
         var entriesByGroup = derived.Entries
@@ -69,16 +69,7 @@ public static class DerivedSurfaceCook
                     PresentationOnly = e.PresentationOnly
                 })
                 .ToList(),
-            "status" => derived.StatusCategoryVariants
-                .OrderBy(v => v.Ordinal)
-                .Select(v => new DerivedSurfaceVariantDto
-                {
-                    Id = v.Id,
-                    DisplayName = v.DisplayName.Resolve(lang),
-                    Ordinal = v.Ordinal,
-                    PresentationOnly = v.PresentationOnly
-                })
-                .ToList(),
+            "status" => CookStatusVariants(lang),
             "resources" => CookResourceVariants(resources, side),
             _ => new List<DerivedSurfaceVariantDto>()
         };
@@ -164,6 +155,35 @@ public static class DerivedSurfaceCook
             });
         }
 
+        return list;
+    }
+
+    static List<DerivedSurfaceVariantDto> CookStatusVariants(string lang)
+    {
+        var statuses = StatusSurfaceCatalogHub.Catalog.Entries
+            .OrderBy(e => e.Id, StringComparer.Ordinal)
+            .ToList();
+        var list = new List<DerivedSurfaceVariantDto>(statuses.Count + 1)
+        {
+            new()
+            {
+                Id = "omni",
+                DisplayName = lang.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? "全域" : "Omni",
+                Ordinal = 0,
+                PresentationOnly = true
+            }
+        };
+        for (var i = 0; i < statuses.Count; i++)
+        {
+            var e = statuses[i];
+            list.Add(new DerivedSurfaceVariantDto
+            {
+                Id = e.Id,
+                DisplayName = e.DisplayName,
+                Ordinal = i + 1,
+                PresentationOnly = false
+            });
+        }
         return list;
     }
 

@@ -2,29 +2,12 @@
   "surfaceId": "derived-console",
   "host": "actor-panel-tab",
   "version": 1,
-  "notes": "Design SSOT recipe. Mount inside ActorPanel Derived tab. Header copy for family-block is payload.title — not a separate piece.",
+  "notes": "Design SSOT recipe. Mount inside ActorPanel Derived tab. No identity header — ActorPanel owns who/level. Tools live on the primary cook rail.",
   "root": {
     "piece": "surface-shell",
     "instanceId": "shell:derived",
     "bind": "vm",
     "slots": {
-      "identity": {
-        "piece": "identity-hd",
-        "instanceId": "identity:derived",
-        "bind": "vm.identity"
-      },
-      "tools": [
-        {
-          "piece": "tool-search",
-          "instanceId": "tool:search",
-          "bind": "vm.search"
-        },
-        {
-          "piece": "tool-toggle",
-          "instanceId": "tool:showUnchanged",
-          "bind": "vm.showUnchanged"
-        }
-      ],
       "railPrimary": {
         "piece": "rail-primary",
         "instanceId": "rail:primary",
@@ -34,7 +17,19 @@
             "$bindArray": "vm.primaryRail.chips",
             "piece": "chip",
             "instanceIdTemplate": "chip:primary:{id}"
-          }
+          },
+          "tools": [
+            {
+              "piece": "tool-search",
+              "instanceId": "tool:search",
+              "bind": "vm.search"
+            },
+            {
+              "piece": "tool-toggle",
+              "instanceId": "tool:showUnchanged",
+              "bind": "vm.showUnchanged"
+            }
+          ]
         }
       },
       "railVariant": {
@@ -62,7 +57,7 @@
               "content": {
                 "piece": "family-list",
                 "instanceId": "families:derived",
-                "bind": "vm.families",
+                "bind": "vm.familyList",
                 "slots": {
                   "blocks": {
                     "$bindArray": "vm.families",
@@ -136,9 +131,9 @@
     }
   },
   "lifecycleOverlays": {
-    "loading": { "piece": "phase-loading", "bind": "vm.phase" },
-    "empty": { "piece": "phase-empty", "bind": "vm.phase" },
-    "error": { "piece": "phase-error", "bind": "vm.phase" },
+    "loading": { "piece": "phase-loading", "bind": "vm.phasePayload" },
+    "empty": { "piece": "phase-empty", "bind": "vm.phasePayload" },
+    "error": { "piece": "phase-error", "bind": "vm.phasePayload" },
     "pendingField": { "piece": "phase-pending", "bind": "field.phase" }
   }
 }

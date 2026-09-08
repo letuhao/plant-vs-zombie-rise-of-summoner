@@ -126,7 +126,8 @@ export function joinDerivedChannelId(
 export function expandDerivedFamily(
   family: DerivedFamilyCatalogRow | DerivedSurfaceFamily,
   elements: ElementCatalogRow[],
-  resources: { id: string }[] = []
+  resources: { id: string }[] = [],
+  statuses: { id: string; displayName?: string }[] = []
 ): ExpandedDerivedChannel[] {
   const expand = family.expand as DerivedExpandKind;
   switch (expand) {
@@ -138,6 +139,17 @@ export function expandDerivedFamily(
           element,
           variantLabel: element.displayName
         }));
+    case "status-id":
+      return [
+        { channelId: `${family.family}.omni`, element: null, variantLabel: "Omni" },
+        ...[...statuses]
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map((s) => ({
+            channelId: `${family.family}.${s.id}`,
+            element: null,
+            variantLabel: s.displayName ?? s.id
+          }))
+      ];
     case "status-category":
       return STATUS_CATEGORY_VARIANTS.map((id) => ({
         channelId: `${family.family}.${id}`,
@@ -225,9 +237,9 @@ export function bucketContributions(contributions: ActorContributionDto[]): {
     .map(([key, value]) => ({ key, label: BUCKET_LABELS[key] ?? key, value }));
 }
 
-/** @deprecated Prefer formatDerivedMagnitude — kept for stop-gap row/inspector. */
+/** Thin alias — channel totals use formatDerivedMagnitude role "total". */
 export function formatChannelValue(value: number, unitClass: string): string {
-  return formatDerivedMagnitude(value, unitClass).valueText;
+  return formatDerivedMagnitude(value, unitClass, { role: "total" }).valueText;
 }
 
 export function toLiveMap(

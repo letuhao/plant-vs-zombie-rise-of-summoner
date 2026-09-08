@@ -310,10 +310,30 @@ public static partial class BattleEngine
             // never at wiring time.
             if (runnerBindings is { Count: > 0 })
                 Host.UseRunner(runnerBindings, seed, () => NowTick);
-            Status = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(),
+            Status = new StatusRuntime(StatusCatalogHub.Current,
                 (ptr, attackerLess) => attackerLess || ptr == null || !ByKey.TryGetValue(ptr, out var a)
                     ? ActorDerivedSnapshot.AttackerLess()
                     : a.Derived);
+
+            // status-rail B2: project status-instance StatMods into the battle ledger (lawn does this
+            // in EffectRuntime.OnApplied). Distinct from FA1 EffectActions.ModifyStat.
+            Status.OnApplied = inst =>
+            {
+                if (inst.StatMods.Count == 0) return;
+                foreach (var mod in StatusStatPayload.ToModifiers(inst))
+                {
+                    Ledger.Add(
+                        inst.HostPtr,
+                        mod.Channel,
+                        StatusStatPayload.SourceIdOf(inst),
+                        mod);
+                }
+            };
+            Status.OnEnded = inst =>
+            {
+                if (inst.StatMods.Count == 0) return;
+                Ledger.RemoveBySource(inst.HostPtr, StatusStatPayload.SourceIdOf(inst));
+            };
 
             // Shield stack (battle-adoption): battle-local runtime + gate; every HP delta goes
             // through the shared pipeline so the one-key discipline holds (single FA10 slot per

@@ -1,10 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { render } from "@testing-library/react";
 import { bindSurface } from "./bindSurface";
 import { clearPieceRegistryForTests, registerPiece } from "./pieceRegistry";
 import { clearRecipeRegistryForTests, registerRecipe } from "./recipeRegistry";
-import { createSurfaceBus } from "./createSurfaceBus";
-import { RecipeMount } from "@/ui/gui-lego/RecipeMount";
 import type { RecipeDocument } from "./types";
 
 const fixtureRecipe: RecipeDocument = {
@@ -130,12 +127,40 @@ describe("bindSurface", () => {
     expect(rows[0]!.instanceId).toBe("row:combat.power.fire");
   });
 
-  it("applies lifecycle overlay when phase is not ready", () => {
-    const vm = { ...readyVm(), phase: "loading" };
+  it("applies lifecycle overlay when phase is loading", () => {
+    const vm = {
+      ...readyVm(),
+      phase: "loading",
+      phasePayload: {
+        piece: "phase-loading",
+        phase: "loading",
+        message: "Loading derived…",
+        canRetry: false
+      }
+    };
     const plan = bindSurface(fixtureRecipe, vm);
     expect(plan.root).toBeNull();
     expect(plan.overlay?.pieceId).toBe("phase-loading");
     expect(plan.overlay?.instanceId).toBe("overlay:loading");
+    expect(plan.overlay?.payload.message).toBe("Loading derived…");
+    expect(plan.overlay?.payload.phase).toBe("loading");
+  });
+
+  it("empty phase keeps root and does not attach surface overlay", () => {
+    const vm = {
+      ...readyVm(),
+      phase: "empty",
+      phasePayload: { piece: "phase-empty", phase: "empty", message: "Nothing" }
+    };
+    const plan = bindSurface(fixtureRecipe, vm);
+    expect(plan.root).not.toBeNull();
+    expect(plan.overlay).toBeNull();
+  });
+
+  it("throws when payload.piece mismatches recipe piece", () => {
+    const vm = readyVm();
+    vm.primaryRail.piece = "chip";
+    expect(() => bindSurface(fixtureRecipe, vm)).toThrow(/payload.piece/);
   });
 
   it("attaches themeResolved from themeRef", () => {
@@ -149,86 +174,5 @@ describe("bindSurface", () => {
       .chips as import("./types").MountNode[];
     expect(chips[0]!.payload.themeResolved?.themeId).toBe("element.fire");
     expect(chips[0]!.payload.themeResolved?.paint.accent).toMatch(/^#/);
-  });
-});
-
-describe("RecipeMount", () => {
-  beforeEach(() => {
-    clearPieceRegistryForTests();
-    registerPiece({
-      pieceId: "surface-shell",
-      slots: ["railPrimary"],
-      factory: ({ slots }) => (
-        <div className="console" data-testid="fx-console">
-          {slots.railPrimary}
-        </div>
-      )
-    });
-    registerPiece({
-      pieceId: "rail-primary",
-      slots: ["chips"],
-      factory: ({ slots }) => (
-        <div className="rail-primary" role="tablist" data-testid="fx-rail">
-          {slots.chips}
-        </div>
-      )
-    });
-    registerPiece({
-      pieceId: "chip",
-      slots: [],
-      factory: ({ payload }) => (
-        <button type="button" role="tab" data-instance={payload.instanceId}>
-          {String(payload.label ?? "")}
-        </button>
-      )
-    });
-  });
-
-  afterEach(() => clearPieceRegistryForTests());
-
-  it("renders chips as direct children of rail (no contents wrapper)", () => {
-    const recipe: RecipeDocument = {
-      surfaceId: "fx-dom",
-      root: {
-        piece: "surface-shell",
-        instanceId: "shell",
-        bind: "vm",
-        slots: {
-          railPrimary: {
-            piece: "rail-primary",
-            instanceId: "rail",
-            bind: "vm.primaryRail",
-            slots: {
-              chips: {
-                $bindArray: "vm.primaryRail.chips",
-                piece: "chip",
-                instanceIdTemplate: "chip:{id}"
-              }
-            }
-          }
-        }
-      }
-    };
-    const vm = {
-      phase: "ready",
-      revision: 1,
-      piece: "surface-shell",
-      primaryRail: {
-        piece: "rail-primary",
-        phase: "ready",
-        chips: [
-          { piece: "chip", id: "a", label: "A", phase: "ready" },
-          { piece: "chip", id: "b", label: "B", phase: "ready" }
-        ]
-      }
-    };
-    const plan = bindSurface(recipe, vm);
-    const bus = createSurfaceBus();
-    const { container } = render(<RecipeMount plan={plan} bus={bus} />);
-    const rail = container.querySelector(".rail-primary");
-    expect(rail).toBeTruthy();
-    const kids = [...(rail?.children ?? [])];
-    expect(kids.every((el) => el.tagName === "BUTTON")).toBe(true);
-    expect(container.querySelector(".contents")).toBeNull();
   });
 });

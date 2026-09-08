@@ -16,5 +16,5 @@
     "select": "vfx.air-pulse",
     "idle": null
   },
-  "glyphDefault": null
+  "glyphDefault": "wind"
 }

@@ -48,17 +48,17 @@ def _identity_fields() -> "dict[str, Any]":
     `kinds.py`'s `UNIQUE_OWNERSHIP["nameKey"] = "PLANNED"` — the same field is planned, not
     authored, on every other kind that mints one ahead of the call."""
     return {
-        "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        "flavor": {"type": "string", "minLength": 8, "maxLength": 400},
+        "name": {"type": ["string", "null"], "minLength": 3, "maxLength": 48},
+        "flavor": {"type": ["string", "null"], "minLength": 8, "maxLength": 400},
     }
 
 
 def _blocked() -> "dict[str, Any]":
     return {
-        "type": "string",
+        "type": ["string", "null"],
         "description": "Set this INSTEAD of the content fields if the brief cannot be satisfied — "
                        "say why. A blocked answer writes nothing and is reported, not retried "
-                       "forever.",
+                       "forever. When blocked is set, every other field must be null.",
     }
 
 
@@ -83,15 +83,17 @@ def combination_schema(tuning: ComboTuning, *,
         raise ValueError(
             "no role's socket ceiling reaches the ingredient count, so no combination could ever "
             "fire; refusing to build a schema for content nothing can host")
+    # required + nullable: same 2026-09-08 / 2026-09-09 live-model fix as setgen/affixfamgen —
+    # `"required": []` lets constrained decoding omit name/flavor forever through heal.
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": [],
+        "required": ["name", "flavor", "blocked", "ingredients", "grants", "hostRole", "hostFrame"],
         "properties": {
             **_identity_fields(),
             "blocked": _blocked(),
             "ingredients": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": tuning.ingredient_count,
                 "maxItems": tuning.ingredient_count,
                 "items": {
@@ -103,7 +105,7 @@ def combination_schema(tuning: ComboTuning, *,
                 },
             },
             "grants": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": 1,
                 "maxItems": 2,
                 "items": {
@@ -115,14 +117,14 @@ def combination_schema(tuning: ComboTuning, *,
                 },
             },
             "hostRole": {
-                "type": "string",
-                "enum": list(host_roles),
-                "description": "omit for any role; naming one pins the combination to that chassis",
+                "type": ["string", "null"],
+                "enum": list(host_roles) + [None],
+                "description": "null for any role; naming one pins the combination to that chassis",
             },
             "hostFrame": {
-                "type": "string",
-                "enum": list(HOST_FRAMES),
-                "description": "omit for any frame",
+                "type": ["string", "null"],
+                "enum": list(HOST_FRAMES) + [None],
+                "description": "null for any frame",
             },
         },
     }

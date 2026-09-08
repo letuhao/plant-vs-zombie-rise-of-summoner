@@ -35,6 +35,32 @@ MORE_OP_FAMILIES: "frozenset[str]" = frozenset({"atom.bulwark", "atom.savagery"}
 MATCH_SCOPE_ONLY_FAMILIES: "frozenset[str]" = frozenset({"atom.warding", "atom.resilience"})
 
 
+def legal_set_stat_pool(vocabulary: Vocabulary,
+                        tuning: "SetCharmGenTuning | None" = None) -> "tuple[FamilyPick, ...]":
+    """Stat picks a set brief/schema may offer — distributor-legal only (D14 / More ban).
+
+    Charm already filters via `charm_pool`. Set used to print the raw `vocabulary.stat` pool,
+    including match-scope-only and More-op families that `distribute_set` then refuses — the
+    brief/schema vs distributor mismatch that produced live escalate on `atom.resilience`.
+    """
+    kinds = frozenset(tuning.stat_kinds) if tuning is not None else None
+    return tuple(
+        pick for pick in vocabulary.stat
+        if pick.family not in MORE_OP_FAMILIES
+        and pick.family not in MATCH_SCOPE_ONLY_FAMILIES
+        and (kinds is None or pick.kind_id in kinds)
+    )
+
+
+def capability_family_ids(vocabulary: Vocabulary) -> "tuple[str, ...]":
+    """Closed `capability.family` enum values — unique family ids from the capability pool."""
+    seen: "list[str]" = []
+    for pick in vocabulary.capability:
+        if pick.family not in seen:
+            seen.append(pick.family)
+    return tuple(seen)
+
+
 @dataclass(frozen=True)
 class RollPlan:
     """ssot-sets §3.9's member-piece shape, in the columns that actually exist.

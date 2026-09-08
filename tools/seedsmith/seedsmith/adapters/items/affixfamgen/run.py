@@ -143,15 +143,22 @@ def main(argv=None) -> int:
     ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
     args = ap.parse_args(argv)
 
-    brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
-                                               theme_note=args.theme)
+    partition = brief_mod.load_partition_context(args.group)
+    free_pairs = brief_mod.free_channel_ops(partition, args.affix_kind)
 
     if args.dry_run:
         print(json.dumps({"group": args.group, "kindId": args.affix_kind,
-                          "existingChannels": list(brief.partition.channels)},
+                          "existingChannels": list(partition.channels),
+                          "freePairs": [f"{c}|{o}" for c, o in free_pairs]},
                          ensure_ascii=False, indent=2))
-        print("--- brief ---")
-        print(brief.render())
+        if free_pairs:
+            brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
+                                                       theme_note=args.theme)
+            print("--- brief ---")
+            print(brief.render())
+        else:
+            print("--- brief ---")
+            print("(skipped — no free (channel, op) pair remains)")
         return 0
 
     if not args.write:
@@ -159,13 +166,15 @@ def main(argv=None) -> int:
             "seedsmith: refused — no --write. Use --dry-run to inspect the brief first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
 
-    free_pairs = brief_mod.free_channel_ops(brief.partition, args.affix_kind)
     if not free_pairs:
         print(json.dumps({
             "outcome": "blocked",
             "reason": "no free (channel, op) pair remains in this partition for the requested kind",
         }, ensure_ascii=False, indent=2))
         return 0
+
+    brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
+                                               theme_note=args.theme)
 
     from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
 
@@ -175,7 +184,8 @@ def main(argv=None) -> int:
             "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     validator = lambda answer, schema: schema_mod.validate_answer(
-        answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind)
+        answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind,
+        free_pairs=free_pairs)
     answer = live_answer_caller(config, validator=validator)(brief.render(), brief.schema)
 
     defects = validator(answer, brief.schema)

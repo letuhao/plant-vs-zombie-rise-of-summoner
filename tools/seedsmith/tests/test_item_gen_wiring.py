@@ -218,14 +218,14 @@ class SchemaCheckTests(unittest.TestCase):
 
     def test_a_clean_answer_has_no_schema_defects(self):
         for label, draft, schema in (
-            ("set", _clean_set_answer(), schema_mod.set_schema(TUNING)),
+            ("set", _clean_set_answer(), schema_mod.set_schema(TUNING, vocabulary=VOCAB)),
             ("charm", _clean_charm_answer(), schema_mod.charm_schema(TUNING)),
         ):
             with self.subTest(label):
                 self.assertEqual(answers_mod.schema_defects(draft, schema), [])
 
     def test_each_closed_keyword_is_actually_enforced(self):
-        schema = schema_mod.set_schema(TUNING)
+        schema = schema_mod.set_schema(TUNING, vocabulary=VOCAB)
         cases = {
             "unknown field": ({**_clean_set_answer(), "tier": "x"}, "unknown field"),
             "bad role enum": ({**_clean_set_answer(),
@@ -706,7 +706,7 @@ class Module13DefectsFixedTests(unittest.TestCase):
         The enum, the row count and the brief all read the ladder now."""
         ladder = distribute.threshold_ladder(TUNING, TUNING.typical_members)
         self.assertEqual(ladder, (2, 4))
-        node = schema_mod.set_schema(TUNING)["properties"]["thresholds"]
+        node = schema_mod.set_schema(TUNING, vocabulary=VOCAB)["properties"]["thresholds"]
         self.assertEqual(node["items"]["properties"]["pieces"]["enum"], [2, 4])
         self.assertEqual((node["minItems"], node["maxItems"]), (2, 2))
         text = brief_mod.build_set_brief(_build_theme(), TUNING, VOCAB)
@@ -723,15 +723,15 @@ class Module13DefectsFixedTests(unittest.TestCase):
         one row, and the schema is now sized from the ladder instead of assuming two.
         """
         self.assertEqual(distribute.threshold_ladder(TUNING, 5), (2, 4))
-        five = schema_mod.set_schema(TUNING, member_count=5)["properties"]["thresholds"]
+        five = schema_mod.set_schema(TUNING, vocabulary=VOCAB, member_count=5)["properties"]["thresholds"]
         self.assertEqual((five["minItems"], five["maxItems"]), (2, 2))
         self.assertEqual(five["items"]["properties"]["pieces"]["enum"], [2, 4])
-        two = schema_mod.set_schema(TUNING, member_count=2)["properties"]["thresholds"]
+        two = schema_mod.set_schema(TUNING, vocabulary=VOCAB, member_count=2)["properties"]["thresholds"]
         self.assertEqual((two["minItems"], two["maxItems"]), (1, 1))
         for count in (2, 3, 4, 5, 6):
             with self.subTest(members=count):
                 ladder = distribute.threshold_ladder(TUNING, count)
-                node = schema_mod.set_schema(TUNING, member_count=count)["properties"]["thresholds"]
+                node = schema_mod.set_schema(TUNING, vocabulary=VOCAB, member_count=count)["properties"]["thresholds"]
                 self.assertEqual(node["minItems"], len(ladder))
                 self.assertEqual(node["items"]["properties"]["pieces"]["enum"], list(ladder))
 

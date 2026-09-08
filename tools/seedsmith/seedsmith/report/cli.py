@@ -807,9 +807,18 @@ def _cmd_items_combination(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
 
     planned_total = len(plan.subjects)
+    # Resume before limit: slicing the full grid first made --limit 1 hit an already-ledgered
+    # sample cell and report planned=0 while dozens of subjects still needed work.
+    from ..adapters.items.combogen import authored as authored_mod
+    from ..pipeline.run_ledger import RunLedger
+    import dataclasses
+
+    ledger_root = Path(args.out_dir) if args.out_dir else authored_mod.COMBINATIONS_DIR
+    ledger = RunLedger(ledger_root / authored_mod.DEFAULT_LEDGER_NAME)
+    needing = authored_mod.plan_needing_work(plan, ledger)
     if args.limit and args.limit > 0:
-        import dataclasses
-        plan = dataclasses.replace(plan, subjects=plan.subjects[:args.limit])
+        needing = needing[: args.limit]
+    plan = dataclasses.replace(plan, subjects=needing)
 
     legality = migrate_mod.legality_report(tuning, host_roles=plan.host_roles)
     summary = {

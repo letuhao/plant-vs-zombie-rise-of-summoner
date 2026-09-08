@@ -13,8 +13,8 @@
     "onAccent": "#1a1410"
   },
   "vfx": {
-    "select": null,
+    "select": "vfx.status-omni-pulse",
     "idle": null
   },
-  "glyphDefault": null
+  "glyphDefault": "hexagon"
 }

@@ -38,6 +38,8 @@ export type ThemeResolved = {
     onAccent: string;
   };
   vfx: { select: string | null; idle: string | null };
+  /** Lucide / CatalogIcon key when the pack authors a default glyph. */
+  glyphDefault?: string | null;
 };
 
 export type ThemePack = {

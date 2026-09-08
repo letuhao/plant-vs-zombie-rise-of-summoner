@@ -15,6 +15,7 @@ import type {
 } from "./types";
 import {
   BUCKET_LABELS,
+  COOK_PRIMARY_TAB_IDS,
   COMPOSE_SENTENCE,
   UNIT_SENTENCE,
   bucketContributions,
@@ -59,16 +60,16 @@ export type DerivedSurfaceVmInput = {
   revision?: number;
 };
 
-export type DerivedSurfaceVm = PiecePayload & {
+export type DerivedSurfaceVm = {
   phase: Phase;
   revision: number;
   selectedChannelId: string | null;
   selectedInstanceId: string | null;
-  identity: PiecePayload;
   search: PiecePayload;
   showUnchanged: PiecePayload;
   primaryRail: PiecePayload & { chips: PiecePayload[] };
   variantRail: PiecePayload & { chips: PiecePayload[] };
+  familyList: PiecePayload;
   families: PiecePayload[];
   dockScroll: PiecePayload;
   inspectScroll: PiecePayload;
@@ -82,6 +83,8 @@ export type DerivedSurfaceVm = PiecePayload & {
   };
   foot: PiecePayload;
   phasePayload: PiecePayload;
+  themeRef?: ThemeRef;
+  themeResolved?: import("./types").ThemeResolved;
 };
 
 const PAINT_BUCKET: Record<string, string> = {
@@ -106,8 +109,77 @@ function variantTheme(
 ): ThemeRef | undefined {
   if (!variantId) return undefined;
   if (tabId === "elements") return { kind: "element", id: variantId };
-  if (tabId === "status") return { kind: "status-category", id: variantId };
+  if (tabId === "status") {
+    // Omni + L2b category chips reuse status-category packs; per-status ids tint via category pack.
+    if (variantId === "omni" || variantId === "dot" || variantId === "cc" || variantId === "contagion") {
+      return { kind: "status-category", id: variantId };
+    }
+    return { kind: "status-category", id: statusIdToL2b(variantId) };
+  }
+  if (tabId === "resources") return { kind: "resource", id: variantId };
   return undefined;
+}
+
+/** L2b category for status-catalog ids — mirrors StatusCategoryRegistry. */
+function statusIdToL2b(statusId: string): string {
+  const map: Record<string, string> = {
+    wither: "dot",
+    poison: "dot",
+    leech: "dot",
+    bond: "dot",
+    rally: "dot",
+    expose: "dot",
+    command: "dot",
+    shatter: "dot",
+    "nerve.unsettled": "dot",
+    "nerve.shaken": "dot",
+    "nerve.afflicted": "dot",
+    butter: "cc",
+    freeze: "cc",
+    cold: "cc",
+    hypno: "cc",
+    ember: "cc",
+    jala: "cc",
+    kelp: "cc",
+    charm_pulse: "cc",
+    blight: "contagion",
+    rot: "contagion",
+    spark: "contagion",
+    pact_mark: "contagion",
+    spore: "contagion"
+  };
+  return map[statusId] ?? "dot";
+}
+
+function statusGlyph(statusId: string): string {
+  const map: Record<string, string> = {
+    omni: "hexagon",
+    butter: "ban",
+    freeze: "snowflake",
+    cold: "snowflake",
+    poison: "virus",
+    hypno: "sparkles",
+    ember: "flame",
+    jala: "flame",
+    kelp: "wind",
+    wither: "activity",
+    bond: "hexagon",
+    rally: "shield",
+    leech: "heart",
+    expose: "crosshair",
+    command: "sword",
+    shatter: "zap",
+    charm_pulse: "sparkles",
+    blight: "virus",
+    rot: "virus",
+    spark: "zap",
+    pact_mark: "hexagon",
+    spore: "virus",
+    "nerve.unsettled": "activity",
+    "nerve.shaken": "activity",
+    "nerve.afflicted": "activity"
+  };
+  return map[statusId] ?? "hexagon";
 }
 
 function glyphFromFamily(icon: string | null | undefined, title: string): GlyphRef {
@@ -120,7 +192,11 @@ function glyphFromFamily(icon: string | null | undefined, title: string): GlyphR
 export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfaceVm {
   const locale = input.locale ?? "en";
   const revision = input.revision ?? 1;
-  const tabs = [...input.cookTabs].sort((a, b) => a.order - b.order);
+  // Pin primary rail to COOK_PRIMARY_TAB_IDS order (SSOT); drop unknown cook ids.
+  const byCookId = new Map(input.cookTabs.map((t) => [t.id, t]));
+  const tabs = COOK_PRIMARY_TAB_IDS.map((id) => byCookId.get(id)).filter(
+    (t): t is DerivedSurfaceTab => t != null
+  );
   const tabId =
     tabs.some((t) => t.id === input.ui.tabId) && input.ui.tabId
       ? input.ui.tabId
@@ -246,15 +322,6 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
   else if (visibleRows.length === 0) phase = "empty";
 
   const sideRef = sideTheme(input.identity.side);
-  const identity: PiecePayload = {
-    piece: "identity-hd",
-    instanceId: "identity:derived",
-    phase: "ready",
-    who: input.identity.displayName,
-    meta: `Lv ${input.identity.level} · ${input.identity.side} · cook ${activeTab?.id ?? "—"}`,
-    themeRef: sideRef,
-    themeResolved: resolveTheme(sideRef)
-  };
 
   const search: PiecePayload = {
     piece: "tool-search",
@@ -293,6 +360,10 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
 
   const variantChips: PiecePayload[] = variantChoices.map((v) => {
     const themeRef = variantTheme(tabId, v.id);
+    const themeResolved = resolveTheme(themeRef ?? null);
+    if (tabId === "status") {
+      themeResolved.glyphDefault = statusGlyph(v.id);
+    }
     return {
       piece: "chip",
       instanceId: `chip:variant:${v.id}`,
@@ -303,7 +374,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       rail: "variant" as const,
       elementId: tabId === "elements" ? v.id : undefined,
       themeRef,
-      themeResolved: resolveTheme(themeRef ?? null)
+      themeResolved
     };
   });
 
@@ -335,7 +406,10 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       const mag: MagnitudeDisplay | null =
         row.state === "no-producer" || !row.live
           ? null
-          : formatDerivedMagnitude(row.live.value, row.unitClass, locale);
+          : formatDerivedMagnitude(row.live.value, row.unitClass, {
+              locale,
+              role: "total"
+            });
       const rowTheme = row.element
         ? ({ kind: "element", id: row.element.id } as ThemeRef)
         : themeVar;
@@ -400,21 +474,29 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
         : phase === "error"
           ? "Derived sheet unavailable"
           : "No channels in this filter.",
-    canRetry: phase === "error"
+    canRetry: phase === "error",
+    retryLabel: "Retry"
   };
 
   return {
-    piece: "surface-shell",
-    instanceId: "shell:derived",
+    // No top-level `piece` — children bind to `vm` (e.g. split-inspect) and must not
+    // inherit surface-shell's piece id. Root piece comes from the recipe.
     phase,
     revision,
     selectedChannelId,
     selectedInstanceId: selectedChannelId ? `row:${selectedChannelId}` : null,
-    identity,
     search,
     showUnchanged,
     primaryRail,
     variantRail,
+    /** List metadata for family-list bind (count drives dock empty). */
+    familyList: {
+      piece: "family-list",
+      instanceId: "families:derived",
+      phase: phase === "empty" ? ("empty" as Phase) : ("ready" as Phase),
+      count: families.length,
+      message: "No channels in this filter."
+    },
     families,
     dockScroll: {
       piece: "scroll-region",
@@ -483,7 +565,10 @@ function buildInspect(
   const mag =
     selected.state === "no-producer" || !selected.live
       ? null
-      : formatDerivedMagnitude(selected.live.value, selected.unitClass, locale);
+      : formatDerivedMagnitude(selected.live.value, selected.unitClass, {
+          locale,
+          role: "total"
+        });
   const buckets = bucketContributions(selected.live?.contributions ?? []);
   const totalPos = buckets.filter((b) => b.key !== "neg").reduce((a, b) => a + b.value, 0) || 1;
   const max = Math.max(1, ...buckets.map((b) => b.value));
@@ -563,10 +648,10 @@ function buildInspect(
     value: b.value,
     barPct: Math.max(4, Math.round((b.value / max) * 100)),
     sharePct: Math.round((b.value / totalPos) * 100),
-    valueText:
-      selected.unitClass === "UnitInterval"
-        ? b.value.toFixed(2)
-        : `+${Math.round(b.value).toLocaleString()}`,
+    valueText: formatDerivedMagnitude(b.value, selected.unitClass, {
+      locale,
+      role: "delta"
+    }).valueText,
     paint: PAINT_BUCKET[b.key] ?? PAINT_BUCKET.other!
   }));
 
@@ -580,10 +665,10 @@ function buildInspect(
   const items = (selected.live?.contributions ?? []).map((c, i) => ({
     id: `${c.sourceId}-${i}`,
     label: c.label,
-    valueText:
-      selected.unitClass === "UnitInterval"
-        ? c.value.toFixed(2)
-        : `${c.value >= 0 ? "+" : ""}${c.value.toLocaleString()}`
+    valueText: formatDerivedMagnitude(c.value, selected.unitClass, {
+      locale,
+      role: "delta"
+    }).valueText
   }));
 
   const sources: PiecePayload = {

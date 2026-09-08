@@ -35,4 +35,16 @@ Fixes:
 
 ## Out of scope (unchanged)
 
-Cross-domain mega-fill; auto-`--write` on generate; inventing new partitions; schema/prompt changes; expanding `items validate --deps` beyond combination.
+Cross-domain mega-fill; auto-`--write` on generate; inventing new partitions; schema/prompt changes; expanding `items validate --deps` beyond combination; migrating `gem.word-*` / sockword combination corpus; wiring affixfamgen onto `call_with_self_heal` (today uses `live_answer_caller` one-repair).
+
+## Smoke resolve (2026-09-09)
+
+Root cause of gem fill `refused`: fill emitted `--batch-size`, which the outer `items generate` parser rejects (shared flag is `--count`). Fixed + skip full affix / empty gem slots before `max_partitions`. See todo for operator evidence.
+
+## Root-cause fixes (2026-09-09) — generator schema/vocab, not skips
+
+1. **Affix** — `required`+nullable wire schema, free-pair-only `channelOp`, derive `nameKey` ([`affixfamgen/schema.py`](../tools/seedsmith/seedsmith/adapters/items/affixfamgen/schema.py)).
+2. **Set** — `legal_set_stat_pool` + capability family enums so brief/schema match D14/More distributor bans.
+3. **Combination** — apply `--limit` after ledger resume; same required+nullable identity schema as setgen.
+
+Sockword retirement remains a separate migrate stream.

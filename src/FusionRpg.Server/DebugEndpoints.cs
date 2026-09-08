@@ -152,6 +152,7 @@ public static class DebugEndpoints
 
             var entered = false;
             var boardStart = FindLatestLiveBoardStart(store);
+            string? enteredLevelType = null;
 
             if (boardStart is null)
             {
@@ -176,9 +177,17 @@ public static class DebugEndpoints
                 }
                 else
                 {
-                    boardStart = await PollForKind(store, beforeEnter, "board.start", TimeSpan.FromSeconds(timeoutSec));
-                    if (boardStart is null)
-                        return Results.Conflict(new { ok = false, error = $"enter-level ok but no board.start within {timeoutSec}s — check main menu state" });
+                    // Some game builds create the Board and begin spawning before the Board.Awake
+                    // telemetry reaches the server. The injector's successful enter acknowledgement
+                    // is still authoritative for the level type; keep waiting for board.start for
+                    // lifecycle correlation, but do not reject a usable live board solely because
+                    // that optional telemetry edge was missed.
+                    enteredLevelType = PayloadString(enterAck.Payload, "levelType");
+                    // Board.Awake telemetry is best-effort on cold starts; bound this optional wait so
+                    // quick-start can continue from the authoritative enter acknowledgement instead
+                    // of holding the HTTP request for the full scenario timeout.
+                    boardStart = await PollForKind(store, beforeEnter, "board.start",
+                        TimeSpan.FromSeconds(Math.Min(timeoutSec, 5)));
                     entered = true;
                 }
 
@@ -194,7 +203,9 @@ public static class DebugEndpoints
                     return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
             }
 
-            var levelType = PayloadString(boardStart.Payload, "levelType") ?? "";
+            var levelType = boardStart is null
+                ? enteredLevelType ?? ""
+                : PayloadString(boardStart.Payload, "levelType") ?? "";
             if (BadLevelTypes.Contains(levelType))
                 return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
 

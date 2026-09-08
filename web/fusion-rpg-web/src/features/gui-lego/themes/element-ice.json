@@ -16,5 +16,5 @@
     "select": "vfx.frost-pulse",
     "idle": null
   },
-  "glyphDefault": null
+  "glyphDefault": "snowflake"
 }

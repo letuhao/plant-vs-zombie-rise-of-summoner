@@ -16,5 +16,5 @@
     "select": "vfx.light-pulse",
     "idle": null
   },
-  "glyphDefault": null
+  "glyphDefault": "sun"
 }

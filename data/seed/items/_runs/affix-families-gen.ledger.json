@@ -1,5 +1,15 @@
 {
   "done": {
+    "g.armour:stat.modify:op": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-op"
+    },
+    "g.armour:stat.modify:plate": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-plate"
+    },
     "g.elem-power:stat.derived:surfeit": {
       "groupId": "g.elem-power",
       "kindId": "stat.derived",

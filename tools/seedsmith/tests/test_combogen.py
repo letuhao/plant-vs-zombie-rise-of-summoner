@@ -242,6 +242,23 @@ class AuthoredBatchTests(unittest.TestCase):
         # The file still reflects both already-done entries — resume does not drop them.
         self.assertEqual(len(result_again.entries), 2)
 
+    def test_limit_after_resume_skips_already_done_first_cell(self) -> None:
+        """`--limit` must apply to needing work, not the raw grid head (smoke planned=0 bug)."""
+        authored_mod.run_batch(
+            plan=dataclasses.replace(self.plan, subjects=self.plan.subjects[:1]),
+            answers=self._answers_for_plan(), tuning=self.tuning,
+            out_dir=self.out_dir, authored_utc="1970-01-01T00:00:00Z", model="test/1",
+            ledger_path=self.ledger_path)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        limited = needing[:1]
+        self.assertEqual(len(limited), 1)
+        self.assertEqual(limited[0].subject_id, self.plan.subjects[1].subject_id)
+        # Wrong order (limit then resume) yields empty — the defect this guards against.
+        wrong = authored_mod.plan_needing_work(
+            dataclasses.replace(self.plan, subjects=self.plan.subjects[:1]), ledger)
+        self.assertEqual(wrong, [])
+
     def test_reconcile_recovers_a_corrupted_ledger_row(self) -> None:
         authored_mod.run_batch(
             plan=self.plan, answers=self._answers_for_plan(), tuning=self.tuning,
@@ -312,6 +329,7 @@ class CombinationLiveTransportTests(unittest.TestCase):
         plan = dataclasses.replace(plan, subjects=plan.subjects[:1])
         with tempfile.TemporaryDirectory() as temp:
             args = SimpleNamespace(
+                kind="combination",
                 out_dir=temp, answers="", endpoint="http://127.0.0.1:9876/v1/chat/completions",
                 model="test-live-model", allow_production_tree=False, ledger="",
                 authored_utc="1970-01-01T00:00:00Z")

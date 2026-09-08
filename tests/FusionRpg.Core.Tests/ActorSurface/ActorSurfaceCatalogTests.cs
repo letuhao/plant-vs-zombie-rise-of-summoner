@@ -85,6 +85,10 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(24, catalog.Entries.Count);
         Assert.Contains(catalog.Entries, e => e.Id == "butter" && e.Kind == StatusKind.UnityCc);
         Assert.Contains(catalog.Entries, e => e.Id == "wither" && e.Kind == StatusKind.OverTime);
+        Assert.Contains(catalog.Entries, e => e.Id == "bond" && e.PayloadKinds.Count == 0);
+        Assert.Contains(catalog.Entries, e => e.Id == "expose"
+            && e.PayloadKinds.Contains(StatusPayloadKind.ModifyStat));
+        Assert.Contains(catalog.Entries, e => e.Id == "leech" && e.PulseHealsAttacker);
     }
 
     [Fact]

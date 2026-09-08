@@ -17,7 +17,7 @@
         "en": "Status"
       },
       "order": 20,
-      "expand": "status-category"
+      "expand": "status-id"
     },
     {
       "id": "resources",
@@ -616,7 +616,7 @@
     },
     {
       "family": "status.power",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",
@@ -631,7 +631,7 @@
     },
     {
       "family": "status.resist",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",
@@ -647,7 +647,7 @@
     },
     {
       "family": "status.duration",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",
@@ -662,7 +662,7 @@
     },
     {
       "family": "status.durationReduction",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",
@@ -677,7 +677,7 @@
     },
     {
       "family": "status.intensity",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",
@@ -692,7 +692,7 @@
     },
     {
       "family": "status.intensityReduction",
-      "expand": "status-category",
+      "expand": "status-id",
       "sheetGroup": "status",
       "compose": "SumIncreased",
       "unitClass": "StatusPotencyPoints",

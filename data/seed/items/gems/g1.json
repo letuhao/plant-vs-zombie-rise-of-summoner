@@ -6,18 +6,18 @@
     "partition": "gems/1",
     "contractVersion": 1,
     "registryVersions": {
-      "core": 1,
       "bands": 1,
-      "tags": 3,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
       "themes": 1,
-      "classes": 2,
-      "naming": 4,
-      "words": 4
+      "words": 5
     },
     "exemplarVersion": 1,
-    "promptVersion": 1,
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
+    "promptVersion": "gem-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "2026-09-07T00:00:00Z",
     "sourceRef": "entry-shapes.md#1"
   },
   "entries": [
@@ -255,6 +255,29 @@
       "iconKey": "icon.gem.resilience-gem",
       "tags": [
         "defensive"
+      ]
+    },
+    {
+      "family": "atom.entangling",
+      "iconKey": "icon.gem.entangling-spore",
+      "id": "gem.g1-021",
+      "name": "Entangling Spore",
+      "nameKey": "gem.entangling-spore",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.arm-op",
+      "iconKey": "icon.gem.reinforced-plating",
+      "id": "gem.g1-022",
+      "name": "Reinforced Plating",
+      "nameKey": "gem.reinforced-plating",
+      "powerBand": "medium",
+      "tags": [
+        "sturdy",
+        "metal"
       ]
     }
   ]
