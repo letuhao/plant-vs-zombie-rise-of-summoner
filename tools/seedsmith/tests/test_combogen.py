@@ -303,6 +303,20 @@ class AuthoredBatchTests(unittest.TestCase):
         blocked = [o for o in result.outcomes if o.subject_id == first_id]
         self.assertEqual(blocked[0].outcome, "blocked")
         self.assertEqual(len(result.persisted), 1)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        self.assertEqual([s.subject_id for s in needing], [])
+
+    def test_blocked_only_batch_exits_clean_and_escalated_exits_gap(self) -> None:
+        blocked = SimpleNamespace(outcomes=[
+            SimpleNamespace(outcome="blocked"),
+            SimpleNamespace(outcome="persisted"),
+        ])
+        empty = SimpleNamespace(outcomes=[])
+        escalated = SimpleNamespace(outcomes=[SimpleNamespace(outcome="escalated")])
+        self.assertEqual(cli_mod.EXIT_CLEAN, cli_mod._exit_for_graph_batch(blocked))
+        self.assertEqual(cli_mod.EXIT_CLEAN, cli_mod._exit_for_graph_batch(empty))
+        self.assertEqual(cli_mod.EXIT_GAP, cli_mod._exit_for_graph_batch(escalated))
 
     def test_authored_module_never_imports_the_live_model_caller(self) -> None:
         """Mirrors `setgen.answers`'s own "cannot reach the network" discipline: the replay

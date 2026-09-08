@@ -36,7 +36,7 @@ public sealed class FoundationHarness
         _bag.UtcNow = () => _clock.UtcNow;
         _bag.UiPresent = _uiPresent;
         _bag.Status = new StatusRuntime(
-            StatusCatalogBootstrap.CreateDefault(),
+            StatusCatalogHub.Current,
             (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
         Funnel = new EffectFunnel(_bag, _fx);
     }

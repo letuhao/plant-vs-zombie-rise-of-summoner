@@ -55,6 +55,18 @@ EXIT_REFUSED = 3
 _SEVERITY_ORDER = {Severity.GAP: 0, Severity.NOTE: 1, Severity.NOT_MEASURED: 2}
 
 
+def _exit_for_graph_batch(result) -> int:
+    """EXIT_CLEAN when the batch finished without escalate — persisted and/or blocked (or empty).
+
+    Affix already returns 0 on a coherent `blocked`. Set/charm/combination used to require at least
+    one persist this batch, so fill `--limit 1` turned a legitimate decline into `gap` and stalled
+    resume. Escalate remains EXIT_GAP.
+    """
+    if any(getattr(o, "outcome", None) == "escalated" for o in getattr(result, "outcomes", ())):
+        return EXIT_GAP
+    return EXIT_CLEAN
+
+
 def build_registry() -> MetricRegistry:
     """Every metric that exists so far. S2-S8 each add their own metrics here — one line per
     metric, never a rewrite of this function."""
@@ -674,8 +686,7 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
         model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
-    return EXIT_CLEAN if result.persisted and not any(
-        o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+    return _exit_for_graph_batch(result)
 
 
 _PASSTHROUGH_MODULE_BY_KIND = {
@@ -942,8 +953,7 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
         authored_utc=args.authored_utc, model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
-    return EXIT_CLEAN if result.persisted and not any(
-        o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+    return _exit_for_graph_batch(result)
 
 
 def _cmd_items_validate(args: argparse.Namespace) -> int:

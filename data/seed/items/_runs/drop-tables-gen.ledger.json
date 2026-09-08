@@ -19,6 +19,10 @@
     "droptable-draw-d1-004": {
       "entryId": "droptable.d1-015",
       "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d1-005": {
+      "entryId": "droptable.d1-016",
+      "name": "Overgrowth Cache"
     }
   },
   "schemaVersion": 1

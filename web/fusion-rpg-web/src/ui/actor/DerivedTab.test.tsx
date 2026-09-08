@@ -176,6 +176,15 @@ describe("resolveDerivedRenderState", () => {
     ).toBe("capped");
     expect(
       resolveDerivedRenderState(
+        "status.resist.butter",
+        live("status.resist.butter", 0.95, [
+          { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.95 }
+        ]),
+        "categoryResistCap"
+      )
+    ).toBe("capped");
+    expect(
+      resolveDerivedRenderState(
         "status.resist.omni",
         live("status.resist.omni", 0.99, [
           { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.99 }
@@ -343,13 +352,16 @@ describe("DerivedTab UI", () => {
     fireEvent.click(screen.getByTestId("derived-variant-butter"));
     expect(screen.getByTestId("derived-channel-status.resist.butter")).toHaveAttribute(
       "data-state",
-      "active"
+      "capped"
     );
     fireEvent.click(screen.getByTestId("derived-variant-omni"));
     expect(screen.getByTestId("derived-channel-status.resist.omni")).toHaveAttribute(
       "data-state",
       "active"
     );
+    fireEvent.click(screen.getByTestId("derived-show-unchanged"));
+    fireEvent.click(screen.getByTestId("derived-variant-nerve.afflicted"));
+    expect(screen.getByTestId("derived-channel-status.resist.nerve.afflicted")).toBeInTheDocument();
   });
 
   it("join hole expands to no-producer when show unchanged", () => {

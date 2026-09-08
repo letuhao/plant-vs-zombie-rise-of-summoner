@@ -15,6 +15,10 @@
     "recipe-draw-003": {
       "entryId": "recipe.034",
       "operation": "temper"
+    },
+    "recipe-draw-004": {
+      "entryId": "recipe.035",
+      "operation": "temper"
     }
   },
   "schemaVersion": 1

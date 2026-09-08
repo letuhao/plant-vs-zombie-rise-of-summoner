@@ -228,6 +228,38 @@
         "defensive"
       ],
       "notes": "A surge of life essence that bolsters the physical vessel against the coming storm."
+    },
+    {
+      "id": "enh.015",
+      "nameKey": "enh.enhance-prowess",
+      "name": "Enhancement Prowess",
+      "runtimeFamily": "atom.enhance-prowess",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "The base type's innate combat instincts sharpen, allowing for more devastating strikes when momentum is high."
+    },
+    {
+      "id": "enh.016",
+      "nameKey": "enh.enhance-might",
+      "name": "Enhancement Might",
+      "runtimeFamily": "atom.enhance-might",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "The base essence of the entity swells with raw, unbridled power."
     }
   ]
 }

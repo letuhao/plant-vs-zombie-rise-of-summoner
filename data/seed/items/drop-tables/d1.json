@@ -1677,6 +1677,86 @@
         }
       ],
       "tags": []
+    },
+    {
+      "id": "droptable.d1-016",
+      "nameKey": "droptable.overgrowth-cache",
+      "name": "Overgrowth Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrowth-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-secondary",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.flux",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-016",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-016",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
     }
   ]
 }

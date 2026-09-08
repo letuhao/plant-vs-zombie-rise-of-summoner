@@ -45,3 +45,12 @@ Widen `--max-partitions` / `--limit` only after smoke is green. Use `--full` onl
 - [x] Set brief/schema: `legal_set_stat_pool` drops D14/More; capability family enum — live **persisted** 1 set
 - [x] Combination: `--limit` after `plan_needing_work`; same required+null schema fix as setgen
 - [x] Bounded `items fill --limit 1 --max-partitions 1 --count 1 --batch-size 1 --continue-on-error`: affix/set/gem/material/…/strain **ran**; only splice **gap** (model/content), not empty-plan or argv refuse
+
+### Gap resolve (2026-09-09) — blocked exit + ledger, not hide
+
+- [x] Live splice investigate: `combination-splice-might-fortitude` → **blocked** (not escalate), process EXIT=1 under old contract
+- [x] Combination + set/charm: ledger `blocked` as done; `_exit_for_graph_batch` → EXIT_CLEAN unless escalate; combo `_ledger_is_valid` accepts blocked rows
+- [x] Strain brief: defense/balance omit offense-shaped "Hit harder" paste; splice brief frames opposing readings as fusion material (`PROMPT_VERSION` → `strain-splice-gen/2`)
+- [x] Set `plan_run`: skip entry ids already on disk (theme rename / ledger drift → caltropnut collision)
+- [x] Unit tests: combogen blocked resume + exit helper; BriefTests paradox/splice framing; set corpus skip; wiring blocked ledger
+- [x] Bounded fill **without** `--continue-on-error`: process **EXIT=0**, all 12 steps `status=ran` / `exit_code=0` (charm+strain legitimate blocked; splice persisted)

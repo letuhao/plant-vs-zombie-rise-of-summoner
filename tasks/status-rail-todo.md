@@ -42,6 +42,14 @@ Checklist for program `status-rail`. Audit: [`docs/research/status/status-covera
 - [x] `bond`: no PulseHp (Counter nested-burst only)
 - [x] Tags: empty on defs; immunity grant-only (status-ssot)
 
+## Wave C — Completeness (2026-09-09)
+
+- [x] C1 Death/`TakeHostInstances` StatMod teardown (battle + lawn ClearAll status kind)
+- [x] C2 `RefreshCombatBoardSnapshot` + `BattleContagionBoardTests`
+- [x] C3 AtomKindRegistry/harnesses → Hub; Categories parity; charm_pulse SSOT
+- [x] C4 Omni+25 cook asserts; FE resist cap; catalog paint; nerve.* click
+- [x] C5 `StatusUnityClearGuardTests`; audit rewrite
+
 ## Docs
 
 - [x] `tasks/status-rail-plan.md` / `status-rail-todo.md`

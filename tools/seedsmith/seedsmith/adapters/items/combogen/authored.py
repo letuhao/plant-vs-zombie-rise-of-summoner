@@ -46,10 +46,16 @@ DEFAULT_LEDGER_NAME = "combination-gen.ledger.json"
 
 def _ledger_is_valid(_subject_id: str, entry: dict) -> bool:
     """The reconcile half `RunLedger.plan` exists for — mirrors `gemgen.run._ledger_is_valid`
-    exactly: a ledger row counts as done only if it carries an assembled entry with a real id, never
-    trusted on the row's mere presence."""
-    return (isinstance(entry, dict) and isinstance(entry.get("entry"), dict)
-           and isinstance(entry["entry"].get("id"), str) and bool(entry["entry"].get("id")))
+    for persisted rows, plus an explicit `blocked` completion so a legitimate model decline
+    advances resume (affix returns clean on blocked; combination used to re-hit the same cell)."""
+    if not isinstance(entry, dict):
+        return False
+    if (isinstance(entry.get("entry"), dict)
+            and isinstance(entry["entry"].get("id"), str) and bool(entry["entry"].get("id"))):
+        return True
+    reason = entry.get("blockedReason")
+    return (entry.get("outcome") == "blocked"
+            and isinstance(reason, str) and bool(reason.strip()))
 
 
 def plan_needing_work(plan: RunPlan, ledger: RunLedger) -> "list[Subject]":
@@ -224,9 +230,17 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
                 outcome="escalated", attempts=attempts, defects=defects))
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
+            reason = draft["blocked"].strip()
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
-                outcome="blocked", attempts=attempts, blocked_reason=draft["blocked"]))
+                outcome="blocked", attempts=attempts, blocked_reason=reason))
+            # No seed entry — but ledger the decline so --limit / resume advances past this cell.
+            ledger.mark_done(subject.subject_id, {
+                "outcome": "blocked",
+                "blockedReason": reason,
+                "entryId": subject.entry_id,
+                "attempts": attempts,
+            })
             continue
 
         entry = emit.assemble_entry(

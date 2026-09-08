@@ -554,15 +554,28 @@ class BatchTests(unittest.TestCase):
     def test_a_blocked_answer_writes_nothing_and_is_reported(self):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
-            plan = _set_plan()
+            plan = _set_plan(subject_count=2)
+            out = Path(tmp) / "sets"
+            ledger_path = Path(tmp) / "ledger.json"
+            first_id = plan.subjects[0].subject_id
+            second_id = plan.subjects[1].subject_id
             result = authored_mod.run_batch(
                 plan=plan,
-                answers=_answer_file("set", "build",
-                                     {plan.subjects[0].subject_id: {"blocked": "no motifs land"}}),
-                tuning=TUNING, vocabulary=VOCAB, out_dir=Path(tmp) / "sets", kind="set",
-                population="build", authored_utc="1970-01-01T00:00:00Z", model="fixture")
+                answers=_answer_file("set", "build", {
+                    first_id: {"blocked": "no motifs land"},
+                    second_id: _clean_set_answer(),
+                }),
+                tuning=TUNING, vocabulary=VOCAB, out_dir=out, kind="set",
+                population="build", authored_utc="1970-01-01T00:00:00Z", model="fixture",
+                ledger_path=ledger_path)
             self.assertEqual(result.outcomes[0].outcome, "blocked")
-            self.assertEqual(result.files, [])
+            self.assertEqual(result.outcomes[1].outcome, "persisted")
+            done = json.loads(ledger_path.read_text(encoding="utf-8"))["done"]
+            self.assertEqual(done[first_id]["outcome"], "blocked")
+            self.assertIn(second_id, done)
+            # Presence alone advances set/charm resume — both subjects are done.
+            remaining = [s.subject_id for s in plan.subjects if s.subject_id not in done]
+            self.assertEqual(remaining, [])
 
     def test_the_model_call_is_the_only_path_to_a_model(self):
         """A raising stub in `call` proves nothing else in the batch driver reaches an endpoint."""

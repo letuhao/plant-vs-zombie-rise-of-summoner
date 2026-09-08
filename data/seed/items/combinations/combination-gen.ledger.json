@@ -1,5 +1,38 @@
 {
   "done": {
+    "combination-splice-might-fortitude": {
+      "entry": {
+        "aptitudes": [
+          "Might",
+          "Fortitude"
+        ],
+        "flavor": "The force of the blow is returned through the very density of the defender's stance.",
+        "grantedTier": 1,
+        "grants": [
+          "atom.retribution"
+        ],
+        "hostFrame": "plant",
+        "hostRole": "armament-primary",
+        "id": "combo.splice-might-fortitude",
+        "ingredients": [
+          {
+            "family": "atom.fortitude",
+            "minTier": 1,
+            "quantity": 2
+          },
+          {
+            "family": "atom.might",
+            "minTier": 2,
+            "quantity": 2
+          }
+        ],
+        "minSockets": 4,
+        "name": "Kinetic Impact",
+        "nameKey": "combination.splice-might-fortitude",
+        "shape": "splice"
+      },
+      "entryId": "combo.splice-might-fortitude"
+    },
     "combination-strain-agility-balance": {
       "entry": {
         "aptitudes": [
@@ -203,6 +236,12 @@
         "shape": "strain"
       },
       "entryId": "combo.strain-fortitude-defense"
+    },
+    "combination-strain-might-balance": {
+      "attempts": 1,
+      "blockedReason": "The brief requires a 'balance' archetype for 'Might' (offense/power), but the provided list of grantable atom families lacks a mechanism to express 'mitigation, sustain, or balanced commitment' (such as 'retribution' or 'resilience') in a way that creates a new behavior from the 'Might' aptitude without simply adding more offense or defense stats. However, to strictly follow the prompt's logic of 'Might' through 'balance', I must select ingredients that imply a cycle of force and stability.",
+      "entryId": "combo.strain-might-balance",
+      "outcome": "blocked"
     },
     "combination-strain-might-defense": {
       "entry": {

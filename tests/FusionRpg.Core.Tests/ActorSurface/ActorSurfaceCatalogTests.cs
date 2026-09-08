@@ -26,7 +26,7 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(1, catalog.Version);
         Assert.Equal(54, catalog.Entries.Count);
         Assert.Equal(28, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.Element));
-        Assert.Equal(6, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.StatusCategory));
+        Assert.Equal(6, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.StatusId));
         Assert.Equal(4, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.Resource));
         Assert.Contains(catalog.Entries, e => e.Family == "combat.power");
         Assert.Contains(catalog.Entries, e => e.Family == "status.resist" && e.CapRef == "categoryResistCap");
@@ -250,7 +250,11 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(28, elements.Categories.SelectMany(c => c.Families).Count());
 
         var status = Assert.Single(en.Tabs, t => t.Id == "status");
-        Assert.Equal(4, status.Variants.Count);
+        Assert.Equal(25, status.Variants.Count);
+        Assert.Equal("omni", status.Variants[0].Id);
+        Assert.True(status.Variants[0].PresentationOnly);
+        Assert.Contains(status.Variants, v => v.Id == "butter" && !v.PresentationOnly);
+        Assert.Contains(status.Variants, v => v.Id == "nerve.afflicted");
         Assert.Equal(6, status.Categories.SelectMany(c => c.Families).Count());
 
         var resources = Assert.Single(en.Tabs, t => t.Id == "resources");

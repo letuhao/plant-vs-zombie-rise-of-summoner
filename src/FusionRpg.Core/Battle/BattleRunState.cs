@@ -243,8 +243,9 @@ public static partial class BattleEngine
 
         /// <summary>base-defense `siege-positions` §3: null for every caller without a board (every
         /// caller until this module wires siege battles through one) — the value `BattleEngine.Resolve`'s
-        /// round loop passes to `Status.Tick`'s own optional trailing `board` parameter.</summary>
-        public Combat.BoardSnapshot? CombatBoardSnapshot { get; }
+        /// round loop passes to `Status.Tick`'s own optional trailing `board` parameter.
+        /// status-rail C2: refreshed before each status pulse so moves/deaths update contagion geometry.</summary>
+        public Combat.BoardSnapshot? CombatBoardSnapshot { get; private set; }
 
         /// <summary>A22 (spec-action-resolution-by-category.md §1): the constructor already received
         /// this — captured only inside the `rungOf` closure below (`:493`), never kept as a field.
@@ -1016,6 +1017,35 @@ public static partial class BattleEngine
         }
 
         /// <summary>
+        /// status-rail C2: rebuild the combat board snap from live positions + Active actors so
+        /// contagion neighbors track moves and deaths (ctor snap alone goes stale mid-battle).
+        /// </summary>
+        public void RefreshCombatBoardSnapshot()
+        {
+            if (_board is null)
+            {
+                CombatBoardSnapshot = null;
+                return;
+            }
+
+            CombatBoardSnapshot = Board.BoardSnapshotAdapter.ToCombatSnapshot(this);
+            Host.Bag.BoardSnapshot = CombatBoardSnapshot;
+        }
+
+        /// <summary>
+        /// status-rail C1: drop host statuses without <c>OnEnded</c> (VFX death contract) but withdraw
+        /// status-instance StatMods from the battle ledger so death/retreat cannot orphan them.
+        /// </summary>
+        public void WithdrawStatusHost(string actorKey)
+        {
+            foreach (var inst in Status.TakeHostInstances(actorKey))
+            {
+                if (inst.StatMods.Count == 0) continue;
+                Ledger.RemoveBySource(inst.HostPtr, StatusStatPayload.SourceIdOf(inst));
+            }
+        }
+
+        /// <summary>
         /// party-dungeon D2.10 — lifted out of <see cref="CheckRetreats"/> with **no behaviour
         /// change** (the coward-retreat call site below is byte-identical to what it inlined
         /// before), so it can gain producers beyond the coward trait: a capture (`wild-room`) and a
@@ -1025,7 +1055,7 @@ public static partial class BattleEngine
         public void Withdraw(ActorState actor)
         {
             actor.Retreated = true;
-            Status.WithdrawEntity(actor.Setup.Key);
+            WithdrawStatusHost(actor.Setup.Key);
             Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(actor.Setup.Key));
         }
 

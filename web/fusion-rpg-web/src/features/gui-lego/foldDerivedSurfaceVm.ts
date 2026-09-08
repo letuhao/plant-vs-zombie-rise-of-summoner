@@ -54,6 +54,8 @@ export type DerivedSurfaceVmInput = {
   }[];
   leanChannels?: { channelId: string; value: number; contributions: { sourceId: string; op: string; value: number }[] }[];
   elements: ElementCatalogRow[];
+  /** status-rail C4: catalog color/hudToken for Status variant chips. */
+  statuses?: { id: string; color: string; hudToken: string }[];
   locale?: string;
   ui: DerivedUiState;
   availability: "ready" | "loading" | "error";
@@ -358,11 +360,29 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     chips: primaryChips
   };
 
+  const statusById = new Map((input.statuses ?? []).map((s) => [s.id, s]));
+
   const variantChips: PiecePayload[] = variantChoices.map((v) => {
     const themeRef = variantTheme(tabId, v.id);
     const themeResolved = resolveTheme(themeRef ?? null);
+    let glyphRef: GlyphRef | undefined;
     if (tabId === "status") {
       themeResolved.glyphDefault = statusGlyph(v.id);
+      const catalog = statusById.get(v.id);
+      if (catalog?.color) {
+        themeResolved.paint = {
+          ...themeResolved.paint,
+          accent: catalog.color,
+          accentMuted: catalog.color
+        };
+      }
+      if (catalog?.hudToken) {
+        glyphRef = {
+          catalogIcon: statusGlyph(v.id),
+          hudToken: catalog.hudToken,
+          fallbackText: catalog.hudToken
+        };
+      }
     }
     return {
       piece: "chip",
@@ -374,7 +394,8 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       rail: "variant" as const,
       elementId: tabId === "elements" ? v.id : undefined,
       themeRef,
-      themeResolved
+      themeResolved,
+      glyphRef
     };
   });
 
@@ -386,7 +407,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       tabId === "elements"
         ? "Element variants"
         : tabId === "status"
-          ? "Status category variants"
+          ? "Status catalog variants"
           : tabId === "resources"
             ? "Resource variants"
             : "Action category variants",

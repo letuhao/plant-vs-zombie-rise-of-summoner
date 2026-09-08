@@ -483,6 +483,21 @@ class BriefTests(unittest.TestCase):
         self.assertIn("MECHANISM", text)
         self.assertIn("volume discount with a name", text)
 
+    def test_defense_strain_brief_does_not_pair_hit_harder_with_avoid_offense(self):
+        """might-defense themes ship Hit harder + antiMotifs offense; brief must not paste both."""
+        cell = next(c for c in grid.strain_cells()
+                    if c.aptitudes[0].token == "might" and c.archetype == "defense")
+        text = self.brief(cell)
+        self.assertIn("Avoid entirely: offense", text)
+        self.assertNotIn("Hit harder", text)
+        self.assertIn("archetype is 'defense'", text)
+
+    def test_splice_brief_frames_opposing_readings_as_fusion_material(self):
+        cell = grid.splice_cells()[0]
+        text = self.brief(cell)
+        self.assertIn("Opposing or tensioned readings", text)
+        self.assertIn("do not refuse the cell", text)
+
 
 # ── the run plan ────────────────────────────────────────────────────────────────────────────────
 

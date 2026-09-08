@@ -1,6 +1,6 @@
-# Status coverage audit — status-rail Wave 0
+# Status coverage audit — status-rail
 
-**Date:** 2026-09-09  
+**Date:** 2026-09-09 (Wave C completeness pass)  
 **Program:** `status-rail`  
 **Scope:** Battle / lawn / derived reach vs the 24-id status catalog.
 
@@ -11,30 +11,25 @@
 | `data/tuning/status-catalog.v1.json` | 24 | Surface + combat inject |
 | `StatusCatalogBootstrap.CreateDefault()` | 24 | Migration golden / shim |
 
-Parity test: `StatusCatalogParityTests` — JSON ∩ Bootstrap ids equal.
+Parity: `StatusCatalogParityTests` — ids, kinds, stacking, family, categories, payloads, L2b registry.
 
 ## Gap tracker
 
-| Gap | Status | Wave |
+| Gap | Status | Evidence |
 |---|---|---|
-| Dual catalog (Bootstrap vs JSON; empty payloadKinds) | **Closed** | B1 |
-| Battle status-instance StatMods unread | **Closed** | B2 |
-| Lawn UnityCc apply/clear asymmetry | **Closed** (jala unclearable; plant butter-only policy) | B3 |
-| Contagion battle board | **Closed** — `BattleEngine` passes `state.CombatBoardSnapshot` when a board exists; boardless battles correctly pass null | B4 |
-| `bond` Counter + PulseHp mismatch | **Closed** — strip PulseHp; nested burst only | B4 |
-| `StatusDef.Tags` empty vs SSOT | **Closed** — SSOT: immunity is grant-only | B4 |
-| Derived Status rail = 4 categories | **Closed** — Omni+24 status-id | A1–A2 |
+| Dual catalog | **Closed (C3)** | Inject via Hub; AtomKindRegistry / FoundationHarness / SimEffectHost use `StatusCatalogHub.Current`; Bootstrap = fallback + golden |
+| Battle status-instance StatMods | **Closed (C1)** | OnApplied/OnEnded + **death/retreat** `WithdrawStatusHost` / lawn `TakeHostInstances` StatMod teardown without `OnEnded` (VFX contract) |
+| Match ClearAll status mods | **Closed (C1)** | `WithdrawAllBySourceKind("status")` after Bag clear |
+| Lawn UnityCc apply/clear | **Closed (C5)** | Clear covers ember/hypno/kelp; **jala** only unclearable (`StatusUnityClearGuardTests`); plant butter-only |
+| Contagion battle board | **Closed (C2)** | `RefreshCombatBoardSnapshot` before each Status.Tick; hop tests on adapter sides `squad`/`wave`; boardless → no hop. Overlay filters using `zombie`/`plant` do not see battle neighbors |
+| `bond` Counter + PulseHp | **Closed** | No PulseHp; nested burst only |
+| `StatusDef.Tags` | **Closed** | Grant-only immunity (status-ssot) |
+| Derived Status rail Omni+24 | **Closed (C4)** | Cook 25 variants; FE resist cap for per-id; catalog chip paint; Core/Server asserts 25 |
 | `nerve.*` VFX recipes | Open (VFX stream) | Out |
 
-## Reach (post-close)
+## Decisions locked
 
-- **Lawn:** `StatusRuntime` + Funnel pulses; UnityCc via `DebugActions` (8 wraps); StatMods via `EffectRuntime.OnApplied`. Clear covers butter/freeze/cold/poison/ember/hypno/kelp; **jala** refuses Unity clear (RPG instance still ends).
-- **Battle:** `status.apply` → `StatusRuntime`; FA1 `ModifyStat` via ledger; **status-instance StatMods** projected in `BattleRunState` OnApplied/OnEnded.
-- **Derived:** Status cook rail = Omni + 24 status ids; category channels remain legal in combat math / search.
-
-## Decisions locked this program
-
-1. Status cook expand = **`status-id`** with **Omni + 24** chips (not hybrid with category chips).
-2. **`bond`:** no `PulseHp` in catalog — Counter does not tick-pulse; burst remains nested.
-3. **Tags:** stay empty on defs; immunity remains **per-grant** (status-ssot amended).
-4. Unclearable Unity flags: **jala** only; ember/hypno/kelp clear attempted; plant-side still butter-only by host limit.
+1. Status cook = **Omni + 24** (not hybrid).
+2. Death does **not** fire `OnEnded`; callers tear down StatMods from `TakeHostInstances`.
+3. Battle contagion sides are **`squad` / `wave`** (adapter), not lawn `zombie` / `plant`.
+4. Unclearable Unity: **jala** only.

@@ -19,6 +19,11 @@ Derived Status cook rail = **Omni + 24** status-catalog chips (Elements-shaped).
 | B2 | Battle projects status StatMods → ledger |
 | B3 | Lawn UnityCc clear symmetry; plant butter-only policy |
 | B4 | Contagion board verify; bond no PulseHp; Tags grant-only SSOT |
+| **C1** | Death/ClearAll StatMod teardown without OnEnded |
+| **C2** | Live CombatBoardSnapshot per tick + hop tests (squad/wave sides) |
+| **C3** | Hub SSOT leftovers + Categories parity + charm_pulse SSOT errata |
+| **C4** | Cook 25 asserts; FE per-id resist cap; catalog chip paint |
+| **C5** | jala-only clear guard + audit rewrite |
 | Docs | This pair + derived-plan / status-ssot / sheet errata |
 
 ## Non-goals

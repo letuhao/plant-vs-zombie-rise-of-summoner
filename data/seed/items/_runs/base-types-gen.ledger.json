@@ -10,6 +10,16 @@
       "entryId": "item.humanoid-main-hand-a-015",
       "implicitFamily": "atom.ferocity"
     },
+    "basetype-draw-armament-primary-humanoid-a-002": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-016",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-a-003": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-017",
+      "implicitFamily": "atom.ferocity"
+    },
     "basetype-draw-core-guard-humanoid-b-000": {
       "class": "plate",
       "entryId": "item.humanoid-torso-b-013",

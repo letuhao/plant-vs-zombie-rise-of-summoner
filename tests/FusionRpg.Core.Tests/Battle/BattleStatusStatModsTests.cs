@@ -7,14 +7,13 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
-/// status-rail B2 — battle projects status-instance StatMods into
-/// <see cref="BattleStatModifierLedger"/> on apply and withdraws on end (same seam as
-/// <c>BattleRunState</c> OnApplied/OnEnded; nested BattleRunState is not constructible from tests).
+/// status-rail B2/C1 — battle projects status-instance StatMods into
+/// <see cref="BattleStatModifierLedger"/> on apply and withdraws on end / death teardown
+/// (same seam as <c>BattleRunState</c>; nested BattleRunState is not constructible from tests).
 /// </summary>
 public class BattleStatusStatModsTests
 {
-    [Fact]
-    public void Apply_ModifyStat_status_adds_channel_delta_withdraw_on_end_clears_it()
+    static (StatusRuntime Rt, BattleStatModifierLedger Ledger) Wired()
     {
         var ledger = new BattleStatModifierLedger();
         var rt = new StatusRuntime(
@@ -22,7 +21,6 @@ public class BattleStatusStatModsTests
             (_, attackerLess) =>
                 attackerLess ? ActorDerivedSnapshot.AttackerLess() : ActorDerivedSnapshot.StubNeutral());
 
-        // Mirror BattleRunState status-rail B2 hooks.
         rt.OnApplied = inst =>
         {
             if (inst.StatMods.Count == 0) return;
@@ -34,9 +32,11 @@ public class BattleStatusStatModsTests
             if (inst.StatMods.Count == 0) return;
             ledger.RemoveBySource(inst.HostPtr, StatusStatPayload.SourceIdOf(inst));
         };
+        return (rt, ledger);
+    }
 
-        var now = DateTimeOffset.UtcNow;
-        var outcome = rt.Apply(
+    static StatusApplyOutcome ApplyExpose(StatusRuntime rt, DateTimeOffset now) =>
+        rt.Apply(
             new StatusApplyInput(
                 "expose",
                 HostPtr: "squad:0",
@@ -49,15 +49,44 @@ public class BattleStatusStatModsTests
             new FixedStatusRng(0.0),
             now);
 
-        Assert.True(outcome.Applied);
-        Assert.NotNull(outcome.Instance);
-        var live = ledger.For("squad:0", "atk");
-        Assert.Single(live);
-        Assert.Equal(ModifierOp.More, live[0].Op);
-        Assert.Equal(-0.1, live[0].Value);
+    [Fact]
+    public void Apply_ModifyStat_status_adds_channel_delta_withdraw_on_ClearGrant()
+    {
+        var (rt, ledger) = Wired();
+        var now = DateTimeOffset.UtcNow;
+        var outcome = ApplyExpose(rt, now);
 
-        // WithdrawEntity does not fire OnEnded; ClearGrant / expire does (BattleRunState mirrors that).
+        Assert.True(outcome.Applied);
+        Assert.Single(ledger.For("squad:0", "atk"));
+
         rt.ClearGrant("g-expose");
+        Assert.Empty(ledger.For("squad:0", "atk"));
+    }
+
+    [Fact]
+    public void Death_TakeHostInstances_tears_down_ledger_without_OnEnded()
+    {
+        var (rt, ledger) = Wired();
+        var ended = 0;
+        var prevEnded = rt.OnEnded;
+        rt.OnEnded = inst =>
+        {
+            ended++;
+            prevEnded?.Invoke(inst);
+        };
+
+        Assert.True(ApplyExpose(rt, DateTimeOffset.UtcNow).Applied);
+        Assert.Single(ledger.For("squad:0", "atk"));
+
+        // Mirror BattleRunState.WithdrawStatusHost — OnEnded must stay silent (VFX death contract).
+        foreach (var inst in rt.TakeHostInstances("squad:0"))
+        {
+            if (inst.StatMods.Count == 0) continue;
+            ledger.RemoveBySource(inst.HostPtr, StatusStatPayload.SourceIdOf(inst));
+        }
+
+        Assert.Equal(0, ended);
+        Assert.Empty(rt.ForHost("squad:0"));
         Assert.Empty(ledger.For("squad:0", "atk"));
     }
 }

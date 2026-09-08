@@ -190,6 +190,21 @@ public sealed class StatusRuntime
     public IReadOnlyList<StatusInstance> AllInstances() =>
         _byHost.Values.SelectMany(v => v).ToList();
 
+    /// <summary>
+    /// status-rail C1: remove every instance on the host <b>without</b> firing <see cref="OnEnded"/>
+    /// (death/retreat — VFX reaps via anchor). Callers that own StatMod ledgers/bags must tear those
+    /// down from the returned list before discarding it.
+    /// </summary>
+    public IReadOnlyList<StatusInstance> TakeHostInstances(string hostPtr)
+    {
+        if (string.IsNullOrWhiteSpace(hostPtr)) return Array.Empty<StatusInstance>();
+        var key = hostPtr.Trim();
+        if (!_byHost.TryGetValue(key, out var list))
+            return Array.Empty<StatusInstance>();
+        _byHost.Remove(key);
+        return list;
+    }
+
     /// <summary>Allocation-free liveness probe — checked per frame by the DoT tick.</summary>
     public bool HasAnyInstances()
     {
@@ -423,11 +438,7 @@ public sealed class StatusRuntime
         return pulses;
     }
 
-    public void WithdrawEntity(string hostPtr)
-    {
-        if (string.IsNullOrWhiteSpace(hostPtr)) return;
-        _byHost.Remove(hostPtr.Trim());
-    }
+    public void WithdrawEntity(string hostPtr) => _ = TakeHostInstances(hostPtr);
 
     public void ClearGrant(string grantId)
     {

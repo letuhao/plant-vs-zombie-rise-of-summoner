@@ -48,3 +48,16 @@ Root cause of gem fill `refused`: fill emitted `--batch-size`, which the outer `
 3. **Combination** — apply `--limit` after ledger resume; same required+nullable identity schema as setgen.
 
 Sockword retirement remains a separate migrate stream.
+
+## Gap resolve (2026-09-09) — investigate + fix remaining fill gaps
+
+Immediate splice `gap` was not “content fate”: combination/set write required `persisted` this batch, so fill `--limit 1` + model `blocked` → EXIT_GAP, and blocked subjects were not ledgered (resume re-hit). Affix already returned 0 on blocked.
+
+Shipped:
+
+1. **`_exit_for_graph_batch`** in [`cli.py`](../tools/seedsmith/seedsmith/report/cli.py) — EXIT_CLEAN unless any `escalated`.
+2. **Combo/set ledger blocked** — mark done with `{outcome, blockedReason}`; combo `_ledger_is_valid` accepts that shape.
+3. **Brief framing** — [`combogen/brief.py`](../tools/seedsmith/seedsmith/adapters/items/combogen/brief.py) strain defense/balance + splice tension sentence (`strain-splice-gen/2`).
+4. **Set corpus skip** — [`setgen/run.py`](../tools/seedsmith/seedsmith/adapters/items/setgen/run.py) `plan_run` skips set ids already on disk (fixes theme-rename ledger drift collisions).
+
+Prove: `items fill --limit 1 --max-partitions 1 --count 1 --batch-size 1` (no `--continue-on-error`) → EXIT=0, all steps ran.

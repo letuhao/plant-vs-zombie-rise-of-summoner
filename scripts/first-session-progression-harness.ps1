@@ -18,5 +18,10 @@ if ($NoBuild) { $serverArgs += '--no-build' }
 & dotnet @serverArgs
 if ($LASTEXITCODE -ne 0) { throw "onboarding HTTP harness failed ($LASTEXITCODE)" }
 
-Write-Host 'Evidence covered: fresh Player 1, settled victory, species reveal, deterministic Dave item,
-replay/idempotency, GET projection, and acknowledgement-only claim.'
+$simArgs = @('test', 'tests/FusionRpg.E2E.Tests', '--filter', 'FullyQualifiedName~Sim_victory_emits_game_driven_result_and_unlocks_ordered_onboarding_reveals')
+if ($NoBuild) { $simArgs += '--no-build' }
+& dotnet @simArgs
+if ($LASTEXITCODE -ne 0) { throw "simulator onboarding harness failed ($LASTEXITCODE)" }
+
+Write-Host 'Evidence covered: fresh Player 1, settled victory, simulator match.result, species reveal,
+deterministic Dave item, replay/idempotency, GET projection, and acknowledgement-only claim.'

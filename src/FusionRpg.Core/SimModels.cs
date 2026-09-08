@@ -76,6 +76,9 @@ public sealed class SimSpawnZombieRequest
     public string? Ptr { get; set; }
     /// <summary>Capture dump source tag (e.g. extra for PvzIntent).</summary>
     public string? Source { get; set; }
+    /// <summary>Optional typed progression claim carried by simulator spawn events.</summary>
+    public string? SourceKind { get; set; }
+    public string? SourceId { get; set; }
 }
 
 public sealed class SimDamageRequest

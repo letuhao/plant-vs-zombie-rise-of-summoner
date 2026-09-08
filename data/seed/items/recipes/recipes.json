@@ -785,6 +785,28 @@
       "soulsCostBand": "standard",
       "tags": [],
       "flavor": "Infuse the fabric with solar warmth to harden the weave."
+    },
+    {
+      "id": "recipe.035",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "Infuse the fabric with solar warmth to harden the weave."
     }
   ]
 }

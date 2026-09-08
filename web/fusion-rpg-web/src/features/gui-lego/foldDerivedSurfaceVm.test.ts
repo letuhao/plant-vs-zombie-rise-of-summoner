@@ -162,10 +162,12 @@ describe("foldDerivedSurfaceVm", () => {
   it("status rail cooks Omni + every status-catalog chip", () => {
     const surface = actorSurfaceFixture();
     const cook = derivedSurfaceFromFixture(surface);
+    const butterRow = surface.statuses.find((s) => s.id === "butter")!;
     const vm = foldDerivedSurfaceVm({
       identity: { displayName: "X", level: 1, side: "plant" },
       cookTabs: cook.tabs,
       elements: surface.elements,
+      statuses: surface.statuses,
       ui: {
         tabId: "status",
         variantId: "butter",
@@ -177,10 +179,15 @@ describe("foldDerivedSurfaceVm", () => {
     });
     const ids = vm.variantRail.chips.map((c) => c.id);
     expect(ids[0]).toBe("omni");
-    expect(ids).toHaveLength(1 + surface.statuses.length);
+    expect(ids).toHaveLength(25);
     expect(ids).toContain("butter");
     expect(ids).toContain("nerve.afflicted");
+    expect(vm.variantRail.ariaLabel).toBe("Status catalog variants");
     const butter = vm.variantRail.chips.find((c) => c.id === "butter");
     expect(butter?.themeResolved?.glyphDefault).toBe("ban");
+    expect(butter?.themeResolved?.paint.accent).toBe(butterRow.color);
+    expect((butter as { glyphRef?: { hudToken?: string } })?.glyphRef?.hudToken).toBe(
+      butterRow.hudToken
+    );
   });
 });

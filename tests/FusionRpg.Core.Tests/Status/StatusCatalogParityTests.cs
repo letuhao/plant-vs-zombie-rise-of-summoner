@@ -42,8 +42,13 @@ public class StatusCatalogParityTests
             Assert.Equal(b.Family, a.Family);
             Assert.Equal(b.PulseHealsAttacker, a.PulseHealsAttacker);
             Assert.Equal(
+                b.Categories.OrderBy(c => c, StringComparer.Ordinal).ToArray(),
+                a.Categories.OrderBy(c => c, StringComparer.Ordinal).ToArray());
+            Assert.Equal(
                 b.PayloadKinds.OrderBy(k => k.ToString(), StringComparer.Ordinal).ToArray(),
                 a.PayloadKinds.OrderBy(k => k.ToString(), StringComparer.Ordinal).ToArray());
+            Assert.True(StatusCategoryRegistry.TryGetCategory(id, out var l2b));
+            Assert.Equal(l2b, a.Categories[0]);
         }
     }
 

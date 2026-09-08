@@ -32,6 +32,28 @@ from .vocab import Vocabulary
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_LEDGER = REPO_ROOT / "data" / "seed" / "items" / "_runs" / "set-charm-gen.ledger.json"
+DEFAULT_SETS_DIR = REPO_ROOT / "data" / "seed" / "items" / "sets"
+
+
+def _set_entry_on_disk(entry_id: str, *, sets_dir: "Path | None" = None) -> bool:
+    """True when the production (or test) sets corpus already carries this id.
+
+    Ledger subject keys can drift when a theme/species id is renamed (e.g. demon.caltrop →
+    demon.caltropnut) while the partition file still holds the minted set id. Re-planning that
+    theme then regenerates a different row for the same id and `_merged_partition_rows` raises.
+    Corpus presence wins — same discipline materialgen uses for hand-authored rows without a
+    ledger record.
+    """
+    if not isinstance(entry_id, str) or "." not in entry_id:
+        return False
+    body = entry_id.split(".", 1)[1]
+    partition = body.rsplit("-", 1)[0]
+    path = (sets_dir or DEFAULT_SETS_DIR) / f"{partition}.json"
+    if not path.exists():
+        return False
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return any(isinstance(row, dict) and row.get("id") == entry_id
+               for row in (document.get("entries") or []))
 
 
 def live_caller(live_config: LlmCallerConfig) -> "Callable[..., str]":
@@ -120,7 +142,8 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
              species_themes: "list[Theme] | None" = None,
              build_themes: "list[Theme] | None" = None,
              ledger: "dict[str, dict] | None" = None,
-             legacy_partitions: "frozenset[str] | None" = None) -> RunPlan:
+             legacy_partitions: "frozenset[str] | None" = None,
+             sets_dir: "Path | None" = None) -> RunPlan:
     if kind not in ("set", "charm"):
         raise ValueError(f"kind must be 'set' or 'charm', got {kind!r}")
     if population not in ("species", "build"):
@@ -149,6 +172,9 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
             already.append(subject_id)
             continue
         entry_id = _entry_id(kind, population, theme, partitions)
+        if kind == "set" and _set_entry_on_disk(entry_id, sets_dir=sets_dir):
+            already.append(subject_id)
+            continue
         text = (brief_mod.build_set_brief(theme, tuning, vocabulary) if kind == "set"
                 else brief_mod.build_charm_brief(theme, tuning, vocabulary))
         subjects.append(Subject(subject_id=subject_id, kind=kind, population=population,

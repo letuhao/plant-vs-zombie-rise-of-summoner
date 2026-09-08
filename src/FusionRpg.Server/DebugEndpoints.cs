@@ -173,7 +173,13 @@ public static class DebugEndpoints
                     var err = PayloadString(enterAck.Payload, "error") ?? "enter-level rejected";
                     if (!err.Contains("board already live", StringComparison.OrdinalIgnoreCase))
                         return Results.Conflict(new { ok = false, error = err });
-                    // "board already live" — fall through and use the board that's already there.
+                    // "board already live" is an explicit injector assertion. On cold starts the
+                    // Board.Awake event can predate the server's current event window, so use the
+                    // injector assertion and the latest catalog level metadata rather than inventing
+                    // a board lifecycle row. The scenario snapshot below still proves the board.
+                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
+                    if (boardStart is null)
+                        enteredLevelType = PayloadString(FindLatestKind(store, "catalog.zombies")?.Payload, "levelType");
                 }
                 else
                 {
@@ -197,10 +203,8 @@ public static class DebugEndpoints
                 // SAME live board, which would otherwise look "stale" to the session rule below and
                 // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
                 // itself was added — the fix for one false positive created a false negative.
-                if (boardStart is null)
-                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
-                if (boardStart is null)
-                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
+                if (boardStart is null && string.IsNullOrWhiteSpace(enteredLevelType))
+                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no level metadata was found" });
             }
 
             var levelType = boardStart is null
@@ -664,6 +668,15 @@ public static class DebugEndpoints
     {
         var items = store.ListEvents(500, afterId);
         return items.LastOrDefault(e => e.Kind == kind);
+    }
+
+    static EventEnvelope? FindLatestKind(RpgStore store, string kind)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return null;
+        const int windowCapacity = 2000;
+        return store.ListEvents(windowCapacity, Math.Max(0, max - windowCapacity))
+            .LastOrDefault(e => string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase));
     }
 
     static async Task<EventEnvelope?> PollForKind(RpgStore store, long afterId, string kind, TimeSpan timeout)

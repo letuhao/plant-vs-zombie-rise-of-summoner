@@ -277,7 +277,7 @@ Magnitudes stay in grant overlay. This table is id + kind + host + notes only.
 | `expose` | Debuff tag | Actor | More overlay HP taken (CombatMath later) |
 | `command` | Meter | Actor | Stacks when you apply statuses |
 | `shatter` | Consume window | Actor | Brief amp after freeze expires |
-| `charm_pulse` | CrowdControl UnityCc | actor ptr | Short hypno; L4 zombie adapter |
+| `charm_pulse` | CrowdControl + ModifyStat | actor ptr | Overlay CC lock via `cc` category; no UnityCc path (E17 def correction) |
 
 ### 9.4 Contagion overlay ids
 

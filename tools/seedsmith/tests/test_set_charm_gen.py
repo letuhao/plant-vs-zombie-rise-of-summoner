@@ -721,9 +721,14 @@ class VerdictTests(unittest.TestCase):
 # The run — resume, and the brief
 # --------------------------------------------------------------------------------------------
 class RunTests(unittest.TestCase):
-    def _plan(self, ledger=None, population="build", kind="set"):
+    def _plan(self, ledger=None, population="build", kind="set", sets_dir=None):
+        # Isolate from the live sets corpus — plan_run skips entry ids already on disk.
+        if sets_dir is None:
+            import tempfile
+            sets_dir = Path(tempfile.mkdtemp())
+            self.addCleanup(lambda p=sets_dir: __import__("shutil").rmtree(p, ignore_errors=True))
         return run_mod.plan_run(kind=kind, population=population, tuning=TUNING,
-                                vocabulary=VOCAB, ledger=ledger or {})
+                                vocabulary=VOCAB, ledger=ledger or {}, sets_dir=sets_dir)
 
     def test_the_build_population_plans_thirty_six_subjects(self) -> None:
         plan = self._plan()
@@ -735,6 +740,23 @@ class RunTests(unittest.TestCase):
         held = themes_mod.holdback_report(themes_mod.load_species_themes())
         self.assertEqual(len(plan.subjects), held.generatable)
         self.assertFalse(plan.complete)
+
+    def test_plan_skips_set_ids_already_present_in_the_corpus(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            sets_dir = Path(tmp)
+            theme = themes_mod.load_build_themes()[0]
+            entry_id = run_mod._entry_id(
+                "set", "build", theme, themes_mod.legacy_partition_ids())
+            partition = entry_id.split(".", 1)[1].rsplit("-", 1)[0]
+            (sets_dir / f"{partition}.json").write_text(
+                json.dumps({"kind": "set", "_meta": {"partition": f"sets/{partition}"},
+                            "entries": [{"id": entry_id, "name": "Existing"}]}),
+                encoding="utf-8")
+            plan = self._plan(sets_dir=sets_dir)
+            self.assertEqual(len(plan.subjects), 35)
+            self.assertIn(f"set-build-{theme.theme_key}", plan.already_done)
+            self.assertTrue(run_mod._set_entry_on_disk(entry_id, sets_dir=sets_dir))
 
     def test_the_run_resumes_after_an_interrupt_without_duplicating_entries(self) -> None:
         first = self._plan()

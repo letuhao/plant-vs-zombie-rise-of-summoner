@@ -39,4 +39,15 @@ describe("OnboardingReveal", () => {
     const { container } = render(<OnboardingReveal playerId={1} onOpenCommanders={vi.fn()} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("explains why acknowledgement is disabled while it saves", () => {
+    mockUseClaim.mockReturnValue({ isPending: true, mutateAsync: vi.fn() });
+    mockUseOnboarding.mockReturnValue({ isLoading: false, isError: false, data: {
+      playerId: 1, playerLevel: 1, revision: 1,
+      checkpoints: [{ checkpointId: "first-win-dave", state: "earned", claimedUtc: null, earnedRunId: 2,
+        rewardRef: "fact:2", payloadJson: "{}", earnedUtc: "now", revision: 1 }]
+    }});
+    render(<OnboardingReveal playerId={1} onOpenCommanders={vi.fn()} />);
+    expect(screen.getByRole("button", { name: "Saving…" })).toHaveAttribute("title", "Saving reward…");
+  });
 });

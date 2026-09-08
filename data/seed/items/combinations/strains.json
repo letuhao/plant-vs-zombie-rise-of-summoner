@@ -15,7 +15,7 @@
       "words": 5
     },
     "exemplarVersion": 1,
-    "promptVersion": "strain-splice-gen/1",
+    "promptVersion": "strain-splice-gen/2",
     "model": "google/gemma-4-26b-a4b-qat",
     "authoredUtc": "1970-01-01T00:00:00Z",
     "sourceRef": "docs/architecture/item-seedgen/spec-combination-write-unblock.md"

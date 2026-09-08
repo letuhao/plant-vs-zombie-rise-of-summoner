@@ -231,13 +231,27 @@ public static class EffectRuntime
 
     /// <summary>
     /// Withdraw all grants owned by <c>entity:{ptr}</c> (normalized). Call on die before ForgetEntity.
+    /// status-rail C1: tear down status StatMods without firing OnEnded (VFX reaps via anchor).
     /// </summary>
     public static int WithdrawEntity(string? ptrHex)
     {
         if (string.IsNullOrWhiteSpace(ptrHex)) return 0;
         Ensure();
         var n = Bag.WithdrawForOwner(null, EffectOwnerKeys.Entity(ptrHex.Trim()));
-        _status?.WithdrawEntity(ptrHex.Trim());
+        if (_status != null)
+        {
+            foreach (var inst in _status.TakeHostInstances(ptrHex.Trim()))
+            {
+                if (inst.StatMods.Count == 0) continue;
+                try
+                {
+                    CheatState.Stats.WithdrawSource("status", Core.Status.StatusStatPayload.SourceIdOf(inst));
+                    CheatActions.ReapplyLivingForOwner("entity:" + inst.HostPtr);
+                }
+                catch (Exception ex) { CheatState.Error("status stat death withdraw: " + ex.Message); }
+            }
+        }
+
         if (n > 0)
         {
             DebugRuntime.Emit("debug.effect.withdrawn_entity", new Dictionary<string, object>
@@ -250,7 +264,7 @@ public static class EffectRuntime
         return n;
     }
 
-    /// <summary>Withdraw all grants, clear proc/dedupe, strip session effect mods.</summary>
+    /// <summary>Withdraw all grants, clear proc/dedupe, strip session effect and status mods.</summary>
     public static void ClearAll(string reason = "clear")
     {
         Ensure();
@@ -264,6 +278,8 @@ public static class EffectRuntime
         }
 
         try { CheatState.Stats.WithdrawAllBySourceKind("effect"); } catch { }
+        // status-rail C1: Bag.ClearAll → Status.Clear() skips OnEnded; strip status session mods.
+        try { CheatState.Stats.WithdrawAllBySourceKind("status"); } catch { }
         try { CheatActions.ReapplyAllLiving(); } catch { }
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();

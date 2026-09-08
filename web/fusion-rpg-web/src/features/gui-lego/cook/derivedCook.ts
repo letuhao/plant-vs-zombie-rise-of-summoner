@@ -177,7 +177,14 @@ export function expandDerivedFamily(
 export function registryCapFor(channelId: string, familyCapRef: string | null): number | null {
   if (channelId === "status.resist.omni") return null;
   if (KNOWN_CAPS[channelId] != null) return KNOWN_CAPS[channelId]!;
-  if (familyCapRef === "categoryResistCap" && /\.(dot|cc|contagion)$/.test(channelId)) return 0.95;
+  // Core open-prefix applies categoryResistCap to every status.resist.* except dense omni.
+  if (
+    familyCapRef === "categoryResistCap" &&
+    channelId.startsWith("status.resist.") &&
+    channelId !== "status.resist.omni"
+  ) {
+    return 0.95;
+  }
   if (channelId.startsWith("status.immune.") || channelId.startsWith("status.immuneReduction.")) return 1;
   return null;
 }

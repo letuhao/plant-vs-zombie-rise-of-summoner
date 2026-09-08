@@ -326,7 +326,9 @@ public sealed class SimEngine
             }));
         }
         Zombies.Add(entity);
-        events.Add(Evt("zombie.spawn", ZombieDump(entity, string.IsNullOrWhiteSpace(req.Source) ? "initHealth" : req.Source!)));
+        events.Add(Evt("zombie.spawn", ZombieDump(entity,
+            string.IsNullOrWhiteSpace(req.Source) ? "initHealth" : req.Source!,
+            req.SourceKind, req.SourceId)));
         var result = new SimResult();
         result.Events.AddRange(events);
         return WithKey(result);
@@ -741,8 +743,10 @@ public sealed class SimEngine
         ["source"] = source
     };
 
-    Dictionary<string, object> ZombieDump(SimEntity e, string source) => new()
+    Dictionary<string, object> ZombieDump(SimEntity e, string source, string? sourceKind = null, string? sourceId = null)
     {
+        var dump = new Dictionary<string, object>
+        {
         ["type"] = e.Type,
         ["typeName"] = e.TypeName,
         ["displayName"] = e.TypeName,
@@ -777,7 +781,11 @@ public sealed class SimEngine
         ["armorMaxBase"] = e.ArmorMax,
         ["armorMax"] = e.ArmorMax,
         ["source"] = source
-    };
+        };
+        if (!string.IsNullOrWhiteSpace(sourceKind)) dump["sourceKind"] = sourceKind!;
+        if (!string.IsNullOrWhiteSpace(sourceId)) dump["sourceId"] = sourceId!;
+        return dump;
+    }
 
     SimResult WithKey(SimResult r)
     {

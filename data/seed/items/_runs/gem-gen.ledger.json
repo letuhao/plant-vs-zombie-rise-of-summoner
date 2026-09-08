@@ -15,6 +15,21 @@
       },
       "entryId": "gem.g1-022"
     },
+    "gem-gems/1-atom.arm-plate": {
+      "entry": {
+        "family": "atom.arm-plate",
+        "iconKey": "icon.gem.reinforced-plating",
+        "id": "gem.g1-023",
+        "name": "Reinforced Plating",
+        "nameKey": "gem.reinforced-plating",
+        "powerBand": "medium",
+        "tags": [
+          "metal",
+          "sturdy"
+        ]
+      },
+      "entryId": "gem.g1-023"
+    },
     "gem-gems/1-atom.entangling": {
       "entry": {
         "family": "atom.entangling",
@@ -28,6 +43,20 @@
         ]
       },
       "entryId": "gem.g1-021"
+    },
+    "gem-gems/1-atom.firelining": {
+      "entry": {
+        "family": "atom.firelining",
+        "iconKey": "icon.gem.firelining",
+        "id": "gem.g1-024",
+        "name": "Firelining",
+        "nameKey": "gem.firelining",
+        "powerBand": "medium",
+        "tags": [
+          "offensive"
+        ]
+      },
+      "entryId": "gem.g1-024"
     },
     "gem-gems/2-atom.affliction": {
       "entry": {

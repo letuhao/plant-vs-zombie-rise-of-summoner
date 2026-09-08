@@ -279,6 +279,29 @@
         "sturdy",
         "metal"
       ]
+    },
+    {
+      "family": "atom.arm-plate",
+      "iconKey": "icon.gem.reinforced-plating",
+      "id": "gem.g1-023",
+      "name": "Reinforced Plating",
+      "nameKey": "gem.reinforced-plating",
+      "powerBand": "medium",
+      "tags": [
+        "metal",
+        "sturdy"
+      ]
+    },
+    {
+      "family": "atom.firelining",
+      "iconKey": "icon.gem.firelining",
+      "id": "gem.g1-024",
+      "name": "Firelining",
+      "nameKey": "gem.firelining",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
     }
   ]
 }

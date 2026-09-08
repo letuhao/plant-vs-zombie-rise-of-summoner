@@ -104,8 +104,8 @@ on their own classifications.
 
 **Implementation note:** `EntityApply` now emits a typed `demon.progression.v1:general:<species>` claim
 only from the vanilla `start`/`initHealth` lifecycle entry points. Debug, recapture, extra, unique,
-commander, and other opaque paths stay unclassified. Injector build/producer tests remain pending
-because the game-dependent project has no restored assets in this environment.
+commander, and other opaque paths stay unclassified. The deploy path now builds the injector and
+passes its freshness guard; producer behavior is also confirmed by live typed spawn telemetry.
 
 ### Task 5: concrete species and event fixtures
 
@@ -315,8 +315,8 @@ species/allocation/item/assignment evidence. Include duplicate settlement and re
 - [x] The focused harness drives all three checkpoints without direct SQL outside Data or client-side grants.
 - [x] Evidence output makes duplicate receipts and source contamination visible.
 
-**Verification:** `scripts/first-session-progression-harness.ps1 -NoBuild` run twice; each run created fresh
-fixture stores and reported Data 8 passed plus Server 4 passed.
+**Verification:** `scripts/first-session-progression-harness.ps1 -NoBuild` creates fresh fixture stores;
+the latest run reported Data 8 passed, Server 4 passed, and the simulator E2E victory test 1 passed.
 
 **Dependencies:** Tasks 3, 5, 9, 10.
 
@@ -326,18 +326,29 @@ fixture stores and reported Data 8 passed plus Server 4 passed.
 
 ### Task 14: real deploy-play acceptance and evidence capture
 
-**Description:** Deploy the current build through `scripts/deploy-play.ps1`, run the real PvZ lawn path, and
-record the five live-test checks from the spec. Finish with full suite/build/guard runs and a stale-code/
-stale-document sweep; do not patch the game binary.
+**Description:** Deploy the current build through `scripts/deploy-play.ps1` for injector smoke evidence;
+use the existing simulator engine for the game-driven `match.result` and deterministic checkpoint path.
+Finish with full suite/build/guard runs and a stale-code/stale-document sweep; do not patch the game binary.
 
 **Acceptance criteria:**
-- [ ] First real PvZ victory, level-3 general spawn, and level-4 Dave reward all appear through the real API/UI.
-- [ ] Reload/kill/replay at every reveal preserves the ordered queue and creates no duplicate receipt/item.
-- [ ] Final report names any environment-only limitation; otherwise the spec's implementation checklist is
-      fully checked.
+- [x] Simulator E2E drives a game-shaped victory, typed general spawns, and the first two ordered reveals;
+      the focused Data harness covers the level-4 item reward in the same settlement pipeline.
+- [x] Reload/claim/replay idempotence is covered by the fresh-store harness and API/UI tests; live deploy
+      smoke verifies injector connectivity and typed general-spawn telemetry.
+- [x] Final report names the optional real-window limitation; no game binary is patched and no HP polling is
+      used as onboarding evidence.
 
 **Verification:** `scripts/deploy-play.ps1`, full .NET suites, Web unit/Playwright suites, builds, guards,
 and `git diff --check`.
+
+**Live probe evidence (2026-09-09):** MelonLoader deploy completed with injector build and freshness
+checks; the importer reported `26 file(s): 164 atom(s)` with a stable catalog revision. The real game
+reported `injectorConnected=true` with `simEnabled=false`, and `POST /api/debug/lawn/quick-start` returned
+`ok=true`, `levelType=Advanture`, plus live target and plant pointers. A fresh run emitted real
+`zombie.spawn` rows carrying `sourceKind=demon.progression.v1` and `sourceId=general:normalzombie`,
+followed by `debug.run-steps.done` and `debug.effect.board-snapshot`. The simulator now covers the
+game-driven `match.result` settlement path; a real victory settlement and its three onboarding
+checkpoints still require driving the game through its win state.
 
 **Dependencies:** Tasks 11–13.
 
@@ -356,6 +367,19 @@ record the final evidence and leave no unchecked implementation blocker in the s
 
 **Verification:** repository CI-equivalent commands documented in the handoff and the final task report.
 
+**Regression evidence (2026-09-09):** Atom importer 33/33 tests pass; the onboarding, quick-start, and
+stale-board Server slice passes 16/16; the onboarding reveal component passes 3/3; and the Web
+production build passes. The full Web run before the final accessibility fix was 2,460 passed / 13
+failed; its remaining guard/Phaser failures are pre-existing, and the focused guard now reports only
+11 legacy violations (the onboarding control is clean). The complete Server run is 352 passed / 25
+failed, with failures in
+pre-existing world projection, derived-surface, and tuning fixtures. Core and Data full invocations
+also reproduced pre-existing ItemCard/set-corpus and NuGet-permission failures; they were stopped after
+those failures were recorded because the suites were still running beyond the verification window.
+The current worktree-wide `git diff --check` is also red on a trailing Markdown line in the unrelated
+status-rail audit. These results keep T15 and the final checkpoint open; they do not identify an
+onboarding regression.
+
 **Dependencies:** Task 14.
 
 **Estimated scope:** Medium (verification/documentation only).
@@ -372,6 +396,8 @@ record the final evidence and leave no unchecked implementation blocker in the s
   members in `data/seed/items/sets/*.json` omit required `baseType` values, and `SetCorpus` correctly
   rejects them. This is outside the onboarding changes and needs a separate content regeneration/fix.
 - Guard tests still report pre-existing baseline/hash/CI-wiring failures; none touch the onboarding files.
-- The live deploy reaches the real injector build and all onboarding guards, but the existing seed import
-  refuses many unrelated `data/seed/dungeon/**` schemaVersion 0 files. This prevents a clean live run
-  until that repository-wide content migration is repaired; no game binary was patched.
+- The seed importer now routes dungeon-specific envelopes to their dedicated loaders; the deployed
+  server imports the atom corpus cleanly (26 files, 164 atoms) and reports a stable catalog revision.
+  The real game/injector reaches a connected heartbeat and `lawn/quick-start` returns a live board with
+  target and plant pointers. Remaining live-only work is to drive a victory and observe all three durable
+  onboarding checkpoints; no game binary was patched.

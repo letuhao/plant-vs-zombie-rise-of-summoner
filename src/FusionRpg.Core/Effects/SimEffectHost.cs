@@ -36,7 +36,7 @@ public sealed class SimEffectHost
         _bag = new EffectBag(defs, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
         _bag.UtcNow = () => _clock.UtcNow;
         _bag.Status = new StatusRuntime(
-            StatusCatalogBootstrap.CreateDefault(),
+            StatusCatalogHub.Current,
             (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
         Funnel = new EffectFunnel(_bag, _fx);
         Plugins = EffectPluginHostFactory.Create(_bag);

@@ -52,7 +52,11 @@ public sealed class DerivedSurfaceEndpointsTests : IAsyncLifetime
         Assert.Equal(2, body.SchemaVersion);
         Assert.Equal(new[] { "elements", "status", "resources", "other" }, body.Tabs.Select(t => t.Id));
         Assert.Contains(body.Tabs.Single(t => t.Id == "elements").Variants, v => v.Id == "omni" && v.PresentationOnly);
-        Assert.Equal(4, body.Tabs.Single(t => t.Id == "status").Variants.Count);
+        var statusTab = body.Tabs.Single(t => t.Id == "status");
+        Assert.Equal(25, statusTab.Variants.Count);
+        Assert.Equal("omni", statusTab.Variants[0].Id);
+        Assert.Contains(statusTab.Variants, v => v.Id == "butter");
+        Assert.Contains(statusTab.Variants, v => v.Id == "nerve.afflicted");
         Assert.Empty(body.Tabs.Single(t => t.Id == "other").Variants);
         Assert.Equal(5, body.Tabs.Single(t => t.Id == "other").ActionCategoryVariants!.Count);
     }

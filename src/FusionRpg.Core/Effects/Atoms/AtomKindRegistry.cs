@@ -96,11 +96,11 @@ public static class AtomKindRegistry
     static IReadOnlyCollection<string> DerivedChannels() =>
         Stats.Derived.DerivedStatRegistry.CreateDefault().AllRegistered.Select(d => d.ChannelId).ToList();
 
-    /// <summary>21 catalog statuses `status.apply`/`status.clear` both name — the union, per rule 4:
-    /// a status legal here but inert on one runtime (e.g. `wither` on the lawn — it is not, see the
-    /// spec's own §3 rule-4 correction) refuses at EXECUTE time with a reason, never at load.</summary>
+    /// <summary>status-rail C3: live inject via <see cref="Status.StatusCatalogHub.Current"/> (24 ids
+    /// today including <c>nerve.*</c>). Falls back to Bootstrap when hosts have not configured.
+    /// A status legal here but inert on one runtime refuses at EXECUTE with a reason, never at load.</summary>
     static IReadOnlyCollection<string> StatusIds() =>
-        Status.StatusCatalogBootstrap.CreateDefault().All().Select(d => d.StatusId).ToList();
+        Status.StatusCatalogHub.Current.All().Select(d => d.StatusId).ToList();
 
     /// <summary>5 — §2.1 corrects `AtomKindRegistry`'s own stale "which FA9 does not" claim about
     /// maxSun/maxMoney: `ExecEconomy` passes `currency` through unfiltered and `CheatActions.SetEconomy`

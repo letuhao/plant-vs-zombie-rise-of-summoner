@@ -196,9 +196,17 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
                 outcome="escalated", attempts=attempts, defects=defects))
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
+            reason = draft["blocked"].strip()
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
-                outcome="blocked", attempts=attempts, blocked_reason=draft["blocked"]))
+                outcome="blocked", attempts=attempts, blocked_reason=reason))
+            # Presence alone advances set/charm resume; no seed row for a decline.
+            done[subject.subject_id] = {
+                "outcome": "blocked",
+                "blockedReason": reason,
+                "entryId": subject.entry_id,
+                "attempts": attempts,
+            }
             continue
 
         entry_id, row = _row_for(

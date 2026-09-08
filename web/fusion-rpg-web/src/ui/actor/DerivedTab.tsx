@@ -155,6 +155,7 @@ export function DerivedTab({
         sheetChannels: sheet.data?.derived,
         leanChannels: derived.data?.channels,
         elements: surface.elements,
+        statuses: surface.statuses,
         ui: {
           tabId,
           variantId,
@@ -173,6 +174,7 @@ export function DerivedTab({
       sheet.data,
       derived.data,
       surface.elements,
+      surface.statuses,
       tabId,
       variantId,
       query,

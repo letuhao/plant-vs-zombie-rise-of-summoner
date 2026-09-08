@@ -108,6 +108,12 @@
     "charm-species-demon.bucketzombie": {
       "entryId": "charm.surv-util-029",
       "attempts": 1
+    },
+    "charm-species-demon.cabbagepult": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The theme of 'pitcher/attack' requires offensive scaling or multipliers to feel impactful, but the brief restricts charms to FLAT effects only, making it impossible to express the 'power' of a pitcher effectively.",
+      "entryId": "charm.(axis-group)-NNN for cabbagepult",
+      "attempts": 1
     }
   }
 }

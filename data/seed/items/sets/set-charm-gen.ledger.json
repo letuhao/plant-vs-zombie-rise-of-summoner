@@ -120,6 +120,10 @@
     "set-species-demon.caltrop": {
       "entryId": "set.caltrop-001",
       "attempts": 1
+    },
+    "set-species-demon.cherrythreepeater": {
+      "entryId": "set.cherrythreepeater-001",
+      "attempts": 1
     }
   }
 }

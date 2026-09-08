@@ -15,6 +15,14 @@
     "milestone-draw-003": {
       "entryId": "enh.014",
       "runtimeFamily": "atom.enhance-vitality"
+    },
+    "milestone-draw-004": {
+      "entryId": "enh.015",
+      "runtimeFamily": "atom.enhance-prowess"
+    },
+    "milestone-draw-005": {
+      "entryId": "enh.016",
+      "runtimeFamily": "atom.enhance-might"
     }
   },
   "schemaVersion": 1
