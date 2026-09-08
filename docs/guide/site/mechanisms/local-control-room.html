@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Local control room — how Rise of Summoner runs on your machine in the browser. No account, no cloud."
+    />
+    <title>Local control room — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/local-control-room.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Session · how you play
+        </p>
+        <h1 class="teach-title">Local control room</h1>
+        <p class="teach-hook">
+          The <strong>local control room</strong> is the browser window where you play Rise of
+          Summoner on your own machine — your hall, roster, map, and menus — with no account and no
+          cloud.
+        </p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the walkthrough.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Control room</dt>
+              <dd>
+                The Rise of Summoner interface in your <strong>browser</strong>. Not a Discord lobby,
+                not a public game server, not “someone else’s computer.”
+              </dd>
+            </div>
+            <div>
+              <dt>Launcher</dt>
+              <dd>
+                The small desktop app you double-click. It starts the helper that keeps your save,
+                starts the lawn game when you ask, and opens the control room in the browser.
+              </dd>
+            </div>
+            <div>
+              <dt>Lawn game</dt>
+              <dd>
+                <strong>Plants vs. Zombies: Fusion</strong> — a fan-made Plants vs. Zombies pack
+                (separate from EA’s official titles). Matches on that board are the <strong>lawn</strong>.
+              </dd>
+            </div>
+            <div>
+              <dt>Save</dt>
+              <dd>
+                Your Rise of Summoner progress on <strong>this PC</strong>, next to the local helper.
+                Separate from the lawn game’s own save files.
+              </dd>
+            </div>
+            <div>
+              <dt>Local</dt>
+              <dd>
+                Everything runs on your machine. No Rise of Summoner account. No website hosted by
+                someone else.
+              </dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>
+              Rise of Summoner does <strong>not</strong> replace Plants vs. Zombies: Fusion. Point the
+              launcher at a <strong>legal</strong> install of that pack.
+            </li>
+            <li>
+              When a menu says <strong>Fusion</strong>, it usually means merging two demons — not the
+              host pack’s product name.
+            </li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="pieces-title">
+          <h2 id="pieces-title">The three pieces</h2>
+          <p>Think of one session as three windows that work together:</p>
+          <ol class="pieces" aria-label="Launcher, control room, lawn game">
+            <li class="piece">
+              <strong class="piece-name">Launcher</strong>
+              <p>
+                Your front door. Trust prompt on first run, pick the lawn-game folder, Play. Leave it
+                running (or minimized) while you play.
+              </p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Browser — control room</strong>
+              <p>
+                Where the RPG and empire live when you are not inside a lawn match — and where you
+                watch the lawn mirror when a match is running.
+              </p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Lawn game</strong>
+              <p>
+                The live board. Play matches here; souls, levels, almanac, and deploy land in your
+                Rise of Summoner save.
+              </p>
+            </li>
+          </ol>
+          <p class="teach-note">
+            You can keep the control room open with the lawn game closed once features have unlocked.
+            The save stays on this machine — you do not log in from another house.
+          </p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="gui-title">
+          <h2 id="gui-title">What you see (GUI)</h2>
+
+          <div class="gui-walk">
+            <h3>On the launcher</h3>
+            <ol>
+              <li>
+                <strong>Trust &amp; security</strong> (first run) — unsigned hobby build; some
+                antivirus tools may warn. Allow if you accept. Open that panel again anytime for the
+                same explanation.
+              </li>
+              <li>
+                <strong>Browse</strong> — choose the folder that contains your legal Plants vs.
+                Zombies: Fusion install (the folder with the game’s own executable). The launcher
+                does not guess a fixed path.
+              </li>
+              <li>
+                <strong>Loader / plugin</strong> — install one loader and the Rise of Summoner plugin
+                into that folder. Only one loader path; dual-load is refused.
+              </li>
+              <li>
+                <strong>Play</strong> — starts the local helper, can start the lawn game, and opens
+                the control room in your default browser.
+              </li>
+            </ol>
+            <p class="teach-note">
+              Full install and antivirus steps:
+              <a href="../../../runbook/players.md">player runbook</a>. This page teaches what the
+              control room is, not every button on first install.
+            </p>
+          </div>
+
+          <div class="gui-walk">
+            <h3>In the browser</h3>
+            <p>When Play succeeds, a normal browser tab opens on your machine. That tab <strong>is</strong> the control room.</p>
+            <ol>
+              <li>
+                <strong>Title / save select</strong> — pick or create a summoner save. Detail:
+                <a href="../../mechanisms/save-select.md">Title / save select</a>.
+              </li>
+              <li>
+                <strong>Sanctum</strong> — your home hall after you enter. Where you are when nothing
+                else is open. Detail: <a href="../../mechanisms/sanctum.md">Sanctum</a>.
+              </li>
+            </ol>
+            <p class="teach-note">
+              From Sanctum you open layers over the stage you are already on — you do not leave the
+              game to visit a separate website.
+            </p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Unzip the release (or use your usual local setup) and start the <strong>launcher</strong>.</li>
+            <li>
+              Finish trust / folder / plugin setup if this is a fresh install
+              (<a href="../../../runbook/players.md">player runbook</a>).
+            </li>
+            <li>Click <strong>Play</strong>. Wait for the browser tab.</li>
+            <li>At the door, <strong>create or pick a save</strong>.</li>
+            <li>Land in the <strong>Sanctum</strong>. You are now in the local control room.</li>
+          </ol>
+          <p class="teach-note">
+            Stop here for this mechanism. Next: how saves work at the door, then what Sanctum is for.
+          </p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="yours-title">
+          <h2 id="yours-title">What stays yours</h2>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Thing</th>
+                <th scope="col">What happens</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Rise of Summoner save</td>
+                <td>Lives beside the local helper on your PC. Updating the RPG is meant to keep that data.</td>
+              </tr>
+              <tr>
+                <td>Lawn game saves</td>
+                <td>Stay the lawn game’s. Rise of Summoner does not rewrite them.</td>
+              </tr>
+              <tr>
+                <td>While you play</td>
+                <td>Leave the launcher running (or minimized). Closing it can stop the helper the browser needs.</td>
+              </tr>
+              <tr>
+                <td>After unlock</td>
+                <td>
+                  Unlocked control-room features stay playable with the lawn game closed. The lawn
+                  still feeds souls, levels, almanac, and deploy when you play it.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is this online multiplayer?</dt>
+              <dd>No. Local means your PC. There is no Rise of Summoner account.</dd>
+            </div>
+            <div>
+              <dt>I closed the browser — did I quit the game?</dt>
+              <dd>
+                You closed the control room window. Open it again from the launcher (Play / open UI).
+                Your save is still on disk if the helper was running normally.
+              </dd>
+            </div>
+            <div>
+              <dt>Can I play only in the browser?</dt>
+              <dd>
+                After early unlocks, yes for many RPG and empire features. Lawn matches still need
+                the lawn game when you want board progress.
+              </dd>
+            </div>
+            <div>
+              <dt>The menu says Fusion — is that the host pack?</dt>
+              <dd>
+                Usually no. In Rise of Summoner menus, Fusion is the specimen-merge action. The host
+                pack’s full name is Plants vs. Zombies: Fusion.
+              </dd>
+            </div>
+            <div>
+              <dt>Will an update wipe my demons?</dt>
+              <dd>
+                Updating Rise of Summoner is designed to keep your save folder. It does not download
+                or patch the lawn game. If something looks wrong after an update, check the runbook
+                and SUPPORT — do not reinstall the lawn pack hoping that fixes the RPG save.
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/save-select.md">Title / save select</a> ·
+            <a href="../../mechanisms/sanctum.md">Sanctum</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/local-control-room.md">Markdown (editable SSOT)</a> ·
+            <a href="../../how-you-play.md">How you play</a> ·
+            <a href="../../../runbook/players.md">Install runbook</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/local-control-room.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

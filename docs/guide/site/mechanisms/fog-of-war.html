@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Fog of war keeps other people’s ground and the past uncertain — your own held ground stays clear." />
+    <title>Fog of war — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/fog-of-war.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          World and empire · sight and uncertainty
+        </p>
+        <h1 class="teach-title">Fog of war</h1>
+        <p class="teach-hook"><strong>Fog of war</strong> keeps other people’s ground and the past uncertain — your own held ground stays clear.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Fog</dt>
+              <dd>Uncertainty about ground you do not hold (and about memory of what was). Not a weather status on a lawn tile.</dd>
+            </div>
+            <div>
+              <dt>Clear sight</dt>
+              <dd>Holding a sector grants full sight of it — home turf is not a guessing game.</dd>
+            </div>
+            <div>
+              <dt>Zomboss’s fog</dt>
+              <dd>He evaluates from <strong>his</strong> fog. He does not peek at your save.</dd>
+            </div>
+            <div>
+              <dt>Scout</dt>
+              <dd>Moving carefully into uncertain ground so you learn what is there — not automatic full reveal of the map.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Deeper fog craft and procedural generator work are Vision — see <a href="../../mechanisms/world-generator.md">world generator</a>.</li>
+            <li>Fog is about other people’s ground and about memory — not about hiding your own holdings from you.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Your own ground is clear. Other people’s ground and the past stay uncertain.</p>
+          <p>That asymmetry is the adventure: expand into fog, hold what you take, and never assume Zomboss shares your eyes.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Sight follows ownership and contact:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  hold sector  -&gt;  clear sight there
+  other ground / past  -&gt;  uncertain (fog)
+  Zomboss  -&gt;  decides from his fog
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Hold</strong>
+              <p>Claimed sectors you keep give clear sight of that ground.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Push</strong>
+              <p>March into fog to learn lanes and contacts the hard way.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Opponent</strong>
+              <p>Zomboss plans under his own fog — fair war, not omniscience.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On the World map</h3>
+            <p>Fog is visible as soon as you leave fully held ground.</p>
+            <ol>
+              <li>Travel to World.</li>
+              <li>Compare a held sector (clear) with neighbouring uncertain ground.</li>
+              <li>Scout one step carefully, then End Turn and reassess.</li>
+            </ol>
+            <p class="teach-note">Lenses that recolour fog or supply are WIP map tools — see <a href="../../mechanisms/map-orders.md">map orders</a>.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Open the world map on ground you hold.</li>
+            <li>Look outward until the view turns uncertain.</li>
+            <li>March one careful step into fog and End Turn — notice what you learned vs what stayed dark.</li>
+          </ol>
+          <p class="teach-note">Stop when fog ≠ “the map is broken.” Related: <a href="../../mechanisms/world-map.md">world map</a>, <a href="../../mechanisms/zomboss-commander.md">Zomboss</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why can’t I see the whole map?</dt>
+              <dd>Fog is intentional. Clear sight comes from holding ground and scouting.</dd>
+            </div>
+            <div>
+              <dt>Does Zomboss cheat and see everything?</dt>
+              <dd>No. He evaluates from his fog.</dd>
+            </div>
+            <div>
+              <dt>Is my homeworld fogged to me?</dt>
+              <dd>Holding a sector grants full sight of it — your own land stays clear.</dd>
+            </div>
+            <div>
+              <dt>Is richer fog crafting in this build?</dt>
+              <dd>Basic fog ships. Deeper craft and generator work are Vision.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/zomboss-commander.md">Zomboss as commander</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/world-map.md">Rift world map</a> ·
+            <a href="../../mechanisms/zomboss-commander.md">Zomboss as commander</a> ·
+            <a href="../../mechanisms/world-generator.md">World generator and deeper fog</a> ·
+            <a href="../../mechanisms/map-orders.md">Map tools and orders</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/fog-of-war.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-rift.md">The rift</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/fog-of-war.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

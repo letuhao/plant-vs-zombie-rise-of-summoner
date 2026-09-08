@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Extract"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 R1's own named gap: 'material-seam x3 yield ZERO'. Closes the second half of R1's stated deficiency (extractor, dumped above, already closes the ShardVein half).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "MaterialSeam",
+        "role": "Extract",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "seam-works",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "seam-works",
+      "name": "Seam Works"
+    }
+  ],
+  "kind": "structure-anchor"
+}

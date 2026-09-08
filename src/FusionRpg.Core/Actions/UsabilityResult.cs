@@ -18,6 +18,14 @@ public enum UsabilityReason
     ConditionFailed,
     NoValidTarget,
     MissingStock,
+
+    /// <summary>aura-skill T13: toggling on an aura the commander does not carry in their 5-slot
+    /// loadout — equipped and active are independent scarcities (spec-aura-action-shape.md §1).</summary>
+    NotEquipped,
+
+    /// <summary>aura-skill T13: toggling on an aura that is already active — a no-op that reports it,
+    /// never a refresh that resets the aura's age in the FIFO eviction order.</summary>
+    AlreadyActive,
 }
 
 /// <summary>

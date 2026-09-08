@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A chamber of polished obsidian holds a mountain of tarnished silver and silk tapestries, all draped over the silent, unmoving remains of a forgotten dynasty.",
+  "hazardBand": "none",
+  "kind": "cache",
+  "name": "The Gilded Ossuary",
+  "reason": "The room contains high-value loot but is physically empty of threats, serving as a moment of respite and resource replenishment.",
+  "roomId": "room.cache-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

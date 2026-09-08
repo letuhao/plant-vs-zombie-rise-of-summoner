@@ -4,6 +4,8 @@ using FusionRpg.Contracts;
 using FusionRpg.Data.Abstractions;
 using FusionRpg.Data.Policies;
 using FusionRpg.Data.Sqlite;
+using FusionRpg.Data.Sqlite.Migrations;
+using FusionRpg.Core.Demons;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -49,13 +51,17 @@ public sealed partial class RpgStore : IRpgDb
         LegacyMonoMigrator.HealOrphanMediaTables(_dataDir, Console.Out);
 
         using (var db = Open())
+        {
             EnsureHotSchema(db);
+            ShardRungs.Migrate(db, Console.Out);
+        }
         using (var media = OpenMedia())
             EnsureMediaSchema(media);
 
         using (var db = Open())
         {
             SeedPlayerIfEmpty(db);
+            BackfillWorldSeedsUnlocked(db);
             EnsurePvzStatsRevisionForAllPlayers(db);
             EnsurePvzActivityRevisionForAllPlayers(db);
             var pid = GetCurrentPlayerIdUnlocked(db);
@@ -76,6 +82,16 @@ public sealed partial class RpgStore : IRpgDb
             var swept = SweepStaleActiveBoundUnlocked(db);
             if (swept > 0)
                 Console.WriteLine($"[unique] swept {swept} stale ActiveBound → Roster");
+
+            // D1 §10 M1 — copy any pre-cutover rpg_unique_equipment rows into rpg_item_assignment,
+            // which every equipment reader and writer now uses instead (M2). One-way and idempotent:
+            // a specimen+role that already carries an assignment is never overwritten, so this is a
+            // no-op on every boot after the first. Runs here, after EnsureHotSchema has created both
+            // tables and after the ActiveBound sweep, so a save written before 2026-09-06 keeps its
+            // equipment across the switch instead of silently reading empty.
+            var migrated = MigrateUniqueEquipmentToAssignmentsUnlocked(db);
+            if (migrated > 0)
+                Console.WriteLine($"[items] migrated {migrated} rpg_unique_equipment row(s) → rpg_item_assignment");
         }
     }
 
@@ -85,7 +101,8 @@ public sealed partial class RpgStore : IRpgDb
             CREATE TABLE IF NOT EXISTS players (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL,
-              created_utc TEXT NOT NULL
+              created_utc TEXT NOT NULL,
+              world_seed INTEGER NOT NULL DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS settings (
               key TEXT PRIMARY KEY,
@@ -223,6 +240,12 @@ public sealed partial class RpgStore : IRpgDb
             );
             PRAGMA journal_mode=WAL;
             """);
+        // world-seed (T5.1, spec-world-seed.md) — "the whole save"'s own per-player root. Created
+        // once at player creation, never regenerated; a legacy row (pre-dating this column, or
+        // SeedPlayerIfEmpty's own direct INSERT) defaults to 0, which BackfillWorldSeeds treats as
+        // the sentinel for "not yet assigned" and fixes in Init(), never left at 0 permanently — two
+        // players sharing 0 would derive identical rosters.
+        EnsureColumn(db, "players", "world_seed", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "almanac_seed_enrichment", "description_text", "TEXT");
         EnsureColumn(db, "events", "player_id", "INTEGER");
         EnsureColumn(db, "events", "run_id", "INTEGER");
@@ -340,12 +363,26 @@ public sealed partial class RpgStore : IRpgDb
               through_fact_id INTEGER NOT NULL DEFAULT 0,
               schema_version INTEGER NOT NULL DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS rpg_onboarding_checkpoint (
+              player_id INTEGER NOT NULL,
+              checkpoint_id TEXT NOT NULL,
+              state TEXT NOT NULL,
+              earned_run_id INTEGER,
+              reward_ref TEXT,
+              payload_json TEXT,
+              earned_utc TEXT NOT NULL,
+              claimed_utc TEXT,
+              revision INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (player_id, checkpoint_id)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_onboarding_checkpoint_player
+              ON rpg_onboarding_checkpoint(player_id, checkpoint_id);
             CREATE TABLE IF NOT EXISTS rpg_actor_progression (
               player_id INTEGER NOT NULL,
               kind TEXT NOT NULL,
               type_id INTEGER NOT NULL,
               level INTEGER NOT NULL DEFAULT 1,
-              xp REAL NOT NULL DEFAULT 0,
+              xp INTEGER NOT NULL DEFAULT 0,
               highest_level INTEGER NOT NULL DEFAULT 1,
               demotion_count INTEGER NOT NULL DEFAULT 0,
               revision INTEGER NOT NULL DEFAULT 0,
@@ -361,13 +398,15 @@ public sealed partial class RpgStore : IRpgDb
               type_id INTEGER NOT NULL,
               run_id INTEGER NOT NULL DEFAULT 0,
               t TEXT NOT NULL,
-              delta REAL NOT NULL,
+              delta INTEGER NOT NULL,
               reason TEXT NOT NULL,
               activity_fact_id INTEGER,
               level_before INTEGER NOT NULL,
-              xp_before REAL NOT NULL,
+              -- INTEGER since 2026-09-05: XP is an integer magnitude, and the 2026-09-04 pass
+              -- migrated rpg_actor_progression.xp but not the ledger that mirrors it.
+              xp_before INTEGER NOT NULL,
               level_after INTEGER NOT NULL,
-              xp_after REAL NOT NULL,
+              xp_after INTEGER NOT NULL,
               demotion_before INTEGER NOT NULL,
               demotion_after INTEGER NOT NULL,
               payload_json TEXT,
@@ -382,7 +421,7 @@ public sealed partial class RpgStore : IRpgDb
               type_id INTEGER NOT NULL,
               phase TEXT NOT NULL,
               level INTEGER NOT NULL DEFAULT 1,
-              xp REAL NOT NULL DEFAULT 0,
+              xp INTEGER NOT NULL DEFAULT 0,
               match_key TEXT,
               last_ptr TEXT,
               deploy_correlation_id TEXT,
@@ -394,6 +433,39 @@ public sealed partial class RpgStore : IRpgDb
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_corr ON rpg_unique_actors(deploy_correlation_id);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_ptr ON rpg_unique_actors(last_ptr);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_match ON rpg_unique_actors(match_key);
+            CREATE TABLE IF NOT EXISTS rpg_unique_lawn_xp_receipts (
+              instance_id TEXT NOT NULL,
+              match_key TEXT NOT NULL,
+              occurrence_id TEXT NOT NULL,
+              reason TEXT NOT NULL,
+              xp INTEGER NOT NULL,
+              created_utc TEXT NOT NULL,
+              PRIMARY KEY (instance_id, match_key, occurrence_id, reason)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_unique_lawn_xp_match
+              ON rpg_unique_lawn_xp_receipts(match_key, occurrence_id);
+            CREATE TABLE IF NOT EXISTS rpg_unique_lawn_sessions (
+              instance_id TEXT NOT NULL PRIMARY KEY,
+              player_id INTEGER NOT NULL,
+              match_key TEXT NOT NULL,
+              bound_utc TEXT NOT NULL,
+              correlation_id TEXT,
+              ptr TEXT,
+              bound_active_ms INTEGER
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_unique_lawn_sessions_match
+              ON rpg_unique_lawn_sessions(match_key);
+            -- party-dungeon D2.23 (spec-delve-attrition.md §1, verbatim SQL): cross-delve pool
+            -- persistence (attrition.persistAcrossDelves[], "hunger" today) and the Recovering
+            -- counter. Neither carries a *_utc column -- "recovery is counted, never timed" (§7).
+            CREATE TABLE IF NOT EXISTS rpg_unique_actor_pools (
+              instance_id TEXT NOT NULL, resource_id TEXT NOT NULL, stored INTEGER NOT NULL,
+              PRIMARY KEY (instance_id, resource_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_unique_actor_recovery (
+              instance_id TEXT PRIMARY KEY, player_id INTEGER NOT NULL,
+              recovery_delves_left INTEGER NOT NULL, wounded_delve_id INTEGER NOT NULL, theta_run INTEGER NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS rpg_unique_equipment (
               instance_id TEXT NOT NULL,
               slot TEXT NOT NULL,
@@ -570,6 +642,26 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "through_ledger_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
+        // demon-lawn-deploy T4.2: preserve correlation/pointer identity on migrated lawn sessions so
+        // the partial unique indexes can reject two open bindings for one run identity.
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "correlation_id", "TEXT");
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "ptr", "TEXT");
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "bound_active_ms", "INTEGER");
+        // A run cannot have two live bindings for the same deployment correlation or Unity pointer.
+        // Create these only after the additive columns exist on migrated databases.
+        Exec(db, """
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_rpg_unique_lawn_sessions_match_corr
+              ON rpg_unique_lawn_sessions(match_key, correlation_id)
+              WHERE correlation_id IS NOT NULL AND correlation_id <> '';
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_rpg_unique_lawn_sessions_match_ptr
+              ON rpg_unique_lawn_sessions(match_key, ptr)
+              WHERE ptr IS NOT NULL AND ptr <> '';
+            """);
+        // species-build T1.1 (spec-species-xp.md §1 Option A): kind='species' rows key on
+        // DemonSpeciesDef.DemonTypeId in the existing type_id column (already unique per species) —
+        // this nullable text column carries the human-readable speciesId alongside it, so a row can be
+        // read back without a roster round-trip. Every other kind leaves it NULL.
+        EnsureColumn(db, "rpg_actor_progression", "scope_key", "TEXT");
         EnsureColumn(db, "rpg_demon_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_demon_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
         // Wardens (spec-loam-texture.md): a permanent, non-releasable bind — the same capacity slot
@@ -583,6 +675,19 @@ public sealed partial class RpgStore : IRpgDb
         // E8: the content stamp a resolve ran against, so the boot sweep can refuse to
         // re-resolve across edited effect content instead of silently producing a different report.
         EnsureColumn(db, "rpg_web_match_log", "content_hash", "TEXT");
+        // B21 (spec-interactive-turns.md §3): the decision trace — the fourth member of the
+        // determinism tuple beside setup_json, seed and the version stamps, so it belongs on this
+        // table rather than in one of its own. NULL means "not an interactive match", which is every
+        // match today; an interactive match with a NULL or partial trace is REFUSED by the sweep
+        // rather than re-resolved, because re-resolving substitutes AI decisions for a player's.
+        EnsureColumn(db, "rpg_web_match_log", "decisions_json", "TEXT");
+        // party-dungeon D2.15 (spec-delve-battle-profile.md §4b): which BattleModeProfile a match
+        // resolved under, so the boot sweep can re-resolve a delve fight with the SAME profile
+        // (`BattleModeProfileCatalog.Resolve(profileId)`) instead of guessing from `WaveId` the way
+        // every non-delve match already can (`WaveCatalog.Get(waveId).Profile`). NULL means "content
+        // did not record one" — every match before this column existed, and every non-delve match
+        // today, which resolves its profile from its wave the existing way.
+        EnsureColumn(db, "rpg_web_match_log", "profile_id", "TEXT");
         // World map (spec-world-model.md) — its DDL lives beside its store partial.
         EnsureWorldSchemaUnlocked(db);
         // Atom effect curves (spec-value-spec-and-curve.md, E2) — Core cannot hold SQL, so the
@@ -594,6 +699,47 @@ public sealed partial class RpgStore : IRpgDb
         EnsureContainerSchemaUnlocked(db);
         // effect_instance / effect_instance_atom / effect_binding (spec-instance-and-binding.md, E6).
         EnsureAtomInstanceSchemaUnlocked(db);
+        // rpg_item — the second reachability root beside effect_binding (item-ideal.md, durable-ownership).
+        EnsureRpgItemSchemaUnlocked(db);
+        // rarity_budget — item-ideal.md, rarity-bands (module 7).
+        EnsureRarityBudgetSchemaUnlocked(db);
+        // item_display_template — item-ideal.md, item-card (module 10).
+        EnsureItemDisplaySchemaUnlocked(db);
+        // loot_source / drop_table[_group|_entry] / item_drop_log / item_generation /
+        // item_loot_pity / item_first_clear — item-ideal.md, drop-volume (module 11).
+        EnsureLootSchemaUnlocked(db);
+        // item_base_type — the real table `ItemBaseTypeCorpus`/`BaseTypeSocketMaxCorpus`'s own boot
+        // comments already name as their target ("Deleted the day that table exists", Program.cs).
+        // Feeds `BuildLiveLootContentView`'s own `BaseTypesFor`, loot-content-view-unwired's one
+        // remaining honest gap (party-dungeon-todo.md D4.12, 2026-09-07).
+        EnsureBaseTypeSchemaUnlocked(db);
+        // material_recipe / material_recipe_cost / rpg_material_spend_log — I9 §6.1–6.2,
+        // salvage-craft (module 14). The material INVENTORY table (rpg_demon_materials) is DDL'd
+        // above with the demon tables and is deliberately not renamed here.
+        EnsureMaterialSchemaUnlocked(db);
+        // effect_instance_op + the five mutation head columns + effect_instance_atom.suppressed --
+        // D2 §9, enhance-reroll (module 15). Must run AFTER EnsureAtomInstanceSchemaUnlocked, whose
+        // tables it adds columns to.
+        EnsureInstanceOpSchemaUnlocked(db);
+        // item_socket (THE SSOT for socket state, D2 §6) + socket_combo_recipe / _ingredient —
+        // spec-sockets.md §5.2, sockets (module 16). Must run AFTER EnsureAtomInstanceSchemaUnlocked,
+        // whose effect_instance it references.
+        EnsureSocketSchemaUnlocked(db);
+        // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
+        EnsureItemSetSchemaUnlocked(db);
+        // item_unique — ssot-uniques.md §5.2, uniques (module 17). Must run AFTER the container schema
+        // it keys on, and it is read alongside item_set_member for §3.8's mutual exclusion.
+        EnsureItemUniqueSchemaUnlocked(db);
+        // consumable_def / rpg_run_draught — ssot-consumables.md §5.2–5.3, consumables (module 18).
+        // Must run AFTER EnsureRpgItemSchemaUnlocked, whose rpg_item_stock the dispatch spend
+        // decrements in the same transaction that writes the draught rows.
+        EnsureConsumableSchemaUnlocked(db);
+        // charm_def / charm_pouch / charm_run_hold / charm_resonance / charm_attunement —
+        // ssot-charms.md §4.2's five tables, charm-carry (module 22, split out of 12 by D40). Must run
+        // AFTER EnsureItemSetSchemaUnlocked only in the sense that both feed module 12's evaluator;
+        // there is no FK between them. charm_run_hold's partial unique index IS the cross-run
+        // exclusivity rule, mirroring ix_rpg_expedition_members_active.
+        EnsureCharmSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
@@ -605,12 +751,49 @@ public sealed partial class RpgStore : IRpgDb
         // rpg_aptitude_allocation — class-system P6.2, spec-point-economy.md. Inputs only, one row
         // per (scope, scopeKey, aptitude) with a nonzero spend.
         EnsureAptitudeAllocationSchemaUnlocked(db);
+        // rpg_tree_node_state — passive-tree B5, spec-tree-state.md §1.1. Inputs only, one row per
+        // (scope, scopeKey, node) owned; soul_level = 0 is a real, persisted state.
+        EnsureTreeNodeStateSchemaUnlocked(db);
+        // rpg_tree_respec_count — passive-tree C10, spec-tree-state.md §5. The tree's OWN respec
+        // counter, never the species respec counter (C10's stated default).
+        EnsureTreeRespecSchemaUnlocked(db);
+        // rpg_tree_catalog_* — passive-tree C4, spec-tree-catalog.md §6. The boot-time importer's own
+        // tables: tree/node/atom rows, the revision counter, and the accumulated known-id set R5
+        // checks existing allocations against.
+        EnsureTreeCatalogSchemaUnlocked(db);
+        // rpg_gate_counter — passive-tree G2, spec-gate-counters.md §4.1. Raw, sparse, uncapped inputs
+        // for the two counter-backed gate quantities (status_applied, element_mastery) — never the
+        // derived index or equivalents.
+        EnsureGateCounterSchemaUnlocked(db);
+        // rpg_gate_counter_seed — passive-tree G5, spec-gate-counters.md §16 OQ1 / D43. The one-time
+        // seed stamp for an existing save — checked/written in the same transaction as the seeded
+        // rpg_gate_counter rows it accompanies.
+        EnsureGateCounterSeedSchemaUnlocked(db);
         // rpg_action + cost/scope/grant/species-basics (spec-action-model.md, A1).
         EnsureActionSchemaUnlocked(db);
+        // item_granted_action — ssot-granted-actions.md §5.2, granted-actions (module 19). Must run
+        // AFTER EnsureActionSchemaUnlocked, whose rpg_action_grant this table's projection writes into.
+        EnsureItemGrantSchemaUnlocked(db);
         // rpg_run_pool — persisted resource pools across a run's encounter boundaries (spec-action-costs.md §9, T18).
         EnsureRunPoolSchemaUnlocked(db);
         // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
         EnsureLoadoutSchemaUnlocked(db);
+        // rpg_actor_unlock_state + rpg_actor_held_unlock — the unlock ladder's own persistence
+        // (spec-action-instance-and-grant.md §3, T59.2).
+        EnsureActionUnlockSchemaUnlocked(db);
+        // rpg_player_commander — default lawn commander (commander-surface default-persistence).
+        EnsurePlayerCommanderSchemaUnlocked(db);
+        // demon_species + demon_species_magnitude — species-generator's committed output, imported
+        // (spec-species-generator.md, demon-seed module 12/13, T4.6).
+        EnsureSpeciesSchemaUnlocked(db);
+        // player_species — the rolled roster per player, append-only (spec-player-materialise.md,
+        // demon-seed module 16, T5.6).
+        EnsurePlayerSpeciesSchemaUnlocked(db);
+        // rpg_species_respec — species-build-todo.md T4.2, spec-species-respec.md. Per-species churn
+        // counter + decay clock; decayed on read, never a timer.
+        EnsureSpeciesRespecSchemaUnlocked(db);
+        // rpg_zomboss_state + rpg_zomboss_pattern_log — species-build-todo.md T4.6, spec-zomboss-adaptive.md.
+        EnsureZombossAdaptiveSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -668,6 +851,12 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM pvz_activity_facts;", "DELETE FROM pvz_activity_rollups;",
                              "DELETE FROM pvz_activity_revisions;",
                              "DELETE FROM rpg_xp_ledger;", "DELETE FROM rpg_actor_progression;",
+                             // ⛔ rpg_item_assignment was MISSING here until 2026-09-06 — found while
+                             // landing D1 §10 M1/M2. It is module 4's durable equip record and, since
+                             // M2, the SSOT this same list already clears the legacy half of; leaving
+                             // it behind is the identical orphan bug the W21 world rows and the delve
+                             // rows below both carry a comment about. Ahead of rpg_unique_actors.
+                             "DELETE FROM rpg_item_assignment;",
                              "DELETE FROM rpg_unique_equipment;", "DELETE FROM rpg_unique_stat_mods;",
                              "DELETE FROM rpg_demon_profiles;", "DELETE FROM rpg_demon_codex;",
                              "DELETE FROM rpg_soul_ledger;", "DELETE FROM rpg_soul_balances;",
@@ -677,10 +866,45 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_materials;",
                              "DELETE FROM rpg_demon_lineage;", "DELETE FROM rpg_fusion_log;",
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
+                             "DELETE FROM rpg_player_commander;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
+                             "DELETE FROM rpg_unique_lawn_xp_receipts;",
+                             "DELETE FROM rpg_unique_lawn_sessions;",
                              "DELETE FROM rpg_aptitude_allocation;",
+                             "DELETE FROM rpg_tree_node_state;",
+                             "DELETE FROM rpg_tree_respec_count;",
+                             "DELETE FROM rpg_tree_catalog_atom;",
+                             "DELETE FROM rpg_tree_catalog_node;",
+                             "DELETE FROM rpg_tree_catalog_tree;",
+                             "DELETE FROM rpg_tree_catalog_known_node_id;",
+                             "UPDATE rpg_tree_catalog_meta SET revision = 0 WHERE id = 1;",
+                             "DELETE FROM rpg_gate_counter;",
+                             "DELETE FROM rpg_gate_counter_seed;",
+                             "DELETE FROM rpg_species_respec;",
+                             "DELETE FROM rpg_zomboss_state;", "DELETE FROM rpg_zomboss_pattern_log;",
                              "DELETE FROM archive_catalog;",
+                             // world-stage W21: found missing here while building an E2E fixture
+                             // test — a world created in one test class outlived every later
+                             // `/api/test/reset`, so any subsequent test reusing the same world id
+                             // (a natural choice, e.g. "first-light") hit `world.exists` against an
+                             // orphaned row whose owning player this same reset had already deleted.
+                             "DELETE FROM rpg_world_turn_log;", "DELETE FROM rpg_world_turn_commits;",
+                             "DELETE FROM rpg_world_commands;", "DELETE FROM rpg_world_entity_members;",
+                             "DELETE FROM rpg_world_faction_intel;", "DELETE FROM rpg_world_entities;",
+                             "DELETE FROM rpg_world_lanes;", "DELETE FROM rpg_world_slots;",
+                             "DELETE FROM rpg_world_sectors;", "DELETE FROM rpg_world_factions;",
+                             // party-dungeon delve-scope: the same orphan reason as the W21 rows
+                             // above — a delve world outliving a reset would leave rpg_delves
+                             // pointing at a deleted rpg_worlds row. Ahead of rpg_worlds itself.
+                             // loot-pack D3.22: ahead of rpg_delves for the identical reason.
+                             // party-dungeon D4.18: rpg_domain_progress names domain ids only (no FK),
+                             // but a player's own discovery/clears are per-player data the same as
+                             // every other row in this list -- ahead of rpg_delves, spec's own words.
+                             "DELETE FROM rpg_domain_progress;",
+                             "DELETE FROM rpg_delve_pack_lock;",
+                             "DELETE FROM rpg_delve_rooms;", "DELETE FROM rpg_delves;",
+                             "DELETE FROM rpg_worlds;",
                              "DELETE FROM players;"
                          })
                 {
@@ -733,7 +957,13 @@ public sealed partial class RpgStore : IRpgDb
         LastHeartbeatUtc = LastHeartbeatUtc?.ToString("o"),
         SimEnabled = simEnabled,
         Source = InjectorConnected ? Source : RpgConstants.SourceNone,
-        CurrentPlayerId = GetCurrentPlayerId()
+        CurrentPlayerId = GetCurrentPlayerId(),
+        // E46 (player-content-boot): imported vs. shipped code fallback, on the one surface both the
+        // player and the owner already read. ContentSource/ContentImportError are set once at startup
+        // by RecordContentBootOutcome; CatalogRevision is read live since it can only ever move up.
+        ContentSource = ContentSource,
+        CatalogRevision = GetCatalogRevision(),
+        ContentImportError = ContentImportError,
     };
 
     static string NormalizeSource(string? source)
@@ -762,7 +992,7 @@ public sealed partial class RpgStore : IRpgDb
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT id, name, created_utc FROM players ORDER BY id;";
+        cmd.CommandText = "SELECT id, name, created_utc, world_seed FROM players ORDER BY id;";
         var list = new List<PlayerDto>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -775,9 +1005,14 @@ public sealed partial class RpgStore : IRpgDb
         var trimmed = string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "INSERT INTO players(name, created_utc) VALUES($n,$t); SELECT last_insert_rowid();";
+        cmd.CommandText =
+            "INSERT INTO players(name, created_utc, world_seed) VALUES($n,$t,$s); SELECT last_insert_rowid();";
         cmd.Parameters.AddWithValue("$n", trimmed);
         cmd.Parameters.AddWithValue("$t", DateTime.UtcNow.ToString("o"));
+        // world-seed (T5.1): rolled once, here, at player creation (spec-world-seed.md's own
+        // "created at player creation... never regenerated"). [1, long.MaxValue) excludes the 0
+        // sentinel BackfillWorldSeedsUnlocked treats as "not yet assigned."
+        cmd.Parameters.AddWithValue("$s", System.Random.Shared.NextInt64(1, long.MaxValue));
         var id = (long)(cmd.ExecuteScalar() ?? 0L);
         EnsurePvzStatsRevisionUnlocked(db, id);
         EnsurePvzActivityRevisionUnlocked(db, id);
@@ -1324,18 +1559,39 @@ public sealed partial class RpgStore : IRpgDb
                 var dedupe = string.IsNullOrWhiteSpace(req.DedupeKey)
                     ? Guid.NewGuid().ToString("N")
                     : req.DedupeKey.Trim();
+                var sourceKind = string.IsNullOrWhiteSpace(req.SourceKind) ? "feature" : req.SourceKind.Trim();
+                var sourceId = string.IsNullOrWhiteSpace(req.SourceId) ? "manual" : req.SourceId.Trim();
+                // Only unique-specimen claims require ownership/correlation validation. General
+                // and commander sources use the same versioned contract kind but have different
+                // grammars; treating every contract source as a unique claim would silently
+                // rewrite valid empire-general facts to `untrusted`.
+                var isUniqueClaim = false;
+                if (string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal))
+                {
+                    try
+                    {
+                        isUniqueClaim = DemonProgressionSource.Parse(sourceKind, sourceId)
+                            is DemonProgressionSource.UniqueSpecimenSource;
+                    }
+                    catch (FormatException) { /* malformed claims fail closed in progression */ }
+                }
+                if (isUniqueClaim && !IsOwnedUniqueSourceUnlocked(db, playerId, sourceKind, sourceId))
+                {
+                    sourceKind = "untrusted";
+                    sourceId = "manual";
+                }
                 var inserted = InsertPvzActivityFactUnlocked(
                     db, playerId, req.RunId, t, kind,
                     string.IsNullOrWhiteSpace(req.PluginId) ? "rpg.feature" : req.PluginId.Trim(),
-                    string.IsNullOrWhiteSpace(req.SourceKind) ? "feature" : req.SourceKind.Trim(),
-                    string.IsNullOrWhiteSpace(req.SourceId) ? "manual" : req.SourceId.Trim(),
+                    sourceKind, sourceId,
                     req.PayloadJson, req.MatchKey, dedupe);
                 IReadOnlyList<RpgProgressionDirty> progression = Array.Empty<RpgProgressionDirty>();
                 if (inserted.Inserted)
                 {
                     BumpAndApplyPvzActivityDeltaUnlocked(db, playerId, inserted.FactId, kind, req.PayloadJson);
                     progression = ApplyRpgProgressionFromActivityUnlocked(
-                        db, playerId, req.RunId, t, kind, req.PayloadJson ?? "{}", dedupe, inserted.FactId);
+                        db, playerId, req.RunId, t, kind, req.PayloadJson ?? "{}", dedupe, inserted.FactId,
+                        sourceKind: sourceKind, sourceId: sourceId);
                 }
                 else
                     EnsurePvzActivityRollupUnlocked(db, playerId);
@@ -1443,19 +1699,274 @@ public sealed partial class RpgStore : IRpgDb
             TryString(payload, "ptr"),
             TryInt(payload, "col"),
             TryInt(payload, "row"),
-            t);
+            t,
+            TryLong(payload, "lifecycleOccurrence"));
+        var sourceKind = "capture";
+        var sourceId = kind;
+        var instanceId = TryString(payload, "instanceId");
+        // The spawn mechanism chooses the source variant. `extra` is the dedicated unique-spawn
+        // mechanism; it must never fall through to the empire-general species row when ownership
+        // cannot be proven. Ordinary lawn/general spawns must carry a typed claim in `sourceKind`
+        // and `sourceId`; the injector's opaque operation token is not enough. The type id is used
+        // solely to verify species identity *after* that mechanism decision, never to select it.
+        var spawnSource = TryString(payload, "source");
+        var isDedicatedExtra = string.Equals(spawnSource, "extra", StringComparison.OrdinalIgnoreCase);
+        var claimedKind = TryString(payload, "sourceKind");
+        var claimedId = TryString(payload, "sourceId");
+        var hasExplicitClaim = !string.IsNullOrWhiteSpace(claimedKind) || !string.IsNullOrWhiteSpace(claimedId);
+        if (hasExplicitClaim
+            && factKind is FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced or FusionRpg.Core.Activity.PvzActivityKinds.ZombieSpawned)
+        {
+            var side = factKind == FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+            if (TryInt(payload, "type") is { } typeId && IsMatchingEmpireGeneralClaim(claimedKind, claimedId, side, typeId))
+            {
+                sourceKind = claimedKind!;
+                sourceId = claimedId!;
+            }
+            else
+            {
+                // A malformed, contradictory, unique, or Commander claim cannot be reclassified
+                // from this capture. Preserve the fact for diagnostics, but make it ineligible for
+                // every source-specific progression award.
+                sourceKind = "untrusted";
+                sourceId = "invalid-claim";
+            }
+        }
+        if (!hasExplicitClaim && !string.IsNullOrWhiteSpace(instanceId) && isDedicatedExtra)
+        {
+            var occurrence = TryString(payload, "correlationId") ?? dedupe;
+            if (IsOwnedUniqueSourceUnlocked(db, playerId, DemonProgressionSource.UniqueSpecimenKind,
+                    $"unique:{instanceId}:{occurrence}"))
+            {
+                var source = DemonProgressionSource.UniqueSpecimen(instanceId!, occurrence);
+                sourceKind = source.Kind;
+                sourceId = source.Id;
+            }
+        }
         var inserted = InsertPvzActivityFactUnlocked(
             db, playerId, runId, t, factKind,
-            "pvz.capture", "capture", kind, payload, matchKey, dedupe);
+            "pvz.capture", sourceKind, sourceId, payload, matchKey, dedupe);
         if (inserted.Inserted)
         {
             BumpAndApplyPvzActivityDeltaUnlocked(db, playerId, inserted.FactId, factKind, payload);
             _activityNotifyBatch?.Add(playerId);
             ApplyRpgProgressionFromActivityUnlocked(
-                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId, pvzGame);
+                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId, pvzGame,
+                sourceKind, sourceId);
             // Soul earns ride the same transaction as the fact — a crash can never lose one (spec-soul-economy.md).
             ApplySoulEarnFromActivityUnlocked(db, playerId, runId, t, factKind, payload, inserted.FactId);
+            ApplyOnboardingFromSettledCaptureUnlocked(
+                db, playerId, runId, factKind, payload, inserted.FactId, t, pvzGame);
         }
+    }
+
+    /// <summary>
+    /// First-session progression T3: checkpoint facts are committed inside the same transaction as the
+    /// captured result, progression, and Souls. The level-3 species reveal is derived from the same
+    /// source-validated lawn facts that feed species XP; no client claim can unlock it.
+    /// </summary>
+    void ApplyOnboardingFromSettledCaptureUnlocked(
+        SqliteConnection db, long playerId, long runId, string factKind, string payload,
+        long factId, string t, bool pvzGame)
+    {
+        if (!pvzGame || factKind != FusionRpg.Core.Activity.PvzActivityKinds.MatchEnded || runId == 0)
+            return;
+        if (FusionRpg.Core.Activity.PvzActivityKinds.NormalizeMatchResult(TryString(payload, "result")) != "victory")
+            return;
+
+        var rewardPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.FirstWinDave,
+            commanderId = "commander:dave",
+            sourceFactId = factId
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.FirstWinDave,
+            runId, $"fact:{factId}", rewardPayload, t);
+
+        // The first general species seen in this settled lawn run is the deterministic teaching
+        // target. It must be an explicit EmpireGeneral claim whose type agrees with the catalog;
+        // unique/commander/opaque spawns are deliberately invisible to this fallback checkpoint.
+        if (ReadActorStateUnlocked(db, playerId, FusionRpg.Core.Progression.RpgActorKinds.Player, 0).Level < 3
+            || ReadOnboardingCheckpointUnlocked(
+                db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies) is not null
+            || !DemonSpeciesCatalog.IsConfigured)
+            return;
+
+        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        DemonSpeciesDef? species = null;
+        long sourceFactId = 0;
+        using (var facts = db.CreateCommand())
+        {
+            facts.CommandText = """
+                SELECT id, kind, payload_json, source_kind, source_id
+                FROM pvz_activity_facts
+                WHERE player_id=$p AND run_id=$r
+                  AND kind IN ($plant, $zombie)
+                ORDER BY id;
+                """;
+            facts.Parameters.AddWithValue("$p", playerId);
+            facts.Parameters.AddWithValue("$r", runId);
+            facts.Parameters.AddWithValue("$plant", FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced);
+            facts.Parameters.AddWithValue("$zombie", FusionRpg.Core.Activity.PvzActivityKinds.ZombieSpawned);
+            using var reader = facts.ExecuteReader();
+            while (reader.Read())
+            {
+                var kind = reader.GetString(1);
+                var payloadJson = reader.IsDBNull(2) ? "{}" : reader.GetString(2);
+                var claimedKind = reader.IsDBNull(3) ? null : reader.GetString(3);
+                var claimedId = reader.IsDBNull(4) ? null : reader.GetString(4);
+                var typeId = TryInt(payloadJson, "type");
+                if (!IsEmpireGeneralSource(claimedKind, claimedId, kind, typeId)
+                    || typeId is not { } tid)
+                    continue;
+                var side = kind == FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+                if (index.TryGet(side, tid, out var candidate))
+                {
+                    species = candidate;
+                    sourceFactId = reader.GetInt64(0);
+                    break;
+                }
+            }
+        }
+
+        if (species is null) return;
+        var speciesState = ReadActorStateUnlocked(db, playerId,
+            FusionRpg.Core.Progression.RpgActorKinds.Species, species.DemonTypeId);
+        // Allocation is a projection of the already-applied species row. Hosts configure the
+        // aptitude/plan hubs at startup; capture-only fixtures may omit them, so an empty map is
+        // explicit rather than a fabricated stat distribution.
+        var allocation = new Dictionary<string, long>(StringComparer.Ordinal);
+        try
+        {
+            var baseline = FusionRpg.Core.Stats.Aptitudes.SpeciesAllocation.Baseline(
+                FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.SharesFor(species.SpeciesId),
+                speciesState.Level,
+                FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+            foreach (var aptitude in FusionRpg.Core.Stats.Aptitudes.AptitudeCatalog.All)
+            {
+                var points = baseline.PointsAt(
+                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, aptitude.Id);
+                if (points > 0) allocation[aptitude.Id] = points;
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Optional presentation hubs are not allowed to reject a valid captured result.
+        }
+
+        var speciesPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies,
+            speciesId = species.SpeciesId,
+            demonTypeId = species.DemonTypeId,
+            sourceFactId,
+            speciesLevel = speciesState.Level,
+            speciesXp = speciesState.Xp,
+            allocation,
+            allocationMode = "auto-primary-stats"
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies,
+            runId, $"fact:{sourceFactId}", speciesPayload, t);
+
+        // Level 4 is the first commander item reveal. Dave is a stable commander id, not a unique
+        // specimen row, so the item is owned by the player and occupies the reserved standard role.
+        // The fixed first-clear container is content-authored; no roll or client-provided item id is
+        // accepted here. Mint, ownership, assignment, and the checkpoint share this transaction.
+        if (ReadActorStateUnlocked(db, playerId, FusionRpg.Core.Progression.RpgActorKinds.Player, 0).Level < 4
+            || ReadOnboardingCheckpointUnlocked(
+                db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment) is not null)
+            return;
+
+        const string containerId = "item.first-clear-almanac-seed";
+        var instanceId = $"onboarding-dave-equipment-{playerId}";
+        var container = GetContainer(containerId);
+        if (container is null) return;
+        var rejection = FusionRpg.Core.Effects.Atoms.Instantiator.TryInstantiate(
+            container, GetAtom, GetAffix, unchecked((long)playerId),
+            FusionRpg.Core.Power.PowerTuningHub.Tuning.Curve.PinIndex,
+            FusionRpg.Core.Power.PowerTuningHub.Tuning, out var instance,
+            FusionRpg.Core.Effects.Atoms.InstanceOrigin.Grant);
+        if (!rejection.IsOk || instance is null) return;
+        SaveOnboardingInstanceUnlocked(db, instanceId, instance, t);
+
+        var playerKey = playerId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        ExecOnboarding(db, """
+            INSERT INTO rpg_item
+              (instance_id, player_id, acquired_utc, origin_kind, origin_ref, locked, disposition, revision)
+            VALUES ($id, $player, $utc, 'onboarding', $ref, 1, 'owned', 1)
+            ON CONFLICT(instance_id) DO UPDATE SET player_id=excluded.player_id,
+              origin_kind=excluded.origin_kind, origin_ref=excluded.origin_ref, locked=1,
+              disposition='owned', revision=rpg_item.revision+1;
+            """, ("$id", instanceId), ("$player", playerKey), ("$utc", t),
+            ("$ref", FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment));
+        ExecOnboarding(db, """
+            INSERT OR IGNORE INTO rpg_item_event(event_id, instance_id, player_id, kind, detail, created_utc)
+            VALUES ($id, $inst, $player, 'acquired', 'onboarding', $utc);
+            """, ("$id", $"onboarding-dave-equipment-acquired-{playerId}"),
+            ("$inst", instanceId), ("$player", playerKey), ("$utc", t));
+        SavePlayerItemAssignmentOnConnectionUnlocked(db, playerKey,
+            FusionRpg.Core.Items.ItemRole.Standard, FusionRpg.Core.Items.EquipRefKinds.Rolled,
+            instanceId, t);
+
+        var equipmentPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment,
+            commanderId = "commander:dave",
+            itemInstanceId = instanceId,
+            containerId,
+            ownerKind = "player",
+            ownerKey = playerId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            role = FusionRpg.Core.Items.ItemRoles.Id(FusionRpg.Core.Items.ItemRole.Standard),
+            assignmentMode = "auto-equip",
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment,
+            runId, $"item:{instanceId}", equipmentPayload, t);
+    }
+
+    void SaveOnboardingInstanceUnlocked(SqliteConnection db, string instanceId,
+        FusionRpg.Core.Effects.Atoms.InstanceRow instance, string utc)
+    {
+        ExecOnboarding(db, """
+            INSERT INTO effect_instance
+              (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+               theta_content, content_scale_milli)
+            VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
+            ON CONFLICT(instance_id) DO UPDATE SET container_id=excluded.container_id,
+              roll_seed=excluded.roll_seed, origin=excluded.origin, theta_content=excluded.theta_content,
+              content_scale_milli=excluded.content_scale_milli;
+            """, ("$id", instanceId), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
+            ("$rev", instance.CatalogRevision), ("$utc", utc), ("$origin", "grant"),
+            ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
+        ExecOnboarding(db, "DELETE FROM effect_instance_atom WHERE instance_id=$id;", ("$id", instanceId));
+        foreach (var atom in instance.Atoms)
+            ExecOnboarding(db, """
+                INSERT INTO effect_instance_atom(instance_id, seq, atom_id, values_json, power_json, identity_digest)
+                VALUES ($id, $seq, $atom, $values, $power, $digest);
+                """, ("$id", instanceId), ("$seq", atom.Seq), ("$atom", atom.AtomId),
+                ("$values", atom.ValuesJson), ("$power", (object?)atom.PowerJson ?? DBNull.Value),
+                ("$digest", (object?)atom.IdentityDigestHex ?? DBNull.Value));
+    }
+
+    static void SavePlayerItemAssignmentOnConnectionUnlocked(SqliteConnection db, string playerId,
+        FusionRpg.Core.Items.ItemRole role, string refKind, string refId, string utc) =>
+        ExecOnboarding(db, """
+            INSERT INTO rpg_player_item_assignment(player_id, role, ref_kind, ref_id, assigned_utc)
+            VALUES ($p, $role, $rk, $rid, $utc)
+            ON CONFLICT(player_id, role) DO UPDATE SET ref_kind=excluded.ref_kind,
+              ref_id=excluded.ref_id, assigned_utc=excluded.assigned_utc;
+            """, ("$p", playerId), ("$role", FusionRpg.Core.Items.ItemRoles.Id(role)),
+            ("$rk", refKind), ("$rid", refId), ("$utc", utc));
+
+    static void ExecOnboarding(SqliteConnection db, string sql,
+        params (string Name, object Value)[] args)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = sql;
+        foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
+        cmd.ExecuteNonQuery();
     }
 
     (bool Inserted, long FactId) InsertPvzActivityFactUnlocked(
@@ -1480,7 +1991,21 @@ public sealed partial class RpgStore : IRpgDb
             cmd.Parameters.AddWithValue("$m", (object?)matchKey ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$d", string.IsNullOrWhiteSpace(dedupeKey) ? "" : dedupeKey);
             if (cmd.ExecuteNonQuery() <= 0)
-                return (false, 0);
+            {
+                // INSERT OR IGNORE is the idempotence gate, but callers still need the canonical
+                // fact id on a replay so downstream ledgers can reference the original receipt.
+                using var existing = db.CreateCommand();
+                existing.CommandText = """
+                    SELECT id FROM pvz_activity_facts
+                    WHERE player_id=$p AND run_id=$r AND kind=$k AND dedupe_key=$d
+                    LIMIT 1;
+                    """;
+                existing.Parameters.AddWithValue("$p", playerId);
+                existing.Parameters.AddWithValue("$r", runId ?? 0L);
+                existing.Parameters.AddWithValue("$k", kind);
+                existing.Parameters.AddWithValue("$d", string.IsNullOrWhiteSpace(dedupeKey) ? "" : dedupeKey);
+                return (false, Convert.ToInt64(existing.ExecuteScalar() ?? 0L));
+            }
         }
         using var idCmd = db.CreateCommand();
         idCmd.CommandText = "SELECT last_insert_rowid();";
@@ -2048,6 +2573,29 @@ public sealed partial class RpgStore : IRpgDb
         }
     }
 
+    /// <summary>Shared by the real `board.start` path and `InsertOneUnlocked`'s own orphan self-heal
+    /// (see its own comment): both cases are "a run needs to exist for this matchKey right now,"
+    /// differing only in whether real level metadata is available to stamp it with.</summary>
+    long CreateRunUnlocked(SqliteConnection db, long playerId, string matchKey, string t, string? game,
+        string? levelName, string? levelType, int? boardLevel, string? modifiersJson)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json, game)
+            VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod,$g);
+            SELECT last_insert_rowid();
+            """;
+        cmd.Parameters.AddWithValue("$g", string.IsNullOrWhiteSpace(game) ? RpgConstants.GameId : game);
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$k", matchKey);
+        cmd.Parameters.AddWithValue("$t", t);
+        cmd.Parameters.AddWithValue("$n", (object?)levelName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$lt", (object?)levelType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$bl", Db(boardLevel));
+        cmd.Parameters.AddWithValue("$mod", (object?)modifiersJson ?? DBNull.Value);
+        return (long)(cmd.ExecuteScalar() ?? 0L);
+    }
+
     void InsertOneUnlocked(SqliteConnection db, EventEnvelope e, long? explicitPlayerId = null)
     {
         var payload = e.Payload is null ? "{}" : JsonSerializer.Serialize(e.Payload, Json);
@@ -2062,30 +2610,32 @@ public sealed partial class RpgStore : IRpgDb
             // Explicit player (web ingest): never stamp current_player_id on a web run — a mid-
             // resolution player switch would mis-credit the save (audit precondition 4).
             playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = """
-                    INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json, game)
-                    VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod,$g);
-                    SELECT last_insert_rowid();
-                    """;
-                cmd.Parameters.AddWithValue("$g",
-                    string.IsNullOrWhiteSpace(e.Game) ? RpgConstants.GameId : e.Game);
-                cmd.Parameters.AddWithValue("$p", playerId);
-                cmd.Parameters.AddWithValue("$k", matchKey);
-                cmd.Parameters.AddWithValue("$t", t);
-                cmd.Parameters.AddWithValue("$n", (object?)TryString(payload, "levelName") ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("$lt", (object?)TryString(payload, "levelType") ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("$bl", Db(TryInt(payload, "boardLevel")));
-                cmd.Parameters.AddWithValue("$mod", (object?)TryObjectJson(payload, "modifiers") ?? DBNull.Value);
-                runId = (long)(cmd.ExecuteScalar() ?? 0L);
-            }
+            runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
+                levelName: TryString(payload, "levelName"), levelType: TryString(payload, "levelType"),
+                boardLevel: TryInt(payload, "boardLevel"), modifiersJson: TryObjectJson(payload, "modifiers"));
         }
         else
         {
             runId = FindRunId(db, matchKey);
             if (runId is { } rid)
                 playerId = GetRunPlayerId(db, rid) ?? explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+            else if (!string.IsNullOrWhiteSpace(matchKey))
+            {
+                // [[match-key-orphan-drops-soul-earn]] (found live 2026-09-06): `Board.Awake` can
+                // rotate `GameHooks.MatchKey` and fire a new `board.start` whose HTTP request never
+                // lands here (dropped, or superseded by the next rotation before it completes). Every
+                // subsequent event under that matchKey would otherwise be permanently orphaned —
+                // routed to `ProjectGlobal` below, which silently drops anything but `catalog.*` — no
+                // symptom on the client (game plays normally) or `/health` (stays green), only a
+                // silently-flat soul/XP balance. Self-heal by lazily creating the missing run the
+                // FIRST time this matchKey is seen anywhere but `board.start`: the lost metadata
+                // (levelName/levelType/boardLevel/modifiers, all null on this recovered row) was
+                // cosmetic; the economy wasn't. A blank/empty matchKey (a real event genuinely
+                // carrying none, e.g. a global `catalog.*` ingest) never reaches this branch at all.
+                playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
+                runId = CreateRunUnlocked(db, playerId, matchKey, t, e.Game,
+                    levelName: null, levelType: null, boardLevel: null, modifiersJson: null);
+            }
             else
                 playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
         }
@@ -2129,6 +2679,20 @@ public sealed partial class RpgStore : IRpgDb
         using var db = Open();
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM events;";
+        return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
+    }
+
+    /// <summary>The current tip of the event log — for an in-process caller (e.g. a debug-orchestration
+    /// endpoint) that needs to remember "everything after this point" before triggering new events, the
+    /// same role the live-test scripts' own binary-search-over-HTTP `Get-MaxEventId`/`max_event_id`
+    /// approximates externally. In-process, a direct query is simply correct instead of a workaround.
+    /// Returns 0 when the log is empty (matches `ListEvents(limit, afterId: 0)`'s own "from the start"
+    /// convention).</summary>
+    public long GetMaxEventId()
+    {
+        using var db = Open();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT COALESCE(MAX(id), 0) FROM events;";
         return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
     }
 
@@ -2989,6 +3553,50 @@ public sealed partial class RpgStore : IRpgDb
         return null;
     }
 
+    static long? TryLong(string json, string prop)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty(prop, out var p)) return null;
+            if (p.ValueKind == JsonValueKind.Number && p.TryGetInt64(out var n)) return n;
+            if (p.ValueKind == JsonValueKind.String && long.TryParse(p.GetString(), out n)) return n;
+        }
+        catch { }
+        return null;
+    }
+
+    static bool IsMatchingEmpireGeneralClaim(string? sourceKind, string? sourceId, string side, int typeId)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(sourceId) || !DemonSpeciesCatalog.IsConfigured) return false;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind!, sourceId!)
+                is not DemonProgressionSource.EmpireGeneralSource general) return false;
+            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, typeId, out var species)
+                && string.Equals(general.SpeciesId, species.SpeciesId, StringComparison.Ordinal);
+        }
+        catch (InvalidOperationException) { return false; }
+        catch (FormatException) { return false; }
+    }
+
+    bool IsOwnedUniqueSourceUnlocked(SqliteConnection db, long playerId, string sourceKind, string sourceId)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.UniqueSpecimenKind, StringComparison.Ordinal))
+            return true;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind, sourceId) is not DemonProgressionSource.UniqueSpecimenSource unique)
+                return false;
+            var actor = ReadUniqueActorUnlocked(db, unique.InstanceId);
+            return actor is not null && actor.PlayerId == playerId
+                && !string.IsNullOrWhiteSpace(actor.DeployCorrelationId)
+                && string.Equals(actor.DeployCorrelationId, unique.OccurrenceId, StringComparison.Ordinal);
+        }
+        catch (FormatException) { return false; }
+    }
+
     static double? TryDouble(string json, string prop)
     {
         try
@@ -3055,13 +3663,14 @@ public sealed partial class RpgStore : IRpgDb
     {
         Id = r.GetInt64(0),
         Name = r.GetString(1),
-        CreatedUtc = r.GetString(2)
+        CreatedUtc = r.GetString(2),
+        WorldSeed = r.GetInt64(3),
     };
 
     static PlayerDto? GetPlayerUnlocked(SqliteConnection db, long id)
     {
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT id, name, created_utc FROM players WHERE id=$id;";
+        cmd.CommandText = "SELECT id, name, created_utc, world_seed FROM players WHERE id=$id;";
         cmd.Parameters.AddWithValue("$id", id);
         using var r = cmd.ExecuteReader();
         return r.Read() ? ReadPlayer(r) : null;
@@ -3092,6 +3701,35 @@ public sealed partial class RpgStore : IRpgDb
         }
         if (GetSettingUnlocked(db, "current_player_id") is null)
             PutSettingUnlocked(db, "current_player_id", "1");
+    }
+
+    /// <summary>Assigns a real, distinct world seed to every player row still at the 0 sentinel — a
+    /// legacy row from before this column existed, or one <see cref="SeedPlayerIfEmpty"/> just
+    /// inserted directly (bypassing <see cref="CreatePlayer"/>'s own seed generation). Never touches
+    /// a player that already has one, matching Q5's "existing rolls frozen forever" rule one layer up
+    /// — a seed change here would silently re-roll everything downstream that already derived from it.</summary>
+    static void BackfillWorldSeedsUnlocked(SqliteConnection db)
+    {
+        var pending = new List<long>();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT id FROM players WHERE world_seed = 0;";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) pending.Add(r.GetInt64(0));
+        }
+
+        foreach (var id in pending)
+        {
+            // 0 is excluded from the range (never re-produce the sentinel) and NextInt64's own upper
+            // bound is exclusive, so this draws from [1, long.MaxValue) — a real, never-repeating
+            // 63-bit-ish space, plenty for "the whole save"'s own identity.
+            var seed = System.Random.Shared.NextInt64(1, long.MaxValue);
+            using var upd = db.CreateCommand();
+            upd.CommandText = "UPDATE players SET world_seed = $s WHERE id = $id;";
+            upd.Parameters.AddWithValue("$s", seed);
+            upd.Parameters.AddWithValue("$id", id);
+            upd.ExecuteNonQuery();
+        }
     }
 
     static string? GetSettingUnlocked(SqliteConnection db, string key)

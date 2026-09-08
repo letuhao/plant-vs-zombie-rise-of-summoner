@@ -94,21 +94,21 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
             FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v1.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v1.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
         FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
             FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
             FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.SimDefaults.Configure(
             FusionRpg.Core.SimTuningLoader.Parse(Read("sim.v1.json")));
         FusionRpg.Core.Demons.SummoningTuningHub.Configure(
             FusionRpg.Core.Demons.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
-            FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v1.json")));
+            FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
             FusionRpg.Data.Policies.DataTuningLoader.Parse(Read("data.v1.json")));
         FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
@@ -126,7 +126,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
-            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v1.json")));
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v2.json")));
 
         // A real IHubContext<RpgHub>, not a hand-rolled fake -- SignalR's own DI wiring, the same
         // production type RunWebMatchAsync's own hub.Clients.Group(...).SendAsync(...) call needs.

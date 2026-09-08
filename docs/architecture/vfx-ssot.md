@@ -1,6 +1,6 @@
 # VFX SSOT — cue → recipe → primitive presentation layer
 
-**Status:** **Locked (2026-08-20); LIVE-proven (2026-08-21, 43/43 + owner visual confirmation)** — migration phases 1–4 in code: the §16 element extension, the `status.{id}.apply` producer path (all 21 catalog statuses seeded), burst shapes, crit-pop/amount-tier floaters with shadow pass, idle-cheap tick, registry-based anchors, element-only hit accents, and the three LIVE render fixes (§10, §16.4). Verdict: `docs/research/effect-runtime/_prove-vfx.json`. See [../../SPEC.md](../../SPEC.md) + `tasks/vfx-v2-todo.md`.
+**Status:** **Locked (2026-08-20); COMPLETE (2026-09-04)** — v1 element visuals, v2 hit/heal polish, and v3 sustained status visuals are all built, LIVE-proven and owner-closed. In code: the §16 element extension, `status.{id}.apply|expire` producer paths (21 statuses seeded, 13 custom carrying sustained sets), burst shapes, crit-pop/amount-tier floaters with shadow pass, idle-cheap tick, registry-based anchors with `UnitFrameResolver` anchor kinds (§9), element-only hit accents, fifteen aura motion styles across five identity batches (§17), shield-bar visuals, and a **config-backed balance surface** (`data/tuning/vfx.v3.json` → `VfxTuning`, §7). Verdicts: prove-vfx **46/46** (`docs/research/effect-runtime/_prove-vfx.json`); identity audit **13/13 sustain-glance pass, 0 fail, 0 color-only pairs**, LIVE **13/13 sustainedStarted** (`docs/research/vfx/status-identity-audit-2026-08-30.md`). Human forced-choice trials waived by the owner. See [../../SPEC.md](../../SPEC.md), `tasks/vfx-v2-todo.md`, `tasks/vfx-v3-todo.md`, `tasks/vfx-identity-batch*-todo.md`.
 **Parent:** [decisions.md](decisions.md) (ADR row **VFX**). Cue producers: [effect-funnel.md](effect-funnel.md), [status-ssot.md](status-ssot.md), [combat-damage-ssot.md](combat-damage-ssot.md). Current implementation being replaced: `src/FusionRpg.Injector/Fx/*`, `src/FusionRpg.Core/Effects/DamageFx.cs`.
 
 This spec defines the **presentation layer** for RPG overlay visual feedback. It does **not** own gameplay state, and it does **not** replace vanilla PVZ animations or particles.
@@ -207,9 +207,16 @@ New kinds (beam, ring, screen shake, trail) are **new spec rows in this table + 
 
 ## 7. Rules and budgets (core, pure)
 
-`VfxRules` generalizes `DamageFxFloaterRules`. All constants live here so tests can lock them.
+`VfxRules` generalizes `DamageFxFloaterRules`.
 
-| Policy key | Role | v1 value |
+**Config-backed since 2026-08-24 (tunables-ssot.md T1/T5):** the numbers below are no longer `const` — they load from
+`data/tuning/vfx.v{n}.json` (current: **v3**) into the `VfxTuning` record tree (`VfxRulesTuning`, `VfxSustainedTuning`,
+`VfxRenderTuning`, `VfxShieldBarTuning`, `VfxIdentityTuning`) and are read through `VfxRules` / `VfxTintMath.MaxStrength` /
+`VfxSustainedRules`. A balance pass retunes a file, not a rebuild. There is **no built-in fallback** — a consumer that
+reads tuning before `Configure(...)` throws, so a missing config fails loudly instead of silently reverting to defaults.
+The table records the shipped v1 values as the reference point; the JSON is the SSOT.
+
+| Policy key | Role | value |
 |---|---|---|
 | `VfxRules.FloaterCap` | Max live floaters | **64** (unchanged) |
 | `VfxRules.BurstCap` | Max live burst GameObjects | **24** (unchanged) |
@@ -259,7 +266,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 - `OnGUI` runs multiple times per frame (Layout, Repaint, input events). `VfxDirector.Draw()` **must early-return unless `Event.current.type == EventType.Repaint`** — the current `DamageFxOverlay.Draw` does the full label loop on every event and this audit retires that.
 - Use one cached `GUIStyle` (constructed once from `GUI.skin.label`) instead of mutating and restoring the shared skin style per call.
 - `Camera.main` performs a tag lookup per call on this Unity version; the director resolves it **once per Tick**, caches it for the frame, and re-resolves on null (scene change).
-- **Shield bar (world VFX):** `ShieldBarPool` under `VfxDirector.Tick` — shader materials from `FxResources.ParticleMaterial()` / `OverlayShaderProbe`, MeshRenderer track + multi-stop fill. Track = max capacity; **fill length** snaps in **10% steps** via Core `ShieldBarVisual.DisplayRatio` (floor; e.g. 89% → 80% wide) while absorb math stays continuous. Hide when Hp/MaxHp are 0. F9 toggles via `OverlaySettings`; F7 is settings-only. **Never** Unity IMGUI/`GUI.Box` for the bar.
+- **Shield bar (world HUD):** `ActorHudPool` shield resource row under `VfxDirector.Tick` → `ActorHudDirector.TickSync` — shader materials from `FxResources.ParticleMaterial()` / `OverlayShaderProbe`, MeshRenderer track + multi-stop fill. Track = max capacity; **fill length** snaps in **10% steps** via Core `ShieldBarVisual.DisplayRatio` (floor; e.g. 89% → 80% wide) while absorb math stays continuous. Hide when Hp/MaxHp are 0. F9 toggles via `OverlaySettings.ShieldBarEnabled`; F7 is settings-only. **Never** Unity IMGUI/`GUI.Box` for the bar.
 - **Draw order vs world sprites:** Shield bars use the same particle sorting order as bursts (`ParticleSortingOrder = 80`). Damage floaters remain IMGUI (screen space). Host OnGUI: `VfxDirector.Draw()` (floaters only) → `OverlaySettingsGui`.
 
 ### 8.4 Burst pooling (locked)
@@ -285,7 +292,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 
 - ptr → `Transform` lookups served from a cache — never `FindObjectsOfType` per cue.
 - **Fill strategy (locked, updated vfx-v2 T1): the shared `InjectorEntityRegistry`.** `AnchorResolver` is a thin facade over the combat path's hook-fed, IntPtr-keyed registry (`FindZombie/FindPlant(ptrHex)?.transform`) — VFX owns no cache and no scan of its own. A miss triggers the registry's frame-throttled resync (`ResyncFrames = 1024`, the mid-match-attach backstop); repeat misses inside the window skip with reason `missing`. The original VFX-private cache + 0.5s sweep was retired when the registry (built later for the event pipeline) superseded it.
-- Cell anchors go through `LawnCoords.CellCenter` + `ClampCol/ClampRow`; unit anchors through `LawnCoords.BodyWorld`. `EstimateCellSize` moves here from `OverlayWorldFx` as the shared size basis primitives scale against.
+- Cell anchors go through `LawnCoords.CellCenter` + `ClampCol/ClampRow`. Unit-attached cues: ptr→Transform via `AnchorResolver`, then anchor+scale via `UnitFrameResolver` only (`BodyWorld` and bounds reads are internal to the resolver — spec: [vfx/spec-unit-frame.md](vfx/spec-unit-frame.md)).
 - A destroyed/missing anchor at spawn time = skip. A destroyed anchor mid-life = the primitive instance expires silently (current floater behavior).
 
 ---
@@ -293,7 +300,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 ## 10. FxResources (injector, shared)
 
 - Absorbs `OverlayShaderProbe` (candidate list, live `Shader.Find`, probe events) unchanged.
-- Owns the cached material(s) and textures (`StealParticleTexture`, `SoftDisc`) currently in `OverlayWorldFx`.
+- Owns the cached materials and generated textures (`SoftDisc`, marker shapes) — the retired `OverlayWorldFx` held these before the pool rewrite.
 - Primitives request materials by role (`AdditiveParticle`, future `SpriteTint`); FxResources caches per role.
 - No shader available → primitives that need one skip with reason `no-shader`, floaters still work (IMGUI needs no shader). This matches today's degradation.
 - Texture is **always the generated soft disc** (changed 2026-08-21): the v1 steal-first rule rendered arbitrary vanilla imagery inside our bursts (electric/lightning sprite sheets — LIVE finding), nondeterministic per scene. The steal is deleted, which also makes all VFX code `FindObjectsOfType`-free (guard-pinned).
@@ -461,7 +468,7 @@ Lands as **migration phase 4** content — phases 1–3 (director, pooling, `fx.
 Duration-bound visuals for the **13 custom statuses** (engine-wrapped vanilla 8 get none — original visuals untouched). Full design: [vfx-v3 spec](../../SPEC.md) §4 identity table; plan `tasks/vfx-v3-plan.md`.
 
 - **Lifecycle:** `status.{id}.apply` cues (with `DurationMs`) start a sustained set keyed `(host, statusId)`; `status.{id}.expire` cues end it. `StatusRuntime.OnEnded` fires at exactly three sites — expiry prune, `ClearGrant`, elemental family-mutex — and stays silent on refresh/replace (no flicker), `WithdrawEntity` (host-gone reap covers), `Clear()` (ClearAll covers). Three backstops: TTL = duration + 2s (60s re-confirm for infinite), host-gone anchor reap, match-end ClearAll.
-- **Sustained primitive kinds:** `Aura` (pooled pulsed particles, six motion styles via pure `VfxAuraMath` — grammar: Drip=DoT, Orbit=passive, Rise=buff, CrackleJitter=armor/electric, PulseRing=mark, StreamOut=drain), `Tint` (`TintCompositor`: layered ≤35% via pure `VfxTintMath`, base capture/restore, 0.25s re-assert adopts external writes so vanilla always owns the base), `Marker` (procedural Ring/Diamond/TriangleDown/Cross badge bobbing above the host; only on react-to states: pact_mark, expose, bond, command).
+- **Sustained primitive kinds:** `Aura` (pooled pulsed particles, fifteen motion styles via pure `VfxAuraMath` — grammar: Drip=generic DoT fallback; WispOut/BubbleRise/ChunkFall=batch-1 drip identity; SparkStrobe/ShardGlitter=batch-2 crackle identity; SporeDrift/CharmHeartbeat=batch-3 orbit identity; PactFootPulse/CommandCrownPulse=batch-5 pulsering identity; CrackleJitter=generic armor/electric fallback; Orbit=passive/link fallback; PulseRing=mark fallback; RiseSparkle=buff; StreamOut=drain — see [spec-status-identity-batch1-drip.md](vfx/spec-status-identity-batch1-drip.md) through [spec-status-identity-batch5-pulsering.md](vfx/spec-status-identity-batch5-pulsering.md)), `Tint` (`TintCompositor`: layered ≤35% via pure `VfxTintMath`, base capture/restore, 0.25s re-assert adopts external writes so vanilla always owns the base), `Marker` (procedural Ring/Diamond/TriangleDown/Cross badge bobbing above the host; only on react-to states: pact_mark, expose, bond, command).
 - **Budget (locked, tight):** 24 sustained sets global / 2 per host, marker-priority eviction; `AuraPool` 24 leases shared by auras+markers (exhaustion degrades to fewer visuals, never errors); ≤6 particles per aura, 0.3s pulses, emission module off (LIVE lesson), explicit colors always.
 - **Events:** `debug.fx.state.started` / `.ended` (reason: expired | host-gone | ttl-cap | evicted | match-end | disabled); `debug.fx.state` command + `GET`-style dump via `POST /api/debug/fx/state`.
 - **Known quirk (documented):** `debug.clear-status` clears native CC only, not L2 instances — sustained visuals rightly follow L2 state.

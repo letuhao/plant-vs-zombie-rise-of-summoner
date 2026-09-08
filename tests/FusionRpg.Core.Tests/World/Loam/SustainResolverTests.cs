@@ -23,11 +23,17 @@ public class SustainResolverTests
 
     /// <summary>
     /// One rootbed sector ("home", production 50, upkeep 10) and one barren, expensive sector
-    /// ("poor", production 0, upkeep 43 once the legion garrisoning it is counted) in the same
-    /// component. Available (post-Production) is 50, upkeep is 53 — a three-unit shortfall, just
+    /// ("poor", production 30, upkeep 73 once the legion garrisoning it is counted) in the same
+    /// component. Available (post-Production) is 80, upkeep is 83 — a three-unit shortfall, just
     /// enough to make `Weakest` pick "poor" (the worse per-sector balance) without a Sustain spend,
     /// and small enough that a modest spend closes it. Both start at full stability so the fade
     /// this causes is observable without also releasing the ground outright.
+    ///
+    /// world-map W55 (empire-economy-ssot.md A8) note: "poor"'s own production is no longer zero —
+    /// `LoamProduction.For` now reads `DevelopmentLevel` too, so `DangerBand` here is
+    /// `2 + 2 * DevelopmentLevel(5) = 12`, not the original `2`, to compensate the new yield term
+    /// exactly (`DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3) == 2` at the real configured
+    /// tuning) and keep the shortfall at the same three units the acceptance test below still names.
     /// </summary>
     static WorldState Fixture(WorldEntity? entity = null) => new()
     {
@@ -44,7 +50,7 @@ public class SustainResolverTests
             new WorldSector
             {
                 SectorId = "poor", TypeId = "stable", OwnerFactionId = Dave, Phase = SectorPhase.Held,
-                StabilityMilli = 1000, DevelopmentLevel = 5, DangerBand = 2
+                StabilityMilli = 1000, DevelopmentLevel = 5, DangerBand = 2 + 2 * 5
             }
         },
         Lanes = new[]

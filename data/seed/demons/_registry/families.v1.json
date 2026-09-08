@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "families": {
+    "bucket": {
+      "canonicalKey": "bucket",
+      "nativeLabels": [
+        "铁桶坚果僵尸",
+        "铁桶僵尸"
+      ]
+    },
+    "cactus": {
+      "canonicalKey": "cactus",
+      "nativeLabels": [
+        "仙人掌",
+        "浮空仙人球"
+      ]
+    },
+    "cherry": {
+      "canonicalKey": "cherry",
+      "nativeLabels": [
+        "樱桃炸弹",
+        "樱桃机枪射手",
+        "樱桃坚果",
+        "樱桃坚果僵尸",
+        "樱桃读报僵尸",
+        "樱桃射手",
+        "樱桃裂荚射手"
+      ]
+    },
+    "corn": {
+      "canonicalKey": "corn",
+      "nativeLabels": [
+        "玉米花盆",
+        "玉米投手"
+      ]
+    },
+    "dolls": {
+      "canonicalKey": "dolls",
+      "nativeLabels": [
+        "套娃僵尸"
+      ]
+    },
+    "double": {
+      "canonicalKey": "double",
+      "nativeLabels": [
+        "双发射手"
+      ]
+    },
+    "garlic": {
+      "canonicalKey": "garlic",
+      "nativeLabels": [
+        "蒜毒豌豆射手",
+        "蒜毒三线射手"
+      ]
+    },
+    "hypno": {
+      "canonicalKey": "hypno",
+      "nativeLabels": [
+        "魅惑"
+      ]
+    },
+    "ice": {
+      "canonicalKey": "ice",
+      "nativeLabels": [
+        "寒冰",
+        "发射寒冰豌豆",
+        "发射施加寒冷状态的寒冰豌豆"
+      ]
+    },
+    "fire": {
+      "canonicalKey": "fire",
+      "nativeLabels": [
+        "火焰",
+        "火辣",
+        "火辣豌豆射手",
+        "火爆辣椒",
+        "火爆杨桃"
+      ]
+    },
+    "light": {
+      "canonicalKey": "light",
+      "nativeLabels": [
+        "流光仙人掌",
+        "灯笼大嘴花",
+        "流光豌豆射手"
+      ]
+    },
+    "chomper": {
+      "canonicalKey": "chomper",
+      "nativeLabels": [
+        "大嘴坚果",
+        "豌豆大嘴花"
+      ]
+    },
+    "nut": {
+      "canonicalKey": "nut",
+      "nativeLabels": [
+        "坚果射手"
+      ]
+    },
+    "pea": {
+      "canonicalKey": "pea",
+      "nativeLabels": [
+        "豌豆射手",
+        "豌豆射手僵尸",
+        "豌豆窝瓜",
+        "裂荚射手"
+      ]
+    },
+    "sun": {
+      "canonicalKey": "sun",
+      "nativeLabels": [
+        "能生产阳光",
+        "提供光照等级"
+      ]
+    },
+    "base": {
+      "canonicalKey": "base",
+      "nativeLabels": [
+        "载体",
+        "保护壳"
+      ]
+    },
+    "fruit": {
+      "canonicalKey": "fruit",
+      "nativeLabels": [
+        "杨桃",
+        "杨桃豌豆射手"
+      ]
+    },
+    "sunflower": {
+      "canonicalKey": "sunflower",
+      "nativeLabels": [
+        "向日葵"
+      ]
+    },
+    "line": {
+      "canonicalKey": "line",
+      "nativeLabels": [
+        "三线射手",
+        "三线路灯花"
+      ]
+    }
+  }
+}

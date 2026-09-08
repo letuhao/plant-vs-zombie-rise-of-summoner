@@ -276,7 +276,7 @@ test.describe("audit shell e2e", () => {
     await expect(runsSurface.getByText(/0xabc/)).toBeVisible();
   });
 
-  test("creates a player save from HudBar", async ({ page }) => {
+  test("creates a player save from Save select", async ({ page }) => {
     let created = false;
     await page.route("**/api/players", async (route) => {
       if (route.request().method() === "POST") {
@@ -287,10 +287,11 @@ test.describe("audit shell e2e", () => {
       await fulfillJson(route, players);
     });
 
-    // HudBar is route-independent, unlike the dev tree — go to a route that doesn't open a
-    // modal panel over it (Status now does, as of T12).
-    await page.goto("./#/sanctum");
-    await page.getByPlaceholder("New save").fill("NewSave");
+    // fe-essentials: player creation moved from HudBar (removed — plate 01 §F, "it is not a
+    // dropdown wedged into the top bar of every screen") to the dedicated Save select screen.
+    await page.goto("./#/saves");
+    await page.getByTestId("save-slot-new").click();
+    await page.getByPlaceholder("Summoner name").fill("NewSave");
     await page.getByRole("button", { name: "Create" }).click();
     await expect.poll(() => created).toBe(true);
   });

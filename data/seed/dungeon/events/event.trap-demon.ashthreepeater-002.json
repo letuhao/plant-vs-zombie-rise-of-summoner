@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-demon.ashthreepeater-002",
+  "flavor": "As the stone slab sinks beneath a boot, the air in the corridor undergoes a 彻底 transformation. A vacuum-like suction pulls at the lungs, and the very light seems to be swallowed by a localized rift that renders the path ahead 无法 to be seen.",
+  "kind": "trap",
+  "name": "The Void-Grip Pressure Plate",
+  "outcomes": [
+    {
+      "consequence": "loot",
+      "dropBand": "exceptional",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "A gravity-based trap designed to isolate party members by manipulating spatial density.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

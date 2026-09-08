@@ -12,19 +12,18 @@ const SKIPPED_DIR_NAMES = new Set(["node_modules", "dist", "coverage", "theme"])
 const TEST_FILE_PATTERN = /\.(test|spec)\.[jt]sx?$/;
 
 /**
- * Two principled exclusions, not a loophole:
- *  - `game/` is Phaser's canvas/WebGL rendering — it sits outside the CSSOM
- *    entirely, so a `var(--color-*)` reference structurally cannot resolve
- *    there; bridging that (reading computed CSS custom properties at
- *    runtime and feeding them into Phaser's colour APIs) is a real,
- *    separate piece of work, not a side effect of T7. The same files are
- *    already carved out of the coverage include list for the same reason
- *    (vite.config.ts).
- *  - `features/world/` is the World stage, excluded this phase (T16,
- *    2026-08-23 owner decision) — "keep it as is" means untouched, hex
- *    literals included, until its own plan lands.
+ * One principled exclusion, not a loophole: `game/` is Phaser's canvas/WebGL rendering — it sits
+ * outside the CSSOM entirely, so a `var(--color-*)` reference structurally cannot resolve there;
+ * bridging that (reading computed CSS custom properties at runtime and feeding them into Phaser's
+ * colour APIs) is a real, separate piece of work, not a side effect of T7. The same files are
+ * already carved out of the coverage include list for the same reason (vite.config.ts).
+ *
+ * `features/world/` was exempted here (T16, 2026-08-23 owner decision) "until its own plan
+ * lands" — `world-stage` W49 is that plan: every hex literal in the old tree was mapped onto an
+ * existing semantic token (`LaneEdge.tsx`, `LegionMarker.tsx`), so the exemption is retired rather
+ * than renewed.
  */
-const SKIPPED_PATH_PREFIXES = ["game/", "features/world/"];
+const SKIPPED_PATH_PREFIXES = ["game/"];
 
 function walk(rootDir: string, relBase: string, onFile: (filePath: string, relPath: string) => void): void {
   for (const entry of readdirSync(rootDir)) {

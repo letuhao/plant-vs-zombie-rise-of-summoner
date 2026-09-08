@@ -1,0 +1,37 @@
+namespace FusionRpg.Contracts;
+
+/// <summary>One GG-49 contribution on a derived (or primary) channel — wire shape for sheet/derived.</summary>
+public sealed class ActorContributionDto
+{
+    public string SourceId { get; init; } = "";
+    public string Label { get; init; } = "";
+    public string Op { get; init; } = "";
+    public double Value { get; init; }
+}
+
+/// <summary>One derived channel on the actor sheet projection.</summary>
+public sealed class ActorSheetChannelDto
+{
+    public string ChannelId { get; init; } = "";
+    public string DisplayName { get; init; } = "";
+    public string Reading { get; init; } = "";
+    public string ComposeKind { get; init; } = "";
+    public double Value { get; init; }
+    public IReadOnlyList<ActorContributionDto> Contributions { get; init; } = Array.Empty<ActorContributionDto>();
+}
+
+/// <summary>
+/// Cold UniqueActor identity + Hot Hub resolve with FULL contribution tracing (GG-49).
+/// Hub compose only — never a second private fold.
+/// </summary>
+public sealed class ActorSheetDto
+{
+    public string InstanceId { get; init; } = "";
+    public long PlayerId { get; init; }
+    public string Side { get; init; } = "";
+    public int TypeId { get; init; }
+    public string? DisplayName { get; init; }
+    public long Level { get; init; }
+    public IReadOnlyList<ActorSheetChannelDto> Derived { get; init; } = Array.Empty<ActorSheetChannelDto>();
+    public IReadOnlyList<ActorContributionDto> Primary { get; init; } = Array.Empty<ActorContributionDto>();
+}

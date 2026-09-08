@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1016,
+  "magnitudes": {
+    "combat.block.shred.omni": 780,
+    "combat.parry.shred.omni": 780,
+    "combat.power.omni": 520,
+    "resource.max.hp": 7239,
+    "resource.max.hunger": 10486,
+    "resource.max.qi": 5568,
+    "resource.max.spirit": 2784,
+    "resource.max.stamina": 11321,
+    "resource.regen.hp": 418,
+    "resource.regen.hunger": 613,
+    "resource.regen.qi": 371,
+    "resource.regen.spirit": 186,
+    "resource.regen.stamina": 464
+  },
+  "pTheta": 928,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CherryChomper",
+  "theta": 27,
+  "traitPool": [
+    "cherry-bomb-detonation",
+    "explosive-digestion",
+    "zombie-consumption"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "mutated"
+  ]
+}

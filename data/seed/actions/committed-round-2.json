@@ -1,0 +1,188 @@
+{
+  "_meta": {
+    "corpusHash": "06c8c8a0f3f1c5560d203917b63e878c9e87811cc91f9e5a8c8de09aa9ddac76",
+    "partition": "round-2",
+    "round": 2
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:22.117868+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5778526d0f4e2260ea4f07c2f9a415a45bcfb9a55e7111e4769840e4d3ff4794"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.searing-strike"
+      ],
+      "category": "attack",
+      "description": "A blinding point of heat erupts from the core, consuming everything in a sudden, white-hot vacuum.",
+      "descriptionKey": "action.species.allpeater.001.desc",
+      "id": "action.species.allpeater.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "攻击"
+      ],
+      "name": "Ignition Singularity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:25.219684+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "599cc63cba84478fdd23c5e66fef5838cc29d9ac2218fb7256071f8345d3f818"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-riveting",
+        "atom.deathblast"
+      ],
+      "category": "attack",
+      "description": "A violent, metallic shudder ripples through the bucket, vibrating with a deafening, hollow clang.",
+      "descriptionKey": "action.species.bucketnutzombie.001.desc",
+      "id": "action.species.bucketnutzombie.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "铁头功"
+      ],
+      "name": "Iron-Skull Resonance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "bucketnutzombie",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:29.598455+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b1adb625b06d60934b25880a187d33ff705d381ce6e9b1e1336d4e838dbe695c"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.terraforming"
+      ],
+      "category": "attack",
+      "description": "The cabbagepult's base thickens into a heavy, earthen anchor as it heaves a massive, soil-caked projectile forward.",
+      "descriptionKey": "action.species.cabbagepult.001.desc",
+      "id": "action.species.cabbagepult.001",
+      "motifsUsed": [
+        "攻击",
+        "卷心菜",
+        "投手"
+      ],
+      "name": "Rooted Retribution",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cabbagepult",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:32.972651+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "906f5b16cfd8db887ec2b6e23fc095a6648ce702d9fef2a9085acc41ac0f6c57"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.terraforming"
+      ],
+      "category": "defense",
+      "description": "Thick, earthen vines coil tightly around the base, anchoring the plant firmly into the soil.",
+      "descriptionKey": "action.species.cabbagepult.002.desc",
+      "id": "action.species.cabbagepult.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "卷心菜"
+      ],
+      "name": "Rooted Bastion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cabbagepult",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:36.373148+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "e61c414af7d2017c1faec1656ef7b22b633cf35b62171f79fb65712a1d1f2be7"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.retribution"
+      ],
+      "category": "defense",
+      "description": "Spines erupt from the cactusblover's surface, lashing out at the first thing that dares to strike.",
+      "descriptionKey": "action.species.cactusblover.001.desc",
+      "id": "action.species.cactusblover.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "仙人掌",
+        "发射"
+      ],
+      "name": "Thorned Retribution",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cactusblover",
+      "targetMode": "single"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

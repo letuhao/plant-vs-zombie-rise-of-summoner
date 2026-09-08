@@ -1,19 +1,23 @@
-# Fast local deploy: injector into the game folder, RPG server, then launch PVZRH.
+# Fast local deploy: web UI, injector into the game folder, RPG server, then launch PVZRH.
 # Usage (repo root):
-#   .\scripts\deploy-play.ps1
-#   .\scripts\deploy-play.ps1 -LoaderHost MelonLoader   # requires FUSIONRPG_ML_GAMEDIR Melon pack
+#   .\scripts\deploy-play.ps1                    # MelonLoader 3.9, the default (2026-08-30 -- faster
+#                                                 # startup than the older BepInEx 3.8.1 install below)
+#   .\scripts\deploy-play.ps1 -LoaderHost BepInEx   # the older 3.8.1 install, kept for BepInEx-specific testing
 #   .\scripts\deploy-play.ps1 -NoGame
-#   .\scripts\deploy-play.ps1 -RebuildUi
+#   .\scripts\deploy-play.ps1 -NoRebuildUi   # skip the web UI build (it's on by default -- 2026-08-30:
+#                                            # a stale wwwroot silently served an old FE build for a
+#                                            # whole session because this used to be opt-in and got
+#                                            # forgotten; opt-out is the only safe default)
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
-# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1
+# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
 # + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
 # + guard-class-system.ps1 before build.
 param(
     [ValidateSet("BepInEx", "MelonLoader")]
-    [string]$LoaderHost = "BepInEx",
+    [string]$LoaderHost = "MelonLoader",
     [switch]$NoGame,
     [switch]$NoServer,
-    [switch]$RebuildUi,
+    [switch]$NoRebuildUi,
     [switch]$RestartServer
 )
 
@@ -28,10 +32,9 @@ $DataDir = Join-Path $ServerOut "data"
 $Health = "http://127.0.0.1:5088/health"
 
 if ($LoaderHost -eq "MelonLoader") {
-    if (-not $env:FUSIONRPG_ML_GAMEDIR) {
-        throw "MelonLoader host requires FUSIONRPG_ML_GAMEDIR (MelonLoader game pack). Do not write into BepInEx\plugins."
-    }
-    $GameDir = Resolve-Path $env:FUSIONRPG_ML_GAMEDIR
+    # Default install for this machine (2026-08-30) -- override with $env:FUSIONRPG_ML_GAMEDIR for a
+    # different MelonLoader pack, same fallback shape the BepInEx branch below already uses.
+    $GameDir = if ($env:FUSIONRPG_ML_GAMEDIR) { Resolve-Path $env:FUSIONRPG_ML_GAMEDIR } else { Resolve-Path "H:\Games\PVZ-Fusion-3.9_MelonLoader" }
     $GameExe = Join-Path $GameDir "PlantsVsZombiesRH.exe"
     $PluginDir = Join-Path $GameDir "Mods"
     $GameProfile = if ($env:FUSIONRPG_GAME_PROFILE) { $env:FUSIONRPG_GAME_PROFILE } else { "pvzrh-3.8.1" }
@@ -61,12 +64,15 @@ if (-not (Test-Path $GameExe)) {
     throw "Game exe missing: $GameExe"
 }
 
-if ($RebuildUi) {
-    Write-Host "==> Building web UI"
+if (-not $NoRebuildUi) {
+    Write-Host "==> Building web UI (writes straight into src\FusionRpg.Server\wwwroot)"
     Push-Location (Join-Path $Root "web\fusion-rpg-web")
     if (-not (Test-Path "node_modules")) { npm install }
     npm run build
+    if ($LASTEXITCODE -ne 0) { Pop-Location; throw "web UI build failed" }
     Pop-Location
+} else {
+    Write-Host "==> Skipping web UI build (-NoRebuildUi) -- server will serve whatever is already in wwwroot"
 }
 
 Write-Host "==> Single-writer guard"
@@ -85,6 +91,10 @@ Write-Host "==> Funnel delta guard"
 & (Join-Path $Root "scripts\guard-funnel-delta.ps1")
 if ($LASTEXITCODE -ne 0) { throw "funnel delta guard failed" }
 
+Write-Host "==> ActorHub gate guard"
+& (Join-Path $Root "scripts\guard-actor-hub.ps1")
+if ($LASTEXITCODE -ne 0) { throw "actor-hub guard failed" }
+
 Write-Host "==> Overflow guard"
 & (Join-Path $Root "scripts\guard-overflow.ps1")
 if ($LASTEXITCODE -ne 0) { throw "overflow guard failed" }
@@ -102,8 +112,27 @@ Write-Host "==> STAT-PAIRS guard"
 if ($LASTEXITCODE -ne 0) { throw "STAT-PAIRS guard failed" }
 
 Write-Host "==> CLASS-SYSTEM guard"
-& (Join-Path $Root "scripts\guard-class-system.ps1")
-if ($LASTEXITCODE -ne 0) { throw "CLASS-SYSTEM guard failed" }
+$ClassSystemOutput = & (Join-Path $Root "scripts\guard-class-system.ps1") *>&1
+$ClassSystemExit = $LASTEXITCODE
+$ClassSystemOutput | ForEach-Object { Write-Host $_ }
+if ($ClassSystemExit -ne 0) {
+    # class-system-plan.md decision 12 (2026-08-27): G3 (Might/Ferocity feed both combat.power.* and
+    # progression.bonus.atk) is a deliberate, PERMANENT forward-looking safeguard for battle-adoption's
+    # own transition, not a same-day defect -- the shipped tuning file is never edited to silence it,
+    # so the guard's real-tree exit is 1 by design (ClassSystemGuardTests.cs's own
+    # "exitsOneOnTheRealTree_onlyG3_permanentlyByDesign" test proves exactly this). Tolerate ONLY this
+    # named, documented exception; any other or additional finding still hard-fails the deploy.
+    $ClassSystemText = $ClassSystemOutput -join "`n"
+    $OnlyG3 = ($ClassSystemText -match "G3 Might:") -and ($ClassSystemText -match "G3 Ferocity:")
+    foreach ($OtherRule in @("G1 ", "G2 ", "G4 ", "G5 ", "G6 ", "G7 ")) {
+        if ($ClassSystemText -match [regex]::Escape($OtherRule)) { $OnlyG3 = $false }
+    }
+    if ($OnlyG3) {
+        Write-Host "==> CLASS-SYSTEM guard: only the known, permanent-by-design G3 finding (decision 12) -- tolerated, deploy continues"
+    } else {
+        throw "CLASS-SYSTEM guard failed"
+    }
+}
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile
@@ -114,12 +143,62 @@ if ($LoaderHost -eq "MelonLoader") {
 else {
     dotnet build $InjectorProj -c Release -p:GameDir=$GameDir -p:GameProfile=$GameProfile
 }
+if ($LASTEXITCODE -ne 0) {
+    throw "injector build failed — the deployed DLLs were not refreshed"
+}
 if (-not (Test-Path (Join-Path $PluginDir $InjectorDll))) {
     throw "Injector DLL missing after build: $PluginDir\$InjectorDll"
 }
 if (-not (Test-Path (Join-Path $PluginDir "FusionRpg.Core.dll"))) {
     throw "FusionRpg.Core.dll missing after build"
 }
+
+# FRESHNESS GUARD (2026-08-30). "Build succeeded" is not evidence the DLL was rebuilt:
+#   * the MelonLoader.39 project prints success and compiles NOTHING when MlGameDir is unset
+#     (its own WarnSkipMelon39 target) -- a real compile error hid behind that for an hour today;
+#   * a running game holds a lock on the DLL, and a failed copy can leave the old file in place.
+# Either way the deployed injector silently disagrees with FusionRpg.Core.dll beside it, which
+# surfaces as a runtime `MethodNotFound` mid-match rather than a build error. Compare against the
+# newest source we actually compiled, so both cases fail HERE, loudly.
+# Check each deployed artifact against the source trees that can produce it. Comparing every DLL
+# with every `src/**/*.cs` file is a false-positive: the server/Data tree can change after the
+# injector was built, even though it is not a dependency of either deployed game assembly. The old
+# global check blocked a valid deploy immediately after a server-only edit (2026-09-08).
+$hostSourceRoot = if ($LoaderHost -eq "MelonLoader") {
+    if ($GameProfile -eq "pvzrh-3.9") { Join-Path $Root "src\FusionRpg.Injector.MelonLoader.39" }
+    else { Join-Path $Root "src\FusionRpg.Injector.MelonLoader" }
+} else { Join-Path $Root "src\FusionRpg.Injector.BepInEx" }
+$injectorSourceRoots = @(
+    (Join-Path $Root "src\FusionRpg.Injector"),
+    $hostSourceRoot,
+    (Join-Path $Root "src\FusionRpg.Contracts"),
+    (Join-Path $Root "src\FusionRpg.Core"),
+    (Join-Path $Root "src\FusionRpg.CheatCore"))
+$coreSourceRoots = @(
+    (Join-Path $Root "src\FusionRpg.Core"),
+    (Join-Path $Root "src\FusionRpg.Contracts"))
+function Get-NewestSource([string[]]$roots) {
+    Get-ChildItem -Path $roots -Recurse -Filter *.cs -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } |
+        Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+}
+$freshnessChecks = @(
+    @{ Dll = $InjectorDll; Source = Get-NewestSource $injectorSourceRoots },
+    @{ Dll = "FusionRpg.Core.dll"; Source = Get-NewestSource $coreSourceRoots })
+foreach ($check in $freshnessChecks) {
+    if ($null -eq $check.Source) { continue }
+    $built = Get-Item (Join-Path $PluginDir $check.Dll)
+    if ($built.LastWriteTimeUtc -lt $check.Source.LastWriteTimeUtc) {
+        throw @"
+STALE DEPLOY: $($check.Dll) is older than the newest source in its dependency set.
+  $($check.Dll)  $($built.LastWriteTimeUtc.ToString('u'))
+  newest .cs    $($check.Source.LastWriteTimeUtc.ToString('u'))  ($($check.Source.Name))
+The build did not actually produce this DLL. Usual causes: the game is still running and holds a
+lock on it, or the injector project skipped compiling. Close the game and re-run.
+"@
+    }
+}
+Write-Host "==> Freshness OK — deployed injector artifacts match their source trees"
 
 function Test-ServerUp {
     try {
@@ -130,8 +209,14 @@ function Test-ServerUp {
     }
 }
 
-if (-not $NoServer) {
-    if ((Test-ServerUp) -and $RestartServer) {
+# NOTE (2026-08-30): `-NoServer` means "do not LAUNCH a server", never "do not BUILD one".
+# It used to wrap this whole block, so `-NoServer` silently skipped `dotnet publish` too and left
+# dist\FusionRpg.Server\ on whatever binary happened to be there. That cost a full hour of chasing a
+# "fix that did not work" -- the fix was correct and unit-tested; the deployed server was 80 minutes
+# stale and still carried the old code. A flag whose name describes one action must not quietly skip
+# a different one. Publishing is ~10s and keeps dist\ honest; only the Start-Process below is gated.
+$serverWasUp = Test-ServerUp
+    if ($serverWasUp -and $RestartServer) {
         Write-Host "==> Stopping old RPG server on :5088"
         try {
             Get-NetTCPConnection -LocalPort 5088 -ErrorAction SilentlyContinue |
@@ -139,12 +224,22 @@ if (-not $NoServer) {
                 ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
         } catch { }
         Start-Sleep -Seconds 2
+        $serverWasUp = $false
     }
 
-    Write-Host "==> Publishing server to $ServerOut"
-    dotnet publish $ServerProj -c Release -o $ServerOut --nologo -v q
-    if (-not (Test-Path $ServerExe)) {
-        throw "Server exe missing after publish: $ServerExe"
+    if ($serverWasUp) {
+        # A running server locks its own published DLLs -- `dotnet publish` below would fail with a
+        # confusing MSBuild file-lock retry spam, not a clear message. Fail fast with the real reason
+        # and the actual fix instead (2026-08-30 -- hit this for real while chasing a stale-FE bug).
+        Write-Host "==> Server already running at $Health -- skipping publish (it would fail: the running exe locks its own DLLs)."
+        Write-Host "    Pass -RestartServer to stop it and deploy the fresh build, or stop it yourself first."
+    } else {
+        Write-Host "==> Publishing server to $ServerOut"
+        dotnet publish $ServerProj -c Release -o $ServerOut --nologo -v q
+        if ($LASTEXITCODE -ne 0) { throw "server publish failed -- see output above" }
+        if (-not (Test-Path $ServerExe)) {
+            throw "Server exe missing after publish: $ServerExe"
+        }
     }
 
     Write-Host "==> Importing data\seed into $DataDir (E20 — the server boots on this, not code literals)"
@@ -152,8 +247,11 @@ if (-not $NoServer) {
     dotnet run --project $ImporterProj -c Release -- --db $DataDir
     if ($LASTEXITCODE -ne 0) { throw "AtomImporter refused the import — see output above" }
 
-    if (Test-ServerUp) {
-        Write-Host "==> Server already running at $Health (pass -RestartServer after server code changes)"
+    if ($NoServer) {
+        Write-Host "==> -NoServer: built and published, NOT started. Start it yourself with:"
+        Write-Host "    Start-Process -FilePath `"$ServerExe`" -WorkingDirectory `"$ServerOut`""
+    } elseif ($serverWasUp) {
+        Write-Host "==> Server still running at $Health (unchanged -- pass -RestartServer to deploy the fresh build)"
     } else {
         Write-Host "==> Starting RPG server (data beside exe: $DataDir)"
         # No FUSIONRPG_DATA — Program.cs defaults to {exeDir}/data/{rpg-hot,rpg-media}.sqlite
@@ -169,7 +267,6 @@ if (-not $NoServer) {
             Write-Host "==> Server up: $Health"
         }
     }
-}
 
 if (-not $NoGame) {
     $ServerUrl = "http://127.0.0.1:5088"

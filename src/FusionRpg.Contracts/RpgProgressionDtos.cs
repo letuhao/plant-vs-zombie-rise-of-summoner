@@ -16,8 +16,8 @@ public sealed class RpgActorProgressionDto
     /// <summary>Promoted PlantInfo.cost (sun/cooldown) from almanac dump.</summary>
     [JsonPropertyName("almanacCost")] public string? AlmanacCost { get; set; }
     [JsonPropertyName("level")] public long Level { get; set; }
-    [JsonPropertyName("xp")] public double Xp { get; set; }
-    [JsonPropertyName("xpToNext")] public double XpToNext { get; set; }
+    [JsonPropertyName("xp")] public long Xp { get; set; }
+    [JsonPropertyName("xpToNext")] public long XpToNext { get; set; }
     [JsonPropertyName("highestLevel")] public long HighestLevel { get; set; }
     [JsonPropertyName("demotionCount")] public long DemotionCount { get; set; }
     [JsonPropertyName("revision")] public long Revision { get; set; }
@@ -56,13 +56,13 @@ public sealed class RpgXpLedgerEntryDto
     [JsonPropertyName("typeName")] public string? TypeName { get; set; }
     [JsonPropertyName("runId")] public long RunId { get; set; }
     [JsonPropertyName("t")] public string T { get; set; } = "";
-    [JsonPropertyName("delta")] public double Delta { get; set; }
+    [JsonPropertyName("delta")] public long Delta { get; set; }
     [JsonPropertyName("reason")] public string Reason { get; set; } = "";
     [JsonPropertyName("activityFactId")] public long? ActivityFactId { get; set; }
     [JsonPropertyName("levelBefore")] public long LevelBefore { get; set; }
-    [JsonPropertyName("xpBefore")] public double XpBefore { get; set; }
+    [JsonPropertyName("xpBefore")] public long XpBefore { get; set; }
     [JsonPropertyName("levelAfter")] public long LevelAfter { get; set; }
-    [JsonPropertyName("xpAfter")] public double XpAfter { get; set; }
+    [JsonPropertyName("xpAfter")] public long XpAfter { get; set; }
     [JsonPropertyName("demotionBefore")] public long DemotionBefore { get; set; }
     [JsonPropertyName("demotionAfter")] public long DemotionAfter { get; set; }
     [JsonPropertyName("payloadJson")] public string? PayloadJson { get; set; }
@@ -92,7 +92,7 @@ public sealed class RpgLevelBucketDto
 public sealed class RpgRecentDeltaDto
 {
     [JsonPropertyName("t")] public string T { get; set; } = "";
-    [JsonPropertyName("delta")] public double Delta { get; set; }
+    [JsonPropertyName("delta")] public long Delta { get; set; }
     [JsonPropertyName("reason")] public string Reason { get; set; } = "";
 }
 

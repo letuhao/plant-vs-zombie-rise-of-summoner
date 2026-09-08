@@ -1,5 +1,18 @@
 # Spec: loam-fe-2 (wave 6)
 
+> **⚠️ Partly superseded, 2026-09-03 — read this before building anything here.** The owner reopened
+> the map's front end as its own program after judging the current `#/world` unusable as a game
+> interface. **This spec's UI half — §3 (Sustain/Build command UI), §4's Web tier (the Ward confirm
+> dialog), §5's map highlight, and the `worldTypes.ts` edits — is superseded by
+> [world-stage-ideal.md](../world-stage-ideal.md)**, which redesigns the whole surface under
+> GG-1…GG-61 rather than adding controls to the pre-refactor page the Game GUI refactor deliberately
+> froze (`tasks/game-gui-todo.md:599-611`). **Its server/Core half is not cancelled — it is re-homed.**
+> The owner decided on 2026-09-03 (ideal doc §8.1) that `world-stage` owns the write-surface work too:
+> the five missing DTO fields, the `Amount`/`StructureId` plumbing through `WorldCommandRequest` *and*
+> `CommandPayload`, the `Ward` command, and the `dowse` stance all move there. **This spec is therefore
+> superseded in full**, and the tasks planned from it (L44–L50 in `tasks/loam-todo.md`) stay closed
+> rather than being resumed. Kept for its reasoning trail, not as a build target.
+
 **Status:** **Draft — Phase 1 (Specify), awaiting owner review.** Module id `loam-fe-2` in the
 [loam capability map](../loam-map.md). Depends on `loam-legions`, `loam-structures`, `loam-texture`
 (all shipped and tested at the Core/Data layer, none of it reachable by a player). Not yet added to

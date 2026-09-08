@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "_meta": {
+    "pipeline": "species-effects",
+    "partition": "pilot-batch"
+  },
+  "entries": [
+    {
+      "id": "species-passive.peashooter",
+      "kind": "species-passive",
+      "atoms": [
+        {
+          "seq": 0,
+          "atom": "atom.critical-hunter.t1"
+        },
+        {
+          "seq": 1,
+          "atom": "atom.fx-passive-atk-flat.t1"
+        }
+      ],
+      "pool": [
+        {
+          "affix": "affix.authored.affix-draw-008",
+          "weight": 300,
+          "group": "affix.authored.affix-draw-008"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": {
+        "requireTags": [],
+        "anyOfTags": []
+      },
+      "_provenance": {
+        "pipeline": "species-effects",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t53_claude_propose.py",
+        "coreAffixIds": [
+          "affix.authored.affix-draw-009"
+        ]
+      }
+    },
+    {
+      "id": "species-passive.sunflower",
+      "kind": "species-passive",
+      "atoms": [
+        {
+          "seq": 0,
+          "atom": "atom.fx-economy-sun.t1"
+        },
+        {
+          "seq": 1,
+          "atom": "atom.fx-spawn-butter.t1"
+        }
+      ],
+      "pool": [
+        {
+          "affix": "affix.authored.affix-draw-002",
+          "weight": 300,
+          "group": "affix.authored.affix-draw-002"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": {
+        "requireTags": [],
+        "anyOfTags": []
+      },
+      "_provenance": {
+        "pipeline": "species-effects",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t53_claude_propose.py",
+        "coreAffixIds": [
+          "affix.authored.affix-draw-006"
+        ]
+      }
+    }
+  ]
+}

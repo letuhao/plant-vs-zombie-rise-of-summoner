@@ -99,7 +99,7 @@
       "name": "+{value} status potency",
       "runtimeFamily": "atom.stalwart",
       "groupId": "g.ward",
-      "status": "pending",
+      "status": "live",
       "tags": []
     },
     {
@@ -316,6 +316,42 @@
       "nameKey": "disptpl.affix.shield-toughness",
       "name": "{element} shields take {value} less damage per hit",
       "runtimeFamily": "atom.shield-toughness",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-034",
+      "nameKey": "disptpl.affix.elemental-power",
+      "name": "+{value} {element} power",
+      "runtimeFamily": "atom.elemental-power",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-035",
+      "nameKey": "disptpl.affix.affliction",
+      "name": "+{value} potency to the statuses you inflict",
+      "runtimeFamily": "atom.affliction",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-036",
+      "nameKey": "disptpl.affix.elpw-surfeit",
+      "name": "{value} increased {element} power overflow",
+      "runtimeFamily": "atom.elpw-surfeit",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-037",
+      "nameKey": "disptpl.affix.shld-absolute",
+      "name": "sets {element} shield penetration to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.shld-absolute",
       "groupId": "g.shield-stat",
       "status": "live",
       "tags": []

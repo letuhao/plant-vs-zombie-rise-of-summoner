@@ -1,0 +1,329 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T09:42:54Z",
+      "minorityValues": {
+        "aptitudePrimary": "Agility"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead-monarch",
+      "corpse-sovereign"
+    ],
+    "gameTypeId": 332,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "Despite its lore-based title and movement ability, its stats and 3rd-level classification do not align with a world-ending calamity.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "EternalZombie_c",
+    "targetPreference": "backline",
+    "traits": [
+      "spatial-displacement",
+      "area-of-effect-death",
+      "high-durability",
+      "asymmetric-mobility"
+    ],
+    "variants": [
+      "ancient",
+      "cursed"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T08:19:32Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Might",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "light",
+    "family": [
+      "undead_monarch"
+    ],
+    "gameTypeId": 208,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "Its ability to ignore obstacles, high base damage, and lethal death explosion make it a significant threat capable of disrupting entire defenses.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "QingZombie",
+    "targetPreference": "structure",
+    "traits": [
+      "immortal_remnant",
+      "kinetic_surge",
+      "soul_stabilizer",
+      "spectral_aura"
+    ],
+    "variants": [
+      "ancient",
+      "blessed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:48:01Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar",
+        "rarity": "heirloom"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Agility",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead_monarch",
+      "zombie_commander"
+    ],
+    "gameTypeId": 234,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "While a powerful leader with evasion and speed buffs, the description depicts a nuisance-style boss rather than a world-ending calamity.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "UltimateImpKing",
+    "targetPreference": "backline",
+    "traits": [
+      "leadership_aura",
+      "evasive_regeneration",
+      "kinetic_explosion",
+      "amphibious_speed"
+    ],
+    "variants": [
+      "normal",
+      "corrupted",
+      "ancient",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T08:19:32Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "earth",
+    "family": [
+      "undead_monarch",
+      "frost_wraith"
+    ],
+    "gameTypeId": 228,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The creature possesses massive durability, high-scale area-of-effect attacks, crowd control immunity, and the ability to manipulate the battlefield environment, justifying a calamity rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "UltimateSnowZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "cryo_immunity",
+      "area_of_effect_blizzard",
+      "snowball_summoner",
+      "status_infliction_freeze"
+    ],
+    "variants": [
+      "ancient",
+      "corrupted",
+      "blessed"
+    ],
+    "verdict": "agree"
+  }
+]

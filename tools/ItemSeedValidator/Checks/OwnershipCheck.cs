@@ -63,7 +63,8 @@ public static class OwnershipCheck
     /// </summary>
     public static readonly string[] StructuralCountFields =
     {
-        "socketMax", "pieces", "pool_rolls", "poolRolls", "rung", "ordinal", "seq", "sequence",
+        "socketMax", "pieces", "pool_rolls", "poolRolls", "prefixRolls", "suffixRolls",
+        "rung", "ordinal", "seq", "sequence",
         // Added after entry-shapes.md shaped the remaining ten kinds. Each is the same species of
         // field as socketMax — it counts a structural thing, it is not a balance magnitude.
         "minSockets", "maxSockets", "apCost", "apCapacity", "manifestCost", "outputQty", "inputQty",
@@ -89,6 +90,37 @@ public static class OwnershipCheck
         string.Equals(entry.File.Kind, "curve", StringComparison.Ordinal)
         && key is "multiplierPerMille" or "input" or "x" or "y";
 
+    /// <summary>
+    /// A second, equally narrow exception, same shape as <see cref="IsCurvePoint"/>: `combination`'s
+    /// `ingredients[].minTier` and `grantedTier` (item-seedgen `combination-write-unblock`, 2026-09-07)
+    /// are code-derived, never model-authored — `combogen/emit.py`'s own `assemble_entry`/
+    /// `ingredient_rows` compute both from `ComboTuning` alone (D22's attunement bonus, the per-index
+    /// `min_tier_plan`), the same P1 split ("model picks identity, code picks magnitude") this whole
+    /// file exists to enforce, not a violation of it. Legacy `socket-word` never needed this exception
+    /// because its own `ingredients[].position` shape (one row per slot, no repeat-folding) carries no
+    /// per-row tier or count at all — `combination`'s ingredients are a genuine unordered MULTISET
+    /// (D41), so `emit.ingredient_rows` folds repeats into `(family, minTier, quantity)` rows instead
+    /// of re-introducing position by the back door (`emit.py`'s own doc comment). Narrow on purpose:
+    /// only these two keys, only in a `combination` file.
+    /// </summary>
+    static bool IsCombinationDerivedTier(SeedEntry entry, string key) =>
+        string.Equals(entry.File.Kind, "combination", StringComparison.Ordinal)
+        && key is "minTier" or "grantedTier";
+
+    /// <summary>
+    /// The `quantity` half of the same exception, checked separately because `quantity` is a global
+    /// <see cref="ForbiddenFields"/> entry (an `OwnershipViolation`, not a `CheckMagnitude` allowlist
+    /// miss) elsewhere in the corpus — a recipe/workbench quantity is a genuine balance lever an
+    /// author must never type, priced instead as a `costBand`. A `combination`'s
+    /// `ingredients[].quantity` is a different fact: how many of the fixed four ingredient slots
+    /// (D20 as amended) share one family, in a MULTISET with no position — a structural count, the
+    /// same species as `pieces`/`socketMax`, not a balance magnitude. Scoped to the one kind and the
+    /// one path, same discipline as <see cref="IsCombinationDerivedTier"/>.
+    /// </summary>
+    static bool IsCombinationIngredientQuantity(SeedEntry entry, string path, string key) =>
+        string.Equals(entry.File.Kind, "combination", StringComparison.Ordinal)
+        && key == "quantity" && path.Contains("ingredients[", StringComparison.Ordinal);
+
     /// <summary>Fields whose value must be a member of the matching bands.v1.json enum.</summary>
     public static readonly string[] BandFields = { "powerBand", "costBand", "dropBand", "variance" };
 
@@ -103,7 +135,7 @@ public static class OwnershipCheck
     {
         foreach (var (path, key, value) in ValidationContext.Walk(entry.Node))
         {
-            if (ForbiddenFields.TryGetValue(key, out var why))
+            if (ForbiddenFields.TryGetValue(key, out var why) && !IsCombinationIngredientQuantity(entry, path, key))
             {
                 ctx.Error(entry, "OwnershipViolation", "seed-contract.md §2.1",
                     $"'{path}' is not the author's to write: {why}");
@@ -121,7 +153,9 @@ public static class OwnershipCheck
     {
         if (value is not JsonValue jv) return;
         var allowed = StructuralCountFields.Contains(key, StringComparer.Ordinal)
-                      || IsCurvePoint(entry, key);
+                      || IsCurvePoint(entry, key)
+                      || IsCombinationDerivedTier(entry, key)
+                      || IsCombinationIngredientQuantity(entry, path, key);
 
         if (jv.TryGetValue<double>(out var number) && jv.GetValueKind() == System.Text.Json.JsonValueKind.Number)
         {

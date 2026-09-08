@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Progression;
 using FusionRpg.Data;
 using Xunit;
 
@@ -60,6 +61,21 @@ public class UniqueActorStoreTests : IDisposable
     }
 
     [Fact]
+    public void Bound_ack_refuses_open_pointer_collision_in_same_match()
+    {
+        var first = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        var second = _store.CreateUniqueActor(_playerId, "zombie", 2);
+        Assert.True(_store.TryBeginUniqueDeploy(first.InstanceId, "corr-bind-a", "m-bind").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-bind-a", "ptr-live", "m-bind").Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(second.InstanceId, "corr-bind-b", "m-bind").Ok);
+
+        var collision = _store.TryAckUniqueSpawn("corr-bind-b", "ptr-live", "m-bind");
+        Assert.False(collision.Ok);
+        Assert.Equal("binding.collision", collision.Reason);
+        Assert.Equal(UniqueActorPhases.Deploying, _store.GetUniqueActor(second.InstanceId)!.Phase);
+    }
+
+    [Fact]
     public void Fail_deploy_returns_Roster()
     {
         var a = _store.CreateUniqueActor(_playerId, "plant", 2);
@@ -94,6 +110,92 @@ public class UniqueActorStoreTests : IDisposable
         });
         Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(b.InstanceId)!.Phase);
         Assert.Null(_store.GetUniqueActor(b.InstanceId)!.LastPtr);
+    }
+
+    // ---- T6.1 (2026-09-06): ObserveUniqueActorEvents now reports which players' ActiveBound roster
+    // changed, so a caller can re-push the atom union for exactly those players -------------------
+
+    [Fact]
+    public void An_ack_event_reports_the_actors_own_player_as_affected()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 4);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-report", "m-report").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-report", """{"correlationId":"corr-report","ptr":"0xREPORT"}""")
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void A_recover_event_reports_the_same_player_as_the_ack_that_bound_it()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 5);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-rec", "m-rec").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-rec", "0xREC", "m-rec").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("plant.die", "m-rec", """{"ptr":"0xREC"}""")
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void An_event_naming_an_unknown_ptr_or_correlation_reports_no_affected_player()
+    {
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-none", """{"correlationId":"no-such-corr","ptr":"0xNONE"}"""),
+            ("plant.die", "m-none", """{"ptr":"0xNONE"}"""),
+        });
+
+        Assert.Empty(affected);
+    }
+
+    [Fact]
+    public void A_batch_touching_the_same_player_twice_reports_that_player_once()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 4);
+        var b = _store.CreateUniqueActor(_playerId, "zombie", 6);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-dup-a", "m-dup").Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(b.InstanceId, "corr-dup-b", "m-dup").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-dup", """{"correlationId":"corr-dup-a","ptr":"0xDUPA"}"""),
+            ("pvz.spawn.extra.ack", "m-dup", """{"correlationId":"corr-dup-b","ptr":"0xDUPB"}"""),
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void A_shared_match_key_recovering_two_specimens_reports_their_distinct_players_once_each()
+    {
+        var otherPlayerId = _store.CreatePlayer("second-player").Id;
+        var mine = _store.CreateUniqueActor(_playerId, "plant", 4);
+        Assert.True(_store.TryBeginUniqueDeploy(mine.InstanceId, "corr-multi-mine", "m-multi").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-multi-mine", "0xMINE", "m-multi").Ok);
+
+        // A second player's own row sharing the same match_key — realistic today only as a fixture
+        // (this repo's own lawn is single-player-per-match), but the query itself has no player
+        // filter, so the return value must not silently assume one player per match_key either.
+        var theirs = _store.CreateUniqueActor(otherPlayerId, "zombie", 9);
+        Assert.True(_store.TryBeginUniqueDeploy(theirs.InstanceId, "corr-multi-theirs", "m-multi").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-multi-theirs", "0xTHEIRS", "m-multi").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("match.result", "m-multi", "{}")
+        });
+
+        Assert.Equal(2, affected.Count);
+        Assert.Contains(_playerId, affected);
+        Assert.Contains(otherPlayerId, affected);
     }
 
     [Fact]
@@ -298,14 +400,20 @@ public class UniqueActorStoreTests : IDisposable
     [Fact]
     public void Equipment_upsert_rebuilds_mods_grants_preserves_absolutes()
     {
+        // stub.atk_ring is atom-backed (mods-absorption, spec-mods-absorption.md): its grant no
+        // longer reaches mods_json at all — it grants exclusively through effect_binding now
+        // (reconciliation fails closed here since this fixture never imports the atom seed tree, so
+        // there's no container to bind against; UniqueEquipmentAtomBindingTests and
+        // ModsAbsorptionTests (Core.Tests) cover the real binding against the real seed tree). This
+        // test stays scoped to what it always tested: the store-level mods_json/absolutes upsert path.
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
         _store.UpsertUniqueStatModsJson(a.InstanceId, """{"absolutes":{"hp":42},"grants":[]}""");
 
         var eq = _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "stub.atk_ring");
         Assert.Equal(a.InstanceId, eq.InstanceId);
         Assert.Contains(eq.Items, x => x.Slot == "weapon" && x.ItemId == "stub.atk_ring");
-        Assert.Contains("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
-        Assert.Contains("equip-stub-atk:weapon", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("equip-stub-atk:weapon", eq.ModsJson, StringComparison.Ordinal);
         Assert.Contains("\"hp\":42", eq.ModsJson.Replace(" ", ""), StringComparison.Ordinal);
 
         var cleared = _store.ClearUniqueEquipmentSlot(a.InstanceId, "weapon");
@@ -341,10 +449,12 @@ public class UniqueActorStoreTests : IDisposable
     [Fact]
     public void Equipment_equips_a_real_relic_and_rejects_wrong_slot()
     {
+        // relic.ashen_reliquary is atom-backed (fx.passive_atk_flat, mods-absorption) — its grant no
+        // longer reaches mods_json; slot validation (out of this module's scope) is unchanged.
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
         var eq = _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "relic.ashen_reliquary");
         Assert.Contains(eq.Items, x => x.Slot == "weapon" && x.ItemId == "relic.ashen_reliquary");
-        Assert.Contains("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
 
         var mismatch = Assert.Throws<ArgumentException>(() =>
             _store.UpsertUniqueEquipment(a.InstanceId, "armor", "relic.ashen_reliquary"));
@@ -353,24 +463,30 @@ public class UniqueActorStoreTests : IDisposable
     }
 
     [Fact]
-    public void Equipment_same_stub_two_slots_unique_grantIds()
+    public void Equipment_same_stub_two_slots_grants_nothing_in_mods_json_either_slot()
     {
+        // 2026-09-06: stub.hp_charm is atom-backed now too (item.fx-entity-atk) — every known item's
+        // per-slot identity lives on effect_binding (a distinct binding per slot, proven in
+        // ModsAbsorptionTests/UniqueEquipmentAtomBindingTests, which import the real seed tree this
+        // fixture does not), never on a stamped mods_json grantId any more; the real regression to
+        // guard HERE is that the SAME item in two slots leaks a grant into neither slot's mods_json.
         var a = _store.CreateUniqueActor(_playerId, "zombie", 2);
-        _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "stub.atk_ring");
-        var eq = _store.UpsertUniqueEquipment(a.InstanceId, "armor", "stub.atk_ring");
-        Assert.Contains("equip-stub-atk:weapon", eq.ModsJson, StringComparison.Ordinal);
-        Assert.Contains("equip-stub-atk:armor", eq.ModsJson, StringComparison.Ordinal);
+        _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "stub.hp_charm");
+        var eq = _store.UpsertUniqueEquipment(a.InstanceId, "armor", "stub.hp_charm");
+        Assert.DoesNotContain("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
     }
 
     [Fact]
     public void Equipment_rebuild_preserves_flat_absolutes()
     {
+        // 2026-09-06: stub.hp_charm is atom-backed now too — absolutes survive regardless, proven
+        // against a mods_json that no longer carries any grant for a known item at all.
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
         _store.UpsertUniqueStatModsJson(a.InstanceId, """{"hp":12,"atk":3}""");
-        var eq = _store.UpsertUniqueEquipment(a.InstanceId, "trinket", "stub.butter_bead");
+        var eq = _store.UpsertUniqueEquipment(a.InstanceId, "trinket", "stub.hp_charm");
         Assert.Contains("12", eq.ModsJson, StringComparison.Ordinal);
         Assert.Contains("3", eq.ModsJson, StringComparison.Ordinal);
-        Assert.Contains("fx.butter_on_hit", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -392,12 +508,18 @@ public class UniqueActorStoreTests : IDisposable
         Assert.Equal("phase.retired", refuse.Reason);
     }
 
+    /// <summary>
+    /// Was `Award_xp_rejects_non_finite_delta`: `AwardUniqueActorXp`'s `delta` moved from `double` to
+    /// `long` (effort-power reconciliation, 2026-09-05, RpgStore.UniqueActors.cs's own doc comment) —
+    /// a `long` can never be NaN or infinite, so those two cases no longer compile. `delta &lt;= 0` is
+    /// the guard that replaced them (same file, same "bad_delta" reason), so the non-positive cases
+    /// it actually covers now are zero and negative.
+    /// </summary>
     [Fact]
-    public void Award_xp_rejects_non_finite_delta()
+    public void Award_xp_rejects_a_non_positive_delta()
     {
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
-        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, double.PositiveInfinity).Reason);
-        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, double.NaN).Reason);
+        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, -1).Reason);
         Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, 0).Reason);
         Assert.Equal(1, _store.GetUniqueActor(a.InstanceId)!.Level);
     }
@@ -411,5 +533,173 @@ public class UniqueActorStoreTests : IDisposable
         var afterProg = _store.GetRpgActor(_playerId, "plant", a.TypeId);
         Assert.Equal(beforeProg?.Xp ?? 0, afterProg?.Xp ?? 0);
         Assert.Equal(beforeProg?.Level ?? 1, afterProg?.Level ?? 1);
+    }
+
+    [Fact]
+    public void Lawn_kill_observation_awards_attributed_unique_xp_once()
+    {
+        ProgressionTuningHub.Configure(ContractTuningTestBootstrap.DefaultProgression with
+        {
+            Awards = ContractTuningTestBootstrap.DefaultProgression.Awards with { SpecimenLawnKill = 18 }
+        });
+        var a = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-lawn", "m-lawn").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-lawn", "killer-ptr", "m-lawn").Ok);
+
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-lawn", "{\"ptr\":\"enemy-ptr\",\"killerPtr\":\"killer-ptr\",\"lifecycleOccurrence\":1}", (string?)null)
+        });
+        var after = _store.GetUniqueActor(a.InstanceId)!;
+        Assert.Equal(18, after.Xp);
+        Assert.Equal(UniqueActorPhases.ActiveBound, after.Phase);
+
+        // The actor remains bound after the enemy kill; replaying the same occurrence cannot award
+        // the receipt a second time.
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-lawn", "{\"ptr\":\"enemy-ptr\",\"killerPtr\":\"killer-ptr\",\"lifecycleOccurrence\":1}", (string?)null)
+        });
+        Assert.Equal(18, _store.GetUniqueActor(a.InstanceId)!.Xp);
+
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("board.end", (string?)"m-lawn", "{}", (string?)null)
+        });
+        Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(a.InstanceId)!.Phase);
+    }
+
+    [Fact]
+    public void Lawn_duration_uses_scaled_active_match_milliseconds_only()
+    {
+        var baseline = ContractTuningTestBootstrap.DefaultProgression;
+        ProgressionTuningHub.Configure(baseline with
+        {
+            Awards = baseline.Awards with
+            {
+                SpecimenBoundIntervalMs = 1_000,
+                SpecimenBoundIntervalXp = 5
+            }
+        });
+        var actor = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        Assert.True(_store.TryBeginUniqueDeploy(actor.InstanceId, "corr-duration", "m-duration").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-duration", "ptr-duration", "m-duration", 100).Ok);
+
+        // 3,000 active milliseconds pays exactly three intervals. The wall-clock event time is
+        // intentionally unrelated; settlement must use the injector's scaled match clock.
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("zombie.die", (string?)"m-duration",
+                "{\"ptr\":\"ptr-duration\",\"lifecycleOccurrence\":1,\"activeMatchMs\":3100}",
+                (string?)DateTimeOffset.UtcNow.AddDays(-3).ToString("o"))
+        });
+
+        var recovered = _store.GetUniqueActor(actor.InstanceId)!;
+        Assert.Equal(15, recovered.Xp);
+        Assert.Equal(UniqueActorPhases.Roster, recovered.Phase);
+    }
+
+    [Fact]
+    public void Lawn_terminal_settlement_rolls_back_receipt_xp_and_recovery_on_failure()
+    {
+        var baseline = ContractTuningTestBootstrap.DefaultProgression;
+        var overflow = baseline with
+        {
+            Awards = baseline.Awards with
+            {
+                SpecimenLawnKill = 18,
+                SpecimenBoundIntervalMs = 1,
+                SpecimenBoundIntervalXp = long.MaxValue
+            }
+        };
+        ProgressionTuningHub.Configure(overflow);
+        var killer = _store.CreateUniqueActor(_playerId, "zombie", 2);
+        var target = _store.CreateUniqueActor(_playerId, "plant", 3);
+        Assert.True(_store.TryBeginUniqueDeploy(killer.InstanceId, "corr-atomic-k", "m-atomic").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-atomic-k", "ptr-killer", "m-atomic", 0).Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(target.InstanceId, "corr-atomic-t", "m-atomic").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-atomic-t", "ptr-target", "m-atomic", 0).Ok);
+
+        // Duration settlement overflows after the kill receipt is inserted. The per-event
+        // transaction must roll back both that receipt and the XP/recovery writes.
+        var eventTime = DateTimeOffset.UtcNow.AddSeconds(2).ToString("o");
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-atomic", "{\"ptr\":\"ptr-target\",\"killerPtr\":\"ptr-killer\",\"lifecycleOccurrence\":1,\"activeMatchMs\":2000}", (string?)eventTime)
+        });
+        var failedKiller = _store.GetUniqueActor(killer.InstanceId)!;
+        var failedTarget = _store.GetUniqueActor(target.InstanceId)!;
+        Assert.Equal(UniqueActorPhases.ActiveBound, failedKiller.Phase);
+        Assert.Equal(UniqueActorPhases.ActiveBound, failedTarget.Phase);
+        Assert.Equal(0, failedKiller.Xp);
+        Assert.Equal(0, failedTarget.Xp);
+
+        // Restore valid tuning and replay the same lifecycle event: a missing receipt proves the
+        // failed attempt did not partially commit, and the retry settles exactly once.
+        ProgressionTuningHub.Configure(baseline with
+        {
+            Awards = baseline.Awards with { SpecimenLawnKill = 18 }
+        });
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-atomic", "{\"ptr\":\"ptr-target\",\"killerPtr\":\"ptr-killer\",\"lifecycleOccurrence\":1,\"activeMatchMs\":2000}", (string?)eventTime)
+        });
+        var recoveredKiller = _store.GetUniqueActor(killer.InstanceId)!;
+        var recoveredTarget = _store.GetUniqueActor(target.InstanceId)!;
+        Assert.Equal(18, recoveredKiller.Xp);
+        Assert.Equal(UniqueActorPhases.ActiveBound, recoveredKiller.Phase);
+        Assert.Equal(UniqueActorPhases.Roster, recoveredTarget.Phase);
+        Assert.Equal(0, recoveredTarget.Xp);
+    }
+
+    [Fact]
+    public void Activity_projection_retains_explicit_unique_source_claim()
+    {
+        var matchKey = "m-source-" + Guid.NewGuid().ToString("N");
+        var actor = _store.CreateUniqueActor(_playerId, "zombie", 3);
+        Assert.True(_store.TryBeginUniqueDeploy(actor.InstanceId, "corr-7", matchKey).Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-7", "source-ptr", matchKey).Ok);
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "board.start", MatchKey = matchKey, Payload = new { levelName = "source" }
+            },
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "zombie.spawn", MatchKey = matchKey,
+                Payload = new { type = 3, ptr = "source-ptr", source = "extra", instanceId = actor.InstanceId, correlationId = "corr-7" }
+            }
+        });
+
+        var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
+        Assert.Equal("demon.progression.v1", fact.SourceKind);
+        Assert.Equal($"unique:{actor.InstanceId}:corr-7", fact.SourceId);
+    }
+
+    [Fact]
+    public void Activity_projection_does_not_promote_unowned_extra_spawn_to_empire_species()
+    {
+        var matchKey = "m-unowned-extra-" + Guid.NewGuid().ToString("N");
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "board.start", MatchKey = matchKey, Payload = new { levelName = "source" }
+            },
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "zombie.spawn", MatchKey = matchKey,
+                Payload = new { type = 3, ptr = "unowned-extra-ptr", source = "extra", instanceId = "missing-instance" }
+            }
+        });
+
+        var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
+        Assert.NotEqual("demon.progression.v1", fact.SourceKind);
+        Assert.Null(_store.GetRpgActor(_playerId, RpgActorKinds.Species, 10003));
     }
 }

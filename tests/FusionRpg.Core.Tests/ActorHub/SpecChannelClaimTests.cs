@@ -35,14 +35,30 @@ public class SpecChannelClaimTests
     /// `status.resistance` is English prose ("the status resistance axis"), not `status.resist`;
     /// `status.probability` is explicitly documented as having no channel equivalent (spec-unbuilt-
     /// reconcile.md F5); `combat.something` is spec-stat-taxonomy.md's own abstract placeholder example.
+    /// `combat.power.pierce` and `combat.power.overflow` are channel-SHAPED ids that authored item
+    /// families name and the registry does NOT contain — `spec-kind-value-guard.md` §5.1 tables them as
+    /// a defect, with the decision to scope E29's acceptance rather than mint 14 channels. Same category
+    /// as `combat.hitland` above: named in a doc precisely BECAUSE it is not shipped. Added 2026-09-03;
+    /// **remove these two if the families are ever registered**, so the guard resumes covering them.
+    /// `combat.timer` is a host EVENT kind, verified in `EffectEventAdapterCore.TryMap` where it maps
+    /// (alongside `effect.timer`) to the `OnTimer` atom trigger — the same category as `combat.hit`
+    /// directly above, added 2026-09-03 when Wave 8's trigger-vocabulary audit named it in prose.
     /// `progression.tierPower` is a locked, shipped FORMULA name (`progression.power ×
-    /// progression.realm`, actor-hub-ssot.md:121) computed where needed, not itself a stored channel.</summary>
+    /// progression.realm`, actor-hub-ssot.md:121) computed where needed, not itself a stored channel.
+    /// `status.timed` is actor-hub-ssot.md §6's own descriptive label for the `StatusDerivedSubsystem`
+    /// registry row (mechanism-wiring E6, 2026-09-06) — the table's "Subsystem" column already uses
+    /// human-readable dotted labels distinct from the real `SubsystemId` string
+    /// (`foundation.effect`/order 350 names `AtomDerivedSubsystem`, whose actual `SubsystemId` is
+    /// `"atom.derived"`; `status.timed`/order 400 names `StatusDerivedSubsystem`, whose actual
+    /// `SubsystemId` is `"l2b.derived"` — verified in code, neither label is a stat channel).</summary>
     static readonly HashSet<string> KnownNonChannelTokens = new(StringComparer.Ordinal)
     {
-        "combat.hit", "combat.hitland", "combat.something",
+        "combat.hit", "combat.hitland", "combat.something", "combat.timer",
+        "combat.power.pierce", "combat.power.overflow",
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
-        "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",
+        "status.v1.json", "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",
+        "status.timed",
         "progression.tierPower"
     };
 

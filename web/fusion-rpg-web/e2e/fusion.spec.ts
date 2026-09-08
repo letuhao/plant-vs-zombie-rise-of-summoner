@@ -81,14 +81,12 @@ test.describe("Fusion layer (T15)", () => {
     await expect(page.getByTestId("sanctum-hud")).toBeVisible();
   });
 
-  test("#/fusion redirects into the layer, and Fusion is absent from AuditNav", async ({ page }) => {
+  // AuditNav (the flat leftover sidebar this test used to check for a redundant link) is gone
+  // entirely (GG-40, foundation.html F.2) — Fusion is reachable only through the rail now.
+  test("#/fusion redirects into the layer", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/fusion");
     await expect(page).toHaveURL(/#\/sanctum\?panel=fusion/);
     await expect(page.getByTestId("fusion-layer")).toBeVisible();
-
-    await page.keyboard.press("Escape");
-    const nav = page.getByTestId("audit-nav");
-    await expect(nav.getByText("Fusion", { exact: true })).toHaveCount(0);
   });
 });

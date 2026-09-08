@@ -33,7 +33,7 @@
         "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.quilted-sash",
       "flavorKey": "flavor.base.quilted-sash",
       "flavor": "Layered cloth stitched in diamonds. Pockets catch sunlight and hold its warmth.",
@@ -103,10 +103,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-pouch",
       "flavorKey": "flavor.base.secondhand-pouch",
       "flavor": "Someone else's carrying solution. The seams are held with care, the straps still sound.",
@@ -143,7 +143,7 @@
         "family": "atom.sunbloom",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.insulated-ziptie",
       "flavorKey": "flavor.base.insulated-ziptie",
       "flavor": "Thick plastic braid wrapped in cloth padding. Holds tight and keeps the sun off.",
@@ -180,7 +180,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.cured-belt",
       "flavorKey": "flavor.base.cured-belt",
       "flavor": "Hide cured by smoke and sun. The brass buckle is old but the leather is steady.",
@@ -214,7 +214,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -253,7 +253,7 @@
         "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.tanned-band",
       "flavorKey": "flavor.base.tanned-band",
       "flavor": "A wide strip of tanned hide, evenly dyed by seasons of sun. Still flexible, never rigid.",
@@ -290,7 +290,7 @@
         "family": "atom.midas",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.supple-cinch",
       "flavorKey": "flavor.base.supple-cinch",
       "flavor": "Leather so soft it moves like cloth. Pulls tight without cutting, holds without complaint.",
@@ -323,10 +323,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.studded-buckle",
       "flavorKey": "flavor.base.studded-buckle",
       "flavor": "Metal studs driven through leather, catching the light. A fastener and a flair.",
@@ -400,7 +400,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.hidebound-webbing",
       "flavorKey": "flavor.base.hidebound-webbing",
       "flavor": "Hide stretched over cord and sewn tight. The knots are thick and the leather binding holds firm.",
@@ -434,7 +434,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.midas",
         "powerBand": "trivial"
       },
       "socketMax": 1,

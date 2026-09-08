@@ -6,6 +6,37 @@
 
 ---
 
+## 0. ⛔ The vocabulary is closed and built. The POOL is empty. Do not confuse the two.
+
+**Added 2026-09-02**, because this document reads as an inventory and was being used as one. Full
+measurement: [`../../research/atom-effect-pool-audit-2026-09-02.md`](../../research/atom-effect-pool-audit-2026-09-02.md).
+
+| | Built | Authored content |
+|---|---|---|
+| Kinds | **12** — all 12 have ≥1 atom, so every kind is proven executable end to end | — |
+| Primary channels | **11** addressable | **1** addressed (`atom.fx-passive-atk-flat` → `atk`) |
+| Derived channels | **267** addressable | **1** addressed (`atom.critical-hunter.t1` → `combat.crit.rate.omni`) |
+| Atoms | — | **21**, in 17 families — FX demo rows plus one migrated trait |
+| Containers | — | **6** |
+
+**What selects an atom, and whether a model is involved.** Neither is ambiguous, and both get
+mis-stated:
+
+- **Selection is `Instantiator.Draw`** — a seeded weighted sample over `container.Pool`, with per-budget
+  RNG streams and one-per-group exclusion. **Pure code. No model, ever.**
+- **A model authors AFFIXES**, one step earlier: it picks a `name` and which **existing** atom ids to
+  bundle. Never a magnitude, never a new atom id, `affix_class` derived not authored, both judgement
+  fields 3-way voted.
+- **The pool the model picks from is `data/seed/atoms/*.json` itself** — `generate_affixes.load_eligible_atoms`
+  walks the shipped seed tree and derives each id the same way `AtomRow.DeriveId` does. **Built and wired**,
+  proven by its own `--dry-run` (21 eligible atoms today). `--only` narrows it for a themed run.
+
+**So the pool file exists and is read. What it lacks is rows.** The step that would fill it — emitting the
+family library from the registry, deterministically — is model-free and unbuilt; `atom-family-library.md`
+§2 already states the rule it should follow: *"do not hand-author what a pure function can generate."*
+
+---
+
 ## 1. What the sweep corrected
 
 Six parallel sweeps read the whole repo. Five counts we had been quoting were wrong, and every one of them had already propagated into the ideal, the adoption audit, or the map.
@@ -24,14 +55,14 @@ And one schema-level error that would have shipped into the atom spec:
 
 ---
 
-## 2. The closed kind list — 12
+## 2. The closed kind list — 18
 
-Twelve kinds cover everything that has a working consumer today. Eleven map to a shipped opcode; `stat.derived` is the one addition, and it exists because four separate magnitude sites (patron, stars, injuries, contracts) already write derived channels with no opcode at all.
+Eighteen kinds cover everything that has a working consumer today. Eleven map to a shipped FA opcode; `stat.derived` is a direct channel write with no opcode (four magnitude sites — patron, stars, injuries, contracts — already wrote derived channels with none); `match.modify` (E35, 2026-09-04) is the first kind on the `Match` attach point, mapping to `ModifyMatch` and writing one `Board.config` field for the match through `CheatState` + `CheatActions.ApplyBoardConfig` rather than an entity's own stats; `wave.control` (E36, 2026-09-04) is the second, mapping to `WaveControl` and driving `CheatActions.SummonWave`/`HugeWave`/`SetWaveTimer` plus `DebugActions.WaveFreeze` — the content path for the four wave-pressure writes that were cheat-only before; `bullet.modify` (E37, 2026-09-04) adds no new attach point — it reuses `board` — and is a second declarative permanent modifier alongside `stat.derived`: the grant's presence is read as a resolved value inside the existing `Bullet.InitData` postfix, never fired by an event; `ui.present` (E41, 2026-09-04) is the first kind on a new, seventh attach point, `Ui` — read-only by construction, mapping to `PresentUi` and executed bag-side in `EffectBag.FireGrant` (never a plan item any state-writing sink arm can reach) — `op:number` reuses the existing `IDamageFxSink` floater path, `op:meter`/`op:banner` go through the new `IUiPresentSink`; `structure.place` (base-defense `siege-construction`, decision 27, 2026-09-06) is the first kind on a new, eighth attach point, `Siege` — the tactical siege board's own counterpart to `board`'s Lawn-only reach: Lawn is `None` always (there is no tactical board on the PvZ lawn), Battle is `Full` (a new `BattleEffectSink.ExecPlaceStructure` branch, the first Battle-only executor in the whole vocabulary) — it places a structure at the firing event's own new `TargetRow`/`TargetCol` (additive fields on `EffectEventDto`), validated through `ConstructionPlacement.CanPlace`, and the placement crosses back out through `BattleOutcome.SlotResults[].StructurePlaced`, never by `structure.place` touching `WorldState` itself; `element.convert` (passive-tree `element-conversion`, D56, spec-element-conversion.md, 2026-09-07) is the first kind on a new, ninth attach point, `Element` — a third permanent modifier alongside `stat.derived`/`bullet.modify`, redistributing weight within the attacking actor's own `ElementPayload` (never fabricating a component on a `null` payload, never inventing a "Physical" element neither `ElementPayload` nor `ElementTypeId` has) — **quarantined, all three runtimes `None`, corrected the same day it shipped**: no real reader resolves a bound `element.convert` grant anywhere yet (the combat-dispatch call site is a genuine, undecided engineering choice, spec §2b), so claiming Lawn/Battle `Full` from the fold mechanism's own theoretical capacity alone was the exact "advertising support it does not have" defect `AtomKindRegistryTests`' own `awaitingConsumer` set exists to catch — caught by `ParamParityGuardTests` the same session, fixed by quarantining rather than by inventing a reader to force the claim true.
 
 | # | Kind | Attach point | Maps to | Runtime support |
 |---|---|---|---|---|
 | 1 | `stat.modify` | stat | FA1 `ModifyStat` | lawn ✅ · battle ✖ (sink ignores FA1) · sim plan-only |
-| 2 | `stat.derived` | stat | *(no opcode — direct channel mods)* | **✖ everywhere — quarantined** (D6): no opcode, no bag branch, no sink arm, and battle reads ChannelMods only from `TraitBattleCatalog`, never from a grant. Re-opens per runtime as consumers ship — **battle re-opens in E12**, which wires `BattleStatComposer` to read bound `stat.derived` atoms at squad build. E12 cannot bind `critical-hunter` until it does, so the re-open is part of that module, not a later favour |
+| 2 | `stat.derived` | stat | *(no opcode — direct channel mods)* | Originally **✖ everywhere — quarantined** (D6): no opcode, no bag branch, no sink arm, and battle read ChannelMods only from `TraitBattleCatalog`, never from a grant. Re-opened per runtime as consumers shipped: **battle** re-opened in E12 (`BattleStatComposer` reads bound atoms at squad build, unblocking `critical-hunter`); **lawn** re-opened 2026-08-30 (`AtomDerivedSubsystem`, decisions.md "Derived-write lawn executor") — both **Full**. **Sim** re-opened 2026-09-06 (mechanism-wiring E5): `RuntimeState.Partial`, not `Full` — `ActorDerivedLookup`'s contribution fold (a plain sum) honours `Flat`/`Increased` but silently miscomposes `Replace`/`Flag` as if `Flat` (`BoundDerivedAtom` carries no `Priority` field), proven by `EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`. Current: lawn ✅ Full · battle ✅ Full · sim 🟡 Partial |
 | 3 | `resource.delta` | resource | FA10 `ApplyResourceDelta` | lawn ✅ · battle ✖ (D6) — battle's sink *does* consume FA10, but no **atom** can reach it: `BattleEngine` never grants and never calls `OnEvent` · sim plan-only |
 | 4 | `resource.economy` | resource | FA9 `Economy` | lawn ✅ · battle ✖ · sim plan-only |
 | 5 | `status.apply` | status | FA2 `ApplyStatus` | lawn ✅ · battle partial *(no FA2 path; setup only)* · sim plan-only |
@@ -42,10 +73,17 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 | 10 | `grid.spawn` | board | FA6 `SpawnGridItem` | lawn ✅ · battle ✖ · sim plan-only |
 | 11 | `grid.clear` | board | FA7 `ClearGridItem` | lawn ✅ · battle ✖ · sim plan-only |
 | 12 | `box.set` | board | FA8 `SetBoxType` | lawn ✅ · battle ✖ · sim plan-only |
+| 13 | `match.modify` | match | `ModifyMatch` | lawn ✅ · battle ✖ (no `Board.config`, no consumer) · sim ✖ (same) |
+| 14 | `wave.control` | match | `WaveControl` | lawn ✅ · battle ✖ (no `BoardSpawner`, no consumer) · sim ✖ (same) |
+| 15 | `bullet.modify` | board | `BulletModify` *(declarative — no sink arm)* | lawn ✅ (`Bullet.InitData` resolved read) · battle ✖ (no projectile, pending) · sim ✖ (same) |
+| 16 | `ui.present` | **ui** | `PresentUi` *(bag-side — never a plan item the state sink sees)* | lawn ✅ (`EffectBag.ExecPresentUi`) · battle ✖ (no present sink today, pending) · sim ✖ (same) |
+| 17 | `structure.place` | **siege** | `PlaceStructure` | lawn ✖ (no tactical board on the lawn — structural, not pending) · battle ✅ (`BattleEffectSink.ExecPlaceStructure`) · sim plan-only |
 
-**Five attach points:** stat · resource · status · shield · board. That list is the thing an ADR guards.
+**Eight attach points:** stat · resource · status · shield · board · match · ui · **siege**. `decisions.md`'s "Atom attach points" row is the thing that guards this list now — it did not exist before E35, which wrote it the same day it added `match`; E41 amended it the same day again to add `ui`; base-defense `siege-construction` amended it again 2026-09-06 to add `siege`.
 
-**`stat.modify` and `stat.derived` carry no trigger.** They are permanent modifiers; apply and revert are runtime lifecycle, not content — `OnGranted`/`OnRemoved` stay in the 7-trigger enum as runtime states no atom may author ([definitions.md](definitions.md) §14.2).
+`match` differs from `board` on purpose: a `board` kind acts on a cell or an entity within the running match (`spawn.entity`, `board.action`, `grid.spawn`, `grid.clear`, `box.set` — each takes `row`/`col`); a `match` kind changes a rule the whole match is played under and names no cell.
+
+**`stat.derived` and `bullet.modify` carry no trigger at all** (`stat.modify` may optionally carry one since A18e, but does not require it). They are permanent modifiers; apply and revert are runtime lifecycle, not content — `OnGranted`/`OnRemoved` stay in the 13-trigger enum as runtime states no atom may author ([definitions.md](definitions.md) §14.2). `AtomKindRegistryTests.cs`'s own `permanentModifiers` set names both `stat.derived` and `bullet.modify` for exactly this reason.
 
 ### Not kinds, on purpose
 
@@ -60,7 +98,7 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 
 ---
 
-## 3. Trigger vocabulary — 7
+## 3. Trigger vocabulary — 13
 
 | Trigger | LIVE signal | Note |
 |---|---|---|
@@ -70,18 +108,35 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 | `OnDeath` | `plant.die` / `zombie.die` | No `OnKill` — killer arrives as `actorIsKiller` |
 | `OnGranted` / `OnRemoved` | grant lifecycle | **Not authorable** — runtime lifecycle only (§14.2). The bag injects the revert itself |
 | `OnTimer` | injector hot-loop ms scheduler | **Exists in code and `effect-data.md`, absent from the trigger table in `effect-system.md`** — no FT number ever assigned |
+| `OnActivate` | the actor's own decision to act | **Added by A18b** (`spec-on-activate-trigger.md`) — a reviewed cross-program vocabulary change, not a unilateral addition. Neither a board event (nothing has necessarily been damaged, spawned or killed) nor a lifecycle transition (the grant was bound earlier, possibly turns ago) |
+| `OnWave` | `wave.change` (canonical) / `wave.spawn` / `wave.huge` (deduped to one edge per wave) | **Added by E34** (`spec-trigger-vocabulary.md`) — match-scoped, no `ActorPtr`/`Side` |
+| `OnMatchStart` | `board.start` | **Added by E34** — match-scoped |
+| `OnMatchEnd` | `board.end` / `match.win` / `match.lose` | **Added by E34** — match-scoped |
+| `OnSunCollect` | `sun.gain` | **Added by E34** — board-economy; the collected count carries no field (a predicate, out of E34's scope) |
+| `OnGridPlace` | `grid.place` | **Added by E34** — board-economy; `TypeId` is the grid item type, `ActorPtr` set when the payload carries `ptr` |
 
-`OnWave`, `OnMindControl`, and `OnHitLand` are **probed but not shipped** (§6).
+`OnMindControl` and `OnHitLand` are **probed but not shipped** (§6).
+
+> **Corrected 2026-09-04 (E34, spec-trigger-vocabulary.md):** this section said **8**. SSOT is
+> `AtomTriggers.All` (`src/FusionRpg.Core/Effects/Atoms/AtomKind.cs`), whose length
+> `AtomKindRegistry.TriggerCount = 13` mirrors as a structural constant. E34 adds five — `OnWave`,
+> `OnMatchStart`, `OnMatchEnd`, `OnSunCollect`, `OnGridPlace` — as input only: no new kind, attach
+> point, or executor. Note the section header counts **authorable + lifecycle** together:
+> `OnGranted`/`OnRemoved` are in `All` but are runtime lifecycle states no kind may carry.
 
 ---
 
 ## 4. Channel vocabulary
 
-### 4.1 Primary — 8, and only these
+### 4.1 Primary — 23, and only these
 
-`hp` · `maxHp` · `atk` · `defense` · `arm1` · `arm1Max` · `arm2` · `arm2Max`
+`hp` · `maxHp` · `atk` · `defense` · `arm1` · `arm1Max` · `arm2` · `arm2Max` · `attackInterval` · `produceInterval` · `zombieSpeed` · `plantShield` · `attackCountdown` · `attackSpeedAdder` · `produceCountdown` · `plantSpeed` · `plantMoveSpeed` · `plantLevel` · `shootingLevel` · `armorFlat` · `takeDmgMultiplier` · `zombieSpeedCurrent` · `zombieOriginSpeed`
 
-**Growing to 11** (owner decision 2026-08-22): `attackInterval` · `produceInterval` · `zombieSpeed` are promoted from cheat-document keys to real composed channels, so fire rate, sun rate, and creep speed become authorable. Own spec, after the atom layer lands.
+**SSOT is `StatChannels.All`** (`src/FusionRpg.Core/Stats/ModifierOp.cs:26`) — never this list. `AtomKindRegistry.PrimaryChannels` reads it rather than copying it, and rule **G6** refuses any `stat.modify` whose `channel` is not in it.
+
+> **Corrected 2026-09-02.** This section said *"8, and only these"* with the last three marked *"growing to 11 … own spec, after the atom layer lands."* **That growth shipped (E16)** — all eleven were real composed channels, which is what makes fire rate, sun rate and creep speed authorable at all. Measured in `docs/research/atom-effect-pool-audit-2026-09-02.md` §3.2.
+>
+> **Grown again 2026-09-04 (E38, `spec-entity-fields-12plus.md`).** Twelve more Unity fields — `theShieldHealth`, `thePlantAttackCountDown`, `attackSpeedAdder`, `thePlantProduceCountDown`, `thePlantSpeed`, `moveSpeed`, `theLevel`, `shootingLevel`, `theArmor`, `takeDmgMultiplier`, `theSpeed`, `theOriginSpeed` — were written straight from cheat keys, past the modifier bag, same shape as E16's three. All twelve are real composed channels now, 11 → 23. `takeDmgMultiplier` is **not** the authoring surface for "enemies take more damage" — under the bearer frame (§2c of the spec) a raise on your own `takeDmgMultiplier` prices as a penalty, correctly; that debuff is a `status.apply` payload, priced as a status.
 
 Armor channels are zombie-only — that is a fact about which Unity fields exist, **not** about mitigation: elemental defense and the whole shield stack serve both sides.
 
@@ -89,15 +144,26 @@ Armor channels are zombie-only — that is a fact about which Unity fields exist
 
 Ops available to an atom: **`Flat` · `Increased` · `More`**. `Override` exists in the stat system but effects cannot emit it — that is a deliberate constraint, not an oversight.
 
-### 4.2 Derived — 99 pre-registered
+### 4.2 Derived — 269 registered
 
-| Group | Count |
-|---|---|
-| `combat.*` — 12 families × (omni + 6 elements) | **84** |
-| `status.power.*` / `status.resist.*` constants | 8 |
-| `progression.*` | 7 |
+**SSOT is `DerivedStatRegistry.CreateDefault().AllRegistered`** — 55 families in `data/seed/derived-stats/catalog.json`, expanded over their declared axis widths (`none`=1, `element`=7, `status-category`=4, `action-category`=5, `resource-id`=6). That enumeration reproduces **exactly 269**, so catalog and registry agree.
 
-Plus five open-ended prefix families (`status.power.{id}`, `status.resist.{id}`, `status.immune.{tag}`, `status.immuneReduction.{tag}`, `status.expose.{category}`); the locked 21-status catalog expands the first two by +42.
+| Axis | Families | Channels |
+|---|---:|---:|
+| `element` (omni + 6) | 28 | **196** |
+| `resource-id` (6 resources) | 4 | 24 |
+| `status-category` | 6 | 24 |
+| `action-category` (5 action categories) | 2 | 10 |
+| `none` | 15 | 15 |
+| **Total** | **55** | **269** |
+
+Plus the open-ended prefix families (`status.power.{id}`, `status.resist.{id}`, `status.immune.{tag}`, `status.immuneReduction.{tag}`, `status.expose.{category}`).
+
+> **Corrected 2026-09-02, and this is the one that had drifted furthest.** This section said **99**. The real figure was **267** — the gap accumulated across three separate expansions (T2 element widening 99→256, `poise-resource` 256→259, `turn.speed`/`turn.haste` 259→261, `resource.restore` 261→267) with nothing watching. **267→268 (party-dungeon D4.25, 2026-09-06):** `loadout.slots`, the extend-action-slot grant, a 14th `none`-axis family.
+>
+> **Why it went unnoticed, and what now stops it:** `spec-derived-stat-sheet.md` carries the same numbers and *cannot* drift, because `ElementHubDocDriftTests.StatSheetCountsMatchGeneration` pins it to `registry.AllRegistered.Count` plus a planted-drift companion. This file had no such test. It does now — `AtomCatalogSsotDriftTests`.
+>
+> ⚠️ **Registered ≠ authorable.** All 267 are addressable by the `stat.derived` KIND; **one** is addressed by a shipped atom, and 63 of them have no designed atom family at all. See the audit §3.3 and §4.
 
 Derived ops are a **different set**: `Flat` · `Increased` · `Replace` · `Flag` — **no `More`** — folded by four compose kinds with per-channel caps (resist caps at 0.95).
 
@@ -105,13 +171,57 @@ Derived ops are a **different set**: `Flat` · `Increased` · `Replace` · `Flag
 
 ---
 
-## 5. Status catalog — 21 declared, 13 functional
+## 5. Status catalog — 24 declared, 24 functional in at least one runtime
+
+> ### ✅ GREW 2026-09-06 — party-dungeon `delve-attrition` D2.19 added `nerve.{unsettled,shaken,afflicted}`
+>
+> **Status catalog — 24 declared** (21 → 24, `StatusCatalogBootstrap.cs` `9.5 Nerve` block,
+> `status-ssot.md` §9.6). All three are `Debuff`/`ModifyStat`/`Replace`, family `nerve`, and are
+> functional the moment they are applied: `NervePolicy.Sync` calls the SAME `StatusRuntime.Apply` every
+> other status uses, with a real, non-empty `StatMods` payload from
+> `data/seed/dungeon/_containers/nerve.v1.json` — there is no battle/lawn split for them the way
+> `rally`/`expose`/`command`/`shatter` had before this doc's 2026-09-02 correction, because nothing
+> about `ModifyStat`'s consumer changed; only a new caller (`NervePolicy`, not an `EffectRow`) exists now.
+> The tables below are the pre-nerve sweep (2026-08-22, corrected 2026-09-02) and are kept for the
+> reasoning trail — they do not cover `nerve.*`, which this note is the whole record of.
 
 | Provenance | Statuses | Note |
 |---|---|---|
 | **Working** (11) | `butter` `freeze` `cold` `poison` `hypno` · `wither` · `blight` `rot` `spark` `pact_mark` `spore` | 5 Unity CC + 1 DoT + 5 contagion |
 | **Partial** (2) | `leech` (damage half only — the heal half was never built) · `bond` (declares `PulseHp`, but `Counter` is skipped by the pulse loop; its real payload is the nested burst) | |
 | **Declared, inert** (8) | `ember` `jala` `kelp` `charm_pulse` — declare `UnityCc` with **no Unity branch**; `rally` `expose` `command` `shatter` — declare `ModifyStat`, and **`StatusPayloadKind.ModifyStat` has zero consumers repo-wide** | **Owner decision 2026-08-22: build the payloads in this program** — wire the **3** real Unity branches (`ember`, `jala`, `kelp`) — `charm_pulse` is a **def error**, not missing wiring: no vanilla method exists, implement a `ModifyStat` consumer, finish `leech`'s heal half. Needs the status stream's agreement (`StatusCatalog` is ADR-locked code-first) |
+
+> ### ✅ CORRECTED 2026-09-02 — "13 functional / 8 declared inert" is stale, and wrong on all 8
+>
+> Re-measured from code. **All 21 have an executing consumer in at least one shipped runtime.** The
+> table above is the 2026-08-22 sweep and is kept for the reasoning trail; where it disagrees with this
+> block, this block wins.
+>
+> | Old claim | Today |
+> |---|---|
+> | `ember` `jala` `kelp` declare `UnityCc` with **no Unity branch** | **All three have branches** — `DebugActions.cs:886-912` |
+> | `rally` `expose` `command` `shatter` declare `ModifyStat`, and **"`StatusPayloadKind.ModifyStat` has zero consumers repo-wide"** | **False.** `EffectRuntime.cs:76-98` upserts and withdraws them |
+> | `charm_pulse` is a **def error**, no vanilla method exists | Resolved as a **def correction** (`UnityCc` → `ModifyStat`), not left broken |
+> | `leech` — *"the heal half was never built"* | **Built** — `StatusEffectBridge.cs:93` |
+> | `poison` CC-locks in battle because the check tests `Kind` | **Fixed** — `BattleEngine.cs:398` tests `IsCrowdControl` (category); poison is `dot` |
+> | contagion **"cannot spread at all"** | **Half true.** Spreads on the lawn (`EffectBag.cs:655` passes a real board); cannot in battle (`BattleEngine.cs:275` passes `board: null`) |
+>
+> **What is still true, and is the more useful number: reach is uneven.**
+>
+> | | Statuses reachable |
+> |---|---|
+> | Battle `status.apply` | **21** — no id filter (`BattleEffects.cs:171-182`) |
+> | Lawn `status.apply` | **8** — the switch at `DebugActions.cs:869-912`; the other 13 hit no case and do nothing |
+> | Lawn `status.clear` | **4** — butter/freeze/cold/poison only (`InjectorEffectActionSink.cs:307-318`) |
+> | Authored in a shipped atom | **4** — butter, freeze, cold, poison |
+>
+> ⛔ **`status.apply` and `status.clear` are asymmetric**, so `ember`/`jala`/`kelp` can be applied and
+> never removed — and `ember`/`jala` have no Unity-side expiry either (`DebugActions.cs:893-899`).
+> **Permanent once applied.**
+>
+> ⛔ **Battle has no `StatMods` consumer** (`BattleEffects.cs:154-183` applies the status but never reads
+> `inst.StatMods`), so `rally`/`expose`/`command`/`shatter`/`charm_pulse` are inert *there* while working
+> on the lawn — the mirror image of the contagion split.
 
 Three further facts the catalog must carry:
 
@@ -138,7 +248,7 @@ These must be in the SSOT so nobody re-probes them.
 | `Board.roadType` tile paint | **failed** | 12-element array, not a lawn map |
 | `Bullet.HitZombie` / `HitPlant` Harmony | **off** | unsafe; on-hit uses TakeDamage + `AttackPlant` |
 | `combat.hitland` | **not shipped** | ~134 overrides, no LIVE events |
-| `OnWave`, `OnMindControl`, summon-wave | **probed, no LIVE row** | may be promoted with evidence |
+| `OnMindControl`, summon-wave | **probed, no LIVE row** | may be promoted with evidence |
 
 ---
 
@@ -211,13 +321,13 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 
 | Thing | Count | Growth policy |
 |---|---|---|
-| **Attach points** | **5** | ADR |
-| **Kinds** | **12** | reviewed code change |
-| **Triggers** | **7** | reviewed code change |
+| **Attach points** | **8** | reviewed change to `decisions.md`'s "Atom attach points" row |
+| **Kinds** | **17** | reviewed code change |
+| **Triggers** | **13** | reviewed code change — `OnWave`/`OnMatchStart`/`OnMatchEnd`/`OnSunCollect`/`OnGridPlace` added by E34 (was 8 here until 2026-09-04) |
 | **Predicate leaves** | **~8** | reviewed code change |
 | Owner-key scopes | **7 total**, including `sector:{id}` and `slot:{id}` | reviewed change |
-| Primary channels | 8 → **11** | channel-extension spec |
-| Derived channels | 99 (+42 status expansions) | generated from families × roster |
+| Primary channels | **11** | shipped (E16); SSOT `StatChannels.All` |
+| Derived channels | **267** | generated from 53 families × axis width; SSOT `DerivedStatRegistry` |
 | Elements | 6 | **data** — roster rows (§8a) |
 | Channel families | 12 | code — each needs a consumer |
 | Statuses | 21 declared / 13 functional | catalog |
@@ -225,4 +335,4 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 | Tiers per family | **unbounded** | data |
 | Atoms | **unbounded** | data |
 
-Twelve kinds and five attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.
+Seventeen kinds and eight attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.

@@ -26,9 +26,9 @@ public class TurnReadinessTests
         var totalTicksAtStart = TurnReadiness.TicksFor(totalWork, startRate);
         Assert.Equal(1000, totalTicksAtStart);
 
-        // Half-way: 500 ticks elapsed at the original rate. Work accrues at rate/BaseSpeed per tick.
+        // Half-way: 500 ticks elapsed at the original rate. Work accrues at rate/SpeedScale per tick.
         const long elapsed = 500;
-        var workDone = elapsed * startRate / DerivedTurnChannels.BaseSpeed;
+        var workDone = elapsed * startRate / TurnReadiness.SpeedScale;
         var remainingWork = totalWork - workDone;
 
         // Haste changes mid-flight: 1000 -> 500 (twice as fast). Rebase from the tick it changed at.
@@ -41,11 +41,11 @@ public class TurnReadinessTests
     }
 
     static long FindWorkForTicks(long rate, long targetTicks) =>
-        // Inverse of TicksFor: work = ticks * rate / BaseSpeed, for a rate/ticks pair with no rounding residue.
-        targetTicks * rate / DerivedTurnChannels.BaseSpeed;
+        // Inverse of TicksFor: work = ticks * rate / SpeedScale, for a rate/ticks pair with no rounding residue.
+        targetTicks * rate / TurnReadiness.SpeedScale;
 
     [Theory]
-    [InlineData(100, 100)]   // default rate: one full turn costs exactly BaseSpeed ticks
+    [InlineData(100, 100)]   // default rate: one full turn costs exactly SpeedScale ticks
     [InlineData(200, 50)]    // doubling speed halves the interval
     [InlineData(50, 200)]    // halving speed doubles the interval
     public void DoublingSpeedHalvesTheIntervalMonotonicity(long rate, long expectedTicks) =>

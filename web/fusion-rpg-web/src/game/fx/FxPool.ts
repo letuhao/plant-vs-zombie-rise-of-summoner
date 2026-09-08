@@ -1,6 +1,13 @@
 import type Phaser from "phaser";
 
-/** Cosmetic FX object pool — reset checklist on release (RT-07). */
+/**
+ * Scene-local cosmetic FX pool (phaser-kernel fx-facade).
+ * Wired: acquireRing/release used by StatusFxSystem for select rings.
+ * Presentation structural max — not Core vfx tuning. Comment: pool size is not a progression ceiling.
+ */
+// Structural: soft pool cap for select rings; drops oldest free entry — not a gameplay clamp.
+const FX_RING_POOL_MAX = 32;
+
 export class FxPool {
   private readonly free: Phaser.GameObjects.Arc[] = [];
 
@@ -18,6 +25,10 @@ export class FxPool {
   release(ring: Phaser.GameObjects.Arc): void {
     this.scene.tweens.killTweensOf(ring);
     ring.setActive(false).setVisible(false).setAlpha(1);
+    if (this.free.length >= FX_RING_POOL_MAX) {
+      const drop = this.free.shift();
+      drop?.destroy();
+    }
     this.free.push(ring);
   }
 

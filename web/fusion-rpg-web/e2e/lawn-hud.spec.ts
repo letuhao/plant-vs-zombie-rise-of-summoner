@@ -51,11 +51,13 @@ test.describe("Lawn player HUD (T28)", () => {
     await mockShell(page);
     await page.goto("/#/lawn");
 
-    await expect(page.getByTestId("lawn-hud")).toBeVisible();
+    await expect(page.getByTestId("lawn-match-hud")).toBeVisible();
+    await expect(page.getByTestId("lawn-match-hud-field")).toBeVisible();
     await expect(page.getByTestId("lawn-hud-sun")).toBeVisible();
     await expect(page.getByTestId("lawn-hud-wave")).toBeVisible();
     await expect(page.getByTestId("lawn-hud-deployed-empty")).toBeVisible();
     await expect(page.getByTestId("lawn-hud-playback")).toBeVisible();
+    await expect(page.getByTestId("lawn-match-hud-connection")).toBeVisible();
 
     // The pre-existing debug apparatus (GG-41: not deleted, just gated) is absent by default.
     await expect(page.getByTestId("lawn-view-toolbar")).not.toBeVisible();
@@ -74,7 +76,7 @@ test.describe("Lawn player HUD (T28)", () => {
     await mockShell(page);
     await page.goto("/#/lawn?devmode=1");
 
-    await expect(page.getByTestId("lawn-hud")).toBeVisible(); // the new HUD stays too
+    await expect(page.getByTestId("lawn-match-hud")).toBeVisible(); // match HUD stays in developer mode too
     await expect(page.getByTestId("lawn-view-toolbar")).toBeVisible();
     await expect(page.getByTestId("panel-lawn-inspector")).toBeVisible();
     await expect(page.getByTestId("lawn-spawn-panel")).toBeVisible();

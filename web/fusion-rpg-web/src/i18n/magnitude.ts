@@ -13,6 +13,14 @@ import type { Magnitude } from "@/contract/types";
  * the only shipped locale (web/spec.md §10).
  */
 export function formatMagnitude(m: Magnitude, locale = "en"): string {
+  // party-dungeon D5.3 (spec-delve-stage.md §13, §18 ask 8) — a `long` figure whose true value may
+  // sit past `Number.MAX_SAFE_INTEGER` renders through its exact decimal string, via `BigInt`, never
+  // through `m.value` (which may already have lost precision crossing the wire as a JSON number).
+  // `Intl.NumberFormat.prototype.format` accepts a `BigInt` natively — no `Number(...)` round-trip,
+  // per §16's own "never parse a long into a number and back."
+  if (m.exact !== undefined) {
+    return new Intl.NumberFormat(locale).format(BigInt(m.exact));
+  }
   switch (m.unit) {
     case "gameUnits":
     case "gameUnitsPerSecond":
@@ -29,6 +37,12 @@ export function formatMagnitude(m: Magnitude, locale = "en"): string {
     case "milliseconds":
       return formatMilliseconds(m.value);
     case "count":
+      return new Intl.NumberFormat(locale).format(m.value);
+    // loamUnits (world-numbers W38): a whole count, unsigned — the point of the class is that
+    // whether it reads as a cost, a stock or a flow is `LoamFigure`'s own composition on top of
+    // this number, never a name this renderer special-cases (the four `…Milli`-named fields it
+    // exists to stop misreading are never consulted here either).
+    case "loamUnits":
       return new Intl.NumberFormat(locale).format(m.value);
     // ladderIndex (Theta, spec-magnitude-and-units.md §3.2) and aptitudePoints (an allocation's own
     // point count, spec-primary-stats.md §3.2) are both non-negative by construction — Theta never
@@ -62,18 +76,39 @@ function signedInt(value: number, locale: string): string {
  * posture (§9.1), independent of the engine-side latent defect the same
  * section documents (the FE renders correctly regardless of whether the
  * engine currently composes `increased` right).
+ *
+ * `absolute` (world-numbers W37, owner-authorised 2026-09-04) is for a field whose own neutral
+ * baseline is 1000, not zero — `FractureIntensityMilli` is the shipped example. It renders the raw
+ * value as a multiplier with **no delta convention**: `1400` → `×1.40`, matching `1000` → `×1.00`
+ * (neutral) rather than `more`'s `×(1 + value/1000)`, which would double-count the baseline
+ * (`1400` → `×2.40`, the verified defect this op exists to fix).
  */
 function formatPerMille(value: number, op: Magnitude["op"]): string {
   const pct = value / 10;
   switch (op) {
     case "more":
       return `×${(1 + value / 1000).toFixed(2)}`;
+    case "absolute":
+      return `×${(value / 1000).toFixed(2)}`;
     case "increased":
-      return pct >= 0 ? `+${pct.toFixed(1)}%` : `−${Math.abs(pct).toFixed(1)}%`;
+      return formatPercent(pct, { alwaysSigned: true });
     case "flat":
     default:
-      return pct >= 0 ? `${pct.toFixed(1)}%` : `−${Math.abs(pct).toFixed(1)}%`;
+      return formatPercent(pct, { alwaysSigned: false });
   }
+}
+
+/**
+ * One decimal, then the trailing `.0` trimmed — `24.0%` reads as `24%`, and `24.5%` is untouched.
+ * Every per-mille value on the wire is a whole integer, so the smallest possible non-zero result
+ * (0.1%) can never round away to `0.0` — rounding happens once, here, away from zero, the same
+ * direction the engine itself rounds, and a genuinely non-zero fact never renders as `0%`.
+ */
+function formatPercent(pct: number, { alwaysSigned }: { alwaysSigned: boolean }): string {
+  let digits = Math.abs(pct).toFixed(1);
+  if (digits.endsWith(".0")) digits = digits.slice(0, -2);
+  if (pct < 0) return `−${digits}%`;
+  return alwaysSigned ? `+${digits}%` : `${digits}%`;
 }
 
 /** "4.0 s · 250 ms under one second" — spec-magnitude-and-units.md's unit ledger. */

@@ -7,11 +7,25 @@ namespace FusionRpg.Core.Tests;
 
 public class EffectPluginLifecycleTests
 {
+    static void RegisterProvePlugins(SimEffectHost host) =>
+        SecondaryPluginRegistry.RegisterById(host.Plugins, SecondaryPluginRegistry.CreateProve()
+            .Select(p => p.PluginId));
+
     [Fact]
-    public void BeginMatch_default_plugins_grant_butter_and_passive_with_pluginId()
+    public void Default_registry_has_patron_only_until_prove_plugins_registered()
     {
         var host = new SimEffectHost();
-        Assert.Equal(3, host.Plugins.Plugins.Count); // butter + passive + patron (grants only when set)
+        Assert.Single(host.Plugins.Plugins);
+        Assert.Contains(host.Plugins.Plugins, p => p.PluginId == "sec.patron.aura");
+        RegisterProvePlugins(host);
+        Assert.Equal(3, host.Plugins.Plugins.Count);
+    }
+
+    [Fact]
+    public void Prove_plugins_grant_butter_and_passive_on_match_start()
+    {
+        var host = new SimEffectHost();
+        RegisterProvePlugins(host);
         host.BeginMatch("m-sim");
         var snap = host.Snapshot();
         var butter = Assert.Single(snap.Grants, g => g.GrantId == "golden-butter");
@@ -23,9 +37,10 @@ public class EffectPluginLifecycleTests
     }
 
     [Fact]
-    public void EndMatch_withdraws_both_default_plugin_grants()
+    public void EndMatch_withdraws_prove_plugin_grants()
     {
         var host = new SimEffectHost();
+        RegisterProvePlugins(host);
         host.BeginMatch("m-sim");
         host.EndMatch();
         Assert.Empty(host.Snapshot().Grants);
@@ -37,6 +52,7 @@ public class EffectPluginLifecycleTests
     public void NotifyRemoved_withdraws_only_matching_pluginId()
     {
         var host = new SimEffectHost();
+        RegisterProvePlugins(host);
         host.BeginMatch("m-sim");
         host.Grant(new EffectGrantDto
         {
@@ -82,6 +98,7 @@ public class EffectPluginLifecycleTests
     public void BeginMatch_uses_passed_matchKey_not_stale_host_key()
     {
         var host = new SimEffectHost(matchKey: "stale");
+        RegisterProvePlugins(host);
         host.MatchKey = "stale";
         host.BeginMatch("custom-key");
         Assert.Equal("custom-key", host.MatchKey);
@@ -98,7 +115,17 @@ public class EffectPluginLifecycleTests
             MatchKey = "custom-key",
             Steps =
             {
-                new EffectScenarioStepDto { Op = "matchStart" },
+                new EffectScenarioStepDto
+                {
+                    Op = "grant",
+                    Grant = new EffectGrantDto
+                    {
+                        GrantId = "golden-butter",
+                        EffectId = "fx.butter_on_hit",
+                        OwnerKey = EffectOwnerKeys.Match,
+                        Overlay = new Dictionary<string, object?> { ["icd_ms"] = 0 }
+                    }
+                },
                 new EffectScenarioStepDto { Op = "hit", TypeId = 0, TargetTypeId = 0 },
                 new EffectScenarioStepDto { Op = "expectPlan", Golden = "butter_on_hit.plan.json" }
             }
@@ -111,6 +138,7 @@ public class EffectPluginLifecycleTests
     public void Second_matchStart_after_matchEnd_regrants()
     {
         var host = new SimEffectHost();
+        RegisterProvePlugins(host);
         host.BeginMatch("m-a");
         host.EndMatch();
         Assert.False(host.Bag.HasGrantForEffect("fx.butter_on_hit"));
@@ -125,6 +153,7 @@ public class EffectPluginLifecycleTests
     public void Live_order_auto_end_before_start_records_Removed_then_Start()
     {
         var host = new SimEffectHost();
+        RegisterProvePlugins(host);
         var spy = new LifecycleSpyPlugin();
         host.Plugins.Register(spy);
 

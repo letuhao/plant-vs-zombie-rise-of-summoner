@@ -130,7 +130,7 @@ public static class ContractEndpoints
         var rows = contracts.Select(c =>
         {
             DemonRarityIds.TryParse(
-                rarities.TryGetValue(c.InstanceId, out var r) ? r : "common", out var rarity);
+                rarities.TryGetValue(c.InstanceId, out var r) ? r : "chaff", out var rarity);
             return new
             {
                 instanceId = c.InstanceId,
@@ -151,7 +151,11 @@ public static class ContractEndpoints
                 used = rows.Count(c => c.bound),
                 total = ContractPolicy.Capacity(purchased),
                 purchasedSlots = purchased,
-                nextSlotPrice = ContractPolicy.NextSlotPrice(purchased),
+                // Same pin the store charges at (SoulSinkPolicy.VanillaPvzTheta), so the quoted
+                // price and the debited price can never disagree.
+                nextSlotPrice = ContractPolicy.NextSlotPrice(
+                    purchased, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta,
+                    FusionRpg.Core.Power.PowerTuningHub.Tuning),
                 canBuy = ContractPolicy.CanBuySlot(purchased),
                 // T3.6 (spec-caps-reconcile.md §2.3): ContractPolicy.MaxSlots is deleted -- price is
                 // now the only real ceiling (SSOT §11.1a). int.MaxValue keeps this wire field's shape

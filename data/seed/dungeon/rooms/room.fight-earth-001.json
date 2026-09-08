@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "Dust motes dance in shafts of dim light, settling upon the cracked clay floor and the jagged pillars of granite that ring the chamber.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Silt-Choked Amphitheater",
+  "reason": "A group of territorial earth elementals has claimed the center of the arena, blocking the only exit.",
+  "roomId": "room.fight-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

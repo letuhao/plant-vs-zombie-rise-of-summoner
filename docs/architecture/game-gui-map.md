@@ -186,3 +186,12 @@ Illustration and final art · audio assets · a second locale · the sector-grap
 React 19 · any server API change beyond fixture emission · new gameplay of any kind · **the World
 stage itself** (T16, excluded 2026-08-23 — a deliberate phase boundary, not a permanent exclusion:
 build the rest of the GUI foundation solid first, plan the World stage separately once it is).
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| ~~**`BANNED_SYMBOLS` beside `BANNED_WORDS`**~~ — **BUILT 2026-09-05**, same day it was found | `party-dungeon/spec-delve-stage.md` §8, §19 (4) | `BANNED_WORD_PATTERN` wraps every entry in `…` (`i18n/vocabularyGuard.ts:55`). `Θ` and `‰` are not word characters, so **adding either to `BANNED_WORDS` is a silent no-op** — the guard reports green over text that shows them. A second list matched without word boundaries, through the same two scanners (JSX text `:106-113`, string literals `:120-129`), plus a fixture test that must fail on a page containing `Θ` or `‰` | Built: `BANNED_SYMBOLS` + `BANNED_SYMBOL_PATTERN` (`i18n/vocabularyGuard.ts`), matched against the **whole line** rather than through the copy-vs-code narrowing the word list needs — the symbols are legitimate in neither copy nor code, and that also closes the case both scanners missed (JSX text on its own line with no tag beside it). Three fixture tests plus the real-tree scan; 10/10 green. **It found two live violations the guard had been blind to:** `features/aptitudes/AptitudesPage.tsx:58` and `ui/actor/ProgressionTab.tsx:103` both rendered the power index as its engine letter — both now read *"spent · power 47"* |
+| Ten more `BANNED_WORDS` | `spec-delve-stage.md` §8 | `bandDelta · dangerBand · PartyIndex · Retired · thetaOffset · rungId · delveId · sectorId · archetypeId · perMille`. **`once` and `many` are deliberately not added** — ordinary English, they would false-positive across the tree; the rule they encode is a stage-local test that the rendered entry kind is a translated phrase, never the raw enum | the delve stage carries the words in its own guard extension |
+| The stage-count assertion becomes a **pair** | `spec-delve-stage.md` §4, §14 | six stage ids **declared**, and a separately named set of those **built** — `siege` and `delve` are both declared-and-unbuilt today, so a single count either lies or blocks. The shape `base-defense/spec-board-render.md:203` already asks for | a count that has to be wrong in one direction or the other |
+

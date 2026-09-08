@@ -1,0 +1,45 @@
+{
+  "waves": [
+    {
+      "waveId": "rift-skirmish",
+      "name": "Rift Skirmish",
+      "contentIndex": 1,
+      "profile": "hybrid-atb",
+      "picks": [
+        { "rarity": "chaff", "count": 4 }
+      ]
+    },
+    {
+      "waveId": "rift-warband",
+      "name": "Rift Warband",
+      "contentIndex": 3,
+      "profile": "hybrid-atb",
+      "picks": [
+        { "rarity": "chaff", "count": 4 },
+        { "rarity": "cultivated", "count": 2 }
+      ]
+    },
+    {
+      "waveId": "rift-onslaught",
+      "name": "Rift Onslaught",
+      "contentIndex": 6,
+      "profile": "hybrid-atb",
+      "picks": [
+        { "rarity": "chaff", "count": 3 },
+        { "rarity": "cultivated", "count": 3 },
+        { "rarity": "heirloom", "count": 1 }
+      ]
+    },
+    {
+      "waveId": "rift-tyrant",
+      "name": "Rift Tyrant",
+      "contentIndex": 10,
+      "profile": "hybrid-atb",
+      "picks": [
+        { "rarity": "cultivated", "count": 3 },
+        { "rarity": "heirloom", "count": 2 },
+        { "rarity": "sunwoven", "count": 1 }
+      ]
+    }
+  ]
+}

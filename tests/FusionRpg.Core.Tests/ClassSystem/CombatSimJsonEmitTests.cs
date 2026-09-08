@@ -111,10 +111,20 @@ public class CombatSimJsonEmitTests : IClassFixture<CombatSimJsonEmitTests.Fixtu
 
         static (int Exit, string Stdout, string Stderr) RunCombatSim(string repoRoot, string args)
         {
+            // `-c Release --no-build` is not a speed tweak — it is what stops this test from failing
+            // non-deterministically. Without it `dotnet run` rebuilds CombatSim, which references
+            // FusionRpg.Core, while the parent `dotnet test` invocation still holds Core's compiler
+            // output; the child then dies with CS2012 ("cannot open FusionRpg.Core.dll for writing,
+            // file may be locked by VBCSCompiler"). The test therefore passed when run alone and
+            // failed inside a full-suite run that built first — a red that belongs to no code change
+            // and that silently corrupts any full-suite baseline measurement.
+            // Both sibling subprocess tests in this project (RealDataAggregateTests,
+            // ResolverMatchesSimulatorTests) already invoke their tools exactly this way; this one
+            // was the outlier.
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -- {args}",
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -c Release --no-build -- {args}",
                 CreateNoWindow = true,
                 WorkingDirectory = repoRoot
             };

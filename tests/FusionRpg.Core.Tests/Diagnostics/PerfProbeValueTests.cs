@@ -79,7 +79,21 @@ public class PerfProbeValueTests
         PerfProbe.RecordValue(null!, 2.0);
         var window = PerfProbe.SnapshotAndReset();
         var values = Assert.IsType<Dictionary<string, object>>(window["values"]);
-        Assert.Empty(values);
+
+        // Assert the two BAD names are absent — not that the whole bag is empty.
+        //
+        // `PerfProbe` is a process-global and xUnit runs test classes in PARALLEL, while
+        // `ActorHub.ResolveDerived` records three gauges on EVERY resolve. So any class resolving stats
+        // between this test's `ResetAll()` and `SnapshotAndReset()` lands a legitimate value in the
+        // window, and `Assert.Empty(values)` fails through no fault of the code under test. It held
+        // only by winning a race, and grew flakier as the suite gained resolve-heavy tests
+        // (aura-skill Phase 5 added ~60, several thousand resolves) — observed failing once in a full
+        // run, then passing 3/3 isolated and 3/3 full.
+        //
+        // This is the idiom the sibling test above already uses (`Assert.False(values.ContainsKey(...))`)
+        // and it tests the actual claim: an empty or null gauge name is ignored.
+        Assert.False(values.ContainsKey(""), "an empty gauge name must be ignored");
+        Assert.DoesNotContain(values.Keys, k => string.IsNullOrWhiteSpace(k));
     }
 
     [Fact]
@@ -141,8 +155,9 @@ public class PerfProbeValueTests
     [Fact]
     public void SeededResolve_emitsPoiseRegen()
     {
-        // class-system-todo.md V5/P7.1: PoiseRuntime now exists (Checkpoint 7), so the mechanism this
-        // metric needs is live -- but no aptitude edge feeds resource.regen.poise in the real shipped
+        // class-system-todo.md V5/P7.1: the poise pool exists (Checkpoint 7; unified onto
+        // PoiseLedger/ActorResourcePools by battle-tempo poise-unification, 2026-09-05), so the
+        // mechanism this metric needs is live -- but no aptitude edge feeds resource.regen.poise in the real shipped
         // config yet (P7.2's own named, still-open gap), so this reads 0 on a real resolve, matching
         // UnhydratedResolve_emitsZeroProgressionPower's own "present, not omitted" contract: "not fed
         // yet" is a value this metric reports, not a silently missing key.

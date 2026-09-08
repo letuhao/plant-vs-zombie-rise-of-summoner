@@ -1,0 +1,1005 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The impact of the shatter is absorbed by overlapping plates of reinforced matter.",
+      "id": "skill.shatter-def-t1-n0",
+      "name": "Layered Shell",
+      "nameKey": "tree.node.layered-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+      "id": "skill.shatter-def-t10-n0",
+      "name": "Kinetic Recirculation",
+      "nameKey": "tree.node.kinetic-recirculation-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it welds the cracks shut with frost.",
+      "id": "skill.shatter-def-t10-n1",
+      "name": "Glacial Suture",
+      "nameKey": "tree.node.glacial-suture-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact of a break is not lost; it is redirected into the structure itself.",
+      "id": "skill.shatter-def-t10-n2",
+      "name": "Fracture Recoil",
+      "nameKey": "tree.node.fracture-recoil-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The cold seeps into the very bone, turning life into something unyielding.",
+      "id": "skill.shatter-def-t2-n0",
+      "name": "Permafrost Marrow",
+      "nameKey": "tree.node.permafrost-marrow-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The frost thickens, turning every impact into a mere vibration against an unyielding wall.",
+      "id": "skill.shatter-def-t3-n0",
+      "name": "Glacial Bastion",
+      "nameKey": "tree.node.glacial-bastion-6",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layer of frost-rimed chitin that hardens upon impact.",
+      "id": "skill.shatter-def-t3-n1",
+      "name": "Glacial Integument",
+      "nameKey": "tree.node.glacial-integument-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact that breaks the enemy only serves to press the shards deeper into the defender's skin.",
+      "id": "skill.shatter-def-t4-n0",
+      "name": "Fracture Plate",
+      "nameKey": "tree.node.fracture-plate",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The cold does not just bite the skin; it settles deep within the bone, turning life into something unyielding and eternal.",
+      "id": "skill.shatter-def-t4-n1",
+      "name": "Permafrost Marrow",
+      "nameKey": "tree.node.permafrost-marrow-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The impact of a break is met with a sudden, kinetic redirection.",
+      "id": "skill.shatter-def-t5-n0",
+      "name": "Fracture Recoil",
+      "nameKey": "tree.node.fracture-recoil",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "A frozen expanse that holds its shape even under the heaviest impact.",
+      "id": "skill.shatter-def-t5-n1",
+      "name": "Glacial Reservoir",
+      "nameKey": "tree.node.glacial-reservoir-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The structural integrity of the shell is maintained through constant, rhythmic stress.",
+      "id": "skill.shatter-def-t6-n0",
+      "name": "Brittle Reinforcement",
+      "nameKey": "tree.node.brittle-reinforcement",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A frost-rimed layer that thickens with every impact, sealing wounds with ice.",
+      "id": "skill.shatter-def-t6-n1",
+      "name": "Glacial Shell",
+      "nameKey": "tree.node.glacial-shell-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The frost does not merely sit upon the armor; it flows into the cracks, knitting flesh and steel back into a singular, frozen whole.",
+      "id": "skill.shatter-def-t7-n0",
+      "name": "Glacial Seepage",
+      "nameKey": "tree.node.glacial-seepage",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A frozen layer of reinforced plating that replenishes as it absorbs impact.",
+      "id": "skill.shatter-def-t7-n1",
+      "name": "Glacial Bastion",
+      "nameKey": "tree.node.glacial-bastion-7",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The frost does not merely coat the skin; it weaves into the very marrow, turning every impact into a structural reinforcement.",
+      "id": "skill.shatter-def-t8-n0",
+      "name": "Permafrost Suture",
+      "nameKey": "tree.node.permafrost-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the impact is met not with a bend, but with a sudden, unyielding stillness.",
+      "id": "skill.shatter-def-t8-n1",
+      "name": "Fracture Anchor",
+      "nameKey": "tree.node.fracture-anchor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The impact of a shattering blow feeds the very vessel that endured it.",
+      "id": "skill.shatter-def-t9-n0",
+      "name": "Fracture Reservoir",
+      "nameKey": "tree.node.fracture-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A crystalline vessel that swells with every impact, turning kinetic force into a protective veil.",
+      "id": "skill.shatter-def-t9-n1",
+      "name": "Frost-Bound Reservoir",
+      "nameKey": "tree.node.frost-bound-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact of the shatter leaves behind jagged, unyielding shards of ice that reinforce the very skin of the survivor.",
+      "id": "skill.shatter-def-t9-n2",
+      "name": "Permafrost Carapace",
+      "nameKey": "tree.node.permafrost-carapace",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.keen-edge",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact is not just felt; it is felt before the strike even lands.",
+      "id": "skill.shatter-off-t1-n0",
+      "name": "Shatter-Point Velocity",
+      "nameKey": "tree.node.shatter-point-velocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The geometry of the impact dictates the depth of the breach.",
+      "id": "skill.shatter-off-t10-n0",
+      "name": "Shatter-Point Calculus",
+      "nameKey": "tree.node.shatter-point-calculus",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Where the impact meets the focus, the structure fails entirely.",
+      "id": "skill.shatter-off-t10-n1",
+      "name": "Shatter-Point Convergence",
+      "nameKey": "tree.node.shatter-point-convergence",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The impact does not merely crack the surface; it sends a spray of jagged shards through the very essence of the target.",
+      "id": "skill.shatter-off-t10-n2",
+      "name": "Fracture Volley",
+      "nameKey": "tree.node.fracture-volley",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Precision strikes accelerate the momentum of the break.",
+      "id": "skill.shatter-off-t2-n0",
+      "name": "Shatterpoint Focus",
+      "nameKey": "tree.node.shatterpoint-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.keen-edge",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact is not merely felt; it is calculated to the exact point of structural failure.",
+      "id": "skill.shatter-off-t3-n0",
+      "name": "Fracture Focus",
+      "nameKey": "tree.node.fracture-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The force of the break carries the weight of the blow.",
+      "id": "skill.shatter-off-t3-n1",
+      "name": "Fracture Impact",
+      "nameKey": "tree.node.fracture-impact",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The moment of impact is not an end, but a sudden, violent expansion of thermal instability.",
+      "id": "skill.shatter-off-t4-n0",
+      "name": "Fracture Point",
+      "nameKey": "tree.node.fracture-point-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The vibration of the break amplifies the essence within.",
+      "id": "skill.shatter-off-t4-n1",
+      "name": "Fracture Resonance",
+      "nameKey": "tree.node.fracture-resonance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The impact does not merely crack the surface; it forces the energy to bleed through the very structure of the target.",
+      "id": "skill.shatter-off-t5-n0",
+      "name": "Fracture Dispersion",
+      "nameKey": "tree.node.fracture-dispersion",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The impact ripples through the structure, turning resistance into a conduit for raw energy.",
+      "id": "skill.shatter-off-t5-n1",
+      "name": "Fracture Overload",
+      "nameKey": "tree.node.fracture-overload",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The structural integrity of the target is no longer a constant, but a variable waiting to be solved.",
+      "id": "skill.shatter-off-t6-n0",
+      "name": "Shatterpoint Resonance",
+      "nameKey": "tree.node.shatterpoint-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light bends, intensifying the elemental surge through the cracks.",
+      "id": "skill.shatter-off-t6-n1",
+      "name": "Prismatic Refraction",
+      "nameKey": "tree.node.prismatic-refraction-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it harmonizes the shards into a singular, freezing intent.",
+      "id": "skill.shatter-off-t7-n0",
+      "name": "Fracture Prism",
+      "nameKey": "tree.node.fracture-prism",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The impact of the shatter vibrates through the very essence of the elements, causing them to swell uncontrollably.",
+      "id": "skill.shatter-off-t7-n1",
+      "name": "Fractured Resonance",
+      "nameKey": "tree.node.fractured-resonance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it flows through the cracks to find the core.",
+      "id": "skill.shatter-off-t8-n0",
+      "name": "Fracture Conduit",
+      "nameKey": "tree.node.fracture-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-override",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it forces the essence of the strike to overflow into every available spectrum.",
+      "id": "skill.shatter-off-t8-n1",
+      "name": "Prismatic Fracture",
+      "nameKey": "tree.node.prismatic-fracture-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it ripples through the very essence of the target.",
+      "id": "skill.shatter-off-t9-n0",
+      "name": "Fracture Cascade",
+      "nameKey": "tree.node.fracture-cascade",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The impact does not merely break the surface; it seeks the structural weakness within.",
+      "id": "skill.shatter-off-t9-n1",
+      "name": "Fracture Point",
+      "nameKey": "tree.node.fracture-point-6",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus",
+        "atom.elpw-override"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The structural integrity of reality yields to the weight of concentrated essence.",
+      "id": "skill.shatter-off-t9-n2",
+      "name": "Fracture Singularity",
+      "nameKey": "tree.node.fracture-singularity",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "shatter"
+}

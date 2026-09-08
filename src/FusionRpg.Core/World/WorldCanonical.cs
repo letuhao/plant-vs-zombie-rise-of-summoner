@@ -31,10 +31,19 @@ public static class WorldCanonical
 
         foreach (var s in w.Sectors)
         {
+            // `s.WardenBindingId` has always been in this row, but every world before world-stage
+            // W28 held it null — no production path ever set it. It is the first field here whose
+            // hash effect isn't "a number changed": once `bind-warden` (W28) is ordered, this cell
+            // carries a real id and the world's hash differs with no numeric magnitude having moved.
+            // world-map W44: RecruitStock/ProjectId/ProjectTurnsRemaining land together in one
+            // batched re-bless (decisions.md's L25 precedent) — every world before this task held
+            // all three at their zero/null default, so this cell's hash effect is the field batch
+            // itself, not a number that moved.
             Row(sb, "sector", s.SectorId, s.TypeId, s.Climate, s.DangerBand, s.Phase, s.OwnerFactionId,
                 s.StabilityMilli, s.PressureMilli, s.DepletionMilli, s.DevelopmentLevel,
                 s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY,
-                s.LoamStock, s.FractureIntensityMilli, s.WardenBindingId, s.NeglectedTurns);
+                s.LoamStock, s.FractureIntensityMilli, s.WardenBindingId, s.NeglectedTurns,
+                s.RecruitStock, s.ProjectId, s.ProjectTurnsRemaining);
 
             foreach (var sl in s.Slots)
                 Row(sb, "slot", s.SectorId, sl.SlotIndex, sl.SlotTypeId, sl.Element, sl.State,
@@ -76,6 +85,47 @@ public static class WorldCanonical
             foreach (var force in snapshot.Forces)
                 Row(sb, "intel-force", faction.FactionId, snapshot.SectorId, force.EntityId,
                     force.OwnerFactionId, force.Kind, force.Exact ? 1 : 0, force.Strength, force.BandIndex);
+        }
+
+        // buff-debuff-scope T12: same non-breaking shape as Intel above — a world with no active
+        // scope modifier (every save/golden that predates this field) emits nothing here and
+        // produces exactly the bytes it always did. Appending this to the existing "faction" row
+        // instead would have moved every prior hash for a value that did not actually change
+        // (found live: it moved WorldWaveOneAcceptanceTests' own golden even at the neutral default).
+        foreach (var f in w.Factions)
+        {
+            if (f.ScopeModifierMilli != 1000)
+                Row(sb, "faction-scope", f.FactionId, f.ScopeModifierMilli);
+        }
+
+        // base-defense `structure-state`: the SAME conditional-row shape as `faction-scope` above,
+        // applied twice more. A separate row emitted only when the value is off its default, NOT a
+        // column appended to the existing `slot` row — appending would move every prior hash for a
+        // value that did not change, the exact failure `faction-scope`'s own comment records finding
+        // live. `s.Slots` is already documented as ordered by SlotIndex, contiguous from zero, so no
+        // explicit sort is needed here either — the same invariant the existing `slot` loop above
+        // already relies on without re-asserting it.
+        foreach (var s in w.Sectors)
+        {
+            foreach (var sl in s.Slots)
+            {
+                if (sl.StructureHp is { } hp)
+                    Row(sb, "slot-hp", s.SectorId, sl.SlotIndex, hp);
+                if (sl.SlotDepletionMilli != 0)
+                    Row(sb, "slot-depletion", s.SectorId, sl.SlotIndex, sl.SlotDepletionMilli);
+            }
+        }
+
+        // base-defense `siege-construction`: same conditional-row shape again — RubbleStock/
+        // IronworkStock are new fields on `WorldSector`, and every world before this task holds both
+        // at zero, so a separate off-default row (not a column appended to the existing "sector" row
+        // above) keeps every prior hash byte-identical.
+        foreach (var s in w.Sectors)
+        {
+            if (s.RubbleStock != 0)
+                Row(sb, "sector-rubble", s.SectorId, s.RubbleStock);
+            if (s.IronworkStock != 0)
+                Row(sb, "sector-ironwork", s.SectorId, s.IronworkStock);
         }
 
         return sb.ToString();

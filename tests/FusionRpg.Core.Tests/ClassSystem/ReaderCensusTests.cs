@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using FusionRpg.Core.Tests.TestSupport;
+using System.Linq;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.ClassSystem;
@@ -34,7 +35,7 @@ public class ReaderCensusTests
             claim.EdgesReserved == computed.EdgesReserved &&
             claim.EdgesTotal == computed.EdgesTotal &&
             claim.Pct == computed.Pct,
-            "data/tuning/aptitudes.v2.json's _meta.measurable is STALE relative to a fresh reader census.\n" +
+            "the live data/tuning/aptitudes.v{n}.json's _meta.measurable is STALE relative to a fresh reader census.\n" +
             $"  claimed:  {claim.Families} families, {claim.EdgesReserved} of {claim.EdgesTotal} edges / {claim.Pct}%\n" +
             $"  computed: {computed.Families} families, {computed.EdgesReserved} of {computed.EdgesTotal} edges / {computed.Pct}%\n" +
             "Run `python scripts/audit-reader-census.py` for the current per-family breakdown (`--json` for " +
@@ -106,12 +107,21 @@ public class ReaderCensusTests
         // OTHER disagreement below is NOT pre-explained and means the census script regressed.
         var knownDrift = new HashSet<string> { "resource.max", "resource.regen" };
 
+        // RETIRED families: registered (so catalog.json lists them, and groundTruth is built from
+        // catalog.json) but carrying zero edges in the live tuning (so the census, which walks EDGES,
+        // never reports them). That is a legitimate state, not a script regression — a retirement shim
+        // exists precisely to stay registered while nothing points at it. combat.heal.power was
+        // generalised into resource.restore.{resource} on 2026-09-02 and kept only so the archived
+        // aptitudes.v1/v2/v3.json remain loadable.
+        var retiredNoEdges = new HashSet<string> { "combat.heal.power" };
+
         var unexplained = new List<string>();
         foreach (var (family, expected) in groundTruth)
         {
             if (!computed.TryGetValue(family, out var computedHasReader))
             {
-                unexplained.Add($"{family}: missing from the computed report");
+                if (!retiredNoEdges.Contains(family))
+                    unexplained.Add($"{family}: missing from the computed report");
                 continue;
             }
             var expectedHasReader = expected == "reader";
@@ -131,7 +141,11 @@ public class ReaderCensusTests
 
     static MeasurableTotals ParseMeasurableClaim(string repoRoot)
     {
-        var aptitudesPath = Path.Combine(repoRoot, "data", "tuning", "aptitudes.v2.json");
+        // Live shipped config, not a pinned literal (2026-09-02) — see the census script's own note.
+        var tuningDir = Path.Combine(repoRoot, "data", "tuning");
+        var aptitudesPath = Directory.GetFiles(tuningDir, "aptitudes.v*.json")
+            .Select(f => (Path: f, V: int.TryParse(Path.GetFileNameWithoutExtension(f).Split(".v").Last(), out var v) ? v : -1))
+            .Where(x => x.V >= 0).OrderByDescending(x => x.V).Select(x => x.Path).FirstOrDefault() ?? "";
         Assert.True(File.Exists(aptitudesPath), "missing " + aptitudesPath);
         using var doc = JsonDocument.Parse(File.ReadAllText(aptitudesPath));
         var measurable = doc.RootElement.GetProperty("_meta").GetProperty("measurable").GetString();

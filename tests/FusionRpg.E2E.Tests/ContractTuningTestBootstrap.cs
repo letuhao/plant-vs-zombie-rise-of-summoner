@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using FusionRpg.Core;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
 using FusionRpg.Core.Demons;
@@ -16,9 +17,12 @@ using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Hud;
+using FusionRpg.Core.Items;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Ai;
+using FusionRpg.Core.World.Growth;
 using FusionRpg.Core.World.Loam;
 using FusionRpg.Data.Policies;
 
@@ -43,6 +47,7 @@ internal static class ContractTuningTestBootstrap
         ContractPolicy.Configure(DefaultContracts);
         LoamPolicy.Configure(DefaultLoam);
         WorldTuningHub.Configure(DefaultWorld);
+        RecruitPolicy.Configure(DefaultWorld.Growth);
         SoulEarnPolicy.Configure(DefaultSouls);
         PatronPolicy.Configure(DefaultPatron);
         ShieldPolicy.Configure(DefaultShield);
@@ -51,6 +56,21 @@ internal static class ContractTuningTestBootstrap
         StarPolicy.Configure(DefaultFusion);
         StatusPolicy.Configure(DefaultStatus);
         DerivedStatPolicy.Configure(DefaultDerivedStats);
+        // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
+        // own identical comment.
+        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // T8.4/T8.5 (ds 18, fusion-recipe-runtime) — behaviour-preserving; see the Core.Tests
+        // bootstrap's own identical comment. Reading the REAL committed seed here (matching
+        // Program.cs's own T8.5 flip) is the WRONG fix, tried and reverted the same session: the
+        // real seed's recipes reference the real ~829-species corpus, but this assembly's own
+        // DemonSpeciesCatalog above is the small compiled default (~84 species) — Configure's own
+        // cross-check against DemonSpeciesCatalog correctly refused nearly every real recipe for
+        // referencing a species this roster does not have. BuildDeterministicOnly() against
+        // WHATEVER species roster is actually configured is what keeps the two in sync.
+        // InternalsVisibleTo for this assembly lives as a C# attribute in
+        // FusionRpg.Core/InternalsVisibleTo.Fusion.cs, not in FusionRpg.Core.csproj — the Core/data
+        // separation guard substring-scans that one file for this very project's own name.
+        DemonRecipeCatalog.Configure(DemonRecipeCatalog.BuildDeterministicOnly());
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -59,11 +79,30 @@ internal static class ContractTuningTestBootstrap
         SimDefaults.Configure(DefaultSim);
         ProgressionTuningHub.Configure(DefaultProgression);
         BattleTuningHub.Configure(DefaultBattle);
+        // battle-tempo battle-resources (2026-09-05): every battle actor held all six resource pools
+        // at max 0 until this landed, because BattleStatComposer seeded no resource.* channel. Same
+        // bootstrap shape (and same "one more Configure every harness must remember") as
+        // ActionTimingPolicy below -- values transcribed from the real, shipped
+        // data/tuning/battle-resources.v1.json, not invented.
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(DefaultBattleResources);
+        // base-defense siege-board (2026-09-05): values transcribed from the real, shipped
+        // data/tuning/siege.v1.json, matching this file's own stated convention.
+        SiegeTuningPolicy.Configure(DefaultSiege);
+        BattleBoardTuningPolicy.Configure(DefaultBattleBoard);
+        // battle-tempo action-timing (2026-09-05): the bootstrap's own new gap this session's
+        // base-defense work found and closed -- BattleRunState's constructor now unconditionally
+        // reads ActionTimingPolicy.Tuning, and this Configure call was missing from every test
+        // bootstrap. Values transcribed from the real, shipped data/tuning/action-timing.v1.json,
+        // matching this file's own stated convention ("same working set as the matching
+        // data/tuning/*.v1.json") -- not invented.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(DefaultActionTiming);
         SummoningTuningHub.Configure(DefaultSummoning);
         WorldAiPolicy.Configure(DefaultAi);
         VfxTuningHub.Configure(DefaultVfx);
+        ActorHudTuningHub.Configure(DefaultActorHud);
         PowerTuningHub.Configure(DefaultPower);
         SealedCompactionPolicy.Configure(DefaultData);
+        ItemsTuningHub.Configure(DefaultItems);
     }
 
     public static readonly ContractTuning DefaultContracts = new(
@@ -84,19 +123,21 @@ internal static class ContractTuningTestBootstrap
             [DemonPersonality.Calculating] = new(100, 90, 110),
             [DemonPersonality.Feral] = new(80, 150, 70),
         },
+        // Full 10-key coverage (seed-to-concrete T4.1) — ContractPolicy.BaseUpkeepPerDay/
+        // RitualPrice throw ArgumentOutOfRangeException on a missing key, no fallback.
         BaseUpkeepPerDay: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 2,
-            [DemonRarity.Rare] = 5,
-            [DemonRarity.Epic] = 12,
-            [DemonRarity.Legendary] = 25,
+            [DemonRarity.Chaff] = 2, [DemonRarity.Sprout] = 3, [DemonRarity.Grafted] = 4,
+            [DemonRarity.Cultivated] = 5, [DemonRarity.Fused] = 7, [DemonRarity.Chimeric] = 9,
+            [DemonRarity.Heirloom] = 12, [DemonRarity.Firstseed] = 16, [DemonRarity.Sunwoven] = 25,
+            [DemonRarity.Almanac] = 32,
         },
         RitualPriceSouls: new Dictionary<DemonRarity, long>
         {
-            [DemonRarity.Common] = 50,
-            [DemonRarity.Rare] = 100,
-            [DemonRarity.Epic] = 200,
-            [DemonRarity.Legendary] = 400,
+            [DemonRarity.Chaff] = 50, [DemonRarity.Sprout] = 65, [DemonRarity.Grafted] = 80,
+            [DemonRarity.Cultivated] = 100, [DemonRarity.Fused] = 130, [DemonRarity.Chimeric] = 160,
+            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 260, [DemonRarity.Sunwoven] = 400,
+            [DemonRarity.Almanac] = 500,
         });
 
     public static readonly LoamTuning DefaultLoam = new(
@@ -105,14 +146,21 @@ internal static class ContractTuningTestBootstrap
         Upkeep: new LoamUpkeepTuning(
             SeepPerTurn: 50, LoamCapacity: 300, BaseUpkeepPerSector: 10,
             GarrisonUpkeepPerMember: 2, DevelopmentUpkeepPerLevel: 5, DangerUpkeepPerBand: 3),
+        // world-map W55, matches loam.v2.json's own `development.yieldPerLevel` exactly.
+        Development: new LoamDevelopmentTuning(YieldPerLevel: 6),
         Fade: new LoamFadeTuning(
             RecoveryMilli: 20, BaseDecayMilli: 40, DecayPerDeficitUnitMilli: 1,
             DecayScaleDivisor: 5, MaxDecayMilli: 300, AbandonmentHorizonTurns: 3),
-        LegionSupply: new LoamLegionSupplyTuning(CarryPerBearer: 200, BurnPerMember: 10),
+        LegionSupply: new LoamLegionSupplyTuning(CarryPerBearer: 200, BurnPerMember: 10, BesiegedRationMilli: 1000),
         Structures: new LoamStructuresTuning(
-            WellYieldMultiplierMilli: 2000, WellCostMilli: 200, WaystationCostMilli: 300,
+            WellYieldMultiplierMilli: 2000, WellCost: 200, WaystationCost: 300,
             WellBuildTurns: 2, WaystationBuildTurns: 4, WaystationRangeHops: 3,
-            GranaryCostMilli: 150, GranaryCapacityBonus: 300, GranaryBuildTurns: 2),
+            GranaryCost: 150, GranaryCapacityBonus: 300, GranaryBuildTurns: 2,
+            // world-map W56, matches loam.v4.json's own soulConduit*/extractor*/hatchery* keys
+            // (renamed off *CostMilli by world-map W57 -- no value changed).
+            SoulConduitCost: 250, SoulConduitFlatYieldPerTurn: 20, SoulConduitBuildTurns: 3,
+            ExtractorCost: 200, ExtractorFlatYieldPerTurn: 15, ExtractorBuildTurns: 2,
+            HatcheryCost: 300, HatcheryYieldMultiplierMilli: 1500, HatcheryBuildTurns: 3),
         Texture: new LoamTextureTuning(
             ContagionPressurePerTurn: 60, MaxPressureMilli: 300, PressureDecayPerTurn: 40,
             SurgeDecayMultiplierMilli: 1500, UnmadeSpawnAfterTurns: 5,
@@ -144,19 +192,34 @@ internal static class ContractTuningTestBootstrap
             DefenderBonusMilli: 1250, WipeoutRatioMilli: 250, RoutWoundMilli: 750, GuardWoundMilli: 100),
         Calendar: new WorldCalendarTuning(
             DaysPerWeek: 7, WeeksPerMonth: 4,
-            SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100));
+            SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100),
+        // world-stage W30, matches data/tuning/world.v2.json's own starting value.
+        Movement: new MovementTuning(DowseBudgetMilli: 250),
+        // world-map W58, matches data/tuning/world.v5.json's own real growth-pulse/season values
+        // (world.v42/W51 identity is history now -- growth and the season upkeep term are live).
+        Growth: new WorldGrowthTuning(
+            SeatPulsePerWeek: 20, LairMultiplierMilli: 4000, SpecialWeekMultiplierMilli: 1500,
+            RaiseCostPoints: 100, RaiseMemberHp: 110,
+            LegionTarget: new LegionTargetTuning(Min: 6, Max: 10, ByTurn: 40)),
+        Seasons: new WorldSeasonsTuning(
+            Count: 4, MonthsPerSeason: 1,
+            YieldMilli: new[] { 1000, 1000, 1000, 1000 },
+            UpkeepMilli: new[] { 1000, 850, 1100, 1400 },
+            MovementMilli: new[] { 1000, 1000, 1000, 1000 }));
 
     public static readonly SoulEarnTuning DefaultSouls = new(
         SchemaVersion: 1,
         Version: 1,
         Kill: new SoulKillTuning(KillDelta: 1),
         MatchEnd: new SoulMatchEndTuning(VictoryDelta: 100, DefeatDelta: 25),
+        // Full 10-key coverage (seed-to-concrete T4.1) — SoulEarnPolicy.DiscoveryDelta has
+        // no fallback for a missing key.
         DiscoveryDelta: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 25,
-            [DemonRarity.Rare] = 75,
-            [DemonRarity.Epic] = 200,
-            [DemonRarity.Legendary] = 500,
+            [DemonRarity.Chaff] = 25, [DemonRarity.Sprout] = 42, [DemonRarity.Grafted] = 58,
+            [DemonRarity.Cultivated] = 75, [DemonRarity.Fused] = 115, [DemonRarity.Chimeric] = 160,
+            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 350, [DemonRarity.Sunwoven] = 500,
+            [DemonRarity.Almanac] = 750,
         },
         Codex: new SoulCodexTuning(HalfMilestone: 500, FullMilestone: 1500));
 
@@ -166,12 +229,15 @@ internal static class ContractTuningTestBootstrap
         SwitchCostSouls: 100,
         AuraClampMilli: 150,
         PerStarMilli: 10,
+        PThetaKMilli: 220, // matches the real shipped patron.v1.json (aura-skill T22)
+        // Full 10-key coverage (seed-to-concrete T4.1) — PatronPolicy.RarityBaseMilli's
+        // fallback reads [DemonRarity.Almanac], which must itself be present.
         RarityBaseMilli: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 20,
-            [DemonRarity.Rare] = 30,
-            [DemonRarity.Epic] = 45,
-            [DemonRarity.Legendary] = 60,
+            [DemonRarity.Chaff] = 20, [DemonRarity.Sprout] = 24, [DemonRarity.Grafted] = 27,
+            [DemonRarity.Cultivated] = 30, [DemonRarity.Fused] = 34, [DemonRarity.Chimeric] = 38,
+            [DemonRarity.Heirloom] = 45, [DemonRarity.Firstseed] = 50, [DemonRarity.Sunwoven] = 60,
+            [DemonRarity.Almanac] = 70,
         });
 
     public static readonly ShieldTuning DefaultShield = new(
@@ -211,24 +277,53 @@ internal static class ContractTuningTestBootstrap
         Version: 1,
         PerStarPowerMilli: 30,
         PerStarDefenseMilli: 30,
+        // Full 10-key coverage (seed-to-concrete T4.1) — StarPolicy.StarCap's own fallback
+        // reads Tuning.StarCap[DemonRarity.Almanac] when a rarity is missing, so Almanac itself
+        // must always be present or that fallback throws too (found exactly this way: a post-
+        // promotion star-merge test hit Sprout, which fell back to Almanac, which wasn't here).
         StarCap: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 3,
-            [DemonRarity.Rare] = 4,
-            [DemonRarity.Epic] = 5,
-            [DemonRarity.Legendary] = 5,
+            [DemonRarity.Chaff] = 6, [DemonRarity.Sprout] = 6, [DemonRarity.Grafted] = 6,
+            [DemonRarity.Cultivated] = 8, [DemonRarity.Fused] = 8, [DemonRarity.Chimeric] = 8,
+            [DemonRarity.Heirloom] = 10, [DemonRarity.Firstseed] = 10, [DemonRarity.Sunwoven] = 10,
+            [DemonRarity.Almanac] = 10,
         },
         StarMergeCost: new FusionCostTuning(Souls: 50, ShardCount: 1, EssenceCount: 1),
         PromotionCost: new FusionCostTuning(Souls: 200, ShardCount: 3, EssenceCount: 3),
+        // Per-rung promotion price (effort-power M5). Mirrors the shipped table so a fixture drift
+        // shows up as a test failure rather than as silently different balance.
+        PromotionCostByRarity: new Dictionary<DemonRarity, FusionCostTuning>
+        {
+            [DemonRarity.Chaff] = new(150, 2, 2), [DemonRarity.Sprout] = new(185, 2, 2),
+            [DemonRarity.Grafted] = new(220, 2, 3), [DemonRarity.Cultivated] = new(320, 3, 4),
+            [DemonRarity.Fused] = new(450, 3, 5), [DemonRarity.Chimeric] = new(620, 4, 6),
+            [DemonRarity.Heirloom] = new(820, 4, 7), [DemonRarity.Firstseed] = new(1000, 5, 8),
+            [DemonRarity.Sunwoven] = new(1000, 5, 8), [DemonRarity.Almanac] = new(1000, 5, 8),
+        },
         RecipeCost: new Dictionary<DemonRarity, RecipeCostTuning>
         {
-            [DemonRarity.Rare] = new(Souls: 150, ShardRarity: DemonRarity.Common, ShardCount: 2, EssenceCount: 2),
-            [DemonRarity.Epic] = new(Souls: 400, ShardRarity: DemonRarity.Rare, ShardCount: 3, EssenceCount: 4),
-            [DemonRarity.Legendary] = new(Souls: 1000, ShardRarity: DemonRarity.Epic, ShardCount: 4, EssenceCount: 8),
+            [DemonRarity.Cultivated] = new(Souls: 150, ShardRarity: DemonRarity.Chaff, ShardCount: 2, EssenceCount: 2),
+            [DemonRarity.Heirloom] = new(Souls: 400, ShardRarity: DemonRarity.Cultivated, ShardCount: 3, EssenceCount: 4),
+            [DemonRarity.Sunwoven] = new(Souls: 1000, ShardRarity: DemonRarity.Heirloom, ShardCount: 4, EssenceCount: 8),
+        },
+        SlotsByRarity: new Dictionary<DemonRarity, int>
+        {
+            [DemonRarity.Chaff] = 1, [DemonRarity.Sprout] = 1, [DemonRarity.Grafted] = 1,
+            [DemonRarity.Cultivated] = 2, [DemonRarity.Fused] = 2, [DemonRarity.Chimeric] = 2,
+            [DemonRarity.Heirloom] = 2, [DemonRarity.Firstseed] = 3, [DemonRarity.Sunwoven] = 3,
+            [DemonRarity.Almanac] = 3,
+        },
+        // WAVE F2.3 — mirrors RecipeCost's own (sparse, same rungs) souls values above; a pick's
+        // cost is read from its own source rarity, never the fusion output's.
+        InheritCostByRarity: new Dictionary<DemonRarity, long>
+        {
+            [DemonRarity.Cultivated] = 150,
+            [DemonRarity.Heirloom] = 400,
+            [DemonRarity.Sunwoven] = 1000,
         });
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
-        SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+        SchemaVersion: 2, Version: 2, CategoryResistCap: 0.95, TurnDefaultSpeed: 100);
 
     public static readonly StatusTuning DefaultStatus = new(
         SchemaVersion: 1,
@@ -280,7 +375,9 @@ internal static class ContractTuningTestBootstrap
             ShinyDie: 64, InjuryPowerDivisor: 4));
 
     public static readonly MatchTuning DefaultMatch = new(
-        SchemaVersion: 1, Version: 1, MaxLivingPlants: 50, MaxLivingZombies: 80);
+        SchemaVersion: 1, Version: 1, MaxLivingPlants: 50, MaxLivingZombies: 80,
+        // E36 (spec-wave-control.md §2.2), matches data/tuning/match.v1.json's own waveHoldFloorSeconds.
+        WaveHoldFloorSeconds: 30);
 
     public static readonly EffectsTuning DefaultEffects = new(
         SchemaVersion: 1, Version: 1,
@@ -293,10 +390,53 @@ internal static class ContractTuningTestBootstrap
 
     public static readonly ProgressionTuning DefaultProgression = new(
         SchemaVersion: 1, Version: 1,
-        PlantCurve: new XpCurveParams(80.0, 32.0),
-        ZombieCurve: new XpCurveParams(70.0, 28.0),
-        PlayerCurve: new XpCurveParams(100.0, 45.0),
+        PlantCurve: new XpCurveParams(80, 32),
+        ZombieCurve: new XpCurveParams(70, 28),
+        PlayerCurve: new XpCurveParams(100, 45),
+        SpecimenCurve: new XpCurveParams(100, 45),
         Awards: new XpAwardsTuning(Kill: 12, Defeat: -100, Mower: -30, PlantPlace: 8, ZombieSpawn: 9));
+
+    public static readonly SiegeTuning DefaultSiege = new(
+        SchemaVersion: 1, Version: 1,
+        MoveCostOpen: 10, MoveCostRough: 20, DiagonalSurcharge: 0, MaxCells: 4096,
+        District: new DistrictTuning(
+            SideByBaseTier: new Dictionary<int, int> { [0] = 18, [1] = 24, [2] = 30 },
+            CoreSideMilli: 400, GateCount: 2, RampartThickness: 1, FortressRampartBonus: 1,
+            ApproachDepth: 4, ApproachDepthPerWardLevel: 1),
+        Structure: new StructureTuning(
+            RepairCostRatioMilli: 600,
+            TierMultiplierMilli: new Dictionary<int, int> { [1] = 1000, [2] = 1800, [3] = 3000 },
+            StorageCapacityPerDevelopmentLevel: 50,
+            DepletionPerHarvestMilli: 10),
+        Objective: new SiegeObjectiveTuning(
+            FieldCapMaxLivingPerSide: -1,
+            LegionSlotsPerSide: 2, LegionSlotsPerDevelopmentLevel: 0,
+            MaxLegionMembers: -1,
+            DefenseSlotsAtDevelopmentZero: 4, DefenseSlotsPerDevelopmentLevel: 2, DefenseSlotsGridCapacityPoint: 2,
+            DistrictDefenderBonusMilli: 1000),
+        Waves: new SiegeWavesTuning(
+            MaxArrivalsPerRound: 8, BatchIntervalTicks: -1, FieldClearedThreshold: 0, BatchSize: -1),
+        Shooting: new FusionRpg.Core.Battle.Siege.SiegeShootingTuning(
+            RangeThresholdMilli: 500, RangePowerMilli: 500,
+            ObstructionPowerMilli: 700, ObstructionFloorMilli: 250, MeleeLockPowerMilli: 500),
+        Construction: new ConstructionTuning(
+            ShardVeinYieldPerTurn: 4, MaterialSeamYieldPerTurn: 3,
+            RefineRubblePerIronwork: 4, RefineYieldMilli: 600, RefinePerTurnCap: -1,
+            LabourMoatStaminaCost: 30, LabourMoatHungerCost: 15, LabourMoatTurns: 2, SummonQiCost: 25),
+        Economy: new EconomyTuning(
+            NodeYieldPerRoundLoam: 5, NodeYieldPerRoundIronwork: 3,
+            DepotSeedMilli: 1000, CaptureRecoveryMilli: 1000),
+        Ai: new FusionRpg.Core.Battle.Siege.AiTuning(
+            WeightHitChance: 70, WeightObjective: 50, WeightKill: 15, WeightLowHp: 10,
+            WeightCannotCounter: 10, WeightRound: 1, WeightRisk: 120,
+            StanceDefault: FusionRpg.Core.Battle.Siege.Stance.Guard,
+            AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0, AggressionRange: 2,
+            MaxCandidatesScored: 32,
+            ObjectiveReferenceDistanceCells: 20, ThreatRadiusCells: 4),
+        Fog: new FusionRpg.Core.Battle.Board.FogTuning(Enabled: true, DefaultVisionRangeTiles: 6));
+
+    public static readonly BattleBoardTuning DefaultBattleBoard = new(
+        SchemaVersion: 1, Version: 1, MinSide: 5, MaxSide: 9);
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,
@@ -315,6 +455,57 @@ internal static class ContractTuningTestBootstrap
             ["genius"] = new(SpecimenXpBonusMilli: 250),
             ["void-touched"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
             ["chaos-marked"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
+        },
+        TimelineProfiles: new Dictionary<string, TimelineProfileTuning>(StringComparer.Ordinal)
+        {
+            ["classic-round"] = new(W: 1, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            ["galaxy-sync"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            ["hybrid-atb"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+            // base-defense F2/decision 29: w/wReact/passQuantum are real values (spec's own
+            // tunables table); MaxRounds/RoundDurationMs stay null (unset) so siege inherits
+            // the ruleset horizon until a real board exists to measure one on.
+            ["siege"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            // party-dungeon D2.9: hybrid-atb-shaped magnitudes, copied verbatim.
+            ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+        },
+        // Wave E3/Phase 7 F1 (2026-09-07): matches data/tuning/battle.v5.json's shipped value --
+        // secondary now carries 300/1000 of an attack's payload for any actor with a real
+        // ElementSecondary. Hand-built fixtures in this file carry no secondary element, so this
+        // change alone does not move any Core/Data/E2E golden built from them; only the real
+        // WaveCatalog-driven expedition goldens (real ElementSecondary, WaveCatalog.cs:115) can move.
+        HybridSecondaryWeightMilli: 300,
+        // base-defense F2: matches data/tuning/battle.v2.json's shipped value exactly, so
+        // 50 * 4000 = 200_000 reproduces the pre-F2 MaxLoopIterations constant.
+        LoopGuardRoundMultiple: 4000,
+        // battle-tempo tempo-content (2026-09-05): matches data/tuning/battle.v3.json's shipped
+        // speciesTempo.referenceIntervalMs exactly (1500ms = the shipped "steady" attack tempo).
+        SpeciesTempoReferenceIntervalMs: 1500);
+
+    /// <summary>Transcribed from the shipped data/tuning/battle-resources.v1.json. `hp` is absent on
+    /// purpose -- its max mirrors BattleActorSetup.MaxHp (spec-battle-resources.md S2.6).</summary>
+    public static readonly FusionRpg.Core.Battle.BattleResourceTuning DefaultBattleResources = new(
+        SchemaVersion: 1, Version: 1,
+        PoolShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 500,
+            ["hunger"] = 500,
+            ["spirit"] = 500,
+            ["qi"] = 500,
+            ["poise"] = 500,
+        });
+
+    public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(
+        WindupPerPowerMilli: 20,
+        WindupCapReferenceMilli: 300,
+        RecoveryPerPowerMilli: 8,
+        BasicAttack: new FusionRpg.Core.Actions.BasicAttackTimingTuning(WindupTicks: 150, RecoveryTicks: 50),
+        Categories: new Dictionary<FusionRpg.Core.Actions.ActionCategory, FusionRpg.Core.Actions.ActionTimingCategoryTuning>
+        {
+            [FusionRpg.Core.Actions.ActionCategory.Attack] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 200),
+            [FusionRpg.Core.Actions.ActionCategory.Defense] = new(TimeCostBaseTicks: 120, CooldownBaseTicks: 150),
+            [FusionRpg.Core.Actions.ActionCategory.Support] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 250),
+            [FusionRpg.Core.Actions.ActionCategory.Movement] = new(TimeCostBaseTicks: 80, CooldownBaseTicks: 100),
+            [FusionRpg.Core.Actions.ActionCategory.Status] = new(TimeCostBaseTicks: 90, CooldownBaseTicks: 180),
         });
 
     public static readonly SummoningTuning DefaultSummoning = new(
@@ -325,13 +516,14 @@ internal static class ContractTuningTestBootstrap
             ["element-focus"] = new(CostPerPull: 120, CostPerTen: 1080, FocusWeightMultiplier: 3.0),
         },
         Roller: new RollerTuning(
-            EpicHardPity: 25, LegendarySoftStart: 41, LegendaryHardPity: 55,
-            LegendaryBasePerMille: 10, LegendaryRampPerMille: 60, EpicPerMille: 50,
-            RarePerMille: 200, ShinyOneIn: 64));
+            HeirloomHardPity: 25, SunwovenSoftStart: 41, SunwovenHardPity: 55,
+            SunwovenBasePerMille: 8, SunwovenRampPerMille: 60, AlmanacPerMille: 2,
+            HeirloomPerMille: 25, FirstseedPerMille: 15, ChimericPerMille: 40, FusedPerMille: 60,
+            CultivatedPerMille: 100, GraftedPerMille: 150, SproutPerMille: 250, ShinyOneIn: 64));
 
     public static readonly WorldAiTuning DefaultAi = new(
         SchemaVersion: 1, Version: 1,
-        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000),
+        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000, MomentumMarginMilli: 250),
         ThreatMap: new ThreatMapTuning(StaleDecayPerTurn: 150, MaxSpreadHops: 4, ProximityFalloffPerHop: 400),
         ValueMap: new ValueMapTuning(
             OptimismMilli: 700, OverextensionPenaltyMilli: 1400, HabitabilityPenaltyMilli: 1400,
@@ -349,13 +541,39 @@ internal static class ContractTuningTestBootstrap
             AmountTierSmallScale: 0.9, AmountTierBigScale: 1.15),
         Sustained: new VfxSustainedTuning(
             GlobalCap: 24, PerHostCap: 2, TtlGraceSeconds: 2.0, InfiniteTtlSeconds: 60.0,
-            AuraPulseSeconds: 0.3, AuraMaxParticles: 6),
+            AuraPulseSeconds: 0.3, AuraMaxParticles: 6, SpanScale: 1.5),
         Render: new VfxRenderTuning(
-            BurstParticles: 28, ParticleSortingOrder: 80, ParticleTextureSize: 64, MarkerEdgeSoftness: 0.1,
+            BurstParticles: 28, ParticleSortingOrder: 80, SortOffsetAboveUnit: 1, SustainedWorldYOffset: 0.25,
+            ParticleTextureSize: 64, MarkerEdgeSoftness: 0.14, MarkerGlowStrength: 0.45,
+            MarkerSizeScale: 0.24, MarkerYOffsetScale: 0.12,
             ShieldBar: new VfxShieldBarTuning(
                 BarWorldWidth: 0.95, BarWorldHeight: 0.12, WorldYOffset: -0.35,
                 MaxSegments: 3, Cap: 32, MaxPips: 3),
-            TintReassertSeconds: 0.25));
+            TintReassertSeconds: 0.25),
+        Identity: new VfxIdentityTuning(SimilarRgbDistanceThreshold: 45, SimilarApplyRgbDistanceThreshold: 35));
+
+    public static readonly ActorHudTuning DefaultActorHud = new(
+        SchemaVersion: 1,
+        Version: 2,
+        StatusStripMax: 3,
+        HpSliverEnabled: false,
+        BadgeMax: 99,
+        AnchorKind: "body",
+        WorldYOffset: -0.35,
+        BarWorldWidth: 0.95,
+        BarWorldHeight: 0.12,
+        RowOffsetIdentity: 0.30,
+        RowOffsetResources: 0.0,
+        RowOffsetStatuses: 0.16,
+        MaxStackPips: 3,
+        EliteTierThreshold: null,
+        MagnitudeMidThreshold: 10.0,
+        MagnitudeHighThreshold: 30.0);
+
+    // Matches data/tuning/items.v1.json exactly (magic-number fix, 2026-09-05) — the two values are
+    // unchanged from their prior ItemNameComposer/RoleFamilyTable consts (3, 5).
+    public static readonly ItemsTuning DefaultItems = new(
+        SchemaVersion: 1, Version: 1, RareNameThreshold: 3, DefaultMaxTier: 5);
 
     public static readonly DataTuning DefaultData = new(
         SchemaVersion: 1, Version: 1,

@@ -210,6 +210,34 @@ public class StanceTests
         Assert.Null(PlaceholderBattleResolver.Instance.Resolve(request, new[] { attacker, afoot }, seed: 1).WinnerEntityId);
     }
 
+    // ---- dowse (world-stage W30) ----------------------------------------------------------
+
+    [Fact]
+    public void Dowse_is_the_exact_same_literal_prospecting_matches_on()
+    {
+        // The whole defect §8c.4 named: a mismatched pair passes admission and reveals nothing,
+        // and no test that only checks "was the order accepted" would ever catch it.
+        Assert.Equal(Prospecting.DowserStance, MovementPolicy.Dowse);
+    }
+
+    [Fact]
+    public void A_dowse_order_is_admitted_where_it_used_to_be_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World(), Stance("e-dave-legion-1", "dowse"));
+        Assert.True(ok, reason);
+    }
+
+    [Fact]
+    public void Dowsing_costs_the_tuned_budget_not_the_full_march()
+    {
+        var dowsing = TurnEngine.Step(World(), new[] { Stance("e-dave-legion-1", "dowse") }, seed: 1);
+
+        Assert.Equal(WorldTuningHub.Tuning.Movement.DowseBudgetMilli, Legion(dowsing.World).MovementRemaining);
+        // The silent half of the defect: falling through to the default arm would hand back the
+        // full march budget instead, and an "order accepted" check alone would never notice.
+        Assert.NotEqual(MovementPolicy.PointsPerTurn, Legion(dowsing.World).MovementRemaining);
+    }
+
     [Fact]
     public void Stances_are_deterministic_and_independent_of_command_order()
     {

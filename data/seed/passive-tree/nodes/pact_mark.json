@@ -1,0 +1,1015 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "Layers of hardened tissue weave into a secondary skin.",
+      "id": "skill.pactmark-def-t1-n0",
+      "name": "Dermal Graft",
+      "nameKey": "tree.node.dermal-graft",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Deeply anchored, the spirit draws strength from the very soil it treads.",
+      "id": "skill.pactmark-def-t1-n1",
+      "name": "Rooted Resilience",
+      "nameKey": "tree.node.rooted-resilience-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "A layer of reinforced plating that hardens the spirit as it thickens the skin.",
+      "id": "skill.pactmark-def-t1-n2",
+      "name": "Ironclad Shell",
+      "nameKey": "tree.node.ironclad-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pact is not written in ink, but forged in the hardening of the skin.",
+      "id": "skill.pactmark-def-t10-n0",
+      "name": "Ironclad Covenant",
+      "nameKey": "tree.node.ironclad-covenant",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Layers of hardened organic matter woven into a seamless defensive barrier.",
+      "id": "skill.pactmark-def-t2-n0",
+      "name": "Reinforced Integument",
+      "nameKey": "tree.node.reinforced-integument-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Overlapping plates of reinforced steel and hardened hide provide a layered defense against the coming tide.",
+      "id": "skill.pactmark-def-t2-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-9",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A density of purpose that hardens the spirit against the coming tide.",
+      "id": "skill.pactmark-def-t2-n2",
+      "name": "Bulwark of the Pact",
+      "nameKey": "tree.node.bulwark-of-the-pact",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A secondary skin woven from the very essence of the pact, layering protection upon protection.",
+      "id": "skill.pactmark-def-t3-n0",
+      "name": "Pact of the Layered Husk",
+      "nameKey": "tree.node.pact-of-the-layered-husk",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The sap runs thick and slow, anchoring the spirit to the very marrow of the world.",
+      "id": "skill.pactmark-def-t3-n1",
+      "name": "Deep Rooted Vitality",
+      "nameKey": "tree.node.deep-rooted-vitality-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the mark is felt not just by the prey, but by the hunter's own skin.",
+      "id": "skill.pactmark-def-t3-n2",
+      "name": "Thickened Sunder",
+      "nameKey": "tree.node.thickened-sunder",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the shield becomes the rhythm of the blood.",
+      "id": "skill.pactmark-def-t4-n0",
+      "name": "Cyclical Suture",
+      "nameKey": "tree.node.cyclical-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pact thickens the barrier between soul and void, turning every layer of protection into a fortress of unyielding density.",
+      "id": "skill.pactmark-def-t4-n1",
+      "name": "Vessel of the Unyielding Shell",
+      "nameKey": "tree.node.vessel-of-the-unyielding-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the shield becomes the rhythm of the blood.",
+      "id": "skill.pactmark-def-t5-n0",
+      "name": "Suture of the Warded Pulse",
+      "nameKey": "tree.node.suture-of-the-warded-pulse",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The pact takes hold not in the skin, but in the very marrow of the being.",
+      "id": "skill.pactmark-def-t5-n1",
+      "name": "Rooted Covenant",
+      "nameKey": "tree.node.rooted-covenant",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The pulse of the ward dictates the tempo of the mend.",
+      "id": "skill.pactmark-def-t6-n0",
+      "name": "Rhythmic Suture",
+      "nameKey": "tree.node.rhythmic-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning every layer of protection into an immovable foundation.",
+      "id": "skill.pactmark-def-t6-n1",
+      "name": "Bulwark of the Deep Root",
+      "nameKey": "tree.node.bulwark-of-the-deep-root",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A graft of iron-veined sap that converts the rhythm of impact into a rising wall of protection.",
+      "id": "skill.pactmark-def-t7-n0",
+      "name": "Suture of the Bastion",
+      "nameKey": "tree.node.suture-of-the-bastion",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the pact has been most deeply etched.",
+      "id": "skill.pactmark-def-t7-n1",
+      "name": "Dermal Suture",
+      "nameKey": "tree.node.dermal-suture-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the shield becomes the pulse of the soul.",
+      "id": "skill.pactmark-def-t8-n0",
+      "name": "Cyclical Suture",
+      "nameKey": "tree.node.cyclical-suture-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.warded"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layer of hardened sap that traps momentum within the skin.",
+      "id": "skill.pactmark-def-t9-n0",
+      "name": "Suture of the Sealed Husk",
+      "nameKey": "tree.node.suture-of-the-sealed-husk",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a guarantee of lethal intent.",
+      "id": "skill.pactmark-off-t1-n0",
+      "name": "Savage Precision",
+      "nameKey": "tree.node.savage-precision",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The pact deepens with every strike, turning precision into raw fury.",
+      "id": "skill.pactmark-off-t1-n1",
+      "name": "Savage Mark",
+      "nameKey": "tree.node.savage-mark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The pact is sealed in the moment the target is identified.",
+      "id": "skill.pactmark-off-t1-n2",
+      "name": "Vow of the Marksman",
+      "nameKey": "tree.node.vow-of-the-marksman",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A mark that does not merely sit upon the skin, but seeks the truth beneath it.",
+      "id": "skill.pactmark-off-t10-n0",
+      "name": "Vigilant Sigil",
+      "nameKey": "tree.node.vigilant-sigil",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a promise of inevitable impact.",
+      "id": "skill.pactmark-off-t2-n0",
+      "name": "Vow of the Unseen",
+      "nameKey": "tree.node.vow-of-the-unseen",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a destiny written in the sight of the hunter.",
+      "id": "skill.pactmark-off-t2-n1",
+      "name": "Vow of the Unfailing Eye",
+      "nameKey": "tree.node.vow-of-the-unfailing-eye",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a promise of absolute certainty.",
+      "id": "skill.pactmark-off-t2-n2",
+      "name": "Vow of the Sharpened Pact",
+      "nameKey": "tree.node.vow-of-the-sharpened-pact",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a destiny etched in the eye's focus.",
+      "id": "skill.pactmark-off-t3-n0",
+      "name": "Vow of the Unfailing Sight",
+      "nameKey": "tree.node.vow-of-the-unfailing-sight",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a promise of inevitable lethality.",
+      "id": "skill.pactmark-off-t3-n1",
+      "name": "Pact of the Keen Mark",
+      "nameKey": "tree.node.pact-of-the-keen-mark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A mark that demands a perfect strike to be truly felt.",
+      "id": "skill.pactmark-off-t3-n2",
+      "name": "Pact of the Fatal Stroke",
+      "nameKey": "tree.node.pact-of-the-fatal-stroke",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the clarity of the mark.",
+      "id": "skill.pactmark-off-t4-n0",
+      "name": "Rhythmic Branding",
+      "nameKey": "tree.node.rhythmic-branding",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The mark burns deeper with every focused gaze.",
+      "id": "skill.pactmark-off-t4-n1",
+      "name": "Unwavering Brand",
+      "nameKey": "tree.node.unwavering-brand",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The brand is not merely a sign, but a fracture in the target's essence.",
+      "id": "skill.pactmark-off-t5-n0",
+      "name": "Sunder of the Marked",
+      "nameKey": "tree.node.sunder-of-the-marked",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The mark burns deeper when the eye never wavers.",
+      "id": "skill.pactmark-off-t5-n1",
+      "name": "Vow of the Crimson Sight",
+      "nameKey": "tree.node.vow-of-the-crimson-sight",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The mark bleeds, and the reaper reaps.",
+      "id": "skill.pactmark-off-t6-n0",
+      "name": "Sanguine Harvest",
+      "nameKey": "tree.node.sanguine-harvest-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mark burns with a hunger that only the unerring eye can satisfy.",
+      "id": "skill.pactmark-off-t6-n1",
+      "name": "Vow of the Crimson Sight",
+      "nameKey": "tree.node.vow-of-the-crimson-sight-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mark does not merely sit upon the skin; it pulses with the rhythm of the soul's intent.",
+      "id": "skill.pactmark-off-t7-n0",
+      "name": "Resonant Brand",
+      "nameKey": "tree.node.resonant-brand",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The brand draws more than just attention; it draws the very essence of the fallen.",
+      "id": "skill.pactmark-off-t7-n1",
+      "name": "Sanguine Scythe",
+      "nameKey": "tree.node.sanguine-scythe",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pact is not broken until the last drop is spent.",
+      "id": "skill.pactmark-off-t8-n0",
+      "name": "Finality's Mark",
+      "nameKey": "tree.node.finality-s-mark",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.marking"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mark is not merely a target, but a harvest waiting to be reaped.",
+      "id": "skill.pactmark-off-t9-n0",
+      "name": "Gleaner's Pact",
+      "nameKey": "tree.node.gleaner-s-pact",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "pact_mark"
+}

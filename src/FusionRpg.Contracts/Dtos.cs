@@ -49,6 +49,18 @@ public sealed class HealthDto
     [JsonPropertyName("currentPlayerId")] public long CurrentPlayerId { get; set; }
     [JsonPropertyName("ingestQueued")] public int IngestQueued { get; set; }
     [JsonPropertyName("lastFlushMs")] public double LastFlushMs { get; set; }
+
+    // E46 (player-content-boot): a player install never ran the seed importer, so its content tables
+    // stayed empty forever and it ran on the shipped code fallback with nobody able to tell. These
+    // three fields are that mode reported on a surface both the player and the owner can read — see
+    // FusionRpg.Data.Seed.SeedImportRunner and RpgStore.RecordContentBootOutcome.
+    /// <summary>"imported" once the catalog tables genuinely hold content (this launch or an earlier
+    /// one); "codeFallback" while nothing has ever been imported successfully.</summary>
+    [JsonPropertyName("contentSource")] public string ContentSource { get; set; } = "codeFallback";
+    [JsonPropertyName("catalogRevision")] public long CatalogRevision { get; set; }
+    /// <summary>Why the self-healing startup import did not run or did not succeed. Null when content
+    /// is imported — a failed or skipped import is reported here, never only logged.</summary>
+    [JsonPropertyName("contentImportError")] public string? ContentImportError { get; set; }
 }
 
 public sealed class HeartbeatDto
@@ -120,6 +132,11 @@ public sealed class PlayerDto
     [JsonPropertyName("id")] public long Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = "";
     [JsonPropertyName("createdUtc")] public string CreatedUtc { get; set; } = "";
+
+    /// <summary>"The whole save"'s own root (spec-world-seed.md, T5.1) — rolled once at creation,
+    /// surfaced here so the UI can show/share it (Q7). Every per-player roll this program and
+    /// demon-seed make derives from this value; it is never regenerated for an existing player.</summary>
+    [JsonPropertyName("worldSeed")] public long WorldSeed { get; set; }
 }
 
 public sealed class CreatePlayerRequest

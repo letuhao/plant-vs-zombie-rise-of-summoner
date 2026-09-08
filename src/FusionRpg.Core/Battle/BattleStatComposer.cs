@@ -6,9 +6,15 @@ namespace FusionRpg.Core.Battle;
 /// <summary>
 /// Composes a per-actor derived snapshot for the battle engine — the web-mode analogue of the
 /// ActorHub compose path. Level formulas fill the omni halves, element affinity fills the actor's
-/// own element channels, and ChannelMods (trait stat mods, later equipment) overlay additively.
+/// own element channels, and ChannelMods (caller additive overlays) plus equipment via
+/// <see cref="EquipAtomSource"/> merge additively.
 /// Every value is an integer; reads go back out through CombatDerivedReader so channel semantics
 /// stay identical to the PvZ overlay.
+///
+/// <para><b>Locked separate from ActorHub</b> (decisions.md "ActorHub sole Hot compose gate",
+/// class-system 2026-08-26): battle seam is <c>ChannelMods</c>, not <see cref="IActorStatSubsystem"/>.
+/// A shared-contribution ADR is required before fusing. Equipment still shares the same atom rows
+/// via <see cref="EquipAtomSource"/> so GG-49 SourceIds on the derived/sheet side stay aligned.</para>
 /// </summary>
 public static class BattleStatComposer
 {
@@ -84,27 +90,75 @@ public static class BattleStatComposer
 
     public static void ResetTraits() => Traits = TraitAtomSource.Shipped();
 
-    public static ActorDerivedSnapshot Compose(BattleActorSetup setup) => Compose(setup, Traits);
+    /// <summary>Where equipped-item channel mods are read from (item-ideal.md, `equip-runtime`).
+    /// Defaults to <see cref="EquipAtomSource.None"/> — every existing caller, including the hundreds
+    /// of tests that never configure this, is unaffected until something wires a real resolver in.</summary>
+    public static EquipAtomSource Equipment { get; private set; } = EquipAtomSource.None;
 
-    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits)
+    public static void UseEquipment(EquipAtomSource source) =>
+        Equipment = source ?? throw new ArgumentNullException(nameof(source));
+
+    public static void ResetEquipment() => Equipment = EquipAtomSource.None;
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup) => Compose(setup, Traits, Equipment);
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits) =>
+        Compose(setup, traits, Equipment);
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits, EquipAtomSource equipment)
     {
         // battle-rates (T2.2) / content-authoring (T2.3): setup.Index is Theta — an alias for Level,
         // not a new source (no real power-index composition is wired through BattleActorSetup yet;
         // that is a later wave's job). Named here so the read is honest about what it means now, per
         // spec-battle-rates.md §2.3's "pass Theta" framing.
-        int theta = setup.Index;
+        //
+        // party-dungeon D2.11: `ThetaActor` overrides Index when a caller sets one -- null for every
+        // existing setup, so this is byte-identical to the old `setup.Index` read for all of them.
+        // This is the seam `ActorThetaSeam`'s own doc comment named as the wiring gap it was closing:
+        // "delve-battle-profile and power-index hydration decide whether that is Level or a new
+        // init-able field" -- ThetaActor is that field.
+        int theta = setup.ThetaActor ?? setup.Index;
 
         // battle-adoption mapping table: Atk is the resolver's BaseOverlayDamage — it must
         // NOT also sit in power.omni (double count). Defense stays: the defense channel is
         // its only consumer. Affinity shares remain genuine adjustments on both sides.
-        var snap = ActorDerivedSnapshot.FromValues(new[]
+        // battle-tempo tempo-content -- the species' own attack interval projects into `turn.speed`,
+        // seeded here so readiness ordering (B39) has something other than TurnDefaultSpeed for every
+        // actor to tie on. A projection, not a second curve (spec-tempo-content.md §2.1): the only new
+        // number is Tuning.SpeciesTempoReferenceIntervalMs, read from config, never a literal.
+        var turnSpeed = SpeciesTempoProjection.SpeedFor(
+            setup.AttackIntervalMs, Tuning.SpeciesTempoReferenceIntervalMs, DerivedStatPolicy.TurnDefaultSpeed);
+
+        // battle-tempo `battle-resources` -- every battle actor held all six resource pools at max 0,
+        // because nothing here ever set a resource.* channel. ActorResourcePools.CreateFull reads
+        // ResourceChannelReader.Max off this snapshot, so an absent channel made the pool 0-capacity
+        // and ReactionCounter.TryCounter declined every counter it was ever offered (TD4's finding).
+        // Loops ResourceIds rather than listing ids: resource-hub-ssot.md §8's six-coverage rule is
+        // normative ("a family covering a subset is a defect, never a feature") and "derive, never
+        // hand-list" is its own stated fix direction -- so a seventh resource is covered here for free.
+        var seeds = new List<KeyValuePair<string, double>>
         {
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta))
-        });
+            new(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
+            new(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
+            new(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
+            new(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
+            new(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta)),
+            new(Timeline.DerivedTurnChannels.Speed, turnSpeed)
+        };
+
+        foreach (var resourceId in DerivedStatChannels.ResourceIds)
+        {
+            seeds.Add(new(DerivedStatChannels.ResourceMax(resourceId),
+                BattleRuleset.BaseResourceMax(theta, resourceId, setup.MaxHp)));
+
+            // Always 0 -- see BattleRuleset.BaseResourceRegen for why that is a decision and not an
+            // unset value. Seeded explicitly rather than left absent so the family is complete and so
+            // the zero is visible to anyone reading a composed snapshot.
+            seeds.Add(new(DerivedStatChannels.ResourceRegen(resourceId),
+                BattleRuleset.BaseResourceRegen(theta, resourceId)));
+        }
+
+        var snap = ActorDerivedSnapshot.FromValues(seeds);
 
         if (setup.ElementPrimary is { } primary)
             AddAffinity(snap, primary, setup, PrimaryAffinityDivisor);
@@ -124,6 +178,16 @@ public static class BattleStatComposer
             foreach (var mod in traits.ModsFor(traitId))
                 snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);
         }
+
+        // item-ideal.md, equip-runtime (module 5): equipped items' stat.derived channel mods, merged
+        // the same way trait mods just did — the same producer shape, a different atom source. No
+        // double-counting risk with setup.ChannelMods below: that field is the caller's own generic
+        // additive list (tests / traits / one-off mods) and this is the ONE place equipment enters
+        // when SpecimenId resolves it via EquipAtomSource, so a caller populating both would be
+        // double-supplying, not this composer double-applying.
+        if (setup.SpecimenId is { } specimenId)
+            foreach (var mod in equipment.ModsFor(specimenId))
+                snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);
 
         foreach (var mod in setup.ChannelMods)
         {

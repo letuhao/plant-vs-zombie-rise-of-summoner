@@ -248,6 +248,21 @@ half of a weapon (`stat.modify`, lawn `Full`) works only on the lawn, and the *a
 battle-only — **and neither runtime executes both.** The weapon fantasy is currently split across two
 runtimes with no overlap. That is worth the owner knowing before any of this is scheduled.
 
+> ⛔ **CORRECTION, 2026-09-05 (module 19, at build time). The matrix above is stale end to end and
+> its headline conclusion INVERTS.** Verified against `AtomKindRegistry.cs`, not recalled:
+> **five kinds are `Battle = Full`** — `stat.modify` (`:217`), `stat.derived` (`:255`),
+> `resource.delta` (`:290`), `status.apply` (`:344`), `shield.grant` (`:396`) — and **no kind is
+> `Partial`**. The remaining seven stay `Battle = None`: the **five** `AttachPoint.Board` kinds
+> (`spawn.entity` `:403`, `board.action` `:431`, `grid.spawn` `:445`, `grid.clear` `:460`,
+> `box.set` `:476`) plus `resource.economy` (`:296`) and `status.clear` (`:358`). Five + five + two
+> = the twelve registered kinds.
+>
+> **So "neither runtime executes both halves" is false.** A weapon's `stat.modify` and `stat.derived`
+> atoms compose in battle (`BattleStatModifierLedger`, `BattleStatComposer`) and an action resolves
+> there. The lawn gap is unchanged and option **(b)** still stands, but the case for it is now
+> *"the lawn has no queue"*, not *"no runtime executes both halves"*. §6.3's anti-silence check keeps
+> its teeth for the seven that remain.
+
 Three ways to handle the lawn gap:
 
 | Option | Shape | Verdict |
@@ -571,6 +586,26 @@ is sufficient.**
    battle. Authoring grants before that is fixed is the `status.expose.*` failure with extra steps.
 4. **There are no real weapons.** Three hardcoded stub items on a `weapon|armor|trinket` allowlist
    (`src/FusionRpg.Core/Match/UniqueEquipmentCatalog.cs:7-12`).
+
+> ⛔ **CORRECTION, 2026-09-05 (module 19, at build time). Two of the four reasons are now false, and
+> one of the two that remain has changed shape.**
+>
+> | # | Verdict |
+> |---|---|
+> | 1. *"`rpg_action` does not exist"* | ⛔ **False.** `rpg_action` ships with `grantable` and `default_attack_eligible` (`RpgStore.Actions.cs:22-32`), `src/FusionRpg.Core/Actions/` holds 30+ files, and `rpg_action_grant` exists as option (a) verbatim — its DDL comment cites item 5 of §5.5 by name |
+> | 2. *"`item_base_type` does not exist"* | ✅ **Still true, and narrower than it reads.** Module 6 shipped the 740-row corpus and the Core readers but **no table**, so `item_granted_action.container_id` carries no FK — a wiring gap, not a wall |
+> | 3. *"Eleven of twelve kinds are `Battle = None`"* | ⛔ **False** — see §3.6's correction above |
+> | 4. *"There are no real weapons"* | ✅ **Still true.** Three stubs (`UniqueEquipmentCatalog`) and four relics |
+>
+> **The v1 answer is unchanged and the reasons for it are not.** What actually blocks content today is
+> **X3**: nothing turns an action seed into an `rpg_action` row (`ActionSeeder.Generate` has zero
+> production callers), so a grant would name a table nothing fills. Gate **GA2** — DDL, validator,
+> reason codes, **zero content rows** — shipped 2026-09-05 and is the honest half.
+>
+> Handshake **item 8** is likewise no longer open: `CapPolicy` (action program, T24) answers it by
+> naming which existing cap governs — held unlocks and equipped skills are capped, **granted by paid
+> sources is uncapped on purpose** — so §3.7(d)'s proposed 8 and `TooManyGrantedActions` have no
+> raiser on either side of the seam.
 
 **So v1 for this lane is a written seam and zero rows in the database.** Under SC7 — *a row no code
 consumes is not content; it is a lie in a table* — shipping the column early would be the defect this

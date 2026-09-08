@@ -21,6 +21,24 @@ A legion is a `rpg_world_entities` row of kind `legion` with members drawn from 
 | **Supply** | in supply if a chain of friendly-controlled sectors and open lanes connects it to the homeworld; out of supply costs attrition each turn |
 | **State** | `idle` · `marching` · `routed` — routed legions fall back and skip a turn's orders |
 
+### What `routed` falls back to
+
+Amended 2026-09-05. The rule reads as one line, but "fall back" has two shapes: a legion caught
+mid-crossing a lane still carries `on_lane_id`/`on_lane_toward_sector_id`, so it simply turns around on
+the lane it was already on. A legion that fully *arrived* at a sector this same turn — a march that
+completed, `on_lane_id` cleared like any ordinary arrival — has nothing left in its stored state to
+retreat down, even though it did use a lane to get there this turn.
+
+The first cut of this feature only wired the mid-crossing shape and left the second silently falling
+through to "nowhere to fall back from" — indistinguishable in code from a genuine long-standing
+garrison losing a fight on ground it already held. That is a real completeness gap, not an intended
+scope line: an attack that fails should retreat the way it came, not stand entrenched in the sector it
+failed to take. Closed the same day by threading which lane an attacker used to arrive, entity id to
+lane id, as movement-phase-local data (never a stored `WorldEntity` field, never hashed) from
+`MovementPhase` down through `BattleReporting.Fight` to `BattleApplication`'s own fall-back logic — it
+cannot outlive the `MovementPhase.Run` call that produced it, so nothing new is actually remembered
+about the world.
+
 ### What `hold` is for
 
 Amended 2026-08-22. `hold` was listed as a stance from wave 1, documented as "a static garrison in place", and behaved in code exactly like `march` — full movement, no effect. Pricing `scout` made the gap obvious, and closing it turned out to fix something worse.

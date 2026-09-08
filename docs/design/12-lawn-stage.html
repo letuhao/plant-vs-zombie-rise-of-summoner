@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lawn stage — interactive catalog — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Plate 12 — lawn interactive. Promote shared rules into _kit if approved. */
+  .p12-key { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0 0; }
+  .p12-key .k { display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px var(--sp-2); border-radius: var(--r-pill);
+    border: 1px solid var(--border-control); font-size: var(--text-2xs);
+    text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .p12-key .k::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--muted); }
+  .p12-key .k[data-b="built"]::before { background: var(--ok); }
+  .p12-key .k[data-b="wiring"]::before { background: var(--warn); }
+  .p12-key .k[data-b="real"]::before { background: var(--bad); }
+  .bucket { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px;
+    border-radius: var(--r-pill); font-size: var(--text-2xs); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    border: 1px solid var(--border-control); color: var(--muted); white-space: nowrap; }
+  .bucket[data-b="built"] { color: var(--ok); border-color: rgb(111 191 115 / .5); }
+  .bucket[data-b="wiring"] { color: var(--warn); border-color: rgb(216 169 79 / .5); }
+  .bucket[data-b="real"] { color: var(--bad); border-color: rgb(217 123 123 / .5); }
+
+  .lawn-board { position: absolute; top: 52px; right: 12px; bottom: 88px; left: 284px; display: grid;
+    grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(5, 1fr); gap: 3px; }
+  .cell.is-spawn { background: rgb(217 123 123 / .07); }
+  .cell-stack { position: relative; display: grid; place-items: center; }
+  .cell-stack .occ { position: absolute; font-size: 18px; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .5)); }
+  .cell-stack .pip-more { position: absolute; right: 2px; bottom: 2px;
+    min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--r-pill);
+    background: var(--panel-raised); border: 1px solid var(--border-control);
+    font-size: 9px; font-family: var(--font-mono); font-weight: 800; }
+  .occ-unique { position: absolute; top: -3px; left: -3px; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--sun); border: 1px solid var(--panel); z-index: 2; }
+  .hp-sliver { height: 3px; background: var(--panel-inset); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .hp-sliver i { display: block; height: 100%; background: var(--ok); }
+  .doll .sl.locked { border-style: dotted; opacity: .6; }
+
+  .dock { position: absolute; top: 52px; left: 8px; bottom: 88px; width: 268px;
+    z-index: var(--band-panel); display: flex; flex-direction: column;
+    background: var(--panel); border: 1px solid var(--border-control); border-radius: var(--r-md);
+    box-shadow: var(--sh-layer); overflow: hidden; }
+  .dock header { display: flex; align-items: center; gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--border); }
+  .dock .body { flex: 1; overflow: auto; min-height: 0; }
+  .dock .tools { display: flex; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--border); align-items: center; }
+
+  .sheet-landing { display: grid; grid-template-columns: 168px minmax(0, 1.1fr) minmax(0, .9fr);
+    gap: var(--sp-4); min-width: 0; }
+  @media (max-width: 900px) { .sheet-landing { grid-template-columns: 1fr; } }
+  .doll { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .doll .sl { min-height: 44px; border: 1px dashed var(--border-control); border-radius: var(--r-sm);
+    background: var(--panel-inset); display: grid; place-items: center; text-align: center;
+    font-size: 9px; font-weight: 800; color: var(--muted); padding: 2px; }
+  .doll .sl.has { border-style: solid; border-color: var(--rarity-3); color: var(--text); background: var(--panel); }
+  .apt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .apt { display: grid; grid-template-columns: minmax(0, 1fr) 28px; gap: 4px; align-items: center;
+    font-size: var(--text-2xs); }
+  .apt .t { height: 6px; background: var(--panel-inset); border-radius: var(--r-pill); overflow: hidden; }
+  .apt .t i { display: block; height: 100%; background: var(--lawn-hot); }
+  .livebox { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-3);
+    background: var(--panel-inset); display: grid; gap: var(--sp-2); }
+  .action-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .sheet-scroll { max-height: 520px; overflow: auto; padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+
+  .bar-dock { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+    z-index: var(--band-hud); display: flex; gap: var(--sp-2); align-items: flex-end;
+    padding: 6px 8px; background: rgb(11 9 7 / .72); border: 1px solid var(--border-control);
+    border-radius: var(--r-md); }
+
+  .contrast { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
+  .contrast .col { padding: var(--sp-3); border-radius: var(--r-md); border: 1px dashed var(--border); min-width: 0; overflow: hidden; }
+  .contrast .col.bad { border-color: rgb(217 123 123 / .45); }
+  .contrast .col.good { border-color: rgb(111 191 115 / .45); }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Lawn stage — interactive catalog</h1>
+  <p>
+    The lawn as a <em>monitor you can act from</em>: stacked cells you can read without a click,
+    a cell list that is the same creature collection as Creatures, a character sheet that is
+    actually a character, unique deploy onto a cell, and an off-board combat book (HoMM3 hero
+    spells while stacks fight — the commander is not a tile). Contract:
+    <a href="spec-lawn-interactive.md">spec-lawn-interactive.md</a>.
+    Supersedes <a href="04-run-stages.html">plate 04</a> lawn interactive chrome (the stage-vs-layer
+    proof there still stands). Replaces plate 08&rsquo;s Overview-as-landing for the actor panel.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — audit-folded 2026-09-06 · not build-authorized</span>
+    <span class="tag">Plate 12</span>
+    <span class="tag">GG-1 · GG-9 · GG-11 · GG-15 · GG-23 · GG-26 · GG-46 · GG-50 · GG-60 · GG-61</span>
+  </p>
+  <div class="p12-key">
+    <span class="k" data-b="built">Built</span>
+    <span class="k" data-b="wiring">Wiring gap</span>
+    <span class="k" data-b="real">Real gap</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="04-run-stages.html">← Plate 04</a>
+  <a href="08-actor-sheet.html">Plate 08</a>
+  <a href="#a">A · Shared list</a>
+  <a href="#b">B · Stage</a>
+  <a href="#c">C · Cell stack</a>
+  <a href="#d">D · Collection</a>
+    <a href="13-actor-sheet.html">Plate 13 · Actor sheet</a>
+  <a href="#f">F · Spawn</a>
+  <a href="#g">G · Orders</a>
+  <a href="#h">H · HUD</a>
+  <a href="#i">I · States</a>
+  <a href="#j">J · Settled</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Shared components — invent nothing on the lawn</h2>
+  <p class="lede">
+    Two entity surfaces, five lawn clusters, everything else already specified. A third actor list
+    on the lawn is a defect, not a feature. <span class="ref">GG-9</span>
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Id</th><th>Consumers</th><th>Bucket</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>ActorCollection</strong> — list / grid / paging</td>
+          <td>Creatures · cell dock · spawn tray · scope picker <em>consume</em> it</td>
+          <td><span class="bucket" data-b="real">real</span> new widget; CreaturesLayer is list-only UniqueActor policy, not a lift</td>
+        </tr>
+        <tr>
+          <td><strong>ActorSheet</strong> — character landing + depth tabs</td>
+          <td>Creatures · Commanders · cell drill-in (Pacts later)</td>
+          <td><span class="bucket" data-b="real">real</span> landing replaces actor-sheet-shell; same filename</td>
+        </tr>
+        <tr>
+          <td>LawnMatchHud</td>
+          <td>This stage only (cluster)</td>
+          <td><span class="bucket" data-b="wiring">wiring</span> plate 04 skeleton; sun vs hunger still conflatable</td>
+        </tr>
+        <tr>
+          <td>CellStack</td>
+          <td>Phaser board</td>
+          <td><span class="bucket" data-b="wiring">wiring</span> occupants exist; overlap + +K not specified before</td>
+        </tr>
+        <tr>
+          <td>CellOccupancyDock</td>
+          <td>Composes ActorCollection after occupant adapter</td>
+          <td><span class="bucket" data-b="real">real</span> reserved left column; 12-col camera shrinks</td>
+        </tr>
+        <tr>
+          <td>SpawnTray</td>
+          <td>Composes ActorCollection + SpawnTargeting ghost</td>
+          <td><span class="bucket" data-b="wiring">wiring</span> Intent+ghost built; typeId box is the player UI</td>
+        </tr>
+        <tr>
+          <td>CommanderActionBar</td>
+          <td>Off-board combat book; ActionSlot from spec-action-layer</td>
+          <td><span class="bucket" data-b="real">real</span> enqueue Intent; FE does not run A2 range</td>
+        </tr>
+        <tr>
+          <td>Token · Chip · Row · Card · meters · ActionSlot · paper-doll · derived sheet · unit HUD</td>
+          <td>Compose</td>
+          <td><span class="bucket" data-b="built">built / specified</span> do not redraw</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Commander is not a lawn tile.</strong> Today the chip is Dave (<code>CommanderId</code>).
+      The order bar is HoMM3 <em>combat</em> hero spells while stacks fight, not the adventure map
+      book (that is world-map Orders). Patron is a different aura.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Stage composition — board stays; chrome docks</h2>
+  <p class="lede">
+    Cell click opens a <em>reserved left</em> dock. The camera shrinks so all 12 columns stay
+    visible, including spawn lanes. <strong>No page scroll</strong> on this stage — HUD, dock chrome,
+    board, combat book. Only the dock list body may scroll. Unity keeps running.
+    <span class="ref">GG-11 · GG-5 amendment</span>
+  </p>
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">⌂</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">✧</span>Creatures</button>
+          <button><span class="g">◈</span>Relics</button>
+        </nav>
+        <div class="stagearea">
+          <div class="stagebox" style="position:absolute;inset:0;height:auto;border:0;border-radius:0">
+            <div class="hud">
+              <div class="cluster">
+                <span class="frame frame--chip" data-rarity="5">☀</span>
+                <span class="val" style="font-size:var(--text-lg)">1 240</span>
+                <span class="readout">sun bank</span>
+              </div>
+              <div class="cluster">
+                <span class="tag tag--warn">Wave 7 of 14</span>
+                <span class="readout">next 0:18</span>
+              </div>
+              <span class="spacer"></span>
+              <div class="cluster">
+                <span class="chip" style="padding:1px var(--sp-2) 1px 1px"><span class="frame frame--chip" data-rarity="4">🧑‍🌾</span><span class="nm">Dave</span></span>
+                <span class="chip" style="padding:1px var(--sp-2) 1px 1px"><span class="frame frame--chip" data-rarity="3">⚔</span><span class="nm">Might</span></span>
+              </div>
+              <div class="cluster">
+                <span class="readout">fielded</span>
+                <span class="chip" style="padding:1px var(--sp-2) 1px 1px"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+              </div>
+            </div>
+
+            <div class="lawn-board">
+              <div class="cell is-self cell-stack" style="grid-area:2/2">
+                <span class="occ-unique" title="Fielded unique"></span>
+                <span class="occ" style="transform:translate(-8px,-6px)">🌻</span>
+                <span class="occ" style="transform:translate(4px,4px);font-size:16px">🌱</span>
+                <span class="pip-more">+1</span>
+              </div>
+              <div class="cell" style="grid-area:3/2">🌵</div>
+              <div class="cell is-target cell-stack" style="grid-area:3/7">
+                <span class="occ" style="transform:translate(-6px,-4px)">🧟</span>
+                <span class="occ" style="transform:translate(6px,6px)">🧟</span>
+              </div>
+              <div class="cell" style="grid-area:2/10">🧟</div>
+              <div class="cell is-spawn" style="grid-area:2/12">🧟</div>
+              <div class="cell is-spawn" style="grid-area:4/12">🧟</div>
+              <div class="cell is-spawn" style="grid-area:5/11">🧟</div>
+            </div>
+
+            <aside class="dock" aria-label="This cell">
+              <header>
+                <strong>Lane 2 · Column 2</strong>
+                <span class="tag">3 here</span>
+                <span style="flex:1"></span>
+                <span class="esc">Esc</span>
+              </header>
+              <div class="tools">
+                <span class="seg">
+                  <button class="is-active">List</button>
+                  <button>Grid</button>
+                </span>
+                <span class="readout">Fielded first</span>
+              </div>
+              <div class="body">
+                <div class="row-flex" style="padding:var(--sp-2) var(--sp-3);background:var(--panel-raised)">
+                  <span class="frame frame--chip" data-rarity="3">🌻</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-weight:800">Emberling</div>
+                    <div class="readout">Fielded · Sunflower · Lv 14</div>
+                    <div class="hp-sliver" title="HP"><i style="width:69%"></i></div>
+                  </div>
+                  <span class="tag tag--ok">unique</span>
+                </div>
+                <div class="row-flex" style="padding:var(--sp-2) var(--sp-3)">
+                  <span class="frame frame--chip">🌱</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-weight:800">Peashooter</div>
+                    <div class="readout">Wave · species only</div>
+                    <div class="hp-sliver"><i style="width:100%"></i></div>
+                  </div>
+                  <span class="tag">wave</span>
+                </div>
+                <div class="row-flex" style="padding:var(--sp-2) var(--sp-3)">
+                  <span class="frame frame--chip">🪴</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-weight:800">Lily Pad</div>
+                    <div class="readout">Wave · under-stack</div>
+                    <div class="hp-sliver"><i style="width:82%"></i></div>
+                  </div>
+                  <span class="tag">wave</span>
+                </div>
+              </div>
+            </aside>
+
+            <div class="bar-dock" aria-label="Orders">
+              <button class="actionslot is-selected"><span class="key">1</span><span class="g">☀</span><span class="n">Sunfall</span><span class="cost">40 sun</span></button>
+              <button class="actionslot"><span class="key">2</span><span class="g">🌩</span><span class="n">Lane bolt</span><span class="cost">2 yang</span></button>
+              <button class="actionslot is-unaffordable" title="Need 80 sun in the bank"><span class="key">3</span><span class="g">🌀</span><span class="n">Rewind</span><span class="cost">80 sun</span></button>
+              <button class="actionslot" style="opacity:.35;border-style:dashed"><span class="key">4</span><span class="n">locked</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Always open the list on cell click.</strong> Count = 1 still shows the dock so
+      overlap cannot hide the other occupant. Sheet is a second push. Space pauses; Enter confirms
+      the tile. Armed orders use a separate targeting mode — occupied click does not dump inspect.
+    </div>
+    <p class="vp-note">Simulated 16:9 stage, <strong>12 columns</strong>, dock reserved (not overlaid). Floor contract is 1280×720 CSS px (GG-36).</p>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Cell stack — monitor without click</h2>
+  <p class="lede">Phaser draws the pile. React does not clone sprites. Topmost keeps plate 10 HUD; extras offset; overflow is a pip.</p>
+  <div class="spec">
+    <div class="row-flex" style="gap:var(--sp-6);align-items:flex-end;flex-wrap:wrap">
+      <div>
+        <p class="spec-label">Empty</p>
+        <div class="cell" style="width:72px;height:72px"></div>
+      </div>
+      <div>
+        <p class="spec-label">One unique</p>
+        <div class="cell is-self cell-stack" style="width:72px;height:72px">
+          <span class="occ-unique" title="Fielded unique"></span>
+          <span class="occ">🌻</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Overlap (3)</p>
+        <div class="cell is-self cell-stack" style="width:72px;height:72px">
+          <span class="occ-unique" title="Fielded unique"></span>
+          <span class="occ" style="transform:translate(-8px,-6px)">🌻</span>
+          <span class="occ" style="transform:translate(2px,2px);font-size:16px">🌱</span>
+          <span class="occ" style="transform:translate(10px,10px);font-size:14px">🪴</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Overflow +K</p>
+        <div class="cell cell-stack" style="width:72px;height:72px">
+          <span class="occ" style="transform:translate(-6px,-4px)">🧟</span>
+          <span class="occ" style="transform:translate(6px,6px)">🧟</span>
+          <span class="pip-more">+4</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Focused (keyboard)</p>
+        <div class="cell is-target cell-stack" style="width:72px;height:72px"><span class="occ">🌵</span></div>
+      </div>
+    </div>
+    <div class="note">
+      Keyboard confirm on a focused cell opens the <em>dock</em>, not only the top occupant — overlap
+      must not be mouse-only. <span class="ref">GG-21</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · ActorCollection — one new widget, three consumers</h2>
+  <p class="lede">
+    Not a lift of CreaturesLayer. Volume policy (≤24 / 25–240 / search-first) lives here once.
+    Occupants need an adapter before they become rows — generals have no <code>instanceId</code>.
+  </p>
+  <div class="spec">
+    <div class="contrast">
+      <div class="col good">
+        <p class="spec-label">List density — cell dock / picker</p>
+        <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">
+          <div class="row-flex" style="padding:var(--sp-2) var(--sp-3);background:var(--panel-raised)">
+            <span class="frame frame--chip" data-rarity="3">🌻</span>
+            <div style="flex:1"><b>Emberling</b><div class="readout">Fielded · Lv 14</div><div class="hp-sliver"><i style="width:69%"></i></div></div>
+            <span class="tag tag--ok">unique</span>
+          </div>
+          <div class="row-flex" style="padding:var(--sp-2) var(--sp-3)">
+            <span class="frame frame--chip">🌱</span>
+            <div style="flex:1"><b>Peashooter</b><div class="readout">Wave · species</div><div class="hp-sliver"><i style="width:100%"></i></div></div>
+            <span class="tag">wave</span>
+          </div>
+        </div>
+      </div>
+      <div class="col good">
+        <p class="spec-label">Grid density — spawn tray / Creatures</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)">
+          <div class="card" style="padding:var(--sp-2)">
+            <div class="hd"><span class="frame frame--card" data-rarity="3">🌻</span>
+              <div><div class="nm">Emberling</div><div class="meta"><span class="tag">Lv 14</span></div></div>
+            </div>
+            <div class="ft"><span class="tag tag--ok">ready</span><button class="btn btn--sm">Field</button></div>
+          </div>
+          <div class="card" style="padding:var(--sp-2);opacity:.55">
+            <div class="hd"><span class="frame frame--card" data-rarity="2">🌵</span>
+              <div><div class="nm">Thornlet</div><div class="meta"><span class="tag">Lv 9</span></div></div>
+            </div>
+            <div class="ft"><span class="tag">on expedition</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      Disabled Field carries the reason on focus: <em>Already on an expedition</em> — not a mute card.
+      <span class="ref">GG-55</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · ActorSheet opens plate 13</h2>
+  <p class="lede">
+    This stage composes <strong>ActorSheet</strong>; it does not re-draw the catalogs. Plate 12 §E
+    as a packed landing is retired. Complete closed lists (12 AptitudeTiles, 3 shield layers, 24
+    statuses, 6 elements + mastery, 15 roles, 28 combat families) live in
+    <a href="13-actor-sheet.html">13-actor-sheet.html</a>. The sheet is a no-scroll floor with
+    eight tabs; only derived / status / elemental lists scroll inside a region.
+  </p>
+  <div class="spec">
+    <div class="note">
+      Lawn chrome (this plate) also has <strong>no page scroll</strong>: HUD, reserved dock frame,
+      12-col board, combat book. The dock <em>list body</em> may scroll. Opening the sheet does not
+      pause Unity.
+    </div>
+    <p class="row-flex" style="flex-wrap:wrap;gap:var(--sp-2)">
+      <span class="tag">Condition</span><span class="tag">Aptitudes</span><span class="tag">Combat</span>
+      <span class="tag">Shield</span><span class="tag">Status</span><span class="tag">Elements</span>
+      <span class="tag">Kit</span><span class="tag">Paths</span>
+    </p>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · Field a unique — collection + ghost, not a type id</h2>
+  <p class="lede">Pick from the roster tray, target a cell, Intent only. Ghost is acknowledgement; the occupant appears when observe says so.</p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="stagebox" style="position:absolute;inset:0;height:auto;border:0;border-radius:0">
+        <div class="hud">
+          <div class="cluster"><span class="frame frame--chip" data-rarity="5">☀</span><span class="val">1 240</span></div>
+          <span class="spacer"></span>
+          <button class="btn btn--sm">Field a creature</button>
+        </div>
+        <div class="lawn-board">
+          <div class="cell is-range" style="grid-area:2/3;outline:2px dashed var(--sun)"></div>
+          <div class="cell is-spawn" style="grid-area:2/12"></div>
+        </div>
+        <aside class="dock">
+          <header><strong>Field</strong> <span class="readout">uniques ready</span><span style="flex:1"></span><span class="esc">Esc</span></header>
+          <div class="tools"><span class="seg"><button>List</button><button class="is-active">Grid</button></span></div>
+          <div class="body" style="padding:var(--sp-2);display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)">
+            <div class="card" style="padding:var(--sp-2);border-color:var(--sun)">
+              <div class="nm">Emberling</div>
+              <button class="btn btn--sm">Choose</button>
+            </div>
+            <div class="card" style="padding:var(--sp-2);opacity:.5">
+              <div class="nm">Thornlet</div>
+              <p class="readout">On expedition</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <div class="note">
+      No numeric species box on the player tray. Debug spawn stays behind developer mode.
+      <span class="ref">GG-23 · GG-24 · GG-40</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G · Orders — HoMM3 combat book (hero off the hex)</h2>
+  <p class="lede">
+    Caster is this-match Commander (Dave today). Keys 1–9. Pick → highlight observe chrome → Enter
+    enqueues Intent. Server/injector re-resolves the target. FE does not run battle range.
+    Unaffordable names the <em>stock</em>. Empty corpus shows locked slots, not fake Strike.
+  </p>
+  <div class="spec">
+    <div class="actionbar">
+      <button class="actionslot is-selected"><span class="key">1</span><span class="g">☀</span><span class="n">Sunfall</span><span class="cost">40 sun</span></button>
+      <button class="actionslot"><span class="key">2</span><span class="g">🌩</span><span class="n">Lane bolt</span><span class="cost">2 yang</span></button>
+      <button class="actionslot is-unaffordable"><span class="key">3</span><span class="g">🌀</span><span class="n">Rewind</span><span class="cost">80 sun</span></button>
+      <button class="actionslot" style="position:relative"><span class="key">4</span><span class="g">🛡</span><span class="n">Brace</span><span class="cd">4s</span></button>
+      <button class="actionslot" style="opacity:.35;border-style:dashed"><span class="key">5</span><span class="n">locked</span></button>
+    </div>
+    <p class="readout" style="margin-top:var(--sp-2)">Rewind: Need 80 in the sun bank — the bank, not Emberling&rsquo;s Sun pool. Yang on Lane bolt is the commander&rsquo;s <code>qi</code>.</p>
+    <div class="note">
+      Space is pause (IA §5), never confirm. Esc cancels an armed order before popping a panel.
+      Dock/sheet mute board arrows (GG-18); spawn targeting keeps them so the ghost can walk.
+      Unity keeps running under the sheet — F10 is overlay pause, not this panel.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== H -->
+<section class="sec" id="h">
+  <h2>H · Match HUD — collect what exists, split the two Suns</h2>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Cluster</th><th>Shows</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr><td>Sun bank</td><td>1 240</td><td>Match <code>pvz.*</code> — never actor hunger</td></tr>
+        <tr><td>Wave + clock + phase</td><td>Wave 7 · next 0:18 · In match</td><td>Match</td></tr>
+        <tr><td>Commander + aura</td><td>Dave · Might</td><td>Snapshot at board start — not Patron</td></tr>
+        <tr><td>Fielded</td><td>Bound unique <code>ActorChip</code>s</td><td>Bindings this match — not every living plant</td></tr>
+        <tr><td>Souls this run</td><td>Only if ledger already attributes lawn kills</td><td>Run — else omit</td></tr>
+        <tr><td>Transport</td><td>Pause / speed</td><td>Overlay pause contract</td></tr>
+        <tr><td>Focus</td><td>Lane 2 · Column 2</td><td>UI — player words</td></tr>
+      </tbody>
+    </table>
+    <div class="note">If it cannot be collected, omit or lock-with-reason. Do not invent a second sun or a fake capture cluster.</div>
+  </div>
+</section>
+
+<!-- ==================================================================== I -->
+<section class="sec" id="i">
+  <h2>I · Ugly states the implementation will otherwise guess</h2>
+  <div class="spec">
+    <div class="row-flex" style="flex-wrap:wrap;gap:var(--sp-4)">
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Collection empty (cell)</p>
+        <p class="readout">Nothing stands here. Field a creature, or pick another cell.</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Collection empty (spawn)</p>
+        <p class="readout">No one is free to field — they are on an expedition or already on the board.</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Sheet loading</p>
+        <p class="readout">Shell + pulse wells. No fake Emberling.</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Observe lag (RT-14)</p>
+        <p class="readout">Binding catching up — not a blank combat column.</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Long CJK name</p>
+        <p class="readout">墓园守望者阿什凯尔 · truncate in row, wrap in sheet header.</p>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <p class="spec-label">Intent rejected</p>
+        <p class="readout">Toast: The board refused Sunfall — not enough sun in the bank. Ghost clears.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== J -->
+<section class="sec" id="j">
+  <h2>J · What this plate settles</h2>
+  <div class="spec">
+    <ul>
+      <li>Two shared entity widgets: <strong>ActorCollection</strong> (new; consumers include Creatures) and <strong>ActorSheet</strong> (replaces actor-sheet-shell landing). Lawn docks compose them after an occupant adapter.</li>
+      <li>ActorSheet is a no-scroll floor with eight tabs. Complete catalogs: <a href="13-actor-sheet.html">plate 13</a>. AptitudeTile is not a number box. Shield is up to 3 layers. Status mastery ≠ live stacks.</li>
+      <li>General vs unique is one sheet with locks. Chips are <strong>Fielded</strong> / <strong>Wave</strong>. Wild is capture.</li>
+      <li>Commander never occupies a tile; orders are an off-board combat book. Intent enqueue, no FE range.</li>
+      <li>Match sun bank and actor Sun (<code>hunger</code>) are different clusters. Cost chips name the payer.</li>
+      <li>No <code>typeId</code> / <code>ptr</code> on player chrome. <code>?sel=</code> is <code>instanceId</code> only. GG-41 may keep the dump.</li>
+      <li>Dock is a reserved left column; 12 lawn columns stay visible. Canvas survives every panel. Unity does not pause because a sheet is open.</li>
+    </ul>
+    <p class="lede" style="margin-top:var(--sp-4)">Owner question (spec §14): keep Dave as <code>CommanderId</code> for v1, or promote unique-demon Commander now?</p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

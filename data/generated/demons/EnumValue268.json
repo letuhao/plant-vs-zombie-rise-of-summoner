@@ -1,0 +1,40 @@
+{
+  "acquisition": "CaptureOnly",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 268,
+  "magnitudes": {
+    "combat.block.shred.omni": 96,
+    "combat.parry.shred.omni": 96,
+    "combat.power.omni": 64,
+    "resource.max.hp": 480,
+    "resource.max.hunger": 400,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 1120,
+    "resource.regen.hp": 24,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "EnumValue268",
+  "theta": 0,
+  "traitPool": [
+    "alluring",
+    "necrotic",
+    "parasitic"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "cursed"
+  ]
+}

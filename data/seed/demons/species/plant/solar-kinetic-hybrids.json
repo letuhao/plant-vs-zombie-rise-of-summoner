@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:27:28Z",
+      "minorityValues": {
+        "aptitudePrimary": "Retribution"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Solar-Kinetic Hybrids"
+    ],
+    "gameTypeId": 963,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "sunwoven",
+    "reach": "long",
+    "reason": "The creature's mechanics focus on resource generation and defensive scaling rather than widespread destruction or existential threat.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateSunNut",
+    "targetPreference": "swarm",
+    "traits": [
+      "Bowling-ball projectile generation",
+      "Resource-conversion (Sunlight to Energy)",
+      "Reactive health-regeneration",
+      "Kinetic-damage scaling"
+    ],
+    "variants": [
+      "normal",
+      "blessed",
+      "ancient"
+    ],
+    "verdict": "too-high"
+  }
+]

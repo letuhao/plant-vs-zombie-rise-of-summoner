@@ -1,0 +1,741 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/2"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while nodeClass is active — nodeClass wins.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The more layers applied, the harder the shell becomes to breach.",
+      "id": "skill.allpeater-def-t1-n0",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-11",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the shield becomes a heartbeat, driving the flow of energy through the vessel.",
+      "id": "skill.allpeater-def-t10-n1",
+      "name": "Osmotic Pulsation",
+      "nameKey": "tree.node.osmotic-pulsation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the pulse dictates the strength of the barrier.",
+      "id": "skill.allpeater-def-t10-n2",
+      "name": "Resonant Shell",
+      "nameKey": "tree.node.resonant-shell-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while branch is active — branch wins.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The more the earth claims you, the harder you are to uproot.",
+      "id": "skill.allpeater-def-t3-n0",
+      "name": "Deep Rooted",
+      "nameKey": "tree.node.deep-rooted-9",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while branch is active — branch wins.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The soul anchors itself into the loam, making the body as unyielding as the ancient wood.",
+      "id": "skill.allpeater-def-t3-n1",
+      "name": "Deep Rooting",
+      "nameKey": "tree.node.deep-rooting-11",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+      "id": "skill.allpeater-def-t4-n0",
+      "name": "Kinetic Recirculation",
+      "nameKey": "tree.node.kinetic-recirculation-8",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bark thickens where the essence pools, turning wounds into hardened amber.",
+      "id": "skill.allpeater-def-t5-n0",
+      "name": "Sap-Sealed Grafts",
+      "nameKey": "tree.node.sap-sealed-grafts",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The boundary between self and shell becomes a permeable membrane, drawing strength from the very energy meant to deflect it.",
+      "id": "skill.allpeater-def-t6-n0",
+      "name": "Osmotic Siphon",
+      "nameKey": "tree.node.osmotic-siphon-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomAttachPoint is active — atomAttachPoint wins.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "A thick, translucent resin that hardens upon impact, cycling energy between the skin and the spirit.",
+      "id": "skill.allpeater-def-t9-n0",
+      "name": "Vitreous Sap",
+      "nameKey": "tree.node.vitreous-sap-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the shield dictates the pace of the blood.",
+      "id": "skill.allpeater-def-t9-n1",
+      "name": "Cyclical Osmosis",
+      "nameKey": "tree.node.cyclical-osmosis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The sap flows in rhythmic pulses, reinforcing the shell even as it breaks.",
+      "id": "skill.allpeater-def-t9-n2",
+      "name": "Cyclical Grafting",
+      "nameKey": "tree.node.cyclical-grafting-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "Precision is sharpened by the keenest of edges.",
+      "id": "skill.allpeater-off-t1-n0",
+      "name": "Focused Edge",
+      "nameKey": "tree.node.focused-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-override",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air grows heavy with the scent of overripe nectar, bending the very laws of elemental stability.",
+      "id": "skill.allpeater-off-t10-n0",
+      "name": "Primal Saturation",
+      "nameKey": "tree.node.primal-saturation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Light breaks against the jagged edges of the petal, scattering its fury in impossible directions.",
+      "id": "skill.allpeater-off-t10-n1",
+      "name": "Fractured Prism",
+      "nameKey": "tree.node.fractured-prism-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The barrier between essences thins, allowing the raw overflow to bypass the physical shell entirely.",
+      "id": "skill.allpeater-off-t10-n2",
+      "name": "Prismatic Rupture",
+      "nameKey": "tree.node.prismatic-rupture-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while nodeClass is active — nodeClass wins.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The weight of the blow is matched only by the fury behind it.",
+      "id": "skill.allpeater-off-t2-n0",
+      "name": "Savage Might",
+      "nameKey": "tree.node.savage-might-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while nodeClass is active — nodeClass wins.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The very essence of the wild swells within the strike, turning raw strength into a jagged edge.",
+      "id": "skill.allpeater-off-t3-n0",
+      "name": "Primal Surge",
+      "nameKey": "tree.node.primal-surge-8",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The precision of the strike dictates the severity of the wound.",
+      "id": "skill.allpeater-off-t3-n1",
+      "name": "Vicious Accuracy",
+      "nameKey": "tree.node.vicious-accuracy-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air hums with a frequency that bends the very nature of the elements.",
+      "id": "skill.allpeater-off-t4-n0",
+      "name": "Resonant Conduit",
+      "nameKey": "tree.node.resonant-conduit-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while nodeClass is active — nodeClass wins.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The scent of blood fuels the hunger for more.",
+      "id": "skill.allpeater-off-t4-n1",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator-11",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air shimmers as elemental energies refuse to remain contained within their natural boundaries.",
+      "id": "skill.allpeater-off-t5-n0",
+      "name": "Prismatic Overload",
+      "nameKey": "tree.node.prismatic-overload-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while element is active — element wins.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The flow of energy becomes a singular, driving force.",
+      "id": "skill.allpeater-off-t5-n1",
+      "name": "Elemental Resonance",
+      "nameKey": "tree.node.elemental-resonance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The light does not merely illuminate the target; it fuels the strike.",
+      "id": "skill.allpeater-off-t6-n0",
+      "name": "Photosynthetic Lens",
+      "nameKey": "tree.node.photosynthetic-lens",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.keen-edge",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The edge is sharpened by the clarity of the kill.",
+      "id": "skill.allpeater-off-t6-n1",
+      "name": "Serrated Sight",
+      "nameKey": "tree.node.serrated-sight",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-override",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very essence of the garden rebels, forcing the elements to overflow their natural boundaries.",
+      "id": "skill.allpeater-off-t7-n0",
+      "name": "Primal Overgrowth",
+      "nameKey": "tree.node.primal-overgrowth",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The light refracts through the thickest petals, splitting into a spectrum of devastating force.",
+      "id": "skill.allpeater-off-t8-n0",
+      "name": "Prismatic Sieve",
+      "nameKey": "tree.node.prismatic-sieve",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the pulse dictates the speed of the bloom.",
+      "id": "skill.allpeater-off-t8-n1",
+      "name": "Accelerated Germination",
+      "nameKey": "tree.node.accelerated-germination",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very essence of power refuses to be contained, bleeding into the surrounding air.",
+      "id": "skill.allpeater-off-t9-n0",
+      "name": "Unstable Catalyst",
+      "nameKey": "tree.node.unstable-catalyst",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The resonance of the elements becomes a violent, uncontrolled surge.",
+      "id": "skill.allpeater-off-t9-n1",
+      "name": "Harmonic Overload",
+      "nameKey": "tree.node.harmonic-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "AllPeater"
+}

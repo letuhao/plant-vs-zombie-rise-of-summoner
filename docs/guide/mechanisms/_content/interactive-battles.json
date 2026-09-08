@@ -1,0 +1,71 @@
+{
+  "slug": "interactive-battles",
+  "title": "Interactive battles",
+  "status": "WIP",
+  "kicker": "Combat language · Delve · map fights",
+  "pillar": {"text": "Combat", "href": "combat.md"},
+  "loopLine": "Combat · Delve · map fights",
+  "hook": "**WIP:** turn-based fights on a **battle stage** you play yourself — initiative, action bar, targets, wind-up and interrupt feel. Not finished yet; many web fights still auto-resolve.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. You do not yet pilot every turn on a shipped battle stage."},
+    {"term": "Interactive", "meaning": "You pick targets and spend actions. Different from watching an auto-resolve report."},
+    {"term": "Auto-resolve", "meaning": "Expeditions and many web fights still resolve with the same combat math without you clicking each turn."},
+    {"term": "Battle stage", "meaning": "The place you fight hands-on — not the lawn board and not the rift map itself."},
+    {"term": "Same math", "meaning": "Auto-resolve and interactive use the same fight language. You feel the roster either way; only the pilot changes."}
+  ],
+  "alsoTrue": [
+    "Skills and meters that feed the action bar are also WIP — see [skills and loadouts](skills-loadouts) and [actor meters](actor-meters).",
+    "Named recipe catalog stays Vision — [named reactions](named-reactions)."
+  ],
+  "sections": [
+    {
+      "title": "Not finished yet",
+      "paras": [
+        "Today you feel the roster through auto-resolve more often than through a turn bar you own.",
+        "When the battle stage ships, you pilot turns: initiative track, action bar, targets, reactions and counters."
+      ]
+    },
+    {
+      "title": "What it will feel like",
+      "intro": "Design shape from the combat pillar:",
+      "cards": [
+        {"name": "Initiative", "body": "Who acts when on the track."},
+        {"name": "Action bar", "body": "What you can spend this turn."},
+        {"name": "Targets", "body": "You pick who the action hits."},
+        {"name": "Reactions", "body": "Windows to interrupt, counter, or answer — feel first; named catalog later."}
+      ],
+      "diagram": [
+        "  roster (same)  ->  auto-resolve (today, many fights)",
+        "                 ->  battle stage (WIP)  ->  you pilot turns"
+      ]
+    },
+    {
+      "title": "Where it hangs",
+      "paras": [
+        "Delves and map fights want this stage. Expeditions can stay auto-resolve on purpose.",
+        "Map handoff into battle is its own WIP — [map → battle handoff](map-battle-handoff)."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Keep sending expeditions and reading returns — auto-resolve is intentional for idle.",
+    "Build roster power; the same math will matter when you pilot.",
+    "When a battle stage appears in a build, follow on-screen initiative and targeting — do not expect the lawn controls."
+  ],
+  "doNote": "Lawn remains the first core board match — [lawn match](lawn-match). This page is the hands-on stage elsewhere.",
+  "mixUps": [
+    {"q": "Why don’t I get turns on expeditions?", "a": "Expeditions can stay auto-resolve. Interactive battles are a different place."},
+    {"q": "Is the lawn becoming turn-based?", "a": "No. The lawn stays a live board match. This is a separate battle stage."},
+    {"q": "Does auto-resolve use weaker math?", "a": "No. Same combat language — you just are not piloting each action."},
+    {"q": "Where is the battle stage button?", "a": "WIP — not finished. Absence is expected."},
+    {"q": "Are named combo recipes required first?", "a": "No. Reaction windows can ship with battles; the named catalog is Vision."}
+  ],
+  "next": ["skills-loadouts"],
+  "related": ["skills-loadouts", "named-reactions", "map-battle-handoff", "actor-meters"],
+  "sources": [
+    "docs/guide/combat.md §Interactive battles",
+    "docs/guide/the-loops.md §Expeditions · Delve · Combat depth",
+    "docs/guide/mechanisms/interactive-battles.md (prior stub)"
+  ]
+}

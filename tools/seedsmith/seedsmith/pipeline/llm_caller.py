@@ -43,44 +43,199 @@ class LlmCallerConfig:
     attempts: int = 2               # hammering a wedged local queue with retries makes it worse
     retry_delay: float = 3.0
     max_heal: int = 3
+    #: ⛔ Real incident, 2026-09-08: a quantized local model degenerated into a repeated-token
+    #: loop inside a schema field whose only constraint was a `pattern` (JSON Schema `pattern` is
+    #: not supported by llama.cpp's grammar-from-schema converter, so it is unenforced at decode
+    #: time — see `call_model`'s own `schema` docstring) and no `maxLength` — every request before
+    #: this field existed had NO upper bound on response length at all, so the loop ran past 20K+
+    #: tokens with nothing to stop it short of the model's full context window. This is a second,
+    #: independent safety net at the transport layer — it bounds every call regardless of whether
+    #: a caller's own schema happens to cap every field.
+    max_tokens: int = 16384
 
 
 DEFAULT_CONFIG = LlmCallerConfig()
 
 
-def load_config(toml_path: Path | None = None) -> LlmCallerConfig:
-    """Read the `[pipeline.llm_caller]` table from `seedsmith.toml`, falling back to
-    `DEFAULT_CONFIG` for any key the file doesn't set — including every key, if the file
-    itself doesn't exist yet (spec-foundation §7.3: every seedsmith flag has a config
-    equivalent, but nothing in seedsmith requires a `seedsmith.toml` to exist today).
+#: `.env` key -> `LlmCallerConfig` field, and the type each value parses as. `.env` is the
+#: per-machine override layer (gitignored, spec below) — it wins over `seedsmith.toml`, which
+#: wins over `LlmCallerConfig`'s own built-in defaults.
+_ENV_KEYS: "dict[str, tuple[str, type]]" = {
+    "SEEDSMITH_LLM_ENDPOINT": ("endpoint", str),
+    "SEEDSMITH_LLM_MODEL": ("model", str),
+    "SEEDSMITH_LLM_TIMEOUT": ("timeout", float),
+    "SEEDSMITH_LLM_ATTEMPTS": ("attempts", int),
+    "SEEDSMITH_LLM_RETRY_DELAY": ("retry_delay", float),
+    "SEEDSMITH_LLM_MAX_HEAL": ("max_heal", int),
+    "SEEDSMITH_LLM_MAX_TOKENS": ("max_tokens", int),
+}
 
-    A missing file or a missing table is a legitimate default. A *malformed* file is not — it
-    is not distinguished from a healthy default here on purpose, matching this program's
-    running rule that a wrong value silently treated as absent is the defect class this whole
-    audit exists to catch; `tomllib.TOMLDecodeError` propagates uncaught.
+
+def _parse_dotenv(path: Path) -> "dict[str, str]":
+    """`KEY=value` lines, `#` comments, blank lines skipped — deliberately not the full dotenv
+    spec (no quoting, no multi-line, no export). seedsmith's own values are all bare scalars
+    (a URL, a model id, small numbers), so the minimal parser is honest about what it supports
+    rather than depending on `python-dotenv` for six key names.
     """
-    path = toml_path or Path("seedsmith.toml")
+    out: "dict[str, str]" = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, _, value = stripped.partition("=")
+        out[key.strip()] = value.strip()
+    return out
+
+
+def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = None) -> LlmCallerConfig:
+    """Read `[pipeline.llm_caller]` from `seedsmith.toml`, then layer `.env` on top (`.env` is
+    per-machine and wins — a real endpoint/model override belongs there, never hand-edited into
+    the committed toml). Falls back to `DEFAULT_CONFIG` for any key neither file sets, including
+    every key when NEITHER file exists (spec-foundation §7.3: every seedsmith flag has a config
+    equivalent, but nothing in seedsmith requires either file to exist today).
+
+    A missing file or a missing table/key is a legitimate default. A *malformed* TOML file is
+    not — matching this program's running rule that a wrong value silently treated as absent is
+    the defect class this whole audit exists to catch; `tomllib.TOMLDecodeError` propagates
+    uncaught. A malformed `.env` line is silently skipped (`_parse_dotenv`'s own minimal-parser
+    contract) since a stray comment or blank line is normal, not a defect.
+    """
+    toml_path = toml_path or Path("seedsmith.toml")
     section: dict = {}
-    if path.exists():
-        with path.open("rb") as f:
+    if toml_path.exists():
+        with toml_path.open("rb") as f:
             data = tomllib.load(f)
         section = data.get("pipeline", {}).get("llm_caller", {})
         if not isinstance(section, dict):
             section = {}
+
     base = DEFAULT_CONFIG
-    return LlmCallerConfig(
-        endpoint=section.get("endpoint", base.endpoint),
-        model=section.get("model", base.model),
-        timeout=section.get("timeout", base.timeout),
-        attempts=section.get("attempts", base.attempts),
-        retry_delay=section.get("retry_delay", base.retry_delay),
-        max_heal=section.get("max_heal", base.max_heal),
-    )
+    resolved = {
+        "endpoint": section.get("endpoint", base.endpoint),
+        "model": section.get("model", base.model),
+        "timeout": section.get("timeout", base.timeout),
+        "attempts": section.get("attempts", base.attempts),
+        "retry_delay": section.get("retry_delay", base.retry_delay),
+        "max_heal": section.get("max_heal", base.max_heal),
+        "max_tokens": section.get("max_tokens", base.max_tokens),
+    }
+
+    dotenv_path = dotenv_path or Path(".env")
+    if dotenv_path.exists():
+        env_values = _parse_dotenv(dotenv_path)
+        for env_key, (field, caster) in _ENV_KEYS.items():
+            if env_key in env_values and env_values[env_key] != "":
+                resolved[field] = caster(env_values[env_key])
+
+    return LlmCallerConfig(**resolved)
+
+
+class DegenerateGenerationError(RuntimeError):
+    """⛔ Real incident, 2026-09-08: a quantized local model (reproduced independently on both
+    `meta/muse-glimmer` and `google/gemma-4-26b-a4b-qat` — not one bad model, a transport gap)
+    degenerated into a short repeating token cycle inside a single JSON string field and never
+    recovered on its own. `max_tokens` alone only bounds the WORST case (it still burns the WHOLE
+    budget, tens of minutes, generating garbage); a schema `maxLength` does not help either — LM
+    Studio's grammar-from-JSON-Schema conversion enforces `type`/`enum`/structural keys but not
+    string-length bounds (confirmed live: a `nameKey` field with `maxLength: 96` still ran to
+    16384 tokens of repeated garbage). The only real fix is catching the loop WHILE STREAMING and
+    aborting the connection immediately — see `_has_repetition_loop` and `call_model`'s own
+    streaming loop below."""
+
+
+def _has_repetition_loop(text: str, *, tail: int = 400, min_period: int = 2, max_period: int = 80,
+                         min_repeats: int = 6) -> bool:
+    """True if the trailing `tail` characters of `text` are `min_repeats` or more consecutive,
+    BYTE-IDENTICAL copies of some short unit (`min_period`..`max_period` characters) — the exact
+    shape of the 2026-09-08 incident (a ~50-char unit repeated hundreds of times in a row inside
+    one JSON string value). Checked against only the tail, never the whole accumulated response,
+    so this stays cheap to call after every streamed chunk regardless of how long the response
+    has already grown. `min_repeats=6` is deliberately generous — legitimate JSON content
+    essentially never repeats an identical 2-80 character unit six times in a row, but a real,
+    short, structurally-repeated legal value (unlikely at this scale in this pipeline's own
+    schemas) would still need to clear this bar before being mistaken for a loop.
+    """
+    s = text[-tail:]
+    for period in range(min_period, max_period + 1):
+        window = period * min_repeats
+        if len(s) < window:
+            continue
+        chunk = s[-window:]
+        unit = chunk[:period]
+        if unit * min_repeats == chunk:
+            return True
+    return False
+
+
+def _stream_once(config: LlmCallerConfig, body: bytes) -> str:
+    """One HTTP attempt, read incrementally over an OpenAI-compatible SSE stream (`data: {...}`
+    lines, terminated by `data: [DONE]`). Aborts the connection (raising `DegenerateGenerationError`,
+    caught by `call_model`'s own retry loop exactly like a transport failure) the moment
+    `_has_repetition_loop` fires on the accumulated text — this is what actually stops a
+    degenerate generation in real time, not just bounds its worst case.
+
+    **Observability**: a progress line every 5 real seconds (`[model] N chars received so far`)
+    so a long call is visible in whatever log this process's stdout is redirected to, not only in
+    the model server's own separate console — the 2026-09-08 incident's own first symptom was a
+    completely silent, unreadable log file for over an hour of real, in-flight generation.
+    """
+    req = urllib.request.Request(config.endpoint, data=body,
+                                 headers={"Content-Type": "application/json"})
+    accumulated: "list[str]" = []
+    # ⛔ A rolling tail, capped at 2x the detector's own `tail` window, kept SEPARATELY from
+    # `accumulated` — checking `_has_repetition_loop` against `"".join(accumulated)` on every
+    # chunk would re-join the WHOLE response every time (O(n) per chunk, O(n^2) total), exactly
+    # the kind of cost a fast-abort mechanism must not have once a response is already thousands
+    # of characters long.
+    tail = ""
+    total_len = 0
+    started = time.monotonic()
+    last_log = started
+    with urllib.request.urlopen(req, timeout=config.timeout) as resp:
+        for raw_line in resp:
+            line = raw_line.decode("utf-8", errors="replace").strip()
+            if not line or not line.startswith("data:"):
+                continue
+            data_str = line[len("data:"):].strip()
+            if data_str == "[DONE]":
+                break
+            try:
+                chunk = json.loads(data_str)
+            except json.JSONDecodeError:
+                continue
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            piece = (choices[0].get("delta") or {}).get("content")
+            if not piece:
+                continue
+            accumulated.append(piece)
+            total_len += len(piece)
+            tail = (tail + piece)[-800:]
+            now = time.monotonic()
+            if now - last_log >= 5.0:
+                print(f"seedsmith.llm_caller: [{config.model}] {total_len} chars received so far "
+                     f"({now - started:.0f}s elapsed)", flush=True)
+                last_log = now
+            if _has_repetition_loop(tail):
+                raise DegenerateGenerationError(
+                    f"[{config.model}] repetition loop detected after {total_len} chars "
+                    f"({now - started:.0f}s) -- aborting this attempt rather than burning the "
+                    f"full max_tokens budget on it")
+    return "".join(accumulated)
 
 
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
-               temperature: float = 0.2) -> str:
-    """Call a local OpenAI-compatible chat endpoint with reasoning disabled.
+               temperature: float = 0.2, schema: "dict | None" = None) -> str:
+    """Call a local OpenAI-compatible chat endpoint with reasoning disabled, streaming the
+    response so a degenerate generation can be caught and aborted in real time (see
+    `_stream_once`/`_has_repetition_loop`/`DegenerateGenerationError`).
+
+    `max_tokens` (`config.max_tokens`, default 16384) is still sent as a hard backstop for
+    whatever the repetition detector's own heuristic misses, but it is no longer the FIRST line of
+    defense — see `DegenerateGenerationError`'s own docstring for why a schema `maxLength` and
+    `max_tokens` alone were not enough (the 2026-09-08 incident happened with both already in
+    place).
 
     Two redundant fields are sent on every call because different servers/templates read
     different keys: `reasoning_effort` is the OpenAI-style field some servers honor directly;
@@ -88,24 +243,46 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
     where a reasoning-capable model usually gates a <think> block on a variable named
     `enable_thinking`/`thinking`. Sending both is harmless — an OpenAI-compatible server or
     template ignores whichever key it doesn't recognize.
+
+    `schema` (optional, spec-dependency-baseline.md §2.4) turns on CONSTRAINED DECODING: LM Studio
+    enforces a JSON Schema's STRUCTURAL keys (`type`/`enum`/`properties`/`required`) at decode time
+    via llama.cpp's GBNF grammar sampling for GGUF models, so a token that would break one of those
+    is never sampleable. It does NOT enforce `pattern` or, confirmed 2026-09-08, `minLength`/
+    `maxLength` — grammar-from-JSON-Schema conversion commonly skips string-length bounds because
+    expressing "at most N characters" as a context-free grammar production is a much harder
+    problem than a structural or enum check. `extract_json` stays as defense-in-depth regardless.
+
+    **Optional on purpose.** `schema=None` produces a byte-identical request body to before this
+    parameter existed, so every existing caller is unaffected — asserted by test.
     """
-    body = json.dumps({
+    payload = {
         "model": config.model, "temperature": temperature,
+        "max_tokens": config.max_tokens,
+        "stream": True,
         "reasoning_effort": "none",
         "chat_template_kwargs": {"enable_thinking": False, "thinking": False},
         "messages": [{"role": "system", "content": system},
                      {"role": "user", "content": user}],
-    }).encode("utf-8")
+    }
+    if schema is not None:
+        payload["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {"name": "seedsmith_response", "strict": True, "schema": schema},
+        }
+    body = json.dumps(payload).encode("utf-8")
     last_err: Exception | None = None
     for attempt in range(config.attempts):
         try:
-            req = urllib.request.Request(config.endpoint, data=body,
-                                         headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=config.timeout) as resp:
-                data = json.loads(resp.read())
-            return data["choices"][0]["message"]["content"]
-        except (urllib.error.URLError, TimeoutError, KeyError) as e:
+            started = time.monotonic()
+            result = _stream_once(config, body)
+            print(f"seedsmith.llm_caller: [{config.model}] call complete, {len(result)} chars, "
+                 f"{time.monotonic() - started:.1f}s", flush=True)
+            return result
+        except (urllib.error.URLError, TimeoutError, KeyError, DegenerateGenerationError) as e:
             last_err = e
+            print(f"seedsmith.llm_caller: [{config.model}] attempt {attempt + 1}/{config.attempts} "
+                 f"failed ({type(e).__name__}: {e}); "
+                 f"{'retrying' if attempt + 1 < config.attempts else 'giving up'}", flush=True)
             if attempt + 1 < config.attempts:
                 time.sleep(config.retry_delay)
     raise RuntimeError(f"model call failed after {config.attempts} attempts: {last_err}")
@@ -135,6 +312,104 @@ def extract_json(text: str) -> dict:
         raise
 
 
+AnswerCallFn = Callable[[str, dict], dict]
+AnswerValidator = Callable[[dict, dict], list[str]]
+
+# Structural retry bound: one repair prompt distinguishes a formatting lapse from an unavailable
+# model without turning a malformed response into an unbounded second generation loop.
+_JSON_REPAIR_ATTEMPTS = 1
+
+
+def live_answer_caller(config: LlmCallerConfig, *,
+                       validator: AnswerValidator | None = None) -> AnswerCallFn:
+    """A `call(brief, schema) -> dict` bound to a real model endpoint through `call_model`.
+
+    This is the shape `basetypegen.run.run_draws`, `milestonegen.run.run_draws`,
+    `recipegen.run.run_draws`, and `droptablegen.run.run_draws` all already declare and test against
+    (`Callable[[str, dict], dict]`) — each module's own brief embeds its full instructions as a
+    single user-role message (there is no separate system prompt to manage, unlike `setgen`'s own
+    `live_caller`, which is a different shape for a different, graph-based caller convention).
+    Lifted here, generic and shared, rather than reimplemented once per module — the four modules
+    above each carried a `main()` that explicitly refused to run for exactly this missing piece
+    (`"REFUSING TO RUN: no model call is wired into this CLI entrypoint yet"`) until this existed.
+
+    Schema-constrained decoding is honored (via `call_model`'s own `schema` parameter) whenever the
+    caller's own schema dict is non-empty, but it is never the only guard: local type/enum checks
+    run after parsing and a caller may supply domain validation. One repair prompt names a parse or
+    validation defect before the error reaches the per-subject batch boundary.
+    """
+
+    def _validate_schema(answer: dict, schema: dict) -> list[str]:
+        if not schema:
+            return []
+        defects: list[str] = []
+        properties = schema.get("properties") or {}
+        for field in schema.get("required") or ():
+            if field not in answer:
+                defects.append(f"missing required field {field!r}")
+        type_map = {"string": str, "boolean": bool, "object": dict, "array": list,
+                    "number": (int, float), "integer": int}
+        for field, value in answer.items():
+            spec = properties.get(field)
+            if not isinstance(spec, dict):
+                if properties:
+                    defects.append(f"field {field!r} is not in the schema")
+                continue
+            declared = spec.get("type")
+            expected = type_map.get(declared)
+            if expected is not None:
+                if declared in ("number", "integer") and isinstance(value, bool):
+                    defects.append(f"field {field!r} is a boolean, not {declared}")
+                elif not isinstance(value, expected):
+                    defects.append(f"field {field!r} should be {declared}")
+            allowed = spec.get("enum")
+            if allowed is not None and value not in allowed:
+                defects.append(f"field {field!r} value {value!r} is not one of {list(allowed)}")
+        return defects
+
+    def _parse_and_validate(raw: str, schema: dict) -> dict:
+        answer = extract_json(raw)
+        defects = _validate_schema(answer, schema)
+        if validator is not None:
+            defects.extend(validator(answer, schema))
+        if defects:
+            raise ValueError("local validation failed: " + "; ".join(defects))
+        return answer
+
+    def _repair_prompt(error: ValueError, brief: str) -> str:
+        if "no JSON object" in str(error):
+            return (
+                "Your previous response was not a JSON object. Return exactly one JSON object "
+                "that satisfies the requested schema, with no prose or Markdown.\n\n"
+                "Original authoring brief:\n"
+                f"{brief}"
+            )
+        return (
+            "Your previous JSON response failed local validation:\n"
+            f"- {error}\n\n"
+            "Return exactly one corrected JSON object that satisfies the requested schema, "
+            "with no prose or Markdown.\n\n"
+            "Original authoring brief:\n"
+            f"{brief}"
+        )
+
+    def _call(brief: str, schema: dict) -> dict:
+        raw = call_model("", brief, config=config, schema=schema or None)
+        try:
+            return _parse_and_validate(raw, schema)
+        except ValueError as error:
+            repair = _repair_prompt(error, brief)
+            for _ in range(_JSON_REPAIR_ATTEMPTS):
+                raw = call_model("", repair, config=config, schema=schema or None)
+                try:
+                    return _parse_and_validate(raw, schema)
+                except ValueError:
+                    continue
+            raise error
+
+    return _call
+
+
 def _default_heal_user(items: dict, out: dict, hard: dict) -> str:
     defects = "\n".join(f"- {k}: {r}" for k, r in list(hard.items())[:40])
     need = {k: items[k] for k in hard if k in items}
@@ -154,6 +429,7 @@ def call_with_self_heal(
     max_heal: int | None = None,
     build_heal_user: BuildHealUserFn | None = None,
     default_for: DefaultForFn | None = None,
+    schema: "dict | None" = None,
 ) -> tuple[dict, dict]:
     """Call the model, verify the parsed output, and self-heal on named defects.
 
@@ -172,6 +448,14 @@ def call_with_self_heal(
 
     Never raises on a model or parse failure — a dead attempt re-prompts for valid JSON and is
     caught uniformly by the next round's `verify_fn`, exactly like any other named defect.
+
+    `schema` (optional, default `None` — every existing caller is byte-for-byte unaffected)
+    passes straight through to every `call_model` attempt this loop makes, including heal
+    re-prompts: `call_model`'s own constrained-decoding contract (measured 2026-09-01 against
+    `google/gemma-4-26b-a4b-qat`) makes a schema-violating token unsampleable, which is strictly
+    stronger than a post-hoc `verify_fn` re-prompt and is why a caller with a real JSON Schema for
+    its draft shape should supply one here rather than relying on the heal loop alone to talk the
+    model into a required key it keeps omitting.
     """
     heal_budget = config.max_heal if max_heal is None else max_heal
     build_heal_user = build_heal_user or _default_heal_user
@@ -181,7 +465,7 @@ def call_with_self_heal(
     out: dict = {}
     for _ in range(heal_budget + 1):
         try:
-            out = extract_json(call_model(system, user, config=config))
+            out = extract_json(call_model(system, user, config=config, schema=schema))
         except (ValueError, json.JSONDecodeError, RuntimeError) as e:
             user = (f"Your previous output could not be parsed as valid JSON ({e}). "
                     f"Re-emit ONLY a strictly-valid JSON object for:\n"

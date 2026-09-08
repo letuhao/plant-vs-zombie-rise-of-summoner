@@ -97,12 +97,17 @@ public class WorldTwentyTurnCheckpointTests : IDisposable
     {
         var stored = PlayTwentyTurns("cp2-replay", seed: 2026);
 
-        // Nothing but (seed, template, command log) — no store state in this loop.
+        // Nothing but (seed, template, command log) — no store state in this loop. The resolver must
+        // match what the store actually commits with (RpgStore.WorldTurns.cs) or "pure engine" would
+        // silently mean "pure engine, minus whichever battle kind the store's resolver wasn't the
+        // default" — a gap base-defense `siege-engagement` (2026-09-06) found the hard way: this
+        // scenario never happens to route a battle through `DistrictAssaultResolver`'s real-board path,
+        // so the two resolvers have always agreed here by coincidence, not by construction.
         var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, 2026, "cp2-replay");
         var replayed = new List<string>();
         for (var turn = 0; turn < Turns; turn++)
         {
-            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp2-replay", turn), 2026);
+            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp2-replay", turn), 2026, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed.Add(result.StateHash);
         }

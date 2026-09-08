@@ -44,6 +44,12 @@ public static class InjectorEntityRegistry
     static readonly Dictionary<IntPtr, ZombieEntry> Zombies = new();
     static int _lastResyncFrame = int.MinValue;
 
+    /// <summary>E28 fix #1 (spec-param-parity.md §3 row 1): the six-resource pool registry for lawn
+    /// actors, keyed the same way this whole class keys everything else for a live match. Lives here
+    /// rather than as a free-floating static because its lifecycle (per-actor drop on death, full
+    /// clear on board reset) mirrors the shield lifecycle flush already below almost exactly.</summary>
+    public static readonly FusionRpg.Core.Combat.LawnActorResourcePools ResourcePools = new();
+
     public static void Add(Plant? p)
     {
         try
@@ -116,6 +122,9 @@ public static class InjectorEntityRegistry
                     FusionRpg.Core.Combat.CombatPtr.Normalize(ptr.ToString("X"))));
         }
         catch { }
+        // E28 fix #1: the five non-hp resource pools carry die with the actor too, same reasoning
+        // as the shield flush directly above — a reused ptr must not inherit a stranger's drained pool.
+        try { ResourcePools.Remove(ptr.ToString("X")); } catch { }
     }
 
     public static void Clear()
@@ -126,6 +135,7 @@ public static class InjectorEntityRegistry
         // Board-start barrier only — Resync clears the dicts directly and must NOT wipe
         // shields (it re-Adds the same live actors every ResyncFrames).
         try { EffectRuntime.Bag.ShieldGate?.Runtime.Clear(); } catch { }
+        try { ResourcePools.Clear(); } catch { }
     }
 
     public static bool NeedsResync(int frame) =>

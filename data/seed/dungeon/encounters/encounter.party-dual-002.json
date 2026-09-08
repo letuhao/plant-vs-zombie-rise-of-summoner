@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.party-dual-002",
+  "formation": "party",
+  "name": "The Vanguard's Divergence",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A high-stakes duel where two specialized elites force the party to split their focus between heavy frontline pressure and precision backline strikes.",
+  "slots": [
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "few",
+      "posture": "Finesse",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "marauder"
+  }
+}

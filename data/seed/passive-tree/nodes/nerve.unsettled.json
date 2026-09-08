@@ -1,0 +1,1005 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The body learns to endure the tremors of its own instability.",
+      "id": "skill.nerveunsettled-def-t1-n0",
+      "name": "Thickened Sinew",
+      "nameKey": "tree.node.thickened-sinew-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The body learns to endure the tremors of its own unraveling.",
+      "id": "skill.nerveunsettled-def-t1-n1",
+      "name": "Nerve-Deep Hardening",
+      "nameKey": "tree.node.nerve-deep-hardening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-seal"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "A frantic, biological sealant that hardens the moment the skin is breached.",
+      "id": "skill.nerveunsettled-def-t10-n0",
+      "name": "Subcutaneous Sealing",
+      "nameKey": "tree.node.subcutaneous-sealing",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The nervous system misfires, forcing a sudden hardening of the shell and a surge of protective energy.",
+      "id": "skill.nerveunsettled-def-t10-n1",
+      "name": "Synaptic Overload",
+      "nameKey": "tree.node.synaptic-overload-6",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The body stiffens in anticipation of the blow, turning instinct into armor.",
+      "id": "skill.nerveunsettled-def-t2-n0",
+      "name": "Reactive Hardening",
+      "nameKey": "tree.node.reactive-hardening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body reacts to the threat before the mind can even name it.",
+      "id": "skill.nerveunsettled-def-t2-n1",
+      "name": "Tremor Response",
+      "nameKey": "tree.node.tremor-response",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-flinch",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A twitch in the nerves before the blow even lands.",
+      "id": "skill.nerveunsettled-def-t3-n0",
+      "name": "Jittering Reflex",
+      "nameKey": "tree.node.jittering-reflex",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body tightens before the blow even lands.",
+      "id": "skill.nerveunsettled-def-t3-n1",
+      "name": "Subcutaneous Tension",
+      "nameKey": "tree.node.subcutaneous-tension",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-freshgraft"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A frantic, involuntary shudder that knits flesh even as it recoils.",
+      "id": "skill.nerveunsettled-def-t4-n0",
+      "name": "Twitch-Graft",
+      "nameKey": "tree.node.twitch-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The frantic twitching subsides into a heavy, unyielding stillness.",
+      "id": "skill.nerveunsettled-def-t4-n1",
+      "name": "Tremor-Settle",
+      "nameKey": "tree.node.tremor-settle",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-seal",
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A frantic, rhythmic twitching of the muscle fibers that hardens the body just before the impact arrives.",
+      "id": "skill.nerveunsettled-def-t5-n0",
+      "name": "Nerve-Stutter",
+      "nameKey": "tree.node.nerve-stutter",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body learns to find stillness within the shaking.",
+      "id": "skill.nerveunsettled-def-t5-n1",
+      "name": "Tremor-Lock",
+      "nameKey": "tree.node.tremor-lock",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The body learns to hold its shape even when the nerves scream to flee.",
+      "id": "skill.nerveunsettled-def-t6-n0",
+      "name": "Tendon-Lock",
+      "nameKey": "tree.node.tendon-lock",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-flinch"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The skin becomes a frantic, twitching barrier that thickens with every sudden movement.",
+      "id": "skill.nerveunsettled-def-t6-n1",
+      "name": "Hyper-Sensory Dermis",
+      "nameKey": "tree.node.hyper-sensory-dermis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The body reacts to the threat before the mind can process the pain.",
+      "id": "skill.nerveunsettled-def-t7-n0",
+      "name": "Reactive Spasm",
+      "nameKey": "tree.node.reactive-spasm",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-harden",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The nervous system hardens into a rigid, protective lattice.",
+      "id": "skill.nerveunsettled-def-t7-n1",
+      "name": "Dermal Calcification",
+      "nameKey": "tree.node.dermal-calcification-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A sudden, violent twitch that hardens the skin and surges the reserves.",
+      "id": "skill.nerveunsettled-def-t8-n0",
+      "name": "Nerve-Jolt",
+      "nameKey": "tree.node.nerve-jolt",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A sudden, violent twitch that hardens the skin before the impact can land.",
+      "id": "skill.nerveunsettled-def-t8-n1",
+      "name": "Startle Response",
+      "nameKey": "tree.node.startle-response",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-flinch"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The body reacts to the threat before the mind can process the pain.",
+      "id": "skill.nerveunsettled-def-t9-n0",
+      "name": "Reflexive Hardening",
+      "nameKey": "tree.node.reflexive-hardening",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-husk",
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A sudden tightening of the dermal layers that converts kinetic impact into a momentary surge of protective energy.",
+      "id": "skill.nerveunsettled-def-t9-n1",
+      "name": "Nerve-Brace",
+      "nameKey": "tree.node.nerve-brace",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "A twitch in the synapse that translates hesitation into momentum.",
+      "id": "skill.nerveunsettled-off-t1-n0",
+      "name": "Unsettled Nerve",
+      "nameKey": "tree.node.unsettled-nerve",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The rhythm of the hunt quickens with every strike.",
+      "id": "skill.nerveunsettled-off-t1-n1",
+      "name": "Frenzy Pulse",
+      "nameKey": "tree.node.frenzy-pulse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-salvo",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While channelFamily holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "channelFamily"
+        ]
+      },
+      "flavor": "The final movement is never a pause, only an acceleration into the void.",
+      "id": "skill.nerveunsettled-off-t10-n0",
+      "name": "Terminal Velocity",
+      "nameKey": "tree.node.terminal-velocity",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.tempo-yield"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pulse of the strike dictates the pace of the recovery.",
+      "id": "skill.nerveunsettled-off-t10-n1",
+      "name": "Rhythmic Tremor",
+      "nameKey": "tree.node.rhythmic-tremor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.quickening",
+        "atom.tempo-haste"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The nervous system fires before the mind can process the threat.",
+      "id": "skill.nerveunsettled-off-t2-n0",
+      "name": "Adrenaline Twitch",
+      "nameKey": "tree.node.adrenaline-twitch-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The pulse quickens, turning raw instinct into overwhelming force.",
+      "id": "skill.nerveunsettled-off-t2-n1",
+      "name": "Adrenaline Surge",
+      "nameKey": "tree.node.adrenaline-surge-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The twitch of a muscle before the strike, amplified by the heat of the hunt.",
+      "id": "skill.nerveunsettled-off-t3-n0",
+      "name": "Frenetic Impulse",
+      "nameKey": "tree.node.frenetic-impulse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A frantic, jagged motion that leaves the nerves raw and the strike devastating.",
+      "id": "skill.nerveunsettled-off-t3-n1",
+      "name": "Unsettled Impulse",
+      "nameKey": "tree.node.unsettled-impulse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The nervous system ceases to react and begins to dictate.",
+      "id": "skill.nerveunsettled-off-t4-n0",
+      "name": "Synaptic Overdrive",
+      "nameKey": "tree.node.synaptic-overdrive-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The mind fractures, seeing the exact moment the strike lands before the hand even moves.",
+      "id": "skill.nerveunsettled-off-t4-n1",
+      "name": "Unsettled Focus",
+      "nameKey": "tree.node.unsettled-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the rhythm of the aftermath.",
+      "id": "skill.nerveunsettled-off-t5-n0",
+      "name": "Cascading Tremor",
+      "nameKey": "tree.node.cascading-tremor",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.precision",
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "A sudden, violent twitch that sharpens the senses and quickens the strike.",
+      "id": "skill.nerveunsettled-off-t5-n1",
+      "name": "Nerve-Spasm",
+      "nameKey": "tree.node.nerve-spasm",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The nervous system ceases to be a conductor and becomes a conductor of raw, unbridled energy.",
+      "id": "skill.nerveunsettled-off-t6-n0",
+      "name": "Synaptic Overload",
+      "nameKey": "tree.node.synaptic-overload-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.precision",
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The nerves fire before the thought even forms, blurring the line between reaction and instinct.",
+      "id": "skill.nerveunsettled-off-t6-n1",
+      "name": "Frayed Synapse",
+      "nameKey": "tree.node.frayed-synapse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.tempo-stampede"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the rhythm of the end.",
+      "id": "skill.nerveunsettled-off-t7-n0",
+      "name": "Aftershock Impulse",
+      "nameKey": "tree.node.aftershock-impulse",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "A violent surge of adrenaline that turns hesitation into raw, unbridled aggression.",
+      "id": "skill.nerveunsettled-off-t7-n1",
+      "name": "Frenetic Impulse",
+      "nameKey": "tree.node.frenetic-impulse-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The nervous system ceases to process signals and begins to dictate them.",
+      "id": "skill.nerveunsettled-off-t8-n0",
+      "name": "Synaptic Overload",
+      "nameKey": "tree.node.synaptic-overload-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body reacts to its own momentum, blooming before the impact is even felt.",
+      "id": "skill.nerveunsettled-off-t8-n1",
+      "name": "Hyper-Reflexive Sprouting",
+      "nameKey": "tree.node.hyper-reflexive-sprouting",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body reacts to the threat before the mind can process the fear.",
+      "id": "skill.nerveunsettled-off-t9-n0",
+      "name": "Adrenaline Spasm",
+      "nameKey": "tree.node.adrenaline-spasm",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The twitch of a nerve becomes a rhythmic command.",
+      "id": "skill.nerveunsettled-off-t9-n1",
+      "name": "Synaptic Aftershock",
+      "nameKey": "tree.node.synaptic-aftershock",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "nerve.unsettled"
+}

@@ -79,6 +79,14 @@ public static class MovementPhase
         var queue = new TurnEventQueue();
         var requests = new Dictionary<string, BattleRequest>(StringComparer.Ordinal);
         var moved = new Dictionary<string, WorldEntity>(StringComparer.Ordinal);
+
+        // A force that fully arrives this turn has its `OnLaneId` cleared the instant it lands, so if
+        // a Sector-kind contact fight right there routs it, `BattleApplication` would otherwise find
+        // "nothing to fall back from" and treat a freshly-arrived attacker exactly like a genuine
+        // long-standing garrison. This is movement-phase-local (never a `WorldEntity` field, never
+        // hashed) precisely because it only needs to survive from here down to `BattleReporting.Fight`
+        // within this same call.
+        var arrivedViaLane = new Dictionary<string, string>(StringComparer.Ordinal);
         // Concrete on the way in, read-only on the way out. Declaring this as the interface and
         // casting back to mutate it would be a runtime failure waiting for someone to change the
         // collection type.
@@ -101,8 +109,11 @@ public static class MovementPhase
             // "at your current burn rate, here is your ceiling," the same honesty LeashTurns already
             // gives a legion that never leaves supply at all.
             if (LegionSupply.TurnsUntilExhausted(entity) is { } turnsLeft)
+                // world-stage W13 (fog defect B): `outcome.OnLaneId` is a lane id, never a sector —
+                // null here (not the lane) when the legion ends its march mid-lane. A dynamic fact
+                // about the viewer's own force, so it carries its own audience.
                 report.Add(phase, TurnReportKinds.Event, entity.EntityId,
-                    "legion.runway:" + (turn + turnsLeft), outcome.AtSectorId ?? outcome.OnLaneId);
+                    "legion.runway:" + (turn + turnsLeft), sectorId: outcome.AtSectorId, audience: entity.OwnerFactionId);
 
             if (outcome.VisitedSectorIds.Count > 0)
             {
@@ -119,6 +130,9 @@ public static class MovementPhase
                 LaneProgressMilli = outcome.LaneProgressMilli,
                 MovementRemaining = outcome.MovementRemaining
             };
+
+            if (outcome.ArrivedAtSectorId is not null && outcome.ArrivedViaLaneId is { } arrivalLane)
+                arrivedViaLane[entity.EntityId] = arrivalLane;
 
             queue.Schedule(outcome.TimeMilli, entity.EntityId, TurnEventKinds.Arrival,
                 outcome.ArrivedAtSectorId ?? outcome.OnLaneId ?? "");
@@ -163,18 +177,7 @@ public static class MovementPhase
 
         foreach (var contact in ContactResolver.SectorContacts(next, movedIds))
         {
-            var request = new BattleRequest
-            {
-                BattleId = BattleKinds.IdFor(turn, BattleKinds.Sector, contact.SectorId,
-                    contact.AttackerEntityId, contact.DefenderEntityId),
-                Kind = BattleKinds.Sector,
-                LocationId = contact.SectorId,
-                TimeMilli = TurnEventQueue.TurnEndMilli,
-                AttackerEntityId = contact.AttackerEntityId,
-                DefenderEntityId = contact.DefenderEntityId,
-                DefenderStationary = contact.DefenderStationary
-            };
-
+            var request = BuildContactRequest(next, turn, seed, contact);
             requests[request.BattleId] = request;
             queue.Schedule(TurnEventQueue.TurnEndMilli, contact.AttackerEntityId,
                 TurnEventKinds.Contact, request.BattleId);
@@ -187,17 +190,100 @@ public static class MovementPhase
             if (evt.Kind is TurnEventKinds.Contact or TurnEventKinds.Crossing
                 && requests.TryGetValue(evt.Detail, out var request))
             {
-                next = BattleReporting.Fight(next, request, resolver, report, phase, seed);
+                next = BattleReporting.Fight(next, request, resolver, report, phase, seed, arrivedViaLane);
                 continue;
             }
 
-            // `Detail` is where a march ended up, which is exactly the ground this line is about.
-            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail, evt.Detail);
+            // world-stage W13 (fog defect B): `evt.Detail` is free text — an `Arrival` mid-lane
+            // carries a lane id there, and a `Halt`'s is `"zoc:" + sectorId`, never a bare sector id
+            // either way. Neither belongs in the structured sector slot (`Believed` on either
+            // returns null, so the line vanished for everybody). Only `Arrival`/`Halt` ever reach
+            // here (`Contact`/`Crossing` are handled above), and both are scheduled only after
+            // `moved[entity.EntityId]` is set, so the entity's own post-march position is the real
+            // answer: a sector when it is standing in one, null when it is not. A dynamic fact about
+            // a specific legion, so it carries that legion's own audience.
+            var mover = moved.TryGetValue(evt.EntityId, out var m) ? m : null;
+            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail,
+                sectorId: mover?.AtSectorId, audience: mover?.OwnerFactionId);
         }
 
         return new MovementResult(
             next,
             visited.ToDictionary(kv => kv.Key, kv => (IReadOnlySet<string>)kv.Value, StringComparer.Ordinal));
+    }
+
+    /// <summary>
+    /// base-defense `siege-engagement`'s own named, deferred gap, closed 2026-09-06: a CONTINUING
+    /// siege (turn 2+, no fresh `assault` order) reached this generic sector-contact path, which
+    /// always built a <see cref="BattleKinds.Sector"/> request — <see cref="Turn.DistrictAssaultResolver"/>'s
+    /// own delegation guard then correctly (per its own contract) routed that away to the placeholder
+    /// resolver, so a siege silently stopped being a real board fight the moment its attacker held
+    /// still for even one turn. Fixed by building the SAME <see cref="Turn.BattleKinds.District"/>
+    /// request <see cref="Turn.DistrictAssaultPhase"/> already builds for a fresh order, whenever the
+    /// contact sector is currently under siege (<see cref="Turn.SiegeEngagement.IsUnderSiege"/>) —
+    /// reusing <see cref="Turn.DistrictAssaultPhase.BuildBoard"/> verbatim rather than re-deriving the
+    /// projection a second time. Every OTHER sector (unowned, or owned but not besieged — the whole
+    /// existing open-field game) is completely untouched: `IsUnderSiege` requires an owner and a
+    /// hostile presence, which is exactly what <see cref="ContactResolver.SectorContacts"/> already
+    /// required to yield this contact at all, so this is a pure re-routing, never a new trigger
+    /// condition.
+    ///
+    /// <para><b>Attacker/defender here means "who does not own the ground" vs "who does"</b> — NOT
+    /// <paramref name="contact"/>'s own movement-based split (which answers "who moved this turn,"
+    /// a different question `Sector`-kind battles use for their own cover/stance framing, but the
+    /// wrong one for which side is the Core-holder in a district fight — the same distinction
+    /// <see cref="Turn.DistrictAssaultPhase.Run"/> already draws from its own `assault` command's
+    /// issuer). For a genuinely continuing siege neither side moved, so this recomputes the roles
+    /// from ownership instead of trusting a movement split that would otherwise be arbitrary
+    /// (`ContactResolver.FirstHostilePair`'s own first-in-ordinal-order tie-break, not a meaningful
+    /// attacker signal when nobody moved).</para>
+    /// </summary>
+    static BattleRequest BuildContactRequest(WorldState world, int turn, ulong seed, SectorContact contact)
+    {
+        var sector = world.Sectors.FirstOrDefault(s =>
+            string.Equals(s.SectorId, contact.SectorId, StringComparison.Ordinal));
+
+        if (sector is not null && Turn.SiegeEngagement.IsUnderSiege(world, contact.SectorId))
+        {
+            var a = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, contact.AttackerEntityId, StringComparison.Ordinal));
+            var b = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, contact.DefenderEntityId, StringComparison.Ordinal));
+
+            // One of the pair owns this ground (sector.OwnerFactionId) and the other does not --
+            // IsUnderSiege already proved a hostile force is present, so exactly one of a/b is that
+            // intruder regardless of which one ContactResolver happened to call "attacker".
+            var (attacker, defender) =
+                a is not null && !string.Equals(a.OwnerFactionId, sector.OwnerFactionId, StringComparison.Ordinal)
+                    ? (a, b)
+                    : (b, a);
+
+            if (attacker is not null)
+            {
+                return new BattleRequest
+                {
+                    BattleId = BattleKinds.IdFor(turn, BattleKinds.District, sector.SectorId,
+                        attacker.EntityId, defender?.EntityId),
+                    Kind = BattleKinds.District,
+                    LocationId = sector.SectorId,
+                    TimeMilli = TurnEventQueue.TurnEndMilli,
+                    AttackerEntityId = attacker.EntityId,
+                    DefenderEntityId = defender?.EntityId,
+                    DefenderStationary = defender is not null,
+                    Board = Turn.DistrictAssaultPhase.BuildBoard(world, sector, attacker, seed),
+                };
+            }
+        }
+
+        return new BattleRequest
+        {
+            BattleId = BattleKinds.IdFor(turn, BattleKinds.Sector, contact.SectorId,
+                contact.AttackerEntityId, contact.DefenderEntityId),
+            Kind = BattleKinds.Sector,
+            LocationId = contact.SectorId,
+            TimeMilli = TurnEventQueue.TurnEndMilli,
+            AttackerEntityId = contact.AttackerEntityId,
+            DefenderEntityId = contact.DefenderEntityId,
+            DefenderStationary = contact.DefenderStationary
+        };
     }
 
     /// <summary>

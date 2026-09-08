@@ -44,7 +44,16 @@ public sealed class DerivedStatRegistry
     /// per-status-id ones resolved on demand. Both must agree on which cap value they saw.</summary>
     readonly double _categoryResistCap;
 
-    DerivedStatRegistry() => _categoryResistCap = DerivedStatPolicy.CategoryResistCap;
+    /// <summary>T14/B28 — the turn.speed channel's base, captured at construction for the same reason
+    /// <see cref="_categoryResistCap"/> is: a registry instance must stay internally consistent with the
+    /// values its defs were frozen against.</summary>
+    readonly long _turnDefaultSpeed;
+
+    DerivedStatRegistry()
+    {
+        _categoryResistCap = DerivedStatPolicy.CategoryResistCap;
+        _turnDefaultSpeed = DerivedStatPolicy.TurnDefaultSpeed;
+    }
 
     public static DerivedStatRegistry CreateDefault()
     {
@@ -107,7 +116,7 @@ public sealed class DerivedStatRegistry
         // (Haste). Class: null matches the Progression channels above — a pacing axis, not a combat
         // stat with a counterpart. FlatSum, not FlatReplace: a haste buff/item contributes an amount,
         // it does not replace the whole channel.
-        Register(new(DerivedTurnChannels.Speed, DerivedComposeKind.FlatSum, DerivedTurnChannels.BaseSpeed,
+        Register(new(DerivedTurnChannels.Speed, DerivedComposeKind.FlatSum, _turnDefaultSpeed,
                      Class: null, Unit: UnitClass.GameUnits));
         Register(new(DerivedTurnChannels.Haste, DerivedComposeKind.FlatSum, DerivedTurnChannels.NominalHasteMilli,
                      Class: null, Unit: UnitClass.PerMilleRatio));
@@ -172,22 +181,45 @@ public sealed class DerivedStatRegistry
         // participates in the formula but every one of its three construction sites (OverlayCombatMath.cs,
         // DebugCombatActions.cs, BattleEngine.cs) leaves it at the default 1.0 no-op -- nothing sets it
         // from this channel. Both await the action/timeline layer (action-map.md, approved unbuilt).
+        // The note is per-CATEGORY on purpose. The reader MECHANISM is generic -- any action whose
+        // envelope names `skill.cooldown.{category}` / `skill.effectiveness.{category}` is read
+        // (species-skills S2/S3) -- but only shipped CONTENT decides which categories are actually
+        // exercised, and today exactly one action ships: the basic attack, which is `attack`.
+        // Claiming a reader for the other four would make `MovementPayloadTests`'s deliberate
+        // "no production reader today" tripwire lie, which is the opposite of what it is for.
         foreach (var category in DerivedStatChannels.ActionCategories)
         {
+            var opted = category == DerivedStatChannels.ActionCategoryAttack;
+
             Register(new(DerivedStatChannels.SkillCooldown(category), DerivedComposeKind.FlatSum, 0,
                          Class: StatClass.Race,
-                         UnitClassNote: "No reader: CooldownMath.ApplyReduction and ActionEnvelope.CooldownChannel both exist with zero callers -- the action/timeline layer that would wire them is unbuilt (action-map.md)."));
+                         UnitClassNote: opted
+                             ? "Read by CooldownLedger.Start via CooldownMath.ApplyReduction, resolved from ActionEnvelope.CooldownChannel at the ARMING site (species-skills S2, 2026-09-04). The shipped basic attack opts in, so this is live in every battle; 0 is neutral and is the exact identity. NOT read by the balance predictor -- DominanceGuard.BuildReservedFamilies still reserves it, correctly, because that list is about the closed-form duel model rather than the battle path."
+                             : "No reader in shipped content: the MECHANISM exists (CooldownLedger.Start reads whatever channel ActionEnvelope.CooldownChannel names, species-skills S2), but no shipped action in this category names it -- the basic attack is the only opted-in action and it is `attack`. Wiring one here must update this note."));
+
             Register(new(DerivedStatChannels.SkillEffectiveness(category), DerivedComposeKind.FlatSum, 0,
                          Class: StatClass.Feeder,
-                         UnitClassNote: "No reader: OverlayCombatRequest.EffectivenessMultiplier is multiplied into the damage formula, but every construction site leaves it at its default 1.0 no-op -- nothing sets it from this channel."));
+                         UnitClassNote: opted
+                             ? "Read by BasicAttack, which sets OverlayCombatRequest.EffectivenessMultiplier from this channel via OverlayCombatRequest.MultiplierFromPerMille, resolved from ActionEnvelope.EffectivenessChannel (species-skills S3, 2026-09-04). 0 is neutral and yields exactly 1.0. NOT read by the balance predictor -- see the cooldown note."
+                             : "No reader in shipped content: the MECHANISM exists (BasicAttack reads whatever channel ActionEnvelope.EffectivenessChannel names, species-skills S3), but no shipped action in this category names it. Wiring one here must update this note."));
         }
 
         // H.4 -- healing. Pool, unpaired (owner decision 2026-08-24 — dissolves §4.3 rather than
         // reopening it: no defender-side term means no delta on the heal path at all). Unit: GameUnits
         // (class-system P1.5, 2026-08-26) -- OverlayCombatMath.cs:81,86 reads it as a flat additive
         // magnitude (effectiveHeal = max(0, signedAmount + healPower)), same shape as combat.power.
-        Register(new(DerivedStatChannels.CombatHealPower, DerivedComposeKind.FlatSum, 0,
-                     Class: StatClass.Pool, Unit: UnitClass.GameUnits));
+
+        // RETIRED 2026-09-02 -- `combat.heal.power` was generalised into `resource.restore.{resource}` (0.8).
+        // It stays REGISTERED, and only for this reason: `data/tuning/aptitudes.v1/v2/v3.json` stay on
+        // disk as revert points and still carry edges naming it, and `TerminationGuardTests` deliberately
+        // pins v1 to prove historical facts about it. An unregistered channel is a hard load rejection,
+        // so retiring the id outright would make every archived config unloadable and delete those
+        // regression checks. Migration-shim only, exactly like `DemonRarity`'s retired four-value ladder:
+        // **nothing reads it** (OverlayCombatMath moved to resource.restore.hp) and **no new edge may name
+        // it** -- the live config v4 has none, and AptitudeTuningTests' coverage test is over
+        // `resource.restore`, not this.
+        Register(new("combat.heal.power", DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                     UnitClassNote: "RETIRED 2026-09-02 -- superseded by resource.restore.hp. Registered only so archived aptitudes.v1/v2/v3.json remain loadable; no reader, no new edges."));
 
         // H.5 -- resource. Pool throughout (Q4): the counters are statuses, not stats. max/regen are
         // magnitudes and stay FlatSum/uncapped (spec-actor-channels.md §2.2). efficiency is a bounded
@@ -204,19 +236,29 @@ public sealed class DerivedStatRegistry
         foreach (var resourceId in DerivedStatChannels.ResourceIds)
         {
             Register(new(DerivedStatChannels.ResourceMax(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.max.hp only (AptitudeModel.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
+                         UnitClassNote: "Readers exist but are narrow (corrected 2026-09-02 -- this note previously read 'No shipped reader for any resource id', which was stale): ExhaustionPolicy.cs:59 reads ResourceRegen(resourceId) GENERICALLY over whatever resources it manages, and Predictor.cs reads the hp and poise members by name. No reader consumes max/regen for hunger/qi/spirit/stamina, and the action/resource economy that would is unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.ResourceRegen(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.regen.hp only (Analytic.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
+                         UnitClassNote: "Readers exist but are narrow (corrected 2026-09-02 -- this note previously read 'No shipped reader for any resource id', which was stale): ExhaustionPolicy.cs:59 reads ResourceRegen(resourceId) GENERICALLY over whatever resources it manages, and Predictor.cs reads the hp and poise members by name. No reader consumes max/regen for hunger/qi/spirit/stamina, and the action/resource economy that would is unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.ResourceEfficiency(resourceId), DerivedComposeKind.SumIncreased, 0,
                          DerivedStatPolicy.ResourceEfficiencyCap, Class: StatClass.Pool,
                          UnitClassNote: "No reader: action cost reduction has no consumer until the action layer exists (action-map.md). CombatSim's own tuning explicitly marks this family 'reserved'."));
+            // Active restoration power -- was the hp-only `combat.heal.power` until 2026-09-02. `hp` is
+            // the one member with a shipped reader (OverlayCombatMath.cs, flat additive magnitude), so
+            // it alone carries GameUnits; the other five are registered and unread, exactly like
+            // max/regen/efficiency, until the action layer grants a non-hp resource.
+            Register(resourceId == "hp"
+                ? new(DerivedStatChannels.ResourceRestore(resourceId), DerivedComposeKind.FlatSum, 0,
+                      Class: StatClass.Pool, Unit: UnitClass.GameUnits)
+                : new(DerivedStatChannels.ResourceRestore(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                      UnitClassNote: "No shipped reader for any non-hp resource id -- active restoration for stamina/hunger/spirit/qi/poise has no consumer until the action layer grants one (action-map.md)."));
         }
 
-        // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: no range-check
-        // consumer exists yet (the battle grid is deferred -- action-map.md: "with no board, every
-        // range check passes"), and CombatSim marks this family reserved too.
+        // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: A9 movement-actions
+        // (BasicAttack.cs's ApplyBasicAttack, 2026-09-07) is the first and only reader, and it consumes
+        // the value as a cell count, not through any registered UnitClass -- no dedicated board-distance
+        // unit exists yet, a separate question from whether a reader exists at all.
         Register(new(DerivedStatChannels.MoveRange, DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                     UnitClassNote: "No reader: the battle grid is deferred (action-map.md), so no range check exists to consume this channel yet."));
+                     UnitClassNote: "Reader: A9 movement-actions (BasicAttack.cs's ApplyBasicAttack, 2026-09-07) reads this to bound how many cells a Movement-category action moves an actor toward the nearest living enemy."));
 
         // H.7 -- progression. xpRate: Class null, matching progression.power/progression.realm — a
         // rate/magnitude the counterbalance rule does not apply to ("Non-combat" row, H.0); FlatSum,
@@ -232,6 +274,24 @@ public sealed class DerivedStatRegistry
         Register(new(DerivedStatChannels.ProgressionBreakthroughSuccess, DerivedComposeKind.SumIncreased, 0,
                      DerivedStatPolicy.BreakthroughSuccessCap, Class: StatClass.Pool,
                      UnitClassNote: "No reader: the breakthrough roll/grant mechanism this probability would drive is unbuilt."));
+
+        // H.8 -- loadout.slots (D4.25, spec-unique-pipeline.md §4). Pool (Q4, same reasoning as
+        // resource/movement above): the actor's own equipped-slot capacity, no attacker-side
+        // counterpart. Count unit (StatClass.cs): a discrete slot count, not a magnitude. FlatSum,
+        // uncapped composition -- composing two +1 grants must sum to a faithful 2, not saturate at 1,
+        // or a reader wanting the raw worn count (e.g. a UI badge counting extend-slot items) would
+        // have no way to recover it. The three readers (LoadoutSet.EffectiveMaxSize, called from
+        // LoadoutSet.Validate, AutoEquip.Select and CapPolicy.EquippedSkillCap) apply the "one at a
+        // time" rule (channel > 0 ? 1 : 0) AT THE READ, never here.
+        Register(new(DerivedStatChannels.LoadoutSlots, DerivedComposeKind.FlatSum, 0,
+                     Class: StatClass.Pool, Unit: UnitClass.Count));
+
+        // H.9 -- siege AI targeting priority (base-defense/spec-siege-ai.md §5.20 rule 4). FlatSum,
+        // no Cap: the -2..+2 bound is enforced by SiegeAi.EffectiveTier throwing out of range, not by
+        // composition (Cap only clamps one-sided, wrong shape for a symmetric range).
+        Register(new(DerivedStatChannels.AiAggression, DerivedComposeKind.FlatSum, 0,
+                     Class: StatClass.Pool, Unit: UnitClass.GameUnits,
+                     UnitClassNote: "Reader: IBattleView.AggressionOf (BattleRunState.cs, 2026-09-07) -> SiegeAiIntentSource -> SiegeAi.EffectiveTier."));
     }
 
     void RegisterCombatDefaults()

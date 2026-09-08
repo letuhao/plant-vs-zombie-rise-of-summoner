@@ -1,0 +1,20 @@
+{
+  "climate": "light",
+  "dispositionBase": "hostile",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
+  ],
+  "flavor": "Sunlight pours through high, crystalline panes, illuminating a swirling vortex of golden feathers and humming, radiant energy. Within the brilliance, a massive, multi-winged entity sits perched upon a pillar of solid light, its eyes glowing like miniature stars as it watches the shadows dance.",
+  "hazardBand": "light",
+  "kind": "wild",
+  "name": "The Gilded Aviary of Solace",
+  "reason": "The party encounters a celestial-aligned entity that can be offered prayers for blessings or traded with for divine relics.",
+  "roomId": "room.wild-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

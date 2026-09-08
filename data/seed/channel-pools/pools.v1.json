@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel-pool",
+  "entries": [
+    {
+      "id": "pool.element-power",
+      "note": "The six concrete element power channels. omni is NOT a member — it is the untyped case, a concrete channel on a concrete atom (spec-channel-pool.md §3.1).",
+      "members": [
+        { "channel": "combat.power.fire",  "weight": 1000 },
+        { "channel": "combat.power.ice",   "weight": 1000 },
+        { "channel": "combat.power.air",   "weight": 1000 },
+        { "channel": "combat.power.earth", "weight": 1000 },
+        { "channel": "combat.power.light", "weight": 1000 },
+        { "channel": "combat.power.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-defense",
+      "note": "The six concrete element defense channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.defense.fire",  "weight": 1000 },
+        { "channel": "combat.defense.ice",   "weight": 1000 },
+        { "channel": "combat.defense.air",   "weight": 1000 },
+        { "channel": "combat.defense.earth", "weight": 1000 },
+        { "channel": "combat.defense.light", "weight": 1000 },
+        { "channel": "combat.defense.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-accuracy",
+      "note": "The six concrete element accuracy channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.accuracy.fire",  "weight": 1000 },
+        { "channel": "combat.accuracy.ice",   "weight": 1000 },
+        { "channel": "combat.accuracy.air",   "weight": 1000 },
+        { "channel": "combat.accuracy.earth", "weight": 1000 },
+        { "channel": "combat.accuracy.light", "weight": 1000 },
+        { "channel": "combat.accuracy.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-dodge",
+      "note": "The six concrete element dodge channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.dodge.fire",  "weight": 1000 },
+        { "channel": "combat.dodge.ice",   "weight": 1000 },
+        { "channel": "combat.dodge.air",   "weight": 1000 },
+        { "channel": "combat.dodge.earth", "weight": 1000 },
+        { "channel": "combat.dodge.light", "weight": 1000 },
+        { "channel": "combat.dodge.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-crit-rate",
+      "note": "The six concrete element crit-rate channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.crit.rate.fire",  "weight": 1000 },
+        { "channel": "combat.crit.rate.ice",   "weight": 1000 },
+        { "channel": "combat.crit.rate.air",   "weight": 1000 },
+        { "channel": "combat.crit.rate.earth", "weight": 1000 },
+        { "channel": "combat.crit.rate.light", "weight": 1000 },
+        { "channel": "combat.crit.rate.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-crit-resist",
+      "note": "The six concrete element crit-resist channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.crit.resist.fire",  "weight": 1000 },
+        { "channel": "combat.crit.resist.ice",   "weight": 1000 },
+        { "channel": "combat.crit.resist.air",   "weight": 1000 },
+        { "channel": "combat.crit.resist.earth", "weight": 1000 },
+        { "channel": "combat.crit.resist.light", "weight": 1000 },
+        { "channel": "combat.crit.resist.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-crit-damage",
+      "note": "The six concrete element crit-damage channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.crit.damage.fire",  "weight": 1000 },
+        { "channel": "combat.crit.damage.ice",   "weight": 1000 },
+        { "channel": "combat.crit.damage.air",   "weight": 1000 },
+        { "channel": "combat.crit.damage.earth", "weight": 1000 },
+        { "channel": "combat.crit.damage.light", "weight": 1000 },
+        { "channel": "combat.crit.damage.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-crit-resist-damage",
+      "note": "The six concrete element crit-resist-damage channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.crit.resist.damage.fire",  "weight": 1000 },
+        { "channel": "combat.crit.resist.damage.ice",   "weight": 1000 },
+        { "channel": "combat.crit.resist.damage.air",   "weight": 1000 },
+        { "channel": "combat.crit.resist.damage.earth", "weight": 1000 },
+        { "channel": "combat.crit.resist.damage.light", "weight": 1000 },
+        { "channel": "combat.crit.resist.damage.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-shield-capacity",
+      "note": "The six concrete element shield-capacity channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.shield.capacity.fire",  "weight": 1000 },
+        { "channel": "combat.shield.capacity.ice",   "weight": 1000 },
+        { "channel": "combat.shield.capacity.air",   "weight": 1000 },
+        { "channel": "combat.shield.capacity.earth", "weight": 1000 },
+        { "channel": "combat.shield.capacity.light", "weight": 1000 },
+        { "channel": "combat.shield.capacity.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-shield-toughness",
+      "note": "The six concrete element shield-toughness channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.shield.toughness.fire",  "weight": 1000 },
+        { "channel": "combat.shield.toughness.ice",   "weight": 1000 },
+        { "channel": "combat.shield.toughness.air",   "weight": 1000 },
+        { "channel": "combat.shield.toughness.earth", "weight": 1000 },
+        { "channel": "combat.shield.toughness.light", "weight": 1000 },
+        { "channel": "combat.shield.toughness.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-shield-pen",
+      "note": "The six concrete element shield-pen channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.shield.pen.fire",  "weight": 1000 },
+        { "channel": "combat.shield.pen.ice",   "weight": 1000 },
+        { "channel": "combat.shield.pen.air",   "weight": 1000 },
+        { "channel": "combat.shield.pen.earth", "weight": 1000 },
+        { "channel": "combat.shield.pen.light", "weight": 1000 },
+        { "channel": "combat.shield.pen.dark",  "weight": 1000 }
+      ]
+    },
+    {
+      "id": "pool.element-shield-regen",
+      "note": "The six concrete element shield-regen channels. omni is NOT a member.",
+      "members": [
+        { "channel": "combat.shield.regen.fire",  "weight": 1000 },
+        { "channel": "combat.shield.regen.ice",   "weight": 1000 },
+        { "channel": "combat.shield.regen.air",   "weight": 1000 },
+        { "channel": "combat.shield.regen.earth", "weight": 1000 },
+        { "channel": "combat.shield.regen.light", "weight": 1000 },
+        { "channel": "combat.shield.regen.dark",  "weight": 1000 }
+      ]
+    }
+  ]
+}

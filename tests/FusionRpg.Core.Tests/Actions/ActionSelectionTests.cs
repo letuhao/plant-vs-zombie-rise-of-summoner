@@ -34,6 +34,11 @@ public class ActionSelectionTests
         public EntityFacts FactsOf(string actorKey) => Facts[actorKey];
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
             Held.TryGetValue(actorKey, out var list) ? list : Array.Empty<CompiledAction>();
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => null;
+        public string? GarrisonedStructureKeyOf(string actorKey) => null;
+        public GridPos? ObjectivePositionOf(string actorKey) => null;
+        public long? MaxHpOf(string actorKey) => null;
+        public int AggressionOf(string actorKey) => 0;
     }
 
     static CompiledAction Action(
@@ -168,6 +173,25 @@ public class ActionSelectionTests
         var intent = Stub(view).TryDeclare("wave:0", nowTick: 0);
 
         Assert.Equal("act.smite", intent.ActionId);
+    }
+
+    [Fact]
+    public void ConstructTagRanksBelowEveryOtherTagIncludingUtility()
+    {
+        // base-defense siege-construction (2026-09-06): placing a structure mid-fight is the least
+        // urgent default for the stub AI to prefer -- a real construction order comes from a
+        // deliberate caller, never from this fallback preference.
+        var build = Action("act.build", tags: new[] { ActionTag.Construct });
+        var rest = Action("act.rest", tags: new[] { ActionTag.Utility });
+        Assert.True(ActionTagPreference.Compare(rest, build) < 0);
+    }
+
+    [Fact]
+    public void ConstructTagRoundTripsThroughNameAndTryParse()
+    {
+        Assert.Equal("construct", ActionTags.Name(ActionTag.Construct));
+        Assert.True(ActionTags.TryParse("construct", out var tag));
+        Assert.Equal(ActionTag.Construct, tag);
     }
 
     // ---- who: nearest, ties, and the no-board fallback ---------------------------------------

@@ -15,7 +15,7 @@ spec, plan, proposal, or ADR — and read the documents its §1 row names for yo
 |---|---|
 | **Before any design work** | **[DESIGN-GATE.md](DESIGN-GATE.md)** — mandatory reading gate + topic index |
 | **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
-| **Players** | [runbook/players.md](runbook/players.md) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
+| **Players** | **[guide/](guide/)** (**product vision SSOT** — [vision site](guide/site/), [brief feature list](guide/features.md), loops, catalog) · [runbook/players.md](runbook/players.md) (install) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
 | **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
 
 Then architecture → protocol → module specs → [local-dev runbook](runbook/local-dev.md).
@@ -45,6 +45,9 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [research/actor-core-chaos-mapping.md](research/actor-core-chaos-mapping.md) | Chaos level/realm/power_scale → Fusion progression.power (reference only) |
 | [research/architecture-stress/00-index.md](research/architecture-stress/00-index.md) | Red-team: situations + break matrix vs dual-authority locks (research only) |
 | [research/mod-loaders.md](research/mod-loaders.md) | BepInEx vs MelonLoader on this machine; host choice (not Effect depth) |
+| [research/commander-fe-audit-2026-08-30.md](research/commander-fe-audit-2026-08-30.md) | Commander/aura FE audit — command list, deploy defaults, genre comparison (audit only) |
+| [research/actor-hud-audit-2026-08-30.md](research/actor-hud-audit-2026-08-30.md) | Actor HUD audit — user perspective, built/wiring/gap, dual-render acceptance (audit only) |
+| [research/actor-hud-data-pipeline-audit-2026-08-30.md](research/actor-hud-data-pipeline-audit-2026-08-30.md) | Actor HUD pipeline audit — SSOT table, Hot read path, FSM alignment, duplicate retirement (audit only) |
 
 ## 2. Architecture (product design)
 
@@ -54,8 +57,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/data-architecture.md](architecture/data-architecture.md) | **Start here (data)** — physical stores, table inventory, SSOT map, lifecycle, DAL boundary |
 | [architecture/overview.md](architecture/overview.md) | Four modules (Launcher + Injector + Server + Web), v1 scope |
 | [architecture/stat-system.md](architecture/stat-system.md) | Modifier bag, compose, EntityApply / single writer |
-| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | **Derived-stat SSOT** — derived snapshot, progression.power, dynamic ApplyScale; 99 registered channels (84 combat **shipped**, not reserved); `resource.*` proposed in §3.G |
-| [architecture/resource-hub-ssot.md](architecture/resource-hub-ssot.md) | **Resource SSOT** — five actor resources in one shared set (`hp` `stamina` `hunger` `spirit` `qi`), faction differences are display labels only; scope/polarity/accrual registry, the two-suns rule, exhaustion-as-status, lazy regen |
+| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | **Derived-stat SSOT** — derived snapshot, progression.power, dynamic ApplyScale; 99 registered channels (84 combat **shipped**, not reserved); `resource.*` §3.G **registered and shipped** 2026-08-25, covering all six ids incl. `poise` |
+| [architecture/resource-hub-ssot.md](architecture/resource-hub-ssot.md) | **Resource SSOT** — **six** actor resources in one shared set (`hp` `stamina` `hunger` `spirit` `qi` `poise`), faction differences are display labels only; scope/polarity/accrual registry, the two-suns rule, exhaustion-as-status, lazy regen. All six are legal action costs; `poise` pays for guarding |
 | [architecture/resource-hub-ideal.md](architecture/resource-hub-ideal.md) | **Superseded — reasoning trail only.** Was the ideal capture — the five resources (`hp` `stamina` `hunger` `spirit` `qi`) with per-faction display labels, the exhaustion-debuff mechanic, lazy regen, and the scope/class/polarity registry shape |
 | [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **shipped** |
 | [architecture/element-hub-ssot.md](architecture/element-hub-ssot.md) | Element typing, ring-cycle matchup matrix (§8.5), combat derived channels — **design locked** |
@@ -70,7 +73,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-data.md](architecture/effect-data.md) | Effect / grant / overlay JSON shapes |
 | [architecture/effect-runtime.md](architecture/effect-runtime.md) | Injector apply path + capture → FT* |
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
-| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **partially shipped** (resolver/Funnel); overlay CombatMath **deferred** |
+| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **shipped and default-on** (resolver/Funnel + overlay CombatMath); C1–C13 proved on a real lawn 2026-08-30 (`docs/runbook/melon-live-checklist.md` §8b) |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/effect-atom-ideal.md](architecture/effect-atom-ideal.md) | **Ideal capture (not a spec)** — atom effects as the smallest unit, skills/traits/items as containers, values + power in SQLite; roll policy (fixed / on-instantiate / on-apply) and power as a category vector |
 | [architecture/effect-adoption-audit-2026-08-22.md](architecture/effect-adoption-audit-2026-08-22.md) | **Adoption tracker** — the 11 sites that own effect-shaped logic, the runtime consumer matrix, what "follows the effect SSOT" means, and a per-stream status table |
@@ -84,7 +87,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/action/spec-targeting.md](architecture/action/spec-targeting.md) | **Spec A2** — typed closed targeting contract compiling to the shipped `TargetResolver`; caster-relative `Relation` (one action serves both factions) and Chebyshev range that passes with no board |
 | [architecture/action/spec-usability-conditions.md](architecture/action/spec-usability-conditions.md) | **Spec A4** — the five ordered usability gates with typed refusals; reuses `E3`'s predicate compiler and asks it for two resource leaves |
 | [architecture/action/spec-basic-attack-adoption.md](architecture/action/spec-basic-attack-adoption.md) | **Spec A5** — the seam proof: the shipped basic attack as a declared action, eight goldens byte-identical; seven hazard fixtures and the `SourceOrder`/`OrdinalPtr` finding |
-| [architecture/action/spec-action-costs.md](architecture/action/spec-action-costs.md) | **Spec A3** — the five resources, lazy regen, exhaustion-as-status with hysteresis, atomic cost rollback, run lifetime and rest |
+| [architecture/action/spec-action-costs.md](architecture/action/spec-action-costs.md) | **Spec A3** — the **six** resources, lazy regen, exhaustion-as-status with hysteresis, atomic cost rollback, run lifetime and rest. ⚠️ That spec's own §1 still says "five" (`action-ideal.md:877` records the errata) |
 | [architecture/action/spec-action-catalog.md](architecture/action/spec-action-catalog.md) | **Spec A6** — load, compile, cache. Server-side only: actions are battle-mode, so the injector never sees one and there is no push |
 | [architecture/action/spec-action-selection.md](architecture/action/spec-action-selection.md) | **Spec A7** — the stub AI and the game's first AI layer: pursue nearest, act to kill, read through `IBattleView` so deferred fog is a swap |
 | [architecture/action/spec-defence-actions.md](architecture/action/spec-defence-actions.md) | **Spec A8** — block/guard/brace as actions; stance vs reaction, separate `WReact` pool, bounded nesting, `WReact=0` byte-identical |
@@ -100,6 +103,9 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [design/tech-stack.md](design/tech-stack.md) | **FE stack + gap register** — what the design demands that the current stack cannot do, the measured per-library bundle cost, the i18n choice (Lingui, English-first) and the 12 open build gaps |
 | [design/information-architecture.md](design/information-architecture.md) | **The GUI map** — 4 stages, 8 layers, the band assignment, the verb table, the reachability exceptions, the unlock ladder, and where all 20 current routes go |
 | [architecture/game-gui-principles.md](architecture/game-gui-principles.md) | **Binding business rules for every player surface** — one stage + layer stack (GG-1), band model, vocabulary/contrast/reach rules, player vs developer trees, enforcement checks, and the 2026-08-22 compliance baseline |
+| [architecture/commander-surface-ideal.md](architecture/commander-surface-ideal.md) | **Ideal capture (not a spec)** — Commanders layer (`K`) + actor sheet role extensions: persisted default, match snapshot at board.start, async handoff (no pre-run web gate), built/wiring inventory |
+| [architecture/commander-surface-map.md](architecture/commander-surface-map.md) | **Capability map (proposed)** — seven modules: persistence, list API, match snapshot, Commanders layer, sheet role, Sanctum readout, lawn HUD chip; build order and program acceptance |
+| [architecture/commander-surface/](architecture/commander-surface/) | Module specs for commander-surface program (**pending owner review**) |
 | [architecture/implementation-roadmap.md](architecture/implementation-roadmap.md) | Master W0–W14 checklist — **W0–W11 shipped**, W12 triage deferred, W13–W14 → implement plan |
 | [architecture/unique-entity-effects.md](architecture/unique-entity-effects.md) | Lawn unique power path + apply scope (bind → `entity:{ptr}`) |
 | [architecture/standalone-rpg-map.md](architecture/standalone-rpg-map.md) | Standalone-first program: web-playable RPG core, PvZ as extension — capability map + invariants |

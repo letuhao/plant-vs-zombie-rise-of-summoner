@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-demon.allpeater-002",
+  "flavor": "The corridor's geometry undergoes a sudden 切换, the floor tiles sliding away to reveal a rhythmic, grinding mechanism. A heavy, brass-weighted pendulum swings through the gap in a predictable 模式, slicing through the air with a low, whistling hum.",
+  "kind": "trap",
+  "name": "The Kinetic Pendulum",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggers a pressure plate that activates a mechanical oscillation hazard.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.allpeater"
+}

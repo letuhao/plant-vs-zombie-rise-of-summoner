@@ -41,18 +41,26 @@ public class ContainerValidatorTests
 
     static AtomRow? Lookup(string id) => Catalog.TryGetValue(id, out var a) ? a : null;
 
-    static AtomRejection Check(ContainerRow c) => ContainerValidator.Validate(c, Lookup);
+    // T3.1 (affix-schema): the pool draws affix ids now. Every `P(id, ...)` fixture below names an
+    // atom id directly, simulating `affix-library`'s (module 3, not yet built) 1:1 single-ref
+    // generation — same id, one ref. T3.2's per-class drawable-group counting DOES read `Class` now,
+    // so a fixed Prefix here means every fixture's `prefixRolls` exercises the prefix budget only —
+    // `SuffixRolls` stays at its default 0 throughout this file, on purpose.
+    static AffixRow? LookupAffix(string id) =>
+        Catalog.TryGetValue(id, out var atom) ? new AffixRow(id, AffixClass.Prefix, new[] { new AffixRefRow(1, atom.AtomId) }) : null;
+
+    static AtomRejection Check(ContainerRow c) => ContainerValidator.Validate(c, Lookup, LookupAffix);
 
     static ContainerRow Item(
         IEnumerable<ContainerAtomRow>? atoms = null,
         IEnumerable<ContainerPoolRow>? pool = null,
-        int poolRolls = 0,
+        int prefixRolls = 0,
         int? minTier = null,
         int? maxTier = null) => new()
     {
         ContainerId = "item.ember-band",
         Kind = ContainerKind.Item,
-        PoolRolls = poolRolls,
+        PrefixRolls = prefixRolls,
         MinTier = minTier,
         MaxTier = maxTier,
         Atoms = (atoms ?? Array.Empty<ContainerAtomRow>()).ToList(),
@@ -101,7 +109,7 @@ public class ContainerValidatorTests
         var c = Item(
             atoms: new[] { new ContainerAtomRow(1, "atom.vitality.t1") },
             pool: new[] { P("atom.vitality.t1", 10), P("atom.might.t1", 10) },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         Assert.Equal(AtomRejectionReason.DuplicateAtomInContainer, Check(c).Reason);
     }
@@ -159,7 +167,7 @@ public class ContainerValidatorTests
     [Fact]
     public void A_negative_weight_is_rejected_not_clamped()
     {
-        var c = Item(pool: new[] { P("atom.vitality.t1", -1) }, poolRolls: 1);
+        var c = Item(pool: new[] { P("atom.vitality.t1", -1) }, prefixRolls: 1);
 
         Assert.Equal(AtomRejectionReason.BadParamValue, Check(c).Reason);
     }
@@ -169,7 +177,7 @@ public class ContainerValidatorTests
     {
         var c = Item(
             pool: new[] { P("atom.vitality.t1", 10), P("atom.might.t1", 0) },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         Assert.True(Check(c).IsOk, Check(c).ToString());
     }
@@ -177,7 +185,7 @@ public class ContainerValidatorTests
     [Fact]
     public void A_pool_where_every_row_is_zero_weight_is_unsatisfiable()
     {
-        var c = Item(pool: new[] { P("atom.vitality.t1", 0), P("atom.might.t1", 0) }, poolRolls: 1);
+        var c = Item(pool: new[] { P("atom.vitality.t1", 0), P("atom.might.t1", 0) }, prefixRolls: 1);
 
         Assert.Equal(AtomRejectionReason.UnsatisfiablePool, Check(c).Reason);
     }
@@ -188,7 +196,7 @@ public class ContainerValidatorTests
         // Two groups, three draws: the one-per-group rule cannot be satisfied.
         var c = Item(
             pool: new[] { P("atom.vitality.t1", 10), P("atom.might.t1", 10) },
-            poolRolls: 3);
+            prefixRolls: 3);
 
         Assert.Equal(AtomRejectionReason.PoolRollsExceedGroups, Check(c).Reason);
     }
@@ -200,7 +208,7 @@ public class ContainerValidatorTests
         // naive check passes -- then the draw yields one atom and the instance is silently short.
         var c = Item(
             pool: new[] { P("atom.vitality.t1", 10), P("atom.might.t1", 0), P("atom.elemental-power.fire.t1", 0) },
-            poolRolls: 3);
+            prefixRolls: 3);
 
         Assert.Equal(AtomRejectionReason.PoolRollsExceedGroups, Check(c).Reason);
     }
@@ -212,7 +220,7 @@ public class ContainerValidatorTests
         // family_id alone, this container could only ever roll one of them.
         var c = Item(
             pool: new[] { P("atom.elemental-power.fire.t1", 10), P("atom.elemental-power.ice.t1", 10) },
-            poolRolls: 2);
+            prefixRolls: 2);
 
         Assert.True(Check(c).IsOk, Check(c).ToString());
     }
@@ -222,7 +230,7 @@ public class ContainerValidatorTests
     {
         var c = Item(
             pool: new[] { P("atom.elemental-power.fire.t1", 10), P("atom.elemental-power.fire.t2", 10) },
-            poolRolls: 2);
+            prefixRolls: 2);
 
         Assert.Equal(AtomRejectionReason.PoolRollsExceedGroups, Check(c).Reason);
     }
@@ -236,7 +244,7 @@ public class ContainerValidatorTests
                 P("atom.elemental-power.fire.t1", 10, "elements"),
                 P("atom.elemental-power.ice.t1", 10, "elements"),
             },
-            poolRolls: 2);
+            prefixRolls: 2);
 
         Assert.Equal(AtomRejectionReason.PoolRollsExceedGroups, Check(c).Reason);
     }
@@ -244,7 +252,7 @@ public class ContainerValidatorTests
     [Fact]
     public void Pool_rolls_above_zero_needs_at_least_one_pool_row()
     {
-        Assert.Equal(AtomRejectionReason.UnsatisfiablePool, Check(Item(poolRolls: 2)).Reason);
+        Assert.Equal(AtomRejectionReason.UnsatisfiablePool, Check(Item(prefixRolls: 2)).Reason);
     }
 
     [Fact]
@@ -262,7 +270,7 @@ public class ContainerValidatorTests
     {
         var c = Item(
             pool: new[] { P("atom.vitality.t3", 10) },
-            poolRolls: 1, minTier: 1, maxTier: 2);
+            prefixRolls: 1, minTier: 1, maxTier: 2);
 
         Assert.Equal(AtomRejectionReason.TierOutOfWindow, Check(c).Reason);
     }
@@ -272,7 +280,7 @@ public class ContainerValidatorTests
     {
         var c = Item(
             pool: new[] { P("atom.vitality.t2", 10) },
-            poolRolls: 1, minTier: 1, maxTier: 2);
+            prefixRolls: 1, minTier: 1, maxTier: 2);
 
         Assert.True(Check(c).IsOk, Check(c).ToString());
     }
@@ -284,7 +292,7 @@ public class ContainerValidatorTests
         var c = Item(
             atoms: new[] { new ContainerAtomRow(1, "atom.vitality.t3") },
             pool: new[] { P("atom.might.t1", 10) },
-            poolRolls: 1, minTier: 1, maxTier: 1);
+            prefixRolls: 1, minTier: 1, maxTier: 1);
 
         Assert.True(Check(c).IsOk, Check(c).ToString());
     }
@@ -334,7 +342,7 @@ public class ContainerValidatorTests
             ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":1}",
         };
 
-        var c = Item(pool: new[] { P("atom.a.bc.t1", 10), P("atom.ab.c.t1", 10) }, poolRolls: 2);
+        var c = Item(pool: new[] { P("atom.a.bc.t1", 10), P("atom.ab.c.t1", 10) }, prefixRolls: 2);
 
         Assert.True(Check(c).IsOk, "two distinct families must be two groups: " + Check(c));
     }

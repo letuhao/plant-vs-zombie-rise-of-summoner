@@ -14,6 +14,17 @@ public enum SequenceShape
 
     /// <summary>The whole id is fixed by the registry; the agent owns nothing.</summary>
     Fixed,
+
+    /// <summary>
+    /// The tail after the prefix is fully determined by deterministic upstream logic (a grid cell,
+    /// not an author's own sequence) — item-seedgen `combination-write-unblock` (2026-09-07),
+    /// `combogen`'s own tokens after `combo.strain-`/`combo.splice-`. Unlike <see cref="Fixed"/> the
+    /// id still varies per subject, so it needs prefix matching, not exact; unlike
+    /// <see cref="ThreeDigit"/>/<see cref="AffixWord"/> the tail has no grammar of its own left to
+    /// check here — the deterministic generator that produced it is the review, not a human sequence
+    /// an agent could get wrong.
+    /// </summary>
+    Derived,
 }
 
 /// <param name="PartitionId">Stable label used to group findings for a fix pass.</param>
@@ -65,8 +76,18 @@ public sealed class NamespaceAllocation
                 case "baseTypes": alloc.ExpandBaseTypes(registries, ns, kind); break;
                 case "affixFamilies": alloc.ExpandAffixFamilies(registries, ns, kind); break;
                 case "uniques": alloc.ExpandUniques(ns, kind); break;
-                case "sets": alloc.ExpandByList(ns, kind, "themeIds", "set."); break;
+                case "sets":
+                    alloc.ExpandByList(ns, kind, "themeIds", "set.");
+                    // Additive 2026-09-07 (registryVersion 5->6): `setgen`'s own build-population
+                    // grid (aptitude x archetype) gets the SAME id shape as the 5 legacy themeIds,
+                    // via a deliberately separate list key — merging it into `themeIds` itself would
+                    // have broken `legacy_partition_ids()`'s own meaning on the Python side (that
+                    // function reads `themeIds` specifically as "the 5 hand-authored partitions",
+                    // caught by a real test regression and reverted to this shape).
+                    alloc.ExpandByList(ns, kind, "buildThemeIds", "set.");
+                    break;
                 case "charms": alloc.ExpandCharms(ns, kind); break;
+                case "combinations": alloc.ExpandCombinations(ns, kind); break;
                 default: alloc.ExpandSlotOrFlat(ns, kind); break;
             }
         }
@@ -229,6 +250,19 @@ public sealed class NamespaceAllocation
             foreach (var breakpoint in breakpoints)
                 Add(kind, $"{kind.Directory}/resonance",
                     $"charm.res-{axis}-{breakpoint}", SequenceShape.Fixed);
+    }
+
+    /// <summary>
+    /// combo.strain-{gridCellTokens} / combo.splice-{gridCellTokens} — two fixed prefixes, one per
+    /// `combogen` shape, each covering every id that shape can ever produce (item-seedgen
+    /// `combination-write-unblock`, 2026-09-07, registryVersion 4→5). No `{seq:03}` exists to expand,
+    /// so this does not go through `ExpandSlotOrFlat` — the same reason `SequenceShape.Derived` exists
+    /// instead of forcing a 3-digit tail that was never going to be there.
+    /// </summary>
+    void ExpandCombinations(JsonObject ns, SeedKind kind)
+    {
+        foreach (var shape in new[] { "strain", "splice" })
+            Add(kind, $"{kind.Directory}/{shape}", $"combo.{shape}-", SequenceShape.Derived);
     }
 
     /// <summary>

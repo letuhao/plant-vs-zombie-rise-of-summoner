@@ -61,7 +61,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-002",
@@ -99,7 +100,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-003",
@@ -134,7 +136,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-004",
@@ -174,7 +177,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-005",
@@ -213,7 +217,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-006",
@@ -253,7 +258,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-007",
@@ -294,7 +300,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.rot-bloom-30-008",
@@ -332,7 +339,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     }
   ]
 }

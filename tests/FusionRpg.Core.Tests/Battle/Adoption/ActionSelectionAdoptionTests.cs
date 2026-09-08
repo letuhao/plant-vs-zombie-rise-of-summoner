@@ -10,7 +10,8 @@ namespace FusionRpg.Core.Tests.Battle.Adoption;
 /// A17 (spec-action-selection-adoption.md) — T35/T36: the `IBattleView` adapter and loadout
 /// compilation, proven from outside `BattleEngine` the only way possible (both are private, nested
 /// per B13's own deviation note) — through `BattleEngine.Resolve`'s public surface and its
-/// observable effects (the report, and thrown exceptions for a bad loadout).
+/// observable effects (the report, including `Warnings` for a loadout that could not resolve —
+/// aura-skill T3/audit D3 replaced the old thrown exception with this degrade-and-warn path).
 /// </summary>
 public class ActionSelectionAdoptionTests
 {
@@ -46,21 +47,29 @@ public class ActionSelectionAdoptionTests
     }
 
     [Fact]
-    public void A_nonempty_loadout_with_no_catalog_throws_loudly()
+    public void A_nonempty_loadout_with_no_catalog_degrades_with_a_named_warning()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
-            BattleEngine.Resolve(Setup(Actor("squad:0", "squad", new[] { "skill.x" })), seed: 1));
-        Assert.Contains("squad:0", ex.Message, StringComparison.Ordinal);
-        Assert.Contains("ActionCatalog", ex.Message, StringComparison.Ordinal);
+        // aura-skill T3 (audit D3): this used to throw ArgumentException and fail the whole battle —
+        // which meant the first authored Skill grant broke every web battle, and re-threw on every
+        // replay of an already-stored setup. It now degrades to the basic-attack fallback and names
+        // the dropped actor/reason in BattleReport.Warnings instead.
+        var report = BattleEngine.Resolve(Setup(Actor("squad:0", "squad", new[] { "skill.x" })), seed: 1);
+
+        Assert.NotNull(report.Warnings);
+        Assert.Contains(report.Warnings!, w =>
+            w.Contains("squad:0", StringComparison.Ordinal) && w.Contains("ActionCatalog", StringComparison.Ordinal));
     }
 
     [Fact]
-    public void An_unknown_equipped_id_against_a_real_catalog_throws_loudly()
+    public void An_unknown_equipped_id_against_a_real_catalog_degrades_with_a_named_warning()
     {
+        // Same D3 fix, the second throw site: an id absent from a real (non-null) catalog.
         var catalog = ActionCatalog.Build(new[] { Dummy("skill.known") });
-        var ex = Assert.Throws<ArgumentException>(() =>
-            BattleEngine.Resolve(Setup(Actor("squad:0", "squad", new[] { "skill.unknown" })), seed: 1, actionCatalog: catalog));
-        Assert.Contains("skill.unknown", ex.Message, StringComparison.Ordinal);
+        var report = BattleEngine.Resolve(
+            Setup(Actor("squad:0", "squad", new[] { "skill.unknown" })), seed: 1, actionCatalog: catalog);
+
+        Assert.NotNull(report.Warnings);
+        Assert.Contains(report.Warnings!, w => w.Contains("skill.unknown", StringComparison.Ordinal));
     }
 
     [Fact]

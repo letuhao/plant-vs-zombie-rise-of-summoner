@@ -25,6 +25,24 @@ public sealed record TraitBattleDef
     /// <summary>Static derived-channel adjustments merged at compose time (e.g. crit rate).</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
 
+    /// <summary>
+    /// combat-unification **Wave E1** — statuses an actor with this trait applies to whoever it LANDS
+    /// a hit on. Reuses <see cref="BattleStatusSpec"/> unchanged: the wave's own spec says "rider
+    /// grammar matches `BattleStatusSpec`", so a rider is the same status grammar attached at a
+    /// different moment, not a new vocabulary.
+    ///
+    /// <para><b>Why riders live on the trait def and not on `BattleActorSetup`.</b> The wave's spec
+    /// offers both ("rider specs on setups/traits") and then settles it: "Trait-sourced riders come
+    /// from `TraitBattleCatalog` rows, not engine branches." The measured reason to prefer it: a new
+    /// property on `BattleActorSetup` lands inside the serialized `BattleSetup` that
+    /// `ExpeditionBattlePlan` hashes, so it moves all four expedition tier goldens for a purely
+    /// structural reason — verified by trying it, at which point 35 battle goldens stayed green and
+    /// only the expedition hash moved. A catalog row is not serialized and moves nothing.</para>
+    ///
+    /// <para>Empty for every shipped trait, which is the wave's byte-identity invariant.</para>
+    /// </summary>
+    public IReadOnlyList<BattleStatusSpec> OnHitRiders { get; init; } = Array.Empty<BattleStatusSpec>();
+
     public int BerserkRampHalfMilli { get; init; }      // extra damage below 50% own HP
     public int BerserkRampQuarterMilli { get; init; }   // extra damage below 25% own HP
     public int RegenPerRoundMilli { get; init; }        // of MaxHp, healed each round
@@ -121,7 +139,8 @@ public static class TraitBattleCatalog
             DeathRefusalCharges = m.DeathRefusalCharges, RetreatBelowMilli = m.RetreatBelowMilli,
             TargetsLowestHp = targetsLowestHp, GuardsAdjacentAlly = guardsAdjacentAlly,
             SoulLootBonusMilli = m.SoulLootBonusMilli, SpecimenXpBonusMilli = m.SpecimenXpBonusMilli,
-            EssenceProcMilli = m.EssenceProcMilli, EssenceRiderMilli = m.EssenceRiderMilli
+            EssenceProcMilli = m.EssenceProcMilli, EssenceRiderMilli = m.EssenceRiderMilli,
+            OnHitRiders = m.OnHitRiders ?? Array.Empty<BattleStatusSpec>()
         };
     }
 

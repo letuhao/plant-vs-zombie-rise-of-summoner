@@ -22,7 +22,7 @@ public class UnlockDiscardTests
     }
 
     static UnlockTuning Tuning(int coeffMilli = 100) =>
-        new(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: coeffMilli);
+        new(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: coeffMilli);
 
     // ---- UnlockState.TryDiscard: the pure, Core-only half ------------------------------------------
 
@@ -82,7 +82,7 @@ public class UnlockDiscardTests
         // at whatever rung the discarded item held -- proving the ratchet, not the slot, decided it.
         var newHeld = state.Held.Single(h => h.UnlockId == "skill.new");
         Assert.Equal(11, newHeld.EarnCountAtAcceptance);
-        Assert.Equal(10, UnlockLadder.Rung(newHeld.EarnCountAtAcceptance, tuning)); // clamped at cap
+        Assert.Equal(10, UnlockLadder.EffectiveRung(newHeld.EarnCountAtAcceptance, tuning).Value); // clamped at rungCap
     }
 
     [Fact]
@@ -98,12 +98,12 @@ public class UnlockDiscardTests
         state.TryAccept("skill.c", tuning, new AlwaysHit()); // earnCount 3
 
         var bBefore = state.Held.Single(h => h.UnlockId == "skill.b");
-        var bRungBefore = UnlockLadder.Rung(bBefore.EarnCountAtAcceptance, tuning);
+        var bRungBefore = UnlockLadder.EffectiveRung(bBefore.EarnCountAtAcceptance, tuning);
 
         state.TryDiscard("skill.a");
 
         var bAfter = state.Held.Single(h => h.UnlockId == "skill.b");
-        Assert.Equal(bRungBefore, UnlockLadder.Rung(bAfter.EarnCountAtAcceptance, tuning));
+        Assert.Equal(bRungBefore, UnlockLadder.EffectiveRung(bAfter.EarnCountAtAcceptance, tuning));
         Assert.Equal(2, bAfter.EarnCountAtAcceptance); // literally unchanged -- never re-derived from position
     }
 

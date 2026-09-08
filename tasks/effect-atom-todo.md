@@ -566,5 +566,57 @@ boundary guards green + the full non-`World`/non-`Loam` regression sweep across 
 
 ## Unowned, tracked
 
+- ⛔ **E20-E25 still owes ONE thing, located exactly on 2026-08-30: a production BINDING PRODUCER.**
+  A live-lawn run this session (real game, real server, real board — `plantPtr 26378414480`) granted a
+  `stat.derived` effect and was refused with `unknown effect_id`. Traced:
+  `RpgHub.BuildApplyCommand` → `AtomPushService.Build(owner, …)` → `RpgStore.ResolveBindings(owner, …)`
+  pushes only atoms **bound to that owner**, and
+
+  > **`select count(*) from effect_binding` → `0`** — there are no bindings for any owner.
+
+  So the compiled catalog reaching the injector is empty, and no atom is grantable on a live lawn no
+  matter how complete the compile chain is. **Proven by construction:** hand-inserting one
+  `effect_instance` + `effect_instance_atom` + `effect_binding` row for `trait.critical-hunter`
+  (owner `player:1`) made the def reach the injector immediately, and the aura then wrote
+  `combat.crit.rate.omni = 150` onto a live lawn plant (aura-skill A5, proven with an on/off/on cycle).
+  The mechanism is complete; only the **production** producer of those rows is missing. Wave 6's own description names three things — *"a loader,
+  an importer run, and a producer of bindings"*. The **loader and importer exist and ran** (21 atoms
+  imported this session); the **binding producer does not exist**. That is the whole of the remaining
+  gap, and it is this program's, not `aura-skill`'s.
+
+  ⚠️ **Related trap, unfixed:** `tools/AtomImporter` reports *"nothing changed — catalog revision and
+  content hash both held"* when only `AtomCompiler` **code** changed, because the hash covers seed
+  **data**. A compiler change therefore never triggers a re-push. Harmless while `effect_binding` is
+  empty; a silent-staleness trap the day it is not. Consider a `--force` flag or a code-version
+  component in the hash.
+
+- ✅ **~~Wave 6 is blocking a test in another program~~ — RESOLVED 2026-08-30, and Wave 6 owes the lawn
+  nothing.** This entry originally recorded `aura-skill` TC2 as blocked on E20-E25 (*"a loader, an
+  importer run, and a producer of bindings"*). Re-checked against code rather than inherited, the real
+  gap was **five small links**, all now built:
+
+  1. `EffectActions.ModifyDerivedStat` — a **declarative** action: nothing executes it, because a
+     `stat.derived` atom declares no trigger and the bag never fires it. No sink arm was needed in
+     either runtime, which is why this did not touch `InjectorEffectActionSink` or `BattleEffectSink`.
+  2. its `EffectOverlayMerge.AllowedByAction` row — keyed to the **compiled** shape (`channel` plus
+     op-as-key `flat`/`increased`/`replace`/`flag`), since `AtomCompiler.ToOpcodeShape` rewrites the
+     authored `{op, amount}` exactly as it already does for `stat.modify`.
+  3. `AtomCompiler.OpcodeOf: "stat.derived" => ModifyDerivedStat`.
+  4. **`Compilability.OpcodeKinds += "stat.derived"`** — the one that mattered most and was invisible
+     from the outside: without it `Classify` returned `Runner("has no FA opcode")`, so the kind produced
+     a runtime entry that no derived consumer reads and **never became an `EffectDef` at all**.
+  5. `GrantedDerivedAtomReader` made catalog-aware, plus the injector adapter wired to pass
+     `bag.Catalog` — without that last step the change would have been test-only.
+
+  **Measured, not assumed: no goldens and no content hashes moved** (196 golden/hash/compiler/parity
+  tests green with the change in). `AtomCompilerTests.A_quarantined_kind_is_rejected_in_the_runtime_that_still_lacks_a_consumer`
+  was updated from `Runner` to `Compiled` for Lawn — Sim stays `Rejected`, so D6's quarantine rule is
+  intact and still carried by the same test.
+
+  Proof: `AuraDeliveryLawnTests.A_real_def_granted_through_the_real_EffectBag_reaches_a_lawn_plant`
+  (real `AtomCompiler` output → real `EffectBag.Grant` → real reader → `ActorHub`) and
+  `StatDerivedCompileGapTests` (4 tests, now asserting each link EXISTS rather than tripwiring its
+  absence). Only **A5**, the live probe against a running game, remains.
+
 - [x] **`effect_channel_policy` — OWNER ASSIGNED 2026-08-22: E16.** Resolved by **E1's own code-or-data rule** (*a thing can be data if adding a row changes behaviour without new code; if a new row needs a new consumer, it must be code*): changing a **cap or default on an existing channel** is a value change with a live consumer (`DerivedStatRegistry.cs:46-48`, `ActorDerivedProfiles`) — **that is data**. Adding a *channel* needs a new reader — **that stays code**. So the table ships with **E16** (the channel module, which already adds a composer and a Writer case per channel) holding values only, never channel identity, and registers with **E8** bumping `ContentHashRegistry.CurrentSchemaVersion` to **4** (E18=2, E9=3).
   - ⚠️ Until E16, the 0.95 resist cap stays a code constant: changing it moves every battle golden with an unchanged `contentHash`. Acceptable only because a constant edit is visible in a diff — which stops being true the moment it becomes a row, which is exactly why it must register with E8 in the same change.

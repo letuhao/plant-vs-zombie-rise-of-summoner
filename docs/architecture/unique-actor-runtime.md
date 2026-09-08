@@ -120,6 +120,26 @@ stateDiagram-v2
 
 **W4 recover note:** Data persists **ActiveBound → Roster in one write** (`revision + 2`); `Recovering` is not an observable intermediate row (diagram remains the logical model).
 
+**party-dungeon D2.23 (spec-delve-attrition.md §7, landed 2026-09-06) — two FSM changes for a delve
+wound, same edges, new durability and a second producer:**
+
+- **`Retired` gains a second producer.** `ActiveBound → Retired` (the same edge above, not a new one)
+  now also fires at `CloseDelve(Extracted|Wiped)` for a `downedOnce` member on a rung at or above
+  `domain.permadeathFromRung` — "died in a delve on a permadeath rung", not a player-issued `retire`.
+  `TryRetireUniqueActor`'s own release path (`RpgStore.UniqueActors.cs:189`) already refused a
+  `Recovering` row before this landed; that refusal now also protects a delve-durable recovery the
+  way it always protected the ordinary one.
+- **`Recovering` becomes durable for a delve wound — the opposite of the W4 note above.** Below the
+  permadeath gate, `ActiveBound → Recovering` persists a REAL row (`rpg_unique_actor_recovery`:
+  `recovery_delves_left`, `wounded_delve_id`, `theta_run` — no `*_utc` column, R6: "recovery is
+  counted, never timed"). `Recovering → Roster` gains a second trigger beyond `persist_ok`: the
+  counter reaching zero (decremented once per `CloseDelve` of ANY LATER delve the player closes,
+  Extracted or Wiped — not only the wounding one) flips it back to `Roster` in that same write, or the
+  player pays the priced escape (`POST /api/delve/recovery-ritual`,
+  `SoulSinkPolicy.Price(risk.recoveryRitualSouls.{rung}, theta_run, tuning)` at the WOUNDING delve's
+  own rung and depth) and it flips immediately. Until then this `Recovering` row IS the observable
+  state — a delve-dispatch caller refuses it the same way expedition dispatch already refuses one.
+
 **W5-D:** Stuck `Deploying` past timeout (default 30s) → `FailExpiredUniqueDeploys` / `UniqueActorDeployWatchdog` → Roster; Server also enqueues Injector `unique.binding.clear` so MatchRuntime PendingSpawn is GC’d (redeploy can begin).
 
 **W5-E:** Boot `SweepStaleActiveBoundUniqueActors` — ActiveBound with missing/stale `match_key` (no open run) → Roster. Observe lag OK; no Hot coupling.
@@ -249,3 +269,12 @@ Future tests (not authored here):
 **Still out:** Full gear shop polish (W12); ActiveBound mid-match equip / Hot re-push; specimen XP balance curves; full ActiveBound Hello rehydrate of gear catalogs.
 
 When extending, cite this file + [match-runtime.md](match-runtime.md) and do not reopen Foundation Effects contract v1 opcodes without an ADR.
+
+### 11.1 Party-dungeon `delve-attrition` (2026-09-05, specced, unbuilt)
+
+`Retired` gains a **second producer**: extraction from a delve on a permadeath rung (`PermadeathGate.Applies`)
+retires a `downedOnce` demon — the release path in `RpgStore.UniqueActors.cs:216` stops being the only
+write. `Recovering` becomes a **durable** row for a delve wound, counted down **in delves** at `CloseDelve`
+(never timed — no `*_utc` column, no `ElapsedDays`), left by the counter reaching 0 or by the recovery
+ritual. The W4 one-write note (§6 Recover: `ActiveBound → Recovering → Roster` in one step) still holds for
+lawn deaths. Spec: [party-dungeon/spec-delve-attrition.md](party-dungeon/spec-delve-attrition.md) §7.

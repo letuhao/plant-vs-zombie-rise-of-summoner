@@ -16,13 +16,11 @@ public class EffectPluginHostTests
     }
 
     [Fact]
-    public void Default_registry_registers_butter_and_passive_plugins()
+    public void Default_registry_registers_patron_plugin_only()
     {
         var h = new FoundationHarness();
         var host = EffectPluginHostFactory.Create(h.Bag);
-        Assert.Equal(3, host.Plugins.Count);
-        Assert.Contains(host.Plugins, p => p.PluginId == "sec.match.butter");
-        Assert.Contains(host.Plugins, p => p.PluginId == "sec.match.passive_atk");
+        Assert.Single(host.Plugins);
         Assert.Contains(host.Plugins, p => p.PluginId == "sec.patron.aura");
     }
 }

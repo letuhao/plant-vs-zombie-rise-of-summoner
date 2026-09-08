@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "A long, narrow corridor of polished white marble where the air hums with a constant, whistling vibration. Translucent silk banners hang from the ceiling, dancing violently in a wind that has no visible source.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Zephyr Gallery",
+  "reason": "A group of elemental sentinels stands poised in the center of the hall, their forms blurring as they draw breath for a coordinated strike.",
+  "roomId": "room.fight-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

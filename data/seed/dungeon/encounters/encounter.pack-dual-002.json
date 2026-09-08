@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "dual",
+  "encounterId": "encounter.pack-dual-002",
+  "formation": "pack",
+  "name": "Swarming Skirmishers",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A coordinated wave of low-level threats that split focus between frontline pressure and flanking maneuvers.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "tyrant",
+    "floorRung": "scourge"
+  }
+}

@@ -27,7 +27,7 @@ public class FusionE2ETests : IAsyncLifetime
     public Task DisposeAsync() => Task.CompletedTask;
 
     static readonly DemonRecipeDef Recipe = DemonRecipeCatalog.All
-        .First(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Rare);
+        .First(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Cultivated);
 
     async Task SeedMaterials(params (string Id, long Qty)[] drops)
     {
@@ -48,8 +48,8 @@ public class FusionE2ETests : IAsyncLifetime
     public async Task Star_merge_previews_and_executes()
     {
         var species = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Common && s.Acquisition != DemonAcquisition.CaptureOnly);
-        await SeedMaterials(("shard.common", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
+            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        await SeedMaterials(("shard.chaff", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
         var baseId = await MintDemon(species.SpeciesId);
         var fuel = new[] { await MintDemon(species.SpeciesId), await MintDemon(species.SpeciesId) };
 
@@ -204,8 +204,8 @@ public class FusionE2ETests : IAsyncLifetime
     public async Task Starred_demon_carries_its_mods_into_a_real_match()
     {
         var species = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Common && s.Acquisition != DemonAcquisition.CaptureOnly);
-        await SeedMaterials(("shard.common", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
+            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        await SeedMaterials(("shard.chaff", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
         var baseId = await MintDemon(species.SpeciesId);
         var fuel = new[] { await MintDemon(species.SpeciesId), await MintDemon(species.SpeciesId) };
         (await _http.PostAsJsonAsync("/api/fusion/execute", new
@@ -235,19 +235,19 @@ public class FusionE2ETests : IAsyncLifetime
     {
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=900000", new { }))
             .EnsureSuccessStatusCode();
-        foreach (var rarity in new[] { "common", "rare", "epic", "legendary" })
+        foreach (var rarity in new[] { "chaff", "cultivated", "heirloom", "sunwoven" })
             await SeedMaterials(("shard." + rarity, 200));
         foreach (var element in new[] { "fire", "ice", "air", "earth", "light", "dark" })
             await SeedMaterials(("essence." + element, 200));
 
         var legendary = DemonRecipeCatalog.All.First(r =>
-            DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Legendary);
+            DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Sunwoven);
         var corr = 0;
 
         async Task<(string Id, string Trait)> Craft(string speciesId)
         {
             var species = DemonSpeciesCatalog.Get(speciesId);
-            if (species.BaseRarity == DemonRarity.Common)
+            if (species.BaseRarity == DemonRarity.Chaff)
                 return (await MintDemon(speciesId), species.TraitPool[0]);
 
             var recipe = DemonRecipeCatalog.All.First(r => r.OutputSpeciesId == speciesId);
@@ -270,7 +270,7 @@ public class FusionE2ETests : IAsyncLifetime
         var roster = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
         var born = roster.GetProperty("items").EnumerateArray()
             .Single(i => i.GetProperty("actor").GetProperty("instanceId").GetString() == crown.Id);
-        Assert.Equal("legendary", born.GetProperty("profile").GetProperty("rarity").GetString());
+        Assert.Equal("sunwoven", born.GetProperty("profile").GetProperty("rarity").GetString());
         Assert.Equal("fusion", born.GetProperty("profile").GetProperty("origin").GetString());
         Assert.Equal(legendary.OutputSpeciesId,
             born.GetProperty("profile").GetProperty("speciesId").GetString());

@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "The air here is thick with the taste of ash, and the floor is a mosaic of glowing, cracked basalt. Heat ripples the vision, making the far wall shimmer like a desert mirage.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Cinder Hearth",
+  "reason": "A group of Magma Mephs is guarding the passage, dancing amidst the rising heat.",
+  "roomId": "room.fight-fire-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

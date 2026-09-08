@@ -30,7 +30,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.buttering",
+        "family": "atom.blighting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -67,10 +67,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.freezing",
+        "family": "atom.rotting",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-trichome",
       "flavorKey": "flavor.base.downy-trichome",
       "flavor": "Soft fur holds the cold as it falls.",
@@ -104,10 +104,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.chilling",
+        "family": "atom.sparking",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.tender-sac",
       "flavorKey": "flavor.base.tender-sac",
       "flavor": "Barely holding together, yet it never breaks where it counts.",
@@ -142,10 +142,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.venomous",
+        "family": "atom.marking",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.wispy-balsam",
       "flavorKey": "flavor.base.wispy-balsam",
       "flavor": "A faint scent moves on the air before the plant itself speaks.",
@@ -179,10 +179,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mesmerizing",
+        "family": "atom.sporing",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.pliant-gland",
       "flavorKey": "flavor.base.pliant-gland",
       "flavor": "Bends with pressure, yet its grip is absolute.",
@@ -216,7 +216,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.withering",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -256,7 +256,7 @@
         "family": "atom.bloodletting",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.slender-resin",
       "flavorKey": "flavor.base.slender-resin",
       "flavor": "Sticky but never heavy, it marks whatever it touches.",
@@ -330,7 +330,7 @@
         "family": "atom.rotting",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.nodding-duct",
       "flavorKey": "flavor.base.nodding-duct",
       "flavor": "Sways like wheat in wind, delivering its dark gift with each bend.",
@@ -404,7 +404,7 @@
         "family": "atom.marking",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.crackling-myrrh",
       "flavorKey": "flavor.base.crackling-myrrh",
       "flavor": "Splits and spits when heat approaches, scent carrying memory.",

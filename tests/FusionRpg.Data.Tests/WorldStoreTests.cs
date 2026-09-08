@@ -231,4 +231,51 @@ public class WorldStoreTests : IDisposable
         Assert.Equal(source.Members.Select(m => m.SpeciesId), legion.Members.Select(m => m.SpeciesId));
         Assert.All(legion.Members, m => Assert.Null(m.InstanceId)); // template members are unbound
     }
+
+    /// <summary>world-map W45 acceptance: a stocked, mid-project sector round-trips byte-identically.</summary>
+    [Fact]
+    public void A_stocked_mid_project_sector_survives_the_round_trip()
+    {
+        var built = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 5, worldId: "w-recruit");
+        var developing = built with
+        {
+            Sectors = built.Sectors
+                .Select(s => s.SectorId == "homeworld"
+                    ? s with { RecruitStock = 340, ProjectId = "placeholder-project", ProjectTurnsRemaining = 2 }
+                    : s)
+                .ToList()
+        };
+
+        var (ok, reason, _) = _store.CreateWorld(playerId: 1, developing);
+        Assert.True(ok, reason);
+
+        var loaded = _store.LoadWorldState("w-recruit");
+        Assert.NotNull(loaded);
+        var home = loaded!.Sectors.Single(s => s.SectorId == "homeworld");
+        Assert.Equal(340, home.RecruitStock);
+        Assert.Equal("placeholder-project", home.ProjectId);
+        Assert.Equal(2, home.ProjectTurnsRemaining);
+        Assert.Equal(WorldCanonical.Write(developing), WorldCanonical.Write(loaded));
+    }
+
+    /// <summary>
+    /// A column that only exists in `CREATE TABLE` never reaches a database that already had a
+    /// world in it (the same trap `A_routed_force_stays_routed_across_a_save` above proves for
+    /// `routed`) — an existing saved world must read the three new columns back as zero/null, not
+    /// throw or silently omit them.
+    /// </summary>
+    [Fact]
+    public void An_existing_world_created_before_this_column_reads_it_back_as_zero_null()
+    {
+        var built = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 3, worldId: "w-pre-existing");
+        _store.CreateWorld(1, built);
+
+        var loaded = _store.LoadWorldState("w-pre-existing")!;
+        Assert.All(loaded.Sectors, s =>
+        {
+            Assert.Equal(0, s.RecruitStock);
+            Assert.Null(s.ProjectId);
+            Assert.Null(s.ProjectTurnsRemaining);
+        });
+    }
 }

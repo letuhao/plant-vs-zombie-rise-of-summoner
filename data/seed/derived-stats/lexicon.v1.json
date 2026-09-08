@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "kind": "derived-stat-lexicon",
+  "version": 1,
+  "_meta": {
+    "owner": "docs/design/spec-derived-stat-sheet.md",
+    "note": "MIGRATION MIRROR (amended 2026-09-07). Runtime SSOT for displayName/reading/gauge is data/tuning/derived-stat-catalog.v{n}.json (+ status/resource/aptitude/element catalogs). This seed file remains until hosts inject those catalogs and SeedCatalogMatchesCode asserts against them. Never generate a player label from the dotted id (GG-62).",
+    "notTunables": "Copy still must NOT live in data/tuning/derived-stats.v2.json (that file holds categoryResistCap and turnDefaultSpeed only). Copy lives in *-catalog.v{n}.json — a runtime catalog class, not a balance-number file (tunables-ssot §1).",
+    "expand": "Combat families expand over omni + ElementRoster the same way catalog.json does. The player name is family + element noun: Fire Power, Omni Defense. omni renders as Omni, never as a seventh type chip.",
+    "channelLabel": "The day catalogs inject, channelLabel reads displayName from the surface catalog API and stops calling idWords on player surfaces."
+  },
+  "families": [
+    {
+      "id": "combat.power",
+      "displayName": "Power",
+      "category": "offense",
+      "icon": "power",
+      "reading": "Adds to overlay damage on this element's share of the hit. Flat game units — not a percentage.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.defense",
+      "displayName": "Defense",
+      "category": "defense",
+      "icon": "defense",
+      "reading": "Subtracts from the attacker's power on this element's share. Flat game units.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.crit.rate",
+      "displayName": "Crit chance",
+      "category": "offense",
+      "icon": "crit",
+      "reading": "How often a hit rolls critical. Sigmoid points — the percentage depends on the opponent. The card shows points; the inspector shows ≈ pp vs a named reference.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.crit.resist",
+      "displayName": "Crit resist",
+      "category": "defense",
+      "icon": "crit-resist",
+      "reading": "Pushes back against the attacker's crit chance. Same sigmoid family.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.crit.damage",
+      "displayName": "Crit damage",
+      "category": "offense",
+      "icon": "crit-dmg",
+      "reading": "How much worse a crit is. Multiplier points with a real ceiling near ×2. Stacking far past that buys almost nothing.",
+      "unitClass": "SigmoidMultiplierPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.crit.resist.damage",
+      "displayName": "Crit damage taken",
+      "category": "defense",
+      "icon": "crit-taken",
+      "reading": "Shrinks the attacker's crit-damage multiplier against you.",
+      "unitClass": "SigmoidMultiplierPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.accuracy",
+      "displayName": "Accuracy",
+      "category": "offense",
+      "icon": "accuracy",
+      "reading": "How often the hit lands versus dodge. Sigmoid points, opposed.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.dodge",
+      "displayName": "Dodge",
+      "category": "defense",
+      "icon": "dodge",
+      "reading": "How often you are somewhere else. Opposed by accuracy.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.shield.capacity",
+      "displayName": "Shield capacity",
+      "category": "shield",
+      "icon": "shield-cap",
+      "reading": "Extra hit points added to a shield layer of this element. Game units, not a percent.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.shield.toughness",
+      "displayName": "Shield toughness",
+      "category": "shield",
+      "icon": "shield-tough",
+      "reading": "How hard that shield layer is to chew through before HP.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.shield.pen",
+      "displayName": "Shield pierce",
+      "category": "shield",
+      "icon": "shield-pen",
+      "reading": "How much of their shield you ignore on a hit of this element.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.shield.regen",
+      "displayName": "Shield regen",
+      "category": "shield",
+      "icon": "shield-regen",
+      "reading": "Shield hit points restored per second on matching layers.",
+      "unitClass": "GameUnitsPerSecond",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.penetration",
+      "displayName": "Penetration",
+      "category": "offense",
+      "icon": "pen",
+      "reading": "Pushes through absorption. Reciprocal — more still helps, never a hard stop.",
+      "unitClass": "ReciprocalPoints",
+      "gauge": "reciprocal",
+      "cap": null
+    },
+    {
+      "id": "combat.absorption",
+      "displayName": "Absorption",
+      "category": "defense",
+      "icon": "absorb",
+      "reading": "Soaks incoming damage before it becomes HP. Opposed by penetration.",
+      "unitClass": "ReciprocalPoints",
+      "gauge": "reciprocal",
+      "cap": null
+    },
+    {
+      "id": "combat.amplification",
+      "displayName": "Amplification",
+      "category": "offense",
+      "icon": "amp",
+      "reading": "Multiplies the hit after the power/defense delta. Reciprocal family.",
+      "unitClass": "ReciprocalPoints",
+      "gauge": "reciprocal",
+      "cap": null
+    },
+    {
+      "id": "combat.reduction",
+      "displayName": "Reduction",
+      "category": "defense",
+      "icon": "reduce",
+      "reading": "Shrinks incoming damage after the delta. Reciprocal family.",
+      "unitClass": "ReciprocalPoints",
+      "gauge": "reciprocal",
+      "cap": null
+    },
+    {
+      "id": "combat.reflect.rate",
+      "displayName": "Reflect chance",
+      "category": "reflect",
+      "icon": "reflect",
+      "reading": "Chance that hitting you sends damage back.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.reflect.damage",
+      "displayName": "Reflect damage",
+      "category": "reflect",
+      "icon": "reflect-dmg",
+      "reading": "How hard the reflected hit is.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.reflect.resist.rate",
+      "displayName": "Reflect chance resist",
+      "category": "reflect",
+      "icon": "reflect-resist",
+      "reading": "Pushes back against their reflect chance.",
+      "unitClass": "SigmoidPoints",
+      "gauge": "sigmoid",
+      "cap": null
+    },
+    {
+      "id": "combat.reflect.resist.damage",
+      "displayName": "Reflect damage resist",
+      "category": "reflect",
+      "icon": "reflect-taken",
+      "reading": "Shrinks reflected damage that would hit you.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.parry.rate",
+      "displayName": "Parry chance",
+      "category": "guard",
+      "icon": "parry",
+      "reading": "Chance to turn the hit aside. Per-mille on the wire; the player sees a percent.",
+      "unitClass": "PerMilleRatio",
+      "gauge": "ratio",
+      "cap": null
+    },
+    {
+      "id": "combat.parry.strength",
+      "displayName": "Parry strength",
+      "category": "guard",
+      "icon": "parry-str",
+      "reading": "How much of the hit a successful parry removes.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.parry.break",
+      "displayName": "Parry break",
+      "category": "guard",
+      "icon": "parry-break",
+      "reading": "How much of their parry you ignore.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.parry.shred",
+      "displayName": "Parry shred",
+      "category": "guard",
+      "icon": "parry-shred",
+      "reading": "Peels their parry chance down when you land.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.block.rate",
+      "displayName": "Block chance",
+      "category": "guard",
+      "icon": "block",
+      "reading": "Chance to stop the hit outright. Per-mille on the wire.",
+      "unitClass": "PerMilleRatio",
+      "gauge": "ratio",
+      "cap": null
+    },
+    {
+      "id": "combat.block.strength",
+      "displayName": "Block strength",
+      "category": "guard",
+      "icon": "block-str",
+      "reading": "How much a successful block removes.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.block.break",
+      "displayName": "Block break",
+      "category": "guard",
+      "icon": "block-break",
+      "reading": "How much of their block you ignore.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "combat.block.shred",
+      "displayName": "Block shred",
+      "category": "guard",
+      "icon": "block-shred",
+      "reading": "Peels their block chance down when you land.",
+      "unitClass": "GameUnits",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "status.resist.dot",
+      "displayName": "DoT resist",
+      "category": "status",
+      "icon": "resist-dot",
+      "reading": "How much damage-over-time statuses shrink against you. Capped — the next point at the cap does nothing.",
+      "unitClass": "StatusPotencyPoints",
+      "gauge": "capped",
+      "cap": 0.95
+    },
+    {
+      "id": "status.resist.cc",
+      "displayName": "CC resist",
+      "category": "status",
+      "icon": "resist-cc",
+      "reading": "How much crowd-control statuses shrink against you. Capped at the same resist ceiling.",
+      "unitClass": "StatusPotencyPoints",
+      "gauge": "capped",
+      "cap": 0.95
+    },
+    {
+      "id": "status.resist.contagion",
+      "displayName": "Contagion resist",
+      "category": "status",
+      "icon": "resist-contagion",
+      "reading": "How much spreading statuses shrink against you. Capped.",
+      "unitClass": "StatusPotencyPoints",
+      "gauge": "capped",
+      "cap": 0.95
+    },
+    {
+      "id": "status.resist.omni",
+      "displayName": "Omni resist",
+      "category": "status",
+      "icon": "resist-omni",
+      "reading": "Resist that applies to every status category. Deliberately uncapped — more still counts.",
+      "unitClass": "StatusPotencyPoints",
+      "gauge": "relative",
+      "cap": null
+    },
+    {
+      "id": "progression.power",
+      "displayName": "Power index",
+      "category": "progression",
+      "icon": "theta",
+      "reading": "Θ — the ladder index. Contests read it linearly; magnitudes read P(Θ). Placeholder curve until the real one is wired.",
+      "unitClass": "LadderIndex",
+      "gauge": "none",
+      "cap": null,
+      "stateHint": "stub"
+    }
+  ],
+  "composeSentences": {
+    "FlatSum": "Sources add together.",
+    "FlatReplace": "The strongest source wins — these do not add.",
+    "SumIncreased": "Sources add, up to the cap.",
+    "MaxPriorityFlag": "On or off — the strongest source decides."
+  },
+  "gaugePolicy": {
+    "pool": "Fill is current / max of that pool. Full is good.",
+    "relative": "Bar length is this value versus the actor's own largest sibling in the group. It is not a cap. Never paint it as CAP.",
+    "sigmoid": "Bar length is distance toward the soft shoulder (~±250 points). Tooltip must still show points + ≈ pp vs a named reference.",
+    "reciprocal": "Bar is a feel spark only. The number is the authority.",
+    "ratio": "Fill is the percent after per-mille rendering. Bounded 0–100% because the unit is.",
+    "capped": "Fill is value / cap. At cap: CAP marker, warn colour, inspector says the next point does nothing.",
+    "none": "No bar. Number + unit only."
+  },
+  "statuses": [
+    { "id": "butter", "displayName": "Butter", "reading": "Stops them acting." },
+    { "id": "freeze", "displayName": "Freeze", "reading": "Locks them in ice." },
+    { "id": "cold", "displayName": "Cold", "reading": "Chills — slower, and ice's sibling." },
+    { "id": "poison", "displayName": "Poison", "reading": "Ticks damage while it lasts." },
+    { "id": "hypno", "displayName": "Hypnotize", "reading": "Turns them against their own." },
+    { "id": "ember", "displayName": "Ember", "reading": "A mixer burn that can sit beside other burns." },
+    { "id": "jala", "displayName": "Jala", "reading": "A hot burst that replaces its elemental family." },
+    { "id": "kelp", "displayName": "Kelp", "reading": "Wraps and slows." },
+    { "id": "wither", "displayName": "Wither", "reading": "Overlay drain over time." },
+    { "id": "bond", "displayName": "Bond", "reading": "A counter that meters hits." },
+    { "id": "rally", "displayName": "Rally", "reading": "A short lift for allies." },
+    { "id": "leech", "displayName": "Leech", "reading": "Takes from them as they live." },
+    { "id": "expose", "displayName": "Expose", "reading": "Makes the next hits land cleaner." },
+    { "id": "command", "displayName": "Command", "reading": "A leadership meter, not a stun." },
+    { "id": "shatter", "displayName": "Shatter", "reading": "Breaks what they were holding." },
+    { "id": "charm_pulse", "displayName": "Charm pulse", "reading": "A pulse that seizes control briefly." },
+    { "id": "blight", "displayName": "Blight", "reading": "A spreading sickness." },
+    { "id": "rot", "displayName": "Rot", "reading": "A spreading decay." },
+    { "id": "spark", "displayName": "Spark", "reading": "A spreading flare." },
+    { "id": "pact_mark", "displayName": "Pact mark", "reading": "A spreading mark from a pact." },
+    { "id": "spore", "displayName": "Spore", "reading": "A spreading cloud." },
+    { "id": "nerve.unsettled", "displayName": "Unsettled", "reading": "Party nerve — first rung." },
+    { "id": "nerve.shaken", "displayName": "Shaken", "reading": "Party nerve — second rung." },
+    { "id": "nerve.afflicted", "displayName": "Afflicted", "reading": "Party nerve — third rung." }
+  ],
+  "resources": [
+    { "id": "hp", "plant": "HP", "zombie": "HP" },
+    { "id": "stamina", "plant": "Stamina", "zombie": "Stamina" },
+    { "id": "hunger", "plant": "Sun", "zombie": "Hunger" },
+    { "id": "spirit", "plant": "Spirit", "zombie": "Spirit" },
+    { "id": "qi", "plant": "Yang", "zombie": "Yin" },
+    { "id": "poise", "plant": "Poise", "zombie": "Poise" }
+  ]
+}

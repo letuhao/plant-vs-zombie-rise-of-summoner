@@ -24,7 +24,7 @@
             "action": "SetBoxType",
             "effectId": "fx.set_dirt_box",
             "grantId": "g-dirt",
-            "params": { "boxType": 1, "row": 2, "col": 3 }
+            "params": { "boxType": 2, "row": 2, "col": 3 }
           }
         ]
       }

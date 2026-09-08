@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "bastion-defence-finesse-breaks-guard",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "escalating",
+    "retinue": 0,
+    "signatureAction": "elemental-surge"
+  },
+  "elementSpread": "dual",
+  "encounterId": "encounter.boss-dual-002",
+  "formation": "boss",
+  "name": "The Twin-Soul Sentinel",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-tempo duel where the retinue provides precision disruption while the boss maintains elemental dominance.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

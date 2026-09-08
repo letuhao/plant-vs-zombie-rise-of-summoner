@@ -30,13 +30,13 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.overlapping-shinguard",
       "flavorKey": "flavor.base.overlapping-shinguard",
-      "flavor": "Bone scales locked in overlapping rows \u2014 each piece moves with the foot but covers the one below.",
+      "flavor": "Bone scales locked in overlapping rows — each piece moves with the foot but covers the one below.",
       "tags": [
         "heavy",
         "mineral",
@@ -67,13 +67,13 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.netted-stilt",
       "flavorKey": "flavor.base.netted-stilt",
-      "flavor": "Rope wrapped tight around a wooden post \u2014 you stand taller on it, slower in it.",
+      "flavor": "Rope wrapped tight around a wooden post — you stand taller on it, slower in it.",
       "tags": [
         "heavy",
         "organic",
@@ -104,13 +104,13 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
       "socketMax": 1,
       "iconKey": "icon.base.shingled-gumboot",
       "flavorKey": "flavor.base.shingled-gumboot",
-      "flavor": "Plastic roofing shingles sewn onto a rubber boot \u2014 waterproof armor for the mire.",
+      "flavor": "Plastic roofing shingles sewn onto a rubber boot — waterproof armor for the mire.",
       "tags": [
         "medium-heavy",
         "mineral",
@@ -141,13 +141,13 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.articulated-boot",
       "flavorKey": "flavor.base.articulated-boot",
-      "flavor": "Metal hinges run the length of the sole \u2014 each step is deliberate, each joint remembers.",
+      "flavor": "Metal hinges run the length of the sole — each step is deliberate, each joint remembers.",
       "tags": [
         "medium-heavy",
         "metal",
@@ -178,10 +178,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.jointed-ski",
       "flavorKey": "flavor.base.jointed-ski",
       "flavor": "Wooden planks strapped to wood, each joint a weapon waiting to snap forward.",
@@ -215,13 +215,13 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.laced-flipper",
       "flavorKey": "flavor.base.laced-flipper",
-      "flavor": "Bound together with rope and tension \u2014 it moves because the parts move with it.",
+      "flavor": "Bound together with rope and tension — it moves because the parts move with it.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -253,13 +253,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.soldered-clog",
       "flavorKey": "flavor.base.soldered-clog",
-      "flavor": "Sheet metal fused by heat into a single unyielding form \u2014 you do not walk in this, you plod.",
+      "flavor": "Sheet metal fused by heat into a single unyielding form — you do not walk in this, you plod.",
       "tags": [
         "heavy",
         "metal",
@@ -290,13 +290,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.rigid-cleat",
       "flavorKey": "flavor.base.rigid-cleat",
-      "flavor": "Ceramic studs set in ceramic plate \u2014 grips the ground because it became the ground.",
+      "flavor": "Ceramic studs set in ceramic plate — grips the ground because it became the ground.",
       "tags": [
         "heavy",
         "mineral",
@@ -327,13 +327,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.ponderous-sneaker",
       "flavorKey": "flavor.base.ponderous-sneaker",
-      "flavor": "Stuffed with padding until it barely bends \u2014 comfort for a soldier who expects to stand a long time.",
+      "flavor": "Stuffed with padding until it barely bends — comfort for a soldier who expects to stand a long time.",
       "tags": [
         "heavy",
         "organic",
@@ -364,13 +364,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.beaten-sandal",
       "flavorKey": "flavor.base.beaten-sandal",
-      "flavor": "Metal plate hammered into a foot shape \u2014 weight for each step, force with each stride.",
+      "flavor": "Metal plate hammered into a foot shape — weight for each step, force with each stride.",
       "tags": [
         "heavy",
         "metal",
@@ -401,13 +401,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.galvanised-tread",
       "flavorKey": "flavor.base.galvanised-tread",
-      "flavor": "Industrial metal plate with a rust-resistant sheen \u2014 made in bulk for someone's army, worn now for yours.",
+      "flavor": "Industrial metal plate with a rust-resistant sheen — made in bulk for someone's army, worn now for yours.",
       "tags": [
         "heavy",
         "metal",
@@ -439,13 +439,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.bevelled-sole",
       "flavorKey": "flavor.base.bevelled-sole",
-      "flavor": "Stone ground at an angle \u2014 edges catch the earth, corners keep you standing when the ground does not.",
+      "flavor": "Stone ground at an angle — edges catch the earth, corners keep you standing when the ground does not.",
       "tags": [
         "heavy",
         "mineral",

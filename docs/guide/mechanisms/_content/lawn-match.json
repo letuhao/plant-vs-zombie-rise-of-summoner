@@ -1,0 +1,81 @@
+{
+  "slug": "lawn-match",
+  "title": "Lawn match",
+  "status": "Shipped",
+  "kicker": "Lawn · first core",
+  "pillar": {"text": "The lawn", "href": "the-lawn.md"},
+  "loopLine": "Lawn — first core",
+  "hook": "A **lawn match** is a live board match (Plants vs. Zombies: Fusion on your machine) — the **first core loop**, not the whole war.",
+  "blindSpots": [
+    {"term": "Lawn", "meaning": "The live PvZ board match on your machine, watched and fed by Rise of Summoner — not the rift map and not a web-only puzzle."},
+    {"term": "First core", "meaning": "What you play first and what feeds almost every spine loop. It is not the win condition and not optional flavour."},
+    {"term": "Replace the game", "meaning": "What Rise of Summoner does **not** do. It observes, records, and can deploy demons back — it does not rewrite the binary."},
+    {"term": "Lawn-only forever", "meaning": "Unlocked web features stay playable with the lawn game closed once opened. Nothing essential stays lawn-only forever."},
+    {"term": "Same save", "meaning": "Progress lands in your Rise of Summoner save. The lawn game’s own saves stay that game’s."}
+  ],
+  "alsoTrue": [
+    "A run feeds [souls](souls), type XP, [almanac](almanac), specimen levels, and [deploy](lawn-deploy).",
+    "Blessing, capture, trophies, and in-game open are still WIP — see sibling pages."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Legal Plants vs. Zombies: Fusion on your machine, with the control room watching.",
+        "You play the board. Rise of Summoner records what happened and can send roster demons back into the fight."
+      ],
+      "note": "Point the launcher at a legal install. Uninstalling the plugin is deleting a folder."
+    },
+    {
+      "title": "What a run leaves behind",
+      "intro": "A normal lawn level ends when the wave ends. Here it leaves something:",
+      "cards": [
+        {"name": "Souls", "body": "Kills and victories feed the soul ledger."},
+        {"name": "Almanac and types", "body": "Plants and zombies you meet feed type progression and the almanac."},
+        {"name": "Specimen levels", "body": "Specimens gain levels from work they actually did."},
+        {"name": "Deployed demons", "body": "Bound demons you field fight with the traits and element you gave them."}
+      ],
+      "diagram": [
+        "  legal match  ->  play board  ->  souls / XP / almanac / levels",
+        "                      |",
+        "                      +->  deploy roster demons (when bound)"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "First session shape",
+          "steps": [
+            "Start a legal lawn-game match from your install.",
+            "Open the control room and go to the Lawn stage while it runs.",
+            "Play the match; when it ends, check souls and roster progress in the Sanctum."
+          ],
+          "note": "Closing a menu over the lawn does not destroy the board — you stay on the stage."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Launch a legal match.",
+    "Open Lawn in the control room and confirm the live mirror is moving.",
+    "Finish a wave and look for souls / almanac / specimen progress in your save."
+  ],
+  "doNote": "Read the board under pressure: [live mirror and unit HUD](lawn-mirror-hud). Field roster demons: [bound demon deploy](lawn-deploy).",
+  "mixUps": [
+    {"q": "Is the lawn the whole game?", "a": "No. It is the first core loop. Expeditions, map, and later places matter too."},
+    {"q": "Do I lose RPG progress if I close the lawn game?", "a": "Unlocked web features stay playable with the lawn game closed. RPG data lives beside the server."},
+    {"q": "Does Rise of Summoner patch the game binary?", "a": "No. It does not download, patch, or rewrite the binary."},
+    {"q": "Are cheats part of this guide?", "a": "Sandbox cheats exist for builders, off by default — not part of normal play guidance."},
+    {"q": "Is blessing required to earn souls?", "a": "No. Souls already pay from play. Blessing (WIP) is meant to boost later idle — see [lawn blessing](lawn-blessing)."}
+  ],
+  "next": ["lawn-mirror-hud"],
+  "related": ["lawn-mirror-hud", "lawn-deploy", "souls", "almanac"],
+  "sources": [
+    "docs/guide/the-lawn.md",
+    "docs/guide/the-loops.md §Lawn — first core",
+    "docs/guide/mechanisms/lawn-match.md (prior stub)",
+    "docs/guide/features.md"
+  ]
+}

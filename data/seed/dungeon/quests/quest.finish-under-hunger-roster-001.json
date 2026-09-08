@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The expedition's rations have dwindled to nothing, and the party must reach the exit before starvation claims the survivors. Every moment spent delving deeper is a moment closer to certain death by famine.",
+  "name": "The Hollow Belly",
+  "objectiveTemplate": "finish-under-hunger",
+  "prereqRefs": [],
+  "questId": "quest.finish-under-hunger-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "roster",
+  "targetRef": "none"
+}

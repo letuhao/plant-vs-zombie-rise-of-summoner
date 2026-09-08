@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Chronicle is your history — run results, progression, and the lasting sheet of what you earned and spent." />
+    <title>Chronicle — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/chronicle.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Quests, failure, memory · history and progression
+        </p>
+        <h1 class="teach-title">Chronicle</h1>
+        <p class="teach-hook"><strong>Chronicle</strong> is your history — run results, progression, and the lasting sheet of what you earned and spent.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Chronicle</dt>
+              <dd>The history layer (<code>H</code>) — ledgers and run memory. Not the Almanac dossier browser.</dd>
+            </div>
+            <div>
+              <dt>Progress survives</dt>
+              <dd>Nothing you earn disappears with the level. There is no hard ceiling that says the grind is over.</dd>
+            </div>
+            <div>
+              <dt>XP ledger</dt>
+              <dd>Tracks summoner, plant types, zombie types, and specimens — separate from the souls bank.</dd>
+            </div>
+            <div>
+              <dt>Run result</dt>
+              <dd>A recorded outcome of play — part of history, not a quest checklist.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Souls buy summons and rituals; XP grows power curves and unlocks — different stocks of progress.</li>
+            <li>New worlds keep who you are — chronicle memory hangs with that prestige of place.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Your history of the war: what you ran, what you earned, what leveled.</p>
+          <p>It is the ledger of your summoner story — not a wiki of species art.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-progression-lands-title">
+          <h2 id="how-progression-lands-title">How progression lands</h2>
+          <pre class="teach-diagram" aria-label="diagram">
+  play  -&gt;  XP / run results  -&gt;  Chronicle (H)
+  play  -&gt;  souls (separate bank)
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Run results</strong>
+              <p>History of what you finished.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Progression dossier</strong>
+              <p>The lasting sheet of earned and spent power.</p>
+            </li>
+          </ol>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Track</th>
+                <th scope="col">What grows</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Summoner</td>
+                <td>Your account level and XP</td>
+              </tr>
+              <tr>
+                <td>Plant / zombie types</td>
+                <td>Per-type levels from play</td>
+              </tr>
+              <tr>
+                <td>Specimens</td>
+                <td>Individual demons from work they did — lawn, expedition, battle</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>Chronicle layer (H)</h3>
+            <p>Open from the rail when available.</p>
+            <ol>
+              <li>Open Chronicle (<code>H</code>).</li>
+              <li>Read run history and XP ledgers.</li>
+              <li>Cross-check Almanac (<code>A</code>) when you want dossiers instead of ledgers.</li>
+            </ol>
+            <p class="teach-note">Presentation polish continues; the surface exists in this build.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Finish a lawn match or expedition that can grant XP.</li>
+            <li>Open Chronicle (<code>H</code>) and find a ledger that moved.</li>
+            <li>Note that souls did not replace XP — both can rise for different jobs.</li>
+          </ol>
+          <p class="teach-note">Stop when chronicle ≠ almanac. Prestige of place: <a href="../../mechanisms/new-world-prestige.md">new world</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is Chronicle the quest log?</dt>
+              <dd>No. Quest log is Vision. Chronicle is history and XP.</dd>
+            </div>
+            <div>
+              <dt>Do I lose XP when a world ends?</dt>
+              <dd>You keep who you are — progression banks with the summoner. Loam and map holdings do not.</dd>
+            </div>
+            <div>
+              <dt>Is there a level cap?</dt>
+              <dd>No hard ceiling — magnitudes keep meaning as you climb.</dd>
+            </div>
+            <div>
+              <dt>Are souls shown as XP?</dt>
+              <dd>No. Souls are a separate stock from XP ledgers.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/new-world-prestige.md">New world — keep who you are</a>
+          </p>
+          <p>
+            Related:
+            <a href="almanac.html">Almanac dossiers</a> ·
+            <a href="dave-level.html">Dave&#x27;s level</a> ·
+            <a href="type-specimen-xp.html">Type and specimen XP</a> ·
+            <a href="../../mechanisms/new-world-prestige.md">New world — keep who you are</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/chronicle.md">Markdown (editable SSOT)</a> ·
+            <a href="../../almanac.md">Almanac</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/chronicle.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

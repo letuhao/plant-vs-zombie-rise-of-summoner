@@ -1,0 +1,26 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "A narrow corridor of translucent blue ice where the walls are etched with deep, rhythmic grooves. A thin layer of frost coats the floor, making every step a precarious dance across a frozen mirror.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Frost-Veined Sluice",
+  "reason": "A heavy slab of jagged ice is suspended by a frozen tension-cord above the path; a sudden temperature shift or vibration triggers a rapid melt, dropping the weight onto the travelers.",
+  "roomId": "room.trap-ice-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

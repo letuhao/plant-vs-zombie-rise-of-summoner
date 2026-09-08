@@ -31,17 +31,19 @@ public class GrantSeamLifecycleTests
     // ---- item 8: the cap question, re-framed rather than re-invented ------------------------------
 
     [Fact]
-    public void EquippedSkillCapIsFiveAndIsLoadoutSetsOwnConstant()
+    public void EquippedSkillCapDefaultsToFiveAndIsLoadoutSetsOwnBase()
     {
         // "The number is not 8" -- named here as exactly what it already is, not a new literal.
-        Assert.Equal(5, CapPolicy.EquippedSkillCap);
-        Assert.Equal(LoadoutSet.MaxSize, CapPolicy.EquippedSkillCap);
+        // D4.25: EquippedSkillCap became a reader of LoadoutSet.EffectiveMaxSize (the loadout.slots
+        // channel can raise it), so the no-channel-worn default is what this test pins.
+        Assert.Equal(5, CapPolicy.EquippedSkillCap());
+        Assert.Equal(LoadoutSet.MaxSize, CapPolicy.EquippedSkillCap());
     }
 
     [Fact]
     public void HeldCapIsUnlockTuningsOwnCapNeverAPrivateNumber()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         Assert.Equal(10, CapPolicy.HeldCap(tuning));
     }
 

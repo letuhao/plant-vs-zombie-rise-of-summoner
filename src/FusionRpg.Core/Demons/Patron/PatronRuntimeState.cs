@@ -1,17 +1,25 @@
 namespace FusionRpg.Core.Demons.Patron;
 
 /// <summary>
-/// Process-local patron cache — the injector fills it from the server's `patron.aura` command
-/// (and the server/SIM fill it directly). Read by the PatronSecondaryPlugin at match start and
-/// by the injector's combat compose. Match-scoped activity is flagged by the plugin lifecycle,
-/// never by wall time, so a mid-match switch changes nothing until the next match (spec lock 2).
+/// Process-local patron designation cache — the injector fills it from the server's `patron.aura`
+/// command (and the server/SIM fill it directly). Read by <see cref="Effects.Plugins.PatronSecondaryPlugin"/>
+/// at match start to decide WHETHER a player has any patron designated at all — a cheap, Core-layer
+/// signal that avoids a store round trip from a Secondary plugin (Core cannot see `RpgStore`).
+///
+/// <para><b>No longer carries a combat magnitude</b> (patron-absorption, `seed-to-concrete` T6.2,
+/// 2026-09-06): the aura's power/defense values now reach combat as the `fx.patron_aura` grant's own
+/// compiled atom action rows (`data/seed/atoms/patron-aura.json`, resolved fresh per push via
+/// <c>AtomPushService.BuildExternalRefs</c> → <c>PatronEndpoints.Compute</c>), read by the same
+/// <c>GrantedDerivedAtomReader</c> path every other match-scoped grant uses — never a bespoke
+/// compose-time overlay. The old `MatchAura`/`BeginMatch`/`EndMatch` freeze existed only to hand that
+/// overlay a snapshot; with the overlay deleted (`PatronAuraOverlay.cs`), freezing has nothing left to
+/// serve, so it was removed rather than kept as an unread mirror of the grant.</para>
 /// </summary>
 public static class PatronRuntimeState
 {
     static readonly object Gate = new();
     static PatronAura? _aura;
     static long _playerId;
-    static bool _matchActive;
 
     public static void Set(long playerId, PatronAura? aura)
     {
@@ -36,41 +44,5 @@ public static class PatronRuntimeState
 
         aura = null!;
         return false;
-    }
-
-    /// <summary>Set by the plugin when its match grant lands; cleared on match teardown.
-    /// The combat compose applies the aura ONLY while this is true — grant lifecycle is the
-    /// single source of in-match truth.</summary>
-    public static bool MatchActive
-    {
-        get { lock (Gate) return _matchActive; }
-        set { lock (Gate) _matchActive = value; }
-    }
-
-    /// <summary>The aura the running match granted (frozen at match start — a switch mid-match
-    /// updates the designation cache but never the live match).</summary>
-    static PatronAura? _matchAura;
-
-    public static PatronAura? MatchAura
-    {
-        get { lock (Gate) return _matchActive ? _matchAura : null; }
-    }
-
-    public static void BeginMatch(PatronAura aura)
-    {
-        lock (Gate)
-        {
-            _matchAura = aura;
-            _matchActive = true;
-        }
-    }
-
-    public static void EndMatch()
-    {
-        lock (Gate)
-        {
-            _matchActive = false;
-            _matchAura = null;
-        }
     }
 }

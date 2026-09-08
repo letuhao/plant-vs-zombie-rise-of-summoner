@@ -30,10 +30,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.ancient-spathe",
       "flavorKey": "flavor.base.ancient-spathe",
       "flavor": "A leaf-sheath so old it has become stone-colored, keeping secrets in every crease.",
@@ -104,10 +104,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.petrified-spadix",
       "flavorKey": "flavor.base.petrified-spadix",
       "flavor": "The flower spike has hardened into stone, sensing becomes seeing into time itself.",
@@ -178,7 +178,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -218,7 +218,7 @@
         "family": "atom.ferocity",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.corky-bract",
       "flavorKey": "flavor.base.corky-bract",
       "flavor": "Spongy cork tissue forms the eye-spot, buoyant and resilient under pressure.",
@@ -252,7 +252,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -292,7 +292,7 @@
         "family": "atom.ferocity",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.sunken-tropism",
       "flavorKey": "flavor.base.sunken-tropism",
       "flavor": "The growth response has hollowed inward, creating a sensory void that draws light into itself.",
@@ -326,7 +326,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -366,7 +366,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.oaken-spathe",
       "flavorKey": "flavor.base.oaken-spathe",
       "flavor": "Built from old oak-like wood, the leaf-sheath is as solid as the trunk itself, sensing through steadiness.",
@@ -400,7 +400,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "extreme"
       },
       "socketMax": 1,

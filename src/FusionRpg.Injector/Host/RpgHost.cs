@@ -60,10 +60,11 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "contracts.v1.json"))));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v1.json"))));
-        FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v4.json"))));
+        var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
+            System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v5.json")));
+        FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
+        FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
         FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
             FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "souls.v1.json"))));
@@ -78,13 +79,51 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "combat.v1.json"))));
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
             FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v2.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status.v1.json"))));
         FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
             FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v2.json"))));
+        FusionRpg.Core.ActorSurface.ActorSurfaceCatalogHub.ConfigureAll(
+            FusionRpg.Core.ActorSurface.AptitudeSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitude-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.DerivedStatSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stat-catalog.v2.json"))),
+            FusionRpg.Core.ActorSurface.StatusSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ResourceSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "resource-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ElementSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "element-catalog.v1.json"))),
+            FusionRpg.Core.ActorSurface.ActorSheetSurfaceCatalogLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-sheet.v1.json"))));
+        // catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06): both of step 5's own
+        // preconditions are now satisfied and evidenced — the 829-species real classification run
+        // (T2.11, 2026-09-04) and the live-lawn/diff-test proof (Checkpoint 4; re-proven this session
+        // via T8.5's mint-demon check) — so this host reads the same real committed tree the Server
+        // already flipped to, via the Core-only path that never needs SQL: every
+        // data/generated/demons/<SpeciesId>.json this project's own .csproj now copies alongside the
+        // built mod, parsed by ConcreteSpeciesSeedReader and mapped by ConcreteSpeciesMapper — the
+        // SAME mapper RpgStore.BuildDemonSpeciesSnapshot() calls, proven field-for-field identical
+        // against the real 829-species tree (ConcreteSpeciesSeedReaderTests). Throws loudly on a
+        // missing/empty tree rather than silently falling back to the compiled default, matching
+        // DemonSpeciesCatalog.Configure's own established "fail loudly at load, name the fix" rule.
+        {
+            var speciesDir = System.IO.Path.Combine(_pluginDir, "data", "generated", "demons");
+            if (!System.IO.Directory.Exists(speciesDir))
+                throw new InvalidOperationException(
+                    $"Species seed tree not found at '{speciesDir}'. Rebuild this project — its own " +
+                    ".csproj now copies data/generated/demons/*.json alongside the mod — or point " +
+                    "FUSIONRPG at a plugin folder that has been rebuilt since 2026-09-06.");
+            var roster = System.IO.Directory.EnumerateFiles(speciesDir, "*.json")
+                .Where(p => !System.IO.Path.GetFileName(p).StartsWith('_'))
+                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesSeedReader.ParseFile)
+                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef)
+                .ToList();
+            FusionRpg.Core.Demons.DemonSpeciesCatalog.Configure(roster);
+        }
         FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
             FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -94,6 +133,18 @@ public static class RpgHost
         FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
             FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "expeditions.v1.json"))));
+        // party-dungeon D1.4 -- same ordering as Server/Program.cs: registries load first (pure),
+        // DungeonTuningHub/EncounterTuningHub configure next (cross-checked against them at parse
+        // time), DungeonRegistryHub last (RoomKindDef joins DungeonTuningHub at first read).
+        var dungeonRegistryDir = System.IO.Path.Combine(_pluginDir, "data", "seed", "dungeon", "_registry");
+        var dungeonRegistries = FusionRpg.Core.Dungeon.Registry.DungeonRegistryLoader.LoadAll(dungeonRegistryDir);
+        FusionRpg.Core.Dungeon.Tuning.DungeonTuningHub.Configure(
+            FusionRpg.Core.Dungeon.Tuning.DungeonTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "dungeon.v3.json")), dungeonRegistries));
+        FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
+            FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));
+        FusionRpg.Core.Dungeon.Registry.DungeonRegistryHub.Configure(dungeonRegistries);
         FusionRpg.Core.Match.MatchTuningPolicy.Configure(
             FusionRpg.Core.Match.MatchTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "match.v1.json"))));
@@ -105,7 +156,8 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "net.v1.json"))));
         FusionRpg.Core.Vfx.VfxTuningHub.Configure(
             FusionRpg.Core.Vfx.VfxTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "vfx.v1.json"))));
+                // v2 -> v3 (2026-08-30, UnitFrame): sustained.spanScale + render.sortOffsetAboveUnit.
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "vfx.v3.json"))));
         FusionRpg.Core.Power.PowerTuningHub.Configure(
             FusionRpg.Core.Power.PowerTuningLoader.Parse(
                 // T4.2 (power-dial, 2026-08-24): v1 (bMilli=0) -> v2 (bMilli=400). v1 stays on disk --
@@ -113,8 +165,17 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "power-scale.v2.json"))));
         FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
             FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v2.json"))));
+                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34). D55 (2026-09-06): v6 -> v7, demonType/aspect/uniqueDemon given real rates {15,15,22} -- v6 stays on disk.
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v8.json"))));
+        FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
+            FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-hud.v1.json"))));
+        FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
+            FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "lawn-deploy-events.v1.json"))));
+        FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
+            FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
 
         IsInitialized = true;
     }

@@ -31,6 +31,10 @@ public static class MatchTuningPolicy
 
     public static int MaxLivingPlants => Tuning.MaxLivingPlants;
     public static int MaxLivingZombies => Tuning.MaxLivingZombies;
+
+    /// <summary>E36 (spec-wave-control.md §2.2): the floor `wave.control`'s `hold` op applies to
+    /// `Board.timeUntilNextWave` every tick — was a bare `30f` literal in `CheatActions.cs`.</summary>
+    public static double WaveHoldFloorSeconds => Tuning.WaveHoldFloorSeconds;
 }
 
 public readonly struct LivingCounts

@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The local smiths require the Everburning Ember to reignite their dying furnaces. Without its warmth, the village's industry will freeze forever.",
+  "name": "The Heart of the Forge",
+  "objectiveTemplate": "extract-with-item-kind",
+  "prereqRefs": [],
+  "questId": "quest.extract-with-item-kind-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "delve",
+  "targetRef": "retinue"
+}

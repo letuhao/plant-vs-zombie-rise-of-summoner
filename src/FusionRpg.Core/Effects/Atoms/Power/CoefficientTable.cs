@@ -1,3 +1,5 @@
+using FusionRpg.Core.Stats.Derived;
+
 namespace FusionRpg.Core.Effects.Atoms.Power;
 
 /// <summary>
@@ -36,6 +38,46 @@ public sealed record PredicateFrequencyRow(
     string LeafId, string ArgKey, int ReachabilityMilli, int SusceptibilityMilli, int CoincidenceMilli, int UptimeMilli);
 
 /// <summary>
+/// E44 (spec-power-sweep.md §4.2, closing definitions.md §13 D2): a genuinely non-linear correction
+/// between two channels that price additively today but compose multiplicatively in real combat —
+/// crit rate × crit damage is the named, mandatory pair; shield capacity × toughness is the second.
+///
+/// <para><b>Why this exists and the two prior attempts did not close D2.</b> Attempt 1 (marginal read
+/// over an additive sum) and attempt 2 (aggregate channel totals, then price — what
+/// <see cref="ActorPowerCache.Compose"/> already did before this row type existed) are both still
+/// <i>additive underneath</i>: a sum, and a linear <c>price()</c> applied to a sum, both have zero
+/// cross terms by construction, so <c>marginal(x, A)</c> collapsed to <c>p(x)</c> regardless of
+/// <c>A</c> either way. This row is read by <see cref="ActorPowerCache"/> to add a correction term
+/// that is proportional to the <b>product</b> of the two sides' own priced channel totals — the one
+/// shape with an actual cross term, per the concrete direction spec-power-sweep.md's own §"a concrete
+/// direction worth trying" names.</para>
+///
+/// <para><b>Narrow and closed by construction, not a general nonlinear price engine</b> — exactly the
+/// pairs this table lists, never inferred from channel name shape. <see cref="KindA"/>/<see cref="ChannelA"/>
+/// and <see cref="KindB"/>/<see cref="ChannelB"/> are unordered as a pair (the lookup in
+/// <see cref="ActorPowerCache"/> checks both are present on the actor; which one is named "A" is not
+/// meaningful).</para>
+/// </summary>
+/// <param name="CoeffMilli">Per-mille strength of the correction, applied to the product of the two
+/// sides' own priced points (see <see cref="ActorPowerCache"/>'s <c>Interaction</c> for the exact
+/// arithmetic) — the same "coefficient over a data row" shape <see cref="PowerCoefficientRow"/>
+/// already uses, so a later sweep can propose against this table exactly the way it proposes against
+/// that one. <b>Flat and unfitted here</b>, the same discipline the 20 flat-1000 rows in
+/// <see cref="PowerTables.Authored"/> follow — but NOT flat-1000 itself: 1000‰ means something
+/// different for a term that scales a PRODUCT of two already-priced points than it does for a term
+/// that scales a single normalized magnitude, and copying the number without re-deriving what it means
+/// here was this construction's first mistake, caught and corrected — see
+/// <see cref="PowerTables.InteractionCoeffMilli"/>'s own comment for the corrected value and why.
+/// Fitting either table is E44's separate, out-of-scope half (spec-power-sweep.md §4.1).</param>
+/// <param name="Category">Which of the five categories the correction lands in. Not derived from
+/// either side's <c>AtomKind.Categories</c> (both sides here are <c>stat.derived</c>, whose kind-level
+/// categories are Offense|Survivability|Control regardless of which channel it writes) — the
+/// interaction itself has a specific meaning (a crit synergy is offense; a shield synergy is
+/// survivability) that a kind-wide flag set would blur.</param>
+public sealed record PowerInteractionRow(
+    string KindA, string ChannelA, string KindB, string ChannelB, int CoeffMilli, PowerCategory Category);
+
+/// <summary>
 /// The coefficients and trigger frequencies a price is computed from.
 ///
 /// <para><b>Authored values live in rows; a sweep writes proposals to a side table and never touches
@@ -50,11 +92,13 @@ public sealed class PowerTables
 
     public PowerTables(
         IReadOnlyList<PowerCoefficientRow> coefficients, IReadOnlyList<TriggerFrequencyRow> frequencies,
-        IReadOnlyList<PredicateFrequencyRow>? predicateFrequencies = null)
+        IReadOnlyList<PredicateFrequencyRow>? predicateFrequencies = null,
+        IReadOnlyList<PowerInteractionRow>? interactions = null)
     {
         Coefficients = coefficients;
         Frequencies = frequencies;
         PredicateFrequencies = predicateFrequencies ?? Array.Empty<PredicateFrequencyRow>();
+        Interactions = interactions ?? Array.Empty<PowerInteractionRow>();
         _coefficients = new Dictionary<(string, string), PowerCoefficientRow>();
         foreach (var c in coefficients) _coefficients[(c.KindId, c.Channel)] = c;
         _frequency = frequencies.ToDictionary(f => f.Trigger, f => f.PerMinute, StringComparer.Ordinal);
@@ -65,6 +109,12 @@ public sealed class PowerTables
     public IReadOnlyList<PowerCoefficientRow> Coefficients { get; }
     public IReadOnlyList<TriggerFrequencyRow> Frequencies { get; }
     public IReadOnlyList<PredicateFrequencyRow> PredicateFrequencies { get; }
+
+    /// <summary>E44/D2's closed, named set of cross-channel corrections — see <see cref="PowerInteractionRow"/>.
+    /// Empty for a caller that never passed any (every pre-E44 construction site), which is exactly
+    /// "no correction applies", not an error: <see cref="ActorPowerCache.Compose"/> degrades to its
+    /// pre-E44 additive-per-channel behaviour rather than throwing on a table nobody populated.</summary>
+    public IReadOnlyList<PowerInteractionRow> Interactions { get; }
 
     /// <summary>
     /// The row for a kind and channel, falling back to the kind's channel-less row.
@@ -156,7 +206,67 @@ public sealed class PowerTables
             new(AtomTriggers.OnTimer, 12),
         };
 
-        return new PowerTables(coefficients, frequencies);
+        return new PowerTables(coefficients, frequencies, interactions: AuthoredInteractions());
+    }
+
+    /// <summary>
+    /// E44/D2's two closed pairs — crit rate × crit damage, shield capacity × shield toughness — each
+    /// generated once per element slot (omni + the 6-member roster, matching every other 7-slot family
+    /// in <c>DerivedStatChannels</c>) rather than hand-listed 14 times.
+    ///
+    /// <para><b>Why 5‰, not a copy-pasted 1000‰.</b> Unlike <see cref="PowerCoefficientRow"/>, where
+    /// 1000‰ means "apply the normalized magnitude unchanged" — a genuinely neutral starting point —
+    /// <see cref="PowerInteractionRow.CoeffMilli"/> scales a PRODUCT of two already-priced point
+    /// values, so 1000‰ there is not neutral at all: at real authored magnitudes it made the
+    /// correction dwarf the additive base by an order of magnitude (checked against
+    /// <c>data/seed/items/_registry/bands.v1.json</c>'s own <c>sigmoidDerivedChannel</c> worked
+    /// example — tier 1 mid = 6 points, tier 5 mid = 56 points, the real range this fires over). 5‰
+    /// keeps the correction a modest, single-to-low-double-digit percent of the additive base even at
+    /// tier 5's top of that range, while staying unambiguously non-zero and provable at the synthetic
+    /// magnitudes <c>PowerInteractionTests</c> uses to make the effect legible. <b>Still flat and
+    /// unfitted</b> — a starting value chosen to be plausible at content scale, not measured — a later
+    /// sweep proposes against this table exactly the way it proposes against the 20 rows above
+    /// (spec-power-sweep.md §4.1/§4.2). <b>Honestly:</b> because the correction is bilinear in the two
+    /// sides' magnitudes while a believable "interaction error" is closer to a constant percentage, no
+    /// single flat coefficient holds that percentage across all five tiers at once — it under-corrects
+    /// at tier 1 and over-corrects (relatively) at tier 5. That is exactly the imprecision E44's
+    /// out-of-scope fitting half exists to close, not something hidden here.</para>
+    ///
+    /// <para>"The element ring" — the third pair spec-power-sweep.md §4.2 names — is deliberately
+    /// absent here. Its multiplicative-ness (`ElementHub`'s 1.25 × 1.25 = 1.5625 for two strong slots,
+    /// spec-power-vector.md's own worked proof) is a property of an ATTACKER × DEFENDER contest,
+    /// already priced correctly and non-linearly by <see cref="MatchupRead"/> — which reads a defender.
+    /// <see cref="ActorPowerCache.Compose"/> prices one actor with no defender in scope; inventing a
+    /// synthetic opponent so a "ring interaction" row would have something to multiply against would
+    /// not price the element ring, it would price a guess. This is a scope boundary, not a gap in the
+    /// construction below.</para>
+    /// </summary>
+    const int InteractionCoeffMilli = 5;
+
+    static IReadOnlyList<PowerInteractionRow> AuthoredInteractions()
+    {
+        var rows = new List<PowerInteractionRow>();
+        foreach (var slot in Slots())
+        {
+            rows.Add(new PowerInteractionRow(
+                "stat.derived", $"combat.crit.rate.{slot}",
+                "stat.derived", $"combat.crit.damage.{slot}",
+                InteractionCoeffMilli, PowerCategory.Offense));
+            rows.Add(new PowerInteractionRow(
+                "stat.derived", $"{DerivedStatChannels.CombatShieldCapacityPrefix}.{slot}",
+                "stat.derived", $"{DerivedStatChannels.CombatShieldToughnessPrefix}.{slot}",
+                InteractionCoeffMilli, PowerCategory.Survivability));
+        }
+        return rows;
+    }
+
+    /// <summary>omni + the 6-element roster — the same 7 slots every other element-typed channel
+    /// family in <c>DerivedStatChannels</c> generates over, read from <see cref="ElementRoster"/>
+    /// rather than a second, hand-kept element list.</summary>
+    static IEnumerable<string> Slots()
+    {
+        yield return ElementRoster.OmniId;
+        foreach (var e in ElementRoster.Concrete) yield return e.ToElementId();
     }
 
     static PowerTables _current = Authored();

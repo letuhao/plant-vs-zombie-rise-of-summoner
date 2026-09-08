@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "Beams of concentrated sunlight pierce through high, crystalline apertures, casting dancing rainbows across the polished marble floor. The air is warm and smells faintly of ozone.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Prismatic Refraction Chamber",
+  "reason": "A group of crystalline guardians stands motionless in the center of the light beams, waiting for a shadow to cross their path.",
+  "roomId": "room.fight-light-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

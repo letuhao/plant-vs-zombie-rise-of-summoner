@@ -64,7 +64,20 @@ import argparse, io, json, os, re, sys
 from collections import defaultdict
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-APTITUDES_PATH = os.path.join(REPO_ROOT, "data", "tuning", "aptitudes.v2.json")
+# The LIVE shipped config = the highest aptitudes.v*.json, never a pinned literal (2026-09-02).
+# Pinning meant the census measured an ARCHIVED file against the CURRENT registry, so a channel
+# retirement made the archived file's own prose look stale when nothing about it had changed.
+def _latest_aptitudes():
+    import glob, re as _re
+    d = os.path.join(REPO_ROOT, "data", "tuning")
+    best, bestv = None, -1
+    for f in glob.glob(os.path.join(d, "aptitudes.v*.json")):
+        m = _re.search(r"aptitudes\.v(\d+)\.json$", f)
+        if m and int(m.group(1)) > bestv: best, bestv = f, int(m.group(1))
+    if best is None: raise SystemExit("no data/tuning/aptitudes.v*.json")
+    return best
+
+APTITUDES_PATH = _latest_aptitudes()
 CHANNELS_CS_PATH = os.path.join(REPO_ROOT, "src", "FusionRpg.Core", "Stats", "Derived", "DerivedStatChannels.cs")
 CATALOG_JSON_PATH = os.path.join(REPO_ROOT, "data", "seed", "derived-stats", "catalog.json")
 SCAN_ROOT = os.path.join(REPO_ROOT, "src", "FusionRpg.Core")

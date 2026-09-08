@@ -27,6 +27,30 @@ public class PointBudgetTests
     static AptitudeTuning ShippedTuning() =>
         AptitudeTuningLoader.Parse(File.ReadAllText(FindShippedAptitudesTuningPath()));
 
+    // ── C6 (spec-tree-state.md §3, D34): SkillPointsFor / skillPointsPerThetaMilliByScope ──────────
+    // ShippedTuning() above stays pinned to aptitudes.v2.json, which predates this table (its own
+    // pointEconomy.skillPointsPerThetaMilliByScope is absent, deliberately -- see
+    // AptitudePointEconomy's own doc comment). The tests below that need real scoped skill rates load
+    // the CURRENT shipped file (the one RpgHost.cs/Program.cs actually load) -- v7 as of D55
+    // (2026-09-06, spec-tree-state.md open question 3: demonType/aspect/uniqueDemon moved from the
+    // borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22}); v6 was the first
+    // version to carry the table at all.
+
+    static string FindAptitudesV6Path()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v8.json");
+            if (File.Exists(candidate)) return candidate;
+            dir = dir.Parent;
+        }
+        throw new InvalidOperationException("could not locate data/tuning/aptitudes.v8.json above " + AppContext.BaseDirectory);
+    }
+
+    static AptitudeTuning ShippedTuningWithSkillScopes() =>
+        AptitudeTuningLoader.Parse(File.ReadAllText(FindAptitudesV6Path()));
+
     [Fact]
     public void Four_scopes_sum_to_the_effective_allocation()
     {
@@ -75,11 +99,15 @@ public class PointBudgetTests
     }
 
     [Fact]
-    public void Commander_budget_is_smallest_and_unique_largest()
+    public void Rates_are_ordered_commander_smallest_unique_largest()
     {
-        // spec-point-economy.md §2.1's decision and §7 test 3, over the SHIPPED tuning -- not a
-        // synthetic fixture, since this is a claim about the real data, not about PointBudget's own
-        // arithmetic (that's tested separately, without needing any particular ordering).
+        // ⛔ RENAMED (species-build T0.3, audit A1) from "Commander_budget_is_smallest_...". Holding
+        // the source constant on purpose ONLY proves the RATE table's own ordering (3 < 4 <= 4 < 6) --
+        // it does NOT prove the BUDGET ordering the old name claimed, because the four scopes' real
+        // sources are in different UNITS (an index vs an accumulation). That gap is exactly what let
+        // the DemonType-source defect (almanac XP, a 176x inversion at species L12) ship undetected --
+        // this test kept passing straight through it. See Real_budgets_are_ordered_at_representative_sources
+        // below for the test that actually proves the budget claim.
         var tuning = ShippedTuning();
         const long sameSourceValue = 100; // isolates the RATE ordering from any per-scope source difference.
 
@@ -91,6 +119,92 @@ public class PointBudgetTests
         Assert.True(commander < demonType, $"commander ({commander}) must be < demonType ({demonType})");
         Assert.True(demonType <= aspect, $"demonType ({demonType}) must be <= aspect ({aspect})");
         Assert.True(aspect < uniqueDemon, $"aspect ({aspect}) must be < uniqueDemon ({uniqueDemon})");
+    }
+
+    [Fact]
+    public void Real_budgets_are_ordered_at_representative_sources()
+    {
+        // species-build T0.3, audit A1 -- the test the old (renamed) one above could not be, because
+        // it held the source constant. Each scope is fed a REPRESENTATIVE VALUE IN ITS OWN UNITS,
+        // drawn from this repo's own already-recorded ordinary-play numbers, and the ordering is
+        // asserted on the resulting BUDGETS -- the claim the class actually needs to hold.
+        //
+        // Sources, all picked at the SAME representative "mid-game milestone" magnitude -- the whole
+        // point of species-build's audit A1 fix is that species level is now an INDEX comparable in
+        // scale to Theta_player and specimen level, unlike the old "almanac XP" accumulation (2,640 at
+        // species L12) that was never comparable to anything:
+        //   commander:   Theta_player = 20        (ssot-power-scale.md's own pin, "P(20) = 680")
+        //   demonType:   species level 21 -> DemonTypeSourceFromLevel(21) = 20
+        //   uniqueDemon: specimen level 20         (rpg-progression.md's own balance note:
+        //                                            "L12-20 after 20 matches" -- the range's own top)
+        //
+        // Aspect is deliberately EXCLUDED. Its real source, `element_mastery`, does not exist yet --
+        // it is owned by the demon program's `aspect-scope` module, itself reverted and not authorized
+        // to build (decisions.md, "Demon program" row). Inventing a value for it here would decide the
+        // very ordering this test exists to prove, which is the same "fabricated source" defect this
+        // module exists to fix -- so this test asserts commander < demonType < uniqueDemon over real
+        // sources only, and leaves Aspect's own ordering proof to whoever builds that tier for real.
+        var tuning = ShippedTuning();
+
+        const long thetaPlayer = 20;
+        const long speciesLevel = 21;
+        const long specimenLevel = 20;
+
+        var commanderBudget = PointBudget.PointsFor(AllocationScope.Commander, thetaPlayer, tuning);
+        var demonTypeBudget = PointBudget.PointsFor(
+            AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(speciesLevel), tuning);
+        var uniqueDemonBudget = PointBudget.PointsFor(AllocationScope.UniqueDemon, specimenLevel, tuning);
+
+        Assert.True(commanderBudget < demonTypeBudget,
+            $"commander ({commanderBudget}) must be < demonType ({demonTypeBudget}) at real sources");
+        Assert.True(demonTypeBudget < uniqueDemonBudget,
+            $"demonType ({demonTypeBudget}) must be < uniqueDemon ({uniqueDemonBudget}) at real sources");
+    }
+
+    [Fact]
+    public void DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne()
+    {
+        // species-build T0.4 -- an unrecorded actor's progression defaults to Level = 1
+        // (RpgStore.Progression.cs's own DefaultPlayerDtoUnlocked), so a never-levelled species must
+        // carry EXACTLY ZERO points or every battle/expedition golden would move the moment
+        // `demon-type-allocation`'s compose-at-read baseline lands.
+        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(0));
+        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(1));
+        Assert.Equal(1, PointBudget.DemonTypeSourceFromLevel(2));
+        Assert.Equal(11, PointBudget.DemonTypeSourceFromLevel(12));
+    }
+
+    [Fact]
+    public void PointsFor_demonType_atLevelZeroOrOne_isZeroBudget()
+    {
+        // The composed proof: PointsFor(DemonType, DemonTypeSourceFromLevel(level)) is zero for a
+        // never-levelled species, at any real DemonType rate.
+        var tuning = ShippedTuning();
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(0), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(1), tuning));
+    }
+
+    [Fact]
+    public void UniqueDemonSourceFromLevel_isZero_atLevelZeroAndLevelOne()
+    {
+        // passive-tree G7 -- the exact UniqueDemon-scope mirror of
+        // DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne above: RpgStore.CreateUniqueActor
+        // starts every specimen at level 1 (never 0), so a never-levelled specimen must carry EXACTLY
+        // ZERO points here too, or every roster entry ever created gets a free non-empty allocation.
+        Assert.Equal(0, PointBudget.UniqueDemonSourceFromLevel(0));
+        Assert.Equal(0, PointBudget.UniqueDemonSourceFromLevel(1));
+        Assert.Equal(1, PointBudget.UniqueDemonSourceFromLevel(2));
+        Assert.Equal(11, PointBudget.UniqueDemonSourceFromLevel(12));
+    }
+
+    [Fact]
+    public void PointsFor_uniqueDemon_atLevelZeroOrOne_isZeroBudget()
+    {
+        // The composed proof: PointsFor(UniqueDemon, UniqueDemonSourceFromLevel(level)) is zero for a
+        // never-levelled specimen, at any real UniqueDemon rate -- the same property DemonType has.
+        var tuning = ShippedTuning();
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueDemon, PointBudget.UniqueDemonSourceFromLevel(0), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueDemon, PointBudget.UniqueDemonSourceFromLevel(1), tuning));
     }
 
     [Fact]
@@ -161,5 +275,111 @@ public class PointBudgetTests
     {
         var tuning = ShippedTuning();
         Assert.Throws<ArgumentNullException>(() => PointBudget.CheckScope(AllocationScope.Commander, null!, 100, tuning));
+    }
+
+    // ── SkillPointsFor — the exact structural sibling of PointsFor (C6) ─────────────────────────────
+
+    [Fact]
+    public void SkillPointsFor_nullTuning_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => PointBudget.SkillPointsFor(AllocationScope.Commander, 100, null!));
+    }
+
+    [Fact]
+    public void SkillPointsFor_negativeSourceValue_throws()
+    {
+        var tuning = ShippedTuningWithSkillScopes();
+        Assert.Throws<ArgumentOutOfRangeException>(() => PointBudget.SkillPointsFor(AllocationScope.Commander, -1, tuning));
+    }
+
+    [Fact]
+    public void SkillPointsFor_zeroSourceValue_isZeroBudget_notRejected()
+    {
+        // Mirrors PointsFor_zeroSourceValue_isZeroBudget_notRejected -- a fresh actor (Theta_player=0,
+        // a brand-new demon type) is ordinary, not an error; only a NEGATIVE source value is rejected.
+        var tuning = ShippedTuningWithSkillScopes();
+        Assert.Equal(0, PointBudget.SkillPointsFor(AllocationScope.Commander, 0, tuning));
+    }
+
+    [Fact]
+    public void SkillPointsFor_commander_matchesTheShippedRateExactly()
+    {
+        // D38: g = 11, sized against the measured corner build (10.40 rounded up) -- spec-tree-state.md
+        // §8's own table, pinned here the same way ParsesTheShippedFile pins real shipped numbers.
+        var tuning = ShippedTuningWithSkillScopes();
+        const long thetaPlayer = 100;
+        Assert.Equal(11, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.Commander]);
+        Assert.Equal(1_100, PointBudget.SkillPointsFor(AllocationScope.Commander, thetaPlayer, tuning));
+    }
+
+    [Fact]
+    public void SkillPointsFor_noCap_evenAtAnEnormousSourceValue()
+    {
+        // PS-8, mirroring No_cap_on_an_aptitude above -- a budget an actor earns more of is not a cap.
+        var tuning = ShippedTuningWithSkillScopes();
+        const long enormousSourceValue = 10_000_000_000;
+
+        var budget = PointBudget.SkillPointsFor(AllocationScope.UniqueDemon, enormousSourceValue, tuning);
+        var rate = tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.UniqueDemon];
+
+        Assert.Equal(enormousSourceValue * rate, budget); // exact, never clamped
+    }
+
+    [Fact]
+    public void SkillPointsFor_missingScopeRate_isALoadRejectionNamingTheScope()
+    {
+        // T5 / spec-tree-state.md §3: "a missing rate is a load rejection naming it, never a default."
+        // aptitudes.v2.json predates skillPointsPerThetaMilliByScope entirely (the table is OPTIONAL at
+        // parse time -- AptitudePointEconomy's own doc comment explains why), so every scope is
+        // "missing" against it. The rejection must still name the exact scope asked for, never fall
+        // back to Theta_player silently.
+        var tuning = ShippedTuning(); // v2.json -- no skillPointsPerThetaMilliByScope at all
+        var ex = Assert.Throws<AptitudeTuningRejection>(
+            () => PointBudget.SkillPointsFor(AllocationScope.DemonType, 100, tuning));
+        Assert.Contains("DemonType", ex.Message, StringComparison.Ordinal);
+        Assert.Contains("skillPointsPerThetaMilliByScope", ex.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>D34 — the module's own required proof. Positive half: four scopes read the SAME
+    /// shared Theta-shaped source value and resolve to a DIFFERENT budget per scope, because each
+    /// reads its own rate. Unlike the sibling aptitude-point table, this one carries no
+    /// commander-smallest/uniqueDemon-largest ordering claim -- D38's commander = 11 is calibrated
+    /// independently (the corner-share derivation) and happens to be the LARGEST of the four shipped
+    /// rates, not the smallest; the other three are UNMEASURED placeholders borrowed verbatim from the
+    /// sibling table's own {4,4,6} (demonType and aspect legitimately tie at 4, same as the sibling).
+    /// Negative half: a demon actor that (by mistake) read the COMMANDER scope's rate against its own
+    /// source value gets a WRONG, visibly different number from reading its own DemonType scope
+    /// correctly -- proving scope isolation actually matters here, not merely that the configured
+    /// numbers happen to differ.</summary>
+    [Fact]
+    public void Every_actor_reads_its_own_scope_budget()
+    {
+        var tuning = ShippedTuningWithSkillScopes();
+        const long sharedSourceValue = 100; // one shared actor-Theta-shaped value, fed to all four scopes.
+
+        var commander = PointBudget.SkillPointsFor(AllocationScope.Commander, sharedSourceValue, tuning);
+        var demonType = PointBudget.SkillPointsFor(AllocationScope.DemonType, sharedSourceValue, tuning);
+        var aspect = PointBudget.SkillPointsFor(AllocationScope.Aspect, sharedSourceValue, tuning);
+        var uniqueDemon = PointBudget.SkillPointsFor(AllocationScope.UniqueDemon, sharedSourceValue, tuning);
+
+        // Positive proof: each scope reads its OWN rate against the same shared source value. commander
+        // and uniqueDemon are each distinct from every other scope; demonType and aspect legitimately
+        // tie (D55, 2026-09-06: both derived from the sibling {3,4,4,6} ratio's shared "4" for
+        // demonType/aspect, scaled against commander=11 -- 15 each) -- a tie is not a bug here, so it
+        // is asserted explicitly rather than folded into a blanket "all four differ" claim that would
+        // be false against the shipped numbers.
+        Assert.NotEqual(commander, demonType);
+        Assert.NotEqual(commander, aspect);
+        Assert.NotEqual(commander, uniqueDemon);
+        Assert.Equal(demonType, aspect); // legal tie -- both 15, D55's ratio-derived rate
+        Assert.NotEqual(aspect, uniqueDemon);
+        Assert.NotEqual(demonType, uniqueDemon);
+
+        // Negative proof (D34's own named failure mode): a demon actor is scoped DemonType. If its
+        // code path mistakenly read the COMMANDER rate against the demon's own source value instead
+        // (the "every actor reads Theta_player" bug this table exists to prevent), the number it would
+        // get is WRONG -- it must not equal the correct, own-scope answer.
+        var demonReadingCommanderScopeByMistake = PointBudget.SkillPointsFor(AllocationScope.Commander, sharedSourceValue, tuning);
+        Assert.NotEqual(demonType, demonReadingCommanderScopeByMistake);
     }
 }

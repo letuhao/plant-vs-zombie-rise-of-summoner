@@ -1,21 +1,34 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useHealth, useHubStatus, usePlayers } from "@/lib/bus";
 import { DevTreeHost } from "@/dev/DevTreeHost";
 import { SystemHost } from "@/layers/system/SystemHost";
 import { useGlobalKeys } from "@/shell/useGlobalKeys";
-import { Toasts } from "@/shell/Toasts";
 import { Banner } from "@/ui";
-import { AuditNav } from "./AuditNav";
-import { HudBar } from "./HudBar";
+
+/**
+ * world-stage W34: routes whose stage is measured against the viewport, not the page — a stage's
+ * own camera owns its extent, so the outlet must never grow past the viewport and hand the page a
+ * scrollbar (GG-36 forbids exactly that dressed as a feature). Route-scoped on purpose: this is an
+ * opt-in lookup, not a blanket AppShell layout change, so Sanctum and Lawn — neither of which is in
+ * this set — render byte-identically to before.
+ *
+ * `/world` joined this set the same turn `#/world` started serving `WorldStage` (the owner's
+ * "flip now" decision, 2026-09-04): it is the same stage component under a second route, and it
+ * needs the same unpadded, non-scrolling outlet `/world-stage` already gets — not a copy of the
+ * old `WorldPage`'s scrolling layout.
+ */
+const NON_SCROLLING_ROUTES = new Set(["/world-stage", "/world"]);
 
 export function AppShell() {
   useGlobalKeys();
   const health = useHealth();
   const players = usePlayers();
   const hub = useHubStatus();
+  const location = useLocation();
 
   const apiErr = health.error?.message || players.error?.message;
   const hubWarn = hub === "err" ? "SignalR disconnected — falling back to poll" : null;
+  const nonScrolling = NON_SCROLLING_ROUTES.has(location.pathname);
 
   return (
     <div className="flex h-screen flex-col" data-testid="app-shell">
@@ -29,14 +42,14 @@ export function AppShell() {
           {hubWarn}
         </Banner>
       ) : null}
-      <HudBar />
       <div className="flex min-h-0 flex-1" data-testid="shell-body">
-        <AuditNav />
-        <main className="min-w-0 flex-1 overflow-auto p-5" data-testid="page-outlet">
+        <main
+          className={nonScrolling ? "min-w-0 flex-1 overflow-hidden" : "min-w-0 flex-1 overflow-auto p-5"}
+          data-testid="page-outlet"
+        >
           <Outlet />
         </main>
       </div>
-      <Toasts />
       <DevTreeHost />
       <SystemHost />
     </div>

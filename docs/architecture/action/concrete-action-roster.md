@@ -404,8 +404,11 @@ Two param traps, both re-derived from executors rather than docs:
 **Elements** — `fire` `ice` `air` `earth` `light` `dark`. **Base is omni**; an element on the basic attack
 is a stat and trait change on the actor, never a different row.
 
-**Costs** — `stamina` physical · `qi` channelled · `poise` guard. `hp`, `hunger` and `spirit` are never
-action costs.
+**Costs** — ⚠️ **corrected 2026-08-30: all six resources are legal action costs.** `stamina` physical ·
+`qi` channelled · `poise` guard · `hp` sacrifice (floors at 1 unless the action opts into lethality) ·
+`hunger` metabolic (**Sun** on the plant side) · `spirit` essence. The previous line — *"`hp`, `hunger`
+and `spirit` are never action costs"* — was a design defect: it made HP-sacrifice and sun-priced plant
+actions unbuildable and left `spirit` with no sink at all. See `resource-hub-ssot.md` §"pays for".
 
 ---
 

@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "partition": "Deny"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "StructureCatalog.cs Seed[7] (added by siege-construction 15.3b, 2026-09-06). Is \u00a75.18 kind 2 Rampart under a different name \u2014 the source's own cut table: 'Moat / anti-tank ditch -> Rampart: a cell you cannot enter and cannot stand on IS a wall. Identical verbs.'",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built",
+          "assembled",
+          "summoned",
+          "laboured"
+        ],
+        "controlPoint": false,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [
+          "BLOCK",
+          "BLOCK-LOF"
+        ],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Deny",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "moat",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "moat",
+      "magnitudes": {
+        "blocksLineOfFire": true,
+        "blocksMovement": true,
+        "buildTurns": 2,
+        "capacityBonus": 0,
+        "constructIronworkCost": 1,
+        "constructRubbleCost": 4,
+        "containerId": null,
+        "cost": 0,
+        "coverPowerMilli": 0,
+        "coverRadius": 0,
+        "entryStaminaMultiplierMilli": 1000,
+        "flatYieldPerTurn": 0,
+        "materialTier": 1,
+        "obstacleKind": "Rampart",
+        "structureKind": "Obstacle",
+        "visionRangeTiles": null,
+        "yieldMultiplierMilli": 1000
+      },
+      "name": "Moat"
+    }
+  ],
+  "kind": "structure-anchor"
+}

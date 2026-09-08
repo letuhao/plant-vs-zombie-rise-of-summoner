@@ -37,9 +37,11 @@ This wave builds **the foundation only** — the places and the clock. Objects t
 
 **Build order:** `world-model` → `turn-engine` → `world-movement` → `world-fe` → (`world-intel` ∥ `world-topology`) → `ai-commander` → `sector-development` ∥ `combat-handoff` → `world-generator` → `fog-and-intel` → `bases-and-defense`.
 
-Module specs: [world/spec-world-model.md](world/spec-world-model.md) · [world/spec-turn-engine.md](world/spec-turn-engine.md) · [world/spec-world-movement.md](world/spec-world-movement.md) · [world/spec-world-intel.md](world/spec-world-intel.md) · [world/spec-world-topology.md](world/spec-world-topology.md) · [world/spec-ai-commander.md](world/spec-ai-commander.md).
+Module specs: [world/spec-world-model.md](world/spec-world-model.md) · [world/spec-turn-engine.md](world/spec-turn-engine.md) · [world/spec-world-movement.md](world/spec-world-movement.md) · [world/spec-world-intel.md](world/spec-world-intel.md) · [world/spec-world-topology.md](world/spec-world-topology.md) · [world/spec-ai-commander.md](world/spec-ai-commander.md) · [world/spec-sector-development.md](world/spec-sector-development.md).
 
 **Status (2026-08-22):** waves 1 and 2 are **complete and green through checkpoint 11**. `ai-commander` is built end to end — the commit seam, every evaluation table, all seven rules, and a 20-turn acceptance run where Zomboss decides for himself from his own fog. Two owner items remain open on it: the legibility playtest, and the momentum decision (see below). Wave 3 (`sector-development`, `combat-handoff`) has not started.
+
+**Wave 3 pulled forward, partly (2026-09-03).** [world-stage-ideal.md](world-stage-ideal.md) §8d.1 made `sector-development`'s recruitment half a **prerequisite of `world-stage`** rather than a later module — the interface is sized for 6–10 legions (§8e.3, a tunable) and the game ships one. §8b.7 does the same for the calendar's economic half: seasons become real, and they are this module's, not `world-stage`'s. `sector-development` is specced ([world/spec-sector-development.md](world/spec-sector-development.md)); `combat-handoff` still is not.
 
 **One fact has now invalidated four separate design claims and is worth reading before proposing anything about fog:** *holding ground grants full sight of it.* `Visibility` makes every owned sector an observation post, so nothing about your own territory is ever uncertain to you — which killed two claims in `spec-ai-commander`'s believed-supply section and one in its frontier section. Fog is about **other people's ground and about the past**, never about where you are standing.
 
@@ -67,3 +69,16 @@ Shipped expeditions keep running on their real-time timers; their refactor onto 
 ## Open questions carried from the ideal
 
 Homeworld loss penalty (menu in the ideal §10.5) · campaign length in turns · sim steps per turn · whether the RTS/idle barrier policies stay genuinely open or remain a documented property · one world per save vs seasonal reroll.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `world-generator` places domain entrances | `party-dungeon/spec-domain-catalog.md` §Interface | entrance slots (`Lair · Tear · Vault · Anomaly`, `SlotTypeCatalog.cs:14-20`) are placed from `dungeon_domain.entrance_hint`; until it lands the Sanctum picker offers found domains directly (decision 15) |
+| `delve-scope` row | `party-dungeon/spec-delve-scope.md` | `rpg_worlds.kind = 'delve'` / `parent_world_id`; `WorldValidation.Validate(world, profile)` with the delve profile; `GetActiveWorld` keeps `kind = 'map'` |
+
+## Filed by the item program (2026-09-06)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| The content ladder must keep growing past level 10 | `item-map.md` §3 row `X5`, `item-ideal.md` D29 | Item level *is* content level (`ssot-generation.md` §4.1); item content stops at level 10 today, and D29 makes the item power ladder unbounded past it (tier saturates at t5, `contentScale` carries growth beyond). The item program does not set pacing — this is `world map · wave catalog · event generator`'s loop (gear → harder realm → gear, D26); item only supplies the middle arrow. **Filed here because this is the only one of those three names with a document to file into** — `tasks/item-todo.md` P0.1 confirmed 2026-09-06 that neither "wave catalog" nor "event generator" has a map, ideal or task file anywhere in the repo, so half this ask has no address yet |

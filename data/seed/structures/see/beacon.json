@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "See"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "A network-effect See-role structure, same spec-siege-fog.md \u00a72 VisionRangeTiles payoff as Watchtower (extends allied vision chain-of-sight rather than a single high point) \u2014 the third distinct See niche alongside Watchtower's authored range and Lookout-post's cheap range.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "long",
+        "reason": "",
+        "requiredSlotKind": "Spire",
+        "role": "See",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "beacon",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "beacon",
+      "name": "Beacon"
+    }
+  ],
+  "kind": "structure-anchor"
+}

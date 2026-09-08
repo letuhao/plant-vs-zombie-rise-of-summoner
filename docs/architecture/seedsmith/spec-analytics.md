@@ -204,6 +204,21 @@ all some variation on dark-and-decaying. Three deterministic layers, no model:
 similarity, with **LSH banding** to avoid the O(n²) all-pairs comparison at 1,400+ names. Flags pairs
 above a threshold. Standard, cheap, and finds *"Sapvein"* vs *"Sapveil"*.
 
+**6.2b Prose near-duplicates, added 2026-09-06.** `name` is not the only field a generator can
+converge on — `commander-effect`'s `doctrine` is a full sentence, and the live 84-entry corpus
+already contains two near-identical doctrines (Jaccard 0.52) with nothing watching it.
+`KindSpec.dedup_fields` lets a kind declare which of its own free-text fields should also run
+through this pipeline (additive, defaulted empty, every other kind untouched).
+
+**LSH banding is a NAME-scale optimization, not a general default — verified, not assumed.**
+Prose-scale near-duplicates cluster around Jaccard 0.5-0.6 (sentences sharing a topic), well below
+the ~0.8+ range 5-gram/8-band/4-row LSH reliably catches. Run live against the real corpus, LSH
+missed its own clearest pair entirely. A kind with a prose dedup field is bounded in the low
+thousands at worst (`commander-effect`'s ceiling is ~900 demons), where direct all-pairs Jaccard
+over the exact shingle sets is cheap and has no recall to trade away — so 6.2b compares directly and
+does **not** route through MinHash+LSH. The two techniques solve different scale problems; picking
+the wrong one for prose scale is how a check ships and does not fire.
+
 **6.3 Conceptual clustering — and the assumption that did not survive checking.**
 
 The first draft of this spec claimed the word pools already group vocabulary by concept, so entropy

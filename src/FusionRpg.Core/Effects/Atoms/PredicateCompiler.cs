@@ -137,6 +137,21 @@ public static class PredicateCompiler
                 => AtomRejection.Fail(AtomRejectionReason.BadParamValue,
                     $"holdsStock minQty must be >= 1, got {leaf.Value} -- \"do I hold ANY\" is minQty 1, never 0"),
 
+            // D3.7: structural non-negativity only -- an ordinal/count can never be negative, but what
+            // it MEANS (which band, which room kind) is a domain registry's own vocabulary this generic
+            // compiler never imports, matching TypeIdIs's own "any non-negative ordinal" posture.
+            LeafId.BandIs when leaf.Value < 0
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue, $"bandIs takes a non-negative ordinal, got {leaf.Value}"),
+
+            LeafId.HaulAtLeast when leaf.Value < 0
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue, $"haulAtLeast takes a non-negative count, got {leaf.Value}"),
+
+            LeafId.RoomKindIs when leaf.Value < 0
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue, $"roomKindIs takes a non-negative ordinal, got {leaf.Value}"),
+
+            LeafId.PartyDownedCount when leaf.Value < 0
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue, $"partyDownedCount takes a non-negative count, got {leaf.Value}"),
+
             _ => AtomRejection.Ok,
         };
     }
@@ -186,6 +201,11 @@ public static class PredicateCompiler
         LeafId.IsMindControlled => new CharmNode(l.Subject, l.Value != 0),
         // stockId interned to a slot (0-3) here, same as HasStatus; minQty stays a plain runtime int.
         LeafId.HoldsStock => new StockNode(l.Subject, stockBit?.Invoke(l.Text!) ?? -1, l.Value),
+        // D3.7: plain raw ordinals/counts, no interning needed -- the importer already resolved them.
+        LeafId.BandIs => new BandNode(l.Subject, l.Value),
+        LeafId.HaulAtLeast => new HaulAtLeastNode(l.Subject, l.Value),
+        LeafId.RoomKindIs => new RoomKindNode(l.Subject, l.Value),
+        LeafId.PartyDownedCount => new PartyDownedCountNode(l.Subject, l.Value),
         _ => Always,
     };
 
@@ -299,6 +319,34 @@ public static class PredicateCompiler
         readonly Subject _s; readonly int _stockIndex; readonly int _minQty;
         public StockNode(Subject s, int stockIndex, int minQty) { _s = s; _stockIndex = stockIndex; _minQty = minQty; }
         public bool Evaluate(ref FactReader f) => f.StockQty(_s, _stockIndex) >= _minQty;
+    }
+
+    sealed class BandNode : ICompiledPredicate
+    {
+        readonly Subject _s; readonly int _v;
+        public BandNode(Subject s, int band) { _s = s; _v = band; }
+        public bool Evaluate(ref FactReader f) => f.Band(_s) == _v;
+    }
+
+    sealed class HaulAtLeastNode : ICompiledPredicate
+    {
+        readonly Subject _s; readonly int _v;
+        public HaulAtLeastNode(Subject s, int minCells) { _s = s; _v = minCells; }
+        public bool Evaluate(ref FactReader f) => f.HaulCount(_s) >= _v;
+    }
+
+    sealed class RoomKindNode : ICompiledPredicate
+    {
+        readonly Subject _s; readonly int _v;
+        public RoomKindNode(Subject s, int roomKind) { _s = s; _v = roomKind; }
+        public bool Evaluate(ref FactReader f) => f.RoomKind(_s) == _v;
+    }
+
+    sealed class PartyDownedCountNode : ICompiledPredicate
+    {
+        readonly Subject _s; readonly int _v;
+        public PartyDownedCountNode(Subject s, int minDowned) { _s = s; _v = minDowned; }
+        public bool Evaluate(ref FactReader f) => f.DownedCount(_s) >= _v;
     }
 
     sealed class KillerNode : ICompiledPredicate

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
 using Xunit;
 
@@ -237,8 +238,11 @@ public class PushContractTests
     [Fact]
     public void A_receiver_already_on_this_revision_gets_an_empty_apply()
     {
+        // E26: the short-circuit is two-term now (§3.3) — the receiver must also echo the current
+        // EmitterVersion, or a compiler-code change with no data-side revision bump would never re-push.
         var payload = AtomPushCodec.BuildPayload(
-            Catalog(revision: 4), new[] { Bind("b1") }, matchSeed: 7, receiverRevision: 4);
+            Catalog(revision: 4), new[] { Bind("b1") }, matchSeed: 7,
+            receiverRevision: 4, receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.True(payload.UpToDate);
         Assert.Empty(payload.Grants);
@@ -251,11 +255,16 @@ public class PushContractTests
     public void A_stale_receiver_gets_the_full_set_not_a_delta()
     {
         var payload = AtomPushCodec.BuildPayload(
-            Catalog(revision: 4), new[] { Bind("b1"), Bind("b2") }, matchSeed: 7, receiverRevision: 3);
+            Catalog(revision: 4), new[] { Bind("b1"), Bind("b2") }, matchSeed: 7,
+            receiverRevision: 3, receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.False(payload.UpToDate);
         Assert.Single(payload.Grants);
-        Assert.Single(payload.Defs);
+        // E26: one compiled def (unchanged) PLUS one runner def — Entry()'s "atom.searing-strike.fire.t3"
+        // is a safe kind (resource.delta) with a rolled "amount", so EmitRunnerDefs translates it.
+        Assert.Equal(2, payload.Defs.Count);
+        Assert.Contains(payload.Defs, d => d.EffectId == "atom.searing-strike");
+        Assert.Contains(payload.Defs, d => d.EffectId == "atom.searing-strike.fire.t3");
         Assert.Equal(2, payload.RunnerBindings.Count);
     }
 
@@ -318,6 +327,113 @@ public class PushContractTests
         Assert.Equal(2, index.Count);
         Assert.Equal(2, index.SlotsFor(AtomTriggers.OnDamageDealt).Length);
         Assert.Equal("b-alpha", index.Bindings[0].BindingId);
+    }
+
+    // ---- ToDef: a static param must survive the real receive path, not just an in-memory copy --------
+
+    /// <summary>
+    /// Found 2026-09-03 (E28 session): the real receive path
+    /// (<c>CheatCommandRunner.InstallAtomPush</c>) deserializes with
+    /// <c>JsonSerializer.Deserialize&lt;AtomPushDto&gt;</c> and no custom converter, so every value in
+    /// <c>EffectDefActionDto.Params</c> arrived as a boxed <see cref="JsonElement"/> —
+    /// <see cref="JsonElement"/> does not implement <see cref="IConvertible"/>, so
+    /// <c>JsonOverlay.GetInt</c>/<c>GetString</c> (what every <c>InjectorEffectActionSink.Exec*</c>
+    /// method calls) threw <see cref="InvalidCastException"/> for any def's static param, caught by
+    /// that class's own outer try/catch and logged as a failed action, never a crash — invisible to
+    /// every test in this suite because <c>SimEffectHost</c> builds <c>EffectDef</c> in memory,
+    /// bypassing the wire's JSON round-trip entirely. <c>AtomPushCodec.ToDef</c> now unwraps via
+    /// <c>JsonOverlay.FromObject</c> instead of copying the dictionary verbatim — this is the real
+    /// wire round-trip, not an in-memory shortcut, so a regression here throws exactly as it would
+    /// have thrown live.
+    /// </summary>
+    [Fact]
+    public void ToDef_survives_the_real_wire_round_trip_a_static_int_param_reads_back_as_an_int()
+    {
+        var dto = new AtomPushDto
+        {
+            CatalogRevision = 1,
+            Defs = new List<EffectDefDto>
+            {
+                new()
+                {
+                    EffectId = "fx.board_cherry",
+                    EffectType = EffectTypes.Triggered,
+                    Name = "Board cherry bomb",
+                    Enabled = true,
+                    Triggers = new List<string> { EffectTriggers.OnDamageDealt },
+                    Actions = new List<EffectDefActionDto>
+                    {
+                        new()
+                        {
+                            Seq = 1,
+                            Action = EffectActions.BoardAction,
+                            Params = new Dictionary<string, object?>
+                                { ["op"] = "cherry", ["row"] = 2, ["col"] = 4 },
+                        },
+                    },
+                },
+            },
+        };
+
+        // Exactly CheatCommandRunner.InstallAtomPush's own call shape: serialize, deserialize, THEN
+        // convert — never hand ToDef an in-memory DTO that skipped the wire.
+        var wireDto = JsonSerializer.Deserialize<AtomPushDto>(JsonSerializer.Serialize(dto, Wire), Wire)!;
+        var def = AtomPushCodec.ToDef(wireDto.Defs[0]);
+        var actionRow = def.Actions[0];
+
+        Assert.IsNotType<JsonElement>(actionRow.Params["row"]);
+        Assert.IsNotType<JsonElement>(actionRow.Params["op"]);
+        Assert.Equal(2, JsonOverlay.GetInt(actionRow.Params, "row"));
+        Assert.Equal("cherry", JsonOverlay.GetString(actionRow.Params, "op"));
+    }
+
+    [Fact]
+    public void ToDef_survives_the_real_wire_round_trip_for_a_nested_array_param()
+    {
+        // The other shape ToDef must not choke on: an array-of-objects param (E28 fix #7,
+        // box.set.cells[]). JsonOverlay.FromObject's recursive unwrap must reach every nesting level,
+        // not just the top one.
+        var dto = new AtomPushDto
+        {
+            CatalogRevision = 1,
+            Defs = new List<EffectDefDto>
+            {
+                new()
+                {
+                    EffectId = "fx.paint-many",
+                    EffectType = EffectTypes.Triggered,
+                    Name = "Paint many cells",
+                    Enabled = true,
+                    Triggers = new List<string> { EffectTriggers.OnDamageDealt },
+                    Actions = new List<EffectDefActionDto>
+                    {
+                        new()
+                        {
+                            Seq = 1,
+                            Action = EffectActions.SetBoxType,
+                            Params = new Dictionary<string, object?>
+                            {
+                                ["boxType"] = 2,
+                                ["cells"] = new List<object?>
+                                {
+                                    new Dictionary<string, object?> { ["row"] = 1, ["col"] = 2 },
+                                    new Dictionary<string, object?> { ["row"] = 3, ["col"] = 4 },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
+
+        var wireDto = JsonSerializer.Deserialize<AtomPushDto>(JsonSerializer.Serialize(dto, Wire), Wire)!;
+        var def = AtomPushCodec.ToDef(wireDto.Defs[0]);
+        var cells = Assert.IsType<List<object?>>(def.Actions[0].Params["cells"]);
+
+        Assert.Equal(2, cells.Count);
+        var first = Assert.IsType<Dictionary<string, object?>>(cells[0]);
+        Assert.Equal(1, JsonOverlay.GetInt(first, "row"));
+        Assert.Equal(2, JsonOverlay.GetInt(first, "col"));
     }
 
     // ---- the guarantee -------------------------------------------------------------------------------

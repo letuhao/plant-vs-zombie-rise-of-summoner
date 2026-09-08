@@ -485,9 +485,6 @@ public static class DerivedStatChannels
     public static string SkillCooldown(string category) => $"{SkillCooldownPrefix}.{category}";
     public static string SkillEffectiveness(string category) => $"{SkillEffectivenessPrefix}.{category}";
 
-    // H.4 -- healing, 1 channel. Pool class (owner decision 2026-08-24): the healer's own output
-    // capacity, like combat.shield.capacity — not a Contest with a missing half. No counterpart.
-    public const string CombatHealPower = "combat.heal.power";
 
     // H.5 -- resource, 3 families x 5 ids = 15 (supersedes §3G's 10). Pool class throughout (Q4): the
     // counters are statuses (root/qi-burn), never a paired channel. max/regen are magnitudes, FlatSum,
@@ -498,9 +495,23 @@ public static class DerivedStatChannels
     public const string ResourceRegenPrefix = "resource.regen";
     public const string ResourceEfficiencyPrefix = "resource.efficiency";
 
+    /// <summary>Active restoration power, per resource. **Was `combat.heal.power`, an hp-only channel**
+    /// — generalised 2026-09-02 (owner: "hp is a resource generating, so no need heal, we need resource
+    /// generating; don't make healing for only 1 resource and don't support other resources, it is wrong
+    /// design"). `hp` keeps its exact former coefficients, so the rename moves no balance.
+    ///
+    /// <para><b>Not to be confused with <see cref="ResourceRegenPrefix"/>.</b> `regen` is the PASSIVE
+    /// per-tick drip; `gen` scales an ACTIVE grant at resolution. They are different mechanisms and a
+    /// game wants both — the defect was that only hp had the active half. The two names are one letter
+    /// apart, which is a readability hazard and not a matching one: prefix tests are `StartsWith`, and
+    /// neither string is a prefix of the other, so `recovery.families = ["resource.regen"]` does not
+    /// capture `resource.restore.*` and never will.</para></summary>
+    public const string ResourceRestorePrefix = "resource.restore";
+
     public static string ResourceMax(string resourceId) => $"{ResourceMaxPrefix}.{resourceId}";
     public static string ResourceRegen(string resourceId) => $"{ResourceRegenPrefix}.{resourceId}";
     public static string ResourceEfficiency(string resourceId) => $"{ResourceEfficiencyPrefix}.{resourceId}";
+    public static string ResourceRestore(string resourceId) => $"{ResourceRestorePrefix}.{resourceId}";
 
     /// <summary>The six actor resource ids — data/seed/resources/roster.json is the authored mirror;
     /// this is the code-side list registration walks. Kept in ordinal order to match that file's
@@ -519,6 +530,22 @@ public static class DerivedStatChannels
     // requires a StatClass on any capped channel, spec-stat-taxonomy.md §6.1).
     public const string ProgressionXpRate = "progression.xpRate";
     public const string ProgressionBreakthroughSuccess = "progression.breakthroughSuccess";
+
+    // H.8 -- loadout, 1 channel (D4.25, spec-unique-pipeline.md §4: "the extend-action-slot grant").
+    // The actor's own equipped-slot capacity granted by worn gear -- LoadoutSet/AutoEquip/CapPolicy
+    // are this channel's three readers.
+    public const string LoadoutSlots = "loadout.slots";
+
+    // H.9 -- siege AI, 1 channel (base-defense/spec-siege-ai.md §5.20 rule 4, resolved 2026-09-07).
+    // Reader: IBattleView.AggressionOf (BattleRunState.cs), consumed by SiegeAiIntentSource ->
+    // SiegeAi.EffectiveTier. Pool class: one actor's own value, no counterpart. Structurally bounded
+    // to [-AiTuning.AggressionRange, +AiTuning.AggressionRange] (currently -2..+2, siege.v1.json's
+    // "ai.aggression.range") by the VOCABULARY, not by this channel or a Cap (Cap only clamps the top
+    // end -- DerivedComposer.cs:72 -- wrong shape for a symmetric range). A future taunt/stealth status
+    // that sets this outside that range makes EffectiveTier throw, by design, matching this repo's
+    // "throw, never silently clamp" rule generalized from magnitude overflow to a closed vocabulary.
+    // Defaults to 0 (neutral) for every actor today -- no content targets this channel yet.
+    public const string AiAggression = "ai.aggression";
 }
 
 /// <summary>Actor element type metadata field names — see element-hub-ssot.md §5.</summary>

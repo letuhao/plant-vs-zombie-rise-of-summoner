@@ -119,7 +119,12 @@ Offline prove (no game required):
 - `dotnet test tests/FusionRpg.Core.Tests` — **653/653 PASS** (includes §5 matrix golden tests, hit/crit/miss, heal pass-through, status isolation)
 - Filter: `FullyQualifiedName~FusionRpg.Core.Tests.Combat`
 
-LIVE rows (operator): [`../../runbook/debug-live-checklist.md`](../../runbook/debug-live-checklist.md) §10 C1–C6. Script: [`../../../scripts/prove-overlay-combat.ps1`](../../../scripts/prove-overlay-combat.ps1). Enable `OVERLAY-COMBAT` or `FUSIONRPG_OVERLAY_COMBAT=1` before typed hits.
+LIVE rows: **closed 2026-08-30**, 13/13 PASS on a real MelonLoader 3.9 lawn —
+[`../../runbook/melon-live-checklist.md`](../../runbook/melon-live-checklist.md) §8b, raw JSON
+[`_prove-overlay-combat.json`](_prove-overlay-combat.json). Script:
+[`../../../scripts/prove-overlay-combat.ps1`](../../../scripts/prove-overlay-combat.ps1).
+`OVERLAY-COMBAT` is now default-on in all three cheat registries (was gated behind the toggle when
+this section was first written).
 
 | Check | Result | Tier |
 |---|---|---|
@@ -128,7 +133,8 @@ LIVE rows (operator): [`../../runbook/debug-live-checklist.md`](../../runbook/de
 | Heal bypasses matchup/hit/crit | **PASS** unit tests | **CODE** |
 | No payload → pass-through | **PASS** unit tests | **CODE** |
 | `debug.combat.overlay` emit on enqueue-delta | Wired in injector C3 | **CODE** |
-| fire vs ice/air LIVE matchup bonus | **PENDING** operator | **PENDING** |
+| fire vs ice/air LIVE matchup bonus | **PASS** — `matchupBonus=25`/`-25` (C1/C2), real lawn 2026-08-30 | **LIVE** |
+| Heal-power read with/without payload (C11/C12), full mitigation → zero (C13) | **PASS**, real lawn 2026-08-30 | **LIVE** |
 
 ## Follow-up live probes (operator)
 

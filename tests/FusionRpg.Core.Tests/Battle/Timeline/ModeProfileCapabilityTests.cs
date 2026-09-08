@@ -16,15 +16,35 @@ public class ModeProfileCapabilityTests
     // --- WaveCatalog.Get(waveId).Profile ?? classic-round ---------------------------------------
 
     [Fact]
-    public void Every_shipped_wave_resolves_to_classic_round_since_none_has_chosen_yet()
+    public void Every_shipped_wave_now_runs_hybrid_atb()
     {
-        // None of the four authored waves set Profile — confirming the fallback really is the
-        // DEFAULT today, not just a theoretical branch nothing exercises.
+        // T15/B36, 2026-09-04 — all four authored waves moved from `classic-round` to `hybrid-atb`
+        // (decisions.md, "Battle engine open questions (2026-09-04)", item 1). This test used to be
+        // `Every_shipped_wave_resolves_to_classic_round_since_none_has_chosen_yet` and asserted
+        // `Assert.Null(wave.Profile)`; B36's own plan named it as the one tripwire the flip would
+        // trip, and it tripped exactly as predicted.
+        //
+        // It is kept, inverted, rather than deleted: its job was never "the default is classic-round"
+        // but "content, not a hidden default, decides the profile" — so it still earns its place by
+        // failing if a row silently loses its choice and falls back.
+        Assert.NotEmpty(WaveCatalog.All);
         foreach (var wave in WaveCatalog.All)
         {
-            Assert.Null(wave.Profile);
-            Assert.Same(BattleModeProfileCatalog.ClassicRound, BattleModeProfileCatalog.Resolve(wave.Profile));
+            Assert.Equal(BattleModeProfileCatalog.HybridAtbId, wave.Profile);
+            Assert.Same(BattleModeProfileCatalog.HybridAtb, BattleModeProfileCatalog.Resolve(wave.Profile));
         }
+    }
+
+    /// <summary>
+    /// The fallback branch the test above used to cover. Deleting that coverage along with the
+    /// default would have been the quiet loss in B36: `Resolve(null)` is still reachable — any wave a
+    /// future content pass adds without a profile lands here — so it keeps its own assertion instead
+    /// of riding on a roster that no longer exercises it.
+    /// </summary>
+    [Fact]
+    public void A_wave_that_chooses_no_profile_still_falls_back_to_classic_round()
+    {
+        Assert.Same(BattleModeProfileCatalog.ClassicRound, BattleModeProfileCatalog.Resolve(null));
     }
 
     [Fact]
@@ -49,6 +69,42 @@ public class ModeProfileCapabilityTests
         // a test instead of silently moving the four expedition hashes.
         var setupFields = typeof(BattleSetup).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
         Assert.DoesNotContain(setupFields, p => p.Name.Contains("Profile", StringComparison.OrdinalIgnoreCase));
+    }
+
+    // --- party-dungeon D2.9: the delve profile row -------------------------------------------------
+
+    [Fact]
+    public void DownedOnDeplete_is_false_on_every_shipped_row_except_delve()
+    {
+        Assert.False(BattleModeProfileCatalog.ClassicRound.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.GalaxySync.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.HybridAtb.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.Siege.DownedOnDeplete);
+        Assert.True(BattleModeProfileCatalog.Delve.DownedOnDeplete);
+    }
+
+    [Fact]
+    public void The_ruleset_version_is_unchanged_by_adding_a_fifth_profile()
+    {
+        Assert.Equal(4, BattleRuleset.RulesetVersion);
+    }
+
+    [Fact]
+    public void Delve_is_hybrid_atb_shaped_but_PerSide_and_interactive()
+    {
+        var delve = BattleModeProfileCatalog.Delve;
+        var hybrid = BattleModeProfileCatalog.HybridAtb;
+
+        Assert.Equal(hybrid.AdvancePolicy, delve.AdvancePolicy);
+        Assert.Equal(hybrid.DefaultCommitment, delve.DefaultCommitment);
+        Assert.Equal(hybrid.ForecastExactness, delve.ForecastExactness);
+        Assert.Equal(hybrid.OrdersBySpeed, delve.OrdersBySpeed);
+        Assert.Equal(hybrid.WReact, delve.WReact); // inherited through the shared tuning row, and inert here
+
+        Assert.Equal(WScope.PerSide, delve.WScope); // the one structural difference from hybrid-atb's Global
+        Assert.True(delve.RequiresLiveInput);
+        Assert.True(delve.DownedOnDeplete);
+        Assert.False(delve.UsesTimelineDispatch); // not wired in this task, same status as every row but classic/galaxy/hybrid
     }
 
     // --- W proven by contrast, WScope=PerSide covered --------------------------------------------
@@ -126,7 +182,7 @@ public class ModeProfileCapabilityTests
         {
             _actors[key] = new ActorTurnMachine(key);
             _sideOf[key] = side;
-            Readiness.BeginCharging(key, TurnReadiness.OneTurnWork, DerivedTurnChannels.BaseSpeed, Clock.Now);
+            Readiness.BeginCharging(key, TurnReadiness.OneTurnWork, TurnReadiness.SpeedScale, Clock.Now);
         }
 
         public void Pump(long untilTick)
@@ -162,7 +218,7 @@ public class ModeProfileCapabilityTests
                         case TimelineEventKind.Recovery:
                             Runner.OnRecoveryDue(actor, e);
                             Report.Add((Clock.Now, e.OwnerKey, "recovered"));
-                            Readiness.BeginCharging(e.OwnerKey, TurnReadiness.OneTurnWork, DerivedTurnChannels.BaseSpeed, Clock.Now);
+                            Readiness.BeginCharging(e.OwnerKey, TurnReadiness.OneTurnWork, TurnReadiness.SpeedScale, Clock.Now);
                             break;
                     }
                 }

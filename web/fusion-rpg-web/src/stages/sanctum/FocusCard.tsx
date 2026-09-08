@@ -43,22 +43,11 @@ export function FocusCard({
 }) {
   if (actorCount === 0 || !firstActor) {
     return (
-      <div
-        className="max-w-md rounded-md border border-border-control bg-panel p-4"
-        data-testid="focus-card-first-run"
-      >
-        <p className="font-display text-lg text-text">Bind your first creature</p>
-        <p className="mt-1 text-sm text-muted">
-          Everything else in the Sanctum opens up from there — one instruction at a time.
-        </p>
-        <button
-          type="button"
-          data-testid="focus-card-cta"
-          onClick={onOpenCreatures}
-          className="mt-3 rounded-sm bg-lawn px-3 py-1.5 text-sm font-semibold text-text hover:bg-lawn-hot"
-        >
-          Open Creatures
-        </button>
+      <div className="rounded-md border border-panel bg-panel p-4" data-testid="focus-card-first-run">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">First lawn run</p>
+        <p className="mt-1 font-display text-lg text-text">Win a run to meet Crazy Dave</p>
+        <p className="mt-1 text-sm text-muted">Your first victory unlocks the commander and starts the saved progression path.</p>
+        <Button size="sm" className="mt-3" data-testid="focus-card-cta" onClick={onOpenCreatures}>View creatures</Button>
       </div>
     );
   }

@@ -20,6 +20,18 @@
 
 ## 2. The generation rule — do not hand-author 196 channel families
 
+> **⚠️ CLARIFIED 2026-09-03 — this section describes TWO stages, and one sentence merged them.**
+> The phrase *"the same rule that turns 28 families into ~980 atom rows"* was read by two programs as
+> one module, and both claimed it. They are consecutive:
+>
+> | Stage | Input → output | Owner | Shipped? |
+> |---|---|---|---|
+> | **families → atoms** — expand family × axis × tier | family definitions → `AtomRow`s | **effect-atom `E30`** | **no** — this is the unimplemented rule |
+> | **atoms → affixes** — wrap 1:1 | `AtomRow`s → `AffixRow`s | **effect-pipeline module 3** | **yes** — `AffixLibraryGenerator`, written and tested, but with **zero production callers** |
+>
+> `E30` must not emit affixes; module 3 must not expand families. Full reasoning:
+> [`../effect-atom-ideal.md`](../effect-atom-ideal.md) §W7.7.9.
+
 The derived catalog is 28 combat families × 7 element slots = 196 channels (F6, reconcile pass,
 2026-08-25 — was 12 × 7 = 84 when this doc was first drafted; the combat chain's T5.1–T5.4 modules
 added 16 more families: `combat.{penetration,absorption,amplification,reduction}`,
@@ -70,12 +82,28 @@ They look identical and should not be merged, because the channel layers genuine
 
 ### ⚠️ They are not the same units
 
-**`+10 hp` is ten hit points.** **`+10 fire power` is ten *resolver points*** — sigmoid scale, where `AccuracyScale` and `CritRateScale` are `100.0`, so ten points is 0.1 sigmoid units. For calibration: `critical-hunter` grants **+150** crit-rate points, moving crit from ~7.6% to ~26.9%; the patron aura converts per-mille to points by dividing by ten, so its 150‰ clamp is **+15 points**, not +15%.
+> **⛔ CORRECTED 2026-09-03 (E42 `units-correction`).** This worked example used to say *"`+10 fire
+> power` is ten resolver points"*, repeating `definitions.md`'s own former error in the same words —
+> which is worse than the error alone, because a worked example is what a later session copies rather
+> than checks. **`combat.power.*` is game units, not resolver points**
+> (`OverlayCombatCalculator.cs:84-89`; no `PowerScale` exists in `CombatProbabilityPolicy`). The example
+> is replaced with a genuinely sigmoid family so the point being made — that not every derived channel
+> shares primary's units — still holds, and holds for a true reason this time.
+
+**`+10 hp` is ten hit points.** **`+10 fire power` is ten damage** — the peer of `+10 hp`, additive, no
+sigmoid. **`+10 crit rate` is a different story**: it is ten *resolver points* on a sigmoid scale, where
+`CritRateScale` is `100.0`, so ten points is 0.1 sigmoid units. For calibration: `critical-hunter` grants
+**+150** crit-rate points, moving crit from ~7.6% to ~26.9%; the patron aura converts per-mille to points
+by dividing by ten, so its 150‰ clamp is **+15 points**, not +15%.
 
 Two consequences that must not be forgotten:
 
-1. **Tier bands are per channel family, never copied across.** A tier-3 `vitality` might be +45 hp while a tier-3 `elemental_power` is +30 points.
-2. **This is exactly what `normalize(magnitude, referenceScale)` in the power cost function is for.** A naive coefficient table that prices `+10 hp` and `+10 fire power` alike is wrong by an order of magnitude.
+1. **Tier bands are per channel family, never copied across.** A tier-3 `vitality` might be +45 hp, a
+   tier-3 `elemental_power` +30 damage, and a tier-3 `keen_edge` (crit rate) +20 resolver points — three
+   different scales, none interchangeable.
+2. **This is exactly what `normalize(magnitude, referenceScale)` in the power cost function is for.** A
+   naive coefficient table that prices `+10 hp` and `+10 crit rate` alike is wrong by an order of
+   magnitude.
 
 ---
 
@@ -104,12 +132,24 @@ Power category shown as **O**ffense · **S**urvivability · **C**ontrol · **U**
 
 ### 3.2 `stat.derived` — 28 generated families (~980 rows)
 
-> ⚠️ **`stat.derived` is quarantined `None/None/None` (D6)** — it has no executor in any runtime today.
-> Every family below is **`pending` in all three runtimes**, not just battle. The first consumer ships
-> in **E12** (`BattleStatComposer` at squad build), which re-opens the battle cell. Authoring these rows
-> before then produces content nothing can bind. This applies equally to the 16 combat-chain families
-> added below (F6) — they are code-readable today (T5.1–T5.4 shipped their readers), not
-> content-bindable until E12, same as the original 12.
+> ### ✅ The D6 quarantine is OVER — corrected 2026-09-02
+>
+> **This banner used to say `stat.derived` is quarantined `None/None/None` and that every family below
+> is *"pending in all three runtimes"*, so *"authoring these rows before then produces content nothing
+> can bind."* That is no longer true, and it was blocking the exact work it was written to protect.**
+>
+> Today's shipped matrix — `AtomKindRegistry.cs:160`,
+> `new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None)`:
+>
+> | Runtime | State | Consumer |
+> |---|---|---|
+> | **Lawn** | ✅ **Full** | `AtomDerivedSubsystem` — an `IActorStatSubsystem` on the injector's `ActorHub` at the reserved order-350 `foundation.effect` slot. Re-opened 2026-08-30, owner-approved via `decisions.md` *"Derived-write lawn executor"* |
+> | **Battle** | ✅ **Full** | `BattleStatComposer` reads bound `stat.derived` atoms at squad build, via `TraitAtomSource`. Re-opened 2026-08-23 by **E12** |
+> | **Sim** | ⛔ None | `SimEffectHost` still has no consumer — and it stays `None` deliberately, because *"flipping it on the strength of the other two would re-create the quarantine's cause"* |
+>
+> **So the families below are bindable content on lawn and in battle right now.** The only runtime that
+> cannot execute them is Sim. Read the registry, not this paragraph — the matrix is the SSOT and it
+> carries the reasoning for each cell inline.
 
 | Family | Channel family | Cat | Flavour names by element |
 |---|---|---|---|

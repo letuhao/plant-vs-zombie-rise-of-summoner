@@ -20,7 +20,7 @@ public sealed class UniqueActorDto
     [JsonPropertyName("typeId")] public int TypeId { get; set; }
     [JsonPropertyName("phase")] public string Phase { get; set; } = UniqueActorPhases.Roster;
     [JsonPropertyName("level")] public long Level { get; set; } = 1;
-    [JsonPropertyName("xp")] public double Xp { get; set; }
+    [JsonPropertyName("xp")] public long Xp { get; set; }
     [JsonPropertyName("matchKey")] public string? MatchKey { get; set; }
     [JsonPropertyName("lastPtr")] public string? LastPtr { get; set; }
     [JsonPropertyName("deployCorrelationId")] public string? DeployCorrelationId { get; set; }
@@ -83,12 +83,17 @@ public sealed class PutUniqueEquipmentRequest
 
 public sealed class AwardUniqueActorXpRequest
 {
-    [JsonPropertyName("delta")] public double Delta { get; set; }
+    // XP is an integer magnitude end to end (CLAUDE.md numeric rules): long on the wire, long in
+    // the store, INTEGER in the column. Was `double` until 2026-09-05 -- the same defect the
+    // 2026-09-04 XP pass fixed on rpg_actor_progression, surviving on the sibling table.
+    [JsonPropertyName("delta")] public long Delta { get; set; }
     [JsonPropertyName("reason")] public string? Reason { get; set; }
 }
 
-/// <summary>A real, seeded relic definition (T14). Equipping goes through the existing
-/// per-actor `rpg_unique_equipment` pipeline — see <see cref="UniqueEquipmentSlotDto"/>.</summary>
+/// <summary>A real, seeded relic definition (T14). Equipping persists as a module 4
+/// <c>rpg_item_assignment</c> row (`decision-d1-durable-ownership.md` §10 M1/M2, 2026-09-06);
+/// <see cref="Slot"/> stays a legacy <c>weapon|armor|trinket</c> label on the wire and is mapped to
+/// its canonical role in the store — see <see cref="UniqueEquipmentSlotDto"/>.</summary>
 public sealed class RelicDto
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

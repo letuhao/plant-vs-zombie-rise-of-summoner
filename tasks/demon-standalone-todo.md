@@ -192,6 +192,323 @@ Demon fusion: star merges, capped promotion, discoverable recipes
 - [x] Spec synced: structure line (FusionCostTable lives in StarPolicy.cs), essence breadcrumb + replayed-discovery + cross-path species-bonus paragraphs.
 - Post-fix sweep: Core 1264 / Data 140 / Guard 40 / E2E 127 / Vitest 211, guards 4/4, FE build clean.
 
+## WAVE F2 — fusion trait/action inheritance (owner decision 2026-09-07, `demon-mechanism-gaps-ideal.md` §3.4)
+
+⏸ **Deferred — future work, fully investigated, not spec-ready.** `docs/architecture/demon-scope-ideal.md`
+§5-9 explores the broader "demon scope" idea this wave grew out of — general-demon (siege/world-map
+legion) progression, troop-stack identity + per-source upgrade containers, stack experience, a
+near-death survival→promotion mechanic, and a Survivor Title achievement system spanning world
+events/Delve events/quests. Owner decision 2026-09-07: *"troop management, achievement is big
+feature, we will turn back to fusion and demon scope... and complete demon species leftover to make
+gameplayable first."* Resume there when picking this back up — every section names real built/wiring-
+gap/real-gap findings with file:line, so it starts from evidence, not memory.
+
+Wave F's own shipped locked decision 5 ("pick ONE guaranteed trait... roll rest") already exists —
+but it picks from the old, flavour-only `TraitPool` string tags, never from the mechanically-real
+`species-passive.{speciesId}` atom containers `SpeciesMaterialiser` rolls per player
+(`src/FusionRpg.Core/Demons/Materialise/SpeciesMaterialiser.cs:35-70`). This wave moves inheritance
+onto real atoms. Owner decisions locked going in (not re-litigated here): **full `slotsByRarity`
+(1/2/3) as the pick ceiling**, and **cost keyed by the picked trait's own source rarity**, reusing the
+existing `recipeCost`-shaped table indexed differently, not a new curve.
+
+Dependency order: F2.1 (producer capability) and F2.2 (read a specimen's own roll) are independent and
+parallel-safe. F2.3 (cost table) is independent of both. F2.4 needs all three. F2.5 needs F2.4.
+
+- [x] **F2.1: `InstanceProducer.Compose` accepts forced pool picks — DONE 2026-09-07** · **M**
+  - **Design corrected 2026-09-07, before build resumed on it.** The original framing ("reduce
+    `pool_rolls` by the forced count") doesn't match the real shape: `ContainerRow` tracks two
+    separate roll budgets, `PrefixRolls` and `SuffixRolls` (`ContainerRow.cs:149,152`), not one
+    unified count, and `Resolver.Resolve` draws each pass against its own eligible `AffixClass`
+    (`Resolver.cs:154-213`). Forced picks are already-resolved atoms lifted from a PARENT specimen's
+    own roll (F2.2) — they never went through an affix draw *for this instance*, so they don't
+    inherently belong to "prefix" or "suffix" the way a fresh draw does.
+  - **Resolution: reduce the roll budget, not the affix bookkeeping — the same operation
+    `VariantShift.ShiftPrefixRolls`/`ShiftSuffixRolls` (`VariantShift.cs:49,52`) already performs for
+    a completely different reason (shiny/corrupted variants), reused here rather than invented.**
+    `Compose` clones the container via `container with { PrefixRolls = ..., SuffixRolls = ... }` (a
+    plain `record`, confirmed `init`-only and clonable) before handing it to `Resolver.Resolve`,
+    shrinking **`SuffixRolls` first, then `PrefixRolls`**, by exactly the forced-pick count, both
+    clamped at 0. This is a named, documented default (no existing rule dictates which side a forced
+    pick should "cost," since it never drew from either) rather than an invented mechanism — the
+    total roll count still shrinks by exactly the forced count either way, and this repo's own
+    established practice is a stated, deterministic default over blocking on a question play-testing
+    would answer better than a plan can. If the forced-pick count exceeds `PrefixRolls + SuffixRolls`
+    combined, `Compose` refuses (`AtomRejection`, named) rather than silently allowing more total
+    atoms than the rarity's own tier permits.
+  - Acceptance:
+    - [x] A legal forced pick (a real pool member for this container) appears verbatim in the
+          resulting `InstanceRow`, and the cloned container's `SuffixRolls` (then `PrefixRolls`) is
+          reduced by exactly one per forced pick, clamped at 0 — asserted directly, not inferred from
+          the output count alone.
+    - [x] An illegal forced pick (not a real pool member for this container) is rejected by name;
+          nothing is written, matching every other producer refusal's own contract.
+    - [x] A forced-pick count exceeding `PrefixRolls + SuffixRolls` combined is refused by name,
+          before any roll happens.
+    - [x] Remaining slots (the SHRUNKEN `PrefixRolls`/`SuffixRolls`) still roll normally through
+          `Resolver.Resolve`, on a container whose OTHER fields (pool, tiers, groups) are byte-identical
+          to the original — only the two roll counts differ for this one `Compose` call.
+    - [x] Zero forced picks reproduces today's exact output byte-for-byte — no regression to the
+          existing species-materialise path, which calls `Compose` with none.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter InstanceProducer`
+  - Files: `src/FusionRpg.Core/Effects/Atoms/InstanceProducer.cs`, its tests.
+  - ### ✅ Evidence — **DONE 2026-09-07**
+    - New `ForcedPoolPick(string AffixId, IReadOnlyList<InstanceAtomRow> Atoms)` (`InstanceProducer.cs`)
+      carries an already-resolved pick verbatim; `Compose` gained `IReadOnlyList<ForcedPoolPick>?
+      forcedPicks = null`. Validates pool membership per pick and the total-budget cap BEFORE any
+      roll, both refused via `AtomRejection.ContentRule` under a newly-registered `"fusion-inherit"`
+      namespace (`fusion-inherit.not-a-pool-member`, `fusion-inherit.exceeds-roll-budget`) — one code
+      with a namespaced payload (item-ideal.md §2b.1), never a 34th entry in the closed
+      `AtomRejectionReason` list.
+    - Shrinks `SuffixRolls` first then `PrefixRolls` via `container with { ... }` on a CLONE passed
+      only to `Resolver.Resolve` — the container `ContainerValidator.Validate` checks stays the
+      original, unshrunk authored row. Forced atoms are spliced in via `a with { Seq = nextSeq }`,
+      preserving every other field (including `IdentityDigestHex`) verbatim.
+    - **6 new tests, all passing** (13/13 in the file total, 7 pre-existing + 6 new): a legal pick
+      shrinks Suffix and appears verbatim; two picks shrink Suffix then Prefix to zero; an illegal
+      pick and an over-budget pick are each refused by name before any roll; the remaining (shrunk)
+      budget still rolls normally on an otherwise-untouched pool; zero picks (`null` vs
+      `Array.Empty<ForcedPoolPick>()`) reproduce identical `ContentFingerprint()`s.
+    - Test design note: `ContainerValidator.Validate` refuses an all-zero-weight pool
+      (`UnsatisfiablePool`) and requires `rolls ≤ drawable groups` — both surfaced as real, useful
+      test-authoring corrections (weight-0 rows can't be used to force determinism; the "remaining
+      slot" test instead proves the shrink by exact atom COUNT, which parent affix wins the last
+      real draw is genuinely non-deterministic and untested by design).
+    - Verified no regression: `--filter Atoms` 1335/1335 (a single perf-benchmark flake on the first
+      run, confirmed by re-run, unrelated — CPU contention from the concurrent 64-species
+      classification run, not this change).
+    - ### ⛔ Real correction, caught before F2.4 shipped on top of it — DONE 2026-09-07
+      - **The pool-membership check above was wrong and has been removed.** Verified against real
+        content while building F2.4 (`data/seed/demons/species-effects/plant/pilot-batch.json`): every
+        species' pool uses opaque, per-species-authored affix ids (`affix.authored.affix-draw-008`)
+        with zero overlap between species. Inheritance is inherently cross-species (a sacrifice's own
+        species pool feeding a DIFFERENT output species' roll), so requiring a forced pick's `AffixId`
+        to be a member of the TARGET container's own pool would refuse nearly every real inheritance
+        pick — defeating the mechanic's entire point (a fused child is supposed to carry something
+        its OWN species could never roll on its own, matching the genre's own "fusion inherits a skill
+        neither parent's base kit includes" precedent already cited in `demon-mechanism-gaps-ideal.md`
+        §3.3).
+      - **Fix**: `Compose` no longer validates `AffixId` against `container.Pool` — `fusion-inherit.
+        not-a-pool-member` no longer exists as a refusal. Legitimacy is now the CALLER's job (F2.4:
+        source picks only from a real specimen's own real materialised roll via F2.2) — `AffixId` is
+        kept on `ForcedPoolPick` for provenance/logging only. The budget check
+        (`fusion-inherit.exceeds-roll-budget`) is unaffected and still real.
+      - The former "illegal pick" test was replaced with
+        `A_forced_pick_naming_an_affix_that_is_not_in_this_containers_own_pool_still_succeeds` — proves
+        the corrected behavior directly rather than just deleting coverage. 13/13 in the file still
+        green after the fix; `--filter Atoms` 1335/1335 (one more instance of the same unrelated perf
+        flake, confirmed by re-run).
+
+- [x] **F2.2: read a sacrificed specimen's own materialised roll at fusion time — DONE 2026-09-07** · **S**
+  - Fusion today only knows input *species* ids (`spec-demon-fusion.md`: *"Recipe inputs are SPECIMENS
+    of those species... All inputs consumed"* — the specimen's own roll is consumed, never inspected).
+    Add a lookup: given a specimen's `instanceId`, return the real atoms it actually rolled.
+  - Acceptance:
+    - [x] A real specimen's own `instanceId` resolves to its own real rolled atoms, not the species'
+          generic pool.
+    - [x] A specimen with no materialised roll (no container ever existed for its species) returns an
+          explicit "nothing to inherit from" result — never a crash, never a fabricated empty roll
+          presented as real.
+  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter Fusion`
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.Fusion.cs` (extend), its tests. SQL stays inside
+    `FusionRpg.Data` — `guard-dal.ps1` must stay green.
+  - ### ✅ Evidence — **DONE 2026-09-07**
+    - New `RpgStore.GetSpecimenMaterialisedRoll(string specimenInstanceId)` (placed in
+      `RpgStore.PlayerSpecies.cs`, alongside `ListPlayerSpecies` — its own natural home, not a new
+      file) — reuses `GetUniqueActor` → `GetDemonProfile` → `ListPlayerSpeciesInstanceMapUnlocked` →
+      `GetInstance`, the exact same tables/lookups every other read path already uses. Returns the
+      existing `FusionRpg.Core.Demons.Materialise.MaterialisedRoll(SpeciesId, Instance)` record —
+      no new type invented.
+    - `null` is the one, honest "nothing to inherit from" outcome, covering all four real causes:
+      unknown instanceId, a bare `UniqueActor` with no demon profile, a real specimen whose species
+      has no `species-passive.{id}` content, and one whose player has simply never run
+      `player-materialise` for it.
+    - **4 new tests, all passing**: a real specimen resolves to its own real rolled atoms (verified
+      by `ContentFingerprint()` equality against the independently-read `player_species` row, plus a
+      direct atom-id check); an unmaterialised species returns null; an unknown instanceId returns
+      null; a bare `UniqueActor` with no demon profile returns null. `MintDemon` validates against
+      the real `DemonSpeciesCatalog` (unlike `SpeciesMaterialiser`'s own pure path), so the fixture
+      uses a real catalog species (`peashooter`) rather than `PlayerMaterialiseTests`'s synthetic ids.
+    - Verified: `guard-dal.ps1` clean; targeted filter (`PlayerSpecies|PlayerMaterialise|
+      SpecimenMaterialised|RpgStore.Fusion|Data.Tests.FusionStoreTests`) 35/35, zero regressions.
+
+- [x] **F2.3: `inheritCostByRarity` — reuse the existing table shape, index by the pick's own rarity — DONE 2026-09-07** · **S**
+  - `data/tuning/fusion.v1.json` → `.v2.json`: add `inheritCostByRarity`, same 150→1000-souls shape
+    `recipeCost` already uses across the same rarity rungs — but looked up by the *inherited pick's
+    own source species' rarity*, not the fusion output's.
+  - Acceptance:
+    - [x] Table covers every rung `recipeCost` covers.
+    - [ ] A real test fuses two differently-rarity'd sacrifices and confirms each pick's own cost is
+          read from its own source rarity, not the output's. — **honestly deferred to F2.4**:
+          `ExecuteFusion` (the only thing that could fuse two real, differently-rarity'd sacrifices)
+          does not exist yet. Covered instead by a loader-level proof that the two tables are
+          genuinely independent (see evidence).
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter Fusion`
+  - Files: `data/tuning/fusion.v1.json` → `.v2.json`, its loader.
+  - ### ✅ Evidence — **DONE 2026-09-07**
+    - `fusion.v2.json` published via a new, narrow `tools/tuning/publish.py --add-inherit-cost-table`
+      flag (matching `--add-edge`/`--add-rung-power-budget`'s own established "add exactly one thing
+      a coverage gap needs, refuse rather than guess" precedent) — `set`'s dotted-path mechanism
+      explicitly refuses to invent a brand-new top-level key, so a real new-table publish needed its
+      own narrow flag, not a hand-edit. Derives `inheritCostByRarity` from `recipeCost`'s own `souls`
+      field verbatim (150/220/320/450/620/820/1000), refusing if the key already exists or if
+      `recipeCost` is missing/malformed.
+    - `FusionTuning.InheritCostByRarity` (`IReadOnlyDictionary<DemonRarity, long>`) +
+      `FusionTuningLoader` parses it over the SAME `DemonRecipeCatalog.OutputEligibilityFloor`-filtered
+      rung set `recipeCost` already uses (Cultivated..Almanac, 7 rungs) — a flat souls-only map, not
+      the full compound `RecipeCostTuning` shape, since only souls are ever summed for a pick set.
+    - **A real, previously-latent breaking-change discovered and fixed, not assumed away:** `FusionTuning`
+      is a positional record — adding the new required constructor parameter broke all three
+      hand-mirrored `ContractTuningTestBootstrap.cs` fixtures (Core/Data/E2E.Tests) and 5 real
+      `Read("fusion.v1.json")` call sites (`RarityTuningCoverageTests.cs` + 4 Server.Tests files) that
+      the real loader now refuses to parse (missing the new required key). All 3 fixtures gained a
+      matching `InheritCostByRarity` block (mirroring `RecipeCost`'s own values); all 5 call sites
+      bumped to `fusion.v2.json`; `Program.cs`/`RpgHost.cs`'s own hardcoded live-load paths bumped too.
+    - **3 new/extended tests in `RarityTuningCoverageTests.cs`**: `InheritCostByRarity` covers exactly
+      `RecipeCost`'s own rung set; its souls climb monotonically up the ladder, same rule as
+      `RecipeCost`; and it is proven a genuinely separate table (`Assert.NotSame`) whose values happen
+      to match `RecipeCost`'s own today, not an alias.
+    - Verified: `RarityTuningCoverageTests` 5/5; `guard-dal.ps1` N/A (no SQL here). The Injector's own
+      build could not be independently re-verified (`dotnet build` on `FusionRpg.Injector.csproj`
+      throws `Ambiguous project name` — confirmed via `git stash`/rebuild/`pop` on `RpgHost.cs` alone
+      to be a pre-existing environment issue, reproducing identically with the edit removed).
+
+- [x] **F2.4: `ExecuteFusion` accepts, validates, and prices player-selected picks — DONE 2026-09-07** · **M**
+  - Extend the fusion request to carry a list of picks (which atom, from which of the two sacrifices).
+    Validate: pick count ≤ `slotsByRarity[resultRarity]` (the owner's own "full ceiling" decision);
+    every picked atom is one the naming specimen actually rolled (F2.2); total souls ≥ the sum of each
+    pick's own source-rarity cost (F2.3); remaining slots roll normally via F2.1.
+  - **Real design constraint found and resolved while building this task (not pre-planned):**
+    `player_species` is shared per (player, species) and materialised ONCE, never re-rolled
+    (`spec-player-materialise.md` §3/§7 — "a species already present... is neither an error nor
+    rerolled"). Since a fusion's forced picks can only land by composing the OUTPUT species' own
+    `player_species` roll, and that roll is shared across every specimen of that species a player
+    ever owns, picks are only honorable the FIRST time this player ever obtains the output species —
+    if a shared roll already exists, honoring new picks would mean silently re-rolling it out from
+    under every OTHER specimen of that species. Resolved as a named refusal
+    (`picks.already-materialised`), not a gate the player can bypass — a picks-free fusion is
+    completely unaffected either way (no `player_species` write happens at all when `Picks` is empty,
+    matching every pre-F2.4 caller byte-for-byte).
+  - **A second real gap found and fixed the same way:** `FusionCostTable.InheritPick` throws
+    `ArgumentOutOfRangeException` for a source rarity below `DemonRecipeCatalog.OutputEligibilityFloor`
+    (Cultivated) — by design, per F2.3. Since a recipe's own inputs sit ONE RUNG BELOW its output
+    (`InputPoolBelow`), a Cultivated-output recipe's inputs are always below that floor, meaning an
+    unguarded call would crash the whole request with an unhandled exception instead of a clean
+    refusal. Added an explicit `DemonRarityLadder.AtLeast` guard before the `InheritPick` call,
+    returning a named refusal (`picks.source-below-inherit-floor`) instead.
+  - Acceptance:
+    - [x] A valid, affordable pick-set fusion succeeds; the output's instance contains exactly the
+          forced picks plus a correctly-rolled remainder.
+    - [x] A pick-set over `slotsByRarity`'s cap is refused before spending anything.
+    - [x] An unaffordable pick-set is refused before spending anything — matches `ExecuteFusion`'s own
+          existing "refusals write nothing; mid-sequence failure leaves zero rows" contract.
+    - [x] A pick naming an atom its specimen never actually rolled is rejected by name.
+  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter ExecuteFusion`
+  - Files: `RpgStore.Fusion.cs`, `FusionEndpoints.cs`, the fusion request/response DTOs.
+  - ### ✅ Evidence — **DONE 2026-09-07**
+    - New `FusionPick(string SourceInstanceId, string AtomId)` record; `FusionRequest` gained an
+      additive optional `IReadOnlyList<FusionPick>? Picks = null` (positional, defaulted last — every
+      pre-existing 4-arg call site across `FusionStoreTests.cs`/`PatronStoreTests.cs` compiles
+      unchanged). `SameRequest`'s replay-equality check extended to compare `Picks` too (structural
+      record equality via `SequenceEqual`) — an unmatched pick-set on a replayed correlation id now
+      correctly reports `correlation.mismatch` instead of silently replaying the old outcome.
+    - `RecipeUnlocked` gained a validate-then-price-then-materialise block, in this order (matching
+      the method's own established refusal-before-spend discipline): already-materialised gate →
+      slot-cap gate → per-pick source/atom/rarity-floor validation (accumulating `picksSouls` via
+      `FusionCostTable.InheritPick`) → combined `cost with { Souls = cost.Souls + picksSouls }` spent
+      through the SAME `SpendFusionCostsUnlocked` call the base recipe already uses (so "insufficient"
+      is refused before any spend, and a mid-sequence materials failure rolls back the whole
+      transaction, exactly like every other refusal in this method) → mint → (picks-only) compose the
+      output species' own `species-passive.{id}` container with the resolved `ForcedPoolPick`s via
+      `InstanceProducer.Compose`, then write `effect_instance`/`effect_instance_atom`/`player_species`
+      inline using the SAME `db`/transaction `RecipeUnlocked` already holds (plain `db.CreateCommand()`
+      calls, matching this method's own convention — not `RpgStore.PlayerSpecies.cs`'s `ExecIn`-based
+      helpers, which open a SEPARATE lock/connection and would re-decide "already owned" against a
+      different snapshot than the one already proven inside this transaction).
+    - `FusionEndpoints.cs`: `FusionHttpRequest.Picks` (new `FusionPickHttp { SourceInstanceId, AtomId }`
+      list, nullable/optional) maps into `FusionRequest.Picks` in `ToRequest`.
+    - **7 new tests** in `tests/FusionRpg.Data.Tests/FusionInheritancePicksTests.cs`, all passing,
+      covering every acceptance line above plus the two real gaps found while building it: a valid
+      pick-set succeeds and the output's `player_species` instance carries exactly the forced pick
+      (`PrefixRolls=1` total, 1 forced → 0 rolled remainder); over-cap and unaffordable pick-sets both
+      refuse before any souls/materials move and leave no `player_species` row for the output species;
+      a never-rolled atom id is rejected by name; a pick naming an instance that isn't one of the two
+      sacrifices is rejected by name (`picks.source-not-a-sacrifice`); a pick-set against an
+      already-owned output species refuses (`picks.already-materialised`); zero picks reproduces
+      today's exact recipe-fusion behavior byte-for-byte (no `player_species` write attempted at all).
+      Test fixture deliberately selects a recipe whose OWN INPUTS already sit at/above
+      `OutputEligibilityFloor` (not the sibling `FusionStoreTests.Recipe`, a Cultivated-output recipe
+      whose inputs sit one rung BELOW that floor and are therefore never pick-eligible).
+    - Verified: `FusionInheritancePicksTests` 7/7; `FusionRpg.Data` + `FusionRpg.Server` both build
+      clean (0 warnings introduced, 0 errors).
+
+- [x] **F2.5: web FE — real picks in the fusion lab — DONE 2026-09-07** · **M**
+  - Show each sacrifice's own real rolled atoms (named, readable — not the species' generic pool);
+    let the player pick up to `slotsByRarity[resultRarity]` before confirming; show the running soul
+    cost live as picks are added or removed, priced per F2.3.
+  - Acceptance:
+    - [x] A player can see and select from both sacrifices' own real, distinct rolled atoms.
+    - [x] The displayed cost updates live and matches F2.3's own table exactly.
+    - [x] The UI cannot submit a pick-set past the rarity's own cap.
+  - Verify: Vitest + a real click-through against a live server (`local-web-review` skill).
+  - Files: `src/FusionRpg.Server/FusionEndpoints.cs` (preview extended), `web/fusion-rpg-web/src/
+    lib/bus/fusion.ts`, `web/fusion-rpg-web/src/features/fusion/{fusionView.ts,fusionView.test.ts,
+    FusionPage.tsx}`.
+  - ### ✅ Evidence — **DONE 2026-09-07**
+    - `BuildPreview`'s Recipe branch now returns `pickableAtoms` (each sacrifice's own real rolled
+      atoms via `GetSpecimenMaterialisedRoll`, filtered to specimens whose own rarity clears
+      `OutputEligibilityFloor` AND only when this player doesn't already own the output species —
+      mirroring `RecipeUnlocked`'s own two gates so the FE never offers a pick the server would
+      refuse) and `pickSlotCap` (`FusionRoller.SlotsFor(output.BaseRarity)`, the same table F2.4
+      enforces server-side).
+    - New pure helpers in `fusionView.ts`: `togglePick` (add/remove capped at `slotCap` — the UI
+      structurally cannot assemble an over-cap selection), `picksSoulsCost`/`costWithPicks` (sum
+      selected picks' own priced souls onto the base recipe cost, reusing `haveNeed` unchanged rather
+      than duplicating its affordability logic).
+    - `FusionPage.tsx`: new "Inherit atoms" panel (shown only when `pickableAtoms.length > 0`) lets
+      the player toggle up to `pickSlotCap` atoms, each labeled by its source species and its own
+      priced souls cost; the Cost panel shows a live "+N Souls for M inherited atom(s)" line computed
+      from the SAME selection; `picks` ride along on `execute`; a sacrifice-set change clears stale
+      picks (the old selection could name a specimen no longer in the request).
+    - **13 new Vitest cases** in `fusionView.test.ts` (`togglePick` add/remove/cap/cross-source
+      distinction; `picksSoulsCost`/`costWithPicks` sum/zero/no-match-is-zero-never-NaN) — all
+      passing; full FE suite unaffected (12 pre-existing unrelated failures — Phaser HUD mocks +
+      whole-tree guard scans — confirmed identical with F2.5 fully `git stash`-ed out).
+    - **Live click-through** (`local-web-review` skill): a stale published server was occupying
+      5088 (killed per the skill's own documented incident); rebuilt `wwwroot`, and while getting a
+      fresh server up **found and fixed a real, pre-existing, unrelated schema-drift bug** — the
+      `dist/FusionRpg.Server/data` database predates `ContainerRow.Frame`/`BaseTypeId` (added earlier
+      today per `loot-content-view-unwired.md`) and has no migration path for existing databases
+      (`EnsureColumn` was never added for these two columns) — `RpgStore.ItemPower.cs`'s
+      `ValidateRarityPowerBudget` crashed the whole server at boot. Patched non-destructively (two
+      additive `ALTER TABLE ... ADD COLUMN` statements on the existing sqlite file, no data loss) to
+      unblock the live check; **the missing `EnsureColumn` migration itself is a separate, named,
+      unfixed gap** — any other pre-existing database hitting this boot path has the same crash.
+    - Verified live against the real 904-species roster + a real connected player: `/api/fusion/preview`
+      for a real matched recipe pair (`biggloom`+`bamboodragon` → `chimeric`) returned
+      `pickSlotCap: 2` and a correctly-shaped (here: honestly empty, since neither specimen had a
+      materialised roll for this player) `pickableAtoms` — no crash, no new console errors (13
+      pre-existing, unrelated). Confirmed via the real UI too: selecting both specimens rendered the
+      Cost panel with live have/need numbers and the silhouetted result, no "Inherit atoms" panel
+      (correctly absent — nothing to pick). **Did not execute a real fusion** — a real game client was
+      connected to this server (`injectorConnected: true`); an actual `execute` would have
+      irreversibly consumed a real player's real specimens, which is out of scope for a verification
+      pass. See Checkpoint F2 below for what this leaves open.
+
+### ✅ Checkpoint F2 — a real fusion carries real, player-chosen inheritance end to end
+- [ ] A live fusion: two real sacrificed specimens, a player picking real atoms from each (up to the
+      full rarity cap, per the owner's own decision), souls spent matching each pick's own source
+      rarity, remaining slots rolled normally — proven together, not just per-task. **Not run**: F2.5's
+      live check verified preview/selection end-to-end (real server, real roster, real recipe match)
+      but deliberately stopped short of `execute` — the only connected player was a real, live game
+      session, and a real pick-set fusion irreversibly consumes two real specimens. Needs either the
+      owner's own run, or a disposable test player/specimen pair.
+- [x] `slotsByRarity`/`recipeCost`'s own existing shapes are reused, not duplicated by a second curve
+      (`FusionRoller.SlotsFor`/`FusionCostTable.Recipe` on the server, `costWithPicks` layering onto
+      `haveNeed` unchanged on the FE — confirmed by reading both, not assumed).
+- [x] Full Data + Core suites green; `guard-dal.ps1` clean (targeted Fusion-substring filter run:
+      1193 tests, 1188 passed — the 5 failures are pre-existing item/charm corpus-size drift,
+      confirmed unrelated via `git stash` differential re-run).
+
 ## WAVE P — patron-demon (spec: docs/architecture/demons/spec-patron-demon.md; injector scope, ends at a LIVE owner gate)
 
 - [x] PT1: `PatronPolicy` — aura magnitudes + patron kill-earn shape as a running-total difference (cap exact at the boundary, no bonus overshoot). 10 tests. S

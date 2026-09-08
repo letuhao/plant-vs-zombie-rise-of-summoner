@@ -1,0 +1,43 @@
+{
+  "_meta": {
+    "partition": "Defend"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.18's Emplacement row: 'a building, not an obstacle', ironwork, garrisoned, acts through its occupant who gets high cover plus a ranged action. Decision 25's own table: the one Defend-role row WITH a control point \u2014 'Occupies, blocks, has HP \u2014 fires nothing' ungarrisoned.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "heavy",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "small",
+        "obstacleVerbs": [
+          "COVER"
+        ],
+        "rarity": "grafted",
+        "reach": "short",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Defend",
+        "roleSecondary": "none",
+        "strengthBand": "stone",
+        "structureId": "emplacement",
+        "targetPreference": "none",
+        "tempo": "steady",
+        "traits": [],
+        "variants": []
+      },
+      "id": "emplacement",
+      "name": "Emplacement"
+    }
+  ],
+  "kind": "structure-anchor"
+}

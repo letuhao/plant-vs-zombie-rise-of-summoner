@@ -1,0 +1,1017 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "To stand firm is to become part of the earth itself.",
+      "id": "skill.bond-def-t1-n0",
+      "name": "Rooted Resolve",
+      "nameKey": "tree.node.rooted-resolve-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the spirit holds firm, turning impact into mere texture.",
+      "id": "skill.bond-def-t1-n1",
+      "name": "Layered Bark",
+      "nameKey": "tree.node.layered-bark-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while branch is active — branch wins.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The bond is not merely skin deep; it weaves through the very marrow of the being.",
+      "id": "skill.bond-def-t1-n2",
+      "name": "Deep-Rooted Symbiosis",
+      "nameKey": "tree.node.deep-rooted-symbiosis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The circulatory system is rerouted to feed the protective plating, ensuring the shield never stagnates.",
+      "id": "skill.bond-def-t10-n0",
+      "name": "Vascular Conduit",
+      "nameKey": "tree.node.vascular-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-callus",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond between flesh and spirit hardens into a resilient, calloused layer of survival.",
+      "id": "skill.bond-def-t2-n0",
+      "name": "Thickened Sinew",
+      "nameKey": "tree.node.thickened-sinew-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "A dense layering of organic plates that hardens upon impact.",
+      "id": "skill.bond-def-t2-n1",
+      "name": "Reinforced Integument",
+      "nameKey": "tree.node.reinforced-integument",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A hardening of the outer layer that absorbs impact and stabilizes the internal flow.",
+      "id": "skill.bond-def-t2-n2",
+      "name": "Resilient Shell",
+      "nameKey": "tree.node.resilient-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The bark thickens into a calcified rind, turning skin into stone.",
+      "id": "skill.bond-def-t3-n0",
+      "name": "Lignified Plating",
+      "nameKey": "tree.node.lignified-plating-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "A secondary layer of dermal plating that thickens with every impact.",
+      "id": "skill.bond-def-t3-n1",
+      "name": "Reinforced Membrane",
+      "nameKey": "tree.node.reinforced-membrane",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "A layer of calcified sap that thickens with every breath of the forest.",
+      "id": "skill.bond-def-t3-n2",
+      "name": "Hardened Husk",
+      "nameKey": "tree.node.hardened-husk",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-regen",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "A network of vascular conduits that cycles protective fluids through the shield's membrane.",
+      "id": "skill.bond-def-t4-n0",
+      "name": "Sap-Flow Circuitry",
+      "nameKey": "tree.node.sap-flow-circuitry",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the spirit meets the world, turning impact into a memory of strength.",
+      "id": "skill.bond-def-t4-n1",
+      "name": "Grafted Aegis",
+      "nameKey": "tree.node.grafted-aegis-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond draws strength from the very impact meant to sever it.",
+      "id": "skill.bond-def-t5-n0",
+      "name": "Osmotic Siphon",
+      "nameKey": "tree.node.osmotic-siphon-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "A dense weave of reinforced plating and structural integrity.",
+      "id": "skill.bond-def-t5-n1",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-8",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond deepens as the shield pulses, weaving protection directly into the marrow.",
+      "id": "skill.bond-def-t6-n0",
+      "name": "Symbiotic Graft",
+      "nameKey": "tree.node.symbiotic-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The connection runs deeper than the surface, anchoring the spirit to the very marrow of the world.",
+      "id": "skill.bond-def-t6-n1",
+      "name": "Deep-Rooted Vitality",
+      "nameKey": "tree.node.deep-rooted-vitality",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-riveting",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The connection is no longer merely spiritual; it has become structural, calcifying the spirit into a physical bulwark.",
+      "id": "skill.bond-def-t7-n0",
+      "name": "Ossified Bond",
+      "nameKey": "tree.node.ossified-bond",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.plating",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The skin thickens where the spirit refuses to break.",
+      "id": "skill.bond-def-t7-n1",
+      "name": "Calloused Resilience",
+      "nameKey": "tree.node.calloused-resilience",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "A rigid, calcified layer that hardens the skin at the cost of fluid movement.",
+      "id": "skill.bond-def-t8-n0",
+      "name": "Exoskeletal Graft",
+      "nameKey": "tree.node.exoskeletal-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The boundary between self and shell becomes a closed loop of constant renewal.",
+      "id": "skill.bond-def-t9-n0",
+      "name": "Cyclical Integument",
+      "nameKey": "tree.node.cyclical-integument",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The strength of the bond is written in the heat of the struggle.",
+      "id": "skill.bond-off-t1-n0",
+      "name": "Sanguine Vigor",
+      "nameKey": "tree.node.sanguine-vigor",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The first strike carries the weight of a thousand debts.",
+      "id": "skill.bond-off-t1-n1",
+      "name": "Vicious Onset",
+      "nameKey": "tree.node.vicious-onset",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The bond tightens with every strike, turning momentum into raw aggression.",
+      "id": "skill.bond-off-t1-n2",
+      "name": "Sanguine Edge",
+      "nameKey": "tree.node.sanguine-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The resonance between essence and element creates a feedback loop of pure potential.",
+      "id": "skill.bond-off-t10-n0",
+      "name": "Harmonic Graft",
+      "nameKey": "tree.node.harmonic-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The pulse of the forest quickens with every strike, fueling a cycle of raw aggression.",
+      "id": "skill.bond-off-t2-n0",
+      "name": "Primal Surge",
+      "nameKey": "tree.node.primal-surge-5",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The strength of the bond is measured in the heat of the struggle.",
+      "id": "skill.bond-off-t2-n1",
+      "name": "Sanguine Tether",
+      "nameKey": "tree.node.sanguine-tether",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
+      "id": "skill.bond-off-t2-n2",
+      "name": "Vanguard's Cadence",
+      "nameKey": "tree.node.vanguard-s-cadence",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The essence of the bond vibrates in sympathy with the elements, turning a simple connection into a conduit for raw power.",
+      "id": "skill.bond-off-t3-n0",
+      "name": "Resonant Graft",
+      "nameKey": "tree.node.resonant-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond is not merely shared; it is a violent exchange of essence.",
+      "id": "skill.bond-off-t3-n1",
+      "name": "Sanguine Onslaught",
+      "nameKey": "tree.node.sanguine-onslaught-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The rhythm of the hunt quickens with every strike.",
+      "id": "skill.bond-off-t3-n2",
+      "name": "Predatory Pulse",
+      "nameKey": "tree.node.predatory-pulse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The vibration of one element forces the next to erupt with violent instability.",
+      "id": "skill.bond-off-t4-n0",
+      "name": "Resonant Overload",
+      "nameKey": "tree.node.resonant-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The pulse of the hunt quickens the blood, turning every strike into a rhythmic tide of violence.",
+      "id": "skill.bond-off-t4-n1",
+      "name": "Sanguine Surge",
+      "nameKey": "tree.node.sanguine-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the flow of the essence.",
+      "id": "skill.bond-off-t5-n0",
+      "name": "Harmonic Resonance",
+      "nameKey": "tree.node.harmonic-resonance-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond is not merely a connection, but a hunger that demands more.",
+      "id": "skill.bond-off-t5-n1",
+      "name": "Primal Hunger",
+      "nameKey": "tree.node.primal-hunger-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The bond is no longer a tether, but a conduit for the raw essence to tear through the target's defenses.",
+      "id": "skill.bond-off-t6-n0",
+      "name": "Coalescent Breach",
+      "nameKey": "tree.node.coalescent-breach",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The rhythm of the hunt accelerates with every strike.",
+      "id": "skill.bond-off-t6-n1",
+      "name": "Savage Impulse",
+      "nameKey": "tree.node.savage-impulse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The boundary between thought and instinct dissolves into a single, unified impulse.",
+      "id": "skill.bond-off-t7-n0",
+      "name": "Neural Symbiosis",
+      "nameKey": "tree.node.neural-symbiosis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond pulses with a violent, rhythmic heat, turning every strike into a surge of raw aggression.",
+      "id": "skill.bond-off-t7-n1",
+      "name": "Sanguine Overdrive",
+      "nameKey": "tree.node.sanguine-overdrive",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The momentum of the bond pulls the soul forward, turning every connection into a catalyst for motion.",
+      "id": "skill.bond-off-t8-n0",
+      "name": "Kinetic Tether",
+      "nameKey": "tree.node.kinetic-tether",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.bonding",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The bond vibrates with such intensity that the elemental essence ceases to flow and begins to erupt.",
+      "id": "skill.bond-off-t9-n0",
+      "name": "Resonant Overload",
+      "nameKey": "tree.node.resonant-overload-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "bond"
+}

@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn the force of incoming blows into a hardening shell of ice and a restorative layer of frost.",
+  "name": "Glacial Bastion",
+  "treeId": "freeze"
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "rungs": {
+    "very-easy": { "ordinal": 1 },
+    "easy": { "ordinal": 2 },
+    "medium": { "ordinal": 3 },
+    "hard": { "ordinal": 4 },
+    "very-hard": { "ordinal": 5 },
+    "nightmare": { "ordinal": 6 },
+    "hell": { "ordinal": 7 },
+    "abyss": { "ordinal": 8 },
+    "hopeless": { "ordinal": 9 },
+    "impossible": { "ordinal": 10 }
+  }
+}

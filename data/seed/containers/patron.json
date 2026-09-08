@@ -5,8 +5,22 @@
     {
       "id": "patron.aura",
       "kind": "patron",
-      "poolRolls": 0,
-      "atoms": [],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "seq": 1, "atom": "atom.patron-aura-power.fire.t1" },
+        { "seq": 2, "atom": "atom.patron-aura-defense.fire.t1" },
+        { "seq": 3, "atom": "atom.patron-aura-power.ice.t1" },
+        { "seq": 4, "atom": "atom.patron-aura-defense.ice.t1" },
+        { "seq": 5, "atom": "atom.patron-aura-power.air.t1" },
+        { "seq": 6, "atom": "atom.patron-aura-defense.air.t1" },
+        { "seq": 7, "atom": "atom.patron-aura-power.earth.t1" },
+        { "seq": 8, "atom": "atom.patron-aura-defense.earth.t1" },
+        { "seq": 9, "atom": "atom.patron-aura-power.light.t1" },
+        { "seq": 10, "atom": "atom.patron-aura-defense.light.t1" },
+        { "seq": 11, "atom": "atom.patron-aura-power.dark.t1" },
+        { "seq": 12, "atom": "atom.patron-aura-defense.dark.t1" }
+      ],
       "tags": {
         "marker": "fx.patron_aura"
       }

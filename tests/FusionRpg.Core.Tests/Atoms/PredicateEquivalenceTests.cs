@@ -131,6 +131,10 @@ public class PredicateEquivalenceTests
         LeafId.ColIs => e.Col == l.Value,
         LeafId.IsMindControlled => e.IsMindControlled == (l.Value != 0),
         LeafId.HoldsStock => StockQtyRef(e, StockBit(l.Text!)) >= l.Value,
+        LeafId.BandIs => e.Band == l.Value,
+        LeafId.HaulAtLeast => e.HaulCount >= l.Value,
+        LeafId.RoomKindIs => e.RoomKind == l.Value,
+        LeafId.PartyDownedCount => e.DownedCount >= l.Value,
         _ => true,
     };
 
@@ -184,7 +188,7 @@ public class PredicateEquivalenceTests
         var subject = rng.Next(2) == 0 ? Subject.Self : Subject.Target;
         if (allowInvalid && rng.Next(25) == 0) subject = (Subject)9; // omitted-subject shape
 
-        return rng.Next(12) switch
+        return rng.Next(16) switch
         {
             0 => new PredicateNode.Leaf(LeafId.SideIs, subject, Text: Sides[rng.Next(Sides.Length)]),
             1 => new PredicateNode.Leaf(LeafId.TypeIdIs, subject, Value: rng.Next(300)),
@@ -198,9 +202,14 @@ public class PredicateEquivalenceTests
             8 => new PredicateNode.Leaf(LeafId.RowIs, subject, Value: rng.Next(6)),
             9 => new PredicateNode.Leaf(LeafId.ColIs, subject, Value: rng.Next(10)),
             10 => new PredicateNode.Leaf(LeafId.IsMindControlled, subject, Value: rng.Next(2)),
-            _ => new PredicateNode.Leaf(LeafId.HoldsStock, subject,
+            11 => new PredicateNode.Leaf(LeafId.HoldsStock, subject,
                      Value: allowInvalid && rng.Next(10) == 0 ? 0 : 1 + rng.Next(5), // occasionally invalid (minQty < 1)
                      Text: StockIds[rng.Next(StockIds.Length)]),
+            // D3.7 (event-deck): four plain-Value leaves, occasionally invalid (negative) the same way HoldsStock is above.
+            12 => new PredicateNode.Leaf(LeafId.BandIs, subject, Value: allowInvalid && rng.Next(10) == 0 ? -1 - rng.Next(3) : rng.Next(4)),
+            13 => new PredicateNode.Leaf(LeafId.HaulAtLeast, subject, Value: allowInvalid && rng.Next(10) == 0 ? -1 - rng.Next(3) : rng.Next(6)),
+            14 => new PredicateNode.Leaf(LeafId.RoomKindIs, subject, Value: allowInvalid && rng.Next(10) == 0 ? -1 - rng.Next(3) : rng.Next(11)),
+            _ => new PredicateNode.Leaf(LeafId.PartyDownedCount, subject, Value: allowInvalid && rng.Next(10) == 0 ? -1 - rng.Next(3) : rng.Next(5)),
         };
     }
 
@@ -219,7 +228,11 @@ public class PredicateEquivalenceTests
             Stock0Qty: rng.Next(0, 6),
             Stock1Qty: rng.Next(0, 6),
             Stock2Qty: rng.Next(0, 6),
-            Stock3Qty: rng.Next(0, 6));
+            Stock3Qty: rng.Next(0, 6),
+            Band: rng.Next(0, 4),
+            RoomKind: rng.Next(0, 11),
+            HaulCount: rng.Next(0, 6),
+            DownedCount: rng.Next(0, 5));
 
         return (One(), One());
     }

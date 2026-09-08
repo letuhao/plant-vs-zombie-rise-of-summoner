@@ -190,6 +190,10 @@ public sealed partial class RpgStore
         return (long)(cmd.ExecuteScalar() ?? 0L);
     }
 
+    // Columns keep their old names (pulls_since_epic/pulls_since_legendary) after seed-to-concrete
+    // T4.1 renamed the C# concepts to PullsSinceHeirloom/PullsSinceSunwoven (ordinals 70/90,
+    // ssot-rarity.md §3.3) — the counters' function is unchanged, only which rung they guarantee
+    // moved, so a schema migration for a label-only rename was not warranted.
     PityState ReadPityUnlocked(SqliteConnection db, long playerId)
     {
         using var cmd = db.CreateCommand();
@@ -211,8 +215,8 @@ public sealed partial class RpgStore
               updated_utc = excluded.updated_utc;
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$e", pity.PullsSinceEpic);
-        cmd.Parameters.AddWithValue("$l", pity.PullsSinceLegendary);
+        cmd.Parameters.AddWithValue("$e", pity.PullsSinceHeirloom);
+        cmd.Parameters.AddWithValue("$l", pity.PullsSinceSunwoven);
         cmd.Parameters.AddWithValue("$t", now);
         cmd.ExecuteNonQuery();
     }

@@ -3,10 +3,19 @@ using System.Text.RegularExpressions;
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The seven owner scopes a binding may attach to (definitions.md §6).
+/// The eight owner scopes a binding may attach to (definitions.md §6).
 ///
 /// <para><b><see cref="Slot"/> is a world-map construction slot</b>, unrelated to an item's `slot`
 /// column. Two different concepts, one word — deliberately not the same type.</para>
+///
+/// <para><b><see cref="UniqueActor"/> is a persistent `rpg_unique_actor`</b>, keyed on the actor's own
+/// stable `instance_id` — durable like <see cref="Player"/>, just scoped to one actor rather than the
+/// whole account. Added 2026-09-01 (`tasks/seed-to-concrete-open-decisions.md` decision 1, owner-
+/// approved) specifically because <see cref="Entity"/> cannot be reused for this: its pointer is
+/// session-scoped and reused, so an equipped-item binding written as `entity:` would silently vanish
+/// on the next session boundary (`ClearSessionScopedBindings()` deletes every `entity:` binding on
+/// purpose). A unique actor's `instance_id` is never reused, so its bindings are never session-scoped.
+/// </para>
 /// </summary>
 public enum OwnerKind
 {
@@ -17,6 +26,7 @@ public enum OwnerKind
     Player,
     Sector,
     Slot,
+    UniqueActor,
 }
 
 /// <summary>
@@ -49,6 +59,7 @@ public readonly record struct OwnerScope(OwnerKind Kind, string Key)
         OwnerKind.Player => "player",
         OwnerKind.Sector => "sector",
         OwnerKind.Slot => "slot",
+        OwnerKind.UniqueActor => "unique-actor",
         _ => "",
     };
 
@@ -133,6 +144,15 @@ public readonly record struct OwnerScope(OwnerKind Kind, string Key)
                 if (!IdRe.IsMatch(key))
                     return AtomRejection.Fail(AtomRejectionReason.BadOwnerKey,
                         $"{Name(kind)} takes a kebab-case id, got '{key}'");
+                break;
+
+            case OwnerKind.UniqueActor:
+                // Same grammar as Sector/Slot (kebab/alnum id) — durability differs (this scope is
+                // durable, never session-scoped), the key shape does not. Existence is a bind-time
+                // check against rpg_unique_actor, not a grammar check.
+                if (!IdRe.IsMatch(key))
+                    return AtomRejection.Fail(AtomRejectionReason.BadOwnerKey,
+                        $"{Name(kind)} takes a kebab-case instance id, got '{key}'");
                 break;
 
             default:

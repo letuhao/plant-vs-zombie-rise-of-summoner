@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.party-mono-002",
+  "formation": "party",
+  "name": "The Singular Vanguard",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A concentrated, elemental-aligned elite unit designed to overwhelm through high-quality individual duels rather than attrition.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "marauder"
+  }
+}

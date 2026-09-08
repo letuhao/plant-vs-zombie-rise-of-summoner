@@ -35,7 +35,8 @@
           "powerBand": "medium"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"]
     },
     {
@@ -52,7 +53,8 @@
           "powerBand": "high"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"]
     },
     {
@@ -69,7 +71,8 @@
           "powerBand": "medium"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     },
     {
@@ -86,7 +89,8 @@
           "powerBand": "high"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     },
     {
@@ -103,7 +107,8 @@
           "powerBand": "medium"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive"]
     },
     {
@@ -120,7 +125,8 @@
           "powerBand": "high"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive"]
     },
     {
@@ -137,7 +143,8 @@
           "powerBand": "medium"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     },
     {
@@ -154,7 +161,8 @@
           "powerBand": "high"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     },
     {
@@ -171,7 +179,8 @@
           "powerBand": "medium"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     },
     {
@@ -188,7 +197,8 @@
           "powerBand": "high"
         }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"]
     }
   ]

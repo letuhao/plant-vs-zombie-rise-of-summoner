@@ -33,7 +33,7 @@
         "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.plain-tag",
       "flavorKey": "flavor.base.plain-tag",
       "flavor": "A simple marked item, barely worth filing.",
@@ -66,7 +66,7 @@
         "family": "atom.vitality",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.modest-ticket",
       "flavorKey": "flavor.base.modest-ticket",
       "flavor": "An entry document so plain no one remembers having received it.",
@@ -96,7 +96,7 @@
       "class": "signet",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -129,10 +129,10 @@
       "class": "signet",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.unadorned-badge",
       "flavorKey": "flavor.base.unadorned-badge",
       "flavor": "No decoration. It is what it is.",
@@ -195,7 +195,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -231,7 +231,7 @@
         "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.worked-label",
       "flavorKey": "flavor.base.worked-label",
       "flavor": "Carefully constructed identification, meant to endure the sorting process.",
@@ -294,10 +294,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.signed-deed",
       "flavorKey": "flavor.base.signed-deed",
       "flavor": "A legally executed document that binds the present to the past.",
@@ -327,7 +327,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -360,10 +360,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.midas",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.notarised-bond",
       "flavorKey": "flavor.base.notarised-bond",
       "flavor": "A witnessed commitment, sealed beyond dispute or breaking.",

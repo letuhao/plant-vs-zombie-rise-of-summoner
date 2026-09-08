@@ -7,12 +7,23 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// <para><b><see cref="HoldsStock"/> approved 2026-08-27</b> (spec-predicate-tree.md, "a third leaf
 /// requested by the action program") — landed 2026-08-28 under explicit owner authorization to build
 /// across the program boundary (the action program's own `P0.4`/T10). <c>(stockId, minQty)</c>: "do I
-/// hold ≥ 1 of this?" — the precondition a consumable action checks. The underlying inventory/stock
-/// SYSTEM (`rpg_item_stock`, item/ssot-consumables.md) is unbuilt — confirmed absent by search, not
-/// assumed — so this leaf's `FactReader` probe reads from CALLER-SUPPLIED quantities, resolved at
-/// evaluation setup exactly as every other fact is (never I/O from inside the leaf), same as
-/// `IAffordabilityCheck`/`IStanceCheck` stand in for their own not-yet-built systems elsewhere in
+/// hold ≥ 1 of this?" — the precondition a consumable action checks. The underlying stock table
+/// (`rpg_item_stock`, item/ssot-consumables.md) EXISTS — `RpgStore.Items.cs:96` creates it and `:302`
+/// upserts it (this comment said "unbuilt" until 2026-09-05; the table landed after the leaf did).
+/// That changes nothing here: the leaf's `FactReader` probe still reads CALLER-SUPPLIED quantities,
+/// resolved at evaluation setup exactly as every other fact is (never I/O from inside the leaf) —
+/// Core reads no store, so whoever evaluates the tree loads the quantities from `rpg_item_stock`
+/// and hands them in, the same way `IAffordabilityCheck`/`IStanceCheck` are supplied elsewhere in
 /// this codebase.</para>
+///
+/// <para><b>Four more approved 2026-09-06</b> (`event-deck` D3.7, spec-event-deck.md §6: "Real gaps —
+/// four leaves, each a reviewed code change"): <see cref="BandIs"/>, <see cref="HaulAtLeast"/>,
+/// <see cref="RoomKindIs"/>, <see cref="PartyDownedCount"/> — all plain `Value` leaves, no `Text`/
+/// `Values` arg. Each reads a raw, caller-resolved ordinal/count exactly the way `TypeIdIs`/`RowIs`
+/// already do: this generic module never imports a domain registry (`RoomKindCatalog`, the dangerBand
+/// ladder) to validate what a value MEANS — only that it is structurally sane (non-negative) —
+/// resolving a named value (`"shallow"`, a room kind id) to its ordinal is the IMPORTER's job, same as
+/// `TypeIdIs`'s own game-type ordinal today.</para>
 /// </summary>
 public enum LeafId
 {
@@ -28,6 +39,10 @@ public enum LeafId
     ColIs,
     IsMindControlled,
     HoldsStock,
+    BandIs,
+    HaulAtLeast,
+    RoomKindIs,
+    PartyDownedCount,
 }
 
 /// <summary>

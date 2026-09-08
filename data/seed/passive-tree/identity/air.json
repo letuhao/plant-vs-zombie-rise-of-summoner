@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Vortex of the Unseen",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn incoming strikes into a self-sustaining cycle of protection and weightless defense.",
+  "name": "Vortex of the Unyielding Wind",
+  "treeId": "air"
+}

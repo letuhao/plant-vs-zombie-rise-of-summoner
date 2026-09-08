@@ -53,19 +53,22 @@ if (entrySource.includes("Phaser")) {
   console.log("check-bundle: Phaser is absent from the entry chunk — OK");
 }
 
-// `recharts` is fully removed (T19). `@xyflow/react` stays in package.json — it is not in the
-// entry chunk (verified above covers only Phaser, but the same build output shows WorldPage's own
-// chunk carries it, confirmed by hand at T13 time) — but full removal is T16's (World)'s own
-// future plan, not this task's: World is excluded this phase and its existing map code still
-// depends on it. Asserting it gone here would either fail permanently until that plan lands or
-// require rewriting World's map now, which is explicitly out of scope. Tracked, not silently
-// dropped: see tasks/game-gui-todo.md Task 13's own note.
+// `recharts` is fully removed (T19). `@xyflow/react` is gone too (world-stage routing work,
+// 2026-09-05 — the old `WorldPage` it backed is deleted and `#/world` now serves the SVG stage),
+// so both dependencies are asserted absent here rather than just one.
 const packageJson = JSON.parse(readFileSync(path.resolve(scriptDir, "../package.json"), "utf8"));
 if (packageJson.dependencies?.recharts) {
   console.error("check-bundle: \"recharts\" is still a dependency — it was supposed to be fully removed (T19).");
   failed = true;
 } else {
   console.log("check-bundle: recharts is absent from package.json — OK");
+}
+
+if (packageJson.dependencies?.["@xyflow/react"]) {
+  console.error("check-bundle: \"@xyflow/react\" is still a dependency — it was supposed to be fully removed (world-stage routing work).");
+  failed = true;
+} else {
+  console.log("check-bundle: @xyflow/react is absent from package.json — OK");
 }
 
 if (failed) {

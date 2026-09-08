@@ -30,7 +30,19 @@ Three consequences:
 
 ## Scope honesty
 
-Thirteen modules across seven phases. The ordering protects the existing game early (the gate at Phase 2) and puts every piece of new machinery behind its own checkpoint. **If the program stops at any checkpoint, what shipped is coherent and green.** Five modules (T6, T7, T8, T10, T11) are still unspecced; their tasks begin by writing the spec.
+~~Thirteen modules across seven phases.~~ **Seventeen across nine, as of 2026-09-04**: T14
+`timeline-tunables` and T15 `profile-migration` were added by the reconciliation pass, and **B37
+`fsm-routing` and B38 `turn-cycle` were added mid-build** — both were B9's own deliberately deferred
+half (the code says so: *"B9's own remaining half … is NOT attempted here"*), never scheduled, and
+between them they gated six other items. The ordering still protects the existing game early (the gate
+at Phase 2) and puts every piece of new machinery behind its own checkpoint. **If the program stops at
+any checkpoint, what shipped is coherent and green.**
+
+~~Five modules (T6, T7, T8, T10, T11) are still unspecced; their tasks begin by writing the spec.~~
+**All five are specced as of 2026-09-04** — `spec-turn-order-forecast.md` (T8),
+`spec-interactive-turns.md` (T6+T10, one spec because the map binds them), `spec-pvz-observer.md` (T7),
+plus `spec-timeline-tunables.md`, `spec-profile-migration.md` and `spec-fsm-routing.md` for the four
+new modules. T11 is specced within the interactive spec.
 
 ## Slicing principle
 
@@ -110,17 +122,42 @@ bug was found and fixed during B16** (a pure-CC status's `NextPulse` never advan
 round-count cap alone. Full evidence: `battle-timeline-todo.md` B16–B18.
 **Checkpoint B2 — versioned.**
 
-### Phase 4 — interactive battles (T8, T6, T10, T11)
-Forecast, then the dwell, then the trace, then live sessions. **T6 and T10 ship together** — an interactive battle without a persisted decision trace is precisely the hole where a boot sweep silently overwrites a player's win.
-**Checkpoint C.**
+### Phase 4 — interactive battles (T8, T6, T10, T11) *(B19–B22 complete — Checkpoint C CLOSED 2026-09-04)*
+Forecast, then the dwell, then the trace, then live sessions. **T6 and T10 shipped together**, as the plan required — an interactive battle without a persisted decision trace is precisely the hole where a boot sweep silently overwrites a player's win.
+**Checkpoint C — CLOSED** on its own criterion: every interactive battle replays from its trace, and the
+sweep refuses an untraced interactive match terminally rather than healing it. A timeout is recorded as
+a decision **at a tick**, never re-measured — the determinism trap this phase existed to avoid.
 
-### Phase 5 — the observer (T7)
+### Phase 5 — the observer (T7) *(B23 complete 2026-09-04 — Checkpoint D 2 of 3)*
 Stateless projection of live PvZ events into the same vocabulary. No queue, no scheduling, no per-actor machine injector-side.
-**Checkpoint D.**
+**Checkpoint D — CLOSED**: the projection and the no-injector-state rule are proven (zero allocation
+over 100,000 projections, in Core so CI actually builds it). ⛔ **`Committed` is deliberately never
+projected** — PvZ has no observable moment between deciding and resolving, so the vocabulary is shared
+but the coverage is not. ✅ The third clause, **"frame budget held at 200+ entities"**, ~~needs a deploy
+and a stress scenario and is owner-run~~ — **measured live 2026-09-04 on a 252-entity board**:
+`loop.tick` **0.040 ms/frame** against a 2 ms budget, kernel share **0.0018 ms** against 0.15 ms, **zero
+gen2 collections**, at a steady 60 fps. **"Owner-run" was the wrong label** — the run is assistant-safe
+via runbook §3's bare build, which deploys straight into the game's `Mods/` folder.
 
 ### Phase 6 — the injector drive (T13) — *the highest-risk phase*
 The kernel ticks inside the frame and takes over the injector's timing grids, under a bounded resumable drain with live probe sections. Gated by P2's measurement and verified against the B1–B9 matrix at 200+ entities.
 **Checkpoint E — program complete.**
+
+### Phase 7 — the balance surface (T14 `timeline-tunables`)
+The kernel's numbers were never triaged against `tunables-ssot.md`, which landed three days after this
+program was specced. Every number under `Battle/Timeline/` becomes either a published key in
+`battle.v2.json` or a `const` that says why it is not tunable. **No dependencies — it can run in
+parallel with Phases 4–6.** Byte-identical throughout: it relocates values, it does not change one.
+**Checkpoint F.**
+
+### Phase 8 — the profile migration (T15) — *the only phase that moves the economy*
+Expeditions and web matches leave `classic-round` for `hybrid-atb`, so `turn.speed`/`turn.haste`
+finally matter in production. **Four axes change at once** (advance policy, `W` 1→4, commitment,
+economy), so the sweep is staged across five configurations and its deliverable is an *attribution
+table*, not a verdict. Two gates run first: close the `KernelPurityScan` hole, and measure
+`FixedIncrement` resolve cost. **Its re-bless is shared with Phase 6's B26** — one bump to
+`RulesetVersion` 5 covering both movers.
+**Checkpoint G — program complete.**
 
 ## Risks and how the plan handles them
 
@@ -132,11 +169,55 @@ The kernel ticks inside the frame and takes over the injector's timing grids, un
 | T13 regresses working timing grids | Sequenced last, behind the gate and the observer, with the existing grids' behaviour as the acceptance baseline |
 | The gate fails with an opaque hash diff | The parity ladder localises drift to a stream, phase, round, or event before the hash is consulted |
 | Live sessions silently corrupt match history | T10 ships with T6; timeouts recorded **as decisions at a tick**; the sweep refuses incomplete traces rather than healing them |
+| **Four profile axes move the goldens together and nobody can say which did it** | Phase 8's sweep runs **five** configurations, one axis at a time, and its acceptance is that the four deltas **sum** to the observed total. If they do not, the interaction is named before the re-bless, not after |
+| **`FixedIncrement` makes expedition resolve expensive** | Measured before the migration, not assumed — the ~50,000-steps-vs-few-hundred-pops figure is an estimate and is labelled as one. `galaxy-sync` for expeditions is the pre-agreed fallback, **but it needs a per-surface axis that does not exist**, so it is a scope change and is budgeted as one |
+| **Phase 8's flip is coupled to B26, which is blocked on an owner spec review (B24)** | Everything in Phase 8 *except* the flip is independent and proceeds. If B26 slips far enough that holding the flip costs more than a second bump, that is an owner call **at that moment** with a named trigger — not a decision to pre-empt now |
+| **T14 turns into a balance pass by accident** | Every published value is extracted from the shipped code, and any value differing from what the code holds today is a defect in the module. Changing one is explicitly ask-first |
 
 ## Verification standard
 
-Every task: its own tests green, the full Core suite green, no edits to existing tests. From Phase 2 on, also the four boundary guards. From Phase 6, also the kernel's probe sections within budget. Golden hashes move exactly **twice** in the whole program — never at Phase 2, once at Phase 3, and once more only if Phase 4 changes report shape.
+Every task: its own tests green, the full Core suite green, no edits to existing tests. From Phase 2 on, also the four boundary guards. From Phase 6, also the kernel's probe sections within budget. **Golden movement — corrected twice, and the second correction is the interesting one.** The original
+wording predicted "exactly twice". Phase 3 (T9) closed with **no** version change, and then **B35
+measured that Phase 8's profile flip moves no golden either** — the golden fixtures use `"golden-*"`
+wave ids that are not in `WaveCatalog`, and the expedition tier hash covers the expedition *plan*, not
+resolved battle reports. **Verified by probe**, not predicted: the four rows were temporarily flipped to
+`hybrid-atb` and the full golden set re-run at 40/40.
+
+So the count now stands at: **zero movements through Phase 8**, with `RulesetVersion` still **4** —
+and by the end of 2026-09-04, **zero across the whole program**. ⭐ **Three separate predicted
+golden-movers were each measured to move nothing**, which is the most useful single result of this run:
+**B26** (the scaled clock is injector-side; Core has no `Time.timeScale` and `SimulationClock` cannot
+read a wall clock), **B36** (the fixtures use `"golden-*"` wave ids absent from `WaveCatalog`; the
+expedition tier hash covers the *plan*), and **B39** (readiness only reorders a round when speeds
+differ, and no shipped content authors a `turn.speed`).
+
+⛔ **The lesson is not "predictions are pessimistic" — it is that a predicted re-bless was twice used as
+a reason to defer real work, and was wrong both times.** Test the constraint before declaring it.
+Most of this run shipped its mechanism **inert** — riders on no trait, `secondaryWeightMilli` at 0,
+per-wave `W` unset, skill channels at neutral — which is *why* nothing moved. **B36 is the exception
+and is deliberately live:** the four waves now select `hybrid-atb`, which really does change how a
+battle resolves (two action points per round). It still moved no golden, because the golden fixtures
+use `"golden-*"` wave ids that are not in `WaveCatalog` — measured, not assumed.
+
+**Test baseline — re-measure it, never assume it.** The 14-red-Core/2-red-Data figure this plan used to
+quote was stale before it was read; so was every figure that replaced it. Across one session it read
+**14/2**, then **2/3**, then **10 Core**, then **6 Core / 3 Data** — ⛔ **the number is a reading, not
+a constant, and it moved four times while other streams worked.** Never carry it forward.
+
+**The final reading for this run, every figure from an executed command:** Core **6 failed / 5 915
+passed** (demons 4, class-system 2) · Data **3 failed / 684 passed** (atom 1, demon-import 2) · Guard
+**170/171** (the known class-system dominance drift) · the battle-scope filter **403/403** ·
+four boundary guards green · overflow **A1=0, A2=0, 0 critical** · magic numbers **M1 = 1**, in the
+atom stream's untracked `BulletModifyMath.cs`. **Zero failures anywhere in battle or timeline**, and
+every red belongs to another stream and was red before this work.
+
+⚠️ **Two run hazards that cost real time here, both self-inflicted and both avoidable.** (1) **Any Core
+change invalidates every `tools/` binary that references it** — six tests that shell out with
+`--no-build` reported false regressions until the eleven tools were rebuilt. (2) **Never run two
+`dotnet test` invocations concurrently**: an orphaned `testhost` holds `FusionRpg.Core.dll` and the
+next build fails with `MSB3027` after ten retries, which reads exactly like a real breakage. Serialise
+the suites, and `taskkill /IM testhost.exe` before a fresh run if one has been interrupted.
 
 ## Not in this program
 
-Action *content* — specific skills, attacks, defences, damage numbers, targeting shapes, AOE, projectiles. That is the next program, and this one exists to give it a timeline. E1 (riders) and E2 (skills) rebase onto the timeline after T9; E3 (hybrid payloads) is resolver-side and independent.
+Action *content* — specific skills, attacks, defences, damage numbers, targeting shapes, AOE, projectiles. That is the next program, and this one exists to give it a timeline. E1 (riders) rebases onto the timeline after T9 — done, see `combat/spec-battle-enrichment.md`'s 2026-09-04 header. **E2 (skills) was not rebased but replaced**: `combat/spec-species-skills.md` builds no catalog and no vocabulary, because `ActionRow`/`ActionEnvelope`/`ActionCatalog` already carry every field its `SkillDef` proposed. E3 (hybrid payloads) is resolver-side and independent.

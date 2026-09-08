@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "registryVersion": 1,
+  "registryVersion": 2,
   "frozen": true,
   "_meta": {
     "kind": "core-registry",
@@ -208,7 +208,7 @@
       },
       {
         "id": "hybrid",
-        "meaning": "a chimera body combining both natures. Carries 13 of the 15 roles (drops ward-array and jewel-minor-b); each remaining role accepts a base type from either pure frame's ladder. The commander never wears this frame — it takes humanoid or plant only."
+        "meaning": "a chimera body combining both natures. Carries 12 of the 15 roles (drops ward-array, head-guard and sense); each remaining role accepts a base type from either pure frame's ladder. The commander never wears this frame — it takes humanoid or plant only."
       }
     ],
     "list": [
@@ -266,8 +266,9 @@
         "roleId": "head-guard",
         "humanoidName": "head",
         "plantName": "crown",
-        "hybridEligible": true,
-        "budgetWeightMilli": 60
+        "hybridEligible": false,
+        "budgetWeightMilli": 60,
+        "hybridDropReason": "a two-natured head has neither creature's clean guard; its crit-resist, crit-damage padding, status-resist and immunity families migrate to core-guard and mantle at a reduced tier cap instead."
       },
       {
         "roleId": "girdle",
@@ -280,8 +281,9 @@
         "roleId": "sense",
         "humanoidName": "face",
         "plantName": "bract",
-        "hybridEligible": true,
-        "budgetWeightMilli": 50
+        "hybridEligible": false,
+        "budgetWeightMilli": 50,
+        "hybridDropReason": "nor either's clean senses — one fiction covers both: the head is the part that agrees least. Its accuracy and crit-rate families migrate to manipulator and jewel-major at a reduced tier cap instead."
       },
       {
         "roleId": "footing",
@@ -315,8 +317,7 @@
         "roleId": "jewel-minor-b",
         "humanoidName": "ring-2",
         "plantName": "graft-2",
-        "hybridEligible": false,
-        "hybridDropReason": "a second graft onto a body that is already two natures does not take.",
+        "hybridEligible": true,
         "budgetWeightMilli": 15
       }
     ],
@@ -569,9 +570,9 @@
       ]
     }
   },
-  "frozenUtc": "2026-08-22",
-  "frozenNote": "FROZEN v1. Consumed by the wave-1 authoring fleet. No in-place edit from here: a required change is registryVersion 2 plus an explicit decision on which partitions re-run. A silently edited registry splits the corpus into pre-edit and post-edit semantics that nothing downstream can tell apart.",
-  "minCompatibleVersion": 1,
-  "minCompatibleNote": "v1 is current; no breaking change yet.",
+  "frozenUtc": "2026-09-04",
+  "frozenNote": "FROZEN v2 (D30, 2026-09-04). v1's hybrid drops (ward-array, jewel-minor-b) contradicted owner ruling D3/D30, which drops ward-array, head-guard and sense instead — the twelve-role hybrid core at 800‰. This bump corrects hybridEligible on all three affected roles and the hybrid frame's own meaning prose to match. No in-place edit from here either: a required change is registryVersion 3 plus an explicit decision on which partitions re-run.",
+  "minCompatibleVersion": 2,
+  "minCompatibleNote": "v2 corrects the hybrid-core role set (D30); a v1-authored partition assuming the old 13-role/895‰ core must re-validate against v2 before shipping.",
   "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
 }

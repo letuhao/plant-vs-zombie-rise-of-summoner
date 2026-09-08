@@ -110,7 +110,11 @@ public static class PatronEndpoints
         PatronRuntimeState.Set(playerId, computed?.Aura);
     }
 
-    static (PatronRow Row, PatronAura Aura)? Compute(RpgStore store, long playerId)
+    // patron-absorption (spec-patron-absorption.md, 2026-09-06): widened from `private` to `internal`
+    // so AtomPushService.Build's own externalRefs callback can reuse this EXACT logic (patron row →
+    // profile/actor → the player's own Θ → PatronPolicy.Aura) rather than a second copy that could
+    // silently disagree with what this endpoint itself reports.
+    internal static (PatronRow Row, PatronAura Aura)? Compute(RpgStore store, long playerId)
     {
         var row = store.GetPatron(playerId);
         if (row == null) return null;
@@ -119,8 +123,19 @@ public static class PatronEndpoints
             .FirstOrDefault(s => s.Profile.InstanceId == row.InstanceId)?.Actor;
         if (profile == null) return null;
         if (!DemonRarityIds.TryParse(profile.Rarity, out var rarity)) return null;
+
+        // aura-skill T22 (owner sign-off 2026-08-30): the player's own Θ, read the SAME way
+        // AptitudeEndpoints.cs's own ProjectState does — no DI thread needed through this class's 4
+        // external callers (Program.cs, RpgHub.cs, EventIngest.cs, SimEndpoints.cs), since
+        // ServerPowerIndexProvider wraps only `store` + the already-globally-configured
+        // PowerTuningHub.Tuning, both already in scope here.
+        var powerIndex = new FusionRpg.Server.Power.ServerPowerIndexProvider(
+            store, FusionRpg.Core.Power.PowerTuningHub.Tuning);
+        var theta = powerIndex.ActorIndex(new FusionRpg.Core.Stats.StatContext { PlayerId = playerId });
+
         var aura = PatronPolicy.Aura(
-            rarity, profile.Star, actor?.Level ?? 1, profile.ElementPrimary, profile.ElementSecondary);
+            rarity, profile.Star, actor?.Level ?? 1, theta, FusionRpg.Core.Power.PowerTuningHub.Tuning,
+            profile.ElementPrimary, profile.ElementSecondary);
         return (row, aura);
     }
 

@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
 using Xunit;
@@ -89,6 +90,63 @@ public class ContentValidationTests
         var container = Container("item.x", atoms[0].AtomId) with { Rarity = "mythic" };
 
         var report = ContentValidation.Budget(new[] { container }, _ => atoms, _ => null);
+
+        Assert.True(report.Ok);
+        Assert.Equal(0, report.Evaluated);
+    }
+
+    // ---- the budget, rung-keyed (A-G1, spec-tier-access-gate.md §3.2) --------------------------------
+
+    [Fact]
+    public void A_container_over_its_rung_ceiling_fails_and_is_named()
+    {
+        var atoms = new[] { Atom("atom.huge", 1, 100_000) };
+        var container = Container("skill.overspent", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(
+            new[] { container }, _ => atoms, _ => 1, _ => 10L);
+
+        Assert.False(report.Ok);
+        var failure = Assert.Single(report.Failures);
+        Assert.Equal("skill.overspent", failure.Subject);
+        Assert.Contains("rung 1", failure.Detail, StringComparison.Ordinal);
+        Assert.Contains("over", failure.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_container_inside_its_rung_ceiling_passes()
+    {
+        var atoms = new[] { Atom("atom.small", 1, 10) };
+        var container = Container("skill.thrifty", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(new[] { container }, _ => atoms, _ => 1, _ => 100_000L);
+
+        Assert.True(report.Ok);
+        Assert.Equal(1, report.Evaluated);
+    }
+
+    [Fact]
+    public void A_container_with_no_rung_is_skipped_rather_than_treated_as_zero()
+    {
+        var container = Container("skill.unrunged"); // rungOf returns null for it below
+
+        var report = ContentValidation.Budget(
+            new[] { container }, _ => Array.Empty<AtomRow>(), _ => null, _ => 100L);
+
+        Assert.True(report.Ok);
+        Assert.Equal(0, report.Evaluated);
+    }
+
+    [Fact]
+    public void A_rung_with_no_ceiling_loaded_is_skipped_rather_than_treated_as_zero()
+    {
+        // A rung table with no powerBudgetMilli column (v1) resolves every rung to null -- read as
+        // "no ceiling data source", never as "budgets nothing" (the same direction the rarity-keyed
+        // overload already takes for a missing ceiling).
+        var atoms = new[] { Atom("atom.any", 1, 50) };
+        var container = Container("skill.x", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(new[] { container }, _ => atoms, _ => 5, _ => null);
 
         Assert.True(report.Ok);
         Assert.Equal(0, report.Evaluated);
@@ -283,6 +341,40 @@ public class ContentValidationTests
         Assert.Equal("atom.dead.t1", orphan.Subject);
     }
 
+    [Fact]
+    public void An_affix_no_container_pool_references_warns()
+    {
+        // T3.8 (affix-metrics): the container-reachability half of "unreachable affix" — the richer
+        // tag-eligibility check waits on module 8 (eligibility-tags), not yet built.
+        var used = new AffixRow("affix.used", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.used.t1") });
+        var dead = new AffixRow("affix.dead", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.dead.t1") });
+        var container = Container("item.ring") with
+        {
+            Pool = new[] { new ContainerPoolRow("affix.used", 100) },
+        };
+
+        var report = ContentValidation.Lint(
+            Array.Empty<AtomRow>(), new[] { container }, new[] { used, dead });
+
+        var orphan = Assert.Single(report.Warnings.Where(w => w.Rule == "orphan-affix"));
+        Assert.Equal("affix.dead", orphan.Subject);
+    }
+
+    [Fact]
+    public void No_affix_catalog_supplied_reports_no_orphan_affixes()
+    {
+        // Same "safe direction" OrphanAtoms already established: an omitted affix catalog must never
+        // manufacture false positives against data the caller never supplied.
+        var container = Container("item.ring") with
+        {
+            Pool = new[] { new ContainerPoolRow("affix.unknown", 100) },
+        };
+
+        var report = ContentValidation.Lint(Array.Empty<AtomRow>(), new[] { container });
+
+        Assert.DoesNotContain(report.Warnings, w => w.Rule == "orphan-affix");
+    }
+
     // ---- over the real shipped corpus ------------------------------------------------------------------
 
     static (IReadOnlyList<AtomRow> Atoms, IReadOnlyList<ContainerRow> Containers) ShippedSeed()
@@ -310,8 +402,9 @@ public class ContentValidationTests
         var (atoms, _) = ShippedSeed();
         Assert.NotEmpty(atoms);
 
+        var lookupPool = RealLookupPool();
         var unpriceable = atoms
-            .Select(a => (a.AtomId, Priced: CostFunction.Price(a)))
+            .Select(a => (a.AtomId, Priced: CostFunction.Price(a, lookupPool: lookupPool)))
             .Where(x => !x.Priced.Ok)
             .Select(x => $"{x.AtomId}: {x.Priced.Verdict.Reason}")
             .ToList();
@@ -356,6 +449,23 @@ public class ContentValidationTests
             dir = dir.Parent;
         }
         throw new DirectoryNotFoundException("data/seed/atoms");
+    }
+
+    /// <summary>Real bug found 2026-09-08 (atom-family-expansion): `Every_shipped_atom_can_be_priced`
+    /// called `CostFunction.Price(a)` with no `lookupPool` at all, so any pool-referencing
+    /// `stat.derived` atom was reported unpriceable by name — a wiring gap in this test's own setup
+    /// (E30's channel-pool mechanism already ships, per DESIGN-GATE.md's own "L2 shipped as E30"
+    /// correction), not a real product defect. Never visible before because no shipped atom used a
+    /// pool-reference channel until this session's `tier-bands-coverage` module unblocked several
+    /// (`evd-flinch`/`evd-harden`/`evd-seal`/`shld-breach`, all real element-variant evasion/shield
+    /// families). Loads the real, already-shipped `data/seed/channel-pools/pools.v1.json` once.</summary>
+    static Func<string, ChannelPoolRow?> RealLookupPool()
+    {
+        var path = Path.Combine(RepoRoot(), "data", "seed", "channel-pools", "pools.v1.json");
+        var rejection = ChannelPoolFile.TryParse(File.ReadAllText(path), out var pools);
+        Assert.True(rejection.IsOk, rejection.Detail);
+        var byId = pools.ToDictionary(p => p.PoolId, StringComparer.Ordinal);
+        return id => byId.TryGetValue(id, out var row) ? row : null;
     }
 
     [Fact]

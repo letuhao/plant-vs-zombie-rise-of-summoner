@@ -1,4 +1,5 @@
 using FusionRpg.Core.Combat.Element;
+using FusionRpg.Core.Effects.Atoms.Power;
 using System.Text.Json;
 
 namespace FusionRpg.Core.Effects.Atoms;
@@ -13,6 +14,12 @@ public enum SeedEntryKind
     Element,
     ElementMatrix,
     ChannelPolicy,
+    Affix,
+    ChannelPool,
+
+    /// <summary>E44 criterion 0 (spec-power-sweep.md §4.1): one <c>power_coefficient</c> row —
+    /// the seed kind that gives a fitted (or hand-authored) coefficient somewhere real to land.</summary>
+    Coefficient,
 }
 
 /// <summary>
@@ -53,6 +60,7 @@ public sealed class SeedContent
 {
     public List<AtomRow> Atoms { get; } = new();
     public List<ContainerRow> Containers { get; } = new();
+    public List<AffixRow> Affixes { get; } = new();
     public List<CurveSeed> Curves { get; } = new();
     public List<RarityRow> Rarities { get; } = new();
 
@@ -65,12 +73,21 @@ public sealed class SeedContent
     /// <summary>Channel policy rows (E22) — direction is the one column with a live consumer.</summary>
     public List<ChannelPolicySeedRow> ChannelPolicies { get; } = new();
 
+    /// <summary>E30 (spec-channel-pool.md §3.1): named, weighted channel pools an atom's
+    /// <c>params.channel</c> may reference instead of one concrete channel.</summary>
+    public List<ChannelPoolRow> ChannelPools { get; } = new();
+
+    /// <summary>E44 criterion 0 (spec-power-sweep.md §4.1): authored <c>power_coefficient</c> rows —
+    /// the coefficient data path a fitted (or hand-authored) number now has to travel through.</summary>
+    public List<PowerCoefficientRow> Coefficients { get; } = new();
+
     /// <summary>Entry id to the file that authored it — the other half of a duplicate report.</summary>
     public Dictionary<string, string> SourceOf { get; } = new(StringComparer.Ordinal);
 
     public int Count =>
-        Atoms.Count + Containers.Count + Curves.Count + Rarities.Count
-        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count;
+        Atoms.Count + Containers.Count + Affixes.Count + Curves.Count + Rarities.Count
+        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count + ChannelPools.Count
+        + Coefficients.Count;
 }
 
 /// <summary>What a collection pass produced, and everything wrong with it.</summary>
@@ -152,7 +169,7 @@ public static class AtomSeedFile
             {
                 errors.Add(new SeedError(path, "", AtomRejectionReason.UnknownKind,
                     $"kind '{Str(root, "kind")}' — one of "
-                + "atom | container | curve | rarity | element | element-matrix"));
+                + "atom | container | affix | curve | rarity | element | element-matrix | power-coefficient"));
                 return;
             }
 
@@ -175,10 +192,13 @@ public static class AtomSeedFile
                 {
                     case SeedEntryKind.Atom: ReadAtom(path, entry, into, errors); break;
                     case SeedEntryKind.Container: ReadContainer(path, entry, into, errors); break;
+                    case SeedEntryKind.Affix: ReadAffix(path, entry, into, errors); break;
                     case SeedEntryKind.Curve: ReadCurve(path, entry, into, errors); break;
                     case SeedEntryKind.Element: ReadElement(path, entry, into, errors); break;
                     case SeedEntryKind.ElementMatrix: ReadMatrixCell(path, entry, into, errors); break;
                     case SeedEntryKind.ChannelPolicy: ReadChannelPolicy(path, entry, into, errors); break;
+                    case SeedEntryKind.ChannelPool: ReadChannelPool(path, entry, into, errors); break;
+                    case SeedEntryKind.Coefficient: ReadCoefficient(path, entry, into, errors); break;
                     default: ReadRarity(path, entry, into, errors); break;
                 }
             }
@@ -250,7 +270,21 @@ public static class AtomSeedFile
             foreach (var p in poolEls.EnumerateArray())
             {
                 if (p.ValueKind != JsonValueKind.Object) continue;
-                pool.Add(new ContainerPoolRow(Str(p, "atom"), Int(p, "weight", 0), StrOrNull(p, "group")));
+
+                // E32 (spec-affix-import-path.md §2, decided 2026-09-03): the pool row key is
+                // "affix" — ContainerPoolRow.AffixId references an AffixRow, never a bare atom
+                // (definitions.md §4a). The old "atom" key is refused, naming the rename, so the
+                // latent defect this module closes cannot silently return once any container gains a
+                // real pool.
+                if (p.TryGetProperty("atom", out _) && !p.TryGetProperty("affix", out _))
+                {
+                    errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                        "a pool row uses 'atom' — pool rows reference an AFFIX, not a bare atom; " +
+                        "rename the key to 'affix' (spec-affix-import-path.md §2)"));
+                    return;
+                }
+
+                pool.Add(new ContainerPoolRow(Str(p, "affix"), Int(p, "weight", 0), StrOrNull(p, "group")));
             }
 
         into.Containers.Add(new ContainerRow
@@ -262,12 +296,72 @@ public static class AtomSeedFile
             MinTier = IntOrNull(e, "minTier"),
             MaxTier = IntOrNull(e, "maxTier"),
             LevelReq = IntOrNull(e, "levelReq"),
-            PoolRolls = Int(e, "poolRolls", 0),
+            PrefixRolls = Int(e, "prefixRolls", 0),
+            SuffixRolls = Int(e, "suffixRolls", 0),
             TagsJson = Json(e, "tags", "{}"),
             Enabled = Bool(e, "enabled", true),
             Atoms = atoms,
             Pool = pool,
         });
+    }
+
+    /// <summary>
+    /// A named, ordered bundle of atom refs (module 1, `affix-schema`). <c>class</c> is authored here
+    /// only when the file supplies one — <see cref="AffixValidator.Validate"/> and
+    /// <see cref="AffixValidator.ResolveClass"/> are the one place that actually owns derivation.
+    ///
+    /// <para><b>E32 (spec-affix-import-path.md §3.2, decided 2026-09-03): an authored <c>class</c> is
+    /// now OPTIONAL.</b> Absent is legal — the shape a real generator emits, since a model that names
+    /// its own class can contradict the bundle it just picked (seedsmith's own `derive.py` reasoning).
+    /// Present-but-unparseable is still a refusal (an authored value must be one of the three legal
+    /// strings if it is there at all); present-and-checked-against-the-derived-value happens later, in
+    /// <c>AffixValidator.Validate</c>, which is the one place with an atom lookup to derive against.
+    /// This method only parses; it never validates — same division of labor <see cref="ReadContainer"/>
+    /// already has with <c>ContainerValidator</c>.</para>
+    /// </summary>
+    static void ReadAffix(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var id = Str(e, "id");
+        if (!Claim(path, id, into, errors)) return;
+
+        AffixClass? affixClass = null;
+        if (e.TryGetProperty("class", out var classEl) && classEl.ValueKind == JsonValueKind.String)
+        {
+            if (!Enum.TryParse<AffixClass>(classEl.GetString(), ignoreCase: true, out var parsed)
+                || !Enum.IsDefined(typeof(AffixClass), parsed))
+            {
+                errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                    $"affix class '{classEl.GetString()}' — one of prefix | suffix | mixed"));
+                return;
+            }
+            affixClass = parsed;
+        }
+        else if (e.TryGetProperty("class", out var badClassEl) && badClassEl.ValueKind != JsonValueKind.String)
+        {
+            errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                $"affix class must be a string, got {badClassEl.ValueKind} — one of prefix | suffix | mixed"));
+            return;
+        }
+        // else: 'class' key absent entirely — legal, derived later (§3.2).
+
+        var refs = new List<AffixRefRow>();
+        if (e.TryGetProperty("refs", out var refEls) && refEls.ValueKind == JsonValueKind.Array)
+        {
+            var seq = 0;
+            foreach (var r in refEls.EnumerateArray())
+            {
+                if (r.ValueKind != JsonValueKind.Object) continue;
+                var atomId = StrOrNull(r, "atom");
+                var slotName = StrOrNull(r, "slotName");
+                refs.Add(new AffixRefRow(
+                    Int(r, "seq", seq), atomId,
+                    slotName, StrOrNull(r, "slotDomain"),
+                    Int(r, "slotPick", 0), StrOrNull(r, "slotAtomPattern")));
+                seq++;
+            }
+        }
+
+        into.Affixes.Add(new AffixRow(id, affixClass, refs));
     }
 
     static void ReadCurve(string path, JsonElement e, SeedContent into, List<SeedError> errors)
@@ -301,7 +395,8 @@ public static class AtomSeedFile
         if (!Claim(path, id, into, errors)) return;
 
         into.Rarities.Add(new RarityRow(
-            id, Int(e, "ordinal", 0), Int(e, "poolRolls", 0), Int(e, "minTier", 1), Int(e, "maxTier", 1)));
+            id, Int(e, "ordinal", 0), Int(e, "prefixRolls", 0), Int(e, "suffixRolls", 0),
+            Int(e, "minTier", 1), Int(e, "maxTier", 1)));
     }
 
     static void ReadElement(string path, JsonElement e, SeedContent into, List<SeedError> errors)
@@ -338,6 +433,74 @@ public static class AtomSeedFile
         }
 
         into.ChannelPolicies.Add(new ChannelPolicySeedRow(channel, direction));
+    }
+
+    /// <summary>E30 (spec-channel-pool.md §3.1): one named, weighted channel pool. Member parsing is
+    /// shared with <see cref="ChannelPoolFile.TryParse"/> (the whole-document form) via
+    /// <see cref="ChannelPoolFile.TryParseEntry"/>, so the two never validate a pool entry
+    /// differently.</summary>
+    static void ReadChannelPool(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var read = ChannelPoolFile.TryParseEntry(e, out var row);
+        if (!read.IsOk)
+        {
+            errors.Add(new SeedError(path, Str(e, "id"), read.Reason, read.Detail));
+            return;
+        }
+
+        if (!Claim(path, row.PoolId, into, errors)) return;
+
+        into.ChannelPools.Add(row);
+    }
+
+    /// <summary>
+    /// One priced coefficient row (E44 criterion 0, spec-power-sweep.md §4.1) — the closest existing
+    /// sibling is <see cref="ReadChannelPolicy"/>, also a flat row type, and this mirrors its shape:
+    /// structural checks only (a required field must be explicit), the semantic check (reference scale
+    /// must be positive — normalisation divides by it) stays where it already lives,
+    /// <c>RpgStore.UpsertPowerTables</c>'s own, reused unchanged by the import path so this needs no
+    /// new validation logic either.
+    ///
+    /// <para><c>channel</c> is optional and defaults to <c>""</c>, mirroring
+    /// <see cref="PowerCoefficientRow.Channel"/>'s own "empty means priced the same regardless of
+    /// channel" shape. The claim key is <c>kindId/channel</c> (or <c>kindId/*</c> when channel is
+    /// absent) — the same compound identity <c>RpgStore.UpsertPowerTables</c>'s own error strings
+    /// already format a coefficient by — rather than the bare <c>channel</c> <see cref="ReadChannelPolicy"/>
+    /// claims, because a coefficient's real key is the (kind, channel) pair the table's own primary key
+    /// names, and a bare channel would collide with an unrelated channel-policy row naming the same
+    /// channel string.</para>
+    /// </summary>
+    static void ReadCoefficient(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var kindId = Str(e, "kindId");
+        var channel = Str(e, "channel");
+        var coeffId = $"{kindId}/{(channel.Length == 0 ? "*" : channel)}";
+
+        if (kindId.Length == 0)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit kindId"));
+            return;
+        }
+
+        if (!Claim(path, coeffId, into, errors)) return;
+
+        if (IntOrNull(e, "coeffMilli") is not { } coeffMilli)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit coeffMilli — points per reference unit, per-mille"));
+            return;
+        }
+
+        if (IntOrNull(e, "referenceScale") is not { } referenceScale)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit referenceScale — what \"one unit\" means for this " +
+                "channel; normalisation divides by it, so it cannot be defaulted"));
+            return;
+        }
+
+        into.Coefficients.Add(new PowerCoefficientRow(kindId, channel, coeffMilli, referenceScale));
     }
 
     /// <summary>
@@ -411,11 +574,14 @@ public static class AtomSeedFile
         {
             case "atom": kind = SeedEntryKind.Atom; return true;
             case "container": kind = SeedEntryKind.Container; return true;
+            case "affix": kind = SeedEntryKind.Affix; return true;
             case "curve": kind = SeedEntryKind.Curve; return true;
             case "rarity": kind = SeedEntryKind.Rarity; return true;
             case "element": kind = SeedEntryKind.Element; return true;
             case "element-matrix": kind = SeedEntryKind.ElementMatrix; return true;
             case "channel-policy": kind = SeedEntryKind.ChannelPolicy; return true;
+            case "channel-pool": kind = SeedEntryKind.ChannelPool; return true;
+            case "power-coefficient": kind = SeedEntryKind.Coefficient; return true;
             default: kind = SeedEntryKind.Atom; return false;
         }
     }

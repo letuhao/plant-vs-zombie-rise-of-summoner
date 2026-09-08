@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Layers of compressed silt and ancient clay have swallowed a chamber of polished quartz. Within the translucent walls, glints of gold and rusted iron peek through the stratified stone like fossils caught in amber.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Sedimented Hoard",
+  "reason": "The party discovers a long-buried cache of wealth preserved by geological pressure.",
+  "roomId": "room.cache-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

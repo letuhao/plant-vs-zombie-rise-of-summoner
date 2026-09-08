@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "batch": "consumables-trial-2026-09-07",
+    "partition": "consumables/1",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 5,
+      "tags": 4,
+      "classes": 4,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "consumables-gen/1",
+    "model": "consumablegen/hand-authored-1",
+    "authoredUtc": "2026-09-07T00:00:00Z",
+    "sourceRef": "ssot-consumables.md §3.1, §5.2, §7.1 -- trial batch, item-seedgen consumables-gen"
+  },
+  "entries": [
+    {
+      "id": "consumable.k1-021",
+      "nameKey": "consumable.restore-mending-elderroot",
+      "name": "Elderroot Balm",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.mending",
+      "powerBand": "high",
+      "manifestCost": 2,
+      "tags": [
+        "defensive",
+        "organic"
+      ],
+      "notes": "atom.mending Flat current-HP top-up on grant; high band -- the deepest, slowest-grown root stock, reserved for when a quick top-up is not enough."
+    }
+  ]
+}

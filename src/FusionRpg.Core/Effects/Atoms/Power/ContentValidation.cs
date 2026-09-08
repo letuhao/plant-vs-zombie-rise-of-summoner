@@ -46,6 +46,13 @@ public static class ContentValidation
     /// <summary>Below this, a category is too small for a percentage to mean anything.</summary>
     public const int DriftFloor = 1;
 
+    /// <summary>E30 (spec-channel-pool.md §3.4, decided 2026-09-03): a pool whose priciest member is
+    /// more than 25% away from the pool's own weighted mean. Deliberately == <see cref="DriftTolerancePercent"/>
+    /// restated in per-mille — a pool's members are priced by the same cost function with the same
+    /// known ~12.5%-on-multiplicative-pairs error <see cref="Drift"/>'s own tolerance already answers,
+    /// so a second, differently-chosen band would be a second answer to a question already answered.</summary>
+    public const int PoolSpreadTolerancePerMille = 250;
+
     // ---- 1. the budget ----------------------------------------------------------------------------
 
     /// <summary>
@@ -70,6 +77,44 @@ public static class ContentValidation
             if (spent > ceiling)
                 findings.Add(new ContentFinding(container.ContainerId, "budget",
                     $"spends {spent} against a ceiling of {ceiling} for rarity '{container.Rarity}' "
+                    + $"— {spent - ceiling} over", Blocking: true));
+        }
+
+        return new ContentReport(evaluated, findings);
+    }
+
+    /// <summary>
+    /// Rung-keyed sibling of the rarity-keyed <see cref="Budget(IReadOnlyList{ContainerRow}, Func{string, IReadOnlyList{AtomRow}}, Func{string, int?})"/>
+    /// above (A-G1, spec-tier-access-gate.md §3.2): a generated action has a rung, not a rarity --
+    /// `effect_container.rarity` is free TEXT with no FK, so a container reached through an action's
+    /// own <c>Rung</c> needs its own ceiling lookup rather than borrowing the rarity path. Same rule:
+    /// an over-budget container is a finding naming the container id, never clamped, never a silent
+    /// pass; a container the caller cannot resolve a rung or a ceiling for is skipped, not zeroed --
+    /// the same "skip, do not guess" direction the rarity overload already takes for a missing ceiling.
+    /// </summary>
+    /// <param name="rungOf">The rung a container was reached through, or <c>null</c> if this container
+    /// is not addressed by any rung right now (the batch caller's business, never guessed here).</param>
+    /// <param name="ceilingForRung">The rung's own <c>powerBudgetMilli</c>, or <c>null</c> when no
+    /// rung table carrying that column is loaded (e.g. `action-rungs.v1.json`).</param>
+    public static ContentReport Budget(
+        IReadOnlyList<ContainerRow> containers,
+        Func<string, IReadOnlyList<AtomRow>> atomsOf,
+        Func<string, int?> rungOf,
+        Func<int, long?> ceilingForRung)
+    {
+        var findings = new List<ContentFinding>();
+        var evaluated = 0;
+
+        foreach (var container in containers)
+        {
+            if (rungOf(container.ContainerId) is not { } rung) continue;
+            if (ceilingForRung(rung) is not { } ceiling) continue;
+
+            evaluated++;
+            var spent = ActorPowerCache.Compose(atomsOf(container.ContainerId)).Total;
+            if (spent > ceiling)
+                findings.Add(new ContentFinding(container.ContainerId, "budget",
+                    $"spends {spent} against a ceiling of {ceiling} for rung {rung} "
                     + $"— {spent - ceiling} over", Blocking: true));
         }
 
@@ -142,22 +187,78 @@ public static class ContentValidation
         return basis == 0 || delta * 100 > basis * DriftTolerancePercent;
     }
 
+    // ---- pool spread (E30) -----------------------------------------------------------------------
+
+    /// <summary>
+    /// E30 (spec-channel-pool.md §3.4): where a pool's members disagree on coefficient, the weighted
+    /// mean is the honest price and the spread is reportable — never blocking, a pool of wildly
+    /// unequal channels is a content defect, not a pricing one. <b>Neutral today, by construction</b>:
+    /// every shipped <c>stat.derived</c> coefficient row is channel-less (`CoefficientTable.cs`), so
+    /// every declared pool's spread is exactly 0 until per-channel coefficients exist (E44).
+    /// </summary>
+    public static ContentReport PoolSpread(
+        IReadOnlyList<ChannelPoolRow> pools, PowerTables? tables = null, string kindId = "stat.derived")
+    {
+        var t = tables ?? PowerTables.Current;
+        var findings = new List<ContentFinding>();
+        var evaluated = 0;
+
+        foreach (var pool in pools)
+        {
+            var priced = pool.Members
+                .Select(m => (m.Channel, m.WeightMilli, Coeff: t.Find(kindId, m.Channel)))
+                .Where(x => x.Coeff is not null)
+                .Select(x => (x.Channel, x.WeightMilli, CoeffMilli: (long)x.Coeff!.CoeffMilli))
+                .ToList();
+            if (priced.Count == 0) continue;
+
+            evaluated++;
+            long totalWeight = priced.Sum(p => (long)p.WeightMilli);
+            if (totalWeight <= 0) continue;
+            long weightedSum = priced.Sum(p => p.CoeffMilli * p.WeightMilli);
+            var mean = PowerMath.DivRound(weightedSum, totalWeight);
+            if (mean == 0) continue;
+
+            foreach (var (channel, _, coeffMilli) in priced)
+            {
+                var deltaPerMille = PowerMath.DivRound(Math.Abs(coeffMilli - mean) * 1000, Math.Abs(mean));
+                if (deltaPerMille > PoolSpreadTolerancePerMille)
+                    findings.Add(new ContentFinding(pool.PoolId, "pool-spread",
+                        $"member '{channel}' coeff {coeffMilli}‰ is {deltaPerMille}‰ from the pool's " +
+                        $"weighted mean {mean}‰ (tolerance {PoolSpreadTolerancePerMille}‰)", Blocking: false));
+            }
+        }
+
+        return new ContentReport(evaluated, findings);
+    }
+
     // ---- 3. the lints -------------------------------------------------------------------------------
 
     /// <summary>
     /// The cheap checks that catch real mistakes. Every one warns; none blocks.
     /// </summary>
+    /// <param name="affixes">
+    /// T3.1 (affix-schema): pool rows reference affixes, not bare atoms, so resolving "which atom
+    /// does this container's pool actually touch" needs the affix catalog. Optional and defaults to
+    /// empty so every pre-affix caller keeps compiling unchanged (same widening discipline as
+    /// <c>Instantiator.Draw</c>'s own "visibility widened, no behavior changed" precedent) — an
+    /// omitted affix list makes <see cref="OrphanAtoms"/> unable to see through a pool reference, so
+    /// it may over-report an atom as orphaned; it never under-reports, so it stays a safe lint.
+    /// </param>
     public static ContentReport Lint(
-        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers)
+        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers,
+        IReadOnlyList<AffixRow>? affixes = null)
     {
         var findings = new List<ContentFinding>();
+        var affixesById = (affixes ?? Array.Empty<AffixRow>()).ToDictionary(a => a.AffixId, StringComparer.Ordinal);
 
         TierGaps(atoms, findings);
         WeakerTiers(atoms, findings);
         DuplicateAffixes(atoms, findings);
         BackwardsIntervals(atoms, findings);
         LonelyPoolGroups(containers, findings);
-        OrphanAtoms(atoms, containers, findings);
+        OrphanAtoms(atoms, containers, affixesById, findings);
+        OrphanAffixes(affixes ?? Array.Empty<AffixRow>(), containers, findings);
 
         return new ContentReport(atoms.Count + containers.Count, findings);
     }
@@ -261,7 +362,7 @@ public static class ContentValidation
     {
         foreach (var container in containers)
         {
-            var groups = container.Pool.GroupBy(p => p.Group ?? p.AtomId);
+            var groups = container.Pool.GroupBy(p => p.Group ?? p.AffixId);
             foreach (var group in groups.Where(g => g.Count() == 1 && g.Key is not null))
                 into.Add(new ContentFinding(container.ContainerId, "lonely-group",
                     $"pool group '{group.Key}' has one member, so the one-per-group rule never applies",
@@ -271,15 +372,44 @@ public static class ContentValidation
 
     /// <summary>An atom no container references. Legal — and worth surfacing.</summary>
     static void OrphanAtoms(
-        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers, List<ContentFinding> into)
+        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers,
+        IReadOnlyDictionary<string, AffixRow> affixesById, List<ContentFinding> into)
     {
+        // A pool row references an affix now (T3.1); "referenced" means every CONCRETE ref inside
+        // that affix bundle. An affix not in the supplied catalog (or a slot-bearing ref, which has
+        // no single concrete atom by construction) contributes nothing — see Lint's own doc comment
+        // on why that is a safe direction for a non-blocking lint to fail in.
         var referenced = containers
-            .SelectMany(c => c.Atoms.Select(a => a.AtomId).Concat(c.Pool.Select(p => p.AtomId)))
+            .SelectMany(c => c.Atoms.Select(a => a.AtomId).Concat(
+                c.Pool.SelectMany(p => affixesById.TryGetValue(p.AffixId, out var affix)
+                    ? affix.Refs.Where(r => r.AtomId is not null).Select(r => r.AtomId!)
+                    : Enumerable.Empty<string>())))
             .ToHashSet(StringComparer.Ordinal);
 
         foreach (var atom in atoms.Where(a => !referenced.Contains(a.AtomId)))
             into.Add(new ContentFinding(atom.AtomId, "orphan",
                 "no container references it", Blocking: false));
+    }
+
+    /// <summary>
+    /// An affix no container's pool references — the T3.8 (`affix-metrics`) "unreachable affix"
+    /// finding, in its buildable-today form. The spec's own richer phrasing ("tag-eligible for
+    /// nothing") names a check against `eligibility-tags` (module 8, `docs/architecture/effect-
+    /// pipeline-map.md`) — not yet built, so not yet checkable; this is the container-reachability
+    /// half only, the same shape <see cref="OrphanAtoms"/> already proves for a bare atom.
+    /// </summary>
+    static void OrphanAffixes(
+        IReadOnlyList<AffixRow> affixes, IReadOnlyList<ContainerRow> containers, List<ContentFinding> into)
+    {
+        if (affixes.Count == 0) return; // no affix catalog supplied — same "safe direction" as OrphanAtoms
+
+        var referenced = containers
+            .SelectMany(c => c.Pool.Select(p => p.AffixId))
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var affix in affixes.Where(a => !referenced.Contains(a.AffixId)))
+            into.Add(new ContentFinding(affix.AffixId, "orphan-affix",
+                "no container pool references it", Blocking: false));
     }
 
     static string Key((string Family, string Variant) k) =>

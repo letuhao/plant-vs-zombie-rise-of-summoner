@@ -21,6 +21,16 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 # divergence guard-stat-pairs.ps1's own P4 comment already warns about, one level up the stack.
 function Add-Meta([string]$path, [string]$conditions) {
     $doc = Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
+
+    # CombatSim/DominanceBaseline emit `model` as the ABSOLUTE path they were handed, which bakes this
+    # machine's repo root into a committed file (AGENTS.md forbids machine-local paths in the tree) and
+    # makes the baselines diff noisily between contributors. Rewrite it repo-relative with forward
+    # slashes. Only presence of `model` is asserted anywhere (CombatSimJsonEmitTests.cs:22,41,64), never
+    # its value, so this is safe — and it is the same string every other doc in the repo uses.
+    if ($doc.PSObject.Properties.Match("model").Count -gt 0 -and $doc.model) {
+        $doc.model = ([string]$doc.model).Replace($Root, "").TrimStart("\", "/").Replace("\", "/")
+    }
+
     $meta = [pscustomobject]@{
         measuredAt = (Get-Date).ToUniversalTime().ToString("o")
         conditions = $conditions
@@ -33,10 +43,24 @@ function Add-Meta([string]$path, [string]$conditions) {
     ($doc | ConvertTo-Json -Depth 10) | Set-Content -LiteralPath $path -Encoding UTF8
 }
 
-Write-Host "==> _baseline-residual.json (CombatSim predict --json, live v2 config, elements live)"
+# The LIVE shipped config is the HIGHEST data/tuning/aptitudes.v*.json, never a pinned literal
+# (2026-09-02). Tuning files are never hand-edited — a change publishes v{n+1} (tunables-ssot.md T4) —
+# so a version pinned here silently means "whatever shipped the day this line was written". It did:
+# this script called v2 "live" while v5 shipped, and every baseline below is the diff target later
+# phases compare against, so the staleness propagated into every comparison. Same resolution the
+# tests, audit-reader-census.py and tools/DominanceBaseline already use.
+#
+# Sorted NUMERICALLY on the version, not by name: a lexical sort puts v9 above v10.
+$liveAptitudes = Get-ChildItem -Path (Join-Path $Root "data\tuning") -Filter "aptitudes.v*.json" -ErrorAction SilentlyContinue |
+    Sort-Object { [int]([regex]::Match($_.Name, "aptitudes\.v(\d+)\.json").Groups[1].Value) } -Descending |
+    Select-Object -First 1
+if (-not $liveAptitudes) { throw "no data\tuning\aptitudes.v*.json under $Root" }
+$liveAptitudesPath = $liveAptitudes.FullName
+$liveAptitudesName = $liveAptitudes.Name              # e.g. "aptitudes.v5.json"
+$liveAptitudesRel  = "data/tuning/$liveAptitudesName" # as written into every _meta.conditions below
+
+Write-Host "==> _baseline-residual.json (CombatSim predict --json, live $liveAptitudesName config, elements live)"
 $residualPath = Join-Path $OutDir "_baseline-residual.json"
-$liveAptitudesPath = Join-Path $Root "data\tuning\aptitudes.v2.json"
-if (-not (Test-Path $liveAptitudesPath)) { throw "missing $liveAptitudesPath" }
 
 # class-system-todo.md P8.1/Checkpoint 8, resolved 2026-08-27: the tuning-sync concern that blocked
 # this (a second session's own uncommitted tools/CombatSim work) turned out not to exist -- that diff
@@ -71,9 +95,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "CombatSim predict failed (exit $LASTEXITCODE)" }
 } finally { Pop-Location }
 Remove-Item -LiteralPath $elementScratchDir -Recurse -Force
-Add-Meta $residualPath "data/tuning/aptitudes.v2.json (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool's own resolver was ported 2026-08-27 to apply that dial the same way Core's AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1's own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
+Add-Meta $residualPath "$liveAptitudesRel (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool's own resolver was ported 2026-08-27 to apply that dial the same way Core's AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1's own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
 
-Write-Host "==> _baseline-dominance.json (CombatSim trinity --json, live v2 config)"
+Write-Host "==> _baseline-dominance.json (CombatSim trinity --json, live $liveAptitudesName config)"
 $dominancePath = Join-Path $OutDir "_baseline-dominance.json"
 Push-Location $Root
 try {
@@ -81,7 +105,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "CombatSim trinity failed (exit $LASTEXITCODE)" }
 } finally { Pop-Location }
 # class-system-todo.md P8.5/Checkpoint 8, resolved 2026-08-27: --models above now points trinity at the
-# LIVE data/tuning/aptitudes.v2.json directly (not tools/CombatSim's own internal v1 POC copy), and
+# LIVE data/tuning/aptitudes.v*.json directly (highest version, resolved above) (not tools/CombatSim's own internal v1 POC copy), and
 # that tool's resolver now applies the AptitudeMitigation dial the same way Core's own
 # AptitudeResolver.EffectiveKMilli does (ResolverMatchesSimulatorTests.cs, P3.4) -- so `chains` below
 # (a best-response CHASE, BestResponse.Chase, the one field DominanceGuard has no equivalent search for
@@ -95,7 +119,7 @@ $dominanceDoc = Get-Content -LiteralPath $dominancePath -Raw | ConvertFrom-Json
 # TerminationGuard directly -- the SAME production resolver, not a second implementation that could
 # drift from it. `chains` (a best-response CHASE, a different and more complex search DominanceGuard
 # has no equivalent for) is NOT reproducible this way and stays trinity's own (see --models above).
-Write-Host "==> overlaying dominanceMatrix/dominantCorners (FusionRpg.Core.DominanceGuard, live v2 config)"
+Write-Host "==> overlaying dominanceMatrix/dominantCorners (FusionRpg.Core.DominanceGuard, live $liveAptitudesName config)"
 $coreDominancePath = Join-Path $OutDir "_dominance-core-scratch.json"
 Push-Location $Root
 try {
@@ -109,14 +133,14 @@ $dominanceDoc.dominantCorners = $coreDominance.dominantCorners
 
 $syncNote = "dominanceMatrix/dominantCorners updated 2026-08-27 (Checkpoint 8) -- measured via " +
     "tools/DominanceBaseline (FusionRpg.Core.DominanceGuard/TerminationGuard, the SAME production " +
-    "resolver TerminationGuard.Assert uses), which reads the LIVE data/tuning/aptitudes.v2.json " +
+    "resolver TerminationGuard.Assert uses), which reads the LIVE $liveAptitudesRel " +
     "config automatically, no internal copy. Independently corroborated by " +
     "DominanceGuardTests.cs's own Measure_theRealTwelveCornerShape_matchesTheCheckedInBaselinesEmptyDominantCorners " +
     "and docs/research/class-residual-2026-08-27.md's P8.5 section (same headline finding: no absolute " +
     "dominant corner, Retribution near-dominant at 10 of 11, loses only to Pierce). " +
-    "`chains` above is ALSO fresh as of 2026-08-27, closing the one remaining gap: trinity now runs " +
-    "with --models pointed at this same live v2 file (never tools/CombatSim's own internal v1 POC " +
-    "copy), and that tool's own resolver (AptitudeTuning.ToModel) was ported the same day to apply " +
+    "`chains` above is ALSO fresh, closing the one remaining gap: trinity now runs " +
+    "with --models pointed at this same live $liveAptitudesRel file (never tools/CombatSim's own " +
+    "internal v1 POC copy), and that tool's own resolver (AptitudeTuning.ToModel) was ported the same day to apply " +
     "the AptitudeMitigation dial the way Core's AptitudeResolver.EffectiveKMilli does " +
     "(ResolverMatchesSimulatorTests.cs, P3.4) -- so this is a best-response CHASE (BestResponse.Chase, " +
     "a search DominanceGuard has no equivalent for and so cannot reproduce the way dominanceMatrix/ " +
@@ -129,7 +153,7 @@ $syncNote = "dominanceMatrix/dominantCorners updated 2026-08-27 (Checkpoint 8) -
     "json instead, at the ARCHETYPE/posture level, where FORCE/FINESSE/BASTION do carry a real element)."
 $dominanceDoc.coverage | Add-Member -NotePropertyName "tuningSync" -NotePropertyValue $syncNote -Force
 ($dominanceDoc | ConvertTo-Json -Depth 10) | Set-Content -LiteralPath $dominancePath -Encoding UTF8
-Add-Meta $dominancePath "dominanceMatrix/dominantCorners: data/tuning/aptitudes.v2.json (live, via FusionRpg.Core.DominanceGuard -- P8.2/P8.3's stamina bind + mitigation dial). chains: ALSO data/tuning/aptitudes.v2.json now (live, via tools/CombatSim trinity --models, that tool's own resolver ported 2026-08-27 to apply the mitigation dial too). All twelve spiked corners, Theta=100, seed 20260826 — elementAxis neutral BY DESIGN (aptitudes are element-blind, class-system-ideal.md 4.1 rule 2 -- not a gap; see coverage.tuningSync), action economy off."
+Add-Meta $dominancePath "dominanceMatrix/dominantCorners: $liveAptitudesRel (live, via FusionRpg.Core.DominanceGuard -- P8.2/P8.3's stamina bind + mitigation dial). chains: ALSO $liveAptitudesRel now (live, via tools/CombatSim trinity --models, that tool's own resolver ported 2026-08-27 to apply the mitigation dial too). All twelve spiked corners, Theta=100, seed 20260826 — elementAxis neutral BY DESIGN (aptitudes are element-blind, class-system-ideal.md 4.1 rule 2 -- not a gap; see coverage.tuningSync), action economy off."
 
 Write-Host "==> _baseline-goldens.json (BattleGoldenTests.cs hash consts, extracted not retyped)"
 $goldensTestPath = Join-Path $Root "tests\FusionRpg.Core.Tests\Battle\BattleGoldenTests.cs"

@@ -184,7 +184,7 @@ public class LoamStructuresTests
         {
             Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
             Sectors = new[] { Sector(Rootbed()) },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli) }
+            Entities = new[] { Founder(LoamPolicy.WellCost) }
         };
         var report = new TurnReport();
 
@@ -204,7 +204,7 @@ public class LoamStructuresTests
         {
             Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
             Sectors = new[] { Sector(Rootbed()) },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli - 1) }
+            Entities = new[] { Founder(LoamPolicy.WellCost - 1) }
         };
         var report = new TurnReport();
 
@@ -221,7 +221,7 @@ public class LoamStructuresTests
         {
             Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
             Sectors = new[] { Sector(Seat()) },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli) }
+            Entities = new[] { Founder(LoamPolicy.WellCost) }
         };
         var report = new TurnReport();
 
@@ -239,7 +239,7 @@ public class LoamStructuresTests
         {
             Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
             Sectors = new[] { Sector(Rootbed("well")) },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli) }
+            Entities = new[] { Founder(LoamPolicy.WellCost) }
         };
         var report = new TurnReport();
 
@@ -260,7 +260,7 @@ public class LoamStructuresTests
         {
             Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
             Sectors = new[] { Sector(Rootbed()) with { OwnerFactionId = null, Phase = SectorPhase.Lost } },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli) }
+            Entities = new[] { Founder(LoamPolicy.WellCost) }
         };
         var report = new TurnReport();
 
@@ -287,7 +287,7 @@ public class LoamStructuresTests
                     StabilityMilli = 1, DevelopmentLevel = 50, DangerBand = 50, LoamStock = 0
                 }
             },
-            Entities = new[] { Founder(LoamPolicy.WellCostMilli) }
+            Entities = new[] { Founder(LoamPolicy.WellCost) }
         };
 
         var build = new WorldCommand
@@ -410,7 +410,7 @@ public class LoamStructuresTests
         // only the founding legion (not part of the shipped scenario's forces) is added.
         var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.TwoHeartsId, seed: 1) with
         {
-            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCostMilli) }
+            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCost) }
         };
 
         var result = BuildResolver.Run(world, new[] { BuildWaystation("d-outpost") }, new TurnReport(), "snapshot");
@@ -438,7 +438,7 @@ public class LoamStructuresTests
                     _ => s with { OwnerFactionId = "dave" }
                 })
                 .ToList(),
-            Entities = new[] { FounderAt("g", LoamPolicy.WaystationCostMilli) }
+            Entities = new[] { FounderAt("g", LoamPolicy.WaystationCost) }
         };
 
         var report = new TurnReport();
@@ -463,7 +463,7 @@ public class LoamStructuresTests
             Sectors = world.Sectors
                 .Select(s => s.SectorId is "d-home" or "d-flank-1" ? s with { OwnerFactionId = null } : s)
                 .ToList(),
-            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCostMilli) }
+            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCost) }
         };
 
         Assert.DoesNotContain(strandedDave.Sectors, s =>
@@ -475,5 +475,222 @@ public class LoamStructuresTests
         Assert.Null(result.Sectors.Single(s => s.SectorId == "d-outpost").Slots[0].StructureId);
         Assert.Contains(report.Entries, e =>
             e.Kind == TurnReportKinds.CommandDropped && e.Detail == "build.out-of-range:d-outpost");
+    }
+
+    // ---- world-map W56: the yield kinds — soul conduit, extractor, hatchery --------------------
+
+    static WorldSlot EssenceDeposit(string? structureId = null, int? constructionTurnsRemaining = null) => new()
+    {
+        SlotIndex = 0, SlotTypeId = "essence-deposit",
+        StructureId = structureId, ConstructionTurnsRemaining = constructionTurnsRemaining
+    };
+
+    static WorldSlot ShardVein(string? structureId = null, int? constructionTurnsRemaining = null) => new()
+    {
+        SlotIndex = 0, SlotTypeId = "shard-vein",
+        StructureId = structureId, ConstructionTurnsRemaining = constructionTurnsRemaining
+    };
+
+    static WorldSlot Lair(GuardState guardState, string? structureId = null, int? constructionTurnsRemaining = null) => new()
+    {
+        SlotIndex = 1, SlotTypeId = "lair", GuardState = guardState,
+        StructureId = structureId, ConstructionTurnsRemaining = constructionTurnsRemaining
+    };
+
+    [Fact]
+    public void The_three_new_rows_are_known_and_carry_the_new_Yield_kind()
+    {
+        foreach (var id in new[] { "soul-conduit", "extractor", "hatchery" })
+        {
+            Assert.True(StructureCatalog.IsKnown(id));
+            Assert.Equal(StructureKind.Yield, StructureCatalog.Get(id).Kind);
+        }
+    }
+
+    /// <summary>Places a structure on one real, named slot of the shipped `first-light` template —
+    /// the same technique <see cref="WorldInvariantTests.Rule14_accepts_a_structure_on_the_slot_kind_it_was_built_for"/>
+    /// already uses, so the *whole* sixteen-rule pipeline runs, not Rule14 in isolation.</summary>
+    static WorldState WithStructureAt(string sectorId, int slotIndex, string structureId)
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+        var sectorIndex = world.Sectors.ToList().FindIndex(s => s.SectorId == sectorId);
+
+        return world with
+        {
+            Sectors = world.Sectors
+                .Select((s, i) => i != sectorIndex
+                    ? s
+                    : s with
+                    {
+                        Slots = s.Slots
+                            .Select(sl => sl.SlotIndex != slotIndex ? sl : sl with { StructureId = structureId })
+                            .ToList()
+                    })
+                .ToList()
+        };
+    }
+
+    [Fact]
+    public void A_soul_conduit_on_ember_hollows_essence_deposit_validates()
+    {
+        // ember-hollow slot 2 is an essence-deposit — the soul conduit's own RequiredSlotKind.
+        WorldValidation.Validate(WithStructureAt("ember-hollow", slotIndex: 2, "soul-conduit"));
+    }
+
+    [Fact]
+    public void An_extractor_on_verdant_shelfs_shard_vein_validates()
+    {
+        // verdant-shelf slot 2 is a shard-vein — the extractor's own RequiredSlotKind.
+        WorldValidation.Validate(WithStructureAt("verdant-shelf", slotIndex: 2, "extractor"));
+    }
+
+    [Fact]
+    public void A_hatchery_on_ember_hollows_lair_validates()
+    {
+        // ember-hollow slot 3 is a lair — the hatchery's own RequiredSlotKind.
+        WorldValidation.Validate(WithStructureAt("ember-hollow", slotIndex: 3, "hatchery"));
+    }
+
+    [Fact]
+    public void A_hatchery_on_a_non_lair_slot_fails_Rule14()
+    {
+        // ember-hollow slot 2 is an essence-deposit, not a Lair — the hatchery's own RequiredSlotKind.
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => WorldValidation.Validate(WithStructureAt("ember-hollow", slotIndex: 2, "hatchery")));
+        Assert.Contains("ember-hollow", ex.Message);
+    }
+
+    [Fact]
+    public void A_soul_conduit_adds_its_own_flat_yield_additively()
+    {
+        var plain = Sector(Rootbed());
+        var withConduit = Sector(Rootbed(), EssenceDeposit("soul-conduit") with { SlotIndex = 1 });
+
+        Assert.Equal(
+            LoamProduction.For(plain) + LoamPolicy.SoulConduitFlatYieldPerTurn,
+            LoamProduction.For(withConduit));
+    }
+
+    [Fact]
+    public void An_extractor_still_under_construction_contributes_no_flat_yield_yet()
+    {
+        var sector = Sector(ShardVein("extractor", constructionTurnsRemaining: LoamPolicy.ExtractorBuildTurns));
+        Assert.Equal(0, LoamProduction.For(sector));
+    }
+
+    [Fact]
+    public void An_extractor_finished_at_zero_remaining_contributes_its_flat_yield()
+    {
+        var sector = Sector(ShardVein("extractor", constructionTurnsRemaining: 0));
+        Assert.Equal(LoamPolicy.ExtractorFlatYieldPerTurn, LoamProduction.For(sector));
+    }
+
+    [Fact]
+    public void Every_existing_structure_still_carries_a_zero_flat_yield_no_existing_row_changed()
+    {
+        foreach (var id in new[] { "loam-source-placeholder", "well", "waystation", "granary" })
+            Assert.Equal(0, StructureCatalog.Get(id).FlatYieldPerTurn);
+    }
+
+    [Fact]
+    public void An_active_hatchery_on_a_cleared_lair_multiplies_the_sectors_recruit_pulse_through_PulseFor()
+    {
+        // world-map W56's own stated acceptance: "through W43's policy rather than through a second
+        // code path" — proven by asserting the exact composed per-mille product, not merely that the
+        // pulse went up.
+        const long seatPulse = 100;
+        const int lairMultiplier = 2000; // a bare cleared lair, no hatchery
+        var seat = new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.SeatSlotTypeId, OwnerFactionId = "dave" };
+
+        var bareCleared = new FusionRpg.Core.World.WorldState
+        {
+            WorldId = "w", TemplateId = "test", Seed = 1, CurrentTurn = 6,
+            Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+            Sectors = new[] { new WorldSector { SectorId = "s1", TypeId = "stable", OwnerFactionId = "dave", Slots = new[] { seat, Lair(GuardState.Cleared) } } }
+        };
+        var withHatchery = bareCleared with
+        {
+            Sectors = new[]
+            {
+                bareCleared.Sectors[0] with
+                {
+                    Slots = new[] { seat, Lair(GuardState.Cleared, "hatchery", constructionTurnsRemaining: 0) }
+                }
+            }
+        };
+
+        var reportBare = new FusionRpg.Core.World.Turn.TurnReport();
+        var reportHatchery = new FusionRpg.Core.World.Turn.TurnReport();
+
+        var resultBare = FusionRpg.Core.World.Growth.GrowthPhases.Growth(
+            bareCleared, reportBare, "Test", turn: 7, seed: 1,
+            seatPulsePerWeek: seatPulse, lairMultiplierMilli: lairMultiplier, specialWeekMultiplierMilli: 1000);
+        var resultHatchery = FusionRpg.Core.World.Growth.GrowthPhases.Growth(
+            withHatchery, reportHatchery, "Test", turn: 7, seed: 1,
+            seatPulsePerWeek: seatPulse, lairMultiplierMilli: lairMultiplier, specialWeekMultiplierMilli: 1000);
+
+        var bareStock = resultBare.Sectors.Single().RecruitStock;
+        var hatcheryStock = resultHatchery.Sectors.Single().RecruitStock;
+
+        Assert.Equal(seatPulse * lairMultiplier / 1000, bareStock);
+        var expectedCombinedMultiplier = (long)lairMultiplier * LoamPolicy.HatcheryYieldMultiplierMilli / 1000;
+        Assert.Equal(seatPulse * expectedCombinedMultiplier / 1000, hatcheryStock);
+        Assert.True(hatcheryStock > bareStock, "an active hatchery must multiply the pulse further, not merely match it");
+    }
+
+    [Fact]
+    public void A_hatchery_still_under_construction_contributes_no_extra_multiplier()
+    {
+        const long seatPulse = 100;
+        const int lairMultiplier = 2000;
+        var seat = new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.SeatSlotTypeId, OwnerFactionId = "dave" };
+        var world = new FusionRpg.Core.World.WorldState
+        {
+            WorldId = "w", TemplateId = "test", Seed = 1, CurrentTurn = 6,
+            Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+            Sectors = new[]
+            {
+                new WorldSector
+                {
+                    SectorId = "s1", TypeId = "stable", OwnerFactionId = "dave",
+                    Slots = new[] { seat, Lair(GuardState.Cleared, "hatchery", constructionTurnsRemaining: LoamPolicy.HatcheryBuildTurns) }
+                }
+            }
+        };
+
+        var result = FusionRpg.Core.World.Growth.GrowthPhases.Growth(
+            world, new FusionRpg.Core.World.Turn.TurnReport(), "Test", turn: 7, seed: 1,
+            seatPulsePerWeek: seatPulse, lairMultiplierMilli: lairMultiplier, specialWeekMultiplierMilli: 1000);
+
+        Assert.Equal(seatPulse * lairMultiplier / 1000, result.Sectors.Single().RecruitStock);
+    }
+
+    [Fact]
+    public void An_intact_lair_with_an_active_hatchery_still_contributes_no_multiplier_at_all()
+    {
+        // A hatchery only ever matters once its own lair is actually cleared — matching PulseFor's
+        // own "lairCleared" gate, never special-cased separately here.
+        const long seatPulse = 100;
+        const int lairMultiplier = 2000;
+        var seat = new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.SeatSlotTypeId, OwnerFactionId = "dave" };
+        var world = new FusionRpg.Core.World.WorldState
+        {
+            WorldId = "w", TemplateId = "test", Seed = 1, CurrentTurn = 6,
+            Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+            Sectors = new[]
+            {
+                new WorldSector
+                {
+                    SectorId = "s1", TypeId = "stable", OwnerFactionId = "dave",
+                    Slots = new[] { seat, Lair(GuardState.Intact, "hatchery", constructionTurnsRemaining: 0) }
+                }
+            }
+        };
+
+        var result = FusionRpg.Core.World.Growth.GrowthPhases.Growth(
+            world, new FusionRpg.Core.World.Turn.TurnReport(), "Test", turn: 7, seed: 1,
+            seatPulsePerWeek: seatPulse, lairMultiplierMilli: lairMultiplier, specialWeekMultiplierMilli: 1000);
+
+        Assert.Equal(seatPulse, result.Sectors.Single().RecruitStock); // no lair multiplier at all — intact
     }
 }

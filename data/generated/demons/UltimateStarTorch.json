@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 948,
+  "magnitudes": {
+    "combat.block.shred.omni": 1728,
+    "combat.parry.shred.omni": 1728,
+    "combat.power.omni": 1152,
+    "resource.max.hp": 8640,
+    "resource.max.hunger": 7200,
+    "resource.max.qi": 8640,
+    "resource.max.spirit": 4320,
+    "resource.max.stamina": 20160,
+    "resource.regen.hp": 432,
+    "resource.regen.hunger": 432,
+    "resource.regen.qi": 576,
+    "resource.regen.spirit": 288,
+    "resource.regen.stamina": 720
+  },
+  "pTheta": 1440,
+  "rangeCells": 3,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "UltimateStarTorch",
+  "theta": 40,
+  "traitPool": [
+    "bullet-shaping",
+    "elemental-amplifier",
+    "explosive-fruit-generation",
+    "star-shaped-trajectory"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "mutated"
+  ]
+}

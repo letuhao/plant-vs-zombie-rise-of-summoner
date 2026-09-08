@@ -178,6 +178,44 @@ Asserts via `debug.board-stats` (living `plants[].attack` + `sessionMods`). Resu
 | S4 | `effect-spawn-then-grant` | col1 > col3 (select A then entity grant) | **PASS** |
 | S5 | `effect-entity-midspawn` | only A buffed; withdraw restores | **PASS** |
 
+## 8b. Overlay combat prove (C1–C13) — T8, Melon 3.9
+
+**T8 (`tasks/aura-skill-todo.md`) closed here, not on the Bep checklist** — this run was against
+`H:\Games\PVZ-Fusion-3.9_MelonLoader`, so the results belong on this page, not
+[`debug-live-checklist.md`](debug-live-checklist.md)'s own Bep-only C1–C10 table (which stays
+unfilled — it was never re-run on that host and this page's rule against overwriting Bep rows cuts
+both ways).
+
+Setup: `POST /api/debug/lawn/quick-start` (`.claude/skills/live-lawn-quick-start/`) opened level 1,
+froze the wave, fired `lab-overlay`, and returned `targetPtr=22D78434960` / `plantPtr=22D77EF5240`.
+Proof: `.\scripts\prove-overlay-combat.ps1 -TargetPtr 22D78434960 -ActorPtr 22D77EF5240`.
+
+| # | Scenario | Pass | Notes |
+|---|---|---|---|
+| C1 | `overlay-fire-vs-ice` | **PASS** | `matchupBonus=25` |
+| C2 | `overlay-fire-vs-air` | **PASS** | `matchupBonus=-25` |
+| C3 | `overlay-hybrid-vs-ice` | **PASS** | `matchupBonus=17.5` |
+| C4 | `overlay-miss` | **PASS** | `hit=false finalSignedDelta=0` |
+| C5 | `overlay-heal` | **PASS** | no overlay breakdown; heal pass-through |
+| C6 | `overlay-flag-off` | **PASS** | pass-through -100; no overlay emit |
+| C7 | `overlay-ice-vs-fire` | **PASS** | `matchupBonus=-25` |
+| C8 | `overlay-air-vs-earth` | **PASS** | `matchupBonus=-25` |
+| C9 | `overlay-earth-vs-air` | **PASS** | `matchupBonus=25` |
+| C10 | `overlay-force-crit` | **PASS** | `crit=true critMultiplierFinal=1.99330714907572` |
+| C11 | `overlay-heal-with-payload-scales-with-heal-power` | **PASS** | `healed=50` (expected ~50) |
+| C12 | `overlay-heal-with-no-payload-still-reads-heal-power` | **PASS** | `healed=50` — proves `FinalizeHeal` ran despite no payload |
+| C13 | `overlay-full-mitigation-resolves-to-zero-no-chip-floor` | **PASS** | `finalSignedDelta=0`, no exception |
+
+13/13 PASS, 2026-08-30. Raw: [`../research/effect-runtime/_prove-overlay-combat.json`](../research/effect-runtime/_prove-overlay-combat.json).
+`OVERLAY-COMBAT` promoted to default-on in all three cheat registries (`CheatRegistry.cs`,
+`CheatSchema.cs`, `CheatState.cs`) immediately after this run, per `spec-overlay-combat-enable.md` §7's
+"only after the proof" rule. No golden moved — full 6-suite .NET re-run after the flip:
+`Core.Tests` 4663/4663 (1 pre-existing, order-dependent allocation-benchmark flake unrelated to this
+change, confirmed clean in isolation), `Data.Tests` 539/539, `Server.Tests` 60/60, `Guard.Tests`
+116/116, `Launcher.Tests` 162/162, `CheatCore.Tests` 40/40, `E2E.Tests` 194/194 (this last one also
+fixed a real, unrelated pre-existing build break in its own `ContractTuningTestBootstrap.cs`, found
+during this pass — see `tasks/aura-skill-todo.md`'s T22 entry).
+
 ## 9. Sign-off
 
 | Field | Value |

@@ -5,6 +5,28 @@ namespace FusionRpg.Core.Effects;
 
 public static class EffectOwnerKey
 {
+    /// <summary>
+    /// E34 (spec-trigger-vocabulary.md §2.4): the five match/board-economy triggers a type-keyed
+    /// (<c>plant:{tid}</c> / <c>zombie:{tid}</c>) owner grant must always refuse. A type-keyed owner
+    /// means "this entity type"; none of the five is about an entity type — and OnGridPlace's TypeId
+    /// is a GRID ITEM type (§2.2) that happens to share this field with a zombie/plant type. Without
+    /// this explicit arm, the zombie branch below names no trigger at all and its only gate (the side
+    /// check a few lines down) refuses only when ev.Side is PRESENT and not "zombie" — a match-scoped
+    /// event has no Side, so it would wave straight through to `(ev.TypeId ?? ev.TargetTypeId) == tid`,
+    /// and a `zombie:7` grant would fire on every placement of grid item type 7. The plant branch
+    /// already falls through to `false` for anything not in its own explicit list, so this arm is a
+    /// stated refusal there rather than an unnamed one — the zombie branch is where it is load-bearing.
+    /// </summary>
+    static readonly string[] TypeKeyedRefusalTriggers =
+    {
+        EffectTriggers.OnWave, EffectTriggers.OnMatchStart, EffectTriggers.OnMatchEnd,
+        EffectTriggers.OnSunCollect, EffectTriggers.OnGridPlace
+    };
+
+    static bool IsTypeKeyedRefusalTrigger(string? trigger) =>
+        trigger is not null &&
+        Array.Exists(TypeKeyedRefusalTriggers, t => string.Equals(t, trigger, StringComparison.OrdinalIgnoreCase));
+
     public static bool MatchesEvent(EffectGrant grant, EffectEventDto ev)
     {
         var key = grant.OwnerKey ?? "";
@@ -14,6 +36,14 @@ public static class EffectOwnerKey
         if (key.StartsWith("plant:", StringComparison.OrdinalIgnoreCase))
         {
             if (!int.TryParse(key.AsSpan(6), out var tid)) return false;
+
+            // E34 §2.4: explicit refusal for the five match/board-economy triggers. Falling through
+            // to `false` below would already produce the right answer here — stated explicitly to
+            // match the zombie branch's own arm, and so a future trigger added to that branch's
+            // explicit list cannot silently start matching one of these five by accident.
+            if (IsTypeKeyedRefusalTrigger(ev.Trigger))
+                return false;
+
             if (string.Equals(ev.Trigger, EffectTriggers.OnSpawn, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(ev.Trigger, EffectTriggers.OnDeath, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(ev.Trigger, EffectTriggers.OnDamageTaken, StringComparison.OrdinalIgnoreCase))
@@ -24,12 +54,42 @@ public static class EffectOwnerKey
 
             if (string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase))
                 return string.Equals(ev.Side, "plant", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
+            // E33 (spec-activation-edge.md §2.3, point 1 — a wiring fix): nothing matched OnActivate
+            // before this clause. Same shape as OnDamageDealt above — the actor's own type, never the
+            // target's. No shipped behaviour changes: nothing raises OnActivate on the plant side yet.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnActivate, StringComparison.OrdinalIgnoreCase))
+                return string.Equals(ev.Side, "plant", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
             return false;
         }
 
         if (key.StartsWith("zombie:", StringComparison.OrdinalIgnoreCase))
         {
             if (!int.TryParse(key.AsSpan(7), out var tid)) return false;
+
+            // E34 §2.4: the real fix. Without this explicit arm, none of the checks below name these
+            // five triggers, so a match-scoped event (no Side) waves through the side check further
+            // down (it only refuses a PRESENT wrong side) and lands on
+            // `(ev.TypeId ?? ev.TargetTypeId) == tid` — and OnGridPlace's TypeId IS the grid item type
+            // (§2.2), so a `zombie:7` grant would fire on every placement of grid item type 7. This is
+            // a refusal being ADDED here, not documented — the zombie branch had no narrowing for any
+            // of these five before this module.
+            if (IsTypeKeyedRefusalTrigger(ev.Trigger))
+                return false;
+
+            // E33 (spec-activation-edge.md §2.3, point 2 — a NARROWING BEHAVIOUR CHANGE on a branch
+            // Battle's live path flows through: BasicAttack.cs raises OnActivate once per resolved
+            // intent). Before this clause, the unnarrowed fall-through below also matched on
+            // TargetTypeId when TypeId was null (the target's type standing in for the actor's — the
+            // exact thing an owner-key match must never do) and matched when ev.Side was null (only a
+            // PRESENT wrong side was ever refused). An activation must be gated on the actor's own
+            // side and own type, nothing else — no shipped behaviour changes today only because
+            // Battle's own OnActivate emit carries neither Side nor TypeId yet, not because the old
+            // path was narrow enough on its own.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnActivate, StringComparison.OrdinalIgnoreCase))
+                return string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
             if (!string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) &&
                 !(string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase) &&
                   string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase)))
@@ -127,10 +187,22 @@ public static class EffectOwnerKey
 
 public static class EffectOverlayMerge
 {
-    static readonly Dictionary<string, HashSet<string>> AllowedByAction = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Internal (widened 2026-09-06, `EffectActionsAllowlistGuardTests`) so a guard test can
+    /// assert this covers every `EffectActions` constant — the fifth time a new opcode shipped without
+    /// an entry here (see this field's own trailing comments for the first four, `PlaceStructure` most
+    /// recently).</summary>
+    internal static readonly Dictionary<string, HashSet<string>> AllowedByAction = new(StringComparer.OrdinalIgnoreCase)
     {
         [EffectActions.ModifyStat] = new(StringComparer.OrdinalIgnoreCase)
             { "channel", "flat", "increased", "more", "byChannel", "chance", "icd_ms", "max_stacks", "filters" },
+        // aura-skill-todo.md Phase 5 / TC2. These are the keys of the COMPILED action row, which is
+        // NOT the atom's authored ParamSchema: AtomCompiler.ToOpcodeShape rewrites the authored
+        // {op:"flat", amount:150} into the op-as-key form {flat:150}, exactly as it already does for
+        // stat.modify. So the whitelist mirrors ModifyStat's shape, minus `more` and `byChannel` --
+        // the derived side has no More op (AtomDerivedSubsystem.TryParseOp accepts only
+        // flat|increased|replace|flag) and no by-channel scaling.
+        [EffectActions.ModifyDerivedStat] = new(StringComparer.OrdinalIgnoreCase)
+            { "channel", "flat", "increased", "replace", "flag", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ApplyStatus] = new(StringComparer.OrdinalIgnoreCase)
             { "status", "duration", "level", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ClearStatus] = new(StringComparer.OrdinalIgnoreCase)
@@ -168,7 +240,44 @@ public static class EffectOverlayMerge
         {
             "amount", "element", "priority", "sourceClass", "durationTicks", "refillOnMerge",
             "target", "chance", "icd_ms", "max_stacks", "filters"
-        }
+        },
+        [EffectActions.PresentUi] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "op", "amount", "tag", "bannerId", "meterId", "ratio", "durationMs",
+            "chance", "icd_ms", "max_stacks", "filters"
+        },
+        // Found 2026-09-04 while re-verifying E41's own report: this dictionary is not merely an
+        // overlay-key allowlist consulted on the Runner path (as AtomCompiler.cs's own nearby comment
+        // about a DIFFERENT three kinds might suggest at a glance) — EffectBag.Grant calls
+        // EffectOverlayMerge.TryValidateOverlayForDef(def.Actions, ...) UNCONDITIONALLY, for every
+        // grant, and TryValidateOverlayForDef fails with "unknown action <X>" the instant ANY action
+        // in the def's compiled list is missing from this dictionary, even against an EMPTY overlay.
+        // ModifyMatch (E35), WaveControl (E36) and BulletModify (E37) had no entry here, so any real
+        // Grant() of match.modify/wave.control/bullet.modify content — the only way any of that
+        // shipped work ever runs in a live match — threw at the very first line of Grant, regardless
+        // of runtime, regardless of overlay content. Each module's own tests never caught this because
+        // they exercise AtomCompiler.Compile / InjectorEffectActionSink.Execute directly, never
+        // EffectBag.Grant. Keys mirror each kind's own compiled action params exactly (ToOpcodeShape
+        // only rewrites stat.modify/stat.derived, so all three kinds' authored params travel unchanged
+        // — confirmed against each kind's own AtomKindRegistry.cs ParamSchema and Compilability.cs
+        // comment), plus the same generic chance/icd_ms/max_stacks/filters every other entry carries.
+        [EffectActions.ModifyMatch] = new(StringComparer.OrdinalIgnoreCase)
+            { "field", "amount", "chance", "icd_ms", "max_stacks", "filters" },
+        [EffectActions.WaveControl] = new(StringComparer.OrdinalIgnoreCase)
+            { "op", "wave", "timerMs", "enabled", "chance", "icd_ms", "max_stacks", "filters" },
+        [EffectActions.BulletModify] = new(StringComparer.OrdinalIgnoreCase)
+            { "op", "amount", "bulletType", "moveWay", "chance", "icd_ms", "max_stacks", "filters" },
+        // base-defense `siege-construction` 15.3b (2026-09-06): structure.place -> PlaceStructure. The
+        // FIFTH time this exact class of bug has bitten (ModifyMatch/WaveControl/BulletModify's own
+        // comment above already documents the first three; Compilability.OpcodeKinds' own comment,
+        // fixed the same day as this entry, documents a fourth, separate list with the identical shape)
+        // — EffectBag.Grant calls TryValidateOverlayForDef UNCONDITIONALLY for every grant, so a
+        // structure.place effect would throw "unknown action PlaceStructure" the instant anything ever
+        // actually granted it, regardless of overlay content. Found by a real, failing end-to-end test
+        // (ConstructionActionsTests), not by inspection. Keys mirror structureId/instant exactly
+        // (ToOpcodeShape only rewrites stat.modify/stat.derived, so both travel unchanged).
+        [EffectActions.PlaceStructure] = new(StringComparer.OrdinalIgnoreCase)
+            { "structureId", "instant", "chance", "icd_ms", "max_stacks", "filters" },
     };
 
     public static bool TryValidateOverlayForDef(

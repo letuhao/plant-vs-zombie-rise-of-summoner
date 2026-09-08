@@ -1,6 +1,8 @@
 # Capability map: Standalone-first RPG architecture
 
-Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), and expeditions (the announced ship gate: dispatch→collect playable in the web FE) are implemented with all suites green; module boundaries were approved via owner decisions 2026-08-21. Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
+Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21; first-session progression implemented 2026-09-08** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), expeditions (dispatch→collect playable in the web FE), and the server-owned first-session checkpoint/item queue are implemented; real deploy acceptance remains content-environment gated. Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
+
+> **Product-vision reconcile (2026-09-05).** *"Web core / PvZ extension"* in this map means **capability and CI** — gameless-first, one economy, four enrich roles — not the player pitch. Genre and named loops live in [../guide/the-game.md](../guide/the-game.md) + [../guide/the-loops.md](../guide/the-loops.md). The lawn is a first-class place loop and the intended first session; that does not authorize a permanent Fusion gate. See `decisions.md` Standalone-first (qualified) and Product vision rows.
 
 ## Why this is an inversion, not a rewrite
 
@@ -31,6 +33,7 @@ The stack was built game-agnostic from day one: server and web already speak onl
 | `match-source-core` | Promote server-side match production to a first-class source: `BattleEngine` in Core (pure, seeded) resolving squad-vs-wave combat via ActorHub/Status/Element/CombatMath/EffectBag; canonical events through the normal ingest (runs, facts, XP, Souls) | standalone-charter | **1** |
 | `expeditions` | Playable loop #1: squad select → timed expedition → server auto-resolve → rewards + encounter discoveries; FE screens | match-source-core, demon-core, soul-economy | **2** |
 | `web-battles` | Playable loop #2: interactive turn-based battles (server-resolved turns, same BattleEngine); FE battle UI | expeditions | **3** |
+| `first-session-progression` | One server-owned first-session reveal sequence: first victory → Dave sheet, level-3 general species progression, level-4 commander equipment | `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip | **3** |
 | `game-bridge` | PvZ-as-extension policy: earn multipliers by source, exclusive-capture species flags, shared-deploy continuity, trophies | standalone-charter (+ demon-capture later) | **3** |
 
 **Combined roadmap with the [demon program](demon-system-map.md):** `standalone-charter` + `element-extension` (parallel) → `demon-core` → `soul-economy` + `match-source-core` (parallel) → `demon-summoning` → `expeditions` (**the moment the RPG is a standalone playable game**) → `web-battles` / `demon-contracts` / `demon-capture` (PvZ) → `demon-fusion` → `game-bridge` polish → `world-events`.
@@ -41,3 +44,9 @@ The stack was built game-agnostic from day one: server and web already speak onl
 2. **One economy:** web mode and PvZ mode write the same ledgers through the same ingest; source-tagged (`source=web|injector`), never forked.
 3. **Server-authoritative play:** all web-mode outcomes (rolls, battles, expeditions) resolve server-side with recorded seeds; correlation-idempotent commands.
 4. **Existing locks unbroken:** injector Hot-path invariants, Funnel/Writer, DAL boundary, and guard scripts are untouched by this program.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `ExpeditionTickKinds.FoundDomain` | `party-dungeon/spec-domain-catalog.md` §5b | a new tick kind (`ExpeditionResolver.cs:7-14` has none) with its own band ceiling; `ApplyExpeditionRewards` (`RpgStore.Expeditions.cs:276`) writes the `rpg_domain_progress` discovery row through `RecordFoundUnlocked`; the pick is `WeightedChoice` over unfound `shallow` domains on the tick's seed |

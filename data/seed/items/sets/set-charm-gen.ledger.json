@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "set-species-demon.allpeater": {
+      "entryId": "set.allpeater-001",
+      "attempts": 2
+    },
+    "set-species-demon.ashthreepeater": {
+      "entryId": "set.ashthreepeater-001",
+      "attempts": 3
+    },
+    "set-species-demon.bucketzombie": {
+      "entryId": "set.bucketzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.cornpot": {
+      "entryId": "set.cornpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.dollgold": {
+      "entryId": "set.dollgold-001",
+      "attempts": 1
+    },
+    "set-species-demon.dollsilver": {
+      "entryId": "set.dollsilver-001",
+      "attempts": 2
+    },
+    "set-species-demon.doorzombie": {
+      "entryId": "set.doorzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.driverzombie": {
+      "entryId": "set.driverzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.fumeshroom": {
+      "entryId": "set.fumeshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicthreepeater": {
+      "entryId": "set.garlicthreepeater-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironpeazombie": {
+      "entryId": "set.ironpeazombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalapeashooter": {
+      "entryId": "set.jalapeashooter-001",
+      "attempts": 2
+    },
+    "set-species-demon.jalastar": {
+      "entryId": "set.jalastar-001",
+      "attempts": 2
+    },
+    "set-species-demon.lanterncactus": {
+      "entryId": "set.lanterncactus-001",
+      "attempts": 2
+    },
+    "set-species-demon.lanternchomper": {
+      "entryId": "set.lanternchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternpea": {
+      "entryId": "set.lanternpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.paperzombie": {
+      "entryId": "set.paperzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.peasunflower": {
+      "entryId": "set.peasunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.plantern": {
+      "entryId": "set.plantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowgatling": {
+      "entryId": "set.snowgatling-001",
+      "attempts": 2
+    },
+    "set-species-demon.threeplantern": {
+      "entryId": "set.threeplantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.twinflower": {
+      "entryId": "set.twinflower-001",
+      "attempts": 2
+    },
+    "set-species-demon.darkthreepeater": {
+      "entryId": "set.darkthreepeater-001",
+      "attempts": 2
+    },
+    "set-species-demon.gatlingpea": {
+      "entryId": "set.gatlingpea-001",
+      "attempts": 3
+    },
+    "set-species-demon.melonpult": {
+      "entryId": "set.melonpult-001",
+      "attempts": 3
+    },
+    "set-species-demon.threepeater": {
+      "entryId": "set.threepeater-001",
+      "attempts": 2
+    },
+    "set-species-demon.snowpeashooter": {
+      "entryId": "set.snowpeashooter-001",
+      "attempts": 1
+    }
+  }
+}

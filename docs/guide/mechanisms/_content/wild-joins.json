@@ -1,0 +1,66 @@
+{
+  "slug": "wild-joins",
+  "title": "Wild joins",
+  "status": "Shipped",
+  "kicker": "Roster and summoning · idle expeditions",
+  "pillar": {"text": "Expeditions", "href": "expeditions.md"},
+  "loopLine": "Summon and fusion · Idle expeditions",
+  "hook": "**Wild joins** are demons that enter the roster from expedition outcomes — intake that is not the altar.",
+  "blindSpots": [
+    {"term": "Wild join", "meaning": "A specimen that arrives from an expedition result, not from a soul pull."},
+    {"term": "Intake", "meaning": "Any path that adds a demon. Altar, wild join, and (later) capture are different intakes."},
+    {"term": "Expedition", "meaning": "Idle squad mission — dispatch, wait, collect. Detail: [expeditions](expeditions)."},
+    {"term": "Altar", "meaning": "Soul gacha pulls. Wild joins prove gacha is not the only path."}
+  ],
+  "alsoTrue": [
+    "After a wild join lands, treat it like any [specimen](specimens) — bind, fuse, or field as usual.",
+    "Capture on the lawn/delve is a different WIP intake — see [capture](capture)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Expeditions can return more than materials and souls.",
+        "A wild join is a full specimen appearing in Creatures when the outcome says so."
+      ]
+    },
+    {
+      "title": "How you use it",
+      "steps": [
+        "Dispatch an expedition with a squad.",
+        "Collect when it returns.",
+        "If a wild join is in the report, open Creatures and meet the new specimen."
+      ],
+      "diagram": [
+        "  dispatch expedition  ->  wait  ->  collect  ->  wild join on roster"
+      ]
+    },
+    {
+      "title": "Why it exists",
+      "paras": [
+        "If only the altar grew the roster, idle play would never surprise you with a demon.",
+        "Wild joins keep expeditions on the summon-and-fusion spine."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Unlock Expeditions (bound demon available).",
+    "Send a squad and collect a return.",
+    "If no wild join this time, still read the report — joins are an outcome, not a guarantee every run."
+  ],
+  "doNote": "Stop when altar ≠ only intake. WIP hunt path: [capture](capture).",
+  "mixUps": [
+    {"q": "Did I get charged souls for a wild join?", "a": "No. That is the point of a non-altar intake."},
+    {"q": "Is every expedition return a new demon?", "a": "No. Materials and souls are common; wild joins are one possible outcome."},
+    {"q": "Is this capture?", "a": "No. Capture is WIP pressure-and-catch in a run."},
+    {"q": "Can a wild join fuse later?", "a": "Yes. It is a normal specimen once it lands."}
+  ],
+  "next": ["capture"],
+  "related": ["expeditions", "summoning-altar", "specimens", "capture"],
+  "sources": [
+    "docs/guide/creatures.md §Summon",
+    "docs/guide/expeditions.md",
+    "docs/guide/mechanisms/wild-joins.md (prior stub)"
+  ]
+}

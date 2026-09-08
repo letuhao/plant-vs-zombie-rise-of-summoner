@@ -104,6 +104,15 @@ public class PvzActivityRollupBuilderTests
     }
 
     [Fact]
+    public void DedupeKeyForCapture_usesLifecycleOccurrence_forDeaths()
+    {
+        Assert.Equal("occ:7", PvzActivityKinds.DedupeKeyForCapture(
+            PvzActivityKinds.ZombieKilled, "reused-ptr", null, null, "t", lifecycleOccurrence: 7));
+        Assert.Equal("reused-ptr", PvzActivityKinds.DedupeKeyForCapture(
+            PvzActivityKinds.ZombieKilled, "reused-ptr", null, null, "t"));
+    }
+
+    [Fact]
     public void IsKnown_allowlist()
     {
         Assert.True(PvzActivityKinds.IsKnown("ZombieKilled"));

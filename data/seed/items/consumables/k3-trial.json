@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "batch": "consumables-trial-2026-09-07",
+    "partition": "consumables/3",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 5,
+      "tags": 4,
+      "classes": 4,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "consumables-gen/1",
+    "model": "consumablegen/hand-authored-1",
+    "authoredUtc": "2026-09-07T00:00:00Z",
+    "sourceRef": "ssot-consumables.md §3.1, §5.2, §7.3 -- trial batch, item-seedgen consumables-gen"
+  },
+  "entries": [
+    {
+      "id": "consumable.k3-021",
+      "nameKey": "consumable.ward-shield-toughness-anvilcore",
+      "name": "Anvilcore Ward",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.shield-toughness",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "metal"
+      ],
+      "notes": "Shield-toughness stat.derived family (combat.shield.toughness.*); depleting absorption layer bound at battle setup, same discipline as k3's own elemental-defense/resilience wards."
+    }
+  ]
+}

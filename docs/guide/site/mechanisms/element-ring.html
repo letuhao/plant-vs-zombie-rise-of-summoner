@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Elements are real matchups — fire, ice, air, earth, light, dark, plus omni as the all-elements baseline — not flavour labels on a sheet." />
+    <title>Six elements and omni — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/element-ring.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Combat language · every place
+        </p>
+        <h1 class="teach-title">Six elements and omni</h1>
+        <p class="teach-hook"><strong>Elements</strong> are real matchups — fire, ice, air, earth, light, dark, plus <strong>omni</strong> as the all-elements baseline — not flavour labels on a sheet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Element</dt>
+              <dd>A combat type on the creature and the hit. Six concrete colours plus omni — not a class and not a rarity.</dd>
+            </div>
+            <div>
+              <dt>The ring</dt>
+              <dd>The cycle fire → ice → earth → air → fire. That is the matchup story for those four.</dd>
+            </div>
+            <div>
+              <dt>Omni</dt>
+              <dd>The baseline “all elements” case — not a seventh colour you farm like fire essence.</dd>
+            </div>
+            <div>
+              <dt>Two types</dt>
+              <dd>A creature can carry up to two elements. Traits like void or chaos are traits — they are not extra ring colours.</dd>
+            </div>
+            <div>
+              <dt>Neutral</dt>
+              <dd>Cross pairs outside the ring story (and outside light↔dark) stay neutral — no invented third wheel.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>The same ring reads on the lawn and in later battles — one fight language.</li>
+            <li>Essence colours line up with these elements when you fuse — see <a href="essence.html">essence</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Six concrete elements, plus omni:</p>
+          <p><strong>Fire · ice · air · earth · light · dark</strong></p>
+          <p>Matchups are real numbers in combat feedback. Raising a demon’s element at home means something when you field it.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-the-ring-works-title">
+          <h2 id="how-the-ring-works-title">How the ring works</h2>
+          <p>Four colours chase each other. Light and dark stand aside:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  fire -&gt; ice -&gt; earth -&gt; air -&gt; fire
+  light &lt;-&gt; dark
+  other crosses stay neutral
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Fire</strong>
+              <p>Melts ice.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Ice</strong>
+              <p>Cracks earth.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Earth</strong>
+              <p>Blocks air.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Air</strong>
+              <p>Blows out fire.</p>
+            </li>
+          </ol>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Pair</th>
+                <th scope="col">Story</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Fire → ice → earth → air → fire</td>
+                <td>The ring</td>
+              </tr>
+              <tr>
+                <td>Light ↔ dark</td>
+                <td>Counter each other only</td>
+              </tr>
+              <tr>
+                <td>Everything else</td>
+                <td>Neutral</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="teach-note">This is not a second ring and invents no new elements. Named combo recipes on top of it are <a href="../../mechanisms/named-reactions.md">Vision</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On sheets and in fights</h3>
+            <p>Element shows wherever combat and roster care.</p>
+            <ol>
+              <li>Open a specimen sheet and read its element(s).</li>
+              <li>Field and fight with matchups in mind — lawn or web battle.</li>
+              <li>Watch combat feedback when a hit lands soft or hard for the colour story.</li>
+            </ol>
+            <p class="teach-note">Exact multipliers are balance surface. Trust what the UI shows that day.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Pick a specimen and name its element out loud.</li>
+            <li>Remember the ring: fire melts ice, ice cracks earth, earth blocks air, air blows out fire.</li>
+            <li>Treat light and dark as a private duel — not part of that four-colour chase.</li>
+          </ol>
+          <p class="teach-note">Next depth: how hits absorb and crit — <a href="../../mechanisms/shields-crit-resist.md">shields, crit, and resistance</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is omni a seventh essence colour?</dt>
+              <dd>No. Omni is the baseline all-elements case in combat. Essence stock is the six colours — see <a href="essence.html">essence</a>.</dd>
+            </div>
+            <div>
+              <dt>Do void or chaos sit on the ring?</dt>
+              <dd>No. Those are traits, not extra elements.</dd>
+            </div>
+            <div>
+              <dt>Does the lawn use a different type chart?</dt>
+              <dd>No. Lawn and later battles share this combat language.</dd>
+            </div>
+            <div>
+              <dt>Can a creature have more than two elements?</dt>
+              <dd>No. Up to two types. Beyond that you are looking at traits or statuses.</dd>
+            </div>
+            <div>
+              <dt>Is this the same as named reactions?</dt>
+              <dd>No. The ring is shipped matchups. Named recipes on top of it are Vision — see <a href="../../mechanisms/named-reactions.md">named reactions</a>.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/shields-crit-resist.md">Shields, crit, and resistance</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/shields-crit-resist.md">Shields, crit, and resistance</a> ·
+            <a href="../../mechanisms/statuses.md">Statuses</a> ·
+            <a href="patron.html">Patron demon</a> ·
+            <a href="essence.html">Essence</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/element-ring.md">Markdown (editable SSOT)</a> ·
+            <a href="../../combat.md">Combat</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/element-ring.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

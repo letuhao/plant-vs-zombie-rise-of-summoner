@@ -57,6 +57,43 @@ public static class WorldCommandAdmission
             if (namedSector is null) return (false, "sector.missing");
         }
 
+        if (command.Kind == WorldCommandKinds.Cede)
+        {
+            // No entity — a faction cedes ground, not a legion.
+            if (namedSector is null) return (false, "sector.missing");
+            if (!string.Equals(namedSector.OwnerFactionId, command.CommanderId, StringComparison.Ordinal))
+                return (false, "sector.not-yours");
+        }
+
+        if (command.Kind == WorldCommandKinds.BindWarden)
+        {
+            // No entity — a faction binds a warden to ground, not a legion.
+            if (namedSector is null) return (false, "sector.missing");
+            if (!string.Equals(namedSector.OwnerFactionId, command.CommanderId, StringComparison.Ordinal))
+                return (false, "sector.not-yours");
+            if (string.IsNullOrWhiteSpace(command.WardenId)) return (false, "warden.missing");
+        }
+
+        if (command.Kind == WorldCommandKinds.Raise)
+        {
+            // No entity — raise founds a *new* legion, so there is nothing yet to anchor an
+            // ownership check on at submission time. Every other legality check (whose ground, a
+            // Seat, a hostile entity standing in it, enough RecruitStock) is resolution-time, in
+            // RaiseResolver at Snapshot — "not yours at Snapshot", per this kind's own acceptance,
+            // the identical discipline BuildResolver already applies for `build`.
+            if (namedSector is null) return (false, "sector.missing");
+        }
+
+        if (command.Kind == WorldCommandKinds.Develop)
+        {
+            // No entity — `develop` starts a sector-wide project, not a legion order. Ownership is
+            // deferred to `Snapshot`, the same discipline `raise` already applies (`DevelopResolver`
+            // re-validates it there rather than trusting this admission gate).
+            if (namedSector is null) return (false, "sector.missing");
+            if (command.ProjectId is not { } projectId || !Growth.ProjectCatalog.IsKnown(projectId))
+                return (false, "project.unknown");
+        }
+
         if (command.Kind == WorldCommandKinds.Sustain)
         {
             if (command.EntityId is null) return (false, "entity.missing");
@@ -84,6 +121,16 @@ public static class WorldCommandAdmission
             if (command.SlotIndex is not { } slotIndex
                 || namedSector.Slots.All(sl => sl.SlotIndex != slotIndex))
                 return (false, "slot.unknown");
+        }
+
+        if (command.Kind == WorldCommandKinds.Assault)
+        {
+            // `assault` names its target outright — entity, sector. Whether the legion is actually
+            // standing there, and whether the sector is still hostile, is legality at reveal: both
+            // can change between filing the order and the turn resolving, the same discipline
+            // `clear`'s own admission rule already states.
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (namedSector is null) return (false, "sector.missing");
         }
 
         foreach (var laneId in command.LanePath)

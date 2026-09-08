@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "item-category",
+  "_meta": {
+    "batch": "item-category-v1",
+    "partition": "items/_seed/item-category",
+    "contractVersion": 1,
+    "sourceRef": "ssot-item-categories.md §5.1 (the ten rows) and §5.1's SC7 table (the consumer column) -- claimed by base-types (item module 6, I3's lane), transcribed as data, not authored fresh.",
+    "note": "consumer is NOT NULL and non-empty on every row (ContentRuleViolated{item.category-no-consumer} otherwise). Four rows -- consumable, insert, charm, blueprint -- are 'declare only': the row exists so the shape is stable, but no content may be authored into them until their named consumer ships (SC7). `unique`, `set` and `legendary` are rarities (I1), never categories -- that is why this list is ten, not thirteen."
+  },
+  "entries": [
+    {
+      "categoryId": "equipment",
+      "rollsValues": true,
+      "stackIntent": "never",
+      "ownerScope": "player-then-actor",
+      "store": "instance",
+      "consumer": "BindGate + compose -> EntityStatWriter (lawn)",
+      "declareOnly": false
+    },
+    {
+      "categoryId": "material",
+      "rollsValues": false,
+      "stackIntent": "qty",
+      "ownerScope": "player",
+      "store": "stack",
+      "consumer": "DemonMaterialCatalog (inventory rows with validated ids; demon-fusion consumes these)",
+      "declareOnly": false
+    },
+    {
+      "categoryId": "quest",
+      "rollsValues": false,
+      "stackIntent": "qty",
+      "ownerScope": "player",
+      "store": "stack",
+      "consumer": "world/expedition gates",
+      "declareOnly": false
+    },
+    {
+      "categoryId": "currency",
+      "rollsValues": false,
+      "stackIntent": "ledger",
+      "ownerScope": "player",
+      "store": "ledger",
+      "consumer": "rpg_soul_ledger / rpg_soul_balances (RpgStore.cs)",
+      "declareOnly": false
+    },
+    {
+      "categoryId": "consumable",
+      "rollsValues": false,
+      "stackIntent": "charges",
+      "ownerScope": "player-then-actor",
+      "store": "stack",
+      "consumer": "the action layer (unbuilt) -- declared so the shape is stable; do not author",
+      "declareOnly": true
+    },
+    {
+      "categoryId": "insert",
+      "rollsValues": false,
+      "stackIntent": "qty",
+      "ownerScope": "player-then-item",
+      "store": "stack",
+      "consumer": "module 16 sockets (unbuilt) -- declared so the shape is stable; do not author",
+      "declareOnly": true
+    },
+    {
+      "categoryId": "charm",
+      "rollsValues": false,
+      "stackIntent": "never",
+      "ownerScope": "player",
+      "store": "instance",
+      "consumer": "module 12 set-charm-gen (unbuilt) -- declared so the shape is stable; do not author",
+      "declareOnly": true
+    },
+    {
+      "categoryId": "cosmetic",
+      "rollsValues": false,
+      "stackIntent": "never",
+      "ownerScope": "player",
+      "store": "stack",
+      "consumer": "ItemCategoryTable's own closed list -- no functional consumer is planned; declared so the shape is stable; do not author",
+      "declareOnly": true
+    },
+    {
+      "categoryId": "blueprint",
+      "rollsValues": false,
+      "stackIntent": "never",
+      "ownerScope": "player",
+      "store": "stack",
+      "consumer": "module 15 enhance-reroll (unbuilt) -- declared so the shape is stable; do not author",
+      "declareOnly": true
+    },
+    {
+      "categoryId": "cache",
+      "rollsValues": false,
+      "stackIntent": "qty",
+      "ownerScope": "player",
+      "store": "stack",
+      "consumer": "module 11 drop-volume (unbuilt) -- declared so the shape is stable; do not author",
+      "declareOnly": true
+    }
+  ]
+}

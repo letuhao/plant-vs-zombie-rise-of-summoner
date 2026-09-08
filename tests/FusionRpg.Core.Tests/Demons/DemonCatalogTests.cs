@@ -15,12 +15,12 @@ public class DemonCatalogTests
         Assert.Contains(all, s => s.ElementPrimary == ElementTypeId.Light);
         Assert.Contains(all, s => s.ElementPrimary == ElementTypeId.Dark);
         Assert.Contains(all, s => s.DeployMode == DemonDeployMode.HypnoAlly);
-        Assert.Contains(all, s => s.BaseRarity == DemonRarity.Legendary);
+        Assert.Contains(all, s => s.BaseRarity == DemonRarity.Sunwoven);
 
         // Guardrails: ≤15% capture-only, never legendary.
         var captureOnly = all.Where(s => s.Acquisition == DemonAcquisition.CaptureOnly).ToList();
         Assert.True(captureOnly.Count <= Math.Max(1, all.Count * 15 / 100));
-        Assert.DoesNotContain(captureOnly, s => s.BaseRarity == DemonRarity.Legendary);
+        Assert.DoesNotContain(captureOnly, s => s.BaseRarity == DemonRarity.Sunwoven);
     }
 
     static List<CapturedTypeSeed> FixedSeeds() => Enumerable.Range(0, 20)
@@ -53,7 +53,7 @@ public class DemonCatalogTests
         GameTypeId = 1,
         DemonTypeId = 10001,
         ElementPrimary = ElementTypeId.Fire,
-        BaseRarity = DemonRarity.Common,
+        BaseRarity = DemonRarity.Chaff,
         DeployMode = DemonDeployMode.PlantAvatar,
         Acquisition = DemonAcquisition.Summonable,
         Variants = new[] { "normal" },

@@ -112,8 +112,8 @@ public class ContentScaleTests
         // min==max==100 removes the RNG as a variable -- any difference between the two resolved
         // amounts is attributable to contentScale alone, not to a different roll.
         var tuning = TuningAt(400);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 20, tuning, out var atPin).IsOk);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 100, tuning, out var atDepth).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 20, tuning, out var atPin).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 100, tuning, out var atDepth).IsOk);
 
         Assert.Equal(100, ResolvedAmount(atPin!));                 // Theta=20: contentScale=1.000, unscaled
         Assert.Equal(ContentScale.Apply(100, ContentScale.Milli(100, tuning)), ResolvedAmount(atDepth!));
@@ -124,7 +124,7 @@ public class ContentScaleTests
     public void Recorded_OnTheInstance_MatchesWhatWasActuallyApplied()
     {
         var tuning = TuningAt(400);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 100, tuning, out var inst).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 100, tuning, out var inst).IsOk);
 
         Assert.Equal(100, inst!.ThetaContent);
         Assert.Equal(ContentScale.Milli(100, tuning), inst.ContentScaleMilli);
@@ -141,8 +141,8 @@ public class ContentScaleTests
         // at the same Theta, not a re-scale of an already-scaled value. Each call recomputes
         // contentScale from Theta fresh, so nothing accumulates across calls.
         var tuning = TuningAt(400);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 100, tuning, out var first).IsOk);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 100, tuning, out var second).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 100, tuning, out var first).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 100, tuning, out var second).IsOk);
 
         Assert.Equal(ResolvedAmount(first!), ResolvedAmount(second!));
         Assert.Equal(ContentScale.Apply(100, ContentScale.Milli(100, tuning)), ResolvedAmount(second!));
@@ -192,8 +192,8 @@ public class ContentScaleTests
         var atom = Catalog.Values.Single();
         var tuning = TuningAt(400);
 
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 20, tuning, out var atPin).IsOk);
-        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, 7, 200, tuning, out var atDeep).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 20, tuning, out var atPin).IsOk);
+        Assert.True(Instantiator.TryInstantiate(Container(), Lookup, _ => null, 7, 200, tuning, out var atDeep).IsOk);
         Assert.NotEqual(ResolvedAmount(atPin!), ResolvedAmount(atDeep!)); // the instances DID scale differently...
 
         var pricedBefore = CostFunction.Price(atom);
@@ -214,8 +214,12 @@ public class ContentScaleTests
         var checkedContainers = 0;
         foreach (var container in containers.Take(50)) // representative sample -- full corpus is exercised by the suite's other coverage
         {
+            // T3.1: the real corpus's pool rows are not yet migrated to affix ids (that migration is
+            // T3.2's own scope), so `_ => null` here means every POOLED container fails validation
+            // and is skipped by the `if (!r.IsOk) continue` below — same as any other
+            // not-yet-instantiable row this test already tolerates.
             var r = Instantiator.TryInstantiate(container, id => lookup.TryGetValue(id, out var a) ? a : null,
-                rollSeed: 123456, thetaContent: 20, tuning, out var instance);
+                _ => null, rollSeed: 123456, thetaContent: 20, tuning, out var instance);
             if (!r.IsOk) continue; // some rows in the corpus aren't standalone-instantiable (e.g. pool-only); not this test's concern
             checkedContainers++;
 

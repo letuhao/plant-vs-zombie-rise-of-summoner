@@ -32,8 +32,7 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
     public void Upsert(EffectDef def)
     {
         // Actions sorted once here so FireGrant can iterate without a per-fire OrderBy.
-        def.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
-        _defs[def.EffectId] = def;
+        _defs[def.EffectId] = WithSortedActions(def);
         _revision++;
     }
 
@@ -41,12 +40,34 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
     {
         _defs.Clear();
         foreach (var d in defs)
-        {
-            d.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
-            _defs[d.EffectId] = d;
-        }
+            _defs[d.EffectId] = WithSortedActions(d);
         _revision++;
     }
+
+    /// <summary>
+    /// Real, confirmed defect (found running the full suite, not theorized): the old code called
+    /// `def.Actions.Sort(...)` IN PLACE on the caller's own list. A caller that hands the SAME
+    /// `EffectDef` instance to more than one catalog -- e.g. `ConstructionActions.CompiledEffects`,
+    /// a `static { get; }`-cached list shared by every battle/test that references it -- had that
+    /// shared list re-sorted (and its `List&lt;T&gt;` version bumped) by every `Upsert`/`ReplaceAll`
+    /// call, including ones on a DIFFERENT catalog instance entirely. A concurrent `FireGrant`
+    /// enumerating `def.Actions` on another thread over the SAME shared list throws
+    /// "Collection was modified; enumeration operation may not execute" -- reproduced via
+    /// `ConstructionActionsTests` failing only under full-suite parallel execution, never in
+    /// isolation. `EffectDef.Actions` is `init`-only (cannot be reassigned post-construction), so the
+    /// fix is a defensive copy: this catalog gets its OWN `EffectDef` with a freshly-sorted `Actions`
+    /// list, and the caller's original object -- and its original list -- is never touched.
+    /// </summary>
+    static EffectDef WithSortedActions(EffectDef def) => new()
+    {
+        EffectId = def.EffectId,
+        EffectType = def.EffectType,
+        Name = def.Name,
+        Enabled = def.Enabled,
+        SourceTag = def.SourceTag,
+        Triggers = def.Triggers,
+        Actions = def.Actions.OrderBy(a => a.Seq).ToList(),
+    };
 
     /// <summary>Bump revision without changing defs (grant upsert/withdraw).</summary>
     public void TouchRevision() => _revision++;
@@ -166,9 +187,64 @@ public sealed class EffectBag
 
     /// <summary>Shield layer above the Funnel — null keeps combat byte-identical (no shields).</summary>
     public FusionRpg.Core.Combat.Shield.ShieldGate? ShieldGate { get; set; }
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): the <c>op:meter</c>/<c>op:banner</c> collaborator — null
+    /// skips with a named reason (<c>:hud-runtime-missing</c>), the same optional-collaborator shape
+    /// <see cref="ShieldGate"/>/<see cref="Status"/> already use. <c>op:number</c> needs no collaborator
+    /// here — it reuses the Funnel's existing <see cref="IDamageFxSink"/> present path.
+    /// </summary>
+    public IUiPresentSink? UiPresent { get; set; }
+
+    /// <summary>aura-skill T20: the same actor-resolution function wired into `CombatMath`/
+    /// `ShieldGate` ("same resolve as combat" — `EffectRuntime.WireCombatMath`'s own comment) —
+    /// threaded through to <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/>'s
+    /// `actorResolve` parameter so Retribution/reflect actually fires on a real damage packet. Every
+    /// production call site previously omitted this argument, so the shipped-looking reflect math
+    /// never ran outside the offline test harness. Null keeps combat byte-identical (no reflect),
+    /// matching every other optional collaborator on this class.</summary>
+    public FusionRpg.Core.Combat.CombatActorResolve? ActorResolve { get; set; }
+
+    /// <summary>
+    /// passive-tree-todo.md G6 (spec-gate-counters.md §2.2/§7): the seam <c>ElementMasteryCounter</c>
+    /// wires into. Threaded to every <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/> call
+    /// site this bag owns -- both the direct-hit dispatch inside <see cref="FireGrant"/> and the
+    /// DoT-pulse dispatch inside <see cref="TickDots"/> (via <see cref="StatusFunnelPulseSink"/>) -- so
+    /// a host that sets this ONE property gets a credit callback for every landed hit and every DoT
+    /// pulse alike, correctly tagged by <see cref="Combat.DamageOrigin"/> in each case. Null keeps
+    /// combat byte-identical (no credits), the same optional-collaborator shape every other hook on
+    /// this class already uses.
+    /// </summary>
+    public Action<Combat.DamageApplyResult, Combat.DamageOrigin, IReadOnlyList<Combat.Element.ElementPayloadComponent>, string?>? OnDamageApplied { get; set; }
     public StatusRuntime? Status { get; set; }
     public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
-    public Func<DateTimeOffset> UtcNow { get; set; } = () => DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// base-defense Gate 0 (audit C4): moved from an implicit wall-clock default at the FIELD to a
+    /// loud failure that forces every caller to choose explicitly at its own COMPOSITION ROOT — the
+    /// fix the audit itself names. The old default (`() => DateTimeOffset.UtcNow`) worked correctly
+    /// for the one caller that legitimately wants real time (`FusionRpg.Injector`'s live-PvZ host,
+    /// which now sets this explicitly, matching the three deterministic hosts that already did) — but
+    /// it meant a NEW deterministic composition root (a siege resolver, an expedition harness) could
+    /// silently inherit wall-clock status timing by forgetting one line, and nothing would fail until
+    /// a replay disagreed with itself on a different machine, weeks later.
+    ///
+    /// <para>Read only when a status-timed feature (<see cref="TickDots"/>,
+    /// <see cref="StatusEffectBridge.TryApplyFromGrant"/>) is actually exercised — a battle with no
+    /// `Status` wired never reads this and never throws, so boardless/statusless harnesses are
+    /// unaffected.</para>
+    /// </summary>
+    public Func<DateTimeOffset> UtcNow
+    {
+        get => _utcNow ?? throw new InvalidOperationException(
+            "EffectBag.UtcNow has not been set. Every composition root that times statuses must " +
+            "choose explicitly: a deterministic host wires this to its own SimulationClock/IEffectClock " +
+            "(see BattleEffects.cs, FoundationHarness.cs, SimEffectHost.cs); a live, non-replayed host " +
+            "(the injector) wires it to the real wall clock explicitly, on purpose, at its own " +
+            "composition root — never as a silent field default.");
+        set => _utcNow = value ?? throw new ArgumentNullException(nameof(value));
+    }
+    Func<DateTimeOffset>? _utcNow;
     /// <summary>Debug Selected ptr. Grant overlays with <c>target.mode=Selected</c> rewrite to Single.</summary>
     public string? SelectedPtr { get; set; }
 
@@ -416,6 +492,18 @@ public sealed class EffectBag
                 continue;
             }
 
+            // E41 (spec-ui-attach-point.md §2a): bag-side, the same shape as GrantShield immediately
+            // above and ApplyResourceDelta below — a Ui-attached kind's action never becomes an
+            // EffectActionPlanItem and never reaches _sink.Execute (InjectorEffectActionSink's stat/
+            // resource/status/shield/board arms). That is the module's central read-only invariant,
+            // made structural by this branch existing rather than left as a convention nobody enforces
+            // (Ui_attached_kinds_never_reach_the_generic_sink, tests/.../UiPresentTests.cs).
+            if (string.Equals(action.Action, EffectActions.PresentUi, StringComparison.OrdinalIgnoreCase))
+            {
+                ExecPresentUi(grant, ev, merged);
+                continue;
+            }
+
             if (string.Equals(action.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
             {
                 var packet = DamagePacketBuilder.FromOverlay(
@@ -485,7 +573,9 @@ public sealed class EffectBag
                     CombatRng,
                     CombatMath,
                     _lastSkipped,
-                    ShieldGate);
+                    ShieldGate,
+                    ActorResolve,
+                    onDamageApplied: OnDamageApplied);
                 continue;
             }
 
@@ -553,7 +643,9 @@ public sealed class EffectBag
             CombatRng,
             CombatMath,
             _lastSkipped,
-            ShieldGate);
+            ShieldGate,
+            ActorResolve,
+            onDamageApplied: OnDamageApplied);
     }
 
     /// <summary>
@@ -623,12 +715,117 @@ public sealed class EffectBag
         }
     }
 
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): <c>ui.present</c>'s own executor — read-only by construction
+    /// (see the caller's own comment). No target resolution needs a <c>target</c> param (the kind
+    /// declares none, matching <c>resource.delta</c>/<c>status.apply</c>'s "the target comes from the
+    /// event" precedent) — <see cref="ResolvePresentTargetPtr"/> mirrors the injector's own
+    /// <c>ResolveStatusTargetPtr</c> exactly (event TargetPtr, falling back to ActorPtr).
+    ///
+    /// <para><c>op:number</c> reuses the Funnel's existing merge/throttle-tested floater path
+    /// (<see cref="IDamageFxSink"/>/<c>DamageFxDto.MergedCount</c>) rather than a bespoke one — the
+    /// 2026-08 perf audit's own discipline, restated in §3's "no present on the per-hit path
+    /// uncached" rule. <c>op:meter</c>/<c>op:banner</c> go through <see cref="UiPresent"/>, null-safe
+    /// with a named skip (matching <see cref="ShieldGate"/>'s own "runtime-missing" shape) since
+    /// neither has a Funnel-level merge queue of its own.</para>
+    /// </summary>
+    void ExecPresentUi(EffectGrant grant, EffectEventDto ev, Dictionary<string, object?> merged)
+    {
+        var op = JsonOverlay.GetString(merged, "op");
+        switch (op)
+        {
+            case "number":
+            {
+                var targetPtr = ResolvePresentTargetPtr(ev);
+                if (string.IsNullOrEmpty(targetPtr))
+                {
+                    _lastSkipped.Add(grant.GrantId + ":present-no-target");
+                    return;
+                }
+
+                var tagStr = JsonOverlay.GetString(merged, "tag");
+                var tag = !string.IsNullOrEmpty(tagStr)
+                    && Enum.TryParse<DamageFxTag>(tagStr, ignoreCase: true, out var parsed)
+                        ? parsed
+                        : DamageFxTag.Neutral;
+
+                Funnel?.EnqueuePresent(new DamageFxDto
+                {
+                    TargetPtr = targetPtr,
+                    Amount = (long)JsonOverlay.GetDouble(merged, "amount"),
+                    Tag = tag,
+                    Fx = "float",
+                    MergedCount = 1,
+                });
+                return;
+            }
+
+            case "meter":
+            {
+                if (UiPresent == null)
+                {
+                    _lastSkipped.Add(grant.GrantId + ":hud-runtime-missing");
+                    return;
+                }
+
+                var targetPtr = ResolvePresentTargetPtr(ev);
+                if (string.IsNullOrEmpty(targetPtr))
+                {
+                    _lastSkipped.Add(grant.GrantId + ":present-no-target");
+                    return;
+                }
+
+                var meterId = JsonOverlay.GetString(merged, "meterId") ?? "";
+                // §3: ratio's per-mille magnitude divides by 1000 exactly once, last, right here at
+                // the boundary into the 0..1 ratio IUiPresentSink/ActorHudMeter carries.
+                var ratio = JsonOverlay.GetDouble(merged, "ratio") / 1000.0;
+                UiPresent.SetMeter(targetPtr, meterId, ratio);
+                return;
+            }
+
+            case "banner":
+            {
+                if (UiPresent == null)
+                {
+                    _lastSkipped.Add(grant.GrantId + ":hud-runtime-missing");
+                    return;
+                }
+
+                var bannerId = JsonOverlay.GetString(merged, "bannerId") ?? "";
+                int? durationMs = merged.ContainsKey("durationMs")
+                    ? JsonOverlay.GetInt(merged, "durationMs")
+                    : null;
+                UiPresent.ShowBanner(bannerId, durationMs);
+                return;
+            }
+
+            default:
+                // AtomKindRegistry.Validate's own op vocabulary already refuses this at bind time --
+                // defence in depth, a named skip rather than a silent no-op if reached anyway.
+                _lastSkipped.Add(grant.GrantId + ":present-unknown-op");
+                return;
+        }
+    }
+
+    /// <summary>Prefer event TargetPtr; if empty, use ActorPtr — the same precedence
+    /// <c>InjectorEffectActionSink.ResolveStatusTargetPtr</c> uses for FA2/FA10.</summary>
+    static string ResolvePresentTargetPtr(EffectEventDto ev)
+    {
+        if (!string.IsNullOrEmpty(ev.TargetPtr)) return ev.TargetPtr!;
+        if (!string.IsNullOrEmpty(ev.ActorPtr)) return ev.ActorPtr!;
+        return "";
+    }
+
     public int TickDots()
     {
-        var now = UtcNow();
         var n = 0;
         if (Status != null)
         {
+            // Gate 0: UtcNow() moved inside this branch — it now throws if unset (see the property's
+            // own doc comment), and a caller with no Status wired must not pay for a clock it never
+            // uses. Reading it unconditionally, as this used to, meant every TickDots() call — even
+            // on a boardless/statusless harness — required a wired clock for a value it then discarded.
+            var now = UtcNow();
             var sink = new StatusFunnelPulseSink(
                 BoardSnapshot,
                 new EffectEventDto { Trigger = EffectTriggers.OnTimer, ChainDepth = 0 },
@@ -639,7 +836,9 @@ public sealed class EffectBag
                 _lastSkipped,
                 effectId: null,
                 pluginId: null,
-                shieldGate: ShieldGate);
+                shieldGate: ShieldGate,
+                actorResolve: ActorResolve,
+                onDamageApplied: OnDamageApplied);
             n = Status.Tick(now, sink, BoardSnapshot, StatusRng);
         }
 

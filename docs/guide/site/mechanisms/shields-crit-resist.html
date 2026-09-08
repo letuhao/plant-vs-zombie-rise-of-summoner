@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Shields, crits, and resistance are how hits fail, land soft, or land hard — the same combat language on the lawn and in later battles." />
+    <title>Shields, crit, and resistance — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/shields-crit-resist.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Combat language · every place
+        </p>
+        <h1 class="teach-title">Shields, crit, and resistance</h1>
+        <p class="teach-hook"><strong>Shields</strong>, <strong>crits</strong>, and <strong>resistance</strong> are how hits fail, land soft, or land hard — the same combat language on the lawn and in later battles.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Shield</dt>
+              <dd>An element-typed absorb pool that takes RPG damage before HP. Not a flavour bar and not the lawn plant’s armour sprite.</dd>
+            </div>
+            <div>
+              <dt>Crit</dt>
+              <dd>A hit that lands hard when the roll says so — not a separate damage type.</dd>
+            </div>
+            <div>
+              <dt>Miss</dt>
+              <dd>Hits can fail. Absence of damage is a real outcome, not a UI glitch.</dd>
+            </div>
+            <div>
+              <dt>Resistance</dt>
+              <dd>Two-phase: a status can fail to apply, or apply weaker. Not “immune forever” by default.</dd>
+            </div>
+            <div>
+              <dt>One resolver</dt>
+              <dd>One damage path produces the number. Lawn and server battles share that honesty.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Internal cooldowns stop the same interaction from chaining into soup.</li>
+            <li>You read shields and statuses under pressure on the <a href="lawn-mirror-hud.html">lawn unit HUD</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Layered defence in front of health, plus hit outcomes that can miss or crit.</p>
+          <p>Resistance is about statuses failing or landing soft — not a second health bar.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Three layers most players watch:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  hit  -&gt;  (miss?)  -&gt;  shields absorb  -&gt;  remaining to HP
+       +-&gt;  crit can land hard
+  status apply  -&gt;  resist fail / weaker / full
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Shields</strong>
+              <p>Element-typed pools absorb RPG damage before it reaches HP.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Hits</strong>
+              <p>Can miss. Can crit. One resolver writes the damage number.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Resistance</strong>
+              <p>A status may fail to stick, or stick weaker. Cooldowns keep chains honest.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On the board and in builds</h3>
+            <ol>
+              <li>During a lawn match, open Lawn and read shield and status chips on the unit HUD.</li>
+              <li>Build for crit and resist through gear, <a href="aptitudes.html">aptitudes</a>, and specimen traits — not by inventing a private chart.</li>
+              <li>In later battles, expect the same words: shield, miss, crit, resist.</li>
+            </ol>
+            <p class="teach-note">Exact rates move with balance. Trust the feedback on screen.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Start a lawn match with the control room open on Lawn.</li>
+            <li>Find a unit with a shield chip and watch it take hits before HP moves.</li>
+            <li>Note a status that fails to stick or lands soft — that is resistance talking.</li>
+          </ol>
+          <p class="teach-note">Statuses themselves: <a href="../../mechanisms/statuses.md">statuses</a>. Element story: <a href="element-ring.html">six elements and omni</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is a shield the same as plant armour in the base game?</dt>
+              <dd>No. Overlay shields are RPG absorb pools typed by element — read them on the unit HUD.</dd>
+            </div>
+            <div>
+              <dt>Do lawn and web fights use different damage math?</dt>
+              <dd>No. One resolver — same honesty in both places.</dd>
+            </div>
+            <div>
+              <dt>Does resist mean immune?</dt>
+              <dd>Not by default. Resist can mean fail-to-apply or apply-weaker.</dd>
+            </div>
+            <div>
+              <dt>Can I stack the same proc forever?</dt>
+              <dd>Internal cooldowns exist so the same interaction does not soup the board.</dd>
+            </div>
+            <div>
+              <dt>Where do I build for crit?</dt>
+              <dd>Gear, aptitudes, and specimen traits — watch combat feedback rather than a secret table.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/statuses.md">Statuses</a>
+          </p>
+          <p>
+            Related:
+            <a href="element-ring.html">Six elements and omni</a> ·
+            <a href="../../mechanisms/statuses.md">Statuses</a> ·
+            <a href="lawn-mirror-hud.html">Live mirror and unit HUD</a> ·
+            <a href="aptitudes.html">Free-build aptitudes</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/shields-crit-resist.md">Markdown (editable SSOT)</a> ·
+            <a href="../../combat.md">Combat</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/shields-crit-resist.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "done": {
+    "droptable-draw-d1-000": {
+      "entryId": "droptable.d1-011",
+      "name": "Verdant Reliquary"
+    },
+    "droptable-draw-d1-001": {
+      "entryId": "droptable.d1-012",
+      "name": "Banner Offering"
+    },
+    "droptable-draw-d1-002": {
+      "entryId": "droptable.d1-013",
+      "name": "Ward Stockpile"
+    }
+  },
+  "schemaVersion": 1
+}

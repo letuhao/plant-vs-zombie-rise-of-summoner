@@ -35,19 +35,177 @@ public static class CheatState
     /// <see cref="CheatState"/> was first touched. Lazy, same pattern as <see cref="PowerIndex"/>
     /// itself, so first evaluation happens on first actual stat resolve rather than at class-load.</summary>
     /// <summary>class-system-todo.md P2.4 (2026-08-27): now also passes AptitudeTuningHub.Tuning, so
-    /// the overlay's aptitude resolve is actually live — inert (allocation defaults to Empty, P6's
-    /// AllocationStore doesn't exist yet) but exercised through the real ActorHub.Register seam,
-    /// exactly as spec-aptitude-resolve.md §2 requires ("via ActorHub.Register", not merely capable
-    /// of it). Both hosts already call AptitudeTuningHub.Configure at startup (P2.3), so this read is
-    /// safe by the time anything touches ActorHub.</summary>
+    /// the overlay's aptitude resolve is actually live. aura-skill T5 (W1, 2026-08-30): the stale half
+    /// of this comment — "allocation defaults to Empty, P6's AllocationStore doesn't exist yet" — is
+    /// corrected here rather than left to rot: AllocationStore (`RpgStore.LoadAllocation`) has existed
+    /// and been tested since point-economy landed, it simply had zero production callers until
+    /// <see cref="CommanderAllocationSource"/> below became the first one. Exercised through the real
+    /// ActorHub.Register seam, exactly as spec-aptitude-resolve.md §2 requires ("via
+    /// ActorHub.Register", not merely capable of it). Both hosts already call
+    /// AptitudeTuningHub.Configure at startup (P2.3), so this read is safe by the time anything
+    /// touches ActorHub.</summary>
     public static ActorHub ActorHub => _actorHub ??= ActorHubBootstrap.CreateDefault(
-        Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+        Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
+        // species-build `allocation-transport` (module 6): was CommanderAllocation.Resolve directly;
+        // now routed through SpeciesAllocation, which merges the SAME cached commander allocation with
+        // whichever species this ctx's (Side, TypeId) resolves to — one merged AptitudeAllocation, one
+        // resolve, never two scopes resolved separately and concatenated.
+        aptitudeAllocation: SpeciesAllocation.Resolve,
+        // The lawn's `stat.derived` consumer (decisions.md "Derived-write lawn executor", 2026-08-30).
+        // Registering it here is what lets the AtomKindRegistry Lawn cell be `Full` without recreating
+        // D6's "binds accepted, nothing applied" state.
+        // Fully qualified on purpose: a bare `Stats.` here is ambiguous with this class's own
+        // `Stats` StatSystem property.
+        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For,
+        // mechanism-wiring G1's injector half (spec-mechanism-wiring.md §4.1): registers the fourth
+        // IActorStatSubsystem so a status's own `stat.<combat.*|status.*>.<op>` writes reach the
+        // composed value instead of landing in the primary bag no subsystem reads. Additive next to
+        // boundDerivedAtoms above — same opt-in shape, same fully-qualified-on-purpose reason.
+        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For);
+
+    /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
+    /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server
+    /// (`CommanderAllocationSource`'s own doc comment). Populated by
+    /// <see cref="ApplyCommanderAllocation"/>, called from <c>RpgClient.RefreshCommanderAllocationAsync</c>
+    /// at session start and on the server's <c>"AptitudesUpdated"</c> SignalR broadcast — never on a
+    /// per-hit poll.</summary>
+    public static readonly FusionRpg.Core.Stats.Aptitudes.CommanderAllocationSource CommanderAllocation =
+        new(() => FusionRpg.Core.Commanders.MatchCommanderSnapshotHolder.ResolveAllocation(_fetchedCommanderAllocation));
+    static FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation _fetchedCommanderAllocation =
+        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+
+    /// <summary>Latest commander allocation from server poll — used when building match snapshot cache.</summary>
+    internal static FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation FetchedCommanderAllocation =>
+        _fetchedCommanderAllocation;
+
+    /// <summary>Called from the transport (<c>RpgClient.RefreshCommanderAllocationAsync</c>) after a
+    /// successful fetch. Stores the value and immediately refreshes the cache on this same call —
+    /// never touched from a hot-path stat resolve.</summary>
+    public static void ApplyCommanderAllocation(FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation allocation)
+    {
+        _fetchedCommanderAllocation = allocation;
+        RefreshCommanderAllocationCache();
+        // A commander reallocation changes what every living entity resolves to, so it is a stat
+        // invalidation like any other. Without this the new allocation only reached entities spawned
+        // AFTER it (owner-observed live 2026-08-30: reallocating mid-match changed nothing until the
+        // injector reconnected). Invalidate is edge-triggered -- ConsumeDirty clears it -- so this
+        // costs one reapply per real allocation change, not per frame.
+        Stats.Invalidate();
+    }
+
+    /// <summary>Edge-triggered sync of <see cref="CommanderAllocation"/> hot-path cache — match
+    /// start/end and allocation poll, never per stat resolve.
+    ///
+    /// <para>`species-build` T0.1/T0.2: `AptitudeSubsystem`'s per-entity memo needs no explicit
+    /// invalidation from here — it self-corrects by checking the allocation's own object reference on
+    /// every read, so `CommanderAllocation.Refresh()` replacing `_cached` with a new instance is
+    /// already sufficient (see that type's own doc comment for why an earlier draft's explicit-bump
+    /// design was wrong: it could not cover a Core-only caller that never goes through
+    /// `CheatState`).</para></summary>
+    internal static void RefreshCommanderAllocationCache() => CommanderAllocation.Refresh();
+
+    // ---- species-build `allocation-transport` (module 6) --------------------------------------
+
+    /// <summary>The injector-side cache `spec-allocation-transport.md`'s own "Injector side" section
+    /// describes: keyed by speciesId, holding each species' EFFECTIVE allocation exactly as the server
+    /// computed it (baseline composed with any override — this cache never needs the plan, the level,
+    /// or the budget rule, matching the spec's own "it receives points" framing). Replaced wholesale on
+    /// each refresh, at exactly the existing commander-cache cadence (StartAsync, reconnect,
+    /// AptitudesUpdated, match edges) — never a per-entity fetch, never a poll of its own.</summary>
+    static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _speciesAllocations =
+        new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+
+    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>DemonSpeciesCatalog.All</c> and
+    /// cached for the process lifetime (`catalog-runtime`'s own "loaded once, immutable" rule — the
+    /// SAME precedent <c>LawnElementResolverHost</c> already established for the element-resolve case).
+    /// <see cref="FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
+    /// throwing, so an un-configured catalog is a distinguishable <see cref="FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured"/>
+    /// answer rather than an exception or a silent empty-index miss (the exact bootstrap-window hazard
+    /// spec-allocation-transport.md calls out by name).</summary>
+    static readonly object SpeciesIndexGate = new();
+    static FusionRpg.Core.Demons.LawnElementIndex? _speciesIndex;
+
+    static FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult ResolveSpeciesLookup(StatSide side, int typeId)
+    {
+        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured)
+            return FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured;
+
+        FusionRpg.Core.Demons.LawnElementIndex index;
+        lock (SpeciesIndexGate)
+            index = _speciesIndex ??= new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+
+        var sideText = side == StatSide.Zombie ? "zombie" : "plant";
+        return index.TryGet(sideText, typeId, out var species)
+            ? FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.Hit(species.SpeciesId)
+            : FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NoSpecies;
+    }
+
+    /// <summary><see cref="FusionRpg.Core.Stats.Aptitudes.CommanderAllocationSource.Resolve"/> ignores
+    /// its parameter entirely (it is scoped to the local injector's one active commander, not per-ctx)
+    /// — this shared instance avoids allocating a throwaway <see cref="StatContext"/> on every read.
+    /// Declared BEFORE <see cref="SpeciesAllocation"/> below purely to satisfy the nullable analyzer's
+    /// linear, declaration-order view of static field initializers (a real build surfaced the warning:
+    /// runtime behavior was always correct either way, since a lambda captures a field by reference
+    /// and every static field finishes initializing before ANY of them is first used — see the
+    /// reordering's own point, it's a warning fix, not a behavior fix).</summary>
+    static readonly StatContext DummyStatContextForCommanderRead = new();
+
+    /// <summary>Commander merged with whichever species this ctx resolves to — the ONE place
+    /// `ActorHub`'s `aptitudeAllocation` delegate reads. A `LawnElementIndex` not yet configured is
+    /// reported once per call (via <c>RpgHost.Log.Warning</c>, matching <c>LawnElementResolverHost</c>'s
+    /// own reporting convention) rather than silently resolving commander-only forever.</summary>
+    public static readonly FusionRpg.Core.Stats.Aptitudes.SpeciesAllocationSource SpeciesAllocation = new(
+        resolveSpeciesId: ResolveSpeciesLookup,
+        resolveSpeciesAllocation: speciesId => _speciesAllocations.TryGetValue(speciesId, out var a)
+            ? a : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty,
+        resolveCommanderAllocation: _ => CommanderAllocation.Resolve(DummyStatContextForCommanderRead),
+        reportUnconfigured: msg => RpgHost.Log.Warning(msg));
+
+    /// <summary>Called from the transport (`RpgClient.RefreshCommanderAllocationAsync`, extended to
+    /// parse the SAME response's new `species` map alongside `shares` — one fetch, both caches, never
+    /// a second HTTP round trip) after a successful fetch. Replaces the whole cache — never an
+    /// incremental merge, so a species the player no longer has levelled (impossible today, since a
+    /// species row is never deleted, but matching the commander cache's own "wholesale replace"
+    /// contract) cannot leave a stale entry behind.</summary>
+    public static void ApplySpeciesAllocations(
+        IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> bySpeciesId)
+    {
+        _speciesAllocations = bySpeciesId ?? throw new ArgumentNullException(nameof(bySpeciesId));
+        Stats.Invalidate();
+    }
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
     /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
     /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,
     /// so evaluating this eagerly at class-load would crash startup, not just read Theta=0.</summary>
     public static FusionRpg.Core.Power.IPowerIndexProvider PowerIndex =>
         _powerIndex ??= new InjectorPowerIndexProvider(FusionRpg.Core.Power.PowerTuningHub.Tuning);
+
+    /// <summary>aura-skill T6 (W2): the hydration source `InjectorPowerIndexProvider.Hydrate` never
+    /// had — called from `RpgClient.RefreshPowerIndexAsync` at session start / on demand, never per
+    /// hit. `PowerIndex` stays typed as the interface publicly (no existing consumer needs the
+    /// concrete type); this is the one place that needs `Hydrate`, so it casts locally instead of
+    /// widening the public property's type for a single internal caller.</summary>
+    public static void ApplyPowerSnapshot(long playerId, FusionRpg.Core.Power.ActorLadderSnapshot snapshot)
+    {
+        if (PowerIndex is InjectorPowerIndexProvider hydratable)
+            hydratable.Hydrate(new StatContext { PlayerId = playerId }, snapshot);
+        CurrentPlayerId = playerId;
+    }
+
+    /// <summary>Found 2026-08-30 verifying aura-skill's commander-lawn bridge against a real lawn:
+    /// `EntityApply.cs`'s per-plant/zombie `ctx` used `CheatState.PvzStatsPlayerId` for `StatContext.
+    /// PlayerId` — an unrelated field, only ever set when the optional PvzStats-scaling feature has
+    /// content for this player, which is a legitimately common state for a player who has never
+    /// touched it. `HydratedPowerIndexProvider.Key` (`IPowerIndexProvider.cs:60`) includes `PlayerId`,
+    /// so a mismatch here silently hydrates Θ under key `"1:Plant:0"` (this method, above) while every
+    /// spawn/apply resolve looks it up under `"0:Plant:0"` — `ActorIndex` returns Θ=0 for the miss, and
+    /// `AptitudeReadFunctions.Magnitude`'s `kMilli * sharePow * pTheta` formula collapses to 0
+    /// regardless of aptitude share once `pTheta` is 0. This field is set from the exact same call that
+    /// hydrates Θ, so the two can never disagree about which player's ctx a resolve is for — the actual
+    /// bug (a real, empirically observed live-lawn miss: 222 commander points in `Might` produced zero
+    /// change in a spawned plant's written `attackDamage`) traced to this exact mismatch via the
+    /// formula above, not fixed blind.</summary>
+    public static long CurrentPlayerId { get; private set; }
     public static IntPtr SelectedPtr;
     public static string SelectedSide = "";
     static int _spawnCol = 3;
@@ -83,6 +241,22 @@ public static class CheatState
     public static long PvzStatsRevision { get; private set; }
     public static long AppliedPvzStatsRevision { get; private set; } = -1;
     public static long PvzStatsPlayerId { get; private set; }
+
+    /// <summary>aura-skill T21b: ptr → owning-player-id, for `SpecimenOwnershipOracle` (Core). Set once
+    /// at spawn time from `pvz.spawn.extra`'s own `playerId` field (`UniqueActorService.DeployAsync`
+    /// already sends it, Server → Injector — this is the first place anything reads it back).
+    /// Never one-shot/consumed (unlike `SpawnSourceByPtr`) — ownership must answer repeatedly for the
+    /// entity's whole lifetime, not just its first read.</summary>
+    static readonly ConcurrentDictionary<string, long> SpecimenOwnerByPtr = new();
+
+    public static void RegisterSpecimenOwner(string ptr, long playerId)
+    {
+        if (string.IsNullOrWhiteSpace(ptr) || playerId <= 0) return;
+        SpecimenOwnerByPtr[ptr] = playerId;
+    }
+
+    public static long? TryGetSpecimenOwner(string ptr) =>
+        !string.IsNullOrWhiteSpace(ptr) && SpecimenOwnerByPtr.TryGetValue(ptr, out var pid) ? pid : null;
 
     /// <summary>One-shot dump source override for next plant/zombie spawn emit (PvzIntent).</summary>
     public static string? PendingSpawnSourceTag;
@@ -150,6 +324,10 @@ public static class CheatState
             Get("SYS-EMIT-PROOF").Enabled = true;
             Get("SYS-DAMAGE-FX").Enabled = true;
             Get("SYS-ELEMENT-FX").Enabled = true;
+            // T8: C1-C13 proved green on a real MelonLoader 3.9 lawn 2026-08-30 (docs/research/
+            // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
+            // §7's own "only after the proof" rule.
+            Get("OVERLAY-COMBAT").Enabled = true;
             // Schema defaults are not user-set; Effective* applies display defaults when IsSet=false.
         }
         SyncLocalStatsFromEntries();
@@ -196,6 +374,15 @@ public static class CheatState
         return (int)Math.Round(v);
     }
 
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long` channel this class had none of — <see cref="FVal"/>
+    /// stores through `SetFloat` -&gt; `double` -&gt; read back as `float`, and `float` stops being
+    /// integer-exact at 16,777,216 (CLAUDE.md's own overflow table, row 1), well inside what a cursed
+    /// <c>zombieStartAmmor</c> can reach. <see cref="LVal"/> reads <see cref="CheatEntry.LongValue"/>
+    /// directly — no float hop anywhere on this path. Used by <c>E-ZARM</c> only.
+    /// </summary>
+    public static long LVal(string id) => Get(id).LongValue;
+
     public static bool IsUserSet(string id)
     {
         lock (Gate) return Entries.TryGetValue(id, out var e) && e.IsSet;
@@ -229,6 +416,25 @@ public static class CheatState
         if (emitInject) EmitInject(source, "set-float", id, value: v);
         if (id.StartsWith("A-", StringComparison.Ordinal) || id.StartsWith("P-", StringComparison.Ordinal) || id.StartsWith("Z-", StringComparison.Ordinal))
             Stats.Invalidate();
+        MaybeSave();
+    }
+
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long`-preserving sibling of <see cref="SetFloat"/> — used
+    /// by <c>E-ZARM</c> (<c>zombieStartAmmor</c>) only, this kind's one true `long` magnitude. Mirrors
+    /// <see cref="SetFloat"/>'s own shape (board-config lock, inject, save) but never touches
+    /// <see cref="CheatEntry.FloatValue"/>, so nothing here can round-trip through a `float`.
+    /// </summary>
+    public static void SetLong(string id, long v, string source = "web", bool emitInject = true)
+    {
+        var e = Get(id);
+        e.LongValue = v;
+        e.Enabled = true;
+        e.IsSet = true;
+        if (id.StartsWith("E-", StringComparison.Ordinal)) BoardConfigLocked = true;
+        // Telemetry only — the stored value stays the exact long in CheatEntry.LongValue regardless
+        // of what this cast can represent in the injected debug payload.
+        if (emitInject) EmitInject(source, "set-long", id, value: v);
         MaybeSave();
     }
 
@@ -297,6 +503,17 @@ public static class CheatState
     {
         var e = Get(id);
         e.FloatValue = v;
+        e.Enabled = true;
+        e.IsSet = true;
+    }
+
+    /// <summary>The `long`-preserving sibling of <see cref="SetFloatQuiet"/> — E35's
+    /// <c>LoadBoardConfigIntoCheats</c> round-trips <c>E-ZARM</c> through this, not `SetFloatQuiet`,
+    /// so the read-back-from-Unity direction never passes through a `float` either.</summary>
+    public static void SetLongQuiet(string id, long v)
+    {
+        var e = Get(id);
+        e.LongValue = v;
         e.Enabled = true;
         e.IsSet = true;
     }
@@ -467,27 +684,65 @@ public static class CheatState
     }
 
     /// <summary>
-    /// The real-valued absolutes (E16): fire rate, sun rate, creep speed.
+    /// The real-valued absolutes (E16): fire rate, sun rate, creep speed. E38 (spec-entity-fields-
+    /// 12plus.md) adds eight more plant keys the same way — "E16 run a second time".
     ///
-    /// <para>These three used to be written straight to the Unity field from the extras path,
-    /// bypassing the modifier bag — which is why no effect could ever reach them, and why "shoots
-    /// faster" was unauthorable. They are Overrides now, the same shape <c>P-HP</c> and <c>P-ATK</c>
-    /// have always had, so the operator surface is unchanged and there is one path to the field.</para>
+    /// <para>These used to be written straight to the Unity field from the extras path, bypassing
+    /// the modifier bag — which is why no effect could ever reach them, and why "shoots faster" (and
+    /// then "takes +X% damage", E38's own headline case on the zombie side) was unauthorable. They
+    /// are Overrides now, the same shape <c>P-HP</c> and <c>P-ATK</c> have always had, so the
+    /// operator surface is unchanged and there is one path to the field.</para>
     ///
     /// <para>Separate from <see cref="BuildPlantAbsolute"/> because these are fractions and that map
     /// is <c>int</c>: an attack interval of 1.5 seconds would truncate to 1.</para>
+    ///
+    /// <para><b>E38's three guard shapes (§2b), each preserved exactly:</b> P-SHIELD/P-ATK-CD/
+    /// P-PROD-CD/P-LEVEL/P-SHOOTLVL accept a legal zero (<c>&gt;= 0</c> — the same class of key
+    /// <see cref="BuildPlantAbsolute"/>'s own <c>&gt; 0</c> filter would have silently broken, per
+    /// that method's own warning); P-SPEED/P-MOVE keep refusing one (<c>&gt; 0</c> — a zero speed
+    /// freezes the plant, a structural floor, not a balance choice); P-ATK-ADD carries no value
+    /// guard at all (an attack-speed adder is a signed delta by construction, so a negative value is
+    /// ordinary content — <see cref="Stats.Plugins.CheatAbsoluteStatPlugin"/> no longer re-filters
+    /// this map by sign for exactly this reason).</para>
     /// </summary>
     public static Dictionary<string, double> BuildPlantAbsoluteReal()
     {
         var d = new Dictionary<string, double>(StringComparer.Ordinal);
+
+        // >0: a zero interval/speed is refused today and the promotion must not start accepting it.
         void Put(string channel, string id)
         {
             if (!IsUserSet(id)) return;
             var v = FVal(id);
             if (v > 0) d[channel] = v;
         }
+
+        // >=0: a zero is legal and must survive (P-SHIELD "no shield", P-ATK-CD "ready now",
+        // Z-TAKEMULT "immune", …) — the exact shape BuildPlantAbsolute's own int map would drop.
+        void PutGe0(string channel, string id, Func<string, double> read)
+        {
+            if (!IsUserSet(id)) return;
+            var v = read(id);
+            if (v >= 0) d[channel] = v;
+        }
+
         Put(StatChannels.AttackInterval, "P-ATK-INT");
         Put(StatChannels.ProduceInterval, "P-PROD-INT");
+
+        PutGe0(StatChannels.PlantShield, "P-SHIELD", id => IVal(id));
+        PutGe0(StatChannels.AttackCountdown, "P-ATK-CD", id => FVal(id));
+        PutGe0(StatChannels.ProduceCountdown, "P-PROD-CD", id => FVal(id));
+        PutGe0(StatChannels.PlantLevel, "P-LEVEL", id => IVal(id));
+        PutGe0(StatChannels.ShootingLevel, "P-SHOOTLVL", id => IVal(id));
+
+        Put(StatChannels.PlantSpeed, "P-SPEED");
+        Put(StatChannels.PlantMoveSpeed, "P-MOVE");
+
+        // No guard at all (⛔ DECIDED 2026-09-03) — see this method's own doc comment. Do not add
+        // one; EntityFields12PlusGuardTests.P_ATK_ADD_stays_unguarded pins the absence.
+        if (IsUserSet("P-ATK-ADD"))
+            d[StatChannels.AttackSpeedAdder] = FVal("P-ATK-ADD");
+
         return d;
     }
 
@@ -496,6 +751,18 @@ public static class CheatState
         var d = new Dictionary<string, double>(StringComparer.Ordinal);
         if (IsUserSet("Z-SPD-U") && FVal("Z-SPD-U") > 0)
             d[StatChannels.ZombieSpeed] = FVal("Z-SPD-U");
+
+        // E38: same two guard shapes as BuildPlantAbsoluteReal's own note — Z-ARMOR-F/Z-TAKEMULT
+        // accept a legal zero, Z-SPD/Z-SPD-O keep refusing one (a zero speed freezes the zombie).
+        if (IsUserSet("Z-ARMOR-F") && FVal("Z-ARMOR-F") >= 0)
+            d[StatChannels.ArmorFlat] = FVal("Z-ARMOR-F");
+        if (IsUserSet("Z-TAKEMULT") && FVal("Z-TAKEMULT") >= 0)
+            d[StatChannels.TakeDmgMultiplier] = FVal("Z-TAKEMULT");
+        if (IsUserSet("Z-SPD") && FVal("Z-SPD") > 0)
+            d[StatChannels.ZombieSpeedCurrent] = FVal("Z-SPD");
+        if (IsUserSet("Z-SPD-O") && FVal("Z-SPD-O") > 0)
+            d[StatChannels.ZombieOriginSpeed] = FVal("Z-SPD-O");
+
         return d;
     }
 
@@ -776,6 +1043,11 @@ public sealed class CheatEntry
     public string Kind { get; set; } = "toggle";
     public bool Enabled { get; set; }
     public double FloatValue { get; set; }
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long` channel — separate from <see cref="FloatValue"/> on
+    /// purpose, so a value stored here never passes through a `float`. Used by <c>E-ZARM</c> only.
+    /// </summary>
+    public long LongValue { get; set; }
     /// <summary>False = unset (absent for apply). True = user/web explicitly set.</summary>
     public bool IsSet { get; set; }
 }

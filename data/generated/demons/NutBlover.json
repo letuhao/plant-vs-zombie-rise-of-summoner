@@ -1,0 +1,48 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1255,
+  "magnitudes": {
+    "combat.block.strength.omni": 475,
+    "combat.defense.omni": 285,
+    "combat.parry.strength.omni": 475,
+    "combat.shield.capacity.omni": 10306,
+    "combat.shield.regen.omni": 122,
+    "combat.shield.toughness.omni": 461,
+    "progression.bonus.arm1": 2531,
+    "progression.bonus.arm2": 1085,
+    "progression.bonus.defense": 1898,
+    "progression.bonus.maxHp": 1627,
+    "resource.max.hp": 11752,
+    "resource.max.hunger": 7322,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 7956,
+    "resource.regen.hp": 18,
+    "resource.regen.hunger": 294,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 429
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "NutBlover",
+  "theta": 13,
+  "traitPool": [
+    "damage-absorption",
+    "levitation",
+    "passive-regeneration"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "cursed",
+    "normal"
+  ]
+}

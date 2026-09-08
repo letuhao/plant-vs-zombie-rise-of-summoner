@@ -66,6 +66,33 @@ public static class CheatCommandRunner
                 _ = RpgHost.Client.RefreshPvzStatsAsync();
             return;
         }
+        if (name is "aptitudes.allocation.reload")
+        {
+            if (RpgHost.Client != null)
+            {
+                _ = RpgHost.Client.RefreshCommanderAllocationAsync();
+                _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
+            }
+            return;
+        }
+        if (name is "commander.snapshot.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
+            return;
+        }
+        if (name is "lawn-deploy.roster.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshLawnDeployRosterCacheAsync();
+            return;
+        }
+        if (name is "power.index.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshPowerIndexAsync();
+            return;
+        }
         if (name is "pvz.spawn.extra")
         {
             var p = PayloadJson(cmd.Payload);
@@ -81,7 +108,8 @@ public static class CheatCommandRunner
             var side = Str(p, "side") ?? "zombie";
             var instanceId = Str(p, "instanceId");
             var loadoutJson = LoadoutJsonFromPayload(p);
-            CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson);
+            var playerId = LongProp(p, "playerId", 0L);
+            CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson, playerId);
             return;
         }
         if (name is "unique.binding.clear")
@@ -357,6 +385,12 @@ public static class CheatCommandRunner
             case "debug.effect.enqueue-delta":
                 RunEnqueueDelta(p);
                 break;
+            case "debug.scope.start-own-side":
+                RunScopeStartOwnSide(p);
+                break;
+            case "debug.scope.stop-own-side":
+                FusionRpg.Injector.Effects.DebugScopeRuntime.StopOwnSide();
+                break;
             case "debug.shield.grant":
                 RunShieldGrant(p);
                 break;
@@ -469,7 +503,8 @@ public static class CheatCommandRunner
                     var side = Str(payload, "side") ?? "zombie";
                     var instanceId = Str(payload, "instanceId");
                     var loadoutJson = LoadoutJsonFromPayload(payload);
-                    CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson);
+                    var playerId = LongProp(payload, "playerId", 0L);
+                    CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson, playerId);
                 }
                 else if (name.StartsWith("debug.", StringComparison.Ordinal))
                     RunDebug(name, payload);
@@ -853,6 +888,7 @@ public static class CheatCommandRunner
             ["maxHp"] = result.Instance?.MaxHp ?? 0,
             ["evicted"] = result.Evicted?.ShieldId ?? ""
         });
+        try { Hud.ActorHudCache.MarkDirty(ptr); } catch { }
     }
 
     /// <summary>debug.shield.clear — RemoveAll on target/selected (no Funnel write).</summary>
@@ -886,6 +922,7 @@ public static class CheatCommandRunner
             ["targetPtr"] = ptr!,
             ["removed"] = before
         });
+        try { Hud.ActorHudCache.MarkDirty(ptr); } catch { }
     }
 
     /// <summary>
@@ -1161,7 +1198,7 @@ public static class CheatCommandRunner
     }
 
     /// <summary>
-    /// debug.shield.bar-status — one-shot pipeline audit: shield data + body resolve + last OnGUI draw diag.
+    /// debug.shield.bar-status — one-shot pipeline audit: shield data + body resolve + last HUD draw diag.
     /// Prefer this over polling many events for HUD proof.
     /// </summary>
     static void RunShieldBarStatus(JsonElement p)
@@ -1303,7 +1340,8 @@ public static class CheatCommandRunner
                     Effects.EffectRuntime.Bag.CombatRng,
                     Effects.EffectRuntime.Bag.CombatMath,
                     skipped: null,
-                    shieldGate: Effects.EffectRuntime.Bag.ShieldGate);
+                    shieldGate: Effects.EffectRuntime.Bag.ShieldGate,
+                    actorResolve: Effects.EffectRuntime.Bag.ActorResolve);
             }
             else if (amount != 0)
             {
@@ -1467,7 +1505,7 @@ public static class CheatCommandRunner
             return;
         }
 
-        var hostPtr = Str(p, "hostPtr") ?? Str(p, "targetPtr");
+        var hostPtr = Str(p, "hostPtr") ?? Str(p, "targetPtr") ?? Str(p, "ptr");
         if (string.IsNullOrWhiteSpace(hostPtr) && CheatState.SelectedPtr != IntPtr.Zero)
             hostPtr = CheatState.SelectedPtr.ToString("X");
         if (string.IsNullOrWhiteSpace(hostPtr))
@@ -1477,7 +1515,7 @@ public static class CheatCommandRunner
         }
 
         var attackerPtr = Str(p, "attackerPtr");
-        var durationMs = IntProp(p, "durationMs", 4000);
+        var durationMs = ResolveStatusApplyDurationMs(p);
         var amount = LongProp(p, "amount", 0);
         var now = DateTimeOffset.UtcNow;
         var runtime = Effects.EffectRuntime.Status;
@@ -1531,10 +1569,25 @@ public static class CheatCommandRunner
         }
 
         var key = ptr.Trim();
-        var derived = InjectorStatusBridge.ResolveDerived(key, attackerLess: false);
+        var (derived, contributions) = InjectorStatusBridge.ResolveDerivedWithContributions(key, attackerLess: false);
         var channels = derived.Channels
             .OrderBy(kv => kv.Key, StringComparer.Ordinal)
-            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+            .ToDictionary(
+                kv => kv.Key,
+                kv => (object)new Dictionary<string, object>
+                {
+                    ["value"] = kv.Value,
+                    ["contributions"] = contributions.ContributionsFor(kv.Key)
+                        .Select(c => new Dictionary<string, object>
+                        {
+                            ["sourceId"] = c.SourceId,
+                            ["label"] = ContributionSourceIds.FictionLabel(c.SourceId),
+                            ["op"] = c.Op.ToString(),
+                            ["value"] = c.Value
+                        })
+                        .ToList()
+                },
+                StringComparer.Ordinal);
         DebugRuntime.Emit("debug.actor-derived", new Dictionary<string, object>
         {
             ["ptr"] = key,
@@ -1780,6 +1833,68 @@ public static class CheatCommandRunner
         return string.IsNullOrEmpty(raw) ? null : raw;
     }
 
+    /// <summary>
+    /// T11 test harness (buff-debuff-scope-todo.md): wires a live `BattlefieldOwnSideReactor` to this
+    /// match's real `EffectBag`/`MembershipChanged`. Params: `effectId` (required), `pluginId` (default
+    /// "debug-scope"), `relation` ("ally"/"enemy", default "ally"), `atomKindId` (default
+    /// "resource.delta" — the normal per-entity-grant case), `channel` (optional), `host` ("sim"/"live",
+    /// default "live" — this command only makes sense against a real running match). A G8-shaped
+    /// kind/channel/host combination throws `ScopeUnsupportedException` here, live — the same refusal
+    /// T10's own tests already proved against `BattleEffectHost`, now reachable from a real match.
+    /// </summary>
+    static void RunScopeStartOwnSide(JsonElement p)
+    {
+        try
+        {
+            var effectId = Str(p, "effectId");
+            if (string.IsNullOrWhiteSpace(effectId))
+            {
+                CheatState.Error("debug.scope.start-own-side: effectId required");
+                return;
+            }
+
+            var pluginId = Str(p, "pluginId") ?? "debug-scope";
+            var atomKindId = Str(p, "atomKindId") ?? "resource.delta";
+            var channel = Str(p, "channel");
+
+            var hostText = Str(p, "host") ?? "live";
+            if (!FusionRpg.Core.Scope.ScopeHosts.TryParse(hostText, out var host))
+            {
+                CheatState.Error("debug.scope.start-own-side: unknown host '" + hostText + "' (want sim|live)");
+                return;
+            }
+
+            var relationText = Str(p, "relation") ?? "ally";
+            if (!FusionRpg.Contracts.RelationKinds.TryParse(relationText, out var relation))
+            {
+                CheatState.Error("debug.scope.start-own-side: unknown relation '" + relationText + "' (want ally|enemy)");
+                return;
+            }
+
+            FusionRpg.Injector.Effects.DebugScopeRuntime.StartOwnSide(effectId!, pluginId, atomKindId, host, channel, relation);
+            DebugRuntime.Emit("debug.scope.started", new Dictionary<string, object>
+            {
+                ["effectId"] = effectId!,
+                ["pluginId"] = pluginId,
+                ["atomKindId"] = atomKindId,
+                ["host"] = hostText,
+                ["relation"] = relationText
+            });
+        }
+        catch (FusionRpg.Core.Scope.ScopeUnsupportedException ex)
+        {
+            // The G8 refusal, live: proves T11's own criterion 4 the same way T10's tests already
+            // proved it against BattleEffectHost — this kind/host/channel combination is legal only
+            // as the side-wide-constant shape, so this command refuses rather than issuing a grant.
+            CheatState.Error("debug.scope.start-own-side: ScopeUnsupported — " + ex.Message);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.scope.start-own-side: " + ex.Message);
+            DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object> { ["error"] = ex.Message });
+        }
+    }
+
     static void RunEffectGrant(JsonElement p)
     {
         try
@@ -1970,6 +2085,21 @@ public static class CheatCommandRunner
 
     static int IntProp(JsonElement p, string name, int fallback) =>
         p.ValueKind == JsonValueKind.Object && p.TryGetProperty(name, out var el) && el.TryGetInt32(out var i) ? i : fallback;
+
+    /// <summary>debug.status.apply: durationMs wins; else duration (seconds, float) → ms; else 4000.</summary>
+    static int ResolveStatusApplyDurationMs(JsonElement p)
+    {
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("durationMs", out var msEl) && msEl.TryGetInt32(out var ms))
+            return ms;
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("duration", out var secEl))
+        {
+            if (secEl.TryGetDouble(out var sec))
+                return (int)Math.Max(1, Math.Round(sec * 1000.0));
+            if (secEl.TryGetInt32(out var secInt))
+                return Math.Max(1, secInt * 1000);
+        }
+        return 4000;
+    }
 
     static long LongProp(JsonElement p, string name, long fallback)
     {

@@ -22,10 +22,12 @@ from __future__ import annotations
 from ..adapters.items.acquisition import Acquisition
 from .model import Ctx, Finding, Loop, Metric, Severity
 
-# core.v1.json roles.list, the two rows with hybridEligible: false. Hard-coded rather than read,
-# matching the ported source's own reasoning: this must keep working on synthetic fixtures that
-# ship no registry. Both are stable ids in an append-only registry.
-NON_HYBRID_ROLES = frozenset({"ward-array", "jewel-minor-b"})
+# core.v1.json roles.list, the three rows with hybridEligible: false (D30, registryVersion 2,
+# 2026-09-04 — D3 wins over the prior 13-role/895‰ shape this set used to name; jewel-minor-b is
+# now hybrid-eligible, head-guard and sense are not). Hard-coded rather than read, matching the
+# ported source's own reasoning: this must keep working on synthetic fixtures that ship no
+# registry. All three are stable ids in an append-only registry.
+NON_HYBRID_ROLES = frozenset({"ward-array", "head-guard", "sense"})
 
 # Kinds a player is meant to end up holding. Deliberately excludes affix-family / display-template
 # / curve (machinery, never held), set (completed, not acquired — checked separately),
@@ -153,8 +155,22 @@ class Unobtainable(Metric):
         return findings
 
 
-class SocketWordIngredients(Metric):
-    """A socket word whose named ingredient family no gem in the corpus supplies."""
+#: ⭐ The kind ids this gate reads, in the order the corpus is walked.
+#:
+#: Item module 21 (`strain-splice-gen`) retires `socket-word` in favour of `combination` — the D20
+#: vocabulary rename, ruled 2026-09-04 ("regenerate, do not retain"). That ruling carries an explicit
+#: warning: *"`Registration/IngredientUnsatisfiable` must follow the kind, or a `gates = True` check
+#: quietly stops gating."* A metric keyed on ONE spelling is exactly how that happens — it would go
+#: on passing, over zero rows, and nothing would say so.
+#:
+#: So the gate is keyed on BOTH spellings rather than on whichever is current. That is not a
+#: transition hack: the failure mode it removes is permanent, and the cost of the extra id is one
+#: tuple entry. `test_strain_splice_gen.py` asserts the tuple covers both.
+COMBINATION_KINDS: "tuple[str, ...]" = ("socket-word", "combination")
+
+
+class CombinationIngredients(Metric):
+    """A combination (`socket-word` / `combination`) whose named ingredient family no gem supplies."""
 
     id = "Registration/IngredientUnsatisfiable"
     family = "Registration"
@@ -180,17 +196,22 @@ class SocketWordIngredients(Metric):
                 supply.setdefault(family, set()).add(gem.get("powerBand") or "?")
 
         findings = []
-        for word in ctx.corpus.by_kind("socket-word"):
-            for ingredient in word.get("ingredients") or []:
-                family = ingredient.get("family")
-                if family and family not in supply:
-                    findings.append(Finding(
-                        metric=self.id, severity=Severity.GAP, subject=word.id,
-                        message=f"'{word.name}' needs a gem carrying '{family}' at position "
-                                f"{ingredient.get('position')}; no gem in the corpus supplies "
-                                f"that family",
-                        evidence={"code": "IngredientUnsatisfiable", "partition": word.partition,
-                                 "family": family}))
+        for kind in COMBINATION_KINDS:
+            for word in ctx.corpus.by_kind(kind):
+                for ingredient in word.get("ingredients") or []:
+                    family = ingredient.get("family")
+                    if family and family not in supply:
+                        # ⚠ `position` is D41-superseded and only the legacy `socket-word` rows carry
+                        # it. Reported when present because it is what identifies the offending row in
+                        # that corpus, and omitted otherwise rather than printed as `None`.
+                        where = (f" at position {ingredient['position']}"
+                                 if "position" in ingredient else "")
+                        findings.append(Finding(
+                            metric=self.id, severity=Severity.GAP, subject=word.id,
+                            message=f"'{word.name}' needs a gem carrying '{family}'{where}; no gem "
+                                    f"in the corpus supplies that family",
+                            evidence={"code": "IngredientUnsatisfiable", "kind": kind,
+                                      "partition": word.partition, "family": family}))
         return findings
 
 
@@ -349,6 +370,6 @@ class DeadEndMaterials(Metric):
 
 
 ALL_LINKAGE_METRICS: "tuple[type[Metric], ...]" = (
-    SetCompletability, Unobtainable, SocketWordIngredients, RecipeInputs,
+    SetCompletability, Unobtainable, CombinationIngredients, RecipeInputs,
     EnhancementTrackBound, EquipmentSlotCoverage, DeadEndMaterials,
 )

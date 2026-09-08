@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-demon.bucketnutzombie-001",
+  "flavor": "A corridor of heavy, swinging iron spheres descends from the darkness. As the first sphere whistles through the air, the rhythmic thud of a 僵尸's heavy footsteps echoes from the shadows behind you, signaling that the mechanism was triggered by something much larger than yourselves.",
+  "kind": "trap",
+  "name": "The Iron-Skull Gauntlet",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "medium"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggers a mechanical pressure plate that initiates a series of heavy pendulum strikes.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.bucketnutzombie"
+}

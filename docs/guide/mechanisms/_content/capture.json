@@ -1,0 +1,64 @@
+{
+  "slug": "capture",
+  "title": "In-run capture",
+  "status": "WIP",
+  "kicker": "Roster and summoning · lawn / hunt",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Farm / hunt / defend · Lawn",
+  "hook": "**WIP:** weaken a wild demon in a run and attempt to **catch** it — a hunt intake beside the altar and wild joins.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. You should not expect a reliable capture button on every lawn yet."},
+    {"term": "Capture", "meaning": "Pressure a target in play, then attempt to add it as a specimen — not an altar pull."},
+    {"term": "Wild", "meaning": "A demon you meet in a run that is not already on your roster."},
+    {"term": "Lawn-only finds", "meaning": "Design allows a small slice of species as lawn finds (never legendaries forever gated that way), with web paths so web-only play can still finish milestones."}
+  ],
+  "alsoTrue": [
+    "Altar and [wild joins](wild-joins) already grow the roster without capture.",
+    "Vision ecology (raids, blood moons) is separate — see the creatures pillar."
+  ],
+  "sections": [
+    {
+      "title": "What it will feel like",
+      "paras": [
+        "Fight or pressure a target on the lawn or in a delve.",
+        "Attempt capture when the window opens — success adds a specimen."
+      ],
+      "diagram": [
+        "  meet wild target  ->  weaken / pressure  ->  capture attempt  ->  specimen"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Play lawn and expeditions with the intakes that already ship.",
+        "Treat missing capture prompts as unfinished work, not a broken save."
+      ]
+    },
+    {
+      "title": "Design guardrails",
+      "paras": [
+        "No legendary forever locked behind capture-only.",
+        "Web-only players still need a path to finish milestones."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Use the altar and wild joins to grow the roster now.",
+    "When capture UI appears in a build, follow on-screen pressure and attempt rules.",
+    "Do not plan a legendary-only-from-capture collection route."
+  ],
+  "doNote": "Roster category intakes end here for now. Power next: [Dave’s level](dave-level).",
+  "mixUps": [
+    {"q": "Why can’t I capture on this lawn?", "a": "Capture is WIP — absence is expected."},
+    {"q": "Is capture the same as wild join?", "a": "No. Wild joins come from expedition reports; capture is in-run pressure."},
+    {"q": "Will legendaries be capture-only?", "a": "No. Design forbids gating legendaries forever this way."},
+    {"q": "Does capture spend souls like the altar?", "a": "Do not assume altar pricing. When it ships, trust the attempt UI."}
+  ],
+  "next": ["dave-level"],
+  "related": ["wild-joins", "lawn-match", "delve", "specimens"],
+  "sources": [
+    "docs/guide/creatures.md §Capture and the wider world",
+    "docs/guide/mechanisms/capture.md (prior stub)"
+  ]
+}

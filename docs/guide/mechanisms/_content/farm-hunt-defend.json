@@ -1,0 +1,87 @@
+{
+  "slug": "farm-hunt-defend",
+  "title": "Farm, hunt, and defend",
+  "status": "Shipped",
+  "statusNote": "thin",
+  "kicker": "World and empire · territorial verbs",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "Farm / hunt / defend",
+  "hook": "**Farm / hunt / defend** names the territorial loop — yield and materials, prey and capture, Seat and homeworld — so it cannot hide under “the rift.”",
+  "blindSpots": [
+    {"term": "Farm", "meaning": "Hold ground, take sector yield, expedition mats, later buildings. [Loam](loam) is position, not a wallet."},
+    {"term": "Hunt", "meaning": "Prey on the lawn, wild joins, roaming, delves, map fights — pressure that grows the roster and clears threats."},
+    {"term": "Defend", "meaning": "Fracture and neglect, Seat siege, homeworld as the spine you must not lose."},
+    {"term": "Thin", "meaning": "The verbs are real in this build (loam pressure, fog, claim), but full ecology, buildings, and sieges deepen later."}
+  ],
+  "alsoTrue": [
+    "Sieges and richer ecology are Vision. Sector buildings and wardens are WIP.",
+    "Failure branches and enemy counter-development hang on this loop as Vision — consequence and pushback, not only a wipe."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Three verbs for empire play on and around the rift.",
+        "They share stocks and stages: farm leans loam and holdings; hunt leans lawn, capture, delves; defend leans Fracture, Seat, and homeworld."
+      ],
+      "table": {
+        "cols": ["Verb", "Means"],
+        "rows": [
+          ["Farm", "Hold ground, sector yield, expedition mats, later buildings"],
+          ["Hunt", "Lawn prey, capture, wild joins, roaming, delves, map fights"],
+          ["Defend", "Fracture and neglect, Seat siege, homeworld spine"]
+        ]
+      }
+    },
+    {
+      "title": "How it works today",
+      "intro": "Shipped thin — real pressure, unfinished depth:",
+      "cards": [
+        {"name": "Shipped", "body": "Loam pressure, fog, claim, and map adventure already make holding ground matter."},
+        {"name": "WIP", "body": "Buildings and wardens harden the farm beat — see [sector buildings](sector-buildings) and [map orders](map-orders)."},
+        {"name": "Vision", "body": "Sieges, richer ecology, counter-development, and failure branches."}
+      ],
+      "diagram": [
+        "  farm  ->  hold / yield / loam",
+        "  hunt  ->  lawn / capture / delves / map prey",
+        "  defend ->  Fracture / Seat / homeworld"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "Across places",
+          "intro": "There is no single “farm mode” button — the verbs describe how you play.",
+          "steps": [
+            "On the world map: claim and hold for farm; watch loam fade for defend.",
+            "On the lawn and expeditions: hunt for prey, materials, and joins.",
+            "Treat homeworld safety as defend even while you expand."
+          ],
+          "note": "Status is Shipped (thin) — expect the shape, not the finished ecology."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Claim or hold a sector and notice loam pressure (farm / defend).",
+    "Play a lawn match or collect an expedition for hunt materials or joins.",
+    "Say out loud which verb you are doing — if you cannot, you are probably only marching."
+  ],
+  "doNote": "Stop when “the rift” unpacks into three verbs. Related: [loam](loam), [siege](siege).",
+  "mixUps": [
+    {"q": "Is farm a fourth currency?", "a": "No. Farm uses loam and materials — never a new wallet."},
+    {"q": "Is hunt only delves?", "a": "No. Lawn, capture, wild joins, and map prey count. Delves are Vision depth."},
+    {"q": "Is defend only combat?", "a": "No. Neglect and the Fracture are defend — ground can fail without a fight."},
+    {"q": "Why does this feel unfinished?", "a": "It is Shipped thin. Buildings, sieges, and richer ecology are still ahead."}
+  ],
+  "next": ["loam"],
+  "related": ["loam", "capture", "siege", "world-map", "counter-development", "failure-branches"],
+  "sources": [
+    "docs/guide/the-rift.md §Farm, hunt, and defend",
+    "docs/guide/the-loops.md §Farming, hunting, and defending the empire",
+    "docs/guide/mechanisms/farm-hunt-defend.md (prior stub)",
+    "docs/guide/glossary.md §Verbs"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "slug": "commanders",
+  "title": "Commanders",
+  "status": "WIP",
+  "kicker": "Power and builds · lawn",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power · Lawn",
+  "hook": "Choose who **leads the next lawn run**. The choice persists; a match snapshot freezes the leader when the board starts — you do not mid-wave swap the story.",
+  "blindSpots": [
+    {"term": "Commander", "meaning": "Who leads the next lawn — open with `K`. Dave is the default face until you have more names."},
+    {"term": "Snapshot", "meaning": "When the match starts, the leader is frozen for that run."},
+    {"term": "WIP", "meaning": "Commander pick and aptitude spend exist in thin form; auras and fuller fantasy still catch up."},
+    {"term": "Patron", "meaning": "Different system — element colour of the army. Not the same as commander."}
+  ],
+  "alsoTrue": [
+    "Aura presence from that leader is [commander auras](commander-auras) (WIP).",
+    "Aptitude spend at commander scope reaches the side — see [aptitudes](aptitudes)."
+  ],
+  "sections": [
+    {
+      "title": "How you use it",
+      "steps": [
+        "Open Commanders (`K`).",
+        "Set the leader for the next lawn.",
+        "Start the match — the snapshot locks that leader for the run."
+      ]
+    },
+    {
+      "title": "What you do not do",
+      "paras": [
+        "You do not mid-wave swap the story.",
+        "You do not treat commander as a class pick — free-build aptitudes still rule."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Press `K` from the Sanctum.",
+    "Confirm who is set as default lawn commander.",
+    "Play a lawn match without trying to change leader mid-board."
+  ],
+  "doNote": "Aura layer: [commander auras](commander-auras).",
+  "mixUps": [
+    {"q": "Can I swap commanders mid-wave?", "a": "No. Snapshot at match start."},
+    {"q": "Is Dave required forever?", "a": "Default face until you have other commander names to put there."},
+    {"q": "Same as patron?", "a": "No."},
+    {"q": "Why is this WIP if K opens?", "a": "Thin pick/spend can ship while auras and depth stay WIP."}
+  ],
+  "next": ["commander-auras"],
+  "related": ["commander-auras", "lawn-match", "dave-level", "aptitudes"],
+  "sources": [
+    "docs/guide/relics-and-builds.md §Commanders and auras",
+    "web/fusion-rpg-web/src/stages/sanctum/SanctumHome.tsx"
+  ]
+}

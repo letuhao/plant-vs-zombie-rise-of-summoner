@@ -13,10 +13,27 @@ public sealed record CapturedTypeSeed(string Side, int TypeId, string? TypeName,
 /// </summary>
 public static class DemonSpeciesGenerator
 {
-    public const int DefaultMaxSpecies = 24;
-
-    public static List<DemonSpeciesDef> Generate(IEnumerable<CapturedTypeSeed> captured, int maxSpecies = DefaultMaxSpecies)
+    /// <summary>
+    /// Generate the species roster. <paramref name="maxSpecies"/> is optional and defaults to
+    /// <c>null</c> = <b>no limit</b>: every captured species becomes a demon, so a PVZ update that
+    /// adds almanac entries adds demons with no code change.
+    ///
+    /// There was a hard cap of 24 here until 2026-08-31, and it bound: with 18 zombie and 66 plant
+    /// rows carrying HP data, the pool took all 18 zombies then only 24-18=6 of the 66 plants —
+    /// 60 eligible species silently discarded, which is exactly the shipped 18/6 catalog. A ceiling
+    /// on the roster means the overlay cannot represent the game it sits on, and every future almanac
+    /// entry falls off the end without a word. Pass a limit only for a deliberate, local reason
+    /// (a test fixture, a sampling run); never restore a default one.
+    ///
+    /// The real limit is capture coverage — how many types have observed HP — not a constant.
+    /// </summary>
+    /// <param name="maxSpecies">null (default) for the whole roster; a positive count to truncate.</param>
+    public static List<DemonSpeciesDef> Generate(IEnumerable<CapturedTypeSeed> captured, int? maxSpecies = null)
     {
+        if (maxSpecies is int requested && requested <= 0)
+            throw new ArgumentOutOfRangeException(nameof(maxSpecies), requested,
+                "Pass null for the whole roster; an explicit limit must be positive.");
+
         // Usable rows: named, alive-capable; zombies first (demons wear zombie bodies), plants fill.
         var rows = captured
             .Where(c => c.HpBase > 0 && (!string.IsNullOrWhiteSpace(c.TypeName) || !string.IsNullOrWhiteSpace(c.DisplayName)))
@@ -24,14 +41,13 @@ public static class DemonSpeciesGenerator
             .Select(g => g.First())
             .ToList();
 
-        var pool = rows.Where(c => c.Side == "zombie")
-            .OrderByDescending(c => c.HpBase).ThenBy(c => c.TypeId)
-            .Take(maxSpecies)
-            .ToList();
-        if (pool.Count < maxSpecies)
-            pool.AddRange(rows.Where(c => c.Side == "plant")
-                .OrderByDescending(c => c.HpBase).ThenBy(c => c.TypeId)
-                .Take(maxSpecies - pool.Count));
+        static IEnumerable<CapturedTypeSeed> ByPower(List<CapturedTypeSeed> src, string side) =>
+            src.Where(c => c.Side == side).OrderByDescending(c => c.HpBase).ThenBy(c => c.TypeId);
+
+        // Zombies ranked, then plants ranked. Truncating the concatenation reproduces the old
+        // two-step Take exactly when a limit is passed, and takes everything when it is not.
+        var ordered = ByPower(rows, "zombie").Concat(ByPower(rows, "plant"));
+        var pool = (maxSpecies is int cap ? ordered.Take(cap) : ordered).ToList();
 
         var species = new List<DemonSpeciesDef>(pool.Count);
         var usedIds = new HashSet<string>(StringComparer.Ordinal);
@@ -74,11 +90,26 @@ public static class DemonSpeciesGenerator
 
     static DemonRarity RarityForRank(int rank, int count)
     {
-        // Observed-power tiers: top 2 legendary, next ~17% epic, next ~25% rare, rest common.
-        if (rank < 2) return DemonRarity.Legendary;
-        if (rank < 2 + Math.Max(2, count / 6)) return DemonRarity.Epic;
-        if (rank < 2 + Math.Max(2, count / 6) + Math.Max(3, count / 4)) return DemonRarity.Rare;
-        return DemonRarity.Common;
+        // Observed-power tiers, all four proportional: ~8% legendary, ~17% epic, ~25% rare, rest
+        // common. Legendary was a flat `rank < 2` until 2026-08-31, which stopped scaling once the
+        // species cap was removed — at 900 species it still meant exactly two legendaries in the
+        // world, while epic and rare grew with the roster.
+        //
+        // The 1/12 divisor is not a new balance number: it is the ratio the flat 2 already implied
+        // on the 24-species roster it was written for (2/24), so the old roster reproduces exactly.
+        // The Math.Max floors keep small rosters (test fixtures) from collapsing a tier to zero.
+        // Renamed to the ten-rung ladder's own ids (seed-to-concrete T4.1) via the SAME band each
+        // old value migrated to (ssot-rarity.md §4.3) — behaviour-preserving, since this generator
+        // (and the whole DemonCatalogGen/Generated.cs path) is superseded and deleted once
+        // species-generator/species-import (T4.4-T4.8) land; it exists here only to keep the
+        // ASSEMBLY compiling in the meantime, not to be re-run.
+        var legendary = Math.Max(2, count / 12);
+        var epic = legendary + Math.Max(2, count / 6);
+        var rare = epic + Math.Max(3, count / 4);
+        if (rank < legendary) return DemonRarity.Sunwoven;
+        if (rank < epic) return DemonRarity.Heirloom;
+        if (rank < rare) return DemonRarity.Cultivated;
+        return DemonRarity.Chaff;
     }
 
     static void EnsureElementPresence(List<DemonSpeciesDef> species, ElementTypeId element)
@@ -90,7 +121,7 @@ public static class DemonSpeciesGenerator
             s.ElementSecondary != element &&
             s.ElementPrimary != ElementTypeId.Light &&
             s.ElementPrimary != ElementTypeId.Dark;
-        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Common && Eligible(s));
+        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Chaff && Eligible(s));
         if (idx < 0) idx = species.FindIndex(Eligible);
         if (idx < 0) return;
         species[idx] = species[idx] with { ElementPrimary = element };
@@ -104,7 +135,7 @@ public static class DemonSpeciesGenerator
         var marked = 0;
         for (var i = 0; i < species.Count && marked < 2; i++)
         {
-            if (species[i].BaseRarity != DemonRarity.Rare) continue;
+            if (species[i].BaseRarity != DemonRarity.Cultivated) continue;
             species[i] = species[i] with { Acquisition = DemonAcquisition.CaptureOnly };
             marked++;
         }
@@ -113,7 +144,7 @@ public static class DemonSpeciesGenerator
     static IReadOnlyList<string> VariantsFor(DemonRarity rarity, int typeId)
     {
         var list = new List<string> { "normal", "shiny" };
-        if (rarity >= DemonRarity.Epic)
+        if (DemonRarityLadder.AtLeast(rarity, DemonRarity.Heirloom))
         {
             var extras = new[] { "ancient", "mutated", "corrupted", "blessed", "cursed" };
             list.Add(extras[(int)(Hash(typeId, "variant") % (uint)extras.Length)]);
@@ -133,9 +164,9 @@ public static class DemonSpeciesGenerator
         };
         var third = combat[(int)(Hash(typeId, "t3") % (uint)combat.Length)];
         if (!pool.Contains(third)) pool.Add(third);
-        if (rarity >= DemonRarity.Epic)
+        if (DemonRarityLadder.AtLeast(rarity, DemonRarity.Heirloom))
             pool.Add(Hash(typeId, "essence") % 2 == 0 ? "void-touched" : "chaos-marked");
-        if (rarity == DemonRarity.Legendary)
+        if (DemonRarityLadder.IsTopRung(rarity))
             pool.Add("immortal");
         return pool;
     }

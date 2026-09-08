@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-004",
+  "eventPool": [],
+  "flavor": "A circular chamber where the shadows do not behave; they pool like thick, viscous ink around the pedestals of headless statues. A heavy, unnatural silence presses against the eardrums, swallowing the sound of your own breathing.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Void-Stained Reliquary",
+  "reason": "The room contains a concentrated pocket of necrotic energy that empowers the guardians within, requiring a tactical engagement to prevent being overwhelmed by shadow-touched foes.",
+  "roomId": "room.elite-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

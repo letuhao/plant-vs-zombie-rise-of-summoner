@@ -73,9 +73,18 @@ function renderBareBlock(entries) {
   return lines.join("\n");
 }
 
-const BAND_CLASSES = ["stage", "hud", "panel", "dialog", "toast", "system"]
+const BAND_CLASSES = ["stage", "scrim", "hud", "panel", "dialog", "toast", "system"]
   .map((b) => `.band-${b} { z-index: var(--band-${b}); }`)
   .join("\n");
+
+const SAFE_AREA_CSS = `/* Notch / home-indicator insets (lawn HUD / commander bar T13). */
+.safe-area-top {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+.safe-area-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+}
+`;
 
 const BOOT_CSS = `:root {
   color: var(--color-text);
@@ -144,6 +153,7 @@ ${renderBareBlock(entries)}
 
 ${BAND_CLASSES}
 
+${SAFE_AREA_CSS}
 ${BOOT_CSS}`;
 }
 

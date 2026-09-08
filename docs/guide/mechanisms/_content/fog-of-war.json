@@ -1,0 +1,77 @@
+{
+  "slug": "fog-of-war",
+  "title": "Fog of war",
+  "status": "Shipped",
+  "kicker": "World and empire · sight and uncertainty",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure",
+  "hook": "**Fog of war** keeps other people’s ground and the past uncertain — your own held ground stays clear.",
+  "blindSpots": [
+    {"term": "Fog", "meaning": "Uncertainty about ground you do not hold (and about memory of what was). Not a weather status on a lawn tile."},
+    {"term": "Clear sight", "meaning": "Holding a sector grants full sight of it — home turf is not a guessing game."},
+    {"term": "Zomboss’s fog", "meaning": "He evaluates from **his** fog. He does not peek at your save."},
+    {"term": "Scout", "meaning": "Moving carefully into uncertain ground so you learn what is there — not automatic full reveal of the map."}
+  ],
+  "alsoTrue": [
+    "Deeper fog craft and procedural generator work are Vision — see [world generator](world-generator).",
+    "Fog is about other people’s ground and about memory — not about hiding your own holdings from you."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Your own ground is clear. Other people’s ground and the past stay uncertain.",
+        "That asymmetry is the adventure: expand into fog, hold what you take, and never assume Zomboss shares your eyes."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Sight follows ownership and contact:",
+      "cards": [
+        {"name": "Hold", "body": "Claimed sectors you keep give clear sight of that ground."},
+        {"name": "Push", "body": "March into fog to learn lanes and contacts the hard way."},
+        {"name": "Opponent", "body": "Zomboss plans under his own fog — fair war, not omniscience."}
+      ],
+      "diagram": [
+        "  hold sector  ->  clear sight there",
+        "  other ground / past  ->  uncertain (fog)",
+        "  Zomboss  ->  decides from his fog"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the World map",
+          "intro": "Fog is visible as soon as you leave fully held ground.",
+          "steps": [
+            "Travel to World.",
+            "Compare a held sector (clear) with neighbouring uncertain ground.",
+            "Scout one step carefully, then End Turn and reassess."
+          ],
+          "note": "Lenses that recolour fog or supply are WIP map tools — see [map orders](map-orders)."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Open the world map on ground you hold.",
+    "Look outward until the view turns uncertain.",
+    "March one careful step into fog and End Turn — notice what you learned vs what stayed dark."
+  ],
+  "doNote": "Stop when fog ≠ “the map is broken.” Related: [world map](world-map), [Zomboss](zomboss-commander).",
+  "mixUps": [
+    {"q": "Why can’t I see the whole map?", "a": "Fog is intentional. Clear sight comes from holding ground and scouting."},
+    {"q": "Does Zomboss cheat and see everything?", "a": "No. He evaluates from his fog."},
+    {"q": "Is my homeworld fogged to me?", "a": "Holding a sector grants full sight of it — your own land stays clear."},
+    {"q": "Is richer fog crafting in this build?", "a": "Basic fog ships. Deeper craft and generator work are Vision."}
+  ],
+  "next": ["zomboss-commander"],
+  "related": ["world-map", "zomboss-commander", "world-generator", "map-orders"],
+  "sources": [
+    "docs/guide/the-rift.md §World map — adventure",
+    "docs/guide/mechanisms/fog-of-war.md (prior stub)",
+    "docs/guide/glossary.md §Zomboss"
+  ]
+}

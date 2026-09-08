@@ -28,6 +28,7 @@ export function ActorLadderDemoPage() {
   // ?mock=1 renders against the shared server fixture (T5) instead of a live query — for
   // visual/E2E verification without a running server. Not a shipped feature.
   const useMock = searchParams.get("mock") === "1";
+  const sel = searchParams.get("sel");
 
   const state: ActorRungState = useMock
     ? { kind: "ready", data: adaptActor(mockActorFixture as ActorDtoShape) }
@@ -37,10 +38,16 @@ export function ActorLadderDemoPage() {
         ? { kind: "error", message: "Could not load actors" }
         : !query.data || query.data.items.length === 0
           ? { kind: "empty" }
-          : { kind: "ready", data: adaptActor(query.data.items[0]!) };
+          : (() => {
+              const items = query.data.items;
+              const picked = sel
+                ? items.find((a) => a.instanceId === sel) ?? items[0]!
+                : items[0]!;
+              return { kind: "ready" as const, data: adaptActor(picked) };
+            })();
 
   return (
-    <Page title="Actor ladder" description="T8 proof surface — five rungs, one contract type." testId="page-actor-ladder-demo">
+    <Page title="Actor ladder" description="Five presentation sizes, one creature contract." testId="page-actor-ladder-demo">
       <div className="flex flex-col gap-6">
         <section>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-faint">Rung 1 — token</p>

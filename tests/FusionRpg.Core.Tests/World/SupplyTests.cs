@@ -110,15 +110,25 @@ public class SupplyTests
         Assert.Equal(3, SupplyGraph.ConnectedSectors(healed, "dave").Count);
     }
 
+    /// <summary>
+    /// base-defense siege-supply (audit F1/F1b, 2026-09-05): updated from the pre-fix expectation.
+    /// A besieged sector is now a source for ITSELF ("a base with stores is not a legion in the
+    /// field") even though nothing can route THROUGH it — so `ember-hollow` (besieged) is correctly
+    /// `connected` now, while `ash-waste` (reachable only by routing THROUGH ember-hollow) is
+    /// correctly still excluded. This is the intended, audited consequence of the fix, not a
+    /// regression: the traversal half of the rule (cannot route through contested ground) is
+    /// unchanged; only the source half (a besieged sector no longer silently vanishes from its own
+    /// supply) was corrected.
+    /// </summary>
     [Fact]
-    public void Supply_refuses_to_route_through_a_sector_a_hostile_force_stands_in()
+    public void Supply_refuses_to_ROUTE_THROUGH_a_sector_a_hostile_force_stands_in_but_it_still_supplies_itself()
     {
         var world = Own(World(), "dave", "ember-hollow", "ash-waste");
         world = Place(world, "e-wild-pack-1", "ember-hollow");
 
         var connected = SupplyGraph.ConnectedSectors(world, "dave");
 
-        Assert.DoesNotContain("ember-hollow", connected);
+        Assert.Contains("ember-hollow", connected);      // F1/F1b: besieged, but still a source for itself
         Assert.DoesNotContain("ash-waste", connected);   // the only way there ran through ember-hollow
     }
 

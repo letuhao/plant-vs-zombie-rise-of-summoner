@@ -165,8 +165,12 @@ public static class ExpeditionResolver
     }
 
     const string BossWaveId = "rift-tyrant";
-    const string ShardCommon = "shard.common";
-    const string ShardRare = "shard.rare";
+    // Renamed to the ten-rung ladder's own ids (seed-to-concrete T4.1) — these are REWARD
+    // ISSUANCE (a shard actually minted into a player's inventory), unlike DemonMaterialCatalog's
+    // LegacyIds, which exist only to keep old references resolvable. New drops always use the
+    // current ladder's ids, never a legacy one.
+    const string ShardCommon = "shard.chaff";
+    const string ShardRare = "shard.cultivated";
 
     /// <summary>The tier's fixed battle schedule (index, tick, boss) — pure tier math, exposed so
     /// callers can reason about logged battles without resolving a timeline.</summary>
@@ -215,16 +219,19 @@ public static class ExpeditionResolver
         _ => 40
     };
 
-    /// <summary>Wild pool: summonable-adjacent species only — never capture-exclusive, never
-    /// legendary. Rarity bands 84/15/1 (‰-scaled) with fallback to common on an empty band.</summary>
+    /// <summary>Wild pool: summonable-adjacent species only — never capture-exclusive, never the
+    /// top-band rung. Rarity bands 84/15/1 (‰-scaled) with fallback to the bottom rung on an empty
+    /// band. Renamed to the ten-rung ladder (seed-to-concrete T4.1) via the SAME band each old
+    /// value migrated to (ssot-rarity.md §4.3) — behaviour-preserving: today's 84-species catalog
+    /// only populates these four rungs.</summary>
     static DemonSpeciesDef RollWildSpecies(SeededRng rng)
     {
         var rarityRoll = rng.NextPerMille();
-        var rarity = rarityRoll < 840 ? DemonRarity.Common
-            : rarityRoll < 990 ? DemonRarity.Rare
-            : DemonRarity.Epic;
+        var rarity = rarityRoll < 840 ? DemonRarity.Chaff
+            : rarityRoll < 990 ? DemonRarity.Cultivated
+            : DemonRarity.Heirloom;
         var band = WildBand(rarity);
-        if (band.Count == 0) band = WildBand(DemonRarity.Common);
+        if (band.Count == 0) band = WildBand(DemonRarity.Chaff);
         return band[rng.NextInt(band.Count)];
     }
 
@@ -232,7 +239,7 @@ public static class ExpeditionResolver
         DemonSpeciesCatalog.All
             .Where(s => s.Acquisition != DemonAcquisition.CaptureOnly
                         && s.BaseRarity == rarity
-                        && s.BaseRarity != DemonRarity.Legendary)
+                        && s.BaseRarity != DemonRarity.Sunwoven)
             .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
             .ToList();
 

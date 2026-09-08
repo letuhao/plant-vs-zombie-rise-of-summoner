@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The local magistrate demands a tribute of gold to fund the city's defenses. Prove your worthiness by delivering the required sum to ensure the gates remain barred against the coming storm.",
+  "name": "The Tithe of Valor",
+  "objectiveTemplate": "spend-no-provision",
+  "prereqRefs": [],
+  "questId": "quest.spend-no-provision-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "roster",
+  "targetRef": "none"
+}

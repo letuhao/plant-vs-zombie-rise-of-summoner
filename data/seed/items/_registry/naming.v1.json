@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "registryVersion": 4,
+  "registryVersion": 6,
   "frozen": true,
   "_meta": {
     "kind": "naming-and-id-namespace-registry",
@@ -349,8 +349,8 @@
       "themeCountNote": "13 themes after the wave-0 review cut field-manual and merged permafrost-seed into frostbitten-vanguard. Unique partitions are allocated across the 13 survivors; the two removed ids must never be authored or revived."
     },
     "sets": {
-      "partitionCount": 5,
-      "agentsEach": "~6 sets",
+      "partitionCount": 41,
+      "agentsEach": "~6 sets (legacy 5) or ~2 sets (build 36)",
       "partitionKey": "themeId",
       "idTemplate": "set.{themeId}-{seq:03}",
       "themeSource": "data/seed/items/_registry/themes.v1.json — 5 of the 15 themes, chosen for a strong 'matching gear' register",
@@ -360,6 +360,21 @@
         "rusted-legion",
         "frostbitten-vanguard",
         "sunwoven-almanac"
+      ],
+      "buildThemeIdsNote": "Added 2026-09-07, registryVersion 5->6, additive and DELIBERATELY SEPARATE from `themeIds` above rather than merged into it: `seedsmith.adapters.items.setgen.themes.legacy_partition_ids()` reads `themeIds` specifically to mean 'the 5 hand-authored partitions a generated id must never collide with' — merging the two lists would have silently widened that meaning and broken the distinction the function exists to draw (caught by `test_no_generated_id_collides_with_a_legacy_theme_partition` going 5->41, immediately reverted to this shape). One entry per (aptitude, archetype) grid cell `setgen`'s own `themes.load_build_themes()` already mints — found missing when `set-charm-live-endpoint`'s own trial batch tried to author a real `build.retribution-offense` set and the validator refused it `IdOutsideNamespace`; no allocation existed for ANY build-population set, blocking every future one, not just this trial. Same `idTemplate`/`partitionKey`/`ExpandByList`/`SequenceShape.ThreeDigit` mechanism as the legacy 5 — a build-theme id (e.g. `set.retribution-offense-001`) is not a new shape, just a wider list `NamespaceAllocation.cs`'s `case \"sets\"` must also expand.",
+      "buildThemeIds": [
+        "agility-balance", "agility-defense", "agility-offense",
+        "bulwark-balance", "bulwark-defense", "bulwark-offense",
+        "composure-balance", "composure-defense", "composure-offense",
+        "ferocity-balance", "ferocity-defense", "ferocity-offense",
+        "focus-balance", "focus-defense", "focus-offense",
+        "fortitude-balance", "fortitude-defense", "fortitude-offense",
+        "might-balance", "might-defense", "might-offense",
+        "onslaught-balance", "onslaught-defense", "onslaught-offense",
+        "pierce-balance", "pierce-defense", "pierce-offense",
+        "precision-balance", "precision-defense", "precision-offense",
+        "retribution-balance", "retribution-defense", "retribution-offense",
+        "vigor-balance", "vigor-defense", "vigor-offense"
       ],
       "workedExample": "set.thorned-chassis-002 — the item_set.set_id / header row this partition authors.",
       "tierContainerCompositionNote": "ssot-sets.md §4.3 derives the tier bonus container id as `set.{set_id}-{pieces:D2}`. Composed with this partition's id, that is `set.thorned-chassis-002-02` (2-piece tier) and `set.thorned-chassis-002-04` (4-piece tier) — still a single dot after `set`, still passes definitions.md §1's container_id grammar once `set` joins the alternation (ssot-sets.md §9 item 11's ask-first change). No id-namespace change is needed to support this composition; it falls out of the template for free.",
@@ -400,7 +415,18 @@
       "partitionCount": 1,
       "agentsEach": "~25 named ordered combinations",
       "idTemplate": "sockword.{seq:03}",
-      "workedExample": "sockword.019"
+      "workedExample": "sockword.019",
+      "retirementNote": "RULED 2026-09-04 (seedsmith-map.md §5): regenerate, do not retain. `combinations` below is the replacement kind, added 2026-09-07 alongside registryVersion 5 once `combination-write-unblock` had real, generated content to validate."
+    },
+    "combinations": {
+      "partitionCount": 0,
+      "note": "NOT a wave-1 fleet partition, and deliberately carries no `{seq:03}` sequence — added 2026-09-07 (item-seedgen `combination-write-unblock`, registryVersion 4→5) for `combogen`'s own single-pipeline generator, the `socketWords` retirement target. `combogen` mints ids directly from the deterministic (aptitude, archetype) grid cell (`combo.strain-{aptitude}-{archetype}`, `combo.splice-{aptitudeA}-{aptitudeB}`) — one pipeline, zero parallel agents, so the sequence-ownership collision problem every other entry in this section solves does not arise here; this entry exists ONLY to satisfy the id-prefix and nameKey-prefix allowlists the V1 validator enforces corpus-wide (`IdOutsideNamespace`/`NameKeyPrefix`), found live 2026-09-07 by the real `ItemSeedValidator` run against real generated content — the module's own Python-side reference check never exercised this rule. See decisions.md's own entry for this change.",
+      "idTemplate": "combo.{shape}-{gridCellTokens}",
+      "workedExample": "combo.strain-might-offense, combo.splice-cunning-vigor",
+      "partitionIds": [
+        "combinations/strain",
+        "combinations/splice"
+      ]
     },
     "recipes": {
       "partitionCount": 1,
@@ -677,7 +703,8 @@
         "attr",
         "droptable",
         "disptpl",
-        "enh"
+        "enh",
+        "combination"
       ],
       "slugRule": "slug = lowercase(name), spaces and apostrophes → hyphens, all other punctuation stripped, repeated hyphens collapsed to one.",
       "globalUniqueness": "`nameKey` is unique across the ENTIRE corpus, not per kind and not per partition (seed-contract.md §6 states this explicitly). `base.ember-crown` and `unique.ember-crown` collide even though they are different kinds — a slug derived independently by two different partitions is exactly the case the corpus-wide check must catch, because nothing in the id namespaces above stops two unrelated authors from independently naming two different things 'Ember Crown'.",

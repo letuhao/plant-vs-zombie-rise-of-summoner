@@ -1,0 +1,26 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "Molten gold drips from the ceiling like slow, heavy rain, pooling in shallow basins carved into the floor. The air shimmers with a dry, suffocating heat that makes the very stones appear to pulse.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Crucible of Gilded Veins",
+  "reason": "A pressure plate triggers a sudden release of pressurized superheated steam and liquid metal from the walls.",
+  "roomId": "room.trap-fire-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

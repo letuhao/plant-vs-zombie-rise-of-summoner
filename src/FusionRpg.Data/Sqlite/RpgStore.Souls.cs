@@ -26,7 +26,7 @@ public sealed partial class RpgStore
     /// vanilla-PvZ soul award byte-identical to pre-T3.6 behavior (contentScale(20) = 1.000 exactly)
     /// — an explicit, documented placeholder, never a silent unscaled default.
     /// </summary>
-    const int VanillaPvzKillAndRunTheta = 20;
+    const int VanillaPvzKillAndRunTheta = Core.Demons.SoulSinkPolicy.VanillaPvzTheta;
 
     /// <summary>
     /// Soul earns from a freshly inserted Activity fact — called inside the fact's own transaction

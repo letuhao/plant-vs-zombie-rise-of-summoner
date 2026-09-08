@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "mono",
+  "encounterId": "encounter.pack-mono-002",
+  "formation": "pack",
+  "name": "Swarming Monoliths",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A relentless tide of singular elemental essence acting as a single, crushing wave.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

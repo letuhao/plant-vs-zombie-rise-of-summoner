@@ -1,7 +1,7 @@
 import { Button } from "@/ui/Button";
 import type { ActorRungState } from "./actorRungState";
 import { RungStateFallback } from "./RungStateFallback";
-import { ActorFrame, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
+import { ActorFrame, formatActorPhase, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
 
 /** Rung 4 — the lawn inspector / roster grid card: identity, standing, one primary action. */
 export function ActorCard({
@@ -33,7 +33,6 @@ export function ActorCard({
             <SideBadge side={data.side} />
             <LevelTag level={data.level} />
           </div>
-          <PendingNote pending={data.displayName} testId="actor-name-pending" />
         </div>
       </div>
       <div>
@@ -42,7 +41,7 @@ export function ActorCard({
       </div>
       <div className="mt-auto flex items-center gap-2 border-t border-border pt-2">
         <span className="text-xs text-muted" data-testid="actor-phase">
-          {data.phase}
+          {formatActorPhase(data.phase)}
         </span>
         <span className="flex-1" />
         {onInspect ? (

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Pacts bind demons to contract slots. Keep loyalty up — neglect a bound demon long enough and it refuses to deploy." />
+    <title>Pacts and loyalty — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/pacts-loyalty.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Roster and summoning · summon and fusion
+        </p>
+        <h1 class="teach-title">Pacts and loyalty</h1>
+        <p class="teach-hook"><strong>Pacts</strong> bind demons to contract slots. Keep <strong>loyalty</strong> up — neglect a bound demon long enough and it <strong>refuses to deploy</strong>.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Pact</dt>
+              <dd>A contract slot that binds a specimen for field work. Opened with <code>P</code> on the rail.</dd>
+            </div>
+            <div>
+              <dt>Loyalty</dt>
+              <dd>How willing that bound demon is to keep working for you. It decays under daily upkeep if you ignore the pact.</dd>
+            </div>
+            <div>
+              <dt>Refuse to deploy</dt>
+              <dd>The demon stays in the roster but will not go to the lawn (or other field work) until loyalty is healthy again.</dd>
+            </div>
+            <div>
+              <dt>Bound</dt>
+              <dd>Assigned to a pact slot. Bound demons are the ones you field; spare unbound ones can still sit on expeditions.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Tribute is part of keeping a pact paid — see <a href="tribute.html">tribute</a>.</li>
+            <li>Deploy detail for the lawn: <a href="lawn-deploy.html">bound demon deploy</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Binding is how a specimen becomes someone you can count on in a fight.</p>
+          <p>Loyalty is the trust meter on that bond — not a second health bar.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-you-use-it-title">
+          <h2 id="how-you-use-it-title">How you use it</h2>
+          <pre class="teach-diagram" aria-label="diagram">
+  specimen  -&gt;  pact slot  -&gt;  loyalty healthy  -&gt;  can deploy
+                     |
+                     +-&gt;  neglect  -&gt;  refuse to deploy
+</pre>
+          <ol class="steps-plain">
+            <li>Open Pacts (<code>P</code>).</li>
+            <li>Assign a demon to a contract slot.</li>
+            <li>Watch loyalty and pay what the pact asks (including tribute).</li>
+            <li>Deploy bound demons when the lawn or other field work needs them.</li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="why-it-exists-title">
+          <h2 id="why-it-exists-title">Why it exists</h2>
+          <p>Without loyalty, the roster is a free storage chest.</p>
+          <p>With it, binding is a relationship you maintain — not a one-click permanent buff.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Open Pacts when the layer is unlocked (a contract has been offered).</li>
+            <li>Bind one demon you actually want on the lawn.</li>
+            <li>Note loyalty and any tribute ask before you walk away for a long time.</li>
+          </ol>
+          <p class="teach-note">Stop when “refuse to deploy” is clear. Pay next: <a href="tribute.html">tribute</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Did my demon get deleted when loyalty dropped?</dt>
+              <dd>No. It refuses to deploy. Fix the pact; the specimen is still yours.</dd>
+            </div>
+            <div>
+              <dt>Can unbound demons never fight?</dt>
+              <dd>Spare demons can still go on expeditions. Lawn deploy wants a healthy bound pact.</dd>
+            </div>
+            <div>
+              <dt>Is loyalty the same as tribute?</dt>
+              <dd>No. Loyalty is willingness. Tribute is the payment side of the contract — see <a href="tribute.html">tribute</a>.</dd>
+            </div>
+            <div>
+              <dt>Do I bind every demon?</dt>
+              <dd>Only as many as you need in the field. Duplicates and spares have other jobs (fusion, expeditions).</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="tribute.html">Tribute on pacts</a>
+          </p>
+          <p>
+            Related:
+            <a href="tribute.html">Tribute on pacts</a> ·
+            <a href="specimens.html">Persistent specimens</a> ·
+            <a href="lawn-deploy.html">Bound demon deploy</a> ·
+            <a href="souls.html">Souls</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/pacts-loyalty.md">Markdown (editable SSOT)</a> ·
+            <a href="../../creatures.md">Creatures</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/pacts-loyalty.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -90,6 +90,22 @@ public class LegionSupplyResolveTests
     }
 
     [Fact]
+    public void A_top_up_is_reported_with_the_factions_own_audience()
+    {
+        // world-stage W12 (fog defect A): `legion.topup` names no ground, so `Audience` is the only
+        // thing that stops it reaching every viewer.
+        var legion = Legion("legion", atSectorId: "home", fighters: 2, bearers: 1, carriedLoam: 0);
+        var capacity = LegionSupply.Capacity(legion);
+        var world = Fixture(homeStock: capacity + 100) with { Entities = new[] { legion } };
+
+        var report = new TurnReport();
+        LegionSupply.Resolve(world, report, "pressure");
+
+        var topup = Assert.Single(report.Entries, e => e.Detail.StartsWith("legion.topup:"));
+        Assert.Equal(Dave, topup.Audience);
+    }
+
+    [Fact]
     public void A_top_up_never_exceeds_what_the_pool_actually_holds()
     {
         var legion = Legion("legion", atSectorId: "home", fighters: 2, bearers: 1, carriedLoam: 0);
@@ -98,10 +114,57 @@ public class LegionSupplyResolveTests
         // Only half of what the legion wants is actually available.
         var world = Fixture(homeStock: capacity / 2) with { Entities = new[] { legion } };
 
-        var result = LegionSupply.Resolve(world, new TurnReport(), "pressure");
+        var report = new TurnReport();
+        var result = LegionSupply.Resolve(world, report, "pressure");
 
         Assert.Equal(capacity / 2, result.Entities.Single(e => e.EntityId == "legion").CarriedLoam);
         Assert.Equal(0, result.Sectors.Single(s => s.SectorId == "home").LoamStock);
+        // world-stage W11: a partial refill that leaves the legion still short of capacity is not
+        // a restoration — the signal must not fire on "received something", only on "made whole".
+        Assert.DoesNotContain(report.Entries, e => e.Detail == "supply.restored");
+    }
+
+    [Fact]
+    public void Supply_restored_fires_exactly_once_the_turn_a_cut_legions_deficit_is_fully_erased()
+    {
+        // world-stage W11 (re-homed from `world-playback` and ideal §2.3): the counterpart to
+        // `supply.cut:` — nothing reported the reverse before this task. Simulated across three
+        // separate `Resolve` calls (Core has no per-legion cut memory, so the test drives the
+        // legion's position/loam directly rather than through movement) — this is what "cut, then
+        // restored, then stable" looks like from `LegionSupply`'s own point of view.
+        var burn = LegionSupply.Burn(Legion("probe", "field", fighters: 2, bearers: 1, carriedLoam: 0));
+        // Starts with exactly one burn's worth, so the first cut turn lands it at 0 — depleted, but
+        // not destroyed (destruction needs the burn to take it negative).
+        var legion = Legion("legion", atSectorId: "field", fighters: 2, bearers: 1, carriedLoam: burn);
+        var capacity = LegionSupply.Capacity(legion);
+
+        // Turn 1: cut (standing on "field", which Fixture() gives no owner/rootbed, so it is never
+        // part of any connected component) — burns down, and must not claim to be restored.
+        var cutWorld = Fixture() with { Entities = new[] { legion } };
+        var turn1Report = new TurnReport();
+        var afterCut = LegionSupply.Resolve(cutWorld, turn1Report, "pressure");
+        Assert.DoesNotContain(turn1Report.Entries, e => e.Detail == "supply.restored");
+        var carriedAfterBurn = afterCut.Entities.Single(e => e.EntityId == "legion").CarriedLoam;
+        Assert.Equal(0, carriedAfterBurn);
+
+        // Turn 2: reconnected — now standing at "home", with enough pool to erase the whole deficit
+        // in one turn.
+        var reconnected = legion with { AtSectorId = "home", CarriedLoam = carriedAfterBurn };
+        var restoredWorld = Fixture(homeStock: capacity + 100) with { Entities = new[] { reconnected } };
+        var turn2Report = new TurnReport();
+        var afterRestore = LegionSupply.Resolve(restoredWorld, turn2Report, "pressure");
+
+        var restored = Assert.Single(turn2Report.Entries, e => e.Detail == "supply.restored");
+        Assert.Equal("legion", restored.Subject);
+        Assert.Equal("home", restored.SectorId);
+        Assert.Equal(Dave, restored.Audience);
+        Assert.Equal(capacity, afterRestore.Entities.Single(e => e.EntityId == "legion").CarriedLoam);
+
+        // Turn 3: already whole — must not repeat.
+        var stableWorld = restoredWorld with { Entities = afterRestore.Entities };
+        var turn3Report = new TurnReport();
+        LegionSupply.Resolve(stableWorld, turn3Report, "pressure");
+        Assert.DoesNotContain(turn3Report.Entries, e => e.Detail == "supply.restored");
     }
 
     [Fact]

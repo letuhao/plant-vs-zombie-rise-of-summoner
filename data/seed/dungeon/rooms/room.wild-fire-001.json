@@ -1,0 +1,20 @@
+{
+  "climate": "fire",
+  "dispositionBase": "eager",
+  "encounterRef": "encounter.pack-rainbow-004",
+  "eventPool": [
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, hollowed-out caldera where the air shimmers with intense heat. At the center, a massive obsidian pillar is etched with weeping runes, surrounded by a ring of eternal, white-hot coals that pulse like a heartbeat.",
+  "hazardBand": "heavy",
+  "kind": "wild",
+  "name": "The Cinder-Altar of Malphas",
+  "reason": "The party encounters a bound Greater Fire Elemental being offered as a sacrifice by a cult, or perhaps a merchant seeking to trade embers of its essence.",
+  "roomId": "room.wild-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

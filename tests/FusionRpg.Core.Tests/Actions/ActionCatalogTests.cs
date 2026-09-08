@@ -145,6 +145,113 @@ public class ActionCatalogTests
         // that could, since nothing in ActionRow/ActionCostRow/ActionScopeRow encodes a reaction.
     }
 
+    // ---- StructureBudgetGuard.UndetectableAxes (A-G1, spec-tier-access-gate.md §3.3, §5 tests 5/5b) --
+
+    [Fact]
+    public void UndetectableAxesNamesRestrictionOnlyNeverZeroNeverEmpty()
+    {
+        // Test 5: `restriction` must report as `undetectable`, distinct from "0"/absent. A non-empty,
+        // stable list naming exactly `restriction` IS that distinct, queryable state.
+        var undetectable = StructureBudgetGuard.UndetectableAxes();
+        Assert.Equal(new[] { StructureAxes.Restriction }, undetectable);
+        Assert.NotEmpty(undetectable); // never silently "0"
+    }
+
+    [Fact]
+    public void RestrictionNeverAppearsInSpentAxesForAnyInputShapeThisGuardCanRead()
+    {
+        // The other half of test 5: SpentAxes (checked, absent) and UndetectableAxes (cannot be
+        // checked at all) must never overlap -- restriction is undetectable, not "checked and found
+        // not spent", and nothing in ActionRow/ActionCostRow/ActionScopeRow could make it appear.
+        var spentEverything = StructureBudgetGuard.SpentAxes(
+            BaseRow(conditionsJson: """{"leaf":"sideIs","subject":"target","value":"zombie"}""",
+                envelope: ActionEnvelope.NoOp with { ActionId = "skill.test", ResolveOffsets = new long[] { 0, 5 } }),
+            new[] { new ActionCostRow("skill.test", "stamina", new ValueSpec(1, 1, RollPolicy.Fixed), ActionCostTiming.PerTick) },
+            new[]
+            {
+                new ActionScopeRow("skill.test", "atom.strike", ActionEffectScope.PrimaryTarget),
+                new ActionScopeRow("skill.test", "atom.poison-rider", ActionEffectScope.PrimaryTarget),
+                new ActionScopeRow("skill.test", "atom.heal", ActionEffectScope.Caster),
+            });
+
+        Assert.DoesNotContain(StructureAxes.Restriction, spentEverything);
+        Assert.DoesNotContain(StructureAxes.Restriction, StructureBudgetGuard.UndetectableAxes().Intersect(spentEverything));
+    }
+
+    [Fact]
+    public void ReactionStaysExcludedFromUndetectableAxesItIsUnspendableNotUndetectable()
+    {
+        // Test 5b, second half: adding UndetectableAxes must not blur "unspendable" (reaction) into
+        // "undetectable" (restriction) -- they are different states with different remedies (refuse
+        // at authoring vs. a named cross-program dependency).
+        Assert.DoesNotContain(StructureAxes.Reaction, StructureBudgetGuard.UndetectableAxes());
+    }
+
+    [Fact]
+    public void ReactionNeverAppearsInSpentAxesAcrossEveryAxisCombinationThisGuardCanProduce()
+    {
+        // Test 5b, first half (behaviour-based, not "I didn't touch the file"): SpentAxes' own five
+        // detectable axes, driven simultaneously to their maximum, still never produce "reaction" --
+        // the guard's handling of it is provably unchanged because there is no input shape in
+        // ActionRow/ActionCostRow/ActionScopeRow that could ever make it appear. (The refusal itself
+        // lives at authoring time in A-S1's distribution planner --
+        // `validate_structure_axes`/`test_reaction_named_is_refused_not_flagged`,
+        // tools/seedsmith/seedsmith/adapters/actions/distribution_planner/derive.py -- this guard
+        // was never the place that needed to build it.)
+        var row = BaseRow(conditionsJson: """{"leaf":"sideIs","subject":"target","value":"zombie"}""",
+            envelope: ActionEnvelope.NoOp with { ActionId = "skill.test", ResolveOffsets = new long[] { 0, 1, 2 } });
+        var costs = new[]
+        {
+            new ActionCostRow("skill.test", "stamina", new ValueSpec(1, 1, RollPolicy.Fixed), ActionCostTiming.PerTick),
+        };
+        var scopes = new[]
+        {
+            new ActionScopeRow("skill.test", "atom.a", ActionEffectScope.PrimaryTarget),
+            new ActionScopeRow("skill.test", "atom.b", ActionEffectScope.PrimaryTarget),
+            new ActionScopeRow("skill.test", "atom.c", ActionEffectScope.Caster),
+        };
+
+        var spent = StructureBudgetGuard.SpentAxes(row, costs, scopes);
+
+        Assert.Equal(new[] { StructureAxes.Condition, StructureAxes.Consumption, StructureAxes.RiderStatus,
+            StructureAxes.ScopeSplit, StructureAxes.Sequence }, spent.OrderBy(a => a, StringComparer.Ordinal));
+        Assert.DoesNotContain(StructureAxes.Reaction, spent);
+    }
+
+    // ---- test 7 (the load-bearing one): AtomFamilies stays inert metadata, C1 stays disabled ---------
+
+    [Fact]
+    public void AtomFamiliesIsNeverGatedByRungAnywhereInTheCSharpValidationOrCompilePath()
+    {
+        // A-G1 test 7 (spec-tier-access-gate.md §5, "the load-bearing one"): C1 (a tier may gate atom
+        // family access) stays disabled until D2 closes. On the C# side that means AtomFamilies must
+        // stay INERT metadata -- ActionValidator and ActionCompiler must accept the SAME rung carrying
+        // ANY family set, never refuse one combination and accept another. If a future change wires
+        // family-gating into this path without D2 landing, this test starts failing.
+        var lowRungExoticFamilies = BaseRow(rung: 1) with
+        {
+            AtomFamilies = new[] { "atom.family-that-does-not-exist-in-any-real-catalog" },
+        };
+        var lowRungNoFamilies = BaseRow(rung: 1) with { AtomFamilies = Array.Empty<string>() };
+
+        var check1 = ActionValidator.ValidateAction(lowRungExoticFamilies, OneAtomContainer, boardAvailable: false);
+        var check2 = ActionValidator.ValidateAction(lowRungNoFamilies, OneAtomContainer, boardAvailable: false);
+        Assert.True(check1.IsOk, check1.ToString());
+        Assert.True(check2.IsOk, check2.ToString());
+
+        // Same at compile: a rung-1 table that budgets no structure compiles an unstructured action
+        // regardless of what AtomFamilies names -- the rung table is never consulted for it, and
+        // CompiledAction (below) does not even carry the field forward, confirming nothing downstream
+        // of compile could gate on it either.
+        var table = OneRung(1, Array.Empty<string>());
+        var (rejection, compiled) = ActionCompiler.Compile(
+            lowRungExoticFamilies, Array.Empty<ActionCostRow>(), Array.Empty<ActionScopeRow>(),
+            OneAtomContainer, boardAvailable: false, table);
+        Assert.True(rejection.IsOk, rejection.ToString());
+        Assert.NotNull(compiled);
+        Assert.DoesNotContain("AtomFamilies", typeof(CompiledAction).GetProperties().Select(p => p.Name));
+    }
+
     // ---- StructureBudgetGuard.Check (rung lookup + rejection) --------------------------------
 
     [Fact]

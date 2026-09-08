@@ -16,6 +16,7 @@ public static class InjectorLoop
     static float _cheatPush;
     static float _startDelay;
     static float _perf;
+    static float _gateCounters;
     static bool _started;
 
     /// <summary>Reset timers (e.g. after host reload). Normally not needed.</summary>
@@ -27,6 +28,7 @@ public static class InjectorLoop
         _cheatPush = 0;
         _startDelay = 0;
         _perf = 0;
+        _gateCounters = 0;
         _started = false;
     }
 
@@ -43,6 +45,7 @@ public static class InjectorLoop
                 _started = true;
                 ApplyFpsCap();
                 ApplyEventPipelineMode();
+                ApplyLawnMoveMode();
                 _ = client?.StartAsync();
             }
         }
@@ -54,7 +57,15 @@ public static class InjectorLoop
         catch (Exception ex) { RpgHost.Log.Error("CheatUiActions: " + ex); }
         try
         {
-            if (CheatState.Stats.ConsumeDirty(out _) && CheatState.ShouldPushScalesOnDirty())
+            // Dirty means dirty. The second, source-enumerating veto that used to sit here
+            // (`ShouldPushScalesOnDirty`: cheat doc revision / PvzStats revision / Tab A scales)
+            // silently discarded every OTHER contributor's change -- a commander reallocation set the
+            // dirty flag and was then vetoed, so living entities never re-resolved (owner-observed
+            // live 2026-08-30). Deciding whether a re-resolve is WORTH writing is EntityApply's job
+            // now, and it answers by comparing values (EntityFinal.DiffersFrom), so a reapply that
+            // changes nothing writes nothing. `Invalidate` is edge-triggered from 6 discrete state
+            // changes, never per-frame, so this is one board pass per real change.
+            if (CheatState.Stats.ConsumeDirty(out _))
             {
                 CheatActions.ReapplyLivingFromStats();
                 CheatState.MarkAppliedRevision();
@@ -69,9 +80,35 @@ public static class InjectorLoop
         // v2 drain before TickDots so DoT pulses share the drain's board freeze and
         // merge into the same funnel window (plan Task 10).
         try { EventDrainHost.Tick(unscaledDeltaTime); } catch { }
-        try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
-        // Shield upkeep after dispatch+DoTs — spec frame order (shield-system-spec.md §2.6).
-        try { EffectRuntime.TickShields(unscaledDeltaTime); } catch { }
+        // A-M2 lawn-reposition — same record-then-drain slot as EventDrainHost above. Default off
+        // (spec-lawn-reposition.md §6 hazard 4, ships knowingly inert); a no-op while
+        // MoveDrainHost.Enabled is false or nothing has called TryRecordMove.
+        try { MoveDrainHost.Tick(unscaledDeltaTime); } catch { }
+        // battle-timeline T13 — the kernel drives DoT and shield upkeep as scheduled 100 ms events,
+        // in the same slot and the same order the two accumulator grids used to occupy
+        // (drain -> DoT -> shields; shield-system-spec.md §2.6). Same period, same work: only the
+        // scheduling moved, which is what makes this a substitution rather than a redesign.
+        //
+        // The kernel clock is FULLY SCALED (decisions.md, "Battle engine open questions
+        // (2026-09-04)", item 4): it stops on pause and accelerates on fast-forward, up to the 10x
+        // CheatActions.cs allows. That acceleration is chosen, not overlooked -- do not "fix" a 10x
+        // DoT as a bug. `unscaledDeltaTime * Time.timeScale` rather than `Time.deltaTime` because
+        // Unity clamps the latter at Time.maximumDeltaTime, which would silently lose simulated time
+        // after a level-load hitch -- the exact loss the carry-corrected clock exists to prevent.
+        // The second argument stays REAL frame time: the drain budget bounds wall-clock work on the
+        // main thread, so it must not scale with the game's clock.
+        try { KernelDriveHost.Tick(unscaledDeltaTime * Time.timeScale, unscaledDeltaTime); } catch { }
+        if (!KernelDriveHost.DrivingGrids)
+        {
+            // Off-board, or FUSIONRPG_KERNEL_GRIDS=0. The legacy accumulators still own the grids
+            // then — the same revert shape FUSIONRPG_EVENT_V2=0 already gives the event pipeline.
+            // These stay UNSCALED on purpose: the kill switch's job is to restore pre-T13 behaviour
+            // exactly, and pre-T13 behaviour was unscaled. The scaled clock is the kernel's, not a
+            // repo-wide change of what a DoT tick means.
+            try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
+            try { EffectRuntime.TickShields(unscaledDeltaTime); } catch { }
+        }
+        try { Hud.ActorHudCache.ReconcileDirty(); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)
         {
@@ -89,6 +126,17 @@ public static class InjectorLoop
         {
             _perf = 0;
             try { PerfReporter.Flush(client); } catch { }
+        }
+        // passive-tree-todo.md G6 (spec-gate-counters.md §4.3) -- the timer half of the flush contract.
+        // Rides PerfReporter's OWN already-configured cadence rather than a second tuning load: §4.3
+        // names `gateCounters.flushIntervalMs` (default 5000ms) as "the window PerfProbe already uses"
+        // by design, and PassiveTreeTuningHub is never configured in this process (server-only) --
+        // reusing PerfReporter.IntervalSeconds gets the same number without adding one.
+        _gateCounters += unscaledDeltaTime;
+        if (_gateCounters >= PerfReporter.IntervalSeconds)
+        {
+            _gateCounters = 0;
+            try { GateCounterHost.Flush(client); } catch { }
         }
         _cheatPush += unscaledDeltaTime;
         if (_cheatPush >= 3f)
@@ -139,6 +187,25 @@ public static class InjectorLoop
             var off = string.Equals(Environment.GetEnvironmentVariable("FUSIONRPG_EVENT_V2"), "0", StringComparison.Ordinal);
             EventDrainHost.Enabled = !off;
             RpgHost.Log.Info("[perf] event pipeline v2 " + (off ? "OFF (legacy inline)" : "ON (record-then-drain)"));
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// A-M2 lawn-reposition ships default-off (spec-lawn-reposition.md §6 hazard 4, "SHIPS
+    /// KNOWINGLY INERT" — the production caller does not exist yet). Unlike
+    /// <see cref="ApplyEventPipelineMode"/>'s default-ON-unless-killed shape, this only ever forces
+    /// the switch OFF: FUSIONRPG_LAWN_MOVE=0 is a true kill switch that wins over any future default
+    /// flip or debug toggle, but its absence never turns the feature on by itself — the static
+    /// default (false) is what "ships inert" means, and nothing in this method may override that.
+    /// </summary>
+    static void ApplyLawnMoveMode()
+    {
+        try
+        {
+            var off = string.Equals(Environment.GetEnvironmentVariable("FUSIONRPG_LAWN_MOVE"), "0", StringComparison.Ordinal);
+            if (off) MoveDrainHost.Enabled = false;
+            RpgHost.Log.Info("[perf] lawn move drain " + (MoveDrainHost.Enabled ? "ON" : "OFF (default; FUSIONRPG_LAWN_MOVE=0 forces off)"));
         }
         catch { }
     }

@@ -1,0 +1,20 @@
+{
+  "_meta": {
+    "candidateSetHash": "51a084013dd97bf32a06bf5d3d4a3d8934a3f767ad2d245c8b44a7cacd21a365",
+    "corpusHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "partition": "rounds",
+    "round": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateId": "action.general.0002",
+      "collidedWith": "action.general.0001",
+      "id": "reject.round-1.0001",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    }
+  ],
+  "kind": "action-reject",
+  "schemaVersion": 1
+}

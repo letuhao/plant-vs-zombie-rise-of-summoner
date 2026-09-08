@@ -21,6 +21,28 @@ public sealed record DemonSpeciesDef
     public DemonAcquisition Acquisition { get; init; }
     public IReadOnlyList<string> Variants { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> TraitPool { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// demon-lawn-deploy T1.5 — the species' own base-stat magnitudes (`ConcreteSpecies.Magnitudes`,
+    /// already `long`-typed, `PTheta`-derived channel values), carried forward so a deploy can bind
+    /// them the same way `TraitPool` already rides this record. Empty for any species with no
+    /// magnitude data imported yet (a compiled-default/fixture species, or one pending its own
+    /// generation pass) — a reconciler reading this must treat empty as "no magnitude bindings," never
+    /// a startup error, matching this catalog's own species-level "honest incompleteness" precedent.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> Magnitudes { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+
+    /// <summary>
+    /// `battle-tempo` `tempo-content` (spec-tempo-content.md §1.1) — the species' own attack tempo,
+    /// carried from `ConcreteSpecies.AttackIntervalMs` (already authored, already persisted; this
+    /// field is a PROJECTION into the compiled roster, not a new column on the corpus). `0` (the
+    /// default) means "no tempo carried" — a fixture or a pre-tempo snapshot — and
+    /// <see cref="Battle.SpeciesTempoProjection.SpeedFor"/> floors it to the default `turn.speed`
+    /// rather than throwing, so every existing `DemonSpeciesDef` literal in the tree stays valid
+    /// without being touched.
+    /// </summary>
+    public long AttackIntervalMs { get; init; }
 }
 
 public static partial class DemonSpeciesCatalog
@@ -33,11 +55,19 @@ public static partial class DemonSpeciesCatalog
         "normal", "ancient", "mutated", "corrupted", "blessed", "cursed", "shiny"
     };
 
-    static IReadOnlyList<DemonSpeciesDef>? _all;
     static Dictionary<string, DemonSpeciesDef>? _byId;
 
-    /// <summary>Generated seed roster (DemonSpeciesCatalog.Generated.cs), validated on first touch.</summary>
-    public static IReadOnlyList<DemonSpeciesDef> All => _all ??= Validate(GeneratedSpecies);
+    /// <summary>
+    /// The store-backed roster (T4.8, `catalog-runtime`) — <see cref="SpeciesSnapshot.Configure"/>
+    /// must have run first, the same "no built-in default" discipline `DerivedStatPolicy.Tuning`
+    /// already established. `species-import`'s own committed output supersedes the compiled
+    /// <c>GeneratedSpecies</c> array, which stays in the tree only until T4.8's own diff-test-gated
+    /// deletion step.
+    /// </summary>
+    public static IReadOnlyList<DemonSpeciesDef> All => Scoped.Value ?? _configured ?? throw new InvalidOperationException(
+        "DemonSpeciesCatalog.Configure(...) has not run. Every host reads the roster " +
+        "species-import wrote via RpgStore.BuildDemonSpeciesSnapshot() and calls Configure at " +
+        "startup — there is no built-in default to fall back to.");
 
     public static bool IsKnown(string? speciesId) =>
         speciesId != null && ByIdMap().ContainsKey(speciesId);
@@ -49,6 +79,12 @@ public static partial class DemonSpeciesCatalog
 
     static Dictionary<string, DemonSpeciesDef> ByIdMap()
     {
+        // A scoped (test-only) roster is never cached in the process-global _byId — caching it would
+        // leak one test's roster into the next call from a DIFFERENT async context that happens to
+        // reuse the same thread. The real production path (no Scoped.Value) still caches normally.
+        if (Scoped.Value is { } scoped)
+            return scoped.ToDictionary(s => s.SpeciesId, StringComparer.Ordinal);
+
         if (_byId == null)
         {
             _ = All;

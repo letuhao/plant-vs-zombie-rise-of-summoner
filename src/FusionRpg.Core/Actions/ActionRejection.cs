@@ -80,6 +80,27 @@ public enum ActionRejectionReason
     /// inventory (T10, spec-usability-conditions.md's mode matrix). "An unsupported mode named is
     /// fine; an unstated one is the `resource.delta` defect again."</summary>
     ConsumableUnsupportedInMode,
+
+    /// <summary>The action's condition authors a `holdsStock` leaf in a position where the action can
+    /// still fire without that leaf being true — under an `or`, or negated by a `not`. There is then
+    /// no defined quantity to take at commit, and the honest options are "spend nothing" (a free
+    /// consumable, which is the exact defect `IStockLedger` exists to close) or "guess". Refused by
+    /// name instead: a `holdsStock` leaf must sit in conjunctive position — the root, or reachable
+    /// from it through `and` alone — so that firing PROVES the demand held.</summary>
+    ConsumableStockDemandNotGuaranteed,
+
+    /// <summary>A-G1 (spec-tier-access-gate.md §3.2): the container an action's rung reaches spends
+    /// more power than that rung's `powerBudgetMilli` allows (`ContentValidation.Budget`'s rung-keyed
+    /// overload). A finding, never a clamp — the action is refused whole, naming the container and
+    /// the overage, the same "reject, never coerce" law every other reason on this list already
+    /// follows.</summary>
+    PowerBudgetExceeded,
+
+    /// <summary>A-M1 (spec-movement-payload.md §2, §4): a `category = Movement` action whose compiled
+    /// container carries no bound effect atom — `MovementPayloadPolicy.HasStandalonePayload` is false.
+    /// Invariant 9 (standalone-first) cuts the OTHER way: the reposition itself is never required, but
+    /// the RPG-layer payload is — "a movement action must do something with the game closed."</summary>
+    MovementActionHasNoStandalonePayload,
 }
 
 /// <summary>One refusal: the rule that fired, plus enough detail to fix the row.</summary>

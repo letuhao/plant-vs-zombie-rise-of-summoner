@@ -1,0 +1,12 @@
+{
+  "branchiness": "webbed",
+  "gateDensity": "dense",
+  "layoutId": "layout.long-wide-webbed-001",
+  "oneWayDensity": "dense",
+  "raidModes": [
+    "quad"
+  ],
+  "secretDensity": "dense",
+  "sizeBand": "long",
+  "widthBand": "wide"
+}

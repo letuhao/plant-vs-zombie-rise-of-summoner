@@ -215,6 +215,7 @@ public class AtomRowWiringTests : IDisposable
             FamilyId = "atom.scaled",
             Variant = "",
             Tier = t,
+            Name = "Scaled " + t,
             WhenJson = TriggerOnly,
             ParamsJson = "{\"amount\":{\"min\":1,\"max\":2,\"roll\":\"onInstantiate\",\"curve\":\"curve.atk.level\"}}",
         }).ToList();

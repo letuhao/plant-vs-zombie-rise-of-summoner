@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -24,6 +25,16 @@ public sealed record AtomLoadResult(
 /// </summary>
 public sealed partial class RpgStore
 {
+    // aura-skill T2 (audit D6): resolves a stat.derived row's channel to its registered compose kind,
+    // so AtomRowValidator can reject an op that channel never reads (e.g. `increased` on a FlatSum
+    // channel) rather than accept a row that binds and silently does nothing forever. Built once per
+    // call site, not per row — DerivedStatRegistry.CreateDefault() is a fresh dictionary construction
+    // (PvzStatsSheetComposer.cs's own words), cheap but pointless to repeat per atom in a batch.
+    static readonly DerivedStatRegistry ComposeKindRegistry = DerivedStatRegistry.CreateDefault();
+
+    internal static DerivedComposeKind? ComposeKindOf(string channel) =>
+        ComposeKindRegistry.TryResolveChannel(channel, out var def) ? def.Compose : null;
+
     /// <summary>Called from EnsureHotSchema so a fresh database has both tables.</summary>
     void EnsureAtomSchemaUnlocked(SqliteConnection db)
     {
@@ -101,7 +112,7 @@ public sealed partial class RpgStore
     /// </summary>
     public AtomRejection UpsertAtom(AtomRow row)
     {
-        var check = AtomRowValidator.Validate(row, CurveInputOf);
+        var check = AtomRowValidator.Validate(row, CurveInputOf, ComposeKindOf);
         if (!check.IsOk) return check;
 
         lock (_gate)
@@ -129,7 +140,7 @@ public sealed partial class RpgStore
 
             foreach (var row in rows)
             {
-                var check = AtomRowValidator.Validate(row, CurveInputOf);
+                var check = AtomRowValidator.Validate(row, CurveInputOf, ComposeKindOf);
                 if (!check.IsOk)
                 {
                     bad.Add(new AtomLoadRejection(row?.AtomId ?? "(null)", check.Reason, check.Detail));
@@ -250,6 +261,25 @@ public sealed partial class RpgStore
             using var cmd = db.CreateCommand();
             cmd.CommandText = AtomSelect + " WHERE trigger_id = $t ORDER BY atom_id;";
             cmd.Parameters.AddWithValue("$t", trigger);
+            using var r = cmd.ExecuteReader();
+
+            var list = new List<AtomRow>();
+            while (r.Read()) list.Add(ReadAtom(r));
+            return list;
+        }
+    }
+
+    /// <summary>Atoms sharing one family — T59.4's real backing for the `atomsInFamily` seam
+    /// `UniqueContainerLookups`/`ActionCorpusComposer.Compose` both declare (nothing in the codebase
+    /// indexed atoms by family before this, confirmed by direct search).</summary>
+    public IReadOnlyList<AtomRow> ListAtomsByFamily(string familyId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = AtomSelect + " WHERE family_id = $f ORDER BY atom_id;";
+            cmd.Parameters.AddWithValue("$f", familyId);
             using var r = cmd.ExecuteReader();
 
             var list = new List<AtomRow>();

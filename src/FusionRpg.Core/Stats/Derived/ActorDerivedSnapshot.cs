@@ -44,11 +44,29 @@ public sealed class ActorDerivedSnapshot
     public double TierPower =>
         Get(DerivedStatChannels.ProgressionPower, 1.0) * Get(DerivedStatChannels.ProgressionRealm, 1.0);
 
+    /// <summary>Replaces each named channel's value outright. Use for a genuine replacement (a
+    /// fixture overriding a base profile — see <c>ActorDerivedProfiles</c>), never for a second
+    /// producer contributing to a channel another producer already writes: two producers replacing
+    /// the same channel means the second one silently erases the first (audit D1).</summary>
     public ActorDerivedSnapshot Overlay(IEnumerable<KeyValuePair<string, double>> extra)
     {
         var next = FromValues(_channels);
         foreach (var (k, v) in extra)
             next._channels[k] = v;
+        return next;
+    }
+
+    /// <summary>Adds each named channel's value to whatever is already there. Use whenever the
+    /// caller is CONTRIBUTING to a channel rather than replacing it — this is what makes two
+    /// independent producers (e.g. a patron aura and a commander aura) compose instead of one
+    /// silently overwriting the other (audit D1). The caller supplies only its own contribution;
+    /// this method reads the existing value, so a caller must never also add the existing value
+    /// itself or the contribution doubles.</summary>
+    public ActorDerivedSnapshot OverlayAdd(IEnumerable<KeyValuePair<string, double>> extra)
+    {
+        var next = FromValues(_channels);
+        foreach (var (k, v) in extra)
+            next._channels[k] = next._channels.TryGetValue(k, out var existing) ? existing + v : v;
         return next;
     }
 

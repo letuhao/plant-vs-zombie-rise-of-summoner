@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "A narrow corridor of polished obsidian, where the only light emanates from the rhythmic, golden pulse of a single, massive clockwork mechanism embedded in the far wall.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Gilded Sentry's Antechamber",
+  "reason": "The room forces a high-stakes skirmish in a cramped space, preventing easy kiting and requiring tactical positioning against a single, high-health guardian.",
+  "roomId": "room.elite-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

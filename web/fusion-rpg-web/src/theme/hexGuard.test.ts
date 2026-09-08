@@ -61,11 +61,11 @@ describe("hexGuard — fixtures", () => {
     expect(scanForHexLiterals(fixtureDir)).toEqual([]);
   });
 
-  it("does not scan src/features/world/ — excluded this phase (T16)", () => {
+  it("scans src/features/world/ — the T16 exemption was retired by world-stage W49", () => {
     fixtureDir = mkdtempSync(join(tmpdir(), "hex-guard-"));
     mkdirSync(join(fixtureDir, "features", "world"), { recursive: true });
     writeFileSync(join(fixtureDir, "features", "world", "LaneEdge.tsx"), 'const c = "#34d399";\n');
-    expect(scanForHexLiterals(fixtureDir)).toEqual([]);
+    expect(scanForHexLiterals(fixtureDir)).toHaveLength(1);
   });
 
   it("still scans other files under features/", () => {

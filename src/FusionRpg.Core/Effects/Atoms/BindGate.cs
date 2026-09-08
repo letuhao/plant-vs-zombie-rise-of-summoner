@@ -149,6 +149,33 @@ public static class BindGate
     /// </summary>
     static AtomRejection CheckScope(AtomRow atom, AtomKind kind, OwnerScope owner)
     {
+        // E35 (spec-match-modify.md §2.6): match.modify changes a match-wide rule, never an entity's
+        // own stats, so only `match` and `player:` owner keys mean anything to it — `entity:`/
+        // `plant:`/`zombie:` (and every other kind) refuse here, the same refusal shape G8 already
+        // uses below for stat.modify+defense.
+        if (string.Equals(atom.KindId, "match.modify", StringComparison.Ordinal))
+        {
+            return owner.Kind is OwnerKind.Match or OwnerKind.Player
+                ? AtomRejection.Ok
+                : AtomRejection.Fail(AtomRejectionReason.ScopeUnsupported,
+                    $"{atom.AtomId}: match.modify changes a match-wide rule and names no cell or " +
+                    $"entity, so its owner key must be `match` or `player:` — '{owner}' would bind a " +
+                    "match-wide rule to something with no match-wide meaning.");
+        }
+
+        // E36 (spec-wave-control.md §2.5): wave.control changes the match's own wave clock, never an
+        // entity's stats — the same "no cell or entity means anything to this kind" rule as
+        // match.modify immediately above, and the same refusal shape.
+        if (string.Equals(atom.KindId, "wave.control", StringComparison.Ordinal))
+        {
+            return owner.Kind is OwnerKind.Match or OwnerKind.Player
+                ? AtomRejection.Ok
+                : AtomRejection.Fail(AtomRejectionReason.ScopeUnsupported,
+                    $"{atom.AtomId}: wave.control changes the match's own wave clock and names no " +
+                    $"cell or entity, so its owner key must be `match` or `player:` — '{owner}' would " +
+                    "bind a match-wide rule to something with no match-wide meaning.");
+        }
+
         if (!string.Equals(atom.KindId, "stat.modify", StringComparison.Ordinal))
             return AtomRejection.Ok;
 

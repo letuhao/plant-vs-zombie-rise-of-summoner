@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Expeditions are the idle RPG loop — pick spare demons, dispatch them, wait on a real-world timer, then collect." />
+    <title>Expeditions — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/expeditions.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Idle expeditions · dispatch / wait / collect
+        </p>
+        <h1 class="teach-title">Expeditions</h1>
+        <p class="teach-hook"><strong>Expeditions</strong> are the idle RPG loop — pick spare demons, dispatch them, wait on a real-world timer, then collect.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Expedition</dt>
+              <dd>An idle squad mission you start from the Expeditions layer (<code>E</code>). Not a lawn match and not a <a href="delve.html">delve</a>.</dd>
+            </div>
+            <div>
+              <dt>Dispatch</dt>
+              <dd>Send demons who are not on a live task. The timer starts when you confirm.</dd>
+            </div>
+            <div>
+              <dt>Collect</dt>
+              <dd>Claim the return when ready. Nothing expires if you forget — the report waits.</dd>
+            </div>
+            <div>
+              <dt>Stamina gate</dt>
+              <dd>There is none. This build has no play-session stamina wall on expeditions.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Expeditions are a sibling of the Delve, not a prototype to replace. Auto-resolve stays; interactive battles you play yourself are WIP elsewhere.</li>
+            <li>Quest- and world-event-starting ticks stay Vision — see <a href="expedition-event-ticks.html">expedition event ticks</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Monster Hunter–style idle play that stays forever. Playable with the lawn game closed once the layer is open.</p>
+          <p>You pick demons, choose a duration tier, wait, and read the return report.</p>
+          <p class="teach-note">The Expeditions layer opens from the Sanctum rail (<code>E</code>) once you have a <strong>bound demon</strong> to field.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Four duration tiers are built for real schedules:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  pick spare demons  -&gt;  dispatch  -&gt;  wait  -&gt;  collect
+                                         |
+                                         +-&gt;  souls / XP / materials / wild join?
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">While they are out</strong>
+              <p>A battle chain interleaved with quiet stretches, found souls, meeting a wild demon, or injuries. Outcome is sealed at dispatch by a recorded seed and revealed at collection.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">What you bring home</strong>
+              <p>Souls and summoner XP, specimen XP for demons who fought, a chance a wave demon <a href="wild-joins.html">joins</a> the roster, and fusion materials (<a href="essence.html">essence</a>). Materials feed actors and empire — never loam.</p>
+            </li>
+          </ol>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Tier</th>
+                <th scope="col">Length</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Short</td>
+                <td>30 minutes</td>
+              </tr>
+              <tr>
+                <td>Medium</td>
+                <td>4 hours</td>
+              </tr>
+              <tr>
+                <td>Long</td>
+                <td>8 hours</td>
+              </tr>
+              <tr>
+                <td>Overnight</td>
+                <td>20 hours</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>From the Sanctum</h3>
+            <p>Expeditions sit on the layer rail.</p>
+            <ol>
+              <li>Open Expeditions (<code>E</code>) when the rail shows it.</li>
+              <li>Pick demons who are not on a live task.</li>
+              <li>Choose a duration tier, dispatch, then collect when the timer finishes (or <a href="expedition-slots-recall.html">recall</a> early).</li>
+            </ol>
+            <p class="teach-note">Start short. Grow into overnight runs when the roster can carry them.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Bind at least one demon so Expeditions can open.</li>
+            <li>Open Expeditions (<code>E</code>), pick a short tier and a spare squad, and dispatch.</li>
+            <li>Collect when ready and read the return report once.</li>
+          </ol>
+          <p class="teach-note">Stop when dispatch → wait → collect is clear. Next: <a href="expedition-slots-recall.html">slots and recall</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Do I need the lawn game open?</dt>
+              <dd>No. Once unlocked, expeditions run from the control room with the lawn closed.</dd>
+            </div>
+            <div>
+              <dt>Is this a delve?</dt>
+              <dd>No. Delves are a separate Vision stage. Expeditions stay the async idle loop.</dd>
+            </div>
+            <div>
+              <dt>Is there a stamina cost?</dt>
+              <dd>No. There is no stamina gate on expeditions.</dd>
+            </div>
+            <div>
+              <dt>Do rewards expire if I forget to collect?</dt>
+              <dd>No. Collect when you are ready.</dd>
+            </div>
+            <div>
+              <dt>Can expeditions start quests today?</dt>
+              <dd>Full quest and world-event ticks are Vision — see <a href="expedition-event-ticks.html">expedition event ticks</a>.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="expedition-slots-recall.html">Expedition slots and recall</a>
+          </p>
+          <p>
+            Related:
+            <a href="expedition-slots-recall.html">Expedition slots and recall</a> ·
+            <a href="wild-joins.html">Wild joins</a> ·
+            <a href="essence.html">Essence</a> ·
+            <a href="expedition-event-ticks.html">Expedition quest and event ticks</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/expeditions.md">Markdown (editable SSOT)</a> ·
+            <a href="../../expeditions.md">Expeditions</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/expeditions.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

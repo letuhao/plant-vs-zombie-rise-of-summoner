@@ -1,0 +1,3220 @@
+{
+  "_meta": {
+    "corpusHash": "d72d4cf76c516be27df182a9d13b0d5d595bbb947cdacac81a333db3b4e11736",
+    "partition": "role-lean",
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.allpeater",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "分配",
+        "切换",
+        "攻击",
+        "模式",
+        "火力"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:coward",
+        "element:fire",
+        "rarity:chaff",
+        "posture:unresolved",
+        "reach:long",
+        "targetPreference:swarm"
+      ],
+      "speciesKey": "allpeater",
+      "themeKey": "demon.allpeater"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "dark",
+        "secondary": "fire"
+      },
+      "family": null,
+      "id": "lean.ashthreepeater",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "射手",
+        "彻底",
+        "攻击",
+        "无法",
+        "烧焦"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:guardian",
+        "trait:greedy",
+        "trait:soul-eater",
+        "element:dark",
+        "element:fire",
+        "rarity:chaff",
+        "posture:Finesse",
+        "reach:melee",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "ashthreepeater",
+      "themeKey": "demon.ashthreepeater"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": "bucket",
+      "id": "lean.bucketnutzombie",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "铁头功",
+        "僵尸"
+      ],
+      "rarity": "heirloom",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "trait:guardian",
+        "trait:chaos-marked",
+        "element:dark",
+        "rarity:heirloom",
+        "posture:Force",
+        "reach:melee",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "bucketnutzombie",
+      "themeKey": "demon.bucketnutzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "bucket",
+      "id": "lean.bucketzombie",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "铁头功",
+        "僵尸",
+        "江郎才尽"
+      ],
+      "rarity": "heirloom",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:coward",
+        "trait:berserker",
+        "trait:chaos-marked",
+        "element:earth",
+        "rarity:heirloom",
+        "posture:Bastion",
+        "reach:short",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "bucketzombie",
+      "themeKey": "demon.bucketzombie"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.cabbagepult",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "卷心菜",
+        "僵尸",
+        "投手",
+        "攻击",
+        "出"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:loyal",
+        "trait:guardian",
+        "element:earth",
+        "rarity:cultivated",
+        "posture:Bastion",
+        "reach:long",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "cabbagepult",
+      "themeKey": "demon.cabbagepult"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": "cactus",
+      "id": "lean.cactus",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "movement",
+        "status",
+        "support"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "仙人掌",
+        "发射"
+      ],
+      "rarity": "cultivated",
+      "separation": 1,
+      "signals": [
+        "trait:swift",
+        "trait:coward",
+        "trait:critical-hunter",
+        "element:air",
+        "rarity:cultivated",
+        "posture:Bastion",
+        "reach:long",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "cactus",
+      "themeKey": "demon.cactus"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "cactus",
+      "id": "lean.cactusblover",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "仙人掌",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:loyal",
+        "trait:guardian",
+        "element:earth",
+        "rarity:chaff",
+        "posture:Bastion",
+        "reach:long",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "cactusblover",
+      "themeKey": "demon.cactusblover"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "dark"
+      },
+      "family": null,
+      "id": "lean.caltrop",
+      "leanOrder": [
+        "attack",
+        "support",
+        "movement",
+        "status",
+        "defense"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "伤害",
+        "僵尸",
+        "刺能",
+        "扎破",
+        "轮胎"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:bloodthirsty",
+        "element:light",
+        "element:dark",
+        "rarity:cultivated",
+        "posture:Finesse",
+        "reach:short",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "caltrop",
+      "themeKey": "demon.caltrop"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.caltropnut",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "反伤",
+        "坚果",
+        "尖刺",
+        "车辆",
+        "长满"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:loyal",
+        "trait:guardian",
+        "element:dark",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "caltropnut",
+      "themeKey": "demon.caltropnut"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "cherry",
+      "id": "lean.cherrybomb",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:genius",
+        "trait:soul-eater",
+        "element:ice",
+        "rarity:cultivated",
+        "posture:Force",
+        "reach:short",
+        "targetPreference:swarm"
+      ],
+      "speciesKey": "cherrybomb",
+      "themeKey": "demon.cherrybomb"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "air",
+        "secondary": "dark"
+      },
+      "family": "cherry",
+      "id": "lean.cherrygatling",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "movement",
+        "support",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:coward",
+        "element:air",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "cherrygatling",
+      "themeKey": "demon.cherrygatling"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": "cherry",
+      "id": "lean.cherrynut",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "喜爱"
+      ],
+      "rarity": "heirloom",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:greedy",
+        "trait:critical-hunter",
+        "trait:void-touched",
+        "element:fire",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "cherrynut",
+      "themeKey": "demon.cherrynut"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "dark"
+      },
+      "family": "cherry",
+      "id": "lean.cherrynutzombie",
+      "leanOrder": [
+        "attack",
+        "status",
+        "movement",
+        "defense",
+        "support"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "一般"
+      ],
+      "rarity": "heirloom",
+      "separation": 0,
+      "signals": [
+        "trait:swift",
+        "trait:genius",
+        "trait:critical-hunter",
+        "trait:void-touched",
+        "element:fire",
+        "element:dark",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "cherrynutzombie",
+      "themeKey": "demon.cherrynutzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "cherry",
+      "id": "lean.cherrypaperzombie",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "上演"
+      ],
+      "rarity": "sunwoven",
+      "separation": 2,
+      "signals": [
+        "trait:guardian",
+        "trait:greedy",
+        "trait:berserker",
+        "trait:chaos-marked",
+        "trait:immortal",
+        "element:earth",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "cherrypaperzombie",
+      "themeKey": "demon.cherrypaperzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "cherry",
+      "id": "lean.cherryshooter",
+      "leanOrder": [
+        "support",
+        "movement",
+        "status",
+        "attack",
+        "defense"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 3,
+      "signals": [
+        "trait:swift",
+        "trait:genius",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "cherryshooter",
+      "themeKey": "demon.cherryshooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "cherry",
+      "id": "lean.cherrysplit",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "樱桃",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 2,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "trait:guardian",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "cherrysplit",
+      "themeKey": "demon.cherrysplit"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "light"
+      },
+      "family": null,
+      "id": "lean.cherrythreepeater",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "三行",
+        "僵尸",
+        "半熟",
+        "发射",
+        "成熟"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:loyal",
+        "element:ice",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "cherrythreepeater",
+      "themeKey": "demon.cherrythreepeater"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.chomper",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "movement",
+        "defense"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "僵尸",
+        "吞食",
+        "咀嚼",
+        "嘴花",
+        "脆弱"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:genius",
+        "trait:swift",
+        "element:light",
+        "rarity:cultivated",
+        "posture:Force",
+        "reach:melee",
+        "targetPreference:elite"
+      ],
+      "speciesKey": "chomper",
+      "themeKey": "demon.chomper"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.conezombie",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "冰激凌",
+        "不动",
+        "东西",
+        "僵尸",
+        "发现"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:berserker",
+        "trait:genius",
+        "trait:soul-eater",
+        "trait:chaos-marked",
+        "element:ice",
+        "rarity:heirloom",
+        "posture:Bastion",
+        "reach:short",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "conezombie",
+      "themeKey": "demon.conezombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": "corn",
+      "id": "lean.cornpot",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "制成",
+        "子弹"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:soul-eater",
+        "trait:greedy",
+        "trait:guardian",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "cornpot",
+      "themeKey": "demon.cornpot"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": "corn",
+      "id": "lean.cornpult",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "制成",
+        "子弹",
+        "玉米粒"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:genius",
+        "trait:soul-eater",
+        "element:dark",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "cornpult",
+      "themeKey": "demon.cornpult"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.dancepolzombie",
+      "leanOrder": [
+        "status",
+        "defense",
+        "support",
+        "attack",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "流行乐",
+        "运动员",
+        "下走",
+        "优秀",
+        "伴舞"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:guardian",
+        "trait:loyal",
+        "trait:chaos-marked",
+        "element:dark",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "dancepolzombie",
+      "themeKey": "demon.dancepolzombie"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "light"
+      },
+      "family": null,
+      "id": "lean.darkthreepeater",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "倍增",
+        "射手",
+        "火爆",
+        "烧焦",
+        "辣椒"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:berserker",
+        "trait:genius",
+        "trait:soul-eater",
+        "element:ice",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "darkthreepeater",
+      "themeKey": "demon.darkthreepeater"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.dolldiamond",
+      "leanOrder": [
+        "defense",
+        "movement",
+        "attack",
+        "status",
+        "support"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "世界",
+        "像是",
+        "僵尸",
+        "光辉",
+        "制成"
+      ],
+      "rarity": "sunwoven",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:coward",
+        "trait:critical-hunter",
+        "trait:void-touched",
+        "trait:immortal",
+        "element:air",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "dolldiamond",
+      "themeKey": "demon.dolldiamond"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "dolls",
+      "id": "lean.dollgold",
+      "leanOrder": [
+        "defense",
+        "status",
+        "attack",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "制成",
+        "套娃"
+      ],
+      "rarity": "sunwoven",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:genius",
+        "trait:chaos-marked",
+        "trait:immortal",
+        "element:earth",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "dollgold",
+      "themeKey": "demon.dollgold"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "dolls",
+      "id": "lean.dollsilver",
+      "leanOrder": [
+        "support",
+        "defense",
+        "status",
+        "attack",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "制成",
+        "套娃",
+        "感叹号"
+      ],
+      "rarity": "sunwoven",
+      "separation": 1,
+      "signals": [
+        "trait:regenerator",
+        "trait:loyal",
+        "trait:void-touched",
+        "trait:immortal",
+        "element:light",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "dollsilver",
+      "themeKey": "demon.dollsilver"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.doomcactus",
+      "leanOrder": [
+        "attack",
+        "movement",
+        "defense",
+        "support",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "仙人掌",
+        "发射",
+        "大量",
+        "尖刺",
+        "概率"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:bloodthirsty",
+        "trait:critical-hunter",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "doomcactus",
+      "themeKey": "demon.doomcactus"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.doorzombie",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "特遣队",
+        "人质",
+        "僵尸",
+        "内心",
+        "劫匪"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:genius",
+        "trait:chaos-marked",
+        "element:earth",
+        "rarity:heirloom",
+        "posture:Bastion",
+        "reach:short",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "doorzombie",
+      "themeKey": "demon.doorzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "air"
+      },
+      "family": "double",
+      "id": "lean.doublecherry",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "子弹"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:loyal",
+        "element:earth",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "doublecherry",
+      "themeKey": "demon.doublecherry"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "air"
+      },
+      "family": "double",
+      "id": "lean.doubleshooter",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "子弹"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:bloodthirsty",
+        "trait:soul-eater",
+        "element:earth",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "doubleshooter",
+      "themeKey": "demon.doubleshooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": "double",
+      "id": "lean.doublesnow",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "子弹"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:coward",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "doublesnow",
+      "themeKey": "demon.doublesnow"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.driverzombie",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "公司出品",
+        "滑冰场",
+        "僵尸",
+        "冰机",
+        "冰车"
+      ],
+      "rarity": "sunwoven",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:greedy",
+        "trait:chaos-marked",
+        "trait:immortal",
+        "element:earth",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "driverzombie",
+      "themeKey": "demon.driverzombie"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.flagzombie",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "私下里",
+        "一大",
+        "僵尸",
+        "喜爱",
+        "手中"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:coward",
+        "trait:void-touched",
+        "element:fire",
+        "rarity:heirloom",
+        "posture:Force",
+        "reach:melee",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "flagzombie",
+      "themeKey": "demon.flagzombie"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "ice"
+      },
+      "family": null,
+      "id": "lean.footballzombie",
+      "leanOrder": [
+        "support",
+        "attack",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "体育明星",
+        "橄榄球",
+        "球场上",
+        "僵尸",
+        "公司"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:loyal",
+        "trait:void-touched",
+        "element:light",
+        "element:ice",
+        "rarity:heirloom",
+        "posture:Force",
+        "reach:melee",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "footballzombie",
+      "themeKey": "demon.footballzombie"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "fire",
+        "secondary": "earth"
+      },
+      "family": null,
+      "id": "lean.fumeshroom",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "喷射",
+        "喷菇",
+        "烟雾",
+        "穿透",
+        "铁门"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:greedy",
+        "element:fire",
+        "element:earth",
+        "rarity:cultivated",
+        "posture:Force",
+        "reach:long",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "fumeshroom",
+      "themeKey": "demon.fumeshroom"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "fire",
+        "secondary": "dark"
+      },
+      "family": null,
+      "id": "lean.garlic",
+      "leanOrder": [
+        "attack",
+        "support",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "僵尸",
+        "大蒜"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:loyal",
+        "trait:regenerator",
+        "element:fire",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "garlic",
+      "themeKey": "demon.garlic"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "garlic",
+      "id": "lean.garlicpea",
+      "leanOrder": [
+        "support",
+        "attack",
+        "movement",
+        "defense",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "中毒",
+        "体内"
+      ],
+      "rarity": "chaff",
+      "separation": 2,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:greedy",
+        "trait:swift",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "garlicpea",
+      "themeKey": "demon.garlicpea"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": "garlic",
+      "id": "lean.garlicthreepeater",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "中毒",
+        "体内",
+        "三行"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "trait:guardian",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "garlicthreepeater",
+      "themeKey": "demon.garlicthreepeater"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "fire"
+      },
+      "family": null,
+      "id": "lean.gatlingpea",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "发射",
+        "豌豆"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:guardian",
+        "trait:greedy",
+        "trait:berserker",
+        "element:ice",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "gatlingpea",
+      "themeKey": "demon.gatlingpea"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.hypnochomper",
+      "leanOrder": [
+        "attack",
+        "movement",
+        "defense",
+        "support",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "僵尸",
+        "吞食",
+        "成分",
+        "部分",
+        "魅惑"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:bloodthirsty",
+        "trait:critical-hunter",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "hypnochomper",
+      "themeKey": "demon.hypnochomper"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "hypno",
+      "id": "lean.hypnojalapeno",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "变心"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:guardian",
+        "trait:loyal",
+        "trait:soul-eater",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "hypnojalapeno",
+      "themeKey": "demon.hypnojalapeno"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "hypno",
+      "id": "lean.hypnopeashooter",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "变心",
+        "作战"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:genius",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "hypnopeashooter",
+      "themeKey": "demon.hypnopeashooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "hypno",
+      "id": "lean.hypnoshroom",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "变心"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:genius",
+        "element:earth",
+        "rarity:cultivated",
+        "posture:Bastion",
+        "reach:melee",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "hypnoshroom",
+      "themeKey": "demon.hypnoshroom"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "light"
+      },
+      "family": "ice",
+      "id": "lean.icecaltrop",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:bloodthirsty",
+        "element:dark",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "icecaltrop",
+      "themeKey": "demon.icecaltrop"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "fire"
+      },
+      "family": "ice",
+      "id": "lean.iceshroom",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "僵尸"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:greedy",
+        "trait:berserker",
+        "element:dark",
+        "element:fire",
+        "rarity:cultivated",
+        "posture:Finesse",
+        "reach:long",
+        "targetPreference:swarm"
+      ],
+      "speciesKey": "iceshroom",
+      "themeKey": "demon.iceshroom"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.ironpeazombie",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "塔罗牌",
+        "伤害",
+        "僵尸",
+        "发射",
+        "子弹"
+      ],
+      "rarity": "sunwoven",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:bloodthirsty",
+        "trait:chaos-marked",
+        "trait:immortal",
+        "element:ice",
+        "rarity:sunwoven"
+      ],
+      "speciesKey": "ironpeazombie",
+      "themeKey": "demon.ironpeazombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "none"
+      },
+      "family": "fire",
+      "id": "lean.jalacaltrop",
+      "leanOrder": [
+        "defense",
+        "support",
+        "status",
+        "attack",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:loyal",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "jalacaltrop",
+      "themeKey": "demon.jalacaltrop"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "fire"
+      },
+      "family": "fire",
+      "id": "lean.jalagatling",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:coward",
+        "trait:soul-eater",
+        "element:ice",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "jalagatling",
+      "themeKey": "demon.jalagatling"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "air",
+        "secondary": "earth"
+      },
+      "family": "fire",
+      "id": "lean.jalapeashooter",
+      "leanOrder": [
+        "movement",
+        "defense",
+        "support",
+        "attack",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 4,
+      "signals": [
+        "trait:regenerator",
+        "trait:coward",
+        "trait:swift",
+        "element:air",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "jalapeashooter",
+      "themeKey": "demon.jalapeashooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "fire",
+      "id": "lean.jalapeno",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "僵尸"
+      ],
+      "rarity": "cultivated",
+      "separation": 1,
+      "signals": [
+        "trait:soul-eater",
+        "trait:greedy",
+        "element:earth",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "jalapeno",
+      "themeKey": "demon.jalapeno"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "light"
+      },
+      "family": "fire",
+      "id": "lean.jalastar",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "易燃易爆"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:coward",
+        "trait:soul-eater",
+        "element:dark",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "jalastar",
+      "themeKey": "demon.jalastar"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "light",
+      "id": "lean.lanterncactus",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "仙人掌",
+        "伤害"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:loyal",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "lanterncactus",
+      "themeKey": "demon.lanterncactus"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": "light",
+      "id": "lean.lanternchomper",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "仙人掌",
+        "伤害",
+        "光照"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:greedy",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "lanternchomper",
+      "themeKey": "demon.lanternchomper"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "earth"
+      },
+      "family": "light",
+      "id": "lean.lanternpea",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "仙人掌",
+        "伤害",
+        "光能"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:coward",
+        "trait:critical-hunter",
+        "element:light",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "lanternpea",
+      "themeKey": "demon.lanternpea"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.marigold",
+      "leanOrder": [
+        "movement",
+        "attack",
+        "defense",
+        "support",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "金盏花",
+        "生产",
+        "金币",
+        "钻石",
+        "银币"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:bloodthirsty",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "marigold",
+      "themeKey": "demon.marigold"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.melonpult",
+      "leanOrder": [
+        "attack",
+        "support",
+        "status",
+        "defense",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "伤害",
+        "带有",
+        "投手",
+        "溅射",
+        "西瓜"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:soul-eater",
+        "trait:loyal",
+        "trait:berserker",
+        "element:ice",
+        "rarity:chaff"
+      ],
+      "speciesKey": "melonpult",
+      "themeKey": "demon.melonpult"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "dark",
+        "secondary": "light"
+      },
+      "family": null,
+      "id": "lean.normalzombie",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "不配",
+        "个体",
+        "做出",
+        "僵尸",
+        "名字"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:guardian",
+        "trait:bloodthirsty",
+        "trait:chaos-marked",
+        "element:dark",
+        "element:light",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "normalzombie",
+      "themeKey": "demon.normalzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "chomper",
+      "id": "lean.nutchomper",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "吞食"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:greedy",
+        "trait:soul-eater",
+        "element:ice",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "nutchomper",
+      "themeKey": "demon.nutchomper"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.paperzombie",
+      "leanOrder": [
+        "status",
+        "support",
+        "movement",
+        "attack",
+        "defense"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "大脑",
+        "字谜",
+        "完成",
+        "打断",
+        "报纸"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:genius",
+        "trait:swift",
+        "trait:void-touched",
+        "element:light",
+        "rarity:heirloom",
+        "posture:Finesse",
+        "reach:melee",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "paperzombie",
+      "themeKey": "demon.paperzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": "chomper",
+      "id": "lean.peachomper",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "吞食",
+        "吐出"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:coward",
+        "trait:critical-hunter",
+        "element:fire",
+        "rarity:chaff"
+      ],
+      "speciesKey": "peachomper",
+      "themeKey": "demon.peachomper"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "nut",
+      "id": "lean.peanut",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "坚果",
+        "穿透"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:genius",
+        "trait:soul-eater",
+        "element:ice",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "peanut",
+      "themeKey": "demon.peanut"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "light"
+      },
+      "family": "pea",
+      "id": "lean.peashooter",
+      "leanOrder": [
+        "attack",
+        "status",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "发射"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:guardian",
+        "trait:bloodthirsty",
+        "element:dark",
+        "element:light",
+        "rarity:cultivated",
+        "posture:Force",
+        "reach:long",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "peashooter",
+      "themeKey": "demon.peashooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "fire"
+      },
+      "family": "pea",
+      "id": "lean.peashooterzombie",
+      "leanOrder": [
+        "defense",
+        "support",
+        "status",
+        "attack",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "发射",
+        "人心惶惶"
+      ],
+      "rarity": "heirloom",
+      "separation": 1,
+      "signals": [
+        "trait:guardian",
+        "trait:loyal",
+        "trait:chaos-marked",
+        "element:earth",
+        "element:fire",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "peashooterzombie",
+      "themeKey": "demon.peashooterzombie"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "pea",
+      "id": "lean.peasquash",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "发射",
+        "大量"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:bloodthirsty",
+        "trait:guardian",
+        "element:ice",
+        "rarity:chaff"
+      ],
+      "speciesKey": "peasquash",
+      "themeKey": "demon.peasquash"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "light"
+      },
+      "family": "sun",
+      "id": "lean.peasunflower",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "命中"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "element:earth",
+        "element:light",
+        "rarity:chaff"
+      ],
+      "speciesKey": "peasunflower",
+      "themeKey": "demon.peasunflower"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "air"
+      },
+      "family": "sun",
+      "id": "lean.plantern",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "命中",
+        "光照"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:bloodthirsty",
+        "trait:guardian",
+        "element:ice",
+        "element:air",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "plantern",
+      "themeKey": "demon.plantern"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.polevaulterzombie",
+      "leanOrder": [
+        "movement",
+        "support",
+        "status",
+        "attack",
+        "defense"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "促使",
+        "借助",
+        "僵尸",
+        "助跑",
+        "成就"
+      ],
+      "rarity": "sunwoven",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:loyal",
+        "trait:regenerator",
+        "trait:void-touched",
+        "trait:immortal",
+        "element:air",
+        "rarity:sunwoven",
+        "posture:Finesse",
+        "reach:long",
+        "targetPreference:frontline"
+      ],
+      "speciesKey": "polevaulterzombie",
+      "themeKey": "demon.polevaulterzombie"
+    },
+    {
+      "antiMotifs": [
+        "铁头功",
+        "僵尸",
+        "含铁",
+        "坚果",
+        "大家"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "ice"
+      },
+      "family": "base",
+      "id": "lean.pot",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "屋顶",
+        "植物"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:greedy",
+        "trait:critical-hunter",
+        "element:light",
+        "element:ice",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "pot",
+      "themeKey": "demon.pot"
+    },
+    {
+      "antiMotifs": [
+        "铁头功",
+        "僵尸",
+        "含铁",
+        "坚果",
+        "大家"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "base",
+      "id": "lean.pumpkin",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "屋顶",
+        "植物",
+        "保护"
+      ],
+      "rarity": "heirloom",
+      "separation": 2,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "trait:chaos-marked",
+        "element:ice",
+        "rarity:heirloom"
+      ],
+      "speciesKey": "pumpkin",
+      "themeKey": "demon.pumpkin"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "ice"
+      },
+      "family": null,
+      "id": "lean.scaredyshroom",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "status",
+        "movement"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "远距离",
+        "僵尸",
+        "发射",
+        "孢子",
+        "害怕"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:loyal",
+        "element:light",
+        "element:ice",
+        "rarity:cultivated",
+        "posture:Bastion",
+        "reach:long",
+        "targetPreference:swarm"
+      ],
+      "speciesKey": "scaredyshroom",
+      "themeKey": "demon.scaredyshroom"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "ice",
+        "secondary": "none"
+      },
+      "family": "ice",
+      "id": "lean.snowgatling",
+      "leanOrder": [
+        "status",
+        "attack",
+        "defense",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 2,
+      "signals": [
+        "trait:guardian",
+        "trait:genius",
+        "trait:berserker",
+        "element:ice",
+        "rarity:chaff"
+      ],
+      "speciesKey": "snowgatling",
+      "themeKey": "demon.snowgatling"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "ice",
+      "id": "lean.snowpeashooter",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "地刺",
+        "触感",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "trait:guardian",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "snowpeashooter",
+      "themeKey": "demon.snowpeashooter"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "air",
+        "secondary": "earth"
+      },
+      "family": "pea",
+      "id": "lean.snowsplit",
+      "leanOrder": [
+        "movement",
+        "attack",
+        "support",
+        "defense",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 4,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:loyal",
+        "trait:swift",
+        "element:air",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "snowsplit",
+      "themeKey": "demon.snowsplit"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "air"
+      },
+      "family": "pea",
+      "id": "lean.splitpea",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "僵尸",
+        "发射"
+      ],
+      "rarity": "chaff",
+      "separation": 0,
+      "signals": [
+        "trait:berserker",
+        "trait:loyal",
+        "trait:soul-eater",
+        "element:earth",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "splitpea",
+      "themeKey": "demon.splitpea"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.squash",
+      "leanOrder": [
+        "movement",
+        "attack",
+        "support",
+        "defense",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "僵尸",
+        "压扁",
+        "接近",
+        "窝瓜"
+      ],
+      "rarity": "cultivated",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:greedy",
+        "trait:critical-hunter",
+        "element:air",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "squash",
+      "themeKey": "demon.squash"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "light",
+        "secondary": "none"
+      },
+      "family": "fruit",
+      "id": "lean.starfruit",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "方向"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:regenerator",
+        "trait:loyal",
+        "element:light",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "starfruit",
+      "themeKey": "demon.starfruit"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "dark",
+        "secondary": "air"
+      },
+      "family": "fruit",
+      "id": "lean.starpea",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "status",
+        "support",
+        "movement"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "发射",
+        "方向"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:guardian",
+        "trait:coward",
+        "trait:soul-eater",
+        "element:dark",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "starpea",
+      "themeKey": "demon.starpea"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "sunflower",
+      "id": "lean.sunchomper",
+      "leanOrder": [
+        "defense",
+        "attack",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "嘴花",
+        "完成"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:berserker",
+        "trait:coward",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "sunchomper",
+      "themeKey": "demon.sunchomper"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "fire",
+        "secondary": "none"
+      },
+      "family": "sunflower",
+      "id": "lean.sunflower",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "movement",
+        "status",
+        "support"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "嘴花",
+        "完成",
+        "向日葵"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:coward",
+        "element:fire",
+        "rarity:cultivated",
+        "posture:Finesse",
+        "reach:melee",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "sunflower",
+      "themeKey": "demon.sunflower"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "light",
+        "secondary": "dark"
+      },
+      "family": null,
+      "id": "lean.threecabbage",
+      "leanOrder": [
+        "support",
+        "attack",
+        "defense",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "卷心菜",
+        "三行",
+        "弹射",
+        "能够",
+        "出"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:regenerator",
+        "trait:bloodthirsty",
+        "element:light",
+        "element:dark",
+        "rarity:chaff"
+      ],
+      "speciesKey": "threecabbage",
+      "themeKey": "demon.threecabbage"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "earth",
+        "secondary": "none"
+      },
+      "family": "line",
+      "id": "lean.threepeater",
+      "leanOrder": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "三行",
+        "发射"
+      ],
+      "rarity": "cultivated",
+      "separation": 0,
+      "signals": [
+        "trait:soul-eater",
+        "trait:bloodthirsty",
+        "element:earth",
+        "rarity:cultivated"
+      ],
+      "speciesKey": "threepeater",
+      "themeKey": "demon.threepeater"
+    },
+    {
+      "antiMotifs": [
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
+      ],
+      "element": {
+        "primary": "air",
+        "secondary": "earth"
+      },
+      "family": "line",
+      "id": "lean.threeplantern",
+      "leanOrder": [
+        "support",
+        "movement",
+        "attack",
+        "defense",
+        "status"
+      ],
+      "leanSource": "derived",
+      "motifs": [
+        "三行",
+        "发射",
+        "光照"
+      ],
+      "rarity": "chaff",
+      "separation": 1,
+      "signals": [
+        "trait:regenerator",
+        "trait:greedy",
+        "trait:swift",
+        "element:air",
+        "element:earth",
+        "rarity:chaff"
+      ],
+      "speciesKey": "threeplantern",
+      "themeKey": "demon.threeplantern"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.twinflower",
+      "leanOrder": [
+        "attack",
+        "movement",
+        "defense",
+        "support",
+        "status"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "向日葵",
+        "产量",
+        "阳光"
+      ],
+      "rarity": "chaff",
+      "separation": null,
+      "signals": [
+        "trait:critical-hunter",
+        "trait:bloodthirsty",
+        "trait:swift",
+        "element:air",
+        "rarity:chaff"
+      ],
+      "speciesKey": "twinflower",
+      "themeKey": "demon.twinflower"
+    },
+    {
+      "antiMotifs": [],
+      "element": {
+        "primary": "air",
+        "secondary": "none"
+      },
+      "family": null,
+      "id": "lean.wallnut",
+      "leanOrder": [
+        "support",
+        "movement",
+        "status",
+        "attack",
+        "defense"
+      ],
+      "leanSource": "derived-nofloor",
+      "motifs": [
+        "保护",
+        "坚果",
+        "坚硬",
+        "外壳",
+        "植物"
+      ],
+      "rarity": "heirloom",
+      "separation": null,
+      "signals": [
+        "trait:swift",
+        "trait:loyal",
+        "trait:regenerator",
+        "trait:void-touched",
+        "element:air",
+        "rarity:heirloom",
+        "posture:Bastion",
+        "reach:melee",
+        "targetPreference:backline"
+      ],
+      "speciesKey": "wallnut",
+      "themeKey": "demon.wallnut"
+    }
+  ],
+  "kind": "action-role-lean",
+  "schemaVersion": 1
+}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="WIP: commit a legion into a fight — the map hands a battle a request and consumes an outcome. Not finished / not fully playable yet." />
+    <title>Map to battle handoff — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/map-battle-handoff.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--wip">WIP</span>
+          World and empire · commit a legion into a fight
+        </p>
+        <h1 class="teach-title">Map to battle handoff</h1>
+        <p class="teach-hook"><strong>WIP:</strong> commit a legion into a fight — the map hands a battle a request and consumes an outcome. Not finished / not fully playable yet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>WIP</dt>
+              <dd>Not finished. Full fantasy needs interactive battles you play yourself.</dd>
+            </div>
+            <div>
+              <dt>Handoff</dt>
+              <dd>Map → battle request → outcome back to the map. Not a separate save and not a lawn launch by itself.</dd>
+            </div>
+            <div>
+              <dt>Commit</dt>
+              <dd>Sending a legion into the test — travel into a fight, not only standing on a node.</dd>
+            </div>
+            <div>
+              <dt>Interactive battle</dt>
+              <dd>A fight you play (initiative, action bar, targets) — WIP as a stage; expeditions stay auto-resolve.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Lane-board presentation hangs on the <a href="../../mechanisms/three-layer-world.md">three-layer world</a> Vision.</li>
+            <li>You can still march, claim, and End Turn without this handoff.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-will-feel-like-title">
+          <h2 id="what-it-will-feel-like-title">What it will feel like</h2>
+          <p>You commit a legion into a fight from the graph.</p>
+          <p>The map hands the battle a request; when the fight ends, the map consumes the outcome and the war continues.</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  legion on map  -&gt;  commit  -&gt;  battle request
+                                  |
+                                  v
+                            play / resolve fight
+                                  |
+                                  v
+                            map consumes outcome
+</pre>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-you-do-today-title">
+          <h2 id="what-you-do-today-title">What you do today</h2>
+          <p>Advance the shipped map without expecting a finished playable battle stage from every contact.</p>
+          <p>Treat missing commit-to-battle prompts as unfinished work.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-it-depends-on-title">
+          <h2 id="what-it-depends-on-title">What it depends on</h2>
+          <p>Interactive battles you play yourself are WIP — same combat language, your hands on the action bar.</p>
+          <p>Until that stage hardens, the handoff cannot feel finished.</p>
+          <p class="teach-note">See <a href="interactive-battles.html">interactive battles</a> when that teach page exists; combat pillar covers the language.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do while it is WIP</h2>
+          <ol class="steps-plain">
+            <li>Keep using march, claim, and End Turn on the world map.</li>
+            <li>When a commit-to-battle control appears, follow it and read the outcome back on the map.</li>
+            <li>Do not confuse this with launching a casual lawn match from Sanctum.</li>
+          </ol>
+          <p class="teach-note">Stop when handoff ≠ lawn shortcut. Related: <a href="../../mechanisms/world-map.md">world map</a>, <a href="../../mechanisms/three-layer-world.md">three-layer world</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why doesn’t contact always open a battle I play?</dt>
+              <dd>Map→battle handoff and interactive battles are WIP.</dd>
+            </div>
+            <div>
+              <dt>Is this a lawn match?</dt>
+              <dd>No. It is a battle stage fed by the map — lawn remains its own first core loop.</dd>
+            </div>
+            <div>
+              <dt>Do expeditions use this handoff?</dt>
+              <dd>No. Expeditions stay async auto-resolve.</dd>
+            </div>
+            <div>
+              <dt>Does the map ignore the fight result?</dt>
+              <dd>Design consumes the outcome back into the war — that loop is what “handoff” means.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/three-layer-world.md">Three-layer world</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/world-map.md">Rift world map</a> ·
+            <a href="interactive-battles.html">Interactive battles</a> ·
+            <a href="../../mechanisms/three-layer-world.md">Three-layer world</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/map-battle-handoff.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-rift.md">The rift</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/map-battle-handoff.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

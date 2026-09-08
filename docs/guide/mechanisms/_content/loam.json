@@ -1,0 +1,99 @@
+{
+  "slug": "loam",
+  "title": "Loam and the Fracture",
+  "status": "Shipped",
+  "statusNote": "thin",
+  "kicker": "Stocks and economy · world map",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "Farm / hunt / defend · World map adventure",
+  "hook": "**Loam** is the pressure of ground you hold on the rift map — neglect it and the **Fracture** fades that holding away. It never banks into the next world.",
+  "blindSpots": [
+    {"term": "Loam", "meaning": "A **world stock** tied to sectors you hold. It is position and upkeep, not a wallet you carry forever."},
+    {"term": "The Fracture", "meaning": "The force that unmakes ground you do not keep real. Neglect → fade → loss. Not a combat status."},
+    {"term": "Bank", "meaning": "What souls and essence do across worlds. Loam does **not** bank — when a world ends, loam and that map’s holdings stay behind."},
+    {"term": "Sector", "meaning": "A place on the rift map you can claim, march through, or lose. Loam stories live on sectors."}
+  ],
+  "alsoTrue": [
+    "Loam is one of three stocks. The others are [souls](souls) and [essence](essence). They do not convert into each other.",
+    "The surface is playable but thin in this build — deeper empire verbs and buildings are still catching up."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Every sector carries a loam story: fertile ground supports an expanding empire; barren ground drains one.",
+        "Territory you neglect fades, then is lost to the Fracture. Structures die with the fade; some natural rootbeds remain as places you can found on again."
+      ],
+      "note": "Ending a world keeps your roster, souls, and essence — not loam. See [New world](new-world-prestige)."
+    },
+    {
+      "title": "Why it exists",
+      "paras": [
+        "Without a stock that dies with the map, empire play collapses into “farm forever, then leave.”",
+        "Loam makes holding ground a real choice: expand, maintain, or lose what you claimed."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Think in map verbs, not shop tabs:",
+      "cards": [
+        {"name": "Hold", "body": "Claimed sectors stay real while their loam story supports them."},
+        {"name": "Neglect", "body": "Fade is gradual and visible — you get a chance to notice before the Fracture takes the holding."},
+        {"name": "Spend", "body": "Buildings and position cost loam (sometimes with essence). That is the farm beat of empire."}
+      ],
+      "diagram": [
+        "  claim sector  ->  loam pressure on that ground",
+        "       |",
+        "       +->  maintain  ->  holding stays",
+        "       +->  neglect   ->  fade  ->  Fracture takes it"
+      ],
+      "table": {
+        "cols": ["Stock", "Scope"],
+        "rows": [
+          ["Loam", "This world only — never banks"],
+          ["Souls", "Player bank across worlds"],
+          ["Essence", "Player bank across worlds (by element)"]
+        ]
+      }
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the rift map",
+          "intro": "Open World travel when you are ready to march.",
+          "steps": [
+            "Travel to the world map from Sanctum.",
+            "Read loam on sectors you hold or want.",
+            "Watch for fade on neglected ground before it is gone."
+          ],
+          "note": "Sector buildings that spend loam are still WIP as a full farm loop — see [sector buildings](sector-buildings)."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Open the world map when travel is available.",
+    "Claim or inspect a sector and notice its loam story.",
+    "Decide once: hold it (come back) or leave it — neglect is a choice with a cost."
+  ],
+  "doNote": "Stop when you can say why loam is not a second soul bank. Next: [farm / hunt / defend](farm-hunt-defend) and the [world map](world-map).",
+  "mixUps": [
+    {"q": "Can I save loam for the next world?", "a": "No. Loam and that map’s holdings stay behind. Roster, souls, and essence bank."},
+    {"q": "Is loam the same as souls?", "a": "No. Souls buy roster power. Loam buys and keeps ground. See [souls](souls)."},
+    {"q": "Does essence fade with the Fracture?", "a": "No. Only loam and neglected holdings. Essence banks — see [essence](essence)."},
+    {"q": "If ground fades, is my whole save wiped?", "a": "No. You lose that holding’s position on the map. Your summoner bank (roster, souls, essence) remains."},
+    {"q": "Is the Fracture a boss I fight?", "a": "Not as a single boss fight. It is the rule that unanchored ground stops being real."}
+  ],
+  "next": ["farm-hunt-defend", "world-map"],
+  "related": ["souls", "essence", "world-map", "new-world-prestige", "sector-buildings"],
+  "sources": [
+    "docs/guide/the-rift.md §Loam and the Fracture",
+    "docs/guide/the-rift.md §Three stocks",
+    "docs/guide/glossary.md §Currencies",
+    "docs/guide/the-game.md §Win and lose",
+    "docs/architecture/empire-economy-ssot.md",
+    "docs/guide/mechanisms/loam.md (prior stub)"
+  ]
+}

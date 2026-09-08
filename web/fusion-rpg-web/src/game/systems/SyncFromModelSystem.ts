@@ -4,8 +4,11 @@ import { listMowers, listOccupants, listPets, listTiles, normalizePtr } from "@/
 import type { PtrEntityRegistry, PtrViewRecord } from "../entities/PtrEntityRegistry";
 import { noteIconLoadFailure } from "@/features/lawn/lawnSyncGate";
 import { lawnIconTextureKey, lawnIconUrl } from "../iconUrl";
-import { getIconEpoch } from "@/lib/bus/icon-epoch";
+import { getIconEpochMirror } from "../iconEpochMirror";
 import { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, cellToWorld } from "../gridMath";
+import { setHudDisplay } from "./ActorHudDisplay";
+
+export { setHudDisplay } from "./ActorHudDisplay";
 
 export { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, cellToWorld };
 
@@ -68,7 +71,7 @@ function ensureIcon(
   typeId: number,
   onReady?: () => void
 ): string {
-  const epoch = getIconEpoch();
+  const epoch = getIconEpochMirror();
   const key = lawnIconTextureKey(side, typeId, epoch);
   const placeholder = scene.textures.exists("lawn-placeholder")
     ? "lawn-placeholder"
@@ -147,6 +150,20 @@ function setStatusChips(
     row.add(scene.add.circle(i * 8, 0, 3, CHIP_COLOR[c], 1));
   });
   go.add(row);
+}
+
+/** Band B HUD + legacy chip suppression — shared by create and in-place occupant sync. */
+export function syncOccupantBandB(
+  scene: Phaser.Scene,
+  go: Phaser.GameObjects.Container,
+  occ: Pick<Occupant, "hud" | "statusChips">
+): void {
+  setHudDisplay(scene, go, occ.hud);
+  if (occ.hud) {
+    setStatusChips(scene, go, []);
+  } else {
+    setStatusChips(scene, go, occ.statusChips);
+  }
 }
 
 function setHpDisplay(
@@ -239,13 +256,14 @@ function makeOccupantGo(
     .setName("occLabel");
   const container = scene.add.container(0, 0, [bg, label]);
   container.setSize(52, 60);
+  // Hit area includes Band B HUD above the body so HUD clicks open the dock (T12), not a dead zone.
   container.setInteractive(
-    new Phaser.Geom.Rectangle(-26, -30, 52, 60),
+    new Phaser.Geom.Rectangle(-26, -72, 52, 102),
     Phaser.Geom.Rectangle.Contains
   );
   setIconTexture(scene, container, occ.side, occ.typeId, onReady);
   setSelectRing(scene, container, selected);
-  setStatusChips(scene, container, occ.statusChips);
+  syncOccupantBandB(scene, container, occ);
   setHpDisplay(scene, container, occ);
   return container;
 }
@@ -323,7 +341,7 @@ function updateOccupantInPlace(
   label?.setText(`#${occ.typeId}`);
   setIconTexture(scene, rec.go, occ.side, occ.typeId, onReady);
   setSelectRing(scene, rec.go, selected);
-  setStatusChips(scene, rec.go, occ.statusChips);
+  syncOccupantBandB(scene, rec.go, occ);
   setHpDisplay(scene, rec.go, occ);
 }
 

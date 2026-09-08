@@ -20,6 +20,8 @@ public sealed class SimEngine
     public int MaxWave { get; private set; }
     public StatsConfig LastStats { get; private set; } = new();
     public StatSystem Stats { get; } = StatSystemBootstrap.CreateDefault();
+    /// <summary>Sole Hot compose gate over <see cref="Stats"/> (ADR 2026-09-07).</summary>
+    public FusionRpg.Core.Stats.Derived.ActorHub ActorHub { get; }
 
     /// <summary>Optional overlay fold target (W1-F). Null = sim-only lists.</summary>
     public MatchRuntime? MatchOverlay { get; private set; }
@@ -38,6 +40,7 @@ public sealed class SimEngine
 
     public SimEngine()
     {
+        ActorHub = FusionRpg.Core.Stats.Derived.ActorHubBootstrap.CreateDefault(Stats);
         _shieldGate = new Combat.Shield.ShieldGate(_shields, static (_, _) =>
             new Combat.CombatActorSnapshot(
                 global::FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot.StubNeutral(),
@@ -236,7 +239,7 @@ public sealed class SimEngine
             Atk = atk
         });
         var ctx = Stats.Contexts.ForPlant(ptr, baseline, entity.Type, MatchKey, cheatScale: stats, applyStats: stats.ApplyStats);
-        var final = Stats.Resolve(ctx);
+        var final = ActorHub.Resolve(ctx).AppliedCombat;
         if (stats.ApplyStats)
         {
             entity.MaxHp = final.MaxHp;
@@ -302,7 +305,7 @@ public sealed class SimEngine
             Arm1Max = armorMax
         });
         var ctx = Stats.Contexts.ForZombie(ptr, baseline, entity.Type, MatchKey, cheatScale: stats, applyStats: stats.ApplyStats);
-        var final = Stats.Resolve(ctx);
+        var final = ActorHub.Resolve(ctx).AppliedCombat;
         if (stats.ApplyStats)
         {
             entity.MaxHp = final.MaxHp;
@@ -341,7 +344,7 @@ public sealed class SimEngine
         {
             var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
             var ctx = Stats.Contexts.ForPlant(e.Ptr, baseline, cheatScale: stats, applyStats: true);
-            var final = Stats.Resolve(ctx);
+            var final = ActorHub.Resolve(ctx).AppliedCombat;
             after = StatMath.ScaleIncoming(incoming, final.DefensePercent, final.DefenseFlat);
         }
 
@@ -378,7 +381,7 @@ public sealed class SimEngine
         {
             var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
             var ctx = Stats.Contexts.ForZombie(e.Ptr, baseline, cheatScale: stats, applyStats: true);
-            var final = Stats.Resolve(ctx);
+            var final = ActorHub.Resolve(ctx).AppliedCombat;
             after = StatMath.ScaleIncoming(incoming, final.DefensePercent, final.DefenseFlat);
         }
 

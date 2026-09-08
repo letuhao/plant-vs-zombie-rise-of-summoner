@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-001",
+  "eventPool": [],
+  "flavor": "A narrow artery of obsidian glass cuts through the raw granite, its walls polished to a mirror sheen that reflects the torchlight in jagged, distorted streaks.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Vitrified Vein",
+  "reason": "The narrow geometry forces the party into a bottleneck, allowing a high-defense guardian to control the flow of combat.",
+  "roomId": "room.elite-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

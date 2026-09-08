@@ -900,7 +900,17 @@ public partial class MainWindow : FluentWindow
                 SetLight(InjectorLight, InjectorStatusText, false, "Injector", unknown: !serverUp);
             }
 
-            UrlText.Text = "URL: " + (_session.ActiveUrl ?? "—");
+            // E46 (player-content-boot): the server reports whether it is running on real imported
+            // content or the shipped code fallback — show it here so a broken/skipped import is
+            // visible to the player, not only in the server log (spec-player-content-boot.md §3.2).
+            var contentLabel = health?.ContentSource switch
+            {
+                "imported" => "content: imported",
+                "codeFallback" => "content: fallback (see server log)",
+                _ => null,
+            };
+            UrlText.Text = "URL: " + (_session.ActiveUrl ?? "—")
+                + (contentLabel is null ? "" : "  |  " + contentLabel);
 
             try
             {

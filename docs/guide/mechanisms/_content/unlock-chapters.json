@@ -1,0 +1,75 @@
+{
+  "slug": "unlock-chapters",
+  "title": "Dave-level unlock chapters",
+  "status": "Vision",
+  "kicker": "Session and shell · level up and power",
+  "pillar": {"text": "How you play", "href": "how-you-play.md"},
+  "loopLine": "Level up and power",
+  "hook": "**Vision:** complexity will drip by **Dave’s level** so day one is not a spreadsheet — this is not what gates the live rail today.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked design, not playable as a gate yet. You cannot turn this on in the current build."},
+    {"term": "Dave’s level", "meaning": "Your summoner’s endless level — see [Dave’s level](dave-level). Chapters would open features as that number rises."},
+    {"term": "Chapter", "meaning": "A drip of systems (items, pacts, map…) timed to a Dave threshold — not a story cutscene book."},
+    {"term": "Live rail", "meaning": "What you have now unlocks on [play beats](unlock-beats), not on this table."}
+  ],
+  "alsoTrue": [
+    "Thresholds will live in balance data later. Exact numbers below are the product map, not a promise that the live game already enforces them.",
+    "Dave’s level has no cap. New worlds raise prestige; they do not wipe who you are."
+  ],
+  "sections": [
+    {
+      "title": "Not in the current loop",
+      "paras": [
+        "Open the rail today and you will see beat unlocks, not Dave-gated chapters.",
+        "Read this page to understand the intended drip — then play with [unlock beats](unlock-beats) until chapters ship."
+      ]
+    },
+    {
+      "title": "Chapter map (Vision)",
+      "intro": "What the product wants to open as Dave grows:",
+      "table": {
+        "cols": ["Dave", "Opens"],
+        "rows": [
+          ["1", "Lawn, Sanctum, Creatures, deploy, souls; altar when you have souls"],
+          ["2 (first level-up)", "Almanac, Primary Stats, Chronicle"],
+          ["10", "Item loop — loot and Relics"],
+          ["12", "Pacts"],
+          ["15", "Commanders"],
+          ["20", "Expeditions (idle)"],
+          ["22", "Fusion"],
+          ["30", "World-map adventure"],
+          ["35", "World-stage empire; farm and defend verbs"],
+          ["40", "Quest log as a layer"],
+          ["45", "The Delve"],
+          ["50", "Siege"]
+        ]
+      }
+    },
+    {
+      "title": "Why chapters exist (as design)",
+      "paras": [
+        "A full rail on minute one turns the hall into a spreadsheet.",
+        "Chapters keep lawn-first onboarding while still promising the whole war over time."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Treat the table as future design, not a checklist for today’s build.",
+    "Use [unlock beats](unlock-beats) for what the rail actually does now.",
+    "When you wonder “why isn’t X open at Dave 10?”, remember chapters are Vision."
+  ],
+  "doNote": "Stop when you can separate Vision chapters from live beats. Related power: [Dave’s level](dave-level).",
+  "mixUps": [
+    {"q": "I reached Dave 20 — where are Expeditions?", "a": "Expeditions unlock on the live beat (bound demon), not on this Vision table yet."},
+    {"q": "Are the Dave numbers final?", "a": "They are the product map. Balance data will own the live thresholds later."},
+    {"q": "Does a new world reset Dave?", "a": "New worlds are prestige of place — you keep who you are. See [New world](new-world-prestige)."},
+    {"q": "Is this the same as unlock beats?", "a": "No. Beats are Shipped. Chapters are Vision."}
+  ],
+  "next": ["dave-level"],
+  "related": ["unlock-beats", "dave-level", "layer-rail"],
+  "sources": [
+    "docs/guide/how-you-play.md §Unlock chapters — Dave’s level",
+    "docs/guide/mechanisms/unlock-chapters.md (prior stub)"
+  ]
+}

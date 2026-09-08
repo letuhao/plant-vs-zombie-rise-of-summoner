@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1415,
+  "magnitudes": {
+    "combat.power.omni": 217,
+    "combat.shield.pen.omni": 271,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 5695,
+    "resource.max.spirit": 2622,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 48,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 393,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CactusCaltrop",
+  "theta": 13,
+  "traitPool": [
+    "anti-air",
+    "projectile-burst",
+    "thistle-barrage"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "corrupted",
+    "mutated",
+    "normal"
+  ]
+}

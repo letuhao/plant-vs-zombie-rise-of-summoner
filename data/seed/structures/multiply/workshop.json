@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Multiply"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 R3 Multiply's own definition ('raise another producer's yield') given a second, generic instance beyond Hatchery's Lair-only case.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Multiply",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "workshop",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "workshop",
+      "name": "Workshop"
+    }
+  ],
+  "kind": "structure-anchor"
+}

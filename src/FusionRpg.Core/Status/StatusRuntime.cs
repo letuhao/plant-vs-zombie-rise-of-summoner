@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Status;
@@ -25,6 +26,10 @@ public sealed class StatusInstance
     public double SpreadChance { get; init; }
     public string? SpreadStatusId { get; init; }
     public int SpreadMaxHops { get; init; }
+
+    /// <summary>Wave E1 — the element this instance's pulses carry, copied from
+    /// <see cref="StatusApplyInput.Element"/> at apply time. <c>null</c> = element-neutral.</summary>
+    public ElementTypeId? Element { get; init; }
 
     /// <summary>
     /// Timed stat contributions this instance makes while active (E17). Empty for every status that
@@ -78,13 +83,42 @@ public sealed record StatusApplyInput(
     int SpreadIcdMs = 0,
     TargetSpec? SpreadTarget = null,
     int HopDepth = 0,
-    IReadOnlyList<StatusStatMod>? StatMods = null);
+    IReadOnlyList<StatusStatMod>? StatMods = null,
+    /// <summary>combat-unification Wave E1 (typed DoTs) — the element this status's pulses carry to
+    /// the shield gate. <c>null</c> means element-neutral, which is what BOTH modes did before and is
+    /// therefore byte-identical: an unset element produces an empty component list, exactly as today.
+    /// Set it and the pulse arrives as a full-weight component of that element, so the gate's matchup
+    /// and a typed shield finally see a DoT for what it is.</summary>
+    ElementTypeId? Element = null);
 
 public sealed record StatusApplyOutcome(
     bool Applied,
     StatusResistReason? ResistReason,
     StatusInstance? Instance,
     StatusApplyResult EvalResult);
+
+/// <summary>P2's payload (spec-gate-counters.md §7) — wraps the SAME `StatusInstance` `OnApplied`
+/// already carries (HostPtr, AttackerPtr, StatusId, GrantId, …) rather than inventing new fields; a
+/// future `status_applied` counter (task G2, not built here) reads `Instance` for §2.1's own rules
+/// (outbound/landed/fresh/distinct-host).</summary>
+public readonly record struct StatusAppliedEvent(StatusInstance Instance);
+
+/// <summary>
+/// combat-unification Wave E1 — the element payload a status pulse carries.
+///
+/// <para>Shared by BOTH pulse sinks on purpose. Battle and overlay DoT parity is a program invariant
+/// ("both modes are element-neutral on DoTs by parity"), and the cheapest way to keep two
+/// implementations agreeing is to give them one function rather than two copies of a rule.</para>
+/// </summary>
+public static class StatusPulsePayload
+{
+    static readonly ElementPayloadComponent[] Neutral = Array.Empty<ElementPayloadComponent>();
+
+    /// <summary>Empty when the status has no element — byte-identical to the pre-E1 behaviour in both
+    /// modes. A typed status pulses as a single full-weight component of its own element.</summary>
+    public static ElementPayloadComponent[] For(StatusInstance instance) =>
+        instance.Element is { } e ? new[] { new ElementPayloadComponent(e, 1.0) } : Neutral;
+}
 
 public interface IStatusPulseSink
 {
@@ -116,6 +150,14 @@ public sealed class StatusRuntime
 
     /// <summary>Fires on every definitive apply (spread hops included) — VFX cue producer seam (SPEC W5).</summary>
     public Action<StatusInstance>? OnApplied { get; set; }
+
+    /// <summary>P2 (spec-gate-counters.md §7, §2.1c): fires ONLY when `UpsertInstance` ADDED a new
+    /// instance — never on a `Refresh`/`Replace` that matched an existing one. A NEW property, not a
+    /// widened `OnApplied` payload: `OnApplied` is a single-assignment `Action&lt;StatusInstance&gt;?`
+    /// with three assigning sites, one of which chains by hand (`ActorHudInvalidator.cs` saves
+    /// `prevApplied` first) — widening its payload breaks all three; a separate property breaks
+    /// none.</summary>
+    public Action<StatusAppliedEvent>? OnFreshApplication { get; set; }
 
     /// <summary>
     /// Fires when an instance definitively ENDS mid-life: expiry prune, ClearGrant, family mutex.
@@ -206,6 +248,7 @@ public sealed class StatusRuntime
             StatusId = input.StatusId,
             HostPtr = input.HostPtr,
             AttackerPtr = input.AttackerPtr,
+            Element = input.Element,
             GrantId = input.GrantId,
             EffectId = input.EffectId,
             PluginId = input.PluginId,
@@ -232,12 +275,17 @@ public sealed class StatusRuntime
             LastSpread = DateTimeOffset.MinValue
         };
 
-        UpsertInstance(input.HostPtr, instance, def.Stacking);
+        var isFresh = UpsertInstance(input.HostPtr, instance, def.Stacking);
         OnApplied?.Invoke(instance);
+        if (isFresh)
+            OnFreshApplication?.Invoke(new StatusAppliedEvent(instance));
         return new StatusApplyOutcome(true, null, instance, eval);
     }
 
-    void UpsertInstance(string hostPtr, StatusInstance instance, StatusStacking stacking)
+    /// <summary>Returns whether this upsert ADDED a new instance (P2) — `Refresh`/`Replace` report
+    /// fresh only when NO existing instance matched (this actor's first application under that key);
+    /// `Coexist` (the fallthrough) is always fresh, since it never replaces anything.</summary>
+    bool UpsertInstance(string hostPtr, StatusInstance instance, StatusStacking stacking)
     {
         if (!_byHost.TryGetValue(hostPtr, out var list))
         {
@@ -251,21 +299,24 @@ public sealed class StatusRuntime
                 string.Equals(i.StatusId, instance.StatusId, StringComparison.OrdinalIgnoreCase)
                 && string.Equals(i.GrantId, instance.GrantId, StringComparison.OrdinalIgnoreCase));
             if (idx >= 0)
+            {
                 list[idx] = instance;
-            else
-                list.Add(instance);
-            return;
+                return false;
+            }
+            list.Add(instance);
+            return true;
         }
 
         if (stacking == StatusStacking.Replace)
         {
-            list.RemoveAll(i =>
+            var removed = list.RemoveAll(i =>
                 string.Equals(i.StatusId, instance.StatusId, StringComparison.OrdinalIgnoreCase));
             list.Add(instance);
-            return;
+            return removed == 0;
         }
 
         list.Add(instance);
+        return true;
     }
 
     void ApplyFamilyMutex(string hostPtr, StatusDef def, DateTimeOffset now)

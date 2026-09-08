@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Refine"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21's own R2 Refine, called out as the 'strongest addition' and missing until now: 'ironwork is produced from bulk material at a lossy, gated rate ... couples the two stocks by a build decision.' Matches the already-tunable SiegeTuningPolicy.Construction.RefineRubblePerIronwork this session's own siege-construction 15.3b work introduced.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Refine",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "refinery",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "refinery",
+      "name": "Refinery"
+    }
+  ],
+  "kind": "structure-anchor"
+}

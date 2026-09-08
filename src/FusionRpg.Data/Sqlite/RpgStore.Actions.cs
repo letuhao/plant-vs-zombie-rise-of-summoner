@@ -98,19 +98,60 @@ public sealed partial class RpgStore
               innate_action_id TEXT
             );
             """);
+
+        // A-E1 (spec-eligibility-axis.md §3.0/§6a gate 2): a database created before this module has
+        // rpg_action without these six columns — CREATE TABLE IF NOT EXISTS is a no-op against it, so
+        // the addition has to be explicit, same shape as T3.4's effect_instance migration above.
+        // Defaults (scope='general', pairing_role='none') only ever apply to pre-migration rows read
+        // back after this point; UpsertAction always supplies real values from here on.
+        EnsureColumn(db, "rpg_action", "scope", "TEXT NOT NULL DEFAULT 'general'");
+        EnsureColumn(db, "rpg_action", "scope_key", "TEXT");
+        EnsureColumn(db, "rpg_action", "category", "TEXT");
+        EnsureColumn(db, "rpg_action", "pairing_role", "TEXT NOT NULL DEFAULT 'none'");
+        EnsureColumn(db, "rpg_action", "structure_axes_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "rpg_action", "atom_families_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "rpg_action", "rung_band_json", "TEXT");
+        // base-defense siege-cover, decision 35, the fifth of the five plumbing sites
+        // RequiresLineOfSight already occupies. Default 7 = ProjectilePenalties.All (Range|Obstruction|
+        // MeleeLock) -- an ordinary shot pays everything, matching the enum's own default and every
+        // existing row's correct behavior (no exemption authored, none applied).
+        EnsureColumn(db, "rpg_action", "projectile_penalties", "INTEGER NOT NULL DEFAULT 7");
+        // item-content `granted-action-text` (T14, spec-granted-action-text.md criterion 1): the
+        // display KEY for the action's description, per `ssot-presentation.md` §3.6 L3 — the same
+        // `_key` shape `rarity.display_key` and `item_unique.flavour_key` already use, never a
+        // literal sentence. Card block 9 (§9.14) reads it. Default '' means "no description
+        // authored", which `DisplayRules.MissingDisplayKey` reports rather than papering over.
+        //
+        // ⚠ Deliberately NOT joined to `ContentHashRegistry`'s `rpg_action` column list. That list
+        // is explicit, and every column added to this table since V6 (`scope`, `scope_key`,
+        // `category`, `pairing_role`, `structure_axes_json`, `atom_families_json`, `rung_band_json`,
+        // `projectile_penalties`) stayed out of it too. Adding one would force a
+        // `CurrentSchemaVersion` bump that moves every content stamp in the tree for a string that
+        // changes no battle outcome.
+        EnsureColumn(db, "rpg_action", "description_key", "TEXT NOT NULL DEFAULT ''");
+        Exec(db, "CREATE INDEX IF NOT EXISTS ix_rpg_action_scope ON rpg_action(scope, scope_key);");
     }
 
     // ---- rpg_action -------------------------------------------------------------------------------
 
     /// <summary>All atom ids a container holds — fixed core and pool alike, since a pool draw can
-    /// still need a scope row. Returns null when the container itself is unknown.</summary>
+    /// still need a scope row. Returns null when the container itself is unknown.
+    ///
+    /// <para>T3.1 (affix-schema): a pool row names an affix, not an atom directly — every CONCRETE
+    /// ref inside that affix's bundle counts (a slot-bearing ref has no single atom until
+    /// `resolution-order`, module 2, resolves it, so it contributes nothing here — the same
+    /// direction <c>ContentValidation.OrphanAtoms</c> already takes for the same reason).</para>
+    /// </summary>
     HashSet<string>? ContainerAtomIdsUnlocked(string containerId)
     {
         var container = GetContainer(containerId);
         if (container is null) return null;
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in container.Atoms) ids.Add(a.AtomId);
-        foreach (var p in container.Pool) ids.Add(p.AtomId);
+        foreach (var p in container.Pool)
+            if (GetAffix(p.AffixId) is { } affix)
+                foreach (var r in affix.Refs)
+                    if (r.AtomId is not null) ids.Add(r.AtomId);
         return ids;
     }
 
@@ -134,7 +175,9 @@ public sealed partial class RpgStore
                    recovery_ticks, commitment, interruptible, interrupt_refund_milli, slot_consuming,
                    priority_band, cooldown_class, cooldown_key, cooldown_ticks, starts_at,
                    interrupt_cooldown_milli, target_spec_json, min_range, max_range,
-                   range_channel, requires_line_of_sight, conditions_json)
+                   range_channel, requires_line_of_sight, conditions_json,
+                   scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
+                   rung_band_json, projectile_penalties, description_key)
                 VALUES
                   ($id, $name, $kind, $rung, $tags, $enabled, coalesce((SELECT revision FROM rpg_action WHERE action_id = $id), 0) + 1,
                    $grantable, $dae, $container,
@@ -142,7 +185,9 @@ public sealed partial class RpgStore
                    $recovery, $commitment, $interruptible, $refund, $slotConsuming,
                    $priority, $cdClass, $cdKey, $cdTicks, $startsAt,
                    $interruptCd, $tspec, $minRange, $maxRange,
-                   $rangeCh, $los, $conditions)
+                   $rangeCh, $los, $conditions,
+                   $scope, $scopeKey, $category, $pairingRole, $structureAxes, $atomFamilies,
+                   $rungBand, $projectilePenalties, $descriptionKey)
                 -- The update is SKIPPED when nothing differs, so `revision` counts how many times
                 -- this row CHANGED rather than how many times it was written -- the same fix
                 -- `effect_atom`'s own UpsertAtom already carries (E14a: import twice, hash
@@ -166,7 +211,12 @@ public sealed partial class RpgStore
                   target_spec_json = excluded.target_spec_json,
                   min_range = excluded.min_range, max_range = excluded.max_range,
                   range_channel = excluded.range_channel,
-                  requires_line_of_sight = excluded.requires_line_of_sight, conditions_json = excluded.conditions_json
+                  requires_line_of_sight = excluded.requires_line_of_sight, conditions_json = excluded.conditions_json,
+                  scope = excluded.scope, scope_key = excluded.scope_key, category = excluded.category,
+                  pairing_role = excluded.pairing_role, structure_axes_json = excluded.structure_axes_json,
+                  atom_families_json = excluded.atom_families_json, rung_band_json = excluded.rung_band_json,
+                  projectile_penalties = excluded.projectile_penalties,
+                  description_key = excluded.description_key
                 WHERE rpg_action.name IS NOT excluded.name
                   OR rpg_action.kind IS NOT excluded.kind
                   OR rpg_action.rung IS NOT excluded.rung
@@ -196,7 +246,16 @@ public sealed partial class RpgStore
                   OR rpg_action.max_range IS NOT excluded.max_range
                   OR rpg_action.range_channel IS NOT excluded.range_channel
                   OR rpg_action.requires_line_of_sight IS NOT excluded.requires_line_of_sight
-                  OR rpg_action.conditions_json IS NOT excluded.conditions_json;
+                  OR rpg_action.conditions_json IS NOT excluded.conditions_json
+                  OR rpg_action.scope IS NOT excluded.scope
+                  OR rpg_action.scope_key IS NOT excluded.scope_key
+                  OR rpg_action.category IS NOT excluded.category
+                  OR rpg_action.pairing_role IS NOT excluded.pairing_role
+                  OR rpg_action.structure_axes_json IS NOT excluded.structure_axes_json
+                  OR rpg_action.atom_families_json IS NOT excluded.atom_families_json
+                  OR rpg_action.rung_band_json IS NOT excluded.rung_band_json
+                  OR rpg_action.projectile_penalties IS NOT excluded.projectile_penalties
+                  OR rpg_action.description_key IS NOT excluded.description_key;
                 """,
                 ("$id", row.ActionId), ("$name", row.Name), ("$kind", ActionKinds.Name(row.Kind)),
                 ("$rung", row.Rung),
@@ -207,7 +266,10 @@ public sealed partial class RpgStore
                 ("$tct", e.TimeCostTicks), ("$speedCh", e.SpeedChannel),
                 ("$cdCh", (object?)e.CooldownChannel ?? DBNull.Value), ("$windup", e.WindupTicks),
                 ("$offsets", JsonSerializer.Serialize(e.ResolveOffsets)),
-                ("$recovery", e.RecoveryTicks), ("$commitment", e.Commitment.ToString()),
+                // battle-tempo commitment-binding: null means "no override, inherit the profile
+                // default" -- the column stays TEXT NOT NULL (no migration), so null is the empty
+                // string, which never collides with a real Commitment enum name.
+                ("$recovery", e.RecoveryTicks), ("$commitment", e.Commitment?.ToString() ?? ""),
                 ("$interruptible", e.Interruptible.ToString()), ("$refund", e.InterruptRefundMilli),
                 ("$slotConsuming", e.SlotConsuming ? 1 : 0), ("$priority", e.PriorityBand),
                 ("$cdClass", e.Class.ToString()), ("$cdKey", (object?)e.CooldownKey ?? DBNull.Value),
@@ -217,7 +279,18 @@ public sealed partial class RpgStore
                 ("$minRange", row.MinRange), ("$maxRange", row.MaxRange),
                 ("$rangeCh", (object?)row.RangeChannel ?? DBNull.Value),
                 ("$los", row.RequiresLineOfSight ? 1 : 0),
-                ("$conditions", (object?)row.ConditionsJson ?? DBNull.Value));
+                ("$conditions", (object?)row.ConditionsJson ?? DBNull.Value),
+                ("$scope", EligibilityScopes.Name(row.Scope)),
+                ("$scopeKey", (object?)row.ScopeKey ?? DBNull.Value),
+                ("$category", row.Category is { } cat ? ActionCategories.Name(cat) : (object)DBNull.Value),
+                ("$pairingRole", PairingRoles.Name(row.PairingRole)),
+                ("$structureAxes", JsonSerializer.Serialize(row.StructureAxes)),
+                ("$atomFamilies", JsonSerializer.Serialize(row.AtomFamilies)),
+                ("$rungBand", row.RungBand is { } band
+                    ? JsonSerializer.Serialize(new[] { band.Floor, band.Ceiling })
+                    : (object)DBNull.Value),
+                ("$projectilePenalties", (int)row.ProjectilePenalties),
+                ("$descriptionKey", row.DescriptionKey ?? ""));
 
             return ActionRejection.Ok;
         }
@@ -228,22 +301,30 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = """
+            return GetActionUnlocked(db, actionId);
+        }
+    }
+
+    ActionRow? GetActionUnlocked(SqliteConnection db, string actionId, SqliteTransaction? tx = null)
+    {
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = """
                 SELECT action_id, name, kind, rung, tags_json, enabled, revision,
                        grantable, default_attack_eligible, container_id,
                        time_cost_ticks, speed_channel, cooldown_channel, windup_ticks, resolve_offsets_json,
                        recovery_ticks, commitment, interruptible, interrupt_refund_milli, slot_consuming,
                        priority_band, cooldown_class, cooldown_key, cooldown_ticks, starts_at,
                        target_spec_json, min_range, max_range,
-                       range_channel, requires_line_of_sight, conditions_json
+                       range_channel, requires_line_of_sight, conditions_json,
+                       scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
+                       rung_band_json, projectile_penalties, description_key
                 FROM rpg_action WHERE action_id = $id;
                 """;
-            cmd.Parameters.AddWithValue("$id", actionId);
-            using var r = cmd.ExecuteReader();
-            if (!r.Read()) return null;
-            return ReadAction(r);
-        }
+        cmd.Parameters.AddWithValue("$id", actionId);
+        using var r = cmd.ExecuteReader();
+        if (!r.Read()) return null;
+        return ReadAction(r);
     }
 
     /// <summary>Action ids in stable order — future content-hash and assembly-order consumers need this.</summary>
@@ -252,13 +333,19 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT action_id FROM rpg_action ORDER BY action_id;";
-            using var r = cmd.ExecuteReader();
-            var list = new List<string>();
-            while (r.Read()) list.Add(r.GetString(0));
-            return list;
+            return ListActionIdsUnlocked(db);
         }
+    }
+
+    IReadOnlyList<string> ListActionIdsUnlocked(SqliteConnection db, SqliteTransaction? tx = null)
+    {
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = "SELECT action_id FROM rpg_action ORDER BY action_id;";
+        using var r = cmd.ExecuteReader();
+        var list = new List<string>();
+        while (r.Read()) list.Add(r.GetString(0));
+        return list;
     }
 
     static ActionRow ReadAction(SqliteDataReader r)
@@ -279,7 +366,7 @@ public sealed partial class RpgStore
             WindupTicks = r.GetInt64(13),
             ResolveOffsets = offsets,
             RecoveryTicks = r.GetInt64(15),
-            Commitment = Enum.Parse<Commitment>(r.GetString(16)),
+            Commitment = r.GetString(16) is { Length: > 0 } commitmentStr ? Enum.Parse<Commitment>(commitmentStr) : null,
             Interruptible = Enum.Parse<Interruptible>(r.GetString(17)),
             InterruptRefundMilli = r.GetInt32(18),
             SlotConsuming = r.GetInt32(19) != 0,
@@ -291,6 +378,19 @@ public sealed partial class RpgStore
         };
 
         ActionTargetSpecJson.TryRead(r.IsDBNull(25) ? null : r.GetString(25), out var targeting);
+
+        EligibilityScopes.TryParse(r.GetString(31), out var scope);
+        ActionCategory? category = null;
+        if (!r.IsDBNull(33) && ActionCategories.TryParse(r.GetString(33), out var cat)) category = cat;
+        PairingRoles.TryParse(r.GetString(34), out var pairingRole);
+        var structureAxes = JsonSerializer.Deserialize<string[]>(r.GetString(35)) ?? Array.Empty<string>();
+        var atomFamilies = JsonSerializer.Deserialize<string[]>(r.GetString(36)) ?? Array.Empty<string>();
+        RungBand? rungBand = null;
+        if (!r.IsDBNull(37))
+        {
+            var pair = JsonSerializer.Deserialize<int[]>(r.GetString(37));
+            if (pair is { Length: 2 }) rungBand = new RungBand(pair[0], pair[1]);
+        }
 
         return new ActionRow
         {
@@ -311,6 +411,18 @@ public sealed partial class RpgStore
             RangeChannel = r.IsDBNull(28) ? null : r.GetString(28),
             RequiresLineOfSight = r.GetInt32(29) != 0,
             ConditionsJson = r.IsDBNull(30) ? null : r.GetString(30),
+            Scope = scope,
+            ScopeKey = r.IsDBNull(32) ? null : r.GetString(32),
+            Category = category,
+            PairingRole = pairingRole,
+            StructureAxes = structureAxes,
+            AtomFamilies = atomFamilies,
+            RungBand = rungBand,
+            ProjectilePenalties = (ProjectilePenalties)r.GetInt32(38),
+            // item-content `granted-action-text` (T14). `IsDBNull` guarded rather than assumed
+            // non-null: a database created before this column existed gets it by `EnsureColumn`
+            // with a '' default, but a hand-edited row can still hold NULL.
+            DescriptionKey = r.IsDBNull(39) ? "" : r.GetString(39),
         };
     }
 
@@ -443,14 +555,21 @@ public sealed partial class RpgStore
 
     public ActionRejection UpsertGrant(ActionGrantRow grant, string? grantId = null)
     {
-        var check = ActionValidator.ValidateGrant(grant, GetAction);
-        if (!check.IsOk) return check;
-
-        var id = string.IsNullOrWhiteSpace(grantId) ? Guid.NewGuid().ToString("N") : grantId!;
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            return UpsertGrantUnlocked(db, grant, grantId);
+        }
+    }
+
+    ActionRejection UpsertGrantUnlocked(SqliteConnection db, ActionGrantRow grant, string? grantId = null,
+        SqliteTransaction? tx = null)
+    {
+        var check = ActionValidator.ValidateGrant(grant, id => GetActionUnlocked(db, id, tx));
+        if (!check.IsOk) return check;
+
+        var id = string.IsNullOrWhiteSpace(grantId) ? Guid.NewGuid().ToString("N") : grantId!;
+        if (tx is null)
             ExecParams(db, """
                 INSERT INTO rpg_action_grant (grant_id, owner_kind, owner_key, action_id, source, grant_role)
                 VALUES ($id, $kind, $key, $action, $source, $role)
@@ -460,8 +579,16 @@ public sealed partial class RpgStore
                 """,
                 ("$id", id), ("$kind", OwnerScope.Name(grant.OwnerKind)), ("$key", grant.OwnerKey ?? ""),
                 ("$action", grant.ActionId), ("$source", grant.Source ?? ""), ("$role", grant.GrantRole ?? ""));
-        }
-
+        else
+            ExecParams(db, tx, """
+                INSERT INTO rpg_action_grant (grant_id, owner_kind, owner_key, action_id, source, grant_role)
+                VALUES ($id, $kind, $key, $action, $source, $role)
+                ON CONFLICT(grant_id) DO UPDATE SET
+                  owner_kind = excluded.owner_kind, owner_key = excluded.owner_key,
+                  action_id = excluded.action_id, source = excluded.source, grant_role = excluded.grant_role;
+                """,
+                ("$id", id), ("$kind", OwnerScope.Name(grant.OwnerKind)), ("$key", grant.OwnerKey ?? ""),
+                ("$action", grant.ActionId), ("$source", grant.Source ?? ""), ("$role", grant.GrantRole ?? ""));
         return ActionRejection.Ok;
     }
 
@@ -564,6 +691,16 @@ public sealed partial class RpgStore
     static void ExecParams(SqliteConnection db, string sql, params (string Name, object Value)[] args)
     {
         using var cmd = db.CreateCommand();
+        cmd.CommandText = sql;
+        foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
+        cmd.ExecuteNonQuery();
+    }
+
+    static void ExecParams(SqliteConnection db, SqliteTransaction tx, string sql,
+        params (string Name, object Value)[] args)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
         cmd.CommandText = sql;
         foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
         cmd.ExecuteNonQuery();

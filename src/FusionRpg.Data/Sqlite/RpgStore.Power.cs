@@ -137,6 +137,44 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
+    /// E44 criterion 0 (spec-power-sweep.md §4.1): the seed import path's own writer, and the first
+    /// real caller of <see cref="WritePowerTablesUnlocked"/> — <see cref="UpsertPowerTables"/> already
+    /// called it, but has zero production callers itself. Called from <c>RpgStore.Import.cs</c>'s
+    /// <c>ImportContent</c>, inside its own transaction, so this needs no new SQL.
+    ///
+    /// <para><b>Overlays the incoming rows onto whatever is already stored</b>, rather than replacing
+    /// the whole table with just this batch — the same "batch overlays stored" rule <c>ImportContent</c>
+    /// already applies to atoms. A coefficients file only ever adds or retunes the kind/channel pairs
+    /// it names; <see cref="WritePowerTablesUnlocked"/> itself is a whole-table delete-then-insert; the
+    /// merge is what keeps a one-row coefficients file from wiping every other authored coefficient.
+    /// <c>power_trigger_frequency</c>/<c>power_predicate_frequency</c> carry over unchanged — this seed
+    /// kind authors neither, and the writer replaces all three tables together.</para>
+    /// </summary>
+    /// <returns>How many coefficient rows actually differ from what was stored. Zero skips the write
+    /// entirely, so a repeat import of an unchanged coefficients file does not bump
+    /// <c>catalog_revision</c> — the same no-op discipline every other content kind here already has.</returns>
+    int WriteCoefficientsUnlocked(
+        SqliteConnection db, SqliteTransaction tx, IReadOnlyList<PowerCoefficientRow> incoming)
+    {
+        var merged = new Dictionary<(string KindId, string Channel), PowerCoefficientRow>();
+        foreach (var c in ReadCoefficients(db, "power_coefficient")) merged[(c.KindId, c.Channel)] = c;
+
+        var changedRows = 0;
+        foreach (var c in incoming)
+        {
+            var key = (c.KindId, c.Channel);
+            if (!merged.TryGetValue(key, out var existing) || existing != c) changedRows++;
+            merged[key] = c;
+        }
+
+        if (changedRows == 0) return 0;
+
+        var tables = new PowerTables(merged.Values.ToList(), ReadFrequencies(db), ReadPredicateFrequencies(db));
+        WritePowerTablesUnlocked(db, tx, tables);
+        return changedRows;
+    }
+
+    /// <summary>
     /// Record what a sweep would like the coefficients to be. Never touches the authored table.
     /// </summary>
     public void UpsertCoefficientProposals(IReadOnlyList<(PowerCoefficientRow Row, string Note)> proposals)

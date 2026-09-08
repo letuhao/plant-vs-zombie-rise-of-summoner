@@ -8,7 +8,15 @@ public sealed record WebMatchLogEntry(
     long Id, long PlayerId, string CorrelationId, string MatchKey,
     string SetupJson, ulong Seed, int EngineVersion, int RulesetVersion, int RngAlgoVersion,
     long? RunId, string T, string? EnvironmentStamp = null, string? SweepRefused = null,
-    string? ContentHash = null);
+    string? ContentHash = null,
+    /// <summary>B21 — the decision trace for an interactive match. NULL means "not interactive", which
+    /// is every match today. An interactive match with a NULL or partial trace is REFUSED by the boot
+    /// sweep, never re-resolved: re-resolving would substitute AI decisions for a player's.</summary>
+    string? DecisionsJson = null,
+    /// <summary>party-dungeon D2.15 — which `BattleModeProfile` id this match resolved under.
+    /// NULL for every match before this column existed and every non-delve match today (those
+    /// resolve their profile from `WaveCatalog.Get(waveId).Profile` instead).</summary>
+    string? ProfileId = null);
 
 public sealed partial class RpgStore
 {
@@ -20,7 +28,7 @@ public sealed partial class RpgStore
     public (bool Created, WebMatchLogEntry Entry) AppendWebMatchLog(
         long playerId, string correlationId, string matchKey, string setupJson, ulong seed,
         int engineVersion, int rulesetVersion, int rngAlgoVersion, string? environmentStamp = null,
-        string? contentHash = null)
+        string? contentHash = null, string? profileId = null)
     {
         if (string.IsNullOrWhiteSpace(correlationId)) throw new ArgumentException("correlationId is required.");
         if (string.IsNullOrWhiteSpace(matchKey)) throw new ArgumentException("matchKey is required.");
@@ -39,8 +47,8 @@ public sealed partial class RpgStore
                 INSERT INTO rpg_web_match_log(
                   player_id, correlation_id, match_key, setup_json, seed,
                   engine_version, ruleset_version, rng_algo_version, environment_stamp,
-                  content_hash, t)
-                VALUES($p,$c,$k,$s,$seed,$ev,$rv,$av,$env,$ch,$t);
+                  content_hash, profile_id, t)
+                VALUES($p,$c,$k,$s,$seed,$ev,$rv,$av,$env,$ch,$pid,$t);
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
             cmd.Parameters.AddWithValue("$c", corr);
@@ -52,6 +60,7 @@ public sealed partial class RpgStore
             cmd.Parameters.AddWithValue("$av", rngAlgoVersion);
             cmd.Parameters.AddWithValue("$env", (object?)environmentStamp ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$ch", (object?)contentHash ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$pid", (object?)profileId ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$t", DateTime.UtcNow.ToString("o"));
             cmd.ExecuteNonQuery();
             return (true, ReadWebMatchLogUnlocked(db, playerId, corr)!);
@@ -73,6 +82,27 @@ public sealed partial class RpgStore
                 "UPDATE rpg_web_match_log SET sweep_refused=$r WHERE id=$i AND sweep_refused IS NULL;";
             cmd.Parameters.AddWithValue("$i", id);
             cmd.Parameters.AddWithValue("$r", DateTime.UtcNow.ToString("o") + " " + (reason ?? "unspecified"));
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    /// <summary>
+    /// party-dungeon D2.15 (spec-delve-battle-profile.md §4b) — this module is
+    /// `rpg_web_match_log.decisions_json`'s **first writer** (the column existed since B21 but no
+    /// caller in `src/` ever set it until now). Called after every `DecisionTrace.Record`, with
+    /// `DecisionTrace.ToJson()` — a plain overwrite of the whole trace each time, matching
+    /// `MarkWebMatchSweepRefused`'s own single-column-update shape, never an append (the trace object
+    /// already IS the whole history; there is nothing to merge).
+    /// </summary>
+    public void WriteWebMatchDecisions(long id, string decisionsJson)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "UPDATE rpg_web_match_log SET decisions_json=$j WHERE id=$i;";
+            cmd.Parameters.AddWithValue("$i", id);
+            cmd.Parameters.AddWithValue("$j", decisionsJson ?? (object)DBNull.Value);
             cmd.ExecuteNonQuery();
         }
     }
@@ -173,7 +203,7 @@ public sealed partial class RpgStore
     const string SelectLog = """
         SELECT id, player_id, correlation_id, match_key, setup_json, seed,
                engine_version, ruleset_version, rng_algo_version, run_id, t, environment_stamp,
-               sweep_refused, content_hash
+               sweep_refused, content_hash, decisions_json, profile_id
         FROM rpg_web_match_log
         """;
 
@@ -194,7 +224,9 @@ public sealed partial class RpgStore
         r.IsDBNull(9) ? null : r.GetInt64(9), r.GetString(10),
         r.IsDBNull(11) ? null : r.GetString(11),
         r.IsDBNull(12) ? null : r.GetString(12),
-        r.IsDBNull(13) ? null : r.GetString(13));
+        r.IsDBNull(13) ? null : r.GetString(13),
+        r.IsDBNull(14) ? null : r.GetString(14),
+        r.IsDBNull(15) ? null : r.GetString(15));
 
     /// <summary>Defensive: a hand-edited/foreign row must not take down boot (the sweep lists
     /// rows before its per-entry catch). Unparseable seeds map to 0 — deterministic garbage the

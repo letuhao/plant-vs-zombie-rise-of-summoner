@@ -1,0 +1,63 @@
+{
+  "slug": "naming-ritual",
+  "title": "First-run naming ritual",
+  "status": "WIP",
+  "kicker": "Session and shell · summon and fusion",
+  "pillar": {"text": "Sanctum", "href": "sanctum.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "**WIP:** on a brand-new save, you will bind and name your first creature **in the Sanctum** so the roster starts as a story — not a spreadsheet dump.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Designed and partly forged — not finished. You will not get the full ritual yet."},
+    {"term": "Ritual", "meaning": "A short first-session beat in the hall, not a combat ability and not a paid ceremony."},
+    {"term": "In place", "meaning": "Naming happens in the Sanctum itself — you do not leave for a separate “create character” website."},
+    {"term": "Roster", "meaning": "Your specimens. The ritual is how the first one becomes yours with a name."}
+  ],
+  "alsoTrue": [
+    "Until it ships, you still land in the [Sanctum](sanctum) after [save select](save-select) and use the rail yourself.",
+    "This is not the Dave-level chapter drip — see [unlock chapters](unlock-chapters)."
+  ],
+  "sections": [
+    {
+      "title": "What it will feel like",
+      "paras": [
+        "A nearly empty hall on purpose.",
+        "You bind a first creature, give it a name, and get one clear next step — not a tour of every menu."
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Create a summoner at the door.",
+        "Enter the Sanctum and open Creatures when you are ready.",
+        "Treat any early naming or binding UI as temporary until this ritual owns the first session."
+      ],
+      "note": "Do not wait for the ritual to play — the hall and rail are already open."
+    },
+    {
+      "title": "Why it matters",
+      "paras": [
+        "Without a naming beat, the first screen becomes a list of systems.",
+        "With it, the war starts as “this demon is yours,” then the rail opens around that story."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Finish save select and enter the Sanctum.",
+    "Open Creatures and meet whatever roster the build gives you.",
+    "Ignore missing “guided empty hall” moments — they are this page’s unfinished work."
+  ],
+  "doNote": "Stop when you know the ritual is coming, not broken. Home: [Sanctum](sanctum). Specimens: [persistent specimens](specimens).",
+  "mixUps": [
+    {"q": "Is my game broken because nothing forced me to name a demon?", "a": "No. The guided ritual is WIP. You can still play."},
+    {"q": "Is this the same as save select?", "a": "No. Save select names the summoner. This ritual names the first creature."},
+    {"q": "Will it lock the rail forever?", "a": "No. The design opens one clear next step, then the rest of the hall."},
+    {"q": "Does Vision Dave 1 include this?", "a": "Dave 1 is lawn and Sanctum basics. The naming ritual is its own first-session WIP beat."}
+  ],
+  "next": ["specimens"],
+  "related": ["sanctum", "save-select", "specimens", "unlock-beats"],
+  "sources": [
+    "docs/guide/sanctum.md §First-run naming ritual",
+    "docs/guide/mechanisms/naming-ritual.md (prior stub)"
+  ]
+}

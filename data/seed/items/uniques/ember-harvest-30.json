@@ -56,7 +56,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-002",
@@ -92,7 +93,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-003",
@@ -128,7 +130,8 @@
         "fragile",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-004",
@@ -165,7 +168,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-005",
@@ -204,7 +208,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-006",
@@ -240,7 +245,8 @@
         "sturdy",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-007",
@@ -277,7 +283,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.ember-harvest-30-008",
@@ -313,7 +320,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     }
   ]
 }

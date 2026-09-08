@@ -34,7 +34,7 @@ Three consequences the specs got wrong:
 
 | Id | Grammar | Notes |
 |---|---|---|
-| `kind_id` | `^[a-z]+\.[a-z_]+$` | closed set of 12; not content |
+| `kind_id` | `^[a-z]+\.[a-z_]+$` | closed set of ~~12~~ **16**; not content. **Corrected 2026-09-05:** `AtomKindRegistry.KindCount = 16` (`AtomKindRegistry.cs:31`, E35/E36/E37/E41 widened it) and `TriggerCount = 13` (`:36`, E34); the 12 was true when this table was written. `DESIGN-GATE.md`'s atom row already carries 7/16/13 |
 | `family_id` | `^atom\.[a-z0-9]+(-[a-z0-9]+)*$` | one affix concept. **Kebab-case, `atom.` prefix, no underscores** — the family library writes display shorthand (`elemental_power`); the id is `atom.elemental-power` |
 | `variant` | `^[a-z0-9]+(-[a-z0-9]+)*$` or `''` | the discriminator within a family — element id, channel, side. Empty string, never NULL |
 | `atom_id` | `^atom\.[a-z0-9-]+(\.[a-z0-9-]+)?\.t[1-9][0-9]*$` | **derived, not authored:** `{family_id}[.{variant}].t{tier}` |
@@ -58,10 +58,25 @@ Three consequences the specs got wrong:
 
 ### Units — non-negotiable
 
+> **⛔ CORRECTED 2026-09-03 (E42 `units-correction`).** This table used to give one row —
+> *"Derived-channel magnitudes — resolver points, `AccuracyScale = CritRateScale = 100.0`"* — to every
+> derived channel. That was wrong for `combat.power.*` / `combat.defense.*` / `combat.shield.*`, and the
+> item program proved it and handed the fix over on 2026-08-22
+> ([`item/atom-layer-handoff.md`](../item/atom-layer-handoff.md) §1). It sat uncorrected for eleven days
+> because `DESIGN-GATE.md` makes this file win over every spec, so no downstream document could fix it
+> by being right — only editing this file closes it. **The decisive negative evidence:**
+> `CombatProbabilityPolicy` declares `AccuracyScale`, `CritRateScale`, `CritDamageScale` and `Steepness`
+> — **there is no `PowerScale` and no `DefenseScale`**
+> (`src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs:10-13`), and `OverlayCombatCalculator` sums
+> `(power − defense)` straight into `weightedDelta` with no sigmoid anywhere in the call path
+> (`src/FusionRpg.Core/Combat/OverlayCombatCalculator.cs:84-89,104`). So `+10 fire power` is **+10
+> damage** — the peer of `+10 hp`, not a tenth of it under a sigmoid.
+
 | Kind of value | Unit |
 |---|---|
 | Primary-channel magnitudes | game units (hit points, attack points) |
-| Derived-channel magnitudes | **resolver points** — sigmoid scale, `AccuracyScale = CritRateScale = 100.0` |
+| `combat.power.*` · `combat.defense.*` · `combat.shield.*` | **game units** — additive damage / hit points, summed directly (`OverlayCombatCalculator.cs:84-89`). **Not resolver points.** |
+| `combat.accuracy.*` · `dodge` · `crit.rate` · `crit.resist` · `crit.damage` · `crit.resist.damage` | **resolver points** — sigmoid scale, `AccuracyScale = CritRateScale = CritDamageScale = 100.0` (`CombatPolicies.cs:10-12`) |
 | `chance`, curve multipliers, ratios | **integer per-mille** |
 | Durations | integer ms |
 
@@ -161,6 +176,82 @@ An explicit `group` value overrides the default. **`pool_rolls ≤ count(distinc
 
 ---
 
+## 4a. Slot, affix bundle, resolution order, and RNG streams — normative (added 2026-09-01, `seed-to-concrete` T0.5)
+
+`effect-pipeline-ideal.md` §5 designed these against a real defect (`+15% all resistances` costing six
+of a rung-100 item's pool rolls because the element channel had no selection layer). This section
+promotes that design from ideal doc to **normative definition** — it wins over any spec, the same
+standing this document already has for everything above.
+
+### Slot
+
+A **slot** on a container pool row is a parameterised atom reference: it names a **domain** (e.g.
+`element`) and a **pick count**, rather than one concrete atom.
+
+```text
+slot E1 : domain = element, pick = 1
+atom ref: atom.elemental-power.$E1
+```
+
+The atom catalog, `atom_id` derivation, and its unique key are **unchanged** — only the container's
+*reference* becomes parameterised. A patterned ref must resolve for **every member of its domain** at
+load, so a missing element row is a load-time rejection, never a roll-time surprise.
+
+**This is a different `slot` from §6's `owner_key` value `slot` (a world-map construction slot).**
+Two different concepts share the word; §6 already warns not to share a type between them, and this
+section is the other half of that warning — a container pool's `slot` is a channel-selection
+parameter, never an `owner_key`.
+
+### Affix bundle
+
+The pool's roll unit is an **affix** — a named bundle of atom refs (which may include slots) that
+share the container's resolved slots and are drawn **together as one roll**. `effect_container_pool`
+rows reference affixes, not bare atoms.
+
+An affix is what makes *"master of fire and ice"* (four atoms, two families, two elements, the
+element correlated across both families) expressible as a single draw: today's one-atom-per-row pool
+cannot correlate two independent draws, and an affix bundle is the unit that carries the correlation.
+
+Validation follows the same law as every other entity in this document (§10): a bad affix — an
+unresolvable ref, a slot whose domain has no eligible member, a duplicate atom within the bundle — is
+rejected whole, with its id and reason, and does not enter the catalog.
+
+### Resolution order — normative, not the order the layers were designed in
+
+```text
+1. slots      pick concrete variants for every slot in the container/affix
+2. affixes    draw which affixes appear (the container's pool draw)
+3. atoms      expand each drawn affix's refs against the resolved slots
+4. tiers      pick tier within the container's min_tier/max_tier window
+5. values     roll each magnitude in its range (§2)
+```
+
+A slot must resolve before the concrete atom it names can be looked up, and a tier must resolve before
+the value range that atom's tier implies can be read — the dependency direction fixes the order. This
+is what makes a roll reproducible; leaving it implicit is how two runtimes disagree on the same seed.
+
+### RNG streams — one per layer, named
+
+Each layer of the resolution order draws from its **own** named stream, following the shipped pattern
+`SeededRng.DeriveStream(seed, "system:purpose")` (`FusionRoller.cs:27`, `fusion:traits` — already in
+production, not a new mechanism):
+
+| Layer | Stream name |
+|---|---|
+| slots | `affix.slot` |
+| affixes | `affix.draw` |
+| tiers | `affix.tier` |
+| values | `atom.value` |
+
+**Never one shared stream across layers.** If every layer drew from one stream, inserting a new layer
+later would shift every historical roll's consumption — `catalog_revision` (§5) detects a *content*
+change, not a change in how many numbers the resolver consumed, so it cannot protect against this.
+Separate streams make each layer's consumption independent of every other layer, which is what lets
+this program add a layer later without silently re-resolving every already-owned instance on replay —
+the reproducibility law two paragraphs above this one (§5's `roll_seed` contract) depends on it.
+
+---
+
 ## 5. Instances, ordering, determinism
 
 ### Instance identity and reproduction
@@ -204,6 +295,12 @@ That order is what makes multi-atom `OnApply` draws reproducible: two atoms roll
 | player | `player` | decimal id | `> 0` |
 | sector | `sector` | sector id | must exist |
 | slot | `slot` | slot id | must exist |
+
+> **Corrected 2026-09-05 (party-dungeon audit §6, verified against code).** The table above lists seven
+> owner kinds; `OwnerKind` has **eight** (`OwnerScope.cs:20-30`). The eighth is `UniqueActor` — string form
+> `unique-actor` (`OwnerScope.cs:62`), keyed on the persistent `rpg_unique_actor` instance id, with an
+> existence check against that table rather than a grammar check (`:149-152`). The row is not added above
+> so the original seven stay legible as the shape this section was written against.
 
 The canonical string form is `{owner_kind}:{owner_key}`, and `match` renders as `match` with no colon. `entity:0xABC` and `entity:abc` were both in circulation; **only the second parses**. Anything else is `BadOwnerKey`.
 

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "roomKinds": {
+    "fight": { "climateNeutral": false, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "elite": { "climateNeutral": false, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": ["elite"], "unknownResolvesTo": [] },
+    "cache": { "climateNeutral": false, "secretEligible": true, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "curio": { "climateNeutral": false, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "wild": { "climateNeutral": false, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "shrine": { "climateNeutral": false, "secretEligible": true, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "rest": { "climateNeutral": true, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": ["rest"], "unknownResolvesTo": [] },
+    "merchant": { "climateNeutral": true, "secretEligible": true, "bossRowAllowed": false, "neverAdjacentTo": ["merchant"], "unknownResolvesTo": [] },
+    "trap": { "climateNeutral": false, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": [] },
+    "unknown": { "climateNeutral": true, "secretEligible": false, "bossRowAllowed": false, "neverAdjacentTo": [], "unknownResolvesTo": ["cache", "merchant", "fight"] },
+    "boss": { "climateNeutral": true, "secretEligible": false, "bossRowAllowed": true, "neverAdjacentTo": [], "unknownResolvesTo": [] }
+  }
+}

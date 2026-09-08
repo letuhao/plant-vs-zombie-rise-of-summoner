@@ -4,7 +4,9 @@ Module id `standalone-charter` in the [standalone RPG map](../standalone-rpg-map
 
 ## Objective
 
-Make it official and enforceable that **the RPG is the game and PvZ is an extension**: define the mode taxonomy, the gameless-first rule, and the identity web-mode matches carry through the pipeline — so every later module builds on declared architecture instead of convention.
+Make it official and enforceable that **every RPG feature is playable with PvZ closed** (gameless-first): define the mode taxonomy, the capability rule, and the identity web-mode matches carry through the pipeline — so every later module builds on declared architecture instead of convention.
+
+> **Product-vision reconcile (2026-09-05).** In this charter, **"core"** and **"extension"** name **capability and CI** (web/SIM must always work; injector enriches, never permanently gates) — not the player genre. Product vision is [../../guide/the-game.md](../../guide/the-game.md) + [../../guide/the-loops.md](../../guide/the-loops.md): RPG + empire, lawn first core loop, idle forever. Do not collapse this charter; do not re-pitch the game from its mode table. See `decisions.md` Standalone-first (qualified) and Product vision rows.
 
 ## The charter (normative once approved)
 
@@ -12,15 +14,15 @@ Make it official and enforceable that **the RPG is the game and PvZ is an extens
 
 | Mode | Producer | Source tag | Game profile | Status |
 |---|---|---|---|---|
-| **Web RPG** (core) | Server `BattleEngine` / expedition resolver | `web` | `webrpg-1` | primary — must always work |
-| **PvZ run** (extension) | Injector in `PlantsVsZombiesRH.exe` | `injector` | `pvzrh-3.8.1` / `pvzrh-3.9` | optional enricher |
+| **Web RPG** (primary path) | Server `BattleEngine` / expedition resolver | `web` | `webrpg-1` | must always work — capability/CI |
+| **PvZ run** (enricher) | Injector in `PlantsVsZombiesRH.exe` | `injector` | `pvzrh-3.8.1` / `pvzrh-3.9` | first-class place loop in product vision; never the only forever path |
 | **SIM** (dev/test) | `/api/sim/*` under `FUSIONRPG_SIM=1` | `sim` | any | dev-only, CI backbone |
 
 `webrpg-1` joins the game-profile vocabulary (event `game` field, runs rows). Web-mode matches are real runs: they mint `matchKey`s, write `runs`/facts/ledgers through the **same ingest** as injector events — one economy, source-tagged, never forked.
 
 ### 2. Gameless-first rule
 
-Every RPG feature must be **fully playable and CI-provable with the PvZ game closed**. The injector may *enrich* a feature (exclusive capture, boosted earn, second battlefield, trophies — the four adopted extension roles), never *gate* one. Acceptance tests for RPG features run in SIM/web mode; a feature that only works with the game open is incomplete by definition.
+Every RPG feature must be **fully playable and CI-provable with the PvZ game closed**. The injector may *enrich* a feature (exclusive capture, boosted earn, second battlefield, trophies — the four adopted extension roles), never *permanently gate* one. Acceptance tests for RPG features run in SIM/web mode; a feature that only works with the game open is incomplete by definition. Lawn-first onboarding and Dave-level unlock chapters do not waive this: after a feature unlocks, it must still work with Fusion closed.
 
 ### 3. Authority rule
 

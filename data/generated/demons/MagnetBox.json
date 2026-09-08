@@ -1,0 +1,33 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 246,
+  "magnitudes": {
+    "resource.max.hp": 480,
+    "resource.max.hunger": 400,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 640,
+    "resource.max.stamina": 1280,
+    "resource.regen.hp": 2,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 79
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Chaff",
+  "side": "plant",
+  "speciesId": "MagnetBox",
+  "theta": 0,
+  "traitPool": [
+    "nameless",
+    "void-state"
+  ],
+  "variantCount": 0,
+  "variants": []
+}

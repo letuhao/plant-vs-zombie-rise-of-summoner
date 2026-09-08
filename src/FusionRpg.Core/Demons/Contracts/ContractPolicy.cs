@@ -156,11 +156,13 @@ public static class ContractPolicy
     public static int RitualGainFor(DemonPersonality personality) =>
         RitualGain * Rates(personality).GainPct / 100;
 
-    public static long RitualPrice(DemonRarity rarity)
+    /// <summary>Scaled by <see cref="SoulSinkPolicy"/> so the price tracks the faucet that pays for
+    /// it (PS-5). <paramref name="thetaContent"/> is required, never defaulted.</summary>
+    public static long RitualPrice(DemonRarity rarity, int thetaContent, FusionRpg.Core.Power.PowerTuning tuning)
     {
         if (!Tuning.RitualPriceSouls.TryGetValue(rarity, out var v))
             throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null);
-        return v;
+        return SoulSinkPolicy.Price(v, thetaContent, tuning);
     }
 
     /// <summary>T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.1a): no ceiling — the escalating price
@@ -168,8 +170,11 @@ public static class ContractPolicy
     /// A roster of 2,012 costs 600,300,000 cumulative souls; that is the limit, not a hard-coded 48.</summary>
     public static int Capacity(int purchasedSlots) => BaseSlots + Math.Max(0, purchasedSlots);
 
-    public static long NextSlotPrice(int purchasedSlots) =>
-        (long)SlotPriceStep * (Math.Max(0, purchasedSlots) + 1);
+    /// <summary>The escalating slot price, then scaled by <see cref="SoulSinkPolicy"/> so it tracks
+    /// the faucet (PS-5). The escalation is the scarcity control; the scale keeps it meaningful as
+    /// income grows.</summary>
+    public static long NextSlotPrice(int purchasedSlots, int thetaContent, FusionRpg.Core.Power.PowerTuning tuning) =>
+        SoulSinkPolicy.Price((long)SlotPriceStep * (Math.Max(0, purchasedSlots) + 1), thetaContent, tuning);
 
     /// <summary>Always true post-T3.6 — kept as a named check (rather than removed outright) because
     /// the store's buy-slot gate and the contracts API both call it, and "can this purchase ever

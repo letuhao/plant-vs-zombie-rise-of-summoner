@@ -1,0 +1,85 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:04:56Z",
+      "minorityValues": {
+        "elementPrimary": "light"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "crossover_entity",
+      "hybrid_construct"
+    ],
+    "gameTypeId": 252,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "long",
+    "reason": "The ability to fire homing magic bullets that target the entire field and prioritize flying units makes it a high-utility combatant rather than a mere pest.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "CattailGirl",
+    "targetPreference": "frontline",
+    "traits": [
+      "homing_projectile_emission",
+      "aquatic",
+      "aerial_priority_targeting"
+    ],
+    "variants": [
+      "normal",
+      "shiny",
+      "ancient",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

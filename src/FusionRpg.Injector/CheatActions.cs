@@ -32,7 +32,16 @@ public static class CheatActions
             var board = GameHooks.Board;
             if (board != null && CheatState.On("F-WAVE-FREEZE"))
             {
-                try { board.timeUntilNextWave = Mathf.Max(board.timeUntilNextWave, 30f); } catch { }
+                // E36 (spec-wave-control.md §2.2): the floor value itself is data/tuning/match.v1.json's
+                // waveHoldFloorSeconds, not a bare literal (tunables-ssot.md T1 -- a balance pass would
+                // tune this). This still FLOORS the timer every tick, it does not stop it -- the
+                // "hold, not freeze" naming distinction wave.control's own op vocabulary enforces.
+                try
+                {
+                    board.timeUntilNextWave = Mathf.Max(
+                        board.timeUntilNextWave, (float)FusionRpg.Core.Match.MatchTuningPolicy.WaveHoldFloorSeconds);
+                }
+                catch { }
             }
             if (board != null)
             {
@@ -369,19 +378,23 @@ public static class CheatActions
         SpawnExtra("zombie", typeId, col: null, row, reason, correlationId);
     }
 
-    /// <summary>PvzIntent: plant or zombie extra spawn; default side zombie for legacy callers.</summary>
+    /// <summary>PvzIntent: plant or zombie extra spawn; default side zombie for legacy callers.
+    /// <paramref name="playerId"/> (aura-skill T21b): the deploying player, threaded straight through
+    /// from `UniqueActorService.DeployAsync`'s own `pvz.spawn.extra` payload — 0 for spawns with no
+    /// real owner (manual/debug spawns), matching `CheatState.RegisterSpecimenOwner`'s own
+    /// `playerId &lt;= 0` no-op guard.</summary>
     public static void SpawnExtra(string? side, int typeId, int? col, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         var s = (side ?? "zombie").Trim().ToLowerInvariant();
         if (s == "plant")
-            SpawnExtraPlant(typeId, col, row, reason, correlationId, instanceId, loadoutJson);
+            SpawnExtraPlant(typeId, col, row, reason, correlationId, instanceId, loadoutJson, playerId);
         else
-            SpawnExtraZombieCore(typeId, row, reason, correlationId, instanceId, loadoutJson);
+            SpawnExtraZombieCore(typeId, row, reason, correlationId, instanceId, loadoutJson, playerId);
     }
 
     static void SpawnExtraPlant(int typeId, int? col, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         try
         {
@@ -425,6 +438,9 @@ public static class CheatActions
             }
             SpawnCatalog.MarkSpawn("plant", typeId, true);
             CheatState.Select(plant.Pointer, "plant");
+            var plantPtr = GameDumps.Ptr(plant);
+            if (playerId > 0)
+                CheatState.RegisterSpecimenOwner(plantPtr, playerId); // aura-skill T21b
             var ackPlant = new Dictionary<string, object>
             {
                 ["typeId"] = typeId,
@@ -432,7 +448,7 @@ public static class CheatActions
                 ["row"] = CheatState.SpawnRow,
                 ["reason"] = reason ?? "extra",
                 ["correlationId"] = correlationId ?? "",
-                ["ptr"] = GameDumps.Ptr(plant),
+                ["ptr"] = plantPtr,
                 ["side"] = "plant",
                 ["source"] = "extra"
             };
@@ -451,7 +467,7 @@ public static class CheatActions
     }
 
     static void SpawnExtraZombieCore(int typeId, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         try
         {
@@ -491,13 +507,16 @@ public static class CheatActions
             }
             SpawnCatalog.MarkSpawn("zombie", typeId, true);
             CheatState.Select(z.Pointer, "zombie");
+            var zombiePtr = GameDumps.Ptr(z);
+            if (playerId > 0)
+                CheatState.RegisterSpecimenOwner(zombiePtr, playerId); // aura-skill T21b
             var ackZombie = new Dictionary<string, object>
             {
                 ["typeId"] = typeId,
                 ["row"] = CheatState.SpawnRow,
                 ["reason"] = reason ?? "extra",
                 ["correlationId"] = correlationId ?? "",
-                ["ptr"] = GameDumps.Ptr(z),
+                ["ptr"] = zombiePtr,
                 ["side"] = "zombie",
                 ["source"] = "extra"
             };
@@ -644,7 +663,12 @@ public static class CheatActions
             if (CheatState.IsUserSet("E-ZD")) c.zombieDamageMultiplier = CheatState.FVal("E-ZD");
             if (CheatState.IsUserSet("E-ZS")) c.zombieSpeedMultiplier = CheatState.FVal("E-ZS");
             if (CheatState.IsUserSet("E-ZC")) c.zombieCountMultiplier = CheatState.FVal("E-ZC");
-            if (CheatState.IsUserSet("E-ZARM")) c.zombieStartAmmor = CheatState.IVal("E-ZARM");
+            // E35 (spec-match-modify.md §2.3): the one `long` channel on this kind. `checked` so an
+            // authored value above int.MaxValue THROWS at this boundary rather than wrapping or
+            // silently clamping — the same overflow discipline CLAUDE.md requires everywhere else. No
+            // `float` hop: this reads CheatState.LVal (long), never FVal/IVal (which round through a
+            // float that stops being integer-exact at 16,777,216, well under a cursed armour value).
+            if (CheatState.IsUserSet("E-ZARM")) c.zombieStartAmmor = checked((int)CheatState.LVal("E-ZARM"));
             if (CheatState.IsUserSet("E-PMIN")) c.plantModifyMin = CheatState.FVal("E-PMIN");
             if (CheatState.IsUserSet("E-PMAX")) c.plantModifyMax = CheatState.FVal("E-PMAX");
             if (CheatState.IsUserSet("E-ZMIN")) c.zombieModifyMin = CheatState.FVal("E-ZMIN");

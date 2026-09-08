@@ -97,12 +97,20 @@ public sealed class ActionRunner
         public bool HasRecovery;
         public bool TookSlot;
         public bool Active;
+
+        /// <summary>`battle-tempo` `commitment-binding` (D6): the EFFECTIVE commitment for this run —
+        /// <see cref="Envelope"/>'s own value if it declared one, else the profile default resolved
+        /// once at commit time. Read here rather than re-resolved per hit, matching every other
+        /// per-run field's own "resolved once at commit" shape.</summary>
+        public Commitment Commitment;
     }
 
     readonly EventQueue _queue;
     readonly ActionSlots _slots;
     readonly CooldownLedger _cooldowns;
     readonly Func<string, bool> _isActive;
+    readonly Commitment _defaultCommitment;
+    readonly Func<string, string?, string?>? _reselectTarget;
     readonly Dictionary<string, ActionRun> _runs;
 
     /// <param name="isActive">
@@ -110,17 +118,43 @@ public sealed class ActionRunner
     /// view of the board — and taken once at construction rather than per call, so the hot path
     /// carries no per-commit delegate.
     /// </param>
+    /// <param name="defaultCommitment">
+    /// `battle-tempo` `commitment-binding` (D6): the active profile's own
+    /// `BattleModeProfile.DefaultCommitment`, read once at construction — one `ActionRunner` serves
+    /// one battle, so one profile. An envelope's own <see cref="ActionEnvelope.Commitment"/>, when
+    /// non-null, always wins (envelope first, profile default second). Defaults to
+    /// <see cref="Commitment.LateBound"/> — the value <see cref="ActionEnvelope.Commitment"/> itself
+    /// defaulted to before it became nullable — so every existing caller that does not pass this is
+    /// byte-identical.
+    /// </param>
+    /// <param name="reselectTarget">
+    /// `battle-tempo` `commitment-binding` (D6/D11): re-selects a target using the ORIGINAL
+    /// `ActionTargetSpec` the intent used — the runner owns no targeting logic of its own by design
+    /// (see this class's own header: "what an action does... targeting shapes... belong to the
+    /// combat action program"), so re-selection is a caller-supplied delegate, the same shape
+    /// <paramref name="isActive"/> already uses for board access. Takes the acting actor's key and
+    /// the now-terminal target's key; returns a new target key, or null when none is legal (the
+    /// action then fizzles, same outward shape as <see cref="Commitment.EarlyBound"/>). Null (the
+    /// default) means no re-selection support — <see cref="Commitment.LateBound"/> and
+    /// <see cref="Commitment.EarlyBoundWithFallback"/> then fizzle too rather than throwing, so an
+    /// existing caller that never passes this sees no behavioural change: nothing died mid-action
+    /// under zero wind-up either way.
+    /// </param>
     public ActionRunner(
         EventQueue queue,
         ActionSlots slots,
         CooldownLedger cooldowns,
         Func<string, bool> isActive,
+        Commitment defaultCommitment = Commitment.LateBound,
+        Func<string, string?, string?>? reselectTarget = null,
         int expectedActors = 16)
     {
         _queue = queue ?? throw new ArgumentNullException(nameof(queue));
         _slots = slots ?? throw new ArgumentNullException(nameof(slots));
         _cooldowns = cooldowns ?? throw new ArgumentNullException(nameof(cooldowns));
         _isActive = isActive ?? throw new ArgumentNullException(nameof(isActive));
+        _defaultCommitment = defaultCommitment;
+        _reselectTarget = reselectTarget;
         _runs = new Dictionary<string, ActionRun>(expectedActors, StringComparer.Ordinal);
     }
 
@@ -130,6 +164,28 @@ public sealed class ActionRunner
     /// <summary>Hits scheduled but not yet fired. Zero when the actor is not mid-action.</summary>
     public int PendingResolves(string actorKey) =>
         _runs.TryGetValue(actorKey, out var run) && run.Active ? run.ResolveCount - run.ResolvesFired : 0;
+
+    /// <summary>
+    /// `battle-tempo` `timeline-dispatch` (D14): the target this actor's in-flight action currently
+    /// resolves against — reflects any re-selection <see cref="OnResolveDue"/> performed via
+    /// <see cref="TryReselect"/>, which mutates <see cref="ActionRun.TargetKey"/> in place. A caller
+    /// that applies the actual hit after <see cref="OnResolveDue"/> returns <see
+    /// cref="ActionOutcome.Resolved"/> needs this to know who to hit — the runner itself never applies
+    /// damage (this class's own header: "what an action does... belongs to the combat action
+    /// program"). Null when the actor holds no active run, which callers that only ever check
+    /// mid-action actors (guarded by <see cref="IsMidAction"/>) will not observe.
+    /// </summary>
+    public string? CurrentTarget(string actorKey) =>
+        _runs.TryGetValue(actorKey, out var run) && run.Active ? run.TargetKey : null;
+
+    /// <summary>
+    /// A18f (spec-action-dispatch-generalization.md T55.1): the envelope this actor actually
+    /// committed, for the caller applying the resolved hit — the runner itself never applies damage
+    /// (this class's own header: "what an action does... belongs to the combat action program").
+    /// Mirrors <see cref="CurrentTarget"/> exactly: null under the identical conditions.
+    /// </summary>
+    public ActionEnvelope? CurrentEnvelope(string actorKey) =>
+        _runs.TryGetValue(actorKey, out var run) && run.Active ? run.Envelope : null;
 
     /// <summary>
     /// Commits an intent: takes a slot if the action needs one, publishes a resolve handle per hit,
@@ -164,6 +220,8 @@ public sealed class ActionRunner
         run.ResolvesFired = 0;
         run.HasRecovery = false;
         run.Active = true;
+        // D6: envelope first, profile default second -- resolved ONCE here, not re-read per hit.
+        run.Commitment = envelope.Commitment ?? _defaultCommitment;
 
         var offsets = envelope.ResolveOffsets;
         run.ResolveCount = offsets.Count;
@@ -197,13 +255,22 @@ public sealed class ActionRunner
 
         run.ResolvesFired++;
 
-        // The EarlyBound death rule. Checked per hit, not once, because a combo's target can die
-        // between its own hits — and the remaining hits must stop rather than swing at a corpse.
-        if (run.Envelope.Commitment == Commitment.EarlyBound && !IsTargetActive(run))
+        // battle-tempo commitment-binding (D6): checked per hit, not once, because a combo's target
+        // can die between its own hits — and a lost target must be handled again on the very next
+        // hit, the same as on the first.
+        if (!IsTargetActive(run))
         {
-            CancelOutstandingResolves(run);
-            FinishResolution(actor, run, scheduled.DueTick);
-            return ActionOutcome.Fizzled;
+            if (run.Commitment == Commitment.EarlyBound || !TryReselect(actor.ActorKey, run))
+            {
+                // EarlyBound: locked at commit, no re-read, fizzles outright (unchanged from before
+                // this module). LateBound/EarlyBoundWithFallback ALSO fizzle here only when
+                // re-selection itself found nothing legal (no reselectTarget delegate configured, or
+                // the delegate found no live target) — never a silent no-op.
+                CancelOutstandingResolves(run);
+                FinishResolution(actor, run, scheduled.DueTick);
+                return ActionOutcome.Fizzled;
+            }
+            // TryReselect updated run.TargetKey in place; fall through and resolve against it.
         }
 
         if (run.ResolvesFired >= run.ResolveCount) FinishResolution(actor, run, scheduled.DueTick);
@@ -315,6 +382,22 @@ public sealed class ActionRunner
     }
 
     bool IsTargetActive(ActionRun run) => run.TargetKey is null || _isActive(run.TargetKey);
+
+    /// <summary>battle-tempo commitment-binding (D6/D11): `LateBound`/`EarlyBoundWithFallback` only
+    /// — `EarlyBound` never reaches this call (checked by the caller). Delegates to the caller's own
+    /// re-selection function (the ORIGINAL `ActionTargetSpec`, resolved engine-side per D11 — this
+    /// class owns no targeting logic of its own by design). Updates <paramref name="run"/>'s target
+    /// in place and returns true on success; returns false (and touches nothing) when no delegate is
+    /// configured or the delegate found no legal target, so the caller's own fizzle path is the only
+    /// one that ever runs — never a silent partial update.</summary>
+    bool TryReselect(string actorKey, ActionRun run)
+    {
+        if (_reselectTarget is null) return false;
+        var next = _reselectTarget(actorKey, run.TargetKey);
+        if (next is null) return false;
+        run.TargetKey = next;
+        return true;
+    }
 
     ActionRun RunFor(string actorKey)
     {

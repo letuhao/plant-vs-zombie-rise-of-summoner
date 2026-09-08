@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actor sheet — complete catalog — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Plate 13 floor. Shared pieces live in _kit/kit.css (InspectSplit, StatRow, leftover, radial, shield-card). */
+  .sheet-floor {
+    position: relative;
+    width: 100%;
+    max-width: min(1800px, 96vw);
+    height: min(960px, 92vh);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--border-control);
+    border-radius: var(--r-md);
+    /* Owner 2026-09-07: near-fullscreen ActorSheet bound — matches actor-sheet-shell spec.
+       Default PanelShell (640×720-capped) is too small for eight catalog tabs + InspectSplit. */
+  }
+  .sheet-floor > header {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--border);
+    min-height: 0;
+  }
+  .sheet-floor > header h3 { font-size: var(--text-xl); }
+  .sheet-floor .tabs {
+    flex: none;
+    flex-wrap: wrap;
+    padding: var(--sp-2) var(--sp-3) 0;
+    border-bottom: 1px solid var(--border);
+    gap: 4px;
+  }
+  .sheet-floor .tabs .tab { padding: 6px 10px; font-size: var(--text-2xs); }
+  .pane {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    padding: var(--sp-3);
+    gap: var(--sp-2);
+  }
+  .pane { display: none; }
+  .pane.is-on { display: flex; }
+  .pane [hidden] { display: none !important; }
+  .fill { flex: 1; min-height: 0; display: flex; gap: var(--sp-3); overflow: hidden; }
+  .fill.col { flex-direction: column; }
+  .list-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--panel-inset);
+  }
+  .no-scroll { flex: none; min-height: 0; overflow: hidden; }
+
+  .apt-grid-3 {
+    flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2);
+  }
+  .apt-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow: visible; }
+  .apt-col h4 {
+    flex: none; margin: 0; font-size: var(--text-2xs); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .apt-tile {
+    flex: none;
+    display: flex; flex-direction: column; gap: 2px;
+    text-align: left; cursor: pointer;
+    padding: 6px 8px; border-radius: var(--r-sm);
+    border: 1px solid var(--border-control); background: var(--panel-raised);
+    color: inherit; font: inherit;
+  }
+  .apt-tile:hover, .apt-tile:focus-visible, .apt-tile.is-on { border-color: var(--sun); }
+  .apt-tile.is-on { box-shadow: var(--sh-glow); }
+  .apt-tile .nm { font-family: var(--font-display); font-size: var(--text-sm); line-height: 1.1; }
+  .apt-tile .read { font-size: 10px; color: var(--muted); line-height: 1.2; }
+  .apt-tile .num { font-family: var(--font-mono); font-weight: 800; font-size: var(--text-lg); }
+  .apt-tile .stepper { align-self: flex-start; }
+  .apt-tile[data-posture="Force"] { box-shadow: inset 3px 0 0 var(--pw-offense); }
+  .apt-tile[data-posture="Finesse"] { box-shadow: inset 3px 0 0 var(--pw-utility); }
+  .apt-tile[data-posture="Bastion"] { box-shadow: inset 3px 0 0 var(--pw-survivability); }
+  .apt-tile.is-on[data-posture="Force"] { box-shadow: inset 3px 0 0 var(--pw-offense), var(--sh-glow); }
+  .apt-tile.is-on[data-posture="Finesse"] { box-shadow: inset 3px 0 0 var(--pw-utility), var(--sh-glow); }
+  .apt-tile.is-on[data-posture="Bastion"] { box-shadow: inset 3px 0 0 var(--pw-survivability), var(--sh-glow); }
+
+  .path-nodes {
+    display: flex; align-items: center; justify-content: center; gap: 0; padding: 12px 0;
+  }
+  .path-nodes .pn {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: 1px solid var(--border-control); background: var(--panel-inset);
+    font-size: 12px; font-weight: 800;
+  }
+  .path-nodes .pn.on { border-color: var(--sun); background: var(--soil-raised); box-shadow: var(--sh-glow); }
+  .path-nodes .pn.lock { opacity: .4; }
+  .path-nodes i { width: 18px; height: 2px; background: var(--border-control); }
+
+  .meter[data-pool="hp"] .fill { background: var(--bad); }
+  .meter[data-pool="stamina"] .fill { background: var(--warn); }
+  .meter[data-pool="hunger"] .fill { background: var(--sun); }
+  .meter[data-pool="spirit"] .fill { background: var(--info); }
+  .meter[data-pool="qi"] .fill { background: var(--el-light); }
+  .meter[data-pool="poise"] .fill { background: var(--el-air); }
+
+  .cond-hero { flex: none; display: flex; gap: var(--sp-3); align-items: center; }
+  .pool-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .stand-row { flex: 1; min-height: 0; display: flex; gap: var(--sp-3); overflow: hidden; }
+  .radar-box { flex: 0 0 160px; display: grid; place-items: center; }
+  .live-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+
+  .el-spark { display: flex; gap: 3px; }
+  .el-spark i { width: 8px; height: 8px; border-radius: 2px; background: var(--el-omni); opacity: .35; }
+  .el-spark i[data-el="fire"] { background: var(--el-fire); }
+  .el-spark i[data-el="ice"] { background: var(--el-ice); }
+  .el-spark i[data-el="air"] { background: var(--el-air); }
+  .el-spark i[data-el="earth"] { background: var(--el-earth); }
+  .el-spark i[data-el="light"] { background: var(--el-light); }
+  .el-spark i[data-el="dark"] { background: var(--el-dark); }
+  .el-spark i.is-on { opacity: 1; }
+
+  .glyph-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .el-ring-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; flex: none; }
+  .el-cell {
+    text-align: center; padding: 8px 4px; border-radius: var(--r-sm); cursor: pointer;
+    border: 1px solid var(--border-control); background: var(--panel-raised);
+  }
+  .el-cell.is-on { border-color: var(--sun); box-shadow: var(--sh-glow); }
+  .lock-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 800; color: var(--muted);
+    border: 1px dashed var(--border-control); border-radius: var(--r-pill);
+    padding: 2px 8px;
+  }
+  .doll-15 {
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px;
+    flex: 1; min-height: 0;
+  }
+  .doll-15 .sl {
+    min-height: 0; border: 1px dashed var(--border-control); border-radius: var(--r-sm);
+    background: var(--panel-inset); display: grid; place-items: center; text-align: center;
+    font-size: 9px; font-weight: 800; color: var(--muted); padding: 4px;
+  }
+  .doll-15 .sl.has { border-style: solid; border-color: var(--rarity-3); color: var(--text); background: var(--panel); }
+  .doll-15 .sl.locked { border-style: dotted; opacity: .6; }
+  .load-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; flex: none; }
+  .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--sp-3); }
+  .ref-grid figure { margin: 0; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; background: var(--panel-inset); }
+  .ref-grid img { width: 100%; height: 160px; object-fit: cover; display: block; }
+  .ref-grid figcaption { padding: var(--sp-2); font-size: var(--text-xs); color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Actor sheet — complete catalog</h1>
+  <p>
+    The implementable character sheet. Inventories below still list every closed row an implementer
+    must ship. The live mock is no longer a schema dump: <strong>InspectSplit</strong> instead of a
+    nested dialog, <strong>StatRow</strong> instead of channel ids, leftover points + Confirm,
+    gauges that do not fake caps. Names come from runtime catalogs under
+    <code>data/tuning/*-catalog.v{n}.json</code> (and <code>actor-sheet.v1.json</code>) — hosts inject;
+    FE iterates the API. The seed lexicon at
+    <code>data/seed/derived-stats/lexicon.v1.json</code> is a <strong>migration mirror</strong> only,
+    not the player-name home. Do not title-case the id.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — complete inventory, not build-authorized</span>
+    <span class="tag">Plate 13</span>
+    <span class="tag">GG-9 · GG-23 · GG-62 · GG-63 · GG-64 · GG-61</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="08-actor-sheet.html">Plate 08</a>
+  <a href="12-lawn-stage.html">Plate 12</a>
+  <a href="#mock">Live mock</a>
+  <a href="#split">InspectSplit</a>
+  <a href="#statrow">StatRow</a>
+  <a href="#lex">Runtime catalogs</a>
+  <a href="#refs">References</a>
+  <a href="#inv-apt">12 aptitudes</a>
+  <a href="#inv-combat">28 families</a>
+  <a href="#inv-status">24 statuses</a>
+</nav>
+
+<section class="sec" id="principles">
+  <h2>No-scroll floor · inspect in-pane</h2>
+  <p class="lede">
+    The game stage and this sheet never grow a page scrollbar. Vertical scroll is legal only inside
+    a list region or the right inspector. Selecting an AptitudeTile or a StatRow fills the inspector
+    — it does <em>not</em> push a dialog (GG-63). Confirm is the only band-3-shaped control, and it
+    lives in the leftover footer.
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Surface</th><th>Scroll?</th></tr></thead>
+      <tbody>
+        <tr><td>Lawn stage, HUD, action bar, reserved dock chrome</td><td>None. Dock list body may scroll.</td></tr>
+        <tr><td>ActorSheet shell (header, tabs, leftover footer)</td><td>None — flex fill.</td></tr>
+        <tr><td>Left dock lists · right inspector body · Paths lattice</td><td>Vertical only, <code>.list-scroll</code>.</td></tr>
+        <tr><td>Confirm allocation</td><td>Footer control. Not a nested dialog for a paragraph.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== MOCK -->
+<section class="sec" id="mock">
+  <h2>Live mock — split inspector, leftover, gauges</h2>
+  <p class="lede">
+    Shared widgets: <strong>AptitudeTile</strong> (+/−), <strong>StatRow</strong>,
+    <strong>InspectSplit</strong>, <strong>ShieldLayer</strong> (radial), <strong>StatusGlyph</strong>,
+    <strong>LeftoverBar</strong>. Combat tab is renamed <strong>Derived</strong> — it is the
+    derived-stat sheet. Shell is near-fullscreen: min(1800px, 96vw) × min(960px, 92vh).
+    Presentation: buy before build (<code>lucide-react</code>, <code>recharts</code>, sparks, xyflow on Paths).
+  </p>
+
+  <div class="sheet-floor" id="sheet">
+    <header>
+      <span class="frame frame--panel" data-rarity="3">🌻</span>
+      <div style="flex:1;min-width:0">
+        <h3>Emberling</h3>
+        <div class="meta row-flex">
+          <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+          <span class="tag">Sunflower</span>
+          <span class="tag">Lv 14</span>
+          <span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+          <span class="el" data-el="light"><i class="dot"></i>Light</span>
+          <span class="tag tag--ok">Fielded</span>
+        </div>
+      </div>
+      <span class="esc">Esc</span>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-pane="condition" type="button">Condition</button>
+      <button class="tab" data-pane="aptitudes" type="button">Aptitudes</button>
+      <button class="tab" data-pane="derived" type="button">Derived</button>
+      <button class="tab" data-pane="shield" type="button">Shield</button>
+      <button class="tab" data-pane="status" type="button">Status</button>
+      <button class="tab" data-pane="elements" type="button">Elements</button>
+      <button class="tab" data-pane="kit" type="button">Kit</button>
+      <button class="tab" data-pane="paths" type="button">Paths</button>
+    </nav>
+
+    <!-- CONDITION -->
+    <div class="pane is-on" id="pane-condition" role="tabpanel">
+      <div class="cond-hero no-scroll">
+        <div class="radial-wrap" title="HP with fire shield overlay">
+          <div class="radial" style="width:96px;height:96px;--p:40;--c:var(--el-fire)"></div>
+          <div class="radial" style="position:absolute;width:72px;height:72px;--p:69;--c:var(--bad)"></div>
+          <span class="n">HP</span>
+        </div>
+        <div class="pool-col">
+          <div class="meter" data-pool="hp"><span class="cap">HP <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+          <div class="meter" data-pool="stamina"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+          <div class="meter" data-pool="hunger"><span class="cap">Sun <b>12 / 40</b></span><span class="track"><span class="fill" style="width:30%"></span></span></div>
+          <div class="meter" data-pool="spirit"><span class="cap">Spirit <b>22 / 40</b></span><span class="track"><span class="fill" style="width:55%"></span></span></div>
+          <div class="meter" data-pool="qi"><span class="cap">Yang <b>8 / 24</b></span><span class="track"><span class="fill" style="width:33%"></span></span></div>
+          <div class="meter" data-pool="poise"><span class="cap">Poise <b>18 / 20</b></span><span class="track"><span class="fill" style="width:90%"></span></span></div>
+        </div>
+      </div>
+      <div class="stand-row">
+        <div class="radar-box" aria-label="Standing five axes">
+          <svg width="150" height="150" viewBox="0 0 150 150" role="img">
+            <polygon points="75,18 132,62 110,128 40,128 18,62" fill="none" stroke="var(--border-control)"/>
+            <polygon points="75,38 110,64 98,108 52,108 40,64" fill="rgb(224 180 75 / 0.28)" stroke="var(--sun)"/>
+            <circle cx="75" cy="18" r="3" fill="var(--pw-offense)"/>
+            <circle cx="132" cy="62" r="3" fill="var(--pw-survivability)"/>
+            <circle cx="110" cy="128" r="3" fill="var(--pw-control)"/>
+            <circle cx="40" cy="128" r="3" fill="var(--pw-utility)"/>
+            <circle cx="18" cy="62" r="3" fill="var(--pw-economy)"/>
+          </svg>
+        </div>
+        <div class="live-col">
+          <p class="spec-label">Standing · five axes (definitions.md)</p>
+          <div class="pw">
+            <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:64%"></span></span><b>77</b></div>
+            <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:48%"></span></span><b>58</b></div>
+            <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:30%"></span></span><b>36</b></div>
+            <div class="bar" data-c="utility"><span>Utility</span><span class="t"><span class="f" style="width:22%"></span></span><b>26</b></div>
+            <div class="bar" data-c="economy"><span>Economy</span><span class="t"><span class="f" style="width:41%"></span></span><b>49</b></div>
+          </div>
+          <p class="spec-label">Live status · tap for Status tab</p>
+          <div class="glyph-wrap">
+            <button class="status-glyph" type="button" style="--t:70%">SP<span class="ring"></span></button>
+            <button class="status-glyph" type="button" style="--t:40%">CO<span class="ring"></span></button>
+            <button class="status-glyph" type="button" style="--t:85%">EM<span class="ring"></span></button>
+            <span class="tag">+1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APTITUDES -->
+    <div class="pane" id="pane-aptitudes" role="tabpanel">
+      <div class="inspect-split">
+        <div class="dock">
+          <div class="apt-grid-3" id="apt-grid"></div>
+        </div>
+        <aside class="inspect" id="apt-inspect" aria-live="polite"></aside>
+      </div>
+      <div class="leftover-bar">
+        <span class="pts" id="leftover-n">8</span>
+        <span class="why">left
+          <span class="spent-track" aria-hidden="true"><i id="leftover-fill"></i></span>
+          <span id="leftover-spent">96 / 104</span>
+          · commander · empty leftover is legal
+        </span>
+        <button class="btn btn--ghost btn--sm" type="button" id="apt-reset">Reset</button>
+        <button class="btn btn--sm" type="button" id="apt-confirm" disabled>Confirm</button>
+      </div>
+    </div>
+
+    <!-- DERIVED -->
+    <div class="pane" id="pane-derived" role="tabpanel">
+      <div class="no-scroll row-flex">
+        <span class="seg" id="der-cats"></span>
+        <label class="toggle" id="show-unchanged"><span class="track"><span class="knob"></span></span> Show unchanged</label>
+      </div>
+      <div class="inspect-split">
+        <div class="dock">
+          <div class="list-scroll" id="der-list"></div>
+        </div>
+        <aside class="inspect" id="der-inspect"></aside>
+      </div>
+    </div>
+
+    <!-- SHIELD -->
+    <div class="pane" id="pane-shield" role="tabpanel">
+      <div class="fill" style="flex:none;min-height:148px">
+        <div class="shield-card" data-el="fire">
+          <span class="kind">1 · drain first · aura</span>
+          <div class="radial-wrap">
+            <div class="radial" style="--p:67;--c:var(--el-fire)"></div>
+            <span class="n">80</span>
+          </div>
+          <span class="hp">80 / 120</span>
+          <span><i class="el-pip" data-el="fire"></i> Fire</span>
+        </div>
+        <div class="shield-card">
+          <span class="kind">2 · innate</span>
+          <div class="radial-wrap">
+            <div class="radial" style="--p:50;--c:var(--el-omni)"></div>
+            <span class="n">40</span>
+          </div>
+          <span class="hp">40 / 80</span>
+          <span><i class="el-pip" data-el="none"></i> Untyped</span>
+        </div>
+        <div class="shield-card empty">
+          <span class="kind">3 · empty</span>
+          <div class="radial-wrap">
+            <div class="radial" style="--p:0;--c:var(--border)"></div>
+            <span class="n">+</span>
+          </div>
+          <span class="readout">new layer must beat the weakest</span>
+        </div>
+      </div>
+      <p class="spec-label">Shield math (omni glance) — full element matrix is Derived → Shield</p>
+      <div class="list-scroll" id="shield-rows"></div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="pane" id="pane-status" role="tabpanel">
+      <div class="no-scroll row-flex">
+        <span class="seg">
+          <button class="is-active" data-st="live" type="button">Live</button>
+          <button data-st="catalog" type="button">Catalog</button>
+          <button data-st="mastery" type="button">Mastery</button>
+        </span>
+      </div>
+      <div class="inspect-split">
+        <div class="dock">
+          <div class="list-scroll" style="padding:8px" id="status-grid"></div>
+        </div>
+        <aside class="inspect" id="status-inspect"></aside>
+      </div>
+    </div>
+
+    <!-- ELEMENTS -->
+    <div class="pane" id="pane-elements" role="tabpanel">
+      <div class="el-ring-grid no-scroll" id="el-grid"></div>
+      <div class="row-flex no-scroll">
+        <span class="lock-chip">omni is a baseline, not a type</span>
+        <span class="lock-chip">aspect-scope reverted</span>
+        <span class="lock-chip">no DemonFamily in src</span>
+      </div>
+      <div class="inspect-split">
+        <div class="dock">
+          <div class="list-scroll" id="el-rows"></div>
+        </div>
+        <aside class="inspect" id="el-inspect">
+          <div class="hd"><span class="el-pip" data-el="fire"></span><span class="nm">Fire</span></div>
+          <p class="reading">Species typing: Fire + Light. Mastery is player-lifetime, not this specimen.</p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- KIT -->
+    <div class="pane" id="pane-kit" role="tabpanel">
+      <div class="no-scroll row-flex">
+        <span class="seg">
+          <button class="is-active" data-kit="load" type="button">Loadout</button>
+          <button data-kit="gear" type="button">Gear (15)</button>
+        </span>
+      </div>
+      <div id="kit-load" class="fill col">
+        <div class="load-row">
+          <button class="actionslot" type="button"><span class="g">☀</span><span class="n">Sunflare</span><span class="cost">8 sun</span></button>
+          <button class="actionslot" type="button"><span class="g">🔥</span><span class="n">Kindle</span><span class="cost">4 yang</span></button>
+          <button class="actionslot" type="button" style="opacity:.35;border-style:dashed"><span class="n">empty</span></button>
+          <button class="actionslot" type="button" style="opacity:.35;border-style:dashed"><span class="n">empty</span></button>
+          <button class="actionslot" type="button" style="opacity:.35;border-style:dashed"><span class="n">empty</span></button>
+          <button class="actionslot" type="button" style="opacity:.35;border-style:dashed"><span class="n">unlock +1</span></button>
+        </div>
+        <p class="readout">Same ActionSlot as the off-board combat book. Not Strike/Firebolt placeholders.</p>
+      </div>
+      <div id="kit-gear" class="fill col" hidden>
+        <div class="doll-15">
+          <div class="sl has">crown</div>
+          <div class="sl has">muzzle<br>ember bore</div>
+          <div class="sl has">stem<br>heartwood</div>
+          <div class="sl has">graft-1</div>
+          <div class="sl">thorn<br>empty</div>
+          <div class="sl">leaves<br>empty</div>
+          <div class="sl">roots<br>empty</div>
+          <div class="sl">soil</div>
+          <div class="sl">bract<br>empty</div>
+          <div class="sl locked">canopy<br>17</div>
+          <div class="sl locked">pollen<br>20</div>
+          <div class="sl locked">sheath<br>24</div>
+          <div class="sl locked">glands<br>28</div>
+          <div class="sl locked">runner<br>32</div>
+          <div class="sl locked">graft-2<br>36</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATHS -->
+    <div class="pane" id="pane-paths" role="tabpanel">
+      <div class="fill">
+        <div class="shield-card" style="flex:1">
+          <span class="kind">Species bloodline</span>
+          <div class="path-nodes" aria-hidden="true">
+            <span class="pn on">☀</span><i></i>
+            <span class="pn on">🔥</span><i></i>
+            <span class="pn">◇</span><i></i>
+            <span class="pn lock">17</span>
+          </div>
+          <p class="readout">This specimen. Wave generals: look, do not edit.</p>
+        </div>
+        <div class="shield-card" style="flex:1">
+          <span class="kind">Shared corpus</span>
+          <div class="path-nodes" aria-hidden="true">
+            <span class="pn on">I</span><i></i>
+            <span class="pn on">II</span><i></i>
+            <span class="pn">III</span><i></i>
+            <span class="pn lock">IV</span>
+          </div>
+          <p class="readout">Player trees — not the specimen wallet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="vp-note">Shell height min(960px, 92vh) × width min(1800px, 96vw). Page around the mock may scroll — chrome inside it must not.</p>
+</section>
+
+<section class="sec" id="split">
+  <h2>Shared — InspectSplit</h2>
+  <p class="lede">
+    Left dock + right reading. One implementation for Aptitudes, Derived, Status, Elements.
+    Esc still pops the <em>sheet</em>, not the inspector (the inspector is not a stack push).
+    Confirm in the leftover footer is the decision control (GG-22 / GG-63).
+  </p>
+</section>
+
+<section class="sec" id="statrow">
+  <h2>Shared — StatRow</h2>
+  <p class="lede">
+    Icon · catalog displayName · number · spark · <code>?</code>. Binds
+    <code>(channelId, displayName, value, unitClass, state, cap)</code>.
+    Six render states from <a href="spec-derived-stat-sheet.md">spec-derived-stat-sheet.md</a> §3
+    — do not invent a seventh. Spark / gauge policy comes from <code>derived-stat-catalog</code>
+    (seed lexicon is the migration mirror). Uncapped GameUnits never paint CAP.
+  </p>
+  <div class="spec">
+    <button class="stat-row is-on" type="button">
+      <span class="ico" style="background:var(--el-fire)"></span>
+      <span class="lab">Fire Power</span>
+      <span class="el-spark"><i data-el="omni" class="is-on"></i><i data-el="fire" class="is-on"></i><i data-el="ice"></i><i data-el="air"></i><i data-el="earth"></i><i data-el="light" class="is-on"></i><i data-el="dark"></i></span>
+      <span class="val">150</span>
+      <span class="help-btn">?</span>
+    </button>
+    <button class="stat-row is-capped" type="button">
+      <span class="ico"></span>
+      <span class="lab">DoT resist</span>
+      <span class="spark" style="width:72px"><i style="width:100%"></i></span>
+      <span class="val">0.95 CAP</span>
+      <span class="help-btn">?</span>
+    </button>
+  </div>
+</section>
+
+<section class="sec" id="lex">
+  <h2>Runtime catalogs — player names (seed lexicon is a mirror)</h2>
+  <p class="lede">
+    <code>web/fusion-rpg-web/src/contract/adapt.ts</code> already records the gap:
+    seed <code>catalog.json</code> has compose/unit/consumer and no names;
+    <code>channelLabel</code> title-cases the id. That is the FE defect.
+    <strong>Home:</strong> <code>data/tuning/derived-stat-catalog.v{n}.json</code> (and sibling
+    <code>*-catalog</code> files) — hosts inject; FE reads
+    <code>GET /api/catalogs/actor-surface</code>.
+    Seed <code>data/seed/derived-stats/lexicon.v1.json</code> is a check mirror during migration only.
+    <code>data/tuning/derived-stats.v2.json</code> stays numbers.
+    (<code>categoryResistCap</code>, <code>turnDefaultSpeed</code>).
+  </p>
+  <div class="note">
+    Aptitude <code>Reading</code> lines already live on <code>AptitudeCatalog</code> in code.
+    Derived families and the 24 statuses did not. The seed authors both. Lingui wraps the strings
+    later; the ids stay English keys.
+  </div>
+</section>
+
+<section class="sec" id="refs">
+  <h2>What other sheets actually look like</h2>
+  <p class="lede">
+    Patterns stolen for this plate (research pass 2026-09-07). Not a genre pitch — layout only.
+    Full notes: <a href="../research/actor-sheet-ui-refs-2026-09-07.md">actor-sheet-ui-refs-2026-09-07.md</a>.
+  </p>
+  <div class="ref-grid">
+    <figure>
+      <img src="https://assetsio.gnwcdn.com/character-stats.jpg?width=1200&amp;fit=bounds&amp;quality=70&amp;format=jpg&amp;auto=webp" alt="Path of Exile 2 character panel, left-docked tokens and resist bars">
+      <figcaption>PoE2 — left dock, pool tokens first, list is disclosure. Steal the dock; do not steal the long scroll.</figcaption>
+    </figure>
+    <figure>
+      <img src="https://static.wikia.nocookie.net/lastepoch_gamepedia_en/images/f/f4/CharacterStats.png/revision/latest?cb=20180826220854" alt="Last Epoch character stats window with resist icons">
+      <figcaption>Last Epoch — coloured resist icons, not a paragraph. Steal the chip row.</figcaption>
+    </figure>
+    <figure>
+      <img src="https://upload.wikimedia.org/wikipedia/en/b/bb/Heroes_of_Might_and_Magic_III_Spellbook.jpg" alt="Heroes of Might and Magic III combat spellbook icon grid">
+      <figcaption>HoMM3 spellbook — icon grid + school tabs. Steal for the off-board combat book, not as a full-screen over the lawn.</figcaption>
+    </figure>
+  </div>
+  <p class="note">
+    Leftover points + plus buttons: Grim Dawn / Titan Quest, not Diablo IV (D4 auto-grants).
+    Shield as a coloured overlay on HP: Slay the Spire block, Hades 2 armour, Last Epoch ward.
+    Inspector instead of a wiki table: BG3 Examine, Genshin Details.
+  </p>
+</section>
+
+<!-- ==================================================================== INVENTORIES -->
+<section class="sec inv" id="inv-apt">
+  <h2>Inventory — the twelve (<code>AptitudeCatalog.All</code>)</h2>
+  <p class="lede">Count = 3×4. Posture is a read, never stored. Do not invent a thirteenth or rename.</p>
+  <table class="t">
+    <thead><tr><th>Id</th><th>Posture</th><th>Reading</th><th>Role</th><th>Combat families (v7 edges, omni)</th></tr></thead>
+    <tbody>
+      <tr><td>Might</td><td>Force</td><td>Hit harder.</td><td>universal offence — power</td><td>combat.power · crit.rate · crit.damage · accuracy</td></tr>
+      <tr><td>Fortitude</td><td>Force</td><td>Take less of everything.</td><td>mitigation</td><td>defense · absorption · reduction</td></tr>
+      <tr><td>Vigor</td><td>Force</td><td>More to lose before you lose.</td><td>shield</td><td>shield.capacity/regen/toughness · absorption · crit.resist*</td></tr>
+      <tr><td>Onslaught</td><td>Force</td><td>Their guard stops mattering.</td><td>breaks Guard + Reflect</td><td>parry/block break/shred · penetration · amplification · power · accuracy</td></tr>
+      <tr><td>Agility</td><td>Finesse</td><td>Be somewhere else.</td><td>Dodge</td><td>dodge · crit.resist*</td></tr>
+      <tr><td>Composure</td><td>Finesse</td><td>Nothing lands clean on you.</td><td>Crit-denial</td><td>crit.resist* · defense · reduction</td></tr>
+      <tr><td>Pierce</td><td>Finesse</td><td>Armour stops mattering.</td><td>breaks Mitigation + Shield</td><td>shield.pen · reflect.resist* · power · crit* · accuracy</td></tr>
+      <tr><td>Focus</td><td>Finesse</td><td>Do it again, sooner, cheaper.</td><td>utility — qi, ICD</td><td><strong>no combat.* edges</strong> — resource / skill / status only</td></tr>
+      <tr><td>Bulwark</td><td>Bastion</td><td>Stop it outright, sometimes.</td><td>Guard</td><td>parry.rate/strength · block.rate/strength</td></tr>
+      <tr><td>Retribution</td><td>Bastion</td><td>Hitting you costs them.</td><td>Reflect</td><td>reflect.rate · reflect.damage · reduction</td></tr>
+      <tr><td>Precision</td><td>Bastion</td><td>They cannot dodge.</td><td>breaks Dodge</td><td>accuracy</td></tr>
+      <tr><td>Ferocity</td><td>Bastion</td><td>Sometimes it is much worse.</td><td>breaks Crit-denial</td><td>crit.rate · crit.damage · power</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="sec inv" id="inv-res">
+  <h2>Inventory — six pools</h2>
+  <table class="t">
+    <thead><tr><th>id</th><th>Plant</th><th>Zombie</th></tr></thead>
+    <tbody>
+      <tr><td>hp</td><td>HP</td><td>HP</td></tr>
+      <tr><td>stamina</td><td>Stamina</td><td>Stamina</td></tr>
+      <tr><td>hunger</td><td>Sun</td><td>Hunger</td></tr>
+      <tr><td>spirit</td><td>Spirit</td><td>Spirit</td></tr>
+      <tr><td>qi</td><td>Yang</td><td>Yin</td></tr>
+      <tr><td>poise</td><td>Poise</td><td>Poise</td></tr>
+    </tbody>
+  </table>
+  <p class="note"><code>ResourceView</code> in <code>types.ts</code> still omits <code>poise</code> — stale. ActorView has no resources field.</p>
+</section>
+
+<section class="sec inv" id="inv-gear">
+  <h2>Inventory — fifteen roles (plant words + unlock)</h2>
+  <table class="t">
+    <thead><tr><th>role_id</th><th>Plant</th><th>unlock_level</th></tr></thead>
+    <tbody>
+      <tr><td>armament-primary</td><td>muzzle</td><td>1</td></tr>
+      <tr><td>core-guard</td><td>stem</td><td>1</td></tr>
+      <tr><td>head-guard</td><td>crown</td><td>1</td></tr>
+      <tr><td>jewel-minor-a</td><td>graft-1</td><td>1</td></tr>
+      <tr><td>armament-secondary</td><td>thorn</td><td>3</td></tr>
+      <tr><td>manipulator</td><td>leaves</td><td>5</td></tr>
+      <tr><td>footing</td><td>roots</td><td>8</td></tr>
+      <tr><td>girdle</td><td>soil</td><td>11</td></tr>
+      <tr><td>sense</td><td>bract</td><td>14</td></tr>
+      <tr><td>mantle</td><td>canopy</td><td>17</td></tr>
+      <tr><td>jewel-major</td><td>pollen</td><td>20</td></tr>
+      <tr><td>ward-array</td><td>sheath</td><td>24 (hybrid: never)</td></tr>
+      <tr><td>infusion</td><td>glands</td><td>28</td></tr>
+      <tr><td>retinue</td><td>runner</td><td>32</td></tr>
+      <tr><td>jewel-minor-b</td><td>graft-2</td><td>36 (hybrid: never)</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Commander <code>standard</code> is a squad badge, not a 16th body slot.</p>
+</section>
+
+<section class="sec inv" id="inv-combat">
+  <h2>Inventory — 28 combat families</h2>
+  <p class="lede">Player names from runtime catalogs. Engine ids stay here for implementers. Matrix columns: omni + 6.</p>
+  <div class="fam-wrap" id="inv-combat-static"></div>
+</section>
+
+<section class="sec inv" id="inv-status">
+  <h2>Inventory — 24 locked statuses</h2>
+  <p class="lede">
+    Engine ids below. Player names live in the catalogs. <code>StatusInstance</code> has no stack-count
+    field. HUD still uses initials until the glyph set is art-complete (GG-58 placeholder is identity, not a 404).
+  </p>
+  <table class="t">
+    <thead><tr><th>#</th><th>statusId</th><th>Kind</th><th>Family</th><th>Stacking</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>butter</td><td>UnityCc</td><td>cc</td><td>Replace</td></tr>
+      <tr><td>2</td><td>freeze</td><td>UnityCc</td><td>elemental</td><td>Replace · family mutex</td></tr>
+      <tr><td>3</td><td>cold</td><td>UnityCc</td><td>elemental</td><td>Replace · family mutex</td></tr>
+      <tr><td>4</td><td>poison</td><td>UnityCc</td><td>elemental</td><td>Replace · Unity DoT</td></tr>
+      <tr><td>5</td><td>hypno</td><td>UnityCc</td><td>cc</td><td>Replace</td></tr>
+      <tr><td>6</td><td>ember</td><td>UnityCc</td><td>mixer</td><td><strong>Coexist</strong></td></tr>
+      <tr><td>7</td><td>jala</td><td>UnityCc</td><td>elemental</td><td>Replace · family mutex</td></tr>
+      <tr><td>8</td><td>kelp</td><td>UnityCc</td><td>slow</td><td>Replace</td></tr>
+      <tr><td>9</td><td>wither</td><td>OverTime</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>10</td><td>bond</td><td>Counter</td><td>overlay</td><td>Refresh + hit meter</td></tr>
+      <tr><td>11</td><td>rally</td><td>Buff</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>12</td><td>leech</td><td>OverTime</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>13</td><td>expose</td><td>Debuff</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>14</td><td>command</td><td>Meter</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>15</td><td>shatter</td><td>Debuff</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>16</td><td>charm_pulse</td><td>CrowdControl</td><td>overlay</td><td>Replace · ModifyStat</td></tr>
+      <tr><td>17</td><td>blight</td><td>Contagion</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>18</td><td>rot</td><td>Contagion</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>19</td><td>spark</td><td>Contagion</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>20</td><td>pact_mark</td><td>Contagion</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>21</td><td>spore</td><td>Contagion</td><td>overlay</td><td>Refresh</td></tr>
+      <tr><td>22</td><td>nerve.unsettled</td><td>Debuff</td><td>nerve</td><td>Replace · party stacks</td></tr>
+      <tr><td>23</td><td>nerve.shaken</td><td>Debuff</td><td>nerve</td><td>Replace · party stacks</td></tr>
+      <tr><td>24</td><td>nerve.afflicted</td><td>Debuff</td><td>nerve</td><td>Replace · party stacks</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="sec inv" id="inv-el">
+  <h2>Inventory — six elements + mastery</h2>
+  <table class="t">
+    <thead><tr><th>id</th><th>DisplayName</th><th>Mastery quantity</th></tr></thead>
+    <tbody>
+      <tr><td>fire</td><td>Fire</td><td>element_mastery.fire</td></tr>
+      <tr><td>ice</td><td>Ice</td><td>element_mastery.ice</td></tr>
+      <tr><td>air</td><td>Air</td><td>element_mastery.air</td></tr>
+      <tr><td>earth</td><td>Earth</td><td>element_mastery.earth</td></tr>
+      <tr><td>light</td><td>Light</td><td>element_mastery.light</td></tr>
+      <tr><td>dark</td><td>Dark</td><td>element_mastery.dark</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="sec inv" id="inv-sh">
+  <h2>Inventory — shield stack</h2>
+  <ul>
+    <li>Max <strong>3</strong> layers. Drain: priority DESC, then CreatedSeq. Defaults aura 30 / skill 20 / innate 10.</li>
+    <li>Sheet shows instances (coloured radials). HUD may collapse same-element.</li>
+    <li>Noun is <strong>Shield</strong>. Never Ward.</li>
+  </ul>
+</section>
+
+<section class="sec" id="inv-not">
+  <h2>Explicitly not drawn as if they shipped</h2>
+  <table class="t">
+    <thead><tr><th>Temptation</th><th>Why the sheet locks it</th></tr></thead>
+    <tbody>
+      <tr><td>Demon family picker</td><td>No canonical family vocabulary in <code>src/</code>.</td></tr>
+      <tr><td>Six aspects per species</td><td><code>aspect-scope</code> reverted.</td></tr>
+      <tr><td>History / Promote tabs</td><td>Out of scope / stub dump.</td></tr>
+      <tr><td>omni as a type chip you can slot</td><td><code>ParseSlot</code> throws.</td></tr>
+      <tr><td>A third channel classification</td><td>Six render states + thirteen UnitClass. Inventing another is the 2026-08-24 failure.</td></tr>
+      <tr><td>Gauge CAP on uncapped GameUnits</td><td>PS-8 / GG-64.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</div>
+<script>
+(function () {
+  const APT = {
+    Might: { posture:"Force", reading:"Hit harder.", role:"universal offence — power",
+      feeds:["Power","Crit chance","Crit damage","Accuracy"], v:14 },
+    Fortitude: { posture:"Force", reading:"Take less of everything.", role:"mitigation",
+      feeds:["Defense","Absorption","Reduction"], v:8 },
+    Vigor: { posture:"Force", reading:"More to lose before you lose.", role:"shield",
+      feeds:["Shield capacity","Shield regen","Shield toughness"], v:11 },
+    Onslaught: { posture:"Force", reading:"Their guard stops mattering.", role:"breaks Guard + Reflect",
+      feeds:["Parry break","Block break","Penetration"], v:7 },
+    Agility: { posture:"Finesse", reading:"Be somewhere else.", role:"Dodge",
+      feeds:["Dodge","Crit resist"], v:9 },
+    Composure: { posture:"Finesse", reading:"Nothing lands clean on you.", role:"Crit-denial",
+      feeds:["Crit resist","Defense"], v:6 },
+    Pierce: { posture:"Finesse", reading:"Armour stops mattering.", role:"breaks Mitigation + Shield",
+      feeds:["Shield pierce","Reflect chance resist"], v:10 },
+    Focus: { posture:"Finesse", reading:"Do it again, sooner, cheaper.", role:"utility — qi, ICD",
+      feeds:["(no combat edges — pools and cooldowns)"], v:5 },
+    Bulwark: { posture:"Bastion", reading:"Stop it outright, sometimes.", role:"Guard",
+      feeds:["Parry chance","Block chance"], v:12 },
+    Retribution: { posture:"Bastion", reading:"Hitting you costs them.", role:"Reflect",
+      feeds:["Reflect chance","Reflect damage"], v:4 },
+    Precision: { posture:"Bastion", reading:"They cannot dodge.", role:"breaks Dodge",
+      feeds:["Accuracy"], v:7 },
+    Ferocity: { posture:"Bastion", reading:"Sometimes it is much worse.", role:"breaks Crit-denial",
+      feeds:["Crit chance","Crit damage","Power"], v:3 }
+  };
+  const ORDER = ["Might","Fortitude","Vigor","Onslaught","Agility","Composure","Pierce","Focus","Bulwark","Retribution","Precision","Ferocity"];
+  const POSTURE = { Force: ORDER.slice(0,4), Finesse: ORDER.slice(4,8), Bastion: ORDER.slice(8) };
+  const STARTING_LEFT = 8;
+  const BUDGET = ORDER.reduce(function (s, k) { return s + APT[k].v; }, 0) + STARTING_LEFT;
+  const shares = {};
+  ORDER.forEach(function (k) { shares[k] = APT[k].v; });
+  const baseline = Object.assign({}, shares);
+  let selectedApt = "Might";
+  let dirty = false;
+
+  function spent() {
+    return ORDER.reduce(function (s, k) { return s + shares[k]; }, 0);
+  }
+  function leftover() { return BUDGET - spent(); }
+
+  function paintLeftover() {
+    var n = leftover();
+    var s = spent();
+    var el = document.getElementById("leftover-n");
+    el.textContent = String(n);
+    el.classList.toggle("is-zero", n === 0);
+    el.classList.toggle("pts", true);
+    el.style.color = n < 0 ? "var(--bad)" : "";
+    var fill = document.getElementById("leftover-fill");
+    if (fill) fill.style.width = Math.max(0, Math.min(100, (s / BUDGET) * 100)) + "%";
+    var spentEl = document.getElementById("leftover-spent");
+    if (spentEl) spentEl.textContent = s + " / " + BUDGET;
+    var btn = document.getElementById("apt-confirm");
+    btn.disabled = !dirty || n < 0;
+  }
+
+  function inspectApt(name) {
+    selectedApt = name;
+    var a = APT[name];
+    document.querySelectorAll(".apt-tile").forEach(function (t) {
+      t.classList.toggle("is-on", t.getAttribute("data-apt") === name);
+    });
+    document.getElementById("apt-inspect").innerHTML =
+      "<div class='hd'><span class='nm'>" + name + "</span><span class='tag'>" + a.posture + "</span></div>" +
+      "<p class='reading'>" + a.reading + "</p>" +
+      "<p class='spec-label'>What this share feeds</p>" +
+      "<div class='row-flex'>" + a.feeds.map(function (f) { return "<span class='tag'>" + f + "</span>"; }).join("") + "</div>" +
+      "<p class='readout'>Aptitude is a SOURCE share, never a channel id. " + a.role + ".</p>";
+  }
+
+  function renderApts() {
+    var grid = document.getElementById("apt-grid");
+    grid.innerHTML = ["Force","Finesse","Bastion"].map(function (p) {
+      var tiles = POSTURE[p].map(function (id) {
+        return "<div class='apt-tile' data-apt='" + id + "' data-posture='" + p + "' tabindex='0'>" +
+          "<span class='nm'>" + id + "</span>" +
+          "<span class='num' data-n='" + id + "'>" + shares[id] + "</span>" +
+          "<span class='read'>" + APT[id].reading + "</span>" +
+          "<span class='stepper'>" +
+            "<button type='button' data-d='-1' data-apt='" + id + "' aria-label='Decrease " + id + "'>−</button>" +
+            "<input readonly value='" + shares[id] + "' aria-label='" + id + " share'>" +
+            "<button type='button' data-d='1' data-apt='" + id + "' aria-label='Increase " + id + "'>+</button>" +
+          "</span></div>";
+      }).join("");
+      return "<div class='apt-col'><h4>" + p + "</h4>" + tiles + "</div>";
+    }).join("");
+    inspectApt(selectedApt);
+  }
+
+  document.getElementById("apt-grid").addEventListener("click", function (e) {
+    var btn = e.target.closest(".stepper button");
+    if (btn) {
+      e.preventDefault();
+      var id = btn.getAttribute("data-apt");
+      var next = shares[id] + Number(btn.getAttribute("data-d"));
+      if (next < 0) return;
+      shares[id] = next;
+      dirty = true;
+      selectedApt = id;
+      renderApts();
+      paintLeftover();
+      return;
+    }
+    var tile = e.target.closest(".apt-tile");
+    if (tile) inspectApt(tile.getAttribute("data-apt"));
+  });
+  document.getElementById("apt-grid").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var tile = e.target.closest(".apt-tile");
+    if (!tile || e.target.closest(".stepper")) return;
+    e.preventDefault();
+    inspectApt(tile.getAttribute("data-apt"));
+  });
+
+  document.getElementById("apt-reset").addEventListener("click", function () {
+    ORDER.forEach(function (k) { shares[k] = baseline[k]; });
+    dirty = false;
+    renderApts();
+    inspectApt(selectedApt);
+    paintLeftover();
+  });
+  document.getElementById("apt-confirm").addEventListener("click", function () {
+    if (leftover() < 0) return;
+    ORDER.forEach(function (k) { baseline[k] = shares[k]; APT[k].v = shares[k]; });
+    dirty = false;
+    paintLeftover();
+  });
+
+  const FAMILIES = [
+    { id:"combat.power", name:"Power", cat:"offense", val:150, spark:72, state:"" },
+    { id:"combat.crit.rate", name:"Crit chance", cat:"offense", val:40, spark:28, state:"" },
+    { id:"combat.crit.damage", name:"Crit damage", cat:"offense", val:80, spark:40, state:"" },
+    { id:"combat.accuracy", name:"Accuracy", cat:"offense", val:25, spark:20, state:"" },
+    { id:"combat.penetration", name:"Penetration", cat:"offense", val:12, spark:18, state:"" },
+    { id:"combat.defense", name:"Defense", cat:"defense", val:90, spark:50, state:"" },
+    { id:"combat.dodge", name:"Dodge", cat:"defense", val:18, spark:16, state:"" },
+    { id:"combat.crit.resist", name:"Crit resist", cat:"defense", val:10, spark:10, state:"is-default" },
+    { id:"combat.absorption", name:"Absorption", cat:"defense", val:22, spark:22, state:"" },
+    { id:"combat.reduction", name:"Reduction", cat:"defense", val:15, spark:15, state:"" },
+    { id:"combat.shield.capacity", name:"Shield capacity", cat:"shield", val:40, spark:30, state:"" },
+    { id:"combat.shield.toughness", name:"Shield toughness", cat:"shield", val:12, spark:14, state:"" },
+    { id:"combat.shield.pen", name:"Shield pierce", cat:"shield", val:8, spark:10, state:"" },
+    { id:"combat.shield.regen", name:"Shield regen", cat:"shield", val:3, spark:8, state:"" },
+    { id:"combat.parry.rate", name:"Parry chance", cat:"guard", val:"8%", spark:8, state:"" },
+    { id:"combat.block.rate", name:"Block chance", cat:"guard", val:"5%", spark:5, state:"" },
+    { id:"combat.reflect.rate", name:"Reflect chance", cat:"reflect", val:6, spark:8, state:"" },
+    { id:"combat.reflect.damage", name:"Reflect damage", cat:"reflect", val:20, spark:16, state:"" },
+    { id:"status.resist.dot", name:"DoT resist", cat:"status", val:"0.95 CAP", spark:100, state:"is-capped" },
+    { id:"status.resist.omni", name:"Omni resist", cat:"status", val:0.2, spark:20, state:"" },
+    { id:"progression.power", name:"Power index", cat:"progression", val:"Θ 14", spark:0, state:"is-stub" }
+  ];
+  const READ = {
+    "combat.power": "Adds to overlay damage on this element's share of the hit. Flat game units — not a percentage. Sources add together.",
+    "combat.crit.rate": "How often a hit rolls critical. Sigmoid points — the percentage depends on the opponent. Inspector shows ≈ pp vs a named reference.",
+    "status.resist.dot": "Capped at 0.95. The next point does nothing. Omni resist on this actor is uncapped — do not paint that row as CAP.",
+    "progression.power": "Θ — contests read it linearly; magnitudes read P(Θ). Placeholder curve (stub)."
+  };
+  const CATS = ["offense","defense","shield","guard","reflect","status","progression"];
+  const CAT_LABEL = { offense:"Offense", defense:"Defense", shield:"Shield", guard:"Guard", reflect:"Reflect", status:"Status", progression:"Progression" };
+  const CAT_COLOR = { offense:"var(--pw-offense)", defense:"var(--pw-survivability)", shield:"var(--el-ice)", guard:"var(--el-earth)", reflect:"var(--el-fire)", status:"var(--warn)", progression:"var(--sun)" };
+  let cat = "offense";
+  let showUnchanged = false;
+  let openGroup = "offense";
+
+  function inspectDer(f) {
+    document.querySelectorAll("#der-list .stat-row").forEach(function (r) {
+      r.classList.toggle("is-on", r.getAttribute("data-id") === f.id);
+    });
+    document.getElementById("der-inspect").innerHTML =
+      "<div class='hd'><span class='nm'>" + f.name + "</span><button class='help-btn' type='button'>?</button></div>" +
+      "<p class='reading'>" + (READ[f.id] || "Lexicon reading for this family.") + "</p>" +
+      "<p class='spec-label'>Spark</p>" +
+      "<p class='readout'>" + (f.state === "is-capped"
+        ? "Fill is value / cap. Next point does nothing."
+        : "Relative spark — not a cap. More still counts.") + "</p>" +
+      "<p class='spec-label'>Why this number</p>" +
+      "<p class='readout'>Sources add together. Unattributed rows stay visible (GG-49).</p>";
+  }
+
+  function renderDer() {
+    var groups = {};
+    CATS.forEach(function (c) { groups[c] = []; });
+    FAMILIES.forEach(function (f) {
+      if (!showUnchanged && f.state === "is-default") return;
+      groups[f.cat].push(f);
+    });
+    var html = "";
+    CATS.forEach(function (c) {
+      var rows = groups[c];
+      if (!rows.length) return;
+      var open = c === openGroup;
+      html += "<button class='collapse-h" + (open ? " is-open" : "") + "' type='button' data-g='" + c + "'>" + CAT_LABEL[c] + " · " + rows.length + "</button>";
+      if (open) {
+        rows.forEach(function (f) {
+          html += "<button class='stat-row " + f.state + "' type='button' data-id='" + f.id + "'>" +
+            "<span class='ico' style='background:" + CAT_COLOR[f.cat] + "'></span><span class='lab'>" + f.name + "</span>" +
+            "<span class='spark'><i style='width:" + f.spark + "%'></i></span>" +
+            "<span class='val'>" + f.val + "</span><span class='help-btn'>?</span></button>";
+        });
+      }
+    });
+    document.getElementById("der-list").innerHTML = html;
+    document.querySelectorAll("#der-list .collapse-h").forEach(function (h) {
+      h.addEventListener("click", function () {
+        openGroup = h.getAttribute("data-g");
+        renderDer();
+      });
+    });
+    document.querySelectorAll("#der-list .stat-row").forEach(function (r) {
+      r.addEventListener("click", function () {
+        var f = FAMILIES.filter(function (x) { return x.id === r.getAttribute("data-id"); })[0];
+        inspectDer(f);
+      });
+    });
+  }
+
+  document.getElementById("der-cats").innerHTML = CATS.map(function (c, i) {
+    return "<button type='button' data-cat='" + c + "'" + (i === 0 ? " class='is-active'" : "") + ">" + CAT_LABEL[c] + "</button>";
+  }).join("");
+  document.querySelectorAll("#der-cats button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("#der-cats button").forEach(function (x) { x.classList.toggle("is-active", x === b); });
+      cat = b.getAttribute("data-cat");
+      openGroup = cat;
+      renderDer();
+    });
+  });
+  document.getElementById("show-unchanged").addEventListener("click", function () {
+    showUnchanged = !showUnchanged;
+    this.classList.toggle("is-on", showUnchanged);
+    renderDer();
+  });
+
+  document.getElementById("shield-rows").innerHTML =
+    ["Shield capacity","Shield toughness","Shield pierce","Shield regen"].map(function (n, i) {
+      var v = [40,12,8,3][i];
+      return "<button class='stat-row' type='button'><span class='ico' style='background:var(--el-fire)'></span><span class='lab'>" + n + "</span><span class='spark'><i style='width:" + (20+i*10) + "%'></i></span><span class='val'>" + v + "</span><span class='help-btn'>?</span></button>";
+    }).join("");
+
+  const STATUSES = [
+    ["butter","Butter","Stops them acting."],["freeze","Freeze","Locks them in ice."],
+    ["cold","Cold","Chills — ice's sibling."],["poison","Poison","Ticks damage while it lasts."],
+    ["hypno","Hypnotize","Turns them against their own."],["ember","Ember","Mixer burn that can coexist."],
+    ["jala","Jala","Hot burst, elemental family."],["kelp","Kelp","Wraps and slows."],
+    ["wither","Wither","Overlay drain over time."],["bond","Bond","Counter that meters hits."],
+    ["rally","Rally","A short lift for allies."],["leech","Leech","Takes from them as they live."],
+    ["expose","Expose","Makes the next hits land cleaner."],["command","Command","A leadership meter."],
+    ["shatter","Shatter","Breaks what they were holding."],["charm_pulse","Charm pulse","Seizes control briefly."],
+    ["blight","Blight","A spreading sickness."],["rot","Rot","A spreading decay."],
+    ["spark","Spark","A spreading flare."],["pact_mark","Pact mark","A spreading pact mark."],
+    ["spore","Spore","A spreading cloud."],["nerve.unsettled","Unsettled","Party nerve — first rung."],
+    ["nerve.shaken","Shaken","Party nerve — second rung."],["nerve.afflicted","Afflicted","Party nerve — third rung."]
+  ];
+  let statusMode = "live";
+  function inspectSt(row) {
+    document.getElementById("status-inspect").innerHTML =
+      "<div class='hd'><span class='nm'>" + row[1] + "</span></div>" +
+      "<p class='reading'>" + row[2] + "</p>" +
+      "<p class='readout'>Mastery is a player-lifetime gate counter, not a live stack.</p>";
+  }
+  function renderStatus() {
+    var box = document.getElementById("status-grid");
+    var rows = statusMode === "live" ? STATUSES.slice(0,4) : STATUSES;
+    box.innerHTML = "<div class='glyph-wrap'>" + rows.map(function (r, i) {
+      var t = statusMode === "mastery" ? (20 + i * 3) : (40 + (i * 17) % 60);
+      return "<button class='status-glyph' type='button' data-i='" + i + "' style='--t:" + t + "%'>" +
+        r[1].slice(0,2).toUpperCase() + "<span class='ring'></span></button>";
+    }).join("") + "</div>";
+    box.querySelectorAll(".status-glyph").forEach(function (g) {
+      g.addEventListener("click", function () {
+        box.querySelectorAll(".status-glyph").forEach(function (x) { x.classList.toggle("is-on", x === g); });
+        inspectSt(rows[Number(g.getAttribute("data-i"))]);
+      });
+    });
+    inspectSt(rows[0]);
+  }
+  document.querySelectorAll("[data-st]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("[data-st]").forEach(function (b) { b.classList.toggle("is-active", b === btn); });
+      statusMode = btn.getAttribute("data-st");
+      renderStatus();
+    });
+  });
+
+  const ELS = ["fire","ice","air","earth","light","dark"];
+  document.getElementById("el-grid").innerHTML = ELS.map(function (e, i) {
+    return "<button class='el-cell" + (i === 0 ? " is-on" : "") + "' type='button' data-el='" + e + "'><b>" + e[0].toUpperCase() + e.slice(1) + "</b>" +
+      "<div class='radial-wrap' style='margin:6px auto'><div class='radial' style='width:48px;height:48px;--p:" + (70 - i*10) + ";--c:var(--el-" + e + ")'></div></div></button>";
+  }).join("");
+  document.getElementById("el-rows").innerHTML = ELS.map(function (e, i) {
+    return "<button class='stat-row' type='button' data-el='" + e + "'><span class='ico' style='background:var(--el-" + e + ")'></span><span class='lab'>" + e[0].toUpperCase() + e.slice(1) + " mastery</span><span class='spark'><i style='width:" + (70-i*10) + "%'></i></span><span class='val'>" + (12-i*2) + "</span><span class='help-btn'>?</span></button>";
+  }).join("");
+  function inspectEl(e) {
+    document.querySelectorAll("#el-grid .el-cell").forEach(function (c) {
+      c.classList.toggle("is-on", c.getAttribute("data-el") === e);
+    });
+    document.getElementById("el-inspect").innerHTML =
+      "<div class='hd'><span class='el-pip' data-el='" + e + "'></span><span class='nm'>" + e[0].toUpperCase() + e.slice(1) + "</span></div>" +
+      "<p class='reading'>Species typing: Fire + Light. Mastery is player-lifetime, not this specimen.</p>";
+  }
+  document.getElementById("el-grid").addEventListener("click", function (ev) {
+    var cell = ev.target.closest(".el-cell");
+    if (cell) inspectEl(cell.getAttribute("data-el"));
+  });
+  document.getElementById("el-rows").addEventListener("click", function (ev) {
+    var row = ev.target.closest(".stat-row");
+    if (row) inspectEl(row.getAttribute("data-el"));
+  });
+
+  document.getElementById("inv-combat-static").innerHTML = FAMILIES.filter(function (f) {
+    return f.id.indexOf("combat.") === 0;
+  }).map(function (f) { return "<code>" + f.name + "</code>"; }).join("");
+
+  document.querySelectorAll("[data-kit]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("[data-kit]").forEach(function (b) { b.classList.toggle("is-active", b === btn); });
+      var isLoad = btn.getAttribute("data-kit") === "load";
+      document.getElementById("kit-load").hidden = !isLoad;
+      document.getElementById("kit-gear").hidden = isLoad;
+    });
+  });
+
+  document.querySelectorAll(".sheet-floor > .tabs .tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      var id = tab.getAttribute("data-pane");
+      document.querySelectorAll(".sheet-floor > .tabs .tab").forEach(function (t) {
+        t.classList.toggle("is-active", t === tab);
+      });
+      document.querySelectorAll(".sheet-floor > .pane").forEach(function (p) {
+        p.classList.toggle("is-on", p.id === "pane-" + id);
+      });
+    });
+  });
+
+  renderApts();
+  inspectApt("Might");
+  paintLeftover();
+  renderDer();
+  inspectDer(FAMILIES[0]);
+  renderStatus();
+})();
+</script>
+</body>
+</html>

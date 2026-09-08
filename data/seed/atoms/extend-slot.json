@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.extend-slot",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Extend action slot",
+      "icdKey": "item.extend-slot",
+      "params": {
+        "channel": "loadout.slots",
+        "op": "flat",
+        "amount": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "branchiness": "forked",
+  "gateDensity": "dense",
+  "layoutId": "layout.long-mid-forked-001",
+  "oneWayDensity": "sparse",
+  "raidModes": [
+    "pair",
+    "quad"
+  ],
+  "secretDensity": "sparse",
+  "sizeBand": "long",
+  "widthBand": "mid"
+}

@@ -4,9 +4,20 @@ namespace FusionRpg.Core.Demons;
 
 public sealed record BannerTuning(int CostPerPull, int CostPerTen, double FocusWeightMultiplier);
 
+/// <summary>
+/// Ten-rung roll rates (seed-to-concrete T4.1, owner Q15: "All ten, two pity guards at 70 and 90").
+/// Field names carry the RUNG they guard/pay out, not the old four-value names — spec-rarity-
+/// migration.md §6: "renamed... so a reader is never guessing which rarity 'epic' means." The two
+/// pity guards are ordinals from ssot-rarity.md §3.3: 70 = Heirloom, 90 = Sunwoven. `Almanac` (the
+/// true top, ordinal 100) sits above both guards and is never pity-boosted — Q15 names guards at
+/// 70/90 only. `Chaff` has no explicit rate: it is the roll's remainder, same shape the old
+/// `Common` band used.
+/// </summary>
 public sealed record RollerTuning(
-    int EpicHardPity, int LegendarySoftStart, int LegendaryHardPity, int LegendaryBasePerMille,
-    int LegendaryRampPerMille, int EpicPerMille, int RarePerMille, int ShinyOneIn);
+    int HeirloomHardPity, int SunwovenSoftStart, int SunwovenHardPity, int SunwovenBasePerMille,
+    int SunwovenRampPerMille, int AlmanacPerMille, int HeirloomPerMille, int FirstseedPerMille,
+    int ChimericPerMille, int FusedPerMille, int CultivatedPerMille, int GraftedPerMille,
+    int SproutPerMille, int ShinyOneIn);
 
 /// <summary>Summoning balance surface (tunables-ssot.md T1) — spec-demon-summoning.md. Banner
 /// ids/HasElementFocus stay in <see cref="SummonBannerCatalog"/> (schema); costs/pity/rarity moved.</summary>
@@ -48,13 +59,19 @@ public static class SummoningTuningLoader
             }
 
             var roller = new RollerTuning(
-                EpicHardPity: Int(rollerEl, "epicHardPity", "roller"),
-                LegendarySoftStart: Int(rollerEl, "legendarySoftStart", "roller"),
-                LegendaryHardPity: Int(rollerEl, "legendaryHardPity", "roller"),
-                LegendaryBasePerMille: Int(rollerEl, "legendaryBasePerMille", "roller"),
-                LegendaryRampPerMille: Int(rollerEl, "legendaryRampPerMille", "roller"),
-                EpicPerMille: Int(rollerEl, "epicPerMille", "roller"),
-                RarePerMille: Int(rollerEl, "rarePerMille", "roller"),
+                HeirloomHardPity: Int(rollerEl, "heirloomHardPity", "roller"),
+                SunwovenSoftStart: Int(rollerEl, "sunwovenSoftStart", "roller"),
+                SunwovenHardPity: Int(rollerEl, "sunwovenHardPity", "roller"),
+                SunwovenBasePerMille: Int(rollerEl, "sunwovenBasePerMille", "roller"),
+                SunwovenRampPerMille: Int(rollerEl, "sunwovenRampPerMille", "roller"),
+                AlmanacPerMille: Int(rollerEl, "almanacPerMille", "roller"),
+                HeirloomPerMille: Int(rollerEl, "heirloomPerMille", "roller"),
+                FirstseedPerMille: Int(rollerEl, "firstseedPerMille", "roller"),
+                ChimericPerMille: Int(rollerEl, "chimericPerMille", "roller"),
+                FusedPerMille: Int(rollerEl, "fusedPerMille", "roller"),
+                CultivatedPerMille: Int(rollerEl, "cultivatedPerMille", "roller"),
+                GraftedPerMille: Int(rollerEl, "graftedPerMille", "roller"),
+                SproutPerMille: Int(rollerEl, "sproutPerMille", "roller"),
                 ShinyOneIn: Int(rollerEl, "shinyOneIn", "roller"));
 
             return new SummoningTuning(

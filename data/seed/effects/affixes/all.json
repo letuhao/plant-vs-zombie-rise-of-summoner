@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "kind": "affix",
+  "_meta": {
+    "partition": "all"
+  },
+  "entries": [
+    {
+      "id": "affix.authored.affix-draw-000",
+      "name": "Frostbite Venom",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-cold-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-poison-on-hit.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "affix-authoring/1",
+        "generatedUtc": "2026-09-06T02:54:32+00:00",
+        "voteConfidence": {
+          "name": "split",
+          "refs": "split"
+        },
+        "voteMinority": {
+          "name": "Frostbite Strike",
+          "refs": "atom.fx-cold-on-hit.t1,atom.fx-freeze-on-hit.t1"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-001",
+      "name": "Botanical Spore Burst",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-poison-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-spawn-plant-bullet.a.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "affix-authoring/1",
+        "generatedUtc": "2026-09-04T18:04:39+00:00"
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-002",
+      "name": "Glacial Bastion",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-freeze-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-shield-grant.a.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-003",
+      "name": "Undertaker's Frost",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-cold-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-spawn-zombie-ondeath.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-004",
+      "name": "Sovereign's Ember Mantle",
+      "class": "prefix",
+      "refs": [
+        {
+          "atom": "atom.patron-aura-defense.fire.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.patron-aura-power.fire.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-005",
+      "name": "Sovereign's Umbral Mantle",
+      "class": "prefix",
+      "refs": [
+        {
+          "atom": "atom.patron-aura-defense.dark.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.patron-aura-power.dark.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-006",
+      "name": "Golden Husbandry",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-economy-sun.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-spawn-butter.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-007",
+      "name": "Relentless Onslaught",
+      "class": "mixed",
+      "refs": [
+        {
+          "atom": "atom.fx-icd-butter.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-overlay-damage.t1",
+          "seq": 1
+        },
+        {
+          "atom": "atom.fx-passive-atk-flat.t1",
+          "seq": 2
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-008",
+      "name": "Cratered Earthworks",
+      "class": "suffix",
+      "refs": [
+        {
+          "atom": "atom.fx-board-cherry.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-set-dirt-box.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    },
+    {
+      "id": "affix.authored.affix-draw-009",
+      "name": "Hunter's Precision",
+      "class": "prefix",
+      "refs": [
+        {
+          "atom": "atom.critical-hunter.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-passive-atk-flat.t1",
+          "seq": 1
+        }
+      ],
+      "_provenance": {
+        "pipeline": "affix-authoring",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t71_claude_propose.py",
+        "voteConfidence": {
+          "name": "high",
+          "refs": "high"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, circular chamber where the floor is a lattice of silver filigree. Instead of walls, swirling currents of iridescent mist spiral upward toward a skylight, carrying thousands of tiny, glowing glass spheres that drift like slow-moving bubbles in a deep sea.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Zephyr's Gallery",
+  "reason": "The room centers on the 'Aetheric Orbs,' a collection of captured storms and memories that drift through the air, serving as the primary curiosity for the players to interact with.",
+  "roomId": "room.curio-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

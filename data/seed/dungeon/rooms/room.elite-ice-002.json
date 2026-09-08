@@ -1,0 +1,15 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-004",
+  "eventPool": [],
+  "flavor": "Jagged pillars of translucent blue ice rise from a floor of frozen slush, trapping ancient, frost-bitten weapons mid-swing within their crystalline depths.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Rime-Crusted Anvil",
+  "reason": "A concentrated group of frost-touched guardians occupies the center, utilizing the ice pillars for cover and tactical positioning.",
+  "roomId": "room.elite-ice-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

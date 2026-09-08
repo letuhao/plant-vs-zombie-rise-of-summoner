@@ -61,8 +61,22 @@ public static class SoulEarnPolicy
         public const string Upkeep = "upkeep";
         public const string ContractSlot = "contract-slot";
         public const string ContractRitual = "contract-ritual";
+        /// <summary>party-dungeon D2.23 (spec-delve-attrition.md §7) — the priced escape from
+        /// `Recovering`: `SoulSinkPolicy.Price(risk.recoveryRitualSouls.{rung}, theta_run, tuning)`.</summary>
+        public const string DelveRecoveryRitual = "delve-recovery-ritual";
+        /// <summary>party-dungeon D3.12 (spec-dungeon-loot.md §2, verbatim: "event-deck souls bank
+        /// under a new Reasons.Delve"). Kills and the extraction victory term use the pre-existing
+        /// <see cref="Kill"/>/<see cref="Victory"/> reasons instead (dedupe-keyed by a delve-specific
+        /// correlation string, never a separate reason) — this one is event-deck's own, for a
+        /// `resource.delta`-on-souls outcome grant; no production caller exists yet (`event-deck`'s own
+        /// atom dispatch table is D3.5's still-blocked gap), the same "zero callers, provably correct"
+        /// posture this program uses everywhere a real upstream piece is missing.</summary>
+        public const string Delve = "delve";
         /// <summary>Test/dev bankrolls only — keeps the discovery namespace clean for analytics.</summary>
         public const string Seed = "seed";
+        /// <summary>species-build-todo.md T4.2 — a priced species respec (spec-species-respec.md
+        /// decision 15). Never appears for the free cases (first override, revert to baseline).</summary>
+        public const string Respec = "respec";
     }
 
     /// <summary>
@@ -71,11 +85,11 @@ public static class SoulEarnPolicy
     /// <c>Instantiator</c>, T3.4) — a caller with no real depth signal must say so explicitly at the
     /// pin (Θ=20), never silently.
     /// </summary>
-    public static int KillEarn(int thetaEnemy, PowerTuning tuning) =>
+    public static long KillEarn(int thetaEnemy, PowerTuning tuning) =>
         ContentScale.Apply(KillDelta, ContentScale.Milli(thetaEnemy, tuning));
 
     /// <summary>Souls for a match result: <c>(victory ? VictoryDelta : DefeatDelta) ×
     /// contentScale(thetaRun)</c> (SSOT §11.7a).</summary>
-    public static int MatchEndEarn(bool victory, int thetaRun, PowerTuning tuning) =>
+    public static long MatchEndEarn(bool victory, int thetaRun, PowerTuning tuning) =>
         ContentScale.Apply(victory ? VictoryDelta : DefeatDelta, ContentScale.Milli(thetaRun, tuning));
 }

@@ -1,7 +1,9 @@
+using System.Reflection;
 using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Power;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -24,6 +26,15 @@ public static class DebugSessionState
 
 public static class DebugEndpoints
 {
+    /// <summary>E33 (spec-activation-edge.md §2.1): every `public const string` on <paramref name="t"/>,
+    /// in declaration order — the source of truth `/effects/contract` publishes from, so the endpoint
+    /// cannot drift from the class it names without a code change to <paramref name="t"/> itself.</summary>
+    static string[] PublicConstStrings(Type t) =>
+        t.GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+            .Select(f => (string)f.GetRawConstantValue()!)
+            .ToArray();
+
     public static void MapDebug(this WebApplication app)
     {
         var g = app.MapGroup("/api/debug");
@@ -127,6 +138,123 @@ public static class DebugEndpoints
             {
                 return Results.NotFound(new { error = ex.Message });
             }
+        });
+
+        g.MapPost("/lawn/quick-start", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
+        {
+            var b = BodyOrEmpty(body);
+            var levelNumber = IntProp(b, "levelNumber", 1);
+            var scenarioId = StrProp(b, "scenario") ?? "lab-overlay";
+            var timeoutSec = IntProp(b, "timeoutSec", 45);
+
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            var entered = false;
+            var boardStart = FindLatestLiveBoardStart(store);
+
+            if (boardStart is null)
+            {
+                store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
+                await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
+
+                var beforeEnter = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
+
+                var ackTimeoutSec = Math.Min(timeoutSec, 20);
+                var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
+                if (enterAck is null)
+                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s" });
+
+                var ackOk = PayloadBool(enterAck.Payload, "ok");
+                if (!ackOk)
+                {
+                    var err = PayloadString(enterAck.Payload, "error") ?? "enter-level rejected";
+                    if (!err.Contains("board already live", StringComparison.OrdinalIgnoreCase))
+                        return Results.Conflict(new { ok = false, error = err });
+                    // "board already live" — fall through and use the board that's already there.
+                }
+                else
+                {
+                    boardStart = await PollForKind(store, beforeEnter, "board.start", TimeSpan.FromSeconds(timeoutSec));
+                    if (boardStart is null)
+                        return Results.Conflict(new { ok = false, error = $"enter-level ok but no board.start within {timeoutSec}s — check main menu state" });
+                    entered = true;
+                }
+
+                // The INJECTOR has just said a board is live, and it holds the actual Board object —
+                // it outranks this server's event-log heuristic. So drop the session filter here:
+                // a SERVER restart makes the injector re-Hello from the SAME game process with the
+                // SAME live board, which would otherwise look "stale" to the session rule below and
+                // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
+                // itself was added — the fix for one false positive created a false negative.
+                if (boardStart is null)
+                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
+                if (boardStart is null)
+                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
+            }
+
+            var levelType = PayloadString(boardStart.Payload, "levelType") ?? "";
+            if (BadLevelTypes.Contains(levelType))
+                return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
+
+            await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
+
+            var scenarioCorrelation = Guid.NewGuid().ToString("N")[..12];
+            IReadOnlyList<DebugScenarioStep> steps;
+            try { steps = DebugScenarios.Expand(scenarioId, scenarioCorrelation); }
+            catch (ArgumentException ex) { return Results.NotFound(new { ok = false, error = ex.Message }); }
+
+            var beforeScenario = store.GetMaxEventId();
+            DebugSessionState.Active = true;
+            DebugSessionState.ScenarioId = scenarioCorrelation;
+            EffectGrantSessionRecorder.ApplyDebugSteps(grants, steps.Select(st => (st.Name, (object?)st.Payload)));
+            await Send(hub, inbox, "debug.run-steps", new
+            {
+                scenarioId = scenarioCorrelation,
+                id = scenarioId,
+                steps = steps.Select(st => new { name = st.Name, payload = st.Payload }).ToList()
+            });
+
+            var runDone = await PollForKind(store, beforeScenario, "debug.run-steps.done", TimeSpan.FromSeconds(timeoutSec));
+            if (runDone is null)
+                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s" });
+
+            EventEnvelope? snapshot = null;
+            var beforeSnapshot = store.GetMaxEventId();
+            var snapshotDeadline = DateTime.UtcNow.AddSeconds(15);
+            while (DateTime.UtcNow < snapshotDeadline && snapshot is null)
+            {
+                await Send(hub, inbox, "debug.effect.board-snapshot", new { });
+                await Task.Delay(400);
+                snapshot = FindKindAfter(store, beforeSnapshot, "debug.effect.board-snapshot");
+            }
+
+            string? targetPtr = null;
+            string? plantPtr = null;
+            if (snapshot?.Payload is JsonElement snapEl && snapEl.ValueKind == JsonValueKind.Object
+                && snapEl.TryGetProperty("entities", out var entitiesEl) && entitiesEl.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var ent in entitiesEl.EnumerateArray())
+                {
+                    var living = ent.TryGetProperty("living", out var l) && l.ValueKind == JsonValueKind.True;
+                    if (!living || !ent.TryGetProperty("ptr", out var ptrEl) || ptrEl.ValueKind != JsonValueKind.String) continue;
+                    var side = ent.TryGetProperty("side", out var s) ? s.GetString() : null;
+                    if (side == "zombie" && targetPtr is null) targetPtr = ptrEl.GetString();
+                    if (side == "plant" && plantPtr is null) plantPtr = ptrEl.GetString();
+                }
+            }
+
+            return Results.Ok(new
+            {
+                ok = true,
+                entered,
+                levelType,
+                scenario = scenarioId,
+                targetPtr,
+                plantPtr,
+                note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
+            });
         });
 
         MapPost(g, "/reset-board", "debug.reset-board");
@@ -257,24 +385,73 @@ public static class DebugEndpoints
         g.MapGet("/effects/session-grants", (EffectGrantSession grants) =>
             Results.Ok(new { count = grants.Count, grants = grants.Snapshot() }));
 
+        // E33 (spec-activation-edge.md §2.1, §2.1a): both arrays used to be hand-copied and had
+        // drifted from their own source classes — `triggers` was missing OnActivate, `actions` was
+        // missing GrantShield and ModifyDerivedStat, all three real (GrantShield has a live executor;
+        // ModifyDerivedStat is declarative-by-design but still part of the published vocabulary). A
+        // published-but-not-declared or declared-but-not-published constant is exactly "a published
+        // list that lies", the defect this endpoint exists to not repeat — so both arrays are now
+        // reflected off their own class's public const fields, which is what makes "every constant,
+        // and no others" true by construction rather than by someone remembering to edit two lists in
+        // sync. E34 grows EffectTriggers to 13 and needs no edit here for that to stay correct; E35/
+        // E36/E37 grow EffectActions the same way.
         g.MapGet("/effects/contract", () => Results.Ok(new
         {
             contractVersion = FoundationContractVersion.Current,
             frozen = true,
-            triggers = new[]
-            {
-                EffectTriggers.OnSpawn, EffectTriggers.OnDamageDealt, EffectTriggers.OnDamageTaken,
-                EffectTriggers.OnDeath, EffectTriggers.OnGranted, EffectTriggers.OnRemoved,
-                EffectTriggers.OnTimer
-            },
-            actions = new[]
-            {
-                EffectActions.ModifyStat, EffectActions.ApplyStatus, EffectActions.ClearStatus,
-                EffectActions.SpawnEntity, EffectActions.BoardAction, EffectActions.SpawnGridItem,
-                EffectActions.ClearGridItem, EffectActions.SetBoxType, EffectActions.Economy,
-                EffectActions.ApplyResourceDelta
-            }
+            triggers = PublicConstStrings(typeof(EffectTriggers)),
+            actions = PublicConstStrings(typeof(EffectActions))
         }));
+
+        // T5.7 / `dev-reforge` (spec-dev-reforge.md, effect-pipeline module 10; also
+        // spec-player-materialise.md §6, A4): re-derive a player's whole species roster against the
+        // CURRENT catalog, same world seed — a debug-only shortcut for observing a retuned affix
+        // without a new profile. Pure DAL, no injector round trip. Gated the same way every other
+        // `/api/debug/*` route is: Program.cs only calls `app.MapDebug()` on a loopback bind (or
+        // FUSIONRPG_DEBUG_REMOTE=1) — this endpoint lives in the SAME route group, not a second gate.
+        g.MapPost("/reforge-world", (JsonElement? body, RpgStore store, EventIngest ingest) =>
+        {
+            var b = BodyOrEmpty(body);
+            var playerId = b.ValueKind == JsonValueKind.Object
+                && b.TryGetProperty("playerId", out var p) && p.TryGetInt64(out var pid)
+                ? pid : store.GetCurrentPlayerId();
+            var thetaContent = IntProp(b, "thetaContent", 0);
+
+            // "before" — the revision this player's roster was last rolled against, read BEFORE the
+            // reforge touches anything (0 for a player with no roster yet). spec-dev-reforge.md's own
+            // guardrail: log before/after so a dev can see what a retune actually changed.
+            var beforeRows = store.ListPlayerSpecies(playerId);
+            var catalogRevisionBefore = beforeRows.Count == 0 ? 0 : beforeRows.Max(r => r.CatalogRevision);
+
+            var outcome = store.ReforgePlayerSpecies(playerId, thetaContent, PowerTuningHub.Tuning);
+            if (!outcome.IsOk)
+                return Results.Conflict(new { ok = false, error = outcome.Rejection.ToString() });
+
+            ingest.Enqueue(new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"),
+                Kind = "debug.reforge-world",
+                PlayerId = playerId,
+                Payload = new Dictionary<string, object>
+                {
+                    ["catalogRevisionBefore"] = catalogRevisionBefore,
+                    ["catalogRevisionAfter"] = outcome.CatalogRevision,
+                    ["reforged"] = outcome.Written,
+                    ["unchanged"] = outcome.AlreadyPresent,
+                }
+            });
+
+            return Results.Ok(new
+            {
+                ok = true,
+                playerId,
+                catalogRevisionBefore,
+                catalogRevisionAfter = outcome.CatalogRevision,
+                reforged = outcome.Written,
+                unchanged = outcome.AlreadyPresent,
+                elapsedMs = outcome.ElapsedMs
+            });
+        });
 
         g.MapPost("/spawn-extra", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
@@ -291,6 +468,41 @@ public static class DebugEndpoints
                 b = JsonSerializer.SerializeToElement(new { typeId = DebugScenarios.BasicZombieTypeId });
             }
             return await AcceptDebugSpawnExtra(b, store, hub, inbox, reasonDefault: "debug.fire");
+        });
+
+        // Derived sheet audit: real UniqueActor → Hub → /sheet (never a synthetic 269 paint).
+        g.MapPost("/derived-audit-actor", (JsonElement? body, RpgStore store) =>
+        {
+            var b = BodyOrEmpty(body);
+            long? playerId = null;
+            if (b.ValueKind == JsonValueKind.Object
+                && b.TryGetProperty("playerId", out var p) && p.TryGetInt64(out var pid))
+                playerId = pid;
+            try
+            {
+                return Results.Ok(DerivedAuditActor.Seed(store, playerId));
+            }
+            catch (Exception ex)
+            {
+                return Results.Conflict(new { ok = false, error = ex.Message });
+            }
+        });
+
+        g.MapGet("/derived-audit-coverage", (string? instanceId, bool? writeArtifact, string? artifactPath, RpgStore store) =>
+        {
+            try
+            {
+                var write = writeArtifact == true;
+                var path = artifactPath;
+                if (write && string.IsNullOrWhiteSpace(path))
+                    path = Path.Combine(AppContext.BaseDirectory, "derived-audit-coverage.json");
+                var json = DerivedAuditActor.CoverageJson(store, instanceId, write, path);
+                return Results.Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return Results.Conflict(new { ok = false, error = ex.Message });
+            }
         });
 
         g.MapPost("/arm/{kind}", async (string kind, JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
@@ -358,6 +570,102 @@ public static class DebugEndpoints
 
     static JsonElement BodyOrEmpty(JsonElement? body) =>
         body is { ValueKind: JsonValueKind.Object } b ? b : JsonSerializer.SerializeToElement(new { });
+
+    // ---- lawn/quick-start helpers (centralizes what setup-lab-run.ps1 + tools/live_test/lawn.py
+    // each separately hand-rolled — see .claude/skills/live-lawn-quick-start/SKILL.md) ----
+
+    static readonly HashSet<string> BadLevelTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Explore", "TravelAdvanture", "Travel", "IZ"
+    };
+
+    static int IntProp(JsonElement obj, string name, int fallback) =>
+        obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.TryGetInt32(out var v)
+            ? v : fallback;
+
+    static string? StrProp(JsonElement obj, string name) =>
+        obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String
+            ? el.GetString() : null;
+
+    static bool PayloadBool(object? payload, string name) =>
+        payload is JsonElement el && el.ValueKind == JsonValueKind.Object
+        && el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.True;
+
+    static string? PayloadString(object? payload, string name) =>
+        payload is JsonElement el && el.ValueKind == JsonValueKind.Object
+        && el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String
+            ? v.GetString() : null;
+
+    /// <summary>Newest `board.start` with no later `board.end` — in-process port of
+    /// `setup-lab-run.ps1`'s `Get-LatestBoardStart`/`Test-BoardStillLive` (external, HTTP-bound,
+    /// forced into a paging/binary-search shape) and `lawn.py`'s `latest_board_start`/
+    /// `board_still_live` (same idea, Python). One direct scan is sufficient here since the caller
+    /// already holds the store in-process — no HTTP round trip to approximate.</summary>
+    /// <summary>Internal for <c>FusionRpg.Server.Tests</c> — the stale-board rule below has cost two
+    /// sessions and now has a regression test.</summary>
+    /// <param name="trustInjectorLiveBoard">
+    /// Set only when the injector has just reported "board already live". It holds the real Board and
+    /// outranks this event-log heuristic, so the injector-session filter below is skipped — otherwise a
+    /// SERVER restart (same game, same board, fresh Hello) would read as stale.
+    /// </param>
+    internal static EventEnvelope? FindLatestLiveBoardStart(RpgStore store, bool trustInjectorLiveBoard = false)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return null;
+        // How far back to scan the event log for a `board.start`. **Structural, not a balance dial**
+        // (tunables-ssot.md §1): it is the page size handed to `ListEvents`, so it bounds a query
+        // rather than tuning anything a balance pass would touch.
+        //
+        // Named `windowCapacity` rather than `window` deliberately (2026-09-04): the magic-number
+        // audit recognises structural intent from the NAME, and `window` alone reads as a tunable.
+        // Renaming it is better than adding `window` to the audit's exempt list, which would silently
+        // excuse every future `window` constant in the repo — precision over coverage, the rule that
+        // file's own comments already state.
+        const int windowCapacity = 2000;
+        var after = Math.Max(0, max - windowCapacity);
+        var items = store.ListEvents(windowCapacity, after);
+        var starts = items.Where(e => e.Kind == "board.start").ToList();
+        if (starts.Count == 0) return null;
+        var latestStart = starts[^1];
+        var endedAfter = items.Any(e => e.Kind == "board.end" && e.Id > latestStart.Id);
+        if (endedAfter) return null;
+
+        // A board.start is only "live" if it belongs to the CURRENT injector session.
+        //
+        // A `board.end` is written on a clean exit. Kill the game mid-match -- a crash, a redeploy, or
+        // an assistant tool call whose process tree is reaped -- and none is ever written, so that row
+        // stays "live" forever. `quick-start` then reports `entered:false` with null targetPtr/plantPtr
+        // and every probe afterwards runs against a board that does not exist.
+        //
+        // This false positive has now cost two separate sessions (2026-08-30, twice: once mistaken for
+        // an `attackDamage` regression, once blocking A5 entirely), which is why it is fixed here rather
+        // than documented again. `injector.hello` is emitted once per injector startup, so any
+        // board.start older than the newest one belongs to a game process that is gone.
+        if (trustInjectorLiveBoard) return latestStart;
+
+        var lastHello = items.LastOrDefault(e => e.Kind == "injector.hello");
+        if (lastHello is not null && latestStart.Id < lastHello.Id) return null;
+
+        return latestStart;
+    }
+
+    static EventEnvelope? FindKindAfter(RpgStore store, long afterId, string kind)
+    {
+        var items = store.ListEvents(500, afterId);
+        return items.LastOrDefault(e => e.Kind == kind);
+    }
+
+    static async Task<EventEnvelope?> PollForKind(RpgStore store, long afterId, string kind, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            var found = FindKindAfter(store, afterId, kind);
+            if (found is not null) return found;
+            await Task.Delay(300);
+        }
+        return null;
+    }
 
     static object MergeKind(JsonElement body, string kind)
     {

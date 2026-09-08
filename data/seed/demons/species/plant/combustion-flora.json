@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:45:01Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Focus",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "combustion-flora",
+      "artillery-sprout"
+    ],
+    "gameTypeId": 972,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature's ability to rapidly decrease attack intervals to 0.2 seconds and scale damage exponentially through energy accumulation and status amplification places it far beyond a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateDoomScaredy",
+    "targetPreference": "backline",
+    "traits": [
+      "ember-bullet-projection",
+      "kinetic-acceleration",
+      "status-synergy-catalyst",
+      "fear-triggered-burst"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  }
+]

@@ -170,6 +170,114 @@ public static class DebugActions
         }
     }
 
+    // E40 (spec-spawn-non-grid.md §2a): pet/bucket/mower widen spawn.entity.kind onto three more
+    // Unity write paths that were reachable only from CheatActions/the cheat menu (CheatActions.cs's
+    // own SpawnPet/SpawnBucket) or from nowhere at all (CreateMower.SetMower -- patched for capture,
+    // never called, GameHooks.cs's MowerPlace hook). Same idiom as SpawnPlant/SpawnZombie/SpawnBullet
+    // above: parse the payload, clamp col/row through LawnCoords (structural -- an out-of-board cell
+    // is not a legal placement, never a balance question, the same reasoning MatchCaps' per-runtime
+    // spawn caps like MaxLivingBullets carry), call the real game API, dump a debug emit, return
+    // false rather than throw on a null result or a caught exception.
+
+    /// <returns>False if no board, Create null, or exception; true if spawn completed.</returns>
+    public static bool SpawnPet(JsonElement p)
+    {
+        try
+        {
+            var board = GameHooks.Board;
+            if (board == null) { CheatState.Error("debug.spawn-pet: no board"); return false; }
+
+            var typeId = Int(p, "typeId", 0);
+            var col = LawnCoords.ClampCol(Int(p, "col", CheatState.SpawnCol));
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+
+            var pet = MiniPet.SetPet(board, LawnCoords.CellCenter(col, row), (PetType)typeId);
+            if (pet == null) { CheatState.Error("debug.spawn-pet null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.pet", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(pet),
+                ["typeId"] = typeId,
+                ["col"] = col,
+                ["row"] = row,
+            });
+            CheatState.Note($"debug spawn pet {typeId} @{col},{row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-pet: " + ex.Message);
+            return false;
+        }
+    }
+
+    /// <returns>False if no board/itemManager, Create null, or exception; true if spawn completed.</returns>
+    public static bool SpawnBucket(JsonElement p)
+    {
+        try
+        {
+            var board = GameHooks.Board ?? Board.Instance;
+            var mgr = GameAPP.itemManager;
+            if (mgr == null || board == null) { CheatState.Error("debug.spawn-bucket: no board/itemManager"); return false; }
+
+            var typeId = Int(p, "typeId", 0);
+            var col = LawnCoords.ClampCol(Int(p, "col", CheatState.SpawnCol));
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+
+            var bucket = mgr.SetBucket(board, (BucketType)typeId, LawnCoords.CellCenter(col, row));
+            if (bucket == null) { CheatState.Error("debug.spawn-bucket null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.bucket", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(bucket),
+                ["typeId"] = typeId,
+                ["col"] = col,
+                ["row"] = row,
+            });
+            CheatState.Note($"debug spawn bucket {typeId} @{col},{row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-bucket: " + ex.Message);
+            return false;
+        }
+    }
+
+    /// <returns>False if Create null or exception; true if spawn completed.</returns>
+    public static bool SpawnMower(JsonElement p)
+    {
+        try
+        {
+            var typeId = Int(p, "typeId", 0);
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+            var x = p.TryGetProperty("x", out var xEl) && xEl.TryGetSingle(out var xv) ? xv : 0f;
+
+            // CreateMower.SetMower is an INSTANCE method (confirmed by a real build against the
+            // BepInEx interop DLLs -- CS0120 on the static call form; the spec's own citation and
+            // GameHooks.cs's Harmony Postfix on it, MowerPlace, both omit __instance, which is not
+            // reliable evidence either way for Harmony). Same shape as CreatePlant.Instance.SetPlant /
+            // CreateBullet.Instance.SetBullet above.
+            var mower = CreateMower.Instance.SetMower((MowerType)typeId, x, row);
+            if (mower == null) { CheatState.Error("debug.spawn-mower null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.mower", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(mower),
+                ["typeId"] = typeId,
+                ["row"] = row,
+                ["x"] = x,
+            });
+            CheatState.Note($"debug spawn mower {typeId} row={row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-mower: " + ex.Message);
+            return false;
+        }
+    }
+
     /// <summary>Clear Tab A scales, P-/Z- absolutes, and D damage/probe knobs to identity defaults.</summary>
     public static void ResetMods()
     {
@@ -913,6 +1021,59 @@ public static class DebugActions
         }
     }
 
+    /// <summary>
+    /// E39 (spec-plant-side-status.md §2c): plant-side write for the 8 <c>UnityCc</c> statuses,
+    /// swept against the 3.9 interop (`H:\Games\PVZ-Fusion-3.9_MelonLoader\...\Assembly-CSharp.dll`,
+    /// ilspycmd -t Plant, 2026-09-04 — recorded in
+    /// <c>docs/research/effect-runtime/03-status-and-spawn-surface.md</c> under "Plant-side status").
+    ///
+    /// <para><c>butter</c> is the only confirmed, safe write: <c>Plant.butterP</c> is a real IL2CPP
+    /// <c>int</c> field with no competing name anywhere else on the class. Its exact unit (a frame
+    /// count? a stack level? a bare on/off flag?) is UNVERIFIED — IL2CPP compiles the field's real
+    /// consumer to native code the interop assembly never exposes, so no static read can confirm it.
+    /// Writing the atom's own <c>level</c> param (already an int, already meant to carry a status's
+    /// intensity/tier — <c>ApplyStatusToZombie</c>'s own signature) is the one mapping that invents
+    /// no scaling factor; converting <c>duration</c> (float seconds) into whatever unit
+    /// <c>butterP</c> actually counts would be exactly the kind of guess this module exists to
+    /// avoid. Floored at 1 (never 0/negative), the same "count is structural-floored at 1" idiom
+    /// spawn.entity's own count handling uses in the sink (InjectorEffectActionSink.cs, E28 fix
+    /// #5).</para>
+    ///
+    /// <para><c>jala</c>'s own sweep hit, <c>Plant.InfluenceByJalapeno()</c>, is downgraded to
+    /// REFUSED here after this module's own required follow-up read (the sweep result names a
+    /// candidate; verifying it is this module's job before wiring it, same as E17's own
+    /// precedent): the interop dump places it beside <c>UpgradeEvent</c> /
+    /// <c>InfluenceByIceShroom</c> / <c>UseItem(BucketType, Bucket)</c> — an item-use / upgrade-
+    /// reaction group, not a CC-apply group — and, like every IL2CPP method in this assembly, its
+    /// real body is native code the interop wrapper never exposes, so there is no way to confirm
+    /// from static analysis alone that calling it sets the same "on fire" state
+    /// <c>Zombie.SetJalaed()</c> does rather than something else (an upgrade-catalyst reaction, a
+    /// UI hook) entirely. Calling an unverified method here is exactly the E17 failure mode this
+    /// module exists to stop shipping, so it refuses by name instead — the same posture
+    /// <see cref="FusionRpg.Injector.Effects.InjectorEffectActionSink"/>'s own
+    /// <c>UnclearableStatuses</c> already takes for ember/jala/hypno/kelp.</para>
+    ///
+    /// <para>The other six (<c>freeze</c>, <c>cold</c>, <c>poison</c>, <c>hypno</c>, <c>ember</c>,
+    /// <c>kelp</c>) had ZERO hits in the sweep — no field or method on <c>Plant</c> matches any of
+    /// them, nor did a broadened grep for freeze/cold/poison/slow/speed/mindcontrol/charm turn up
+    /// anything beyond unrelated speed-modifier infrastructure and a type-identity bool
+    /// (`tanglekelpPlant`) that is not a kelp-status flag.</para>
+    /// </summary>
+    public static bool ApplyStatusToPlant(Plant p, string status, float duration, int level, out string? reason)
+    {
+        reason = null;
+        if (p == null) { reason = "status-side-unsupported"; return false; }
+
+        if (status == "butter")
+        {
+            try { p.butterP = Math.Max(1, level); return true; }
+            catch { reason = "status-side-unsupported"; return false; }
+        }
+
+        reason = "status-side-unsupported";
+        return false;
+    }
+
     public static void Kill(JsonElement p, bool plants)
     {
         var target = Str(p, "target") ?? "selected";
@@ -1390,6 +1551,9 @@ public static class DebugActions
             if (HasInt(p, "maxHp", out var maxHp)) CheatState.SetFloat("Z-MAXHP", maxHp, "debug");
             if (HasInt(p, "armor1", out var a1)) CheatState.SetFloat("Z-ARM1", a1, "debug");
             if (HasInt(p, "armor2", out var a2)) CheatState.SetFloat("Z-ARM2", a2, "debug");
+            // E28 fix #5: Z-ATK already exists as an absolute cheat id (CheatState.cs:234,605) — this
+            // branch just never read atk from the payload, mirroring the plant branch's P-ATK above.
+            if (HasInt(p, "atk", out var atk)) CheatState.SetFloat("Z-ATK", atk, "debug");
         }
     }
 

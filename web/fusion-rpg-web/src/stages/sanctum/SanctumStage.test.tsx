@@ -11,6 +11,7 @@ const mockUseRuns = vi.fn();
 const mockUseSoulBalance = vi.fn();
 const mockUseRelics = vi.fn();
 const mockUseDemonRoster = vi.fn();
+const mockUseCommanders = vi.fn();
 
 // Almanac/Chronicle mount CatalogPage/RecipesPage/MetricsPage/RpgProgressionPage/PvzStatsPage
 // once opened (T13: layers defer mounting until first open, not on every Sanctum render — see
@@ -29,6 +30,7 @@ vi.mock("@/lib/bus", async (importOriginal) => {
     useSoulBalance: () => mockUseSoulBalance(),
     useRelics: () => mockUseRelics(),
     useDemonRoster: () => mockUseDemonRoster(),
+    useCommanders: () => mockUseCommanders(),
     useSpeciesIndex: () => new Map(),
     useUniqueEquipment: () => ({ data: { items: [] } }),
     usePutUniqueEquipment: () => ({ mutate: vi.fn(), isPending: false })
@@ -50,6 +52,21 @@ const oneActor = {
   items: [{ instanceId: "a1", playerId: 1, side: "plant", typeId: 3, phase: "Roster", level: 5, xp: 10, revision: 1 }]
 };
 
+const commanderListView = {
+  defaultLawnCommanderId: "commander:dave",
+  commanders: [
+    {
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      isDefault: true,
+      activeAuraId: "Might",
+      activeAuraName: "Might",
+      locationStub: null,
+      legionStub: null
+    }
+  ]
+};
+
 beforeEach(() => {
   mockUsePlayers.mockReturnValue({
     data: { currentPlayerId: 1, items: [{ id: 1, name: "Dave", createdUtc: "2026-01-01" }] }
@@ -61,6 +78,7 @@ beforeEach(() => {
   });
   mockUseRelics.mockReturnValue({ data: { items: [] } });
   mockUseDemonRoster.mockReturnValue({ data: { items: [] } });
+  mockUseCommanders.mockReturnValue({ data: commanderListView });
   mockUseContracts.mockReturnValue({
     data: {
       contracts: [],
@@ -81,7 +99,7 @@ describe("SanctumStage", () => {
     expect(screen.getByTestId("rail-sanctum")).toHaveAttribute("data-state", "active");
   });
 
-  it("shows the first-run script when the player has no bound creature", () => {
+  it("shows the first-run prompt while server-backed onboarding is empty", () => {
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     expect(screen.getByTestId("focus-card-first-run")).toBeInTheDocument();
     expect(screen.queryByTestId("focus-card-actor")).not.toBeInTheDocument();
@@ -111,6 +129,18 @@ describe("SanctumStage", () => {
 
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByTestId("creatures-layer")).not.toBeInTheDocument());
+  });
+
+  it("clicking Commanders on the rail opens the real Commanders layer, and Esc closes it", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
+
+    await user.click(screen.getByTestId("rail-commanders"));
+    await waitFor(() => expect(screen.getByTestId("commanders-layer")).toBeInTheDocument());
+    expect(screen.getByRole("heading", { name: "Commanders" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByTestId("commanders-layer")).not.toBeInTheDocument());
   });
 
   it("clicking an unlocked non-Creatures rail entry opens its real layer, and Esc closes it", async () => {
@@ -271,10 +301,10 @@ describe("SanctumStage — with a bound creature", () => {
       await waitFor(() => expect(screen.getByTestId("creatures-layer")).toBeInTheDocument());
     });
 
-    it("the map table honestly states sectors held as Pending, and Travel opens the World route", () => {
+    it("the map table states sectors held aren't shown yet, and Travel opens the World route", () => {
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
       renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
-      expect(screen.getByTestId("sanctum-home-sectors-held")).toHaveTextContent("Pending");
+      expect(screen.getByTestId("sanctum-home-sectors-held")).toHaveTextContent("not shown yet");
       expect(screen.getByTestId("sanctum-home-travel")).toBeInTheDocument();
     });
 
@@ -283,7 +313,7 @@ describe("SanctumStage — with a bound creature", () => {
       renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
       expect(screen.getByTestId("sanctum-home-tonight-empty")).toBeInTheDocument();
       expect(screen.getByTestId("sanctum-home-defend")).toBeInTheDocument();
-      expect(screen.getByTestId("sanctum-home-run-note")).toHaveTextContent("T21");
+      expect(screen.getByTestId("sanctum-home-run-note")).toHaveTextContent("already on the lawn");
     });
   });
 });

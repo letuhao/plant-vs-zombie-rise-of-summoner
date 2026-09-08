@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 923,
+  "magnitudes": {
+    "resource.max.hp": 5424,
+    "resource.max.hunger": 11752,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 362,
+    "resource.regen.hunger": 678,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "RedEmeraldUmbrella",
+  "theta": 13,
+  "traitPool": [
+    "high-durability",
+    "kinetic-redirection",
+    "projectile-deflection",
+    "spatial-displacement"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "normal",
+    "shiny"
+  ]
+}

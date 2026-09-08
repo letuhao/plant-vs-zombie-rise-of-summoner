@@ -1,0 +1,193 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "elementSecondary": "fusion-lineage-derived",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T08:19:30Z",
+      "minorityValues": {
+        "threatBand": "cataclysm"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "light",
+    "family": [
+      "fungal-summoner"
+    ],
+    "gameTypeId": 938,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The ability to summon high-tier, boss-level entities like the Ultimate Bowling Ball or Empress of the Snow across various environments makes it a world-altering threat to the player's defense.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "GoldHypnoDoom",
+    "targetPreference": "structure",
+    "threatBand": "calamity",
+    "traits": [
+      "high-risk-high-reward",
+      "leader-summoning",
+      "resource-generator",
+      "variant-dependent-summoning"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T14:43:40Z",
+      "manualCorrection": {
+        "by": "battle-timeline session, owner-approved",
+        "field": [
+          "rarity"
+        ],
+        "from": {
+          "rarity": "heirloom",
+          "variants": [
+            "normal",
+            "ancient",
+            "mutated",
+            "blessed"
+          ]
+        },
+        "to": {
+          "rarity": "almanac",
+          "variants": [
+            "normal",
+            "ancient",
+            "mutated",
+            "blessed"
+          ]
+        },
+        "utc": "2026-09-04T14:52:00Z",
+        "why": "Caught by VariantCountBandTests within minutes of the kit-shape pass emitting it (emittedUtc 14:43:40Z) -- 4 variants against heirloom's 2..3 band. ⭐ Fixed in the OPPOSITE direction to Peashooter/SunFlower, and the reason matters: there the row's own text said 'nuisance' / 'passive resource producer', so the RARITY was too high. Here it reads 'a force multiplier that summons high-tier, uncapturable units capable of massive damage mitigation, healing' -- so the variant set is right and the rarity was too LOW. Raised to almanac rather than trimming generated content: 4 variants including 'ancient' is the exact profile of 18 of the 20 almanac rows, and that rung is otherwise the Ultimate*/Boss cohort this unit belongs to. ⚠️ 'sunwoven' (3..4) would also satisfy the band and is the conservative alternative if a reviewer thinks almanac too strong -- flagging rather than hiding the judgement call. NOTE: the corpus was still being written when this was corrected (44 files touched in the preceding 40 minutes); if the pass re-emits this row, the band guard will catch it again, which is the point of having it."
+      },
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "inferred",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Fungal Summoner",
+      "Mycelial Tactician"
+    ],
+    "gameTypeId": 305,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "The creature acts as a force multiplier that summons high-tier, uncapturable units capable of massive damage mitigation, healing, and large-scale unit conversion.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateHypnoDoom",
+    "targetPreference": "swarm",
+    "threatBand": "tyrant",
+    "traits": [
+      "Leader Summoning",
+      "Buffing",
+      "Unit Conversion",
+      "Non-Capturable"
+    ],
+    "variants": [
+      "normal",
+      "ancient",
+      "mutated",
+      "blessed"
+    ]
+  }
+]

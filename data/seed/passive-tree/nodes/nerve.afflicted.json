@@ -1,0 +1,1005 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thickening of the outer membrane that hardens upon impact.",
+      "id": "skill.nerveafflicted-def-t1-n0",
+      "name": "Dermal Plating",
+      "nameKey": "tree.node.dermal-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thick layer of protective sheath that absorbs the shock of impact before it reaches the core.",
+      "id": "skill.nerveafflicted-def-t1-n1",
+      "name": "Myelin Insulation",
+      "nameKey": "tree.node.myelin-insulation",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The body learns to ignore the sting of the needle by thickening the skin around the puncture.",
+      "id": "skill.nerveafflicted-def-t1-n2",
+      "name": "Callous Response",
+      "nameKey": "tree.node.callous-response",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The body learns to brace against the very trauma that seeks to unmake it.",
+      "id": "skill.nerveafflicted-def-t10-n0",
+      "name": "Callous Reflex",
+      "nameKey": "tree.node.callous-reflex",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomTrigger is active — atomTrigger wins.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The affliction hardens the very pathways it seeks to corrupt.",
+      "id": "skill.nerveafflicted-def-t2-n0",
+      "name": "Nerve-End Thickening",
+      "nameKey": "tree.node.nerve-end-thickening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very fibers of the nervous system thicken, absorbing the shock of impact before the mind can even register the pain.",
+      "id": "skill.nerveafflicted-def-t2-n1",
+      "name": "Pulsing Myelin",
+      "nameKey": "tree.node.pulsing-myelin",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the nerves once screamed, turning pain into a rigid, protective layer.",
+      "id": "skill.nerveafflicted-def-t2-n2",
+      "name": "Dermal Callous",
+      "nameKey": "tree.node.dermal-callous",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A layer of hardened tissue that absorbs the shock of impact before it reaches the nerves.",
+      "id": "skill.nerveafflicted-def-t3-n0",
+      "name": "Subcutaneous Aegis",
+      "nameKey": "tree.node.subcutaneous-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The nervous system anticipates impact, tightening the skin before the blow lands.",
+      "id": "skill.nerveafflicted-def-t3-n1",
+      "name": "Reactive Myelin",
+      "nameKey": "tree.node.reactive-myelin",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The body learns to knit itself back together before the pain can even register.",
+      "id": "skill.nerveafflicted-def-t3-n2",
+      "name": "Nerve-End Suture",
+      "nameKey": "tree.node.nerve-end-suture",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-husk",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The nervous system begins to weave itself into the protective layers of the skin.",
+      "id": "skill.nerveafflicted-def-t4-n0",
+      "name": "Neural Grafting",
+      "nameKey": "tree.node.neural-grafting",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The affliction hardens the very nerves into a rigid, protective lattice.",
+      "id": "skill.nerveafflicted-def-t4-n1",
+      "name": "Calcified Sinew",
+      "nameKey": "tree.node.calcified-sinew",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-seal",
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "A viscous, insulating layer that hardens upon impact, sealing the neural pathways against external trauma.",
+      "id": "skill.nerveafflicted-def-t5-n0",
+      "name": "Myelin Sealing",
+      "nameKey": "tree.node.myelin-sealing",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The affliction thickens the very fibers it seeks to consume.",
+      "id": "skill.nerveafflicted-def-t5-n1",
+      "name": "Nerve-End Hardening",
+      "nameKey": "tree.node.nerve-end-hardening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The nervous system learns to anticipate the impact, recycling the shock into a defensive pulse.",
+      "id": "skill.nerveafflicted-def-t6-n0",
+      "name": "Synaptic Feedback Loop",
+      "nameKey": "tree.node.synaptic-feedback-loop",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very core of the nerve becomes a pillar of unyielding bone.",
+      "id": "skill.nerveafflicted-def-t6-n1",
+      "name": "Ossified Marrow",
+      "nameKey": "tree.node.ossified-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The very rhythm of the nerves dictates the speed of the mend.",
+      "id": "skill.nerveafflicted-def-t7-n0",
+      "name": "Pulsing Myelin",
+      "nameKey": "tree.node.pulsing-myelin-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very marrow thickens in response to the trauma, turning bone into a dense, unyielding lattice.",
+      "id": "skill.nerveafflicted-def-t7-n1",
+      "name": "Deep-Tissue Ossification",
+      "nameKey": "tree.node.deep-tissue-ossification",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The nervous system bypasses standard biological limits, forcing a surge of protective energy through the synaptic gaps.",
+      "id": "skill.nerveafflicted-def-t8-n0",
+      "name": "Axon Overload",
+      "nameKey": "tree.node.axon-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While channelFamily holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "channelFamily"
+        ]
+      },
+      "flavor": "The rhythm of the pulse dictates the strength of the barrier.",
+      "id": "skill.nerveafflicted-def-t9-n0",
+      "name": "Synaptic Feedback Loop",
+      "nameKey": "tree.node.synaptic-feedback-loop-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The twitch of a nerve dictates the path of the blade.",
+      "id": "skill.nerveafflicted-off-t1-n0",
+      "name": "Nerve-End Precision",
+      "nameKey": "tree.node.nerve-end-precision",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The frantic rhythm of a racing heart fuels the strike.",
+      "id": "skill.nerveafflicted-off-t1-n1",
+      "name": "Adrenaline Surge",
+      "nameKey": "tree.node.adrenaline-surge-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.cruelty"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The mind races ahead of the body, turning instinct into lethal intent.",
+      "id": "skill.nerveafflicted-off-t1-n2",
+      "name": "Synaptic Overload",
+      "nameKey": "tree.node.synaptic-overload",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the slaughter dictates the abundance of the aftermath.",
+      "id": "skill.nerveafflicted-off-t10-n0",
+      "name": "Carrion Harvest",
+      "nameKey": "tree.node.carrion-harvest-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The nerves do not merely signal pain; they demand the violence that caused it.",
+      "id": "skill.nerveafflicted-off-t2-n0",
+      "name": "Hyper-Reactive Tendon",
+      "nameKey": "tree.node.hyper-reactive-tendon",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The momentum of the end is felt before the impact.",
+      "id": "skill.nerveafflicted-off-t2-n1",
+      "name": "Terminal Velocity",
+      "nameKey": "tree.node.terminal-velocity-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.precision",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The sensation of the strike lingers long after the impact, turning agony into momentum.",
+      "id": "skill.nerveafflicted-off-t2-n2",
+      "name": "Nerve-End Rupture",
+      "nameKey": "tree.node.nerve-end-rupture",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The impulse bypasses the flesh to strike the core of the essence.",
+      "id": "skill.nerveafflicted-off-t3-n0",
+      "name": "Synaptic Conductance",
+      "nameKey": "tree.node.synaptic-conductance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The nerves do not merely transmit pain; they amplify the intent to inflict it.",
+      "id": "skill.nerveafflicted-off-t3-n1",
+      "name": "Hyper-Reactive Synapse",
+      "nameKey": "tree.node.hyper-reactive-synapse",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.affliction",
+        "atom.blighting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The sensation of rot begins before the wound is even felt.",
+      "id": "skill.nerveafflicted-off-t3-n2",
+      "name": "Nerve-End Decay",
+      "nameKey": "tree.node.nerve-end-decay",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The final tremor of a dying nerve carries more weight than the strike itself.",
+      "id": "skill.nerveafflicted-off-t4-n0",
+      "name": "Post-Mortem Echo",
+      "nameKey": "tree.node.post-mortem-echo",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.cruelty"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The nervous system bypasses all safety protocols, trading stability for raw, unbridled aggression.",
+      "id": "skill.nerveafflicted-off-t4-n1",
+      "name": "Neural Overdrive",
+      "nameKey": "tree.node.neural-overdrive",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-glean"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The eye learns to see through the veil of the flesh, piercing the very essence of what it observes.",
+      "id": "skill.nerveafflicted-off-t5-n0",
+      "name": "Ocular Suture",
+      "nameKey": "tree.node.ocular-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The nervous system misfires, turning every twitch into a violent outburst of raw aggression.",
+      "id": "skill.nerveafflicted-off-t5-n1",
+      "name": "Neural Spasm",
+      "nameKey": "tree.node.neural-spasm",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The nervous system bypasses physical resistance to channel raw elemental intent.",
+      "id": "skill.nerveafflicted-off-t6-n0",
+      "name": "Synaptic Conduit",
+      "nameKey": "tree.node.synaptic-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The nervous system bypasses standard regulation, forcing elemental currents through every nerve ending.",
+      "id": "skill.nerveafflicted-off-t6-n1",
+      "name": "Synaptic Overload",
+      "nameKey": "tree.node.synaptic-overload-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The spark that leaps from a dying nerve to ignite the marrow.",
+      "id": "skill.nerveafflicted-off-t7-n0",
+      "name": "Terminal Synapse",
+      "nameKey": "tree.node.terminal-synapse",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.cruelty",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The nervous system bypasses all inhibitory signals, forcing the body into a state of violent, uncoordinated motion.",
+      "id": "skill.nerveafflicted-off-t7-n1",
+      "name": "Synaptic Frenzy",
+      "nameKey": "tree.node.synaptic-frenzy",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The nervous system learns to strike even as the pulse fades.",
+      "id": "skill.nerveafflicted-off-t8-n0",
+      "name": "Post-Mortem Reflex",
+      "nameKey": "tree.node.post-mortem-reflex",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The echo of a strike is often more lethal than the blow itself.",
+      "id": "skill.nerveafflicted-off-t9-n0",
+      "name": "Post-Mortem Harvest",
+      "nameKey": "tree.node.post-mortem-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "nerve.afflicted"
+}

@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Expeditions;
+using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -264,7 +265,7 @@ public sealed partial class RpgStore
     public sealed record ExpeditionRewardApply(
         long EventSouls,
         IReadOnlyList<(string MaterialId, long Qty)> Materials,
-        IReadOnlyList<(string InstanceId, double Xp)> SpecimenXp,
+        IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp,
         IReadOnlyList<DemonMintSpec> WildMints);
 
     /// <summary>
@@ -313,7 +314,18 @@ public sealed partial class RpgStore
             foreach (var (instanceId, xp) in rewards.SpecimenXp)
             {
                 if (xp > 0)
-                    AwardUniqueActorXpUnlocked(db, instanceId, xp);
+                {
+                    var (xpOk, _, xpActor, xpLevelsGained) = AwardUniqueActorXpUnlocked(db, instanceId, xp, tx);
+                    // A21 (spec-action-instance-and-grant.md §4): the expedition reward apply is the
+                    // SECOND of AwardUniqueActorXpUnlocked's two production callers this module wires,
+                    // same shape as AwardUniqueActorXp above.
+                    if (xpOk && xpLevelsGained > 0 && xpActor is not null)
+                        TryRollActionUnlocks(db, instanceId, xpActor.TypeId, xpLevelsGained, tx);
+
+                    // Dedicated specimen progression is intentionally isolated from the empire
+                    // species row. Expedition rewards level the specimen only; species progression
+                    // is awarded by its own general-spawn activity projector.
+                }
             }
 
             var minted = new List<DemonSpecimenDto>();
@@ -338,6 +350,18 @@ public sealed partial class RpgStore
             tx.Commit();
             return (true, "", minted);
         }
+    }
+
+    /// <summary>`species-build` T1.4 — the direct `instance_id -> species_id` link
+    /// (`rpg_demon_profiles`, set once at mint and never renamed), used instead of reconstructing the
+    /// species from `rpg_unique_actors.type_id` (which stores the PvZ `GameTypeId`, not
+    /// `DemonTypeId`, and could collide across sides) — this FK has no such ambiguity.</summary>
+    static string? ReadSpeciesIdForInstanceUnlocked(SqliteConnection db, string instanceId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT species_id FROM rpg_demon_profiles WHERE instance_id=$id;";
+        cmd.Parameters.AddWithValue("$id", instanceId);
+        return cmd.ExecuteScalar() as string;
     }
 
     internal bool HasActiveExpeditionMembershipUnlocked(SqliteConnection db, string instanceId)

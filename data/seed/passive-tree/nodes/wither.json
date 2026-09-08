@@ -1,0 +1,997 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The decay does not merely consume; it anchors.",
+      "id": "skill.wither-def-t1-n0",
+      "name": "Deep Rooted",
+      "nameKey": "tree.node.deep-rooted-8",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.econ-toll"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it builds a layer of hardened, necrotic skin over the wound.",
+      "id": "skill.wither-def-t10-n0",
+      "name": "Carrion Callus",
+      "nameKey": "tree.node.carrion-callus",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it builds a second skin from what remains.",
+      "id": "skill.wither-def-t10-n1",
+      "name": "Carrion Husk",
+      "nameKey": "tree.node.carrion-husk",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.life-graft"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it recirculates.",
+      "id": "skill.wither-def-t10-n2",
+      "name": "Transfusion Root",
+      "nameKey": "tree.node.transfusion-root",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The soil grows heavy and nutrient-rich, nourishing the roots of those who endure.",
+      "id": "skill.wither-def-t2-n0",
+      "name": "Thickened Humus",
+      "nameKey": "tree.node.thickened-humus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The slow rot provides a layer of unyielding protection.",
+      "id": "skill.wither-def-t3-n0",
+      "name": "Decaying Resilience",
+      "nameKey": "tree.node.decaying-resilience",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin hardens into a brittle, protective layer as the life force recedes.",
+      "id": "skill.wither-def-t3-n1",
+      "name": "Desiccated Integument",
+      "nameKey": "tree.node.desiccated-integument",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The skin thickens where the rot has begun to knit itself back together.",
+      "id": "skill.wither-def-t4-n0",
+      "name": "Sutured Bark",
+      "nameKey": "tree.node.sutured-bark",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The very soil becomes unyielding as the rot takes hold.",
+      "id": "skill.wither-def-t4-n1",
+      "name": "Hardened Silt",
+      "nameKey": "tree.node.hardened-silt",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A jagged, calcified layer that erupts from the skin whenever the spirit is tested.",
+      "id": "skill.wither-def-t5-n0",
+      "name": "Thorned Bulwark",
+      "nameKey": "tree.node.thorned-bulwark",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "Layers of dried rot harden into an impenetrable shell.",
+      "id": "skill.wither-def-t5-n1",
+      "name": "Calcified Husk",
+      "nameKey": "tree.node.calcified-husk",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thick, translucent resin that hardens upon contact with the blood of the dying.",
+      "id": "skill.wither-def-t6-n0",
+      "name": "Vitreous Sap",
+      "nameKey": "tree.node.vitreous-sap",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The slow rot strengthens the fiber, turning decay into a structural asset.",
+      "id": "skill.wither-def-t6-n1",
+      "name": "Withered Sinew",
+      "nameKey": "tree.node.withered-sinew",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-harvest",
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it knits the flesh back together with threads of decay.",
+      "id": "skill.wither-def-t7-n0",
+      "name": "Necrotic Suture",
+      "nameKey": "tree.node.necrotic-suture-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it builds a barrier of calcified waste to deflect the next blow.",
+      "id": "skill.wither-def-t7-n1",
+      "name": "Osmotic Shell",
+      "nameKey": "tree.node.osmotic-shell-2",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.gravemaking",
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The soil remembers the weight of what has passed.",
+      "id": "skill.wither-def-t8-n0",
+      "name": "Sepulchral Marrow",
+      "nameKey": "tree.node.sepulchral-marrow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it builds a rhythmic, calcified defense from the very decay it spreads.",
+      "id": "skill.wither-def-t8-n1",
+      "name": "Pulsing Sap",
+      "nameKey": "tree.node.pulsing-sap",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-harvest",
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it builds a rigid, unyielding architecture from the remains.",
+      "id": "skill.wither-def-t9-n0",
+      "name": "Sallow Osmosis",
+      "nameKey": "tree.node.sallow-osmosis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-harvest",
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The soil drinks what the rot leaves behind, turning decay into a living mend.",
+      "id": "skill.wither-def-t9-n2",
+      "name": "Grave-Sown Graft",
+      "nameKey": "tree.node.grave-sown-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.rotting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very air turns heavy with the scent of inevitable dissolution.",
+      "id": "skill.wither-off-t1-n0",
+      "name": "Decaying Aura",
+      "nameKey": "tree.node.decaying-aura",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "occasional",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it pays dividends in decay.",
+      "id": "skill.wither-off-t10-n0",
+      "name": "Withered Harvest",
+      "nameKey": "tree.node.withered-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.blighting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot does not merely sit; it spreads, feeding on the very essence of what it consumes.",
+      "id": "skill.wither-off-t10-n1",
+      "name": "Ebbing Decay",
+      "nameKey": "tree.node.ebbing-decay",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot does not merely touch; it claims a permanent residence within the marrow.",
+      "id": "skill.wither-off-t10-n2",
+      "name": "Lingering Blight",
+      "nameKey": "tree.node.lingering-blight",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot does not merely touch; it takes hold and refuses to let go.",
+      "id": "skill.wither-off-t2-n0",
+      "name": "Lingering Decay",
+      "nameKey": "tree.node.lingering-decay",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air grows heavy with the scent of rot as the blight spreads through every pore.",
+      "id": "skill.wither-off-t3-n0",
+      "name": "Vile Saturation",
+      "nameKey": "tree.node.vile-saturation",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot spreads through the very marrow of the earth.",
+      "id": "skill.wither-off-t3-n1",
+      "name": "Withered Veins",
+      "nameKey": "tree.node.withered-veins",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.dooming",
+        "atom.rotting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot finds its target before the wound even closes.",
+      "id": "skill.wither-off-t4-n0",
+      "name": "Sallow Mark",
+      "nameKey": "tree.node.sallow-mark",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot does not merely sit upon the skin; it seeks the pulse.",
+      "id": "skill.wither-off-t4-n1",
+      "name": "Festering Veins",
+      "nameKey": "tree.node.festering-veins",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.dooming",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The rot does not merely sit; it seeks a purpose.",
+      "id": "skill.wither-off-t5-n0",
+      "name": "Festering Omen",
+      "nameKey": "tree.node.festering-omen-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very air turns brittle and dry, leaching the moisture from all that remains.",
+      "id": "skill.wither-off-t5-n1",
+      "name": "Desiccating Breath",
+      "nameKey": "tree.node.desiccating-breath",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.dooming"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The air grows heavy with the scent of impending rot.",
+      "id": "skill.wither-off-t6-n0",
+      "name": "Blighted Omen",
+      "nameKey": "tree.node.blighted-omen-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While status holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "status"
+        ]
+      },
+      "flavor": "The very essence of the target is drawn outward, leaving only brittle husks behind.",
+      "id": "skill.wither-off-t6-n1",
+      "name": "Desiccated Veins",
+      "nameKey": "tree.node.desiccated-veins",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air grows heavy with the scent of stagnant rot as the very essence of life is leeched from the surroundings.",
+      "id": "skill.wither-off-t7-n0",
+      "name": "Necrotic Saturation",
+      "nameKey": "tree.node.necrotic-saturation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.cruelty",
+        "atom.rotting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very air turns brittle and unkind as the rot takes hold.",
+      "id": "skill.wither-off-t7-n1",
+      "name": "Desiccating Cruelty",
+      "nameKey": "tree.node.desiccating-cruelty",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.rot-punisher",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The decay does not merely sit; it hungers for the life it has already stolen.",
+      "id": "skill.wither-off-t8-n0",
+      "name": "Necrotic Siphon",
+      "nameKey": "tree.node.necrotic-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.rot-punisher"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The soil drinks deep of what remains, turning every expiration into a violent bloom.",
+      "id": "skill.wither-off-t8-n1",
+      "name": "Calamity Harvest",
+      "nameKey": "tree.node.calamity-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air thickens with the scent of ancient dust and the slow, inevitable collapse of organic matter.",
+      "id": "skill.wither-off-t9-n0",
+      "name": "Vitreous Decay",
+      "nameKey": "tree.node.vitreous-decay",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.rot-punisher",
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it harvests the very essence of what remains.",
+      "id": "skill.wither-off-t9-n1",
+      "name": "Carrion Sieve",
+      "nameKey": "tree.node.carrion-sieve-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rot does not merely consume; it seeks the very structure of the soul.",
+      "id": "skill.wither-off-t9-n2",
+      "name": "Marrow Siphon",
+      "nameKey": "tree.node.marrow-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "wither"
+}

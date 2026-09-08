@@ -440,6 +440,98 @@
       "groupId": "g.economy",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p3-043",
+      "nameKey": "disptpl.affix.buttering",
+      "name": "{value}% chance to butter target on hit",
+      "runtimeFamily": "atom.buttering",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-044",
+      "nameKey": "disptpl.affix.chilling",
+      "name": "{value}% chance to chill target on hit",
+      "runtimeFamily": "atom.chilling",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-045",
+      "nameKey": "disptpl.affix.blighting",
+      "name": "{value}% chance to blight target on hit",
+      "runtimeFamily": "atom.blighting",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-046",
+      "nameKey": "disptpl.affix.rotting",
+      "name": "{value}% chance to rot target on hit",
+      "runtimeFamily": "atom.rotting",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-047",
+      "nameKey": "disptpl.affix.sparking",
+      "name": "{value}% chance to spark target on hit",
+      "runtimeFamily": "atom.sparking",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-048",
+      "nameKey": "disptpl.affix.marking",
+      "name": "{value}% chance to mark target on hit",
+      "runtimeFamily": "atom.marking",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-049",
+      "nameKey": "disptpl.affix.bonding",
+      "name": "{value}% chance to bond target on hit",
+      "runtimeFamily": "atom.bonding",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-050",
+      "nameKey": "disptpl.affix.chill-punisher",
+      "name": "{value} bonus damage on hit",
+      "runtimeFamily": "atom.chill-punisher",
+      "plantOverrideKey": null,
+      "groupId": "g.punisher",
+      "status": "live",
+      "tags": [],
+      "notes": "Wording matches disptpl.p3-007 (atom.hit-followthrough) because the two families are mechanically identical today, VERIFIED IN CODE rather than read off the family's flavour: g-punisher.json authors kindId `resource.delta`, params `{when: OnDamageDealt}`, powerBand `low` -- byte-identical to g-on-hit.json's `atom.hit-followthrough` -- with no `channel`, no `op` and no `element`. AffixFamilyFile.Read (Generation/AffixFamilyFile.cs:36-44) reads only params.channel and params.op off a family entry and has no predicate field to read, and FamilyExpansion.Expand emits `WhenJson = \"{}\"` on EVERY generated row (FamilyExpansion.cs:208), so no generated affix atom carries a gate of any kind. The family's own inline `displayTemplate` (\"{value} bonus damage against a frozen target\") therefore describes a status gate the compiled atom does not have; the engine's real leaf for it, PredicateNode.LeafId.HasStatus, is live and compiled (CompiledAtom.cs:80,167) but reached only by Delve's AmbushDraw, never by an affix. That divergence is deliberate and is the family's OWN stated position (its `notes`: \"priced honestly as what it does today (an unconditional bonus, same cost as hit-followthrough), not what its name promises\"). When family-authoring-time predicates land, this row's text changes with the mechanism, not before it. The frost identity still reaches the player -- through the affix NAME (`Frost Reckoning`, `of the Shattering Chill`, `of the Absolute Frost`), which is real content, not a promise."
+    },
+    {
+      "id": "disptpl.p3-051",
+      "nameKey": "disptpl.affix.rot-punisher",
+      "name": "{value} bonus damage on hit",
+      "runtimeFamily": "atom.rot-punisher",
+      "plantOverrideKey": null,
+      "groupId": "g.punisher",
+      "status": "live",
+      "tags": [],
+      "notes": "Same grounding as disptpl.p3-050 above, same file, same verification: `atom.rot-punisher` authors the identical `resource.delta` / `{when: OnDamageDealt}` / `powerBand: low` shape with no channel, op or element, so it compiles to the same unconditional on-hit bonus and gets the same sentence. Its own inline `displayTemplate` (\"{value} bonus damage against an afflicted target\") names a gate no compiled affix atom carries. Blight identity reaches the player through the name (`Blighted Reckoning`, `of the Festering Wound`, `of the Creeping Rot`)."
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "many",
+  "flavor": "A local scholar seeks a singing gemstone that vibrates in the presence of ancient magic. Recovering it could stabilize the shifting ley lines of the surrounding region.",
+  "name": "The Echoing Relic",
+  "objectiveTemplate": "gather-curio-kind",
+  "prereqRefs": [],
+  "questId": "quest.gather-curio-kind-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "delve",
+  "targetRef": "curio"
+}

@@ -111,3 +111,14 @@ export function subscribeLastHit(listener: Listener): () => void {
     lastHitListeners.delete(listener);
   };
 }
+
+declare global {
+  interface Window {
+    /** Playwright e2e — append capture events without a live hub. */
+    __fusionRpgAppendLogEvent?: typeof appendLogEvent;
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.__fusionRpgAppendLogEvent = appendLogEvent;
+}

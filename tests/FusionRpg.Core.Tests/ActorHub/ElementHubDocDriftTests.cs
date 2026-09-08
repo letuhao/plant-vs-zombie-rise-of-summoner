@@ -67,7 +67,13 @@ public class ElementHubDocDriftTests
         Assert.Contains($"**{registry.AllRegistered.Count}**", text);
         // 256 -> 259 (class-system `poise-resource`, 2026-08-26): a sixth resource id.
         // 259 -> 261 (P0.5 / battle-timeline B9, 2026-08-28): turn.speed + turn.haste registered.
-        Assert.Equal(261, registry.AllRegistered.Count);
+        // 261 -> 267 (action-corpus Phase 0.8, 2026-09-02): `combat.heal.power` generalised into
+        // `resource.restore.{resource}` — +6 members over ResourceIds, and the old id stays registered as a
+        // retirement shim so the archived aptitudes.v1/v2/v3.json remain loadable (net +6).
+        // 267 -> 268 (party-dungeon D4.25, 2026-09-06): `loadout.slots`, the extend-action-slot grant.
+        // 268 -> 269 (base-defense siege-ai, 2026-09-07): `ai.aggression`, §5.20 rule 4's signed
+        // targeting-priority scalar.
+        Assert.Equal(269, registry.AllRegistered.Count);
     }
 
     [Fact]

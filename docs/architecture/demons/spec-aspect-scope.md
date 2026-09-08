@@ -1,7 +1,17 @@
 # Spec: `aspect-scope` — move element off the species, and make it an allocation tier
 
 **Module id:** `aspect-scope` · **Program:** [demon-system-map.md](../demon-system-map.md) ·
-**Status: proposed 2026-08-26, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
+
+> Approved while resolving the open questions of
+> [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md) §5 Q2: that feature ships an `aspect`
+> `KindSpec` alongside item / action / commander / environment, and aspect-generated content has
+> nowhere to live until this module lands. The approval is of **this spec as written** — including
+> its byte-identical migration path (§3.1), which is what makes today's trait pools reproducible
+> after element moves down a tier.
+>
+> The class-system program's `point-economy` was the original requester and is unblocked by the same
+> approval ([class-system-map.md](../class-system-map.md) §2b).
 
 **Depends on:** `demon-core` · **Blocks:** `point-economy` (its third scope) in the class-system program
 

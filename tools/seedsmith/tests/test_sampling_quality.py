@@ -89,10 +89,16 @@ class LiveFlavourMissingTests(unittest.TestCase):
         findings = {f.subject: f for f in run_all(registry, Ctx(corpus=corpus,
                                                                 adapter=ItemsAdapter()))}
 
-        self.assertEqual(findings["consumable"].evidence["missingCount"], 60)
-        self.assertEqual(findings["consumable"].evidence["totalCount"], 60)
+        # Re-measured 2026-09-07: consumablegen's own trial batch (k1-trial/k2-trial/k3-trial, 3
+        # rows, real content proven end-to-end through `generate_one` -> `RunLedger` ->
+        # `write_partition_file`) added 3 rows to the 60-row wave-1 corpus. None of the three set
+        # `flavor` either (this generator's answers carry `notes`, a different field), so missing
+        # and total both move from 60 to 63 together -- the historical 100% missing rate is
+        # unchanged, only the count.
+        self.assertEqual(findings["consumable"].evidence["missingCount"], 63)
+        self.assertEqual(findings["consumable"].evidence["totalCount"], 63)
         self.assertEqual(findings["charm"].evidence["missingCount"], 30)
-        self.assertEqual(findings["charm"].evidence["totalCount"], 70)
+        self.assertEqual(findings["charm"].evidence["totalCount"], 96)
 
 
 @unittest.skipUnless(LIVE_ITEMS_ROOT.is_dir(), "live item corpus not present in this checkout")

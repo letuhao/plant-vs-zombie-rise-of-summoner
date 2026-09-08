@@ -1,0 +1,26 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A massive, brass-toothed gear hangs suspended in the center of the chamber, rotating with a rhythmic, heartbeat-like thrum. Around its base, dozens of silver wedding bands and iron shackles lie scattered in the dust, all vibrating in perfect unison with the machine.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Chronometer of Unspoken Vows",
+  "reason": "The central gear acts as a focal point for a localized temporal anomaly, drawing in objects of significant emotional weight.",
+  "roomId": "room.curio-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

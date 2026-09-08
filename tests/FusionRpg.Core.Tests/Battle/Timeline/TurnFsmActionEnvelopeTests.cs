@@ -35,10 +35,10 @@ public class TurnFsmActionEnvelopeTests
         readonly NextEventAdvance _advance = new();
         readonly List<ScheduledEvent> _buffer = new(32);
 
-        public Rig(int width = 4, WScope scope = WScope.Global)
+        public Rig(int width = 4, WScope scope = WScope.Global, Func<string, string?, string?>? reselectTarget = null)
         {
             Slots = new ActionSlots(width, scope);
-            Runner = new ActionRunner(Queue, Slots, Cooldowns, key => !_dead.Contains(key));
+            Runner = new ActionRunner(Queue, Slots, Cooldowns, key => !_dead.Contains(key), reselectTarget: reselectTarget);
         }
 
         public ActorTurnMachine Add(string key)
@@ -126,6 +126,24 @@ public class TurnFsmActionEnvelopeTests
     }
 
     [Fact]
+    public void CurrentEnvelope_returns_the_committed_envelope_while_the_run_is_active()
+    {
+        // A18f (spec-action-dispatch-generalization.md T55.1): mirrors CurrentTarget's own shape --
+        // a caller applying the resolved hit needs to know WHICH envelope this actor actually
+        // committed, not re-read a hardcoded field.
+        var rig = new Rig();
+        rig.Add("a");
+        var envelope = Strike(windup: 100, recovery: 50);
+
+        Assert.Null(rig.Runner.CurrentEnvelope("a"));   // nothing committed yet
+        rig.Commit("a", envelope, target: "b");
+        Assert.Equal(envelope, rig.Runner.CurrentEnvelope("a"));
+
+        rig.Pump();   // resolve, then recover -- the run ends
+        Assert.Null(rig.Runner.CurrentEnvelope("a"));   // same lifetime as CurrentTarget
+    }
+
+    [Fact]
     public void The_slot_is_held_across_windup_and_released_when_resolution_ends()
     {
         var rig = new Rig();
@@ -203,10 +221,18 @@ public class TurnFsmActionEnvelopeTests
     public void A_late_bound_action_onto_a_dead_target_still_resolves()
     {
         // Without this the fizzle test above proves only that something happened at tick 100.
-        var rig = new Rig();
+        // `battle-tempo` `commitment-binding` (2026-09-05): LateBound resolving here needs a
+        // re-selection delegate configured -- ActionRunner's own contract (D6) is that LateBound
+        // WITHOUT one fizzles too (nothing to re-target onto), which `CommitmentBindingTests`
+        // covers directly (`WithNoReselectionDelegateConfiguredLateBoundGracefullyFizzles`). This
+        // test's own purpose is the ORIGINAL contrast against the fizzle test above -- EarlyBound
+        // fizzles unconditionally, LateBound resolves BY RE-TARGETING onto a live fallback -- so a
+        // reselect delegate redirecting "b" to a live "c" is what actually demonstrates it.
+        var rig = new Rig(reselectTarget: (actorKey, deadTarget) => "c");
         var env = Strike(windup: 100) with { Commitment = Commitment.LateBound };
 
         rig.Add("a");
+        rig.Add("c");
         rig.Commit("a", env, target: "b");
         rig.Kill("b");
 

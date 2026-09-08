@@ -511,4 +511,44 @@ public class MatchRuntimeTests
         Assert.Equal(1, rt.ToSnapshot().PlantCount);
         Assert.Equal(rev, rt.Revision);
     }
+
+    [Fact]
+    public void TryGetBindingByPtr_returns_bound_row()
+    {
+        var rt = new MatchRuntime();
+        rt.Apply("board.start");
+        var id = "inst-ptr";
+        var corr = "corr-ptr";
+        Assert.True(rt.TryBeginPending(id, corr, "plant", 1));
+        rt.Apply("plant.spawn", new Dictionary<string, object>
+        {
+            ["ptr"] = "0xBEEF",
+            ["correlationId"] = corr,
+            ["instanceId"] = id,
+        });
+
+        Assert.True(rt.TryGetBindingByPtr("BEEF", out var binding));
+        Assert.NotNull(binding);
+        Assert.Equal(UniqueBindingPhase.Bound, binding!.Phase);
+        Assert.Equal("BEEF", binding.Ptr);
+    }
+
+    [Fact]
+    public void TryGetBindingByPtr_miss_after_clear()
+    {
+        var rt = new MatchRuntime();
+        rt.Apply("board.start");
+        var id = "inst-clear";
+        var corr = "corr-clear";
+        Assert.True(rt.TryBeginPending(id, corr, "zombie", 2));
+        rt.Apply("zombie.spawn", new Dictionary<string, object>
+        {
+            ["ptr"] = "0xCAFE",
+            ["correlationId"] = corr,
+            ["instanceId"] = id,
+        });
+        rt.Apply("zombie.die", new Dictionary<string, object> { ["ptr"] = "0xCAFE" });
+
+        Assert.False(rt.TryGetBindingByPtr("CAFE", out _));
+    }
 }

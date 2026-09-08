@@ -72,6 +72,20 @@ public sealed class ActorHub
         return snapshot;
     }
 
+    /// <summary>aura-skill T18 (GG-49): the SAME compose <see cref="ResolveDerived"/> runs, with the
+    /// per-source modifier list also retained via <see cref="DerivedContributionBag"/> instead of
+    /// being discarded the moment `Compose` returns — *"why did my attack drop"* is unanswerable
+    /// without this. Not a second resolve: the same `mods` list feeds both the snapshot and the bag,
+    /// so the two can never disagree about what contributed.</summary>
+    public (ActorDerivedSnapshot Snapshot, DerivedContributionBag Contributions) ResolveDerivedWithContributions(StatContext ctx)
+    {
+        if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        var mods = new List<DerivedModifier>();
+        foreach (var subsystem in _subsystems)
+            subsystem.ContributeDerived(ctx, mods);
+        return (_composer.Compose(mods), DerivedContributionBag.From(mods));
+    }
+
     static EntityFinal MergeAppliedCombat(EntityFinal primary, ActorDerivedSnapshot derived)
     {
         var bonusMaxHp = (long)Math.Round(derived.Get(DerivedStatChannels.ProgressionBonusMaxHp, 0));
@@ -114,10 +128,18 @@ public static class ActorHubBootstrap
     /// name="aptitudeAllocation"/> defaults to <see cref="AptitudeAllocation.Empty"/>, matching P2.4's
     /// own proof that the wiring is inert until `point-economy` gives players something to spend.</para>
     /// </summary>
+    /// <summary><paramref name="boundDerivedAtoms"/> is the lawn executor for the `stat.derived` atom
+    /// kind (decisions.md "Derived-write lawn executor", 2026-08-30). Opt-in for the identical reason
+    /// <paramref name="aptitudeTuning"/> is: omitting it registers no
+    /// <see cref="Subsystems.AtomDerivedSubsystem"/> at all, so every existing caller — including the
+    /// hundreds of tests that call this bare — is unaffected. Pass it to give bound `stat.derived`
+    /// atoms a consumer on this host.</summary>
     public static ActorHub CreateDefault(StatSystem? stats = null,
         FusionRpg.Core.Power.IPowerIndexProvider? powerIndex = null,
         Aptitudes.AptitudeTuning? aptitudeTuning = null,
-        Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null)
+        Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null,
+        Func<StatContext, IReadOnlyList<Subsystems.BoundDerivedAtom>>? boundDerivedAtoms = null,
+        Func<StatContext, IReadOnlyList<Subsystems.StatusDerivedMod>>? statusDerivedMods = null)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
@@ -130,6 +152,12 @@ public static class ActorHubBootstrap
                 powerIndex,
                 aptitudeAllocation));
         }
+        if (boundDerivedAtoms is not null)
+            hub.Register(new Subsystems.AtomDerivedSubsystem(boundDerivedAtoms));
+        // Opt-in like the two above: a caller that passes nothing gets exactly the behaviour it had
+        // before this arm existed, so the hundreds of tests calling CreateDefault() bare are unaffected.
+        if (statusDerivedMods is not null)
+            hub.Register(new Subsystems.StatusDerivedSubsystem(statusDerivedMods));
         return hub;
     }
 }

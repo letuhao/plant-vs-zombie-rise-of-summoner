@@ -1,0 +1,26 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
+  ],
+  "flavor": "A jagged pillar of translucent blue ice rises from the center of the chamber, trapping a swirling vortex of frost within its core. Tiny, crystalline bells hang from the ceiling, motionless in the biting, stagnant air.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Altar of Frozen Breath",
+  "reason": "The party must offer a memory or a drop of blood to the frost-spirit to pass through the sealed gate.",
+  "roomId": "room.shrine-ice-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

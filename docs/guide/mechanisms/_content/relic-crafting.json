@@ -1,0 +1,54 @@
+{
+  "slug": "relic-crafting",
+  "title": "Relic crafting",
+  "status": "WIP",
+  "kicker": "Power and builds · item loop",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Item collection and progression",
+  "hook": "**WIP:** sockets, sets, charms, salvage, enhance, named uniques — the deep gear loop inside the armoury.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Deep craft is not a finished player loop."},
+    {"term": "Affix", "meaning": "Rolled properties frozen at roll — gear identity, not a random re-roll every glance."},
+    {"term": "Enhance / reroll", "meaning": "Design costs something real instead of pure luck spam."},
+    {"term": "Named unique", "meaning": "A relic that breaks the generator’s usual rules on purpose."}
+  ],
+  "alsoTrue": [
+    "Lives inside [relics armoury](relics-armoury).",
+    "Rarity uses horticultural display names — see the glossary."
+  ],
+  "sections": [
+    {
+      "title": "What the deep loop includes",
+      "cards": [
+        {"name": "Rolls", "body": "Affixes frozen at roll."},
+        {"name": "Sets and charms", "body": "Set play and charm slots."},
+        {"name": "Sockets", "body": "Combinations in the vault."},
+        {"name": "Enhance / salvage", "body": "Spend and reclaim with real costs."},
+        {"name": "Uniques", "body": "Named pieces that break normal generation."}
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Use thin Relics UI if present.",
+        "Do not expect finished socket/enhance chrome."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Treat crafting as coming attraction.",
+    "Raise power with aptitudes and roster now.",
+    "Return when armoury craft ships."
+  ],
+  "doNote": "Power category ends here. Combat language next: [element ring](element-ring).",
+  "mixUps": [
+    {"q": "Can I socket now?", "a": "Not as a finished loop — WIP."},
+    {"q": "Is crafting free rerolls?", "a": "Design says enhance/reroll cost something real."},
+    {"q": "Same as fusion?", "a": "No. Fusion merges specimens; crafting is gear."},
+    {"q": "Do I need essence?", "a": "Some sinks may ask stocks later — trust UI when it ships; do not invent a recipe here."}
+  ],
+  "next": ["element-ring"],
+  "related": ["relics-armoury", "souls", "essence"],
+  "sources": ["docs/guide/relics-and-builds.md §Relics armoury and crafting", "docs/guide/glossary.md §Rarity"]
+}

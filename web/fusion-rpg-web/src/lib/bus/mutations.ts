@@ -6,13 +6,17 @@ import { clearCheatFloatDirty } from "./cheat-dirty";
 import type {
   CheatEntry,
   CheatSnapshot,
+  PlayerDto,
   ProbeRunResult,
   StatsConfig,
   StoragePurgeResult,
   UniqueActorDeployResultDto,
   UniqueActorDto,
   UniqueEquipmentListDto,
-  AptitudesState
+  AptitudesState,
+  SpeciesRespecResult,
+  PassiveTreeState,
+  PreviewTreeStateRequest
 } from "./types";
 
 /**
@@ -169,7 +173,7 @@ export function useCreatePlayer() {
   const qc = useQueryClient();
   return useMutation({
     meta: { entity: "Player" },
-    mutationFn: (name: string) => sendJson("/api/players", "POST", { name }),
+    mutationFn: (name: string) => sendJson<PlayerDto>("/api/players", "POST", { name }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.players });
     }
@@ -249,6 +253,57 @@ export function useSaveAptitudes() {
       sendJson<AptitudesState>("/api/aptitudes/allocate", "POST", body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(vars.playerId) });
+    }
+  });
+}
+
+/** passive-tree-todo.md I3 — POST /api/passive-tree/allocate. One WHOLE allocation (node id -> soul
+ * level), the same "the step edits the draft, not the server" shape `useAllocationDraft` expects of
+ * every `onSave` it is handed (spec-tree-surface.md §4 rule 3). */
+export function useSaveTreeNodes() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "PassiveTree" },
+    mutationFn: (body: { playerId: number; nodes: Record<string, number> }) =>
+      sendJson<PassiveTreeState>("/api/passive-tree/allocate", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(vars.playerId) });
+    }
+  });
+}
+
+/** I8's follow-up (spec-tree-surface.md §7.2 part 5) — POST /api/passive-tree/{playerId}/preview.
+ * Deliberately a MUTATION, never a `useQuery`: this call is read-only server-side (nothing is ever
+ * persisted), but it is triggered by an explicit player action ("what would moving these points
+ * close?"), not by data this component subscribes to -- the same reason `useMutation` fits a POST
+ * body assembled on demand rather than a cache key react-query would otherwise own. No `onSuccess`
+ * invalidation: a preview changes nothing the committed `usePassiveTree` cache describes. Rejected
+ * (never silently retried) on a 400 -- `aptitudeDelta.wouldGoNegative`/`.unknownId` are real refusals
+ * the caller renders, not transient failures. */
+export function usePreviewTree() {
+  return useMutation({
+    meta: { entity: "PassiveTreePreview" },
+    mutationFn: (vars: { playerId: number; body: PreviewTreeStateRequest }) =>
+      sendJson<PassiveTreeState>(`/api/passive-tree/${vars.playerId}/preview`, "POST", vars.body)
+  });
+}
+
+/**
+ * spec-species-respec.md — the ONE save path for a species' build: a first override, a revert (empty
+ * `shares`), and a priced change all go through this single endpoint, which decides for itself which
+ * of the three applies. The older, unpriced `/api/aptitudes/species/allocate` route (module 5) this
+ * mutation was written to avoid was retired server-side (species-build-todo.md T4.3, 2026-09-05) — this
+ * is now the only write path for a species aptitude override.
+ */
+export function useRespecSpecies() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "SpeciesRespec" },
+    mutationFn: (body: { playerId: number; speciesId: string; shares: Record<string, number>; correlationId: string }) =>
+      sendJson<SpeciesRespecResult>("/api/species-build/respec", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.speciesAptitudes(vars.playerId, vars.speciesId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.speciesRespecPrice(vars.playerId, vars.speciesId) });
     }
   });
 }

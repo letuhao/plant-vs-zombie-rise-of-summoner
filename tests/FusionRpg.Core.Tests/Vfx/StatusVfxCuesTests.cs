@@ -78,8 +78,15 @@ public class StatusVfxCuesTests
     [Fact]
     public void Every_catalog_status_has_a_seeded_apply_recipe()
     {
+        // `nerve.*` (delve-attrition D2.19, 21 -> 24) is excluded on purpose: this VFX seed roster is
+        // vfx-v3's own catalog (SPEC W5 + shield T14), and a delve-only mechanical debuff getting a
+        // cue recipe is a VFX-authoring decision (color, aura style, sustained-vs-transient) that
+        // stream owns -- matching CLAUDE.md's own precedent for a status that outruns this catalog's
+        // roster. Named here rather than silently widening the loop to something nobody designed.
         var statusIds = CoreStatus.StatusCatalogBootstrap.CreateDefault().All()
-            .Select(d => d.StatusId).ToList();
+            .Select(d => d.StatusId)
+            .Where(id => !id.StartsWith("nerve.", StringComparison.Ordinal))
+            .ToList();
         Assert.Equal(21, statusIds.Count);
         var catalog = new VfxCatalog();
         catalog.ReplaceAll(VfxSeedCatalog.CreateAll());
@@ -120,7 +127,17 @@ public class StatusVfxCuesTests
 
         Assert.Contains(
             VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "wither").Aura,
-            new VfxAuraStyle?[] { VfxAuraStyle.Drip });
+            new VfxAuraStyle?[] { VfxAuraStyle.WispOut });
+        Assert.Equal(VfxAuraStyle.SporeDrift,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "spore").Aura);
+        Assert.Equal(VfxAuraStyle.CharmHeartbeat,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "charm_pulse").Aura);
+        Assert.Equal(VfxAuraStyle.Orbit,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "bond").Aura);
+        Assert.Equal(VfxAuraStyle.PactFootPulse,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "pact_mark").Aura);
+        Assert.Equal(VfxAuraStyle.CommandCrownPulse,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "command").Aura);
 
         // 3 combat/debug cues + shield.broken + 21 status cues
         Assert.Equal(25, catalog.Ids.Count);

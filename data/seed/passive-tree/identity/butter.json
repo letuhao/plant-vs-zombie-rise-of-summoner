@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn their own physical density into a self-mending shield that grows stronger as it absorbs the weight of incoming strikes.",
+  "name": "Viscous Resilience",
+  "treeId": "butter"
+}

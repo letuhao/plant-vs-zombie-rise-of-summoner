@@ -211,10 +211,14 @@ test.describe("System layer — plate parity (T29)", () => {
     await expect(page.getByTestId("pref-damage-numbers")).toHaveAttribute("aria-checked", "true");
   });
 
-  test("Quit to title is disabled and states why", async ({ page }) => {
+  // fe-essentials: the Title screen this button was waiting on now exists (plate 01 §A).
+  test("Quit to title closes Settings and navigates to the real Title screen", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/sanctum?system=1");
-    await expect(page.getByTestId("system-quit-to-title")).toBeDisabled();
-    await expect(page.getByTestId("system-quit-to-title")).toHaveAttribute("title", /title screen/);
+    await expect(page.getByTestId("system-quit-to-title")).not.toBeDisabled();
+    await page.getByTestId("system-quit-to-title").click();
+    await expect(page.getByTestId("system-layer")).not.toBeVisible();
+    await expect(page).toHaveURL(/#\/$/);
+    await expect(page.getByTestId("title-screen")).toBeVisible();
   });
 });

@@ -32,8 +32,9 @@ public static class ContentHashRegistry
 {
     /// <summary>Bump when a table joins or leaves, or a covered table's column list changes.
     /// E18 → 2, E9 → 3, E16 → 4, cap-consolidation (T1) → 5, action program T30 → 6,
-    /// action program P0.3 → 7 — all done.</summary>
-    public const int CurrentSchemaVersion = 7;
+    /// action program P0.3 → 7, effect-pipeline T3.1 (affix-schema) → 8,
+    /// effect-pipeline T3.2 (prefix/suffix split) → 9 — all done.</summary>
+    public const int CurrentSchemaVersion = 9;
 
     /// <summary>
     /// Version 1: the tables E2, E4 and E5 actually created. Instances, bindings and
@@ -279,6 +280,76 @@ public static class ContentHashRegistry
         }),
     }).ToArray());
 
+    /// <summary>
+    /// Version 8 (effect-pipeline T3.1, `affix-schema`): <c>effect_container_pool</c> now references
+    /// an <b>affix</b>, not a bare atom — its <c>atom_id</c> column is <c>affix_id</c>. A column
+    /// <b>rename</b> is a shape change under the same "no silent move" rule V5's own doc comment
+    /// states for a rename in the other direction (columns retired, not renamed) — the covered-column
+    /// list is explicit precisely so this doesn't move every stamp silently. Also adds the two new
+    /// affix tables: a retuned or re-bundled affix is a content change and must move the hash, the
+    /// same as every other authored table.
+    /// </summary>
+    static readonly ContentHashTable[] V8 = Sorted(
+        V7.Where(t => t.TableName != "effect_container_pool")
+          .Append(new ContentHashTable("effect_container_pool", new[]
+          {
+              ContentHashColumn.Text("container_id"),
+              ContentHashColumn.Text("affix_id"),
+              ContentHashColumn.Text("weight"),
+              ContentHashColumn.Text("group_key"),
+          }))
+          .Append(new ContentHashTable("effect_affix", new[]
+          {
+              ContentHashColumn.Text("affix_id"),
+              ContentHashColumn.Text("affix_class"),
+              ContentHashColumn.Text("revision"),
+          }))
+          .Append(new ContentHashTable("effect_affix_ref", new[]
+          {
+              ContentHashColumn.Text("affix_id"),
+              ContentHashColumn.Text("seq"),
+              ContentHashColumn.Text("atom_id"),
+              ContentHashColumn.Text("slot_name"),
+              ContentHashColumn.Text("slot_domain"),
+              ContentHashColumn.Text("slot_pick"),
+              ContentHashColumn.Text("slot_atom_pattern"),
+          }))
+          .ToArray());
+
+    /// <summary>
+    /// Version 9 (effect-pipeline T3.2, `spec-container-schema.md:27`, "replaces the single
+    /// `pool_rolls` column"): both <c>effect_container</c> and <c>rarity</c> split their single
+    /// <c>pool_rolls</c> column into <c>prefix_rolls</c>/<c>suffix_rolls</c> — a rename-plus-split,
+    /// the same "no silent move" shape-change rule V8's own doc comment states for its column rename.
+    /// </summary>
+    static readonly ContentHashTable[] V9 = Sorted(
+        V8.Where(t => t.TableName != "effect_container" && t.TableName != "rarity")
+          .Append(new ContentHashTable("effect_container", new[]
+          {
+              ContentHashColumn.Text("container_id"),
+              ContentHashColumn.Text("container_kind"),
+              ContentHashColumn.Text("slot"),
+              ContentHashColumn.Text("rarity"),
+              ContentHashColumn.Text("min_tier"),
+              ContentHashColumn.Text("max_tier"),
+              ContentHashColumn.Text("level_req"),
+              ContentHashColumn.Text("prefix_rolls"),
+              ContentHashColumn.Text("suffix_rolls"),
+              ContentHashColumn.Json("tags_json"),
+              ContentHashColumn.Text("enabled"),
+              ContentHashColumn.Text("revision"),
+          }))
+          .Append(new ContentHashTable("rarity", new[]
+          {
+              ContentHashColumn.Text("rarity_id"),
+              ContentHashColumn.Text("ordinal"),
+              ContentHashColumn.Text("prefix_rolls"),
+              ContentHashColumn.Text("suffix_rolls"),
+              ContentHashColumn.Text("min_tier"),
+              ContentHashColumn.Text("max_tier"),
+          }))
+          .ToArray());
+
     public static IReadOnlyList<ContentHashTable> For(int schemaVersion) => schemaVersion switch
     {
         1 => V1,
@@ -288,6 +359,8 @@ public static class ContentHashRegistry
         5 => V5,
         6 => V6,
         7 => V7,
+        8 => V8,
+        9 => V9,
         _ => throw new ArgumentOutOfRangeException(nameof(schemaVersion),
             $"contentHashSchemaVersion {schemaVersion} is not a known registry version " +
             $"(latest is {CurrentSchemaVersion})"),

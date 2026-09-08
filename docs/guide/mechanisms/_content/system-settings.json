@@ -1,0 +1,65 @@
+{
+  "slug": "system-settings",
+  "title": "Settings and keymap",
+  "status": "Shipped",
+  "kicker": "Session and shell · how you play",
+  "pillar": {"text": "Sanctum", "href": "sanctum.md"},
+  "loopLine": "Session — how you play",
+  "hook": "**System** is where you rebind keys, adjust display, and quit — open it with Esc when no layer is stacked on top.",
+  "blindSpots": [
+    {"term": "System", "meaning": "The settings layer for Rise of Summoner’s control room — not the lawn game’s own options menu."},
+    {"term": "Empty stack", "meaning": "No Creatures/Fusion/… layer is open. Only then does Esc open System instead of closing a layer."},
+    {"term": "Keymap", "meaning": "Which keys open which rail verbs. It should match what the [layer rail](layer-rail) does."},
+    {"term": "Quit", "meaning": "Leaves the control-room session from System. On some browser-only paths Quit may be unavailable — close the tab or use the launcher."}
+  ],
+  "alsoTrue": [
+    "From the title screen, Settings jumps into System over Sanctum — same surface.",
+    "Developer telemetry and cheat menus are not this page and are not player features."
+  ],
+  "sections": [
+    {
+      "title": "How you open it",
+      "steps": [
+        "Close any open layers until you are back on the bare stage.",
+        "Press Esc — System opens.",
+        "Or choose Settings on the title screen."
+      ],
+      "note": "If Esc only closes a panel, you still had a layer open — that is correct stack behavior."
+    },
+    {
+      "title": "What you change here",
+      "cards": [
+        {"name": "Keybinds", "body": "Rebind rail and travel keys. Pressing ? should agree with the rail."},
+        {"name": "Display", "body": "How the control room looks on your machine."},
+        {"name": "Quit", "body": "Leave the session cleanly when the build supports it."}
+      ]
+    },
+    {
+      "title": "What stays elsewhere",
+      "paras": [
+        "Lawn-game graphics, volume, and packs options stay in the host game.",
+        "Installer trust and antivirus steps stay in the launcher / player runbook — not inside System."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "From Sanctum, press Esc with nothing else open.",
+    "Find the keymap and confirm it matches C / F / E / … on the rail.",
+    "Close System and confirm you return to the same stage."
+  ],
+  "doNote": "Stop when Esc feels predictable. Rail detail: [layer rail](layer-rail).",
+  "mixUps": [
+    {"q": "Esc closed Creatures instead of Settings — bug?", "a": "No. Esc closes the top layer first. Open System only on an empty stack."},
+    {"q": "Where are lawn-game options?", "a": "In Plants vs. Zombies: Fusion itself. System is the RPG control room."},
+    {"q": "Title Settings vs Esc System?", "a": "Same System surface — different doors in."},
+    {"q": "Can I rebind lawn plant keys here?", "a": "No. This keymap is for Rise of Summoner layers and travel."}
+  ],
+  "next": ["layer-rail"],
+  "related": ["layer-rail", "sanctum", "save-select", "local-control-room"],
+  "sources": [
+    "docs/guide/sanctum.md §Settings and keymap",
+    "web/fusion-rpg-web/src/app/TitleScreen.tsx",
+    "docs/guide/mechanisms/system-settings.md (prior stub)"
+  ]
+}

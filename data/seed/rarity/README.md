@@ -1,14 +1,17 @@
 # `rarity/`
 
-Empty on purpose, not by oversight (completeness-audit.md C3). The `rarity` table is real, fully
-built, and hash-covered (E5/E14a) — the format is documented in
-[../README.md](../README.md#rarity) — and this folder is where a rarity band goes when one is
-actually authored (`common`/`rare`/`legendary` ordinals, pool-roll counts, tier ranges). Nothing
-needs one yet: no shipped container currently names a `rarity` value, so `E14b`'s budget check
-(`ContentValidation.Budget`) evaluates zero containers today — a `ceilingFor` with nothing to look up
-is not a bug, it is this table having no content.
+✅ **Seeded 2026-09-04 (item-ideal.md, `rarity-bands`, module 7).** `ladder.v1.json` carries the ten
+authored rungs from `ssot-rarity.md` §3.3 — `chaff` through `almanac`, ordinals 10…100. Was empty on
+purpose (completeness-audit.md C3) while `E14b`'s budget check (`ContentValidation.Budget`) had zero
+containers to evaluate; that gap is exactly what seeding this folder closes.
 
-`tools/AtomImporter` sweeps this folder recursively and finds nothing, which is correct — the audit's
-finding was that an *empty, undocumented* folder is indistinguishable from a forgotten one. This file
-is that distinction. Add a `rarity` JSON file here when a container needs a rarity band; nothing else
-changes.
+⚠ **`prefixRolls`/`suffixRolls` are the FLOOR of §3.3's published half-ranges**, not the full range —
+`RarityRow`'s schema has no `_max` column today (an Ask-first under effect-atom E5's boundaries, not
+decided in this pass). §3.3's own recommended fallback names the cost: this loses one of the three
+variances the overlap invariant (§3.5) is measured on. `sprout` and `heirloom` carry the **E3-corrected**
+halves (`0–1`/`1–1` and `1–2`/`2–2`) — the originally-published halves for those two rungs did not sum
+to their own count band and were fixed before this file was written, per `ssot-rarity.md`'s own note.
+
+`tools/AtomImporter` sweeps this folder recursively; `data/tuning/item-rarity.v1.json` carries the
+non-`rarity`-row values this ladder also needs (drop weights, enhancement caps, power-ceiling shares) —
+see `RarityLadder.cs` for the single source those two files must agree with.

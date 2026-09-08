@@ -66,10 +66,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.padding",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.quilted-hood",
       "flavorKey": "flavor.base.quilted-hood",
       "flavor": "Layered cloth sewn together with care. Someone wore it every day before you.",
@@ -105,7 +105,7 @@
         "family": "atom.vitality",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-brim",
       "flavorKey": "flavor.base.woven-brim",
       "flavor": "A simple interlocked weave. Protective by virtue of how it sits, nothing more.",
@@ -138,10 +138,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-beanie",
       "flavorKey": "flavor.base.secondhand-beanie",
       "flavor": "Cast off by someone else. The stitches are loose but the yarn holds.",
@@ -177,7 +177,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.boiled-bandana",
       "flavorKey": "flavor.base.boiled-bandana",
       "flavor": "Boiled leather, hardened but still flexible. Wraps around where cloth would slip.",
@@ -210,7 +210,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -283,10 +283,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.padding",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.oiled-hardhat",
       "flavorKey": "flavor.base.oiled-hardhat",
       "flavor": "Coated with oil to shed water and wear. It smells faintly of preservation.",
@@ -355,10 +355,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.threadbare-pot",
       "flavorKey": "flavor.base.threadbare-pot",
       "flavor": "Worn through in places, patched in others. Still covers.",
@@ -428,7 +428,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,

@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "many",
+  "flavor": "A local scholar seeks a fragment of celestial glass to prove the existence of the heavens' descent. Recovering this shard will secure funding for the academy and validate the scholar's life's work.",
+  "name": "The Relic of the Fallen Star",
+  "objectiveTemplate": "gather-curio-kind",
+  "prereqRefs": [],
+  "questId": "quest.gather-curio-kind-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "roster",
+  "targetRef": "curio"
+}

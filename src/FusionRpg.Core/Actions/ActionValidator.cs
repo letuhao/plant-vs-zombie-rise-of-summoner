@@ -1,3 +1,4 @@
+using FusionRpg.Core.Actions.Movement;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 
@@ -116,6 +117,30 @@ public static class ActionValidator
         }
 
         return ActionRejection.Ok;
+    }
+
+    /// <summary>
+    /// A-M1 (spec-movement-payload.md §2, §5 AC6): a compiled `category = Movement` action whose
+    /// container carries no bound effect atom is refused, naming the action id and the reason. Runs
+    /// against a <see cref="CompiledAction"/>, not a row — <see cref="MovementPayloadPolicy.HasStandalonePayload"/>
+    /// reads <see cref="CompiledAction.Scopes"/>, which only exists post-compile, so this is a second,
+    /// standalone entry point rather than a stage inside <see cref="ActionCompiler.Compile"/> — the
+    /// same shape <see cref="ValidateGrant"/>/<see cref="ValidateSpeciesBasics"/> already use for a
+    /// check that needs more than the three tables <c>Compile</c> itself reads. A non-Movement action
+    /// always passes: invariant 9 (standalone-first) is a Movement-only rule, never a general one.
+    /// </summary>
+    public static ActionRejection ValidateMovementPayload(CompiledAction action, MovementPayloadPolicy policy)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        ArgumentNullException.ThrowIfNull(policy);
+
+        if (action.Category != ActionCategory.Movement)
+            return ActionRejection.Ok;
+
+        return policy.HasStandalonePayload(action)
+            ? ActionRejection.Ok
+            : Fail(action.ActionId, ActionRejectionReason.MovementActionHasNoStandalonePayload,
+                "a movement action must do something with the game closed");
     }
 
     static ActionRejection CheckBasicSlot(

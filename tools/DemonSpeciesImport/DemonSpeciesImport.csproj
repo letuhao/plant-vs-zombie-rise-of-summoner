@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FusionRpg.Tools.DemonSpeciesImport</RootNamespace>
+    <AssemblyName>DemonSpeciesImport</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The data project, for RpgStore.ImportSpecies. This tool issues no SQL of its own —
+         guard-dal.ps1 scans only src/, so the rule that keeps SQL in one project stops applying the
+         moment a tool writes its own; ImportSpecies is how this tool stays on the right side of that
+         line, the same reasoning RpgStore.Import.cs's own doc comment states for AtomImporter. -->
+    <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
+  </ItemGroup>
+</Project>

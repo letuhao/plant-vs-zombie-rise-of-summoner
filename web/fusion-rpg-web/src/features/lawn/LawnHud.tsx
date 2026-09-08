@@ -1,4 +1,5 @@
 import { Badge, TypeIcon } from "@/ui";
+import { LawnHudCommander, type LawnMatchCommanderChip } from "./LawnHudCommander";
 
 export type LawnDeployedChip = {
   ptr: string;
@@ -27,13 +28,17 @@ export function LawnHud({
   wave,
   maxWave,
   hugeWave,
-  deployed
+  matchCommander,
+  deployed,
+  onOpenCommanderSheet
 }: {
   sun?: number;
   wave?: number;
   maxWave?: number;
   hugeWave?: boolean;
+  matchCommander?: LawnMatchCommanderChip;
   deployed: LawnDeployedChip[];
+  onOpenCommanderSheet?: () => void;
 }) {
   return (
     <div
@@ -51,6 +56,10 @@ export function LawnHud({
         {wave != null && maxWave != null ? `Wave ${wave} of ${maxWave}` : "Wave —"}
         {hugeWave ? " · huge" : ""}
       </Badge>
+
+      {matchCommander ? (
+        <LawnHudCommander commander={matchCommander} onOpenSheet={onOpenCommanderSheet} />
+      ) : null}
 
       <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5" data-testid="lawn-hud-deployed">
         <span className="text-xs text-muted">deployed</span>

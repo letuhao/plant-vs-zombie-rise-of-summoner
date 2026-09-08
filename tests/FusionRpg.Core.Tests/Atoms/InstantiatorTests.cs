@@ -49,9 +49,15 @@ public class InstantiatorTests
 
     static AtomRow? Lookup(string id) => Catalog.TryGetValue(id, out var a) ? a : null;
 
+    // T3.1 (affix-schema): the pool draws affix ids now. Every pool fixture in this file names an
+    // atom id directly, simulating `affix-library`'s (module 3, not yet built) 1:1 single-ref
+    // generation — same id, one ref, class derived from the wrapped atom's kind.
+    static AffixRow? LookupAffix(string id) =>
+        Catalog.TryGetValue(id, out var atom) ? new AffixRow(id, AffixClass.Prefix, new[] { new AffixRefRow(1, atom.AtomId) }) : null;
+
     static InstanceRow Make(ContainerRow c, long seed, int thetaContent = PinTheta)
     {
-        var r = Instantiator.TryInstantiate(c, Lookup, seed, thetaContent, Tuning, out var inst);
+        var r = Instantiator.TryInstantiate(c, Lookup, LookupAffix, seed, thetaContent, Tuning, out var inst);
         Assert.True(r.IsOk, r.ToString());
         return inst!;
     }
@@ -59,11 +65,11 @@ public class InstantiatorTests
     static ContainerRow Container(
         IEnumerable<ContainerAtomRow>? atoms = null,
         IEnumerable<ContainerPoolRow>? pool = null,
-        int poolRolls = 0) => new()
+        int prefixRolls = 0) => new()
     {
         ContainerId = "item.ember-band",
         Kind = ContainerKind.Item,
-        PoolRolls = poolRolls,
+        PrefixRolls = prefixRolls,
         Atoms = (atoms ?? Array.Empty<ContainerAtomRow>()).ToList(),
         Pool = (pool ?? Array.Empty<ContainerPoolRow>()).ToList(),
     };
@@ -86,7 +92,7 @@ public class InstantiatorTests
                 new ContainerPoolRow("atom.elemental-power.fire.t1", 10),
                 new ContainerPoolRow("atom.elemental-power.ice.t1", 10),
             },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         Assert.Equal(Make(c, 4242).ContentFingerprint(), Make(c, 4242).ContentFingerprint());
     }
@@ -101,7 +107,7 @@ public class InstantiatorTests
                 new ContainerPoolRow("atom.elemental-power.ice.t1", 10),
                 new ContainerPoolRow("atom.elemental-power.air.t1", 10),
             },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         var seen = new HashSet<string>();
         for (long seed = 0; seed < 60; seed++) seen.Add(Make(c, seed).Atoms[0].AtomId);
@@ -174,7 +180,7 @@ public class InstantiatorTests
                 new ContainerPoolRow("atom.elemental-power.fire.t1", 10),
                 new ContainerPoolRow("atom.elemental-power.ice.t1", 0),
             },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         for (long seed = 0; seed < 200; seed++)
             Assert.Equal("atom.elemental-power.fire.t1", Make(c, seed).Atoms[0].AtomId);
@@ -192,7 +198,7 @@ public class InstantiatorTests
                 new ContainerPoolRow("atom.elemental-power.fire.t2", 10),
                 new ContainerPoolRow("atom.elemental-power.ice.t1", 10),
             },
-            poolRolls: 2);
+            prefixRolls: 2);
 
         for (long seed = 0; seed < 100; seed++)
         {
@@ -212,7 +218,7 @@ public class InstantiatorTests
                 new ContainerPoolRow("atom.elemental-power.fire.t1", 90),
                 new ContainerPoolRow("atom.elemental-power.ice.t1", 10),
             },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         var fire = 0;
         for (long seed = 0; seed < 1000; seed++)
@@ -221,7 +227,12 @@ public class InstantiatorTests
         // Pinned to this implementation and seed sequence; a change to either must be deliberate.
         // 90% weight over 1000 seeds. Pinned to this RNG and draw order: a change to either must
         // be a deliberate edit here, not a silently shifted distribution.
-        Assert.Equal(908, fire);
+        //
+        // 908 -> 903 (T3.2, prefix/suffix split): Draw()'s RNG stream is now named per-budget
+        // (`atom.pool.prefix.<id>` instead of `atom.pool.<id>`), so the prefix draw's own sequence
+        // shifted even though this fixture's single `prefixRolls: 1` budget and 90/10 weights are
+        // otherwise unchanged — a deliberate, expected re-pin, not a distribution regression.
+        Assert.Equal(903, fire);
     }
 
     [Fact]
@@ -234,7 +245,7 @@ public class InstantiatorTests
                 new ContainerAtomRow(2, "atom.might.t1"),
             },
             pool: new[] { new ContainerPoolRow("atom.elemental-power.fire.t1", 10) },
-            poolRolls: 1);
+            prefixRolls: 1);
 
         var inst = Make(c, 5);
 
@@ -248,7 +259,7 @@ public class InstantiatorTests
     {
         var c = Container(atoms: new[] { new ContainerAtomRow(1, "atom.nope.t1") });
 
-        var r = Instantiator.TryInstantiate(c, Lookup, 1, PinTheta, Tuning, out var inst);
+        var r = Instantiator.TryInstantiate(c, Lookup, LookupAffix, 1, PinTheta, Tuning, out var inst);
 
         Assert.Equal(AtomRejectionReason.UnknownAtom, r.Reason);
         Assert.Null(inst);

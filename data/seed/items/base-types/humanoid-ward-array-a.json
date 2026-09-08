@@ -65,10 +65,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.hemmed-flap",
       "flavorKey": "flavor.base.hemmed-flap",
       "flavor": "A loose piece of cloth, its edges carefully stitched. Meant to shed water and take the first scratch.",
@@ -103,7 +103,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-shoulder",
       "flavorKey": "flavor.base.secondhand-shoulder",
       "flavor": "Salvaged from an older garment, it still carries the creases of its first life. Someone else wore it first.",
@@ -138,7 +138,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.insulated-screen",
       "flavorKey": "flavor.base.insulated-screen",
       "flavor": "Padded and dense cloth, its weight surprising for how it drapes. The insulation works both ways: protection and preservation.",
@@ -170,13 +170,13 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.linen-downspout",
       "flavorKey": "flavor.base.linen-downspout",
-      "flavor": "A tube of rigid linen, guttered and channeled. It diverts the blow, not absorbs it\u2014a practical deflection rather than a wall.",
+      "flavor": "A tube of rigid linen, guttered and channeled. It diverts the blow, not absorbs it—a practical deflection rather than a wall.",
       "tags": [
         "medium-light",
         "utility"
@@ -241,7 +241,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -279,7 +279,7 @@
         "family": "atom.warded",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.boiled-brace",
       "flavorKey": "flavor.base.boiled-brace",
       "flavor": "Boiled stiff and shaped to cup the shoulders, it is more brittle than it looks. A sacrifice of flexibility for single-blow deflection.",
@@ -314,7 +314,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.supple-fender",
       "flavorKey": "flavor.base.supple-fender",
       "flavor": "A curved leather shield hung from the shoulders, supple enough to twist and flex. It yields, then rebounds.",
@@ -346,7 +346,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -416,10 +416,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.weathered-batten",
       "flavorKey": "flavor.base.weathered-batten",
       "flavor": "Strips of leather battened to a frame, weathered until they are as much gray as brown. Holding together not from strength, but from stubbornness.",

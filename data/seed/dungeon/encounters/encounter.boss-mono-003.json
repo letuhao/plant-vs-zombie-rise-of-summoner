@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "force-pure",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "breakpoint",
+    "retinue": 0,
+    "signatureAction": "gravitational-collapse"
+  },
+  "elementSpread": "mono",
+  "encounterId": "encounter.boss-mono-003",
+  "formation": "boss",
+  "name": "The Kinetic Monolith",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A singular elemental engine utilizing gravity to pull defenders into its orbit.",
+  "slots": [
+    {
+      "countBand": "several",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

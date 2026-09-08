@@ -1,0 +1,193 @@
+{
+  "acquisitionPathsPerRole": {
+    "Bank": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Defend": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Deny": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Enable": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Extract": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Move": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Multiply": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Refine": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "See": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ],
+    "Store": [
+      "built",
+      "assembled",
+      "summoned",
+      "laboured"
+    ]
+  },
+  "actualCounts": {
+    "Bank": 2,
+    "Defend": 2,
+    "Deny": 3,
+    "Enable": 2,
+    "Extract": 4,
+    "Move": 3,
+    "Multiply": 2,
+    "Refine": 1,
+    "See": 3,
+    "Store": 3
+  },
+  "budget": {
+    "Bank": 2,
+    "Defend": 2,
+    "Deny": 3,
+    "Enable": 2,
+    "Extract": 4,
+    "Move": 3,
+    "Multiply": 2,
+    "Refine": 1,
+    "See": 3,
+    "Store": 3
+  },
+  "callBudget": {
+    "estimatedCalls": 0,
+    "pipelineStages": 1,
+    "targetNewRows": 0,
+    "voteCountPerField": 3,
+    "voteFields": [
+      "role",
+      "requiredSlotKind",
+      "strengthBand",
+      "acquisitionPaths",
+      "controlPoint"
+    ]
+  },
+  "containerPolicy": {
+    "assignedBy": "human-or-deterministic-tool-never-the-generation-model",
+    "assignment": "opt-in-post-hoc",
+    "requiredForEveryRow": false
+  },
+  "gridDensityMilli": 2500,
+  "legalRoleSlotPairs": [
+    [
+      "Bank",
+      "EssenceDeposit"
+    ],
+    [
+      "Bank",
+      "Shrine"
+    ],
+    [
+      "Defend",
+      "Wildland"
+    ],
+    [
+      "Deny",
+      "Wildland"
+    ],
+    [
+      "Enable",
+      "Market"
+    ],
+    [
+      "Enable",
+      "Vault"
+    ],
+    [
+      "Extract",
+      "MaterialSeam"
+    ],
+    [
+      "Extract",
+      "Rootbed"
+    ],
+    [
+      "Extract",
+      "ShardVein"
+    ],
+    [
+      "Move",
+      "Seat"
+    ],
+    [
+      "Move",
+      "Wildland"
+    ],
+    [
+      "Multiply",
+      "Lair"
+    ],
+    [
+      "Multiply",
+      "Wildland"
+    ],
+    [
+      "Refine",
+      "Wildland"
+    ],
+    [
+      "See",
+      "Spire"
+    ],
+    [
+      "See",
+      "Wildland"
+    ],
+    [
+      "Store",
+      "Wildland"
+    ]
+  ],
+  "schemaVersion": 1,
+  "seed": 0,
+  "tierLadder": [
+    "rubble",
+    "timber",
+    "stone"
+  ],
+  "tierRowCounts": {
+    "rubble": 15,
+    "stone": 3,
+    "timber": 7
+  },
+  "variantCountPolicy": {
+    "max": 4,
+    "min": 0
+  }
+}

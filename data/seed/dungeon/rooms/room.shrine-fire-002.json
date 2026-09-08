@@ -1,0 +1,26 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
+  ],
+  "flavor": "A single, massive obsidian pillar rises from a pool of white-hot slag, its surface etched with weeping runes that glow with a rhythmic, pulsing heat.",
+  "hazardBand": "heavy",
+  "kind": "shrine",
+  "name": "The Crucible of the First Spark",
+  "reason": "A ritual site dedicated to the primordial flame, where offerings are cast into the molten core to ensure the sun's return.",
+  "roomId": "room.shrine-fire-002",
+  "secretEligible": "yes",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -33,8 +33,16 @@ public enum ActionCategory
 }
 
 /// <summary>
-/// The eight closed action tags (spec-action-model.md §2). `A7` selects on these and never on
+/// The nine closed action tags (spec-action-model.md §2). `A7` selects on these and never on
 /// internals — adding one is a reviewed change, because the stub AI's preference key reads this set.
+///
+/// <para><see cref="Construct"/> added base-defense `siege-construction` (owner decision, 2026-09-06):
+/// the four structure-acquisition paths (`Built`/`Assembled`/`Summoned`/`Laboured`) are ordinary
+/// actions under <see cref="ActionCategory.Support"/>, not a new category or a nested sub-category —
+/// `Summoned` already fits the existing <see cref="Summon"/> tag; `Built`/`Assembled`/`Laboured` share
+/// this one rather than reusing <see cref="Utility"/>, since "does this place a structure" is a real
+/// distinction `A7`'s own selection and any future construction-specific filter would otherwise have
+/// no tag to key on.</para>
 /// </summary>
 public enum ActionTag
 {
@@ -46,6 +54,7 @@ public enum ActionTag
     Movement,
     Summon,
     Utility,
+    Construct,
 }
 
 /// <summary>
@@ -65,6 +74,30 @@ public enum ActionCostTiming
 {
     OnCommit = 0,
     PerTick,
+}
+
+/// <summary>
+/// A-E1 (spec-eligibility-axis.md §3.1): which tier's rule decides who may hold an action — exactly
+/// the three the action-corpus program generates. A fourth value would encode a distinction
+/// <see cref="ActionKind"/> already carries (A1's closure — see <see cref="EligibilityScopes"/>).
+/// </summary>
+public enum EligibilityScope
+{
+    General = 0,
+    Family,
+    Species,
+}
+
+/// <summary>
+/// A-E1 (spec-eligibility-axis.md §3.0): whether a generated action sets up or cashes in a
+/// conditional-payoff pairing (`EnablerPayoffPairings`). <c>None</c> is a real value, never an
+/// omission — most actions pair with nothing, and the field must say so rather than being absent.
+/// </summary>
+public enum PairingRole
+{
+    None = 0,
+    Enabler,
+    Payoff,
 }
 
 public static class ActionKinds
@@ -135,6 +168,7 @@ public static class ActionTags
         ActionTag.Movement => "movement",
         ActionTag.Summon => "summon",
         ActionTag.Utility => "utility",
+        ActionTag.Construct => "construct",
         _ => "",
     };
 
@@ -150,6 +184,7 @@ public static class ActionTags
             case "movement": tag = ActionTag.Movement; return true;
             case "summon": tag = ActionTag.Summon; return true;
             case "utility": tag = ActionTag.Utility; return true;
+            case "construct": tag = ActionTag.Construct; return true;
             default: tag = default; return false;
         }
     }
@@ -195,6 +230,50 @@ public static class ActionCostTimings
             case "onCommit": timing = ActionCostTiming.OnCommit; return true;
             case "perTick": timing = ActionCostTiming.PerTick; return true;
             default: timing = default; return false;
+        }
+    }
+}
+
+public static class EligibilityScopes
+{
+    public static string Name(EligibilityScope scope) => scope switch
+    {
+        EligibilityScope.General => "general",
+        EligibilityScope.Family => "family",
+        EligibilityScope.Species => "species",
+        _ => "",
+    };
+
+    public static bool TryParse(string? text, out EligibilityScope scope)
+    {
+        switch (text)
+        {
+            case "general": scope = EligibilityScope.General; return true;
+            case "family": scope = EligibilityScope.Family; return true;
+            case "species": scope = EligibilityScope.Species; return true;
+            default: scope = default; return false;
+        }
+    }
+}
+
+public static class PairingRoles
+{
+    public static string Name(PairingRole role) => role switch
+    {
+        PairingRole.None => "none",
+        PairingRole.Enabler => "enabler",
+        PairingRole.Payoff => "payoff",
+        _ => "",
+    };
+
+    public static bool TryParse(string? text, out PairingRole role)
+    {
+        switch (text)
+        {
+            case "none": role = PairingRole.None; return true;
+            case "enabler": role = PairingRole.Enabler; return true;
+            case "payoff": role = PairingRole.Payoff; return true;
+            default: role = default; return false;
         }
     }
 }

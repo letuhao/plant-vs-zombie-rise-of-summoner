@@ -24,7 +24,7 @@ The tables that let anything own atoms: `effect_container`, `effect_container_at
 | `rarity` | TEXT | nullable; FK to a `rarity` table with **explicit append-only ordinals**. The key budgets are looked up by |
 | `min_tier` / `max_tier` | INT | nullable; **the tier window the pool may offer** — the mechanism rarity previously only claimed |
 | `level_req` | INT | nullable; **enforced at bind** (`LevelTooLow`). A declared field nothing reads is the `GuardsAdjacentAlly` mistake |
-| `pool_rolls` | INT | how many atoms to draw from the pool; `0` = fixed list only |
+| `prefix_rolls` / `suffix_rolls` | INT | **replaces the single `pool_rolls` column, 2026-09-01 (`seed-to-concrete` T0.4/T3.2).** How many atoms to draw from the prefix pool / suffix pool respectively; `0`/`0` = fixed list only. One-per-`group` applies **within each class independently** — a prefix and a suffix may share a `group` value without conflicting |
 | `tags_json` | TEXT | |
 | `enabled`, `revision` | INT | joins the content hash (E8) |
 
@@ -44,9 +44,16 @@ The tables that let anything own atoms: `effect_container`, `effect_container_at
 | `container_id` | FK |
 | `atom_id` | FK — usually one tier of a family |
 | `weight` | spawn weight; `0` excludes without deleting the row |
-| `group` | optional — **at most one atom per group per instance** |
+| `group` | optional — **at most one atom per group per instance, per affix class** |
+| `affix_class` | **added 2026-09-01 (T0.4).** `prefix` \| `suffix`; selects which roll count (`prefix_rolls`/`suffix_rolls`) draws this row |
 
-A container with no pool rows is a plain fixed list. Traits, skills, and species passives use the core alone; item templates roll the pool.
+A container with no pool rows is a plain fixed list. **"Traits, skills, and species passives use the
+core alone" is superseded 2026-09-01 (T0.4, `seed-to-concrete` T5.3 `species-effects`) — species
+passives now roll a pool too, 0–N atoms per species by rarity band (owner: *"specie should have 0-to N
+effect... lowest rarity maybe have 0-1 effect, highest rarity is 10 have 7-10 effect"*), same as an
+item template. `trait.{traitId}` containers (fusion, Q10) and `skill` containers still use the core
+alone — this document's original claim held for those, not for `species-passive`.** Item templates and
+`species-passive` containers roll the pool.
 
 ### The two mechanisms, and why both
 
@@ -54,12 +61,12 @@ A container with no pool rows is a plain fixed list. Traits, skills, and species
 
 `group` is PoE's mod-family rule — an item takes at most one mod per family, which is what stops a rolled item reading as `+10 atk / +12 atk / +14 atk`. 
 
-**`group` defaults to `(family_id, variant)`, not `family_id`.** A container may therefore roll *fire* power and *ice* power — two variants of one family, normal ARPG itemisation — while never rolling two tiers of the same variant. An explicit value overrides the default, and the `pool_rolls ≤ distinct **drawable** groups` check runs **with defaults applied**, never with NULLs — a group whose every row is `weight = 0` is not drawable and does not count.
+**`group` defaults to `(family_id, variant)`, not `family_id`.** A container may therefore roll *fire* power and *ice* power — two variants of one family, normal ARPG itemisation — while never rolling two tiers of the same variant. An explicit value overrides the default, and the `{prefix,suffix}_rolls ≤ distinct **drawable** groups (per class)` check runs **with defaults applied**, never with NULLs — a group whose every row is `weight = 0` is not drawable and does not count.
 
 ### Rarity and tier are different axes — restated because it is the easiest thing to get wrong
 
 - **Tier** (on the atom) is *how strong* one affix is.
-- **Rarity** (on the container) selects the `pool_rolls` count and the `min_tier`/`max_tier` window.
+- **Rarity** (on the container) selects the `prefix_rolls`/`suffix_rolls` counts and the `min_tier`/`max_tier` window.
 
 Loot rarity and capture rarity both fall out of these plus pool weights. **No third mechanism** — and that is now true rather than asserted, because the window has columns.
 
@@ -79,8 +86,9 @@ Same law as E4 — a bad row is rejected whole, with its id and reason, and does
 | override keys valid for the referenced atom's kind | E1 schema |
 | override value specs well-formed | E2 |
 | `weight ≥ 0` | negative is a rejection, not a clamp |
-| `pool_rolls ≤ distinct **drawable** groups in the pool` (`HAVING max(weight) > 0`) | otherwise the draw cannot satisfy the one-per-group rule. Counting zero-weight groups passes validation and then silently under-fills: A(10), B(0), C(0) with `pool_rolls = 3` draws one atom |
-| `pool_rolls > 0` requires at least one pool row | else reject |
+| `prefix_rolls ≤ distinct **drawable** prefix groups` and `suffix_rolls ≤ distinct **drawable** suffix groups` (`HAVING max(weight) > 0`, each `affix_class` counted separately) | otherwise the draw cannot satisfy the one-per-group rule within that class. Counting zero-weight groups passes validation and then silently under-fills: A(10), B(0), C(0) with `prefix_rolls = 3` draws one atom |
+| `prefix_rolls > 0` requires at least one `prefix` pool row; `suffix_rolls > 0` requires at least one `suffix` pool row | else reject, per class |
+| a **mixed bundle** (`affixClass` on the atom itself — `seed-contract.md` §2.1) consumes one prefix roll **and** one suffix roll simultaneously, never doubling either count | `seed-to-concrete` T0.6 |
 | `seq` unique within a container | stable resolve order |
 | every atom's kind supports the container's target runtime | bind-time (E6), not load-time — the same container may be legal on the lawn and rejected in battle |
 
@@ -123,10 +131,11 @@ tests/FusionRpg.Core.Tests/Atoms/ContainerValidatorTests.cs
 | Every pool row at `weight = 0` | `UnsatisfiablePool` — silently under-filling is the failure this program exists to remove |
 | Same atom in both fixed core and pool | `DuplicateAtomInContainer` |
 | `rarity` ordinals | explicit and **append-only**; a reordered rarity fails the test, same rule as elements |
-| Container with no pool rows | legal; `pool_rolls` must be 0 |
-| `pool_rolls` exceeding distinct groups | rejected |
-| `pool_rolls = 3`, groups A(weight 10), B(0), C(0) | **rejected** `PoolRollsExceedGroups` — three groups exist but only one is drawable |
-| Two pool atoms sharing a `group` | a draw returns at most one |
+| Container with no pool rows | legal; `prefix_rolls` and `suffix_rolls` must both be 0 |
+| `prefix_rolls`/`suffix_rolls` exceeding that class's distinct groups | rejected |
+| `prefix_rolls = 3`, prefix groups A(weight 10), B(0), C(0) | **rejected** `PoolRollsExceedGroups` — three groups exist but only one is drawable |
+| Two pool atoms sharing a `group` **and the same `affix_class`** | a draw returns at most one |
+| Two pool atoms sharing a `group`, one `prefix` one `suffix` | legal — one-per-group is scoped to the class |
 | Negative `weight` | rejected, not clamped |
 | `weight = 0` | row kept, never drawn |
 | Override naming a param the kind does not declare | rejected |

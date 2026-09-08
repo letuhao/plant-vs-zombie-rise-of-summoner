@@ -1,7 +1,11 @@
 # The item seed contract — what gets authored, and what gets computed
 
-**Status:** Proposed 2026-08-22, revised the same day after a fan-out safety audit. **Contract for a data
-build**, not a spec and not a plan. Nothing is authorized to be authored from it yet.
+**Status:** Proposed 2026-08-22, revised the same day after a fan-out safety audit. **Contract for a
+data build, authoring authorized as of 2026-09-01** (`seed-to-concrete` T0.6/Phase 1 — `demon-seed`
+and `effect-pipeline` author against this contract starting Phase 1). The prior wording — *"Nothing is
+authorized to be authored from it yet"* — was found by the `seed-to-concrete` plan audit to contradict
+its own dependents: Phases 1-2 of that plan author seeds against this contract, which the old line
+forbade outright. Everything else this document decided stands; only the authoring gate changes.
 
 **Purpose:** define the JSON that human and agent authors write, so that a large parallel authoring
 effort produces content that imports cleanly, hashes stably, and does not have to be re-authored when a
@@ -68,7 +72,7 @@ but does not get to invent roles. Naming a value and owning a value are differen
 | `powerBand`, `costBand`, `dropBand`, `variance` | AUTHORED | **bands, never numbers** — §3 |
 | structural counts (`socketMax`, `pieces`, `pool_rolls`) | AUTHORED | a count is structure, not balance |
 | every **magnitude**, **weight**, **probability**, **quantity** | DERIVED | §3. An author may never type one |
-| `affixClass` (prefix/suffix) | DERIVED from `kindId` | permanent-modifier kinds are prefixes; triggered kinds are suffixes. **Present in a seed file → reject** |
+| `affixClass` (prefix/suffix) | DERIVED from `kindId` | permanent-modifier kinds are prefixes; triggered kinds are suffixes. **Present in a seed file → reject.** **Added 2026-09-01 (T0.6):** a **mixed bundle** — an affix whose atom refs span both classes (e.g. `master of fire and ice`'s power+defense atoms) — derives `affixClass` **per atom**, never once for the whole bundle, and at roll time it **consumes one prefix roll and one suffix roll simultaneously** rather than doubling either count (`spec-container-schema.md`'s validation table). Still never authored — the rule only widens from "one kindId → one class" to "N atom refs → N per-atom classes, still all derived" |
 | role × family legality | DERIVED | from each family's declared role groups — worth ~1 100 cells |
 | `atom_id`, `container_id` | DERIVED | computed from columns and validated (`IdMismatch`) |
 | tier magnitudes, band min/max | GENERATED | from `powerBand` × the channel family's curve |
@@ -308,7 +312,11 @@ Illustrative. Note that **no example below contains a magnitude** — that is th
   "side": "both",
   "roles": ["armament-primary", "jewel-major", "manipulator"],
   "powerBand": "medium",
-  "nameWords": { "prefix": ["Ember", "Frost", "Gale", "Stone", "Radiant", "Umbral"] },
+  "nameWords": { "prefix": [
+    { "variant": "fire", "word": "Ember" }, { "variant": "ice", "word": "Frost" },
+    { "variant": "air", "word": "Gale" }, { "variant": "earth", "word": "Stone" },
+    { "variant": "light", "word": "Radiant" }, { "variant": "dark", "word": "Umbral" }
+  ] },
   "displayTemplate": "+{value} {element} power",
   "tags": ["offense", "elemental"]
 }
@@ -316,6 +324,17 @@ Illustrative. Note that **no example below contains a magnitude** — that is th
 
 No `affixClass` — derived from `kindId`, and rejected if present. No tier magnitudes — generated from
 `powerBand` and the channel family.
+
+⭐ **`nameWords` re-keyed 2026-09-04** (item-ideal.md, `affix-legality` module 8, additive — no id
+changes, no word deletions): each row is `{ band: "A"|"B"|"C", word, wordPlant? }` for the 75 families
+whose list is one word per power band (`band A = t1-t2, B = t3, C = t4-t5`, the fixed split — not an
+even one, since band C is deliberately the top two tiers), or `{ variant: "fire"|"ice"|"air"|"earth"|
+"light"|"dark", word, wordPlant? }` for the 23 families whose list is one word per element variant
+instead (the six-flavour families like `elemental_power` above, plus the 4/5-word shield/ward/stoicism
+families that supply a word for fewer than all six elements — `omni` and any unlisted variant fall back
+to the list's first word). `wordPlant`, sparse, overrides the word on a plant-frame item; absent means
+use `word` on both frames. The old flat `["Ember", "Frost", ...]` shape is gone — a bare string in
+`nameWords` is rejected by `NameWordCheck` (`tools/ItemSeedValidator/Checks/NameWordCheck.cs`).
 
 ### Base type
 

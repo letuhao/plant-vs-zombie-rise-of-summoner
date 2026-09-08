@@ -2,7 +2,7 @@ import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { adaptActor } from "@/contract/adapt";
+import { adaptActor, PLAYER_PENDING } from "@/contract/adapt";
 import type { UniqueActorDto } from "@/lib/bus/types";
 import { renderWithProviders } from "@/test/render";
 import { ActorCard, ActorChip, ActorPanel, ActorRow, ActorToken, type ActorRungState } from "./index";
@@ -174,8 +174,6 @@ describe("one contract type, no forked components (T8)", () => {
   it("not-yet-servable fields render their pending reason honestly instead of fake numbers", () => {
     const data = adaptActor(baseDto);
     render(<ActorCard state={{ kind: "ready", data }} />);
-    expect(screen.getByTestId("actor-standing-pending")).toHaveTextContent(
-      /derived-stat snapshot has no server endpoint/
-    );
+    expect(screen.getByTestId("actor-standing-pending")).toHaveTextContent(PLAYER_PENDING.channelSummary);
   });
 });

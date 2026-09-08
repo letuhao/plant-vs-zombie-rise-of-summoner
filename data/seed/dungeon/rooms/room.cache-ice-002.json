@@ -1,0 +1,15 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A hollowed-out pillar of translucent blue ice stands in the center of the chamber, its core swirling with trapped, frozen air. Beneath a layer of rime coating the floor, the outlines of silvered trinkets and leather pouches are visible through the permafrost.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Frost-Locked Ossuary",
+  "reason": "The party discovers a cache of supplies and valuables preserved within the ice, requiring careful extraction rather than combat.",
+  "roomId": "room.cache-ice-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

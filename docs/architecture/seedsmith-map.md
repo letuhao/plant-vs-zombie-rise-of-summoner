@@ -1,6 +1,13 @@
 # Seedsmith — capability map
 
-**Status:** Map approved 2026-08-23; all module specs written (§8). Nothing is built yet.
+**Status (2026-09-06, corrected):** Map approved 2026-08-23. **Feature 1 (core, W1-W3) BUILT** —
+395 tests green, `seed_graph` absorbed and deleted. **Feature 2 (demons, D1-D4) BUILT** —
+84-species corpus emitted, families/motifs/themes generated from a real model run. **Feature 3
+(generation runtime, G0-G4) BUILT 2026-09-01** — see §3d; this header previously said "SPECCED AND
+SEALED, not built," which was stale by the time it was next read (2026-09-06): `tasks/seedsmith-plan.md`
+Part 5 shows CP-G0 through CP-G4 all reached with real evidence, and
+`data/seed/demons/commander-effect/all.json` (84 entries) is committed. Corrected here rather than
+left to mislead the next reader.
 
 A Python application that owns the health of every seed corpus in the repo: it validates what is
 there, measures what is missing or lopsided, and emits a **deterministically-planned** work order
@@ -74,7 +81,191 @@ frames, rung bands or drop tables. Everything item-shaped lives in `adapter-item
 | `pipeline` | LLM execution: structured output schemas, guardrails, validate-before-accept, bounded retry | `briefkit`, `metrics` |
 | `adapter-items` | All item-specific knowledge: kinds, registries, entry shapes, role/frame/band model | `corpus` |
 
+### 3b. Feature 2 — demons (proposed 2026-08-31)
+
+Ideal: [seedsmith-demons-ideal.md](seedsmith-demons-ideal.md), including its §6 adversarial audit —
+the `A#` references below are that audit's findings, and three of them changed this module set.
+
+**This is the feature §1 was built for:** *"Items are the first feature; the core is feature-agnostic
+by construction, because the second feature must not rewrite it."* Nothing below adds a planner, a
+briefkit or a pipeline. It adds an adapter, the pipelines that fill it, and two metric families.
+
+| id | Capability | Depends on |
+|---|---|---|
+| `demon-corpus-emit` | **C# dev-tool** — `DemonSpeciesCatalog` + `almanac_seed` + `recipes` → `data/seed/demons/*.json`, committed. C# because it reads SQLite and SQL belongs in `FusionRpg.Data` | — (outside seedsmith) |
+| `adapter-demons` | The `SeedAdapter`: kinds, registries, legality, **per-kind motif expression rules** (A1), and a deliberately empty `channels()` (A4) | `corpus`, `demon-corpus-emit` |
+| `family-extract` | LLM stage A — candidate family labels from name + description, each recording its `basis` | `adapter-demons`, `pipeline` |
+| `family-consolidate` | Candidate labels → the append-only family vocabulary. **Deterministic, or committed-and-deliberate** (A6) | `family-extract` |
+| `motif-derive` | Motifs + anti-motifs per demon. Pure derivation, carrying `basis` | `family-consolidate` |
+| `demon-metrics` | Per-demon coverage (A5) + motif-sharing that **excludes tautological both-`basis=name` pairs** (A2) | `metrics`, `motif-derive` |
+| `demon-themes` | Demons become **themes** the items and action corpora consume (A3) | `motif-derive` |
+
+**Spec audit:** [review/audit-demons-specs.md](seedsmith/review/audit-demons-specs.md) — 8 findings,
+3 blockers and 1 contradiction, all applied to the specs below.
+
+**Module specs** (written 2026-08-31, **approved by the owner 2026-08-31 and BUILT** — D1-D4 all
+complete, CP-D4 reached): [demon-corpus-emit](seedsmith/spec-demon-corpus-emit.md) ·
+[adapter-demons](seedsmith/spec-adapter-demons.md) ·
+[family-extract](seedsmith/spec-family-extract.md) ·
+[family-consolidate](seedsmith/spec-family-consolidate.md) ·
+[motif-derive](seedsmith/spec-motif-derive.md) ·
+[demon-metrics](seedsmith/spec-demon-metrics.md) ·
+[demon-themes](seedsmith/spec-demon-themes.md)
+
+**Why `family-extract` and `family-consolidate` are two modules and not one:** their determinism
+differs. Extraction is a model call — non-deterministic, therefore recorded and content-addressed.
+Consolidation decides the taxonomy every other module inherits, so it must be reproducible.
+Collapsing them hides a non-deterministic step inside a deterministic-looking artifact (A6).
+
+**Build order.** `D1` foundation: `demon-corpus-emit` → `adapter-demons`. `D2` taxonomy:
+`family-extract` → `family-consolidate` → `motif-derive`. `D3` measurement: `demon-metrics` —
+**gates D4**, because without A2/A5 there is no way to tell whether the taxonomy is real structure or
+a tautology. `D4` consumption: `demon-themes`.
+
+**D1 has standalone value:** it makes demons queryable by every metric seedsmith already has, with
+**zero model calls** — the same property that made W1 worth shipping alone.
+
+### ⛔ Cross-program dependency — `aspect-scope` (audit S2)
+
+D2's `aspect` kind depends on **`aspect-scope` being built**, not merely approved. It was approved
+2026-08-31, but the tier does not exist in code: `DemonSpeciesDef` still carries `ElementPrimary`,
+`ElementSecondary` and `TraitPool` on the *species*.
+
+**Owner: the demon program**, whose queue this feature does not control. Recorded here as a first-
+class dependency rather than a footnote in one module's open questions, because a dependency on
+another program's unscheduled work is the kind that surfaces late and at the worst moment.
+
+**Declaring the `aspect` kind in D1 is harmless; generating into it before the tier exists is not.**
+
+**Owner decision 2026-08-31: the demon program builds `aspect-scope` first, and D2's aspect
+generation waits for it.** D2's other kinds are not blocked — only aspect generation is. This makes
+the sequencing explicit rather than leaving D2 to discover the missing tier mid-build.
+
+### Roster decisions — the species cap is gone (owner, 2026-08-31)
+
+`DemonSpeciesGenerator` had a hard cap of **24** species. It is **removed**: `Generate` now takes
+`int? maxSpecies = null` meaning *no limit*, so every captured species becomes a demon and a PVZ
+update that adds almanac entries adds demons with no code change. Full reasoning, including why the
+caps register's original "no conflict" verdict was wrong, is in
+[`ssot-power-scale.md`](power/ssot-power-scale.md) §11.10a.
+
+Three consequences this feature must carry:
+
+| Consequence | Where it lands |
+|---|---|
+| `n` is a **measurement**, not a fixed design point — 84 eligible rows today, rising toward ~904 | `spec-demon-metrics` §2.2a; every sharing figure reports `demonCount` |
+| **Rarity is a snapshot, not an attribute.** `RarityForRank` is proportional in `count`, so a growing roster moves demons between tiers at unchanged rank (Common → Epic at rank 20 as `count` goes 24 → 904) | `spec-demon-themes` §2.4a; `spec-demon-corpus-emit` §9 Q1 |
+| **Membership churn is milder** — nothing is evicted by a better-ranked rival any more; a demon leaves only if the game drops its type | `spec-demon-themes` §2.4a |
+
+⚠️ **Open, owner's call, not a defect:** `RarityForRank` grants Legendary to `rank < 2` — absolute,
+while Epic and Rare are proportional. On a 900-demon roster that is two legendaries in the world.
+Whether that is the intent or an unscaled constant is a balance decision, and changing it moves the
+committed catalog.
+
+✅ **The catalog is regenerated: 24 → 84 species** (2026-08-31, from
+`dist/FusionRpg.Server/data`, 907 captured type rows → 84 usable). `Validate()` passes; the split is
+2 legendary / 14 epic / 21 rare / 47 common, 14 light / 14 dark, 2 hypno, 2 capture-only.
+
+Regenerating required fixing `tools/DemonCatalogGen`, which **could not run at all**: it never called
+`DerivedStatPolicy.Configure`, so `RpgStore`'s static ctor threw (tunables-ssot T5 — no built-in
+defaults). The catalog had quietly stopped being regenerable.
+
+It also moved one golden legitimately: `ExpeditionResolverTests.Tier_goldens_are_locked`, because
+`ExpeditionResolver.WildBand` picks wild enemies from `DemonSpeciesCatalog.All` and indexes by
+`rng.NextInt(band.Count)` — a bigger roster rolls a different enemy. Re-blessed with that reason
+recorded; the resolver's own determinism tests stayed green unchanged, proving it was selection and
+not a math break.
+
+Rarity itself also changed: `RarityForRank`'s legendary tier was a flat `rank < 2` and is now
+proportional like the others (**owner, 2026-08-31**) — see `ssot-power-scale.md` §11.10a. At 84
+species the split is 7 / 14 / 21 / 42.
+
+### D5 — `power-estimate`: the roster's missing power signal (owner decision 2026-08-31)
+
+**The constraint on seeding all ~900 species is not text — it is observed HP.** Measured
+2026-08-31: **100%** of the 84 eligible species have flavour text (889 of 904 almanac rows overall),
+but only **84 of 904** have `hp_base > 0`. `almanac_seed.hp` does not close the gap (82 rows — it
+mirrors observed stats), and sun cost is no fallback either (`cost_status` is `absent` for 815 of
+904). So the almanac gives names and flavour for ~900 species and **no power signal for 820 of them**,
+while `RarityForRank` ranks by observed HP.
+
+**Decision: an LLM estimates a power tier from the almanac text, recorded with `basis` and marked
+provisional.**
+
+| Property | Rule |
+|---|---|
+| Input | the species' own name and flavour text — the same corpus `family-extract` reads |
+| Output | a **tier**, never a number (`audit_schema` rejects a numeric field mechanically) |
+| Honesty | carries `basis` exactly as family labels do, and `blocked` is a legal answer |
+| Lifetime | **provisional** — superseded the moment that species is actually observed, never competing with a real measurement |
+
+**Why provisional is the load-bearing half.** An estimated tier that outlives its evidence becomes
+indistinguishable from a measured one, and rarity silently stops meaning "observed power". Marking it
+means capture coverage *improving* is what retires the estimate — the estimate degrades gracefully
+instead of hardening into fact.
+
+Rejected: ranking by `type_id`/almanac order (deterministic and model-free, but unlock order is not
+power, and nothing later corrects it), and shipping all 820 as Common (honest, but rarity would stop
+distinguishing anything for species that rarely spawn — possibly forever).
+
+⚠️ **Not yet specced.** This is a recorded decision and a module slot, not a spec. It also depends on
+a `provisional` marker existing on the species side, which is demon-program code — the same
+cross-program shape as `aspect-scope` above.
+
+### Scope of the "no core change" claim (audit S8)
+
+`spec-adapter-demons` §1 sets the criterion *"not one line of core code changed"*. **That holds for
+D1 only.** `demon-metrics` (D3) adds two files under `metrics/`, and `demon-themes` (D4) edits
+`adapters/items/registries.py`. Both are justified in their own specs — the metrics are genuinely
+generic, and the items change adds a *vocabulary* rather than a concept — but the claim is a D1
+property and should not be carried across the feature by implication.
+
+**Scope decisions taken 2026-08-31:**
+
+- **`environment` ships as a `KindSpec` but nothing generates into it in v1.** With no world host,
+  `sector:` bindings are rejected, so generated environment content would be flavour nothing reads —
+  and coverage would report those partitions "covered", making the feature look more finished than it
+  is (A7). The kind costs nothing and keeps the adapter shape stable for when the world host arrives.
+- **`provenance-supersede` is core backlog, not this feature.** Re-derivation that supersedes rather
+  than duplicates (A8) is cross-cutting — items hit the same wall the first time anything regenerates
+  — and burying a general fix inside a demons module is how it becomes demon-shaped by accident.
+  Tracked below in §3c.
+- **`lore-enrich` is deferred**, named rather than scheduled: it is what turns `basis = name` into
+  `basis = text`, and it depends on `provenance-supersede`.
+
+### 3c. Core backlog surfaced by feature 2
+
+| id | Capability | Why it is core, not demons |
+|---|---|---|
+| `provenance-supersede` | A re-derivation path that supersedes a prior generation instead of duplicating it. `ProvenanceLedger.record` currently **raises** on a re-recorded row — deliberately, since a second write is how idempotence fails — but regeneration after better input is a legitimate second write | Any corpus that regenerates hits this. Items will hit it first in practice |
+
 **Dependency direction** is strictly downward in that table; nothing depends on `pipeline`.
+
+### 3c-bis. `frame-classify` — requested by the item program (owner decision 2026-09-03)
+
+**Proposed, not built.** Recorded here rather than only in the consumer's map, because a cross-program
+ask that lives in one document surfaces late — the same reason `aspect-scope` is a first-class row in
+§3b instead of a footnote.
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `frame-classify` | LLM stage — each species' **body frame**: `humanoid` \| `plant` \| `hybrid`, from name + flavour text, carrying `basis`. Published through the theme registry | **yes** | `adapter-demons`, `pipeline` |
+
+**Why it belongs to this feature and not to items.** A frame describes a *body*, so it is species data
+— the same reasoning that sent per-species aptitude vectors to the demon program
+([item-ideal.md](item-ideal.md) D19). And it is **the shape this pipeline already produces**:
+`family-extract` and `motif-derive` both read a species' own text and return a judgement about what it
+is. Frame is one more such judgement, with the same honesty contract — a `basis` field, `blocked` a
+legal answer, and **an enum output that `audit_schema` can mechanically confirm carries no number**.
+
+⭐ **It fixes a conflation rather than inheriting one.** `DemonSpeciesDef.Side` carries faction *and*
+body in one field, and the shipped roster already breaks it: `peashooterzombie`, `ironpeazombie`,
+`cherrynutzombie` and `bucketnutzombie` are zombie-**side** with plant **bodies**. A classifier reading
+flavour text can see that; anything derived from `Side` cannot. **`hybrid` becomes a classification
+outcome instead of a special case.**
+
+**Consumer:** [item-map.md](item-map.md) §3.1 — its modules `slot-roles` (3) and `base-types` (6) both
+key on frame, and its plan opens by resolving this dependency.
 
 ```
 corpus ── adapter ─┬─ numerics ─┐
@@ -83,6 +274,95 @@ corpus ── adapter ─┬─ numerics ─┐
 ```
 
 ---
+
+### 3d. Feature 3 — generation runtime (capability map, 2026-09-01)
+
+Proposal: [seedsmith-agent-runtime-proposal.md](seedsmith-agent-runtime-proposal.md) ·
+Audit: [review/audit-agent-runtime-proposal.md](seedsmith/review/audit-agent-runtime-proposal.md)
+(`R#` below = that audit's findings). **All owner decisions closed 2026-09-01.**
+
+**Why this feature exists:** D1–D4 built a *classifier* — 84 species sorted into families. It
+generates no content. `aspect`, `commander-effect` and `environment` are declared kinds that nothing
+writes into, which is why `Coverage/DemonUncovered` reports 84 gaps. This feature is the generator.
+
+**The layer distinction that defines it:** `planner` answers *"which content, in what order"* (job
+orchestration — solved, kept). Nothing answers *"inside ONE generation: what steps, what state, when
+to branch/retry/resume"* (workflow definition). That is what `workflow-runtime` adds.
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `dependency-baseline` | `pyproject.toml`, exact pins, lockfile, isolated venv, CI install-from-lock, offline env-var assert, `response_format` constrained decoding in `llm_caller` | No | — |
+| `motif-prose-filter` | Restrict motif derivation to prose; drop stat/mechanic lines; prefer `flavorIntroduce` | **No** | `dependency-baseline` |
+| `workflow-runtime` | LangGraph seam: typed state, plain-function nodes, graph wiring, SQLite checkpoint/resume, bounded loops, dual-retry split, fan-out | No (infra) | `dependency-baseline` |
+| `quality-gates` | Deterministic validator library (tiers 1–2). **CoVe fully specified but NOT built** — audit S6: shoehorning is caused by bad motifs, which `motif-prose-filter` fixes for free; build CoVe only if it is *measured* to persist | No (tiers 1–2 are model-free) | `workflow-runtime` |
+| `commander-effect` | The first real per-demon content generator | Yes | `motif-prose-filter`, `workflow-runtime`, `quality-gates` |
+
+**Module specs** (written 2026-09-01, audited, **SEALED — approved by the owner 2026-09-01,
+authorized to build**; audit: [review/audit-generation-runtime-specs.md](seedsmith/review/audit-generation-runtime-specs.md),
+10 findings all applied, **zero open questions remain**). **BUILT 2026-09-01** (see Part 5 of
+`tasks/seedsmith-plan.md`, CP-G0 through CP-G4). **Amended and built 2026-09-06:**
+`spec-commander-effect.md` gained a corpus-wide near-duplicate check on `doctrine` — the sealed
+version measured per-item quality only, with no distribution/diversity gate at corpus scale, despite
+its own §9 probe already reproducing the thesaurus-collision failure at single-demon scale (Jaccard
+mean 0.52 across 3 generations for one demon). Found while auditing whether every seedsmith
+generator, not only `adapter-items`/`tree-plan`, has a deterministic pre-generation coverage check —
+and confirmed real: the already-committed 84-entry corpus had two near-duplicate doctrine pairs with
+nothing watching it. Closed by `KindSpec.dedup_fields` + `SemanticDedup`'s prose extension
+(`spec-analytics.md` §6.2b, `spec-adapter-demons.md` §2.7's amendment); 7 new tests, full suite
+1,777 passed / 1 pre-existing unrelated failure (`test_general_propose.py`, a hash-determinism issue
+in the actions pipeline, untouched by this change).
+[dependency-baseline](seedsmith/spec-dependency-baseline.md) ·
+[motif-prose-filter](seedsmith/spec-motif-prose-filter.md) ·
+[workflow-runtime](seedsmith/spec-workflow-runtime.md) ·
+[quality-gates](seedsmith/spec-quality-gates.md) ·
+[commander-effect](seedsmith/spec-commander-effect.md)
+
+**Build order:** `dependency-baseline` → (`motif-prose-filter` ∥ `workflow-runtime`) →
+`quality-gates` → `commander-effect`.
+
+`motif-prose-filter` and `workflow-runtime` are independent once the baseline lands and may run in
+parallel. **`motif-prose-filter` is the highest value-per-cost item in the feature** (R1) — no model,
+no framework, and it fixes the input every later generator consumes.
+
+**Locked decisions (owner, 2026-09-01) — not re-litigated in the specs:**
+
+| Decision | Choice | Why |
+|---|---|---|
+| Workflow engine | **LangGraph**, pinned `==1.2.11` | 4 claims verified by execution; nodes stay plain functions |
+| Structured output | **LM Studio constrained decoding**, zero deps | Hostile-prompt A/B: unconstrained returned prose and failed `json.loads`; constrained produced valid schema-conforming JSON at no latency cost |
+| Checkpoint store | **`SqliteSaver`** | seedsmith is dev tooling and **never ships** — `guard-dal`'s invariant protects the shipped game's data layer, which this is not part of. **Scope: checkpoints only**; Python still never reads the game's SQLite |
+| Model | **Local Gemma-26B**, no hosted tier | Measured 8/8 first-attempt pass, 0/8 anti-motif violations |
+| `environment` generation | **Cancelled** | Deterministic mapping — `spec-pipeline.md:109`: a pipeline for work a script can do is a slow, expensive, non-reproducible script |
+| `lore-enrich` | **Deferred**, and blocked | Would record synthetic text as `basis="text"`, corrupting the honesty signal `MotifSharing` depends on (R4). Needs `basis="enriched"` first |
+| `aspect` generation | **Blocked** | `aspect-scope` approved but unbuilt in the demon program |
+
+---
+
+### 3c-ter. Theme registry — two defects filed by the item program (D34, 2026-09-04)
+
+⛔ **`data/seed/demons/_registry/themes.v1.json` is stale: 84 themes against 386 shipped species**
+(`data/seed/demons/species/` — 292 plant + 94 zombie, counted 2026-09-04). The registry is a snapshot
+of a corpus this pipeline **generates**, and the corpus grows every run. Any downstream consumer that
+reads it as the species population is reading fiction.
+
+> ⭐ **This is the defect that made an item-program question look like a product decision.** [item-ideal.md](item-ideal.md)
+> §2g #9d read *"31 of 84 themes are `basis = name`, that is 37%, module 13 needs a standing answer"* —
+> and 37% of a stale snapshot is not a rate. The owner's correction was the right one: **the number is
+> a defect, not an input.**
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `theme-refresh` | Republish `themes.v1.json` over the **whole** species corpus, not a snapshot. Staleness becomes a pipeline check, not something a consumer discovers | no | `adapter-demons` |
+| `theme-enrich` | LLM stage — for any theme at `basis: "name"`, generate the flavour text that raises it to `basis: "text"`. **The same shape `family-extract` and `motif-derive` already are**, with the same honesty contract | **yes** | `theme-refresh`, `pipeline` |
+
+**Why `theme-enrich` and not an "ask first" downstream.** `basis: "name"` is not a property of the
+species — it is a record of what the pipeline had when it ran. **This pipeline generates the missing
+input**, exactly as the species and action generators do. A consumer that designs around name-basis
+themes is designing around absent data instead of asking for it.
+
+**Consumer:** [item-map.md](item-map.md) module 13 (`set-charm-gen`), which drops its per-run gate once
+`theme-enrich` lands. Also unblocks [item-ideal.md](item-ideal.md) §2g #9c's `set` `themeKey`
+requirement, which keys on `speciesId` and therefore needs the full corpus published.
 
 ## 4. Build order
 
@@ -269,8 +549,48 @@ thing — **dependency-correct generation order** — and the set case showed th
 not only *between* kinds but *inside* one: a set is five ordered stages, three of them deterministic,
 and the agentic build asked a single agent to do all five at once.
 
-### Still open
+### ~~Still open~~ ✅ CLOSED 2026-09-01 — all four resolved by shipped work
 
-Buildability B1–B4 (undefined interface types, item vocabulary inside the feature-agnostic modules,
-no CLI specification, no CI cutover for absorbing `seed_graph`) and the grounding corrections — all
-spec work, no decisions needed.
+This section was written 2026-08-23, **before W1 was built**. Re-verified against the tree; every
+item is done, and none needed a decision:
+
+| # | Was open | Resolved by | Verified |
+|---|---|---|---|
+| B1 | undefined interface types | `adapters/base.py` | `KindSpec`, `Dimension`, `Channel`, `RegistrySet`, `SeedAdapter` all defined |
+| B2 | item vocabulary inside the feature-agnostic modules | the `_stub` adapter + its conformance suite | `_stub` present, **10 seam tests**; the demons adapter (feature 2) shipped without the core learning a demon concept |
+| B3 | no CLI specification | `seedsmith/report/cli.py` | `python -m seedsmith --help` → `{check, metrics}`, working |
+| B4 | no CI cutover for absorbing `seed_graph` | S10's cutover | `tools/seed_graph/` **deleted**; `ci.yml:85` runs *"Item seed reachability (seedsmith)"* with the cutover recorded in-line |
+
+The grounding corrections landed with the specs they belonged to.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `dungeon` adapter and pipelines | `party-dungeon/spec-dungeon-seed-contract.md` (approved) | `adapters/registry.py:13-15` gains `dungeon`; seven corpus kinds under `data/seed/dungeon/`; `python -m seedsmith dungeon contract --audit \| plan \| run \| audit \| emit`; planner per-cell motif briefs; provenance `{planHash, briefHash, promptVersions, registryVersions, motifSubsetHash}`; `stale_ids`; nothing exists on disk today (`party-dungeon/spec-domain-catalog.md` §Drift 5) |
+| `uniques` extension | `party-dungeon/spec-unique-pipeline.md` §1 | one ownership level per `unique` field on `adapters/items/kinds.py:56-60`; a set-stem audit check; `adapters/items/uniques/{planner,briefs,pipelines,audit}.py` over the `frame × axis × band` grid (30 cells, 2–3 per cell, first ship 30 beside the 49 at rung 80+); `python -m seedsmith items uniques contract --audit \| plan --dry-run \| run \| audit`; tests stub the transport to raise |
+
+
+## Filed by the item program (2026-09-06)
+
+One ask, and it is a **mechanics question about §3c-bis's own publication channel**, not a request to
+change scope or schedule. Filed here rather than only in the consumer's map for the reason §3c-bis
+itself gives: a cross-program ask that lives in one document surfaces late.
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| **How does `frame-classify` publish a frame for a `blocked` demon?** | `item-todo.md` P0.4 (`tasks/`), against §3c-bis above | §3c-bis says frame is *"Published through the theme registry"*, and `item-map.md:61` says the same. But `spec-demon-themes.md` §2.2 defines that registry as `speciesId → { displayName, motifs[], antiMotifs[], expression{}, basis }` — **no `frame` key** — and §2.4/§7 make *"publishes no theme"* a **Never** for a demon whose motifs are `basis = "blocked"`, so such a demon has **no row to carry a frame on**. The item side's requirement is that **frame publishes independently of theme status** (a blocked demon still has a body, and frame is not a theme). Those two cannot both hold as written. **Live today: 15 of 840 anchors sit at `basis: "blocked"`**, so it bites on the first run, not at scale |
+
+**What the item program is *not* asking for.** Not a schedule, not a priority, and not a particular
+answer — the channel is this feature's to choose, and at least three are open (a `frame` key on the
+theme row plus a frame-only row for blocked demons; a separate `frames.v1.json` registry; or frame as
+an anchor field written back to `species/`). Item-side consumers are inert and stay inert either way:
+`EquipGate.cs:80-85`'s frame arm is a proven no-op while `actor.Frame` is null, pinned by
+`The_frame_arm_is_inert_while_no_species_carries_a_frame`, and `LootPipeline.cs:318-326` falls back to
+a uniform draw. Nothing breaks while this is open; it is the **acceptance** (*"every species carries a
+frame"*) that cannot be met through the channel currently named.
+
+⚠ **One correction offered, not imposed.** `item-map.md` §3.1 and this map's §3c-bis both describe the
+species corpus at *"~904 species"*. Measured 2026-09-06 off `data/seed/demons/species/_index.json`:
+**840** species across **502** family files. The item program has corrected its own side; this map's
+number is yours to change or keep.

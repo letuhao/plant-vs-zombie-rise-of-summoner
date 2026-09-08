@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiBase, useHealth, useHubStatus } from "@/lib/bus";
 import { PanelShell } from "@/shell/PanelShell";
 import { captureNextKey, listForbiddenKeys } from "@/shell/keymap";
@@ -11,6 +11,7 @@ import {
   conflictFor,
   currentBindings,
   rebind,
+  reservedRangeReasonFor,
   resetBindings,
   type BindableActionId
 } from "./keybindings";
@@ -84,6 +85,7 @@ function Toggle({ on, onToggle, testId }: { on: boolean; onToggle: () => void; t
  * registry (GG-20) with real, working rebinding and conflict detection.
  */
 export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>("preferences");
   const [prefs, setPrefs] = useState<SystemPreferences>(DEFAULT_PREFERENCES);
@@ -150,7 +152,13 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
         return;
       }
       if (listForbiddenKeys().some((k) => k.toLowerCase() === key.toLowerCase())) {
-        setReservedAttempt(key);
+        setReservedAttempt(`${key.toUpperCase()} is reserved for the game launcher and can't be bound here.`);
+        setListeningFor(null);
+        return;
+      }
+      const digitReason = reservedRangeReasonFor(key);
+      if (digitReason != null) {
+        setReservedAttempt(digitReason);
         setListeningFor(null);
         return;
       }
@@ -180,13 +188,14 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
       band="system"
       footer={
         <>
-          {/* T25/T29 (plate 06 §C): no Title stage exists yet (that's its own gap, outside this
-              task) — say so on the button itself rather than a silent no-op. */}
+          {/* fe-essentials: the Title screen this button was waiting on now exists (plate 01 §A). */}
           <Button
             variant="ghost"
-            disabled
-            title="No title screen exists yet"
             data-testid="system-quit-to-title"
+            onClick={() => {
+              onOpenChange(false);
+              navigate("/");
+            }}
           >
             Quit to title
           </Button>
@@ -219,7 +228,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
           type="button"
           data-testid="system-tab-sound"
           disabled
-          title="No audio pipeline exists yet — out of scope for this refactor (gap G10)"
+          title="Sound settings aren't available yet."
           className="cursor-not-allowed rounded-sm border border-transparent px-2 py-1 text-xs text-faint opacity-60"
         >
           Sound
@@ -349,7 +358,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
               <p className="text-xs text-muted">
                 {import.meta.env.DEV
                   ? "English is the only shipped locale; Pseudo wraps every string for layout QA."
-                  : "English is the only shipped locale (web/spec.md §10) — a second one is enabled by this work, not delivered by it."}
+                  : "English is the only language available right now."}
               </p>
             </div>
             <Segmented
@@ -447,9 +456,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
 
           {reservedAttempt ? (
             <div className="rounded-sm border border-bad p-3" data-testid="keybind-reserved-refusal">
-              <p className="text-sm text-bad">
-                {reservedAttempt.toUpperCase()} is reserved for the game launcher and can't be bound here.
-              </p>
+              <p className="text-sm text-bad">{reservedAttempt}</p>
               <Button
                 size="sm"
                 variant="ghost"

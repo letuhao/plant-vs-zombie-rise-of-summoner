@@ -1,0 +1,67 @@
+{
+  "slug": "summoning-altar",
+  "title": "Summoning altar",
+  "status": "Shipped",
+  "kicker": "Roster and summoning · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "The **altar** is where you spend **souls** to pull new demons into the roster — pity is shown so you always know how close the next strong pull is.",
+  "blindSpots": [
+    {"term": "Altar", "meaning": "The summon surface in the control room (Summon / Demons). Not a lawn plant, not a world-map building."},
+    {"term": "Pull", "meaning": "One spend of souls that adds a specimen. Costs are on screen — this guide does not invent numbers."},
+    {"term": "Pity", "meaning": "Progress toward a stronger result. Shown on the altar so the bank does not feel like a black box."},
+    {"term": "Gacha", "meaning": "Random pulls for new demons. One intake path — [wild joins](wild-joins) and capture are others."}
+  ],
+  "alsoTrue": [
+    "Altar spends [souls](souls), not essence.",
+    "New specimens land on the [roster](specimens)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "A soul sink that grows the roster.",
+        "You watch pity climb so strong pulls are readable, not hidden."
+      ]
+    },
+    {
+      "title": "How a pull feels",
+      "steps": [
+        "Earn souls from play.",
+        "Open the altar when you can afford a pull.",
+        "Confirm the spend — souls leave the bank with no refund.",
+        "Read the new specimen on Creatures."
+      ],
+      "diagram": [
+        "  play  ->  souls  ->  altar pull  ->  new specimen"
+      ]
+    },
+    {
+      "title": "What the altar is not",
+      "paras": [
+        "It is not the only way to get demons.",
+        "It is not Fusion (`F`) — fusion merges specimens you already have."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Check souls on the HUD after a lawn match or other play.",
+    "Open Summon / Demons and read the pity and cost on screen.",
+    "Pull once when you can afford it, then open Creatures (`C`) to meet the new specimen."
+  ],
+  "doNote": "Stop when altar ≠ fusion is clear. Bind next: [pacts and loyalty](pacts-loyalty).",
+  "mixUps": [
+    {"q": "Do I spend essence here?", "a": "No. Essence is for fusion’s element gate. The altar spends souls."},
+    {"q": "Can I refund a bad pull?", "a": "No. Confirmed spends leave the bank."},
+    {"q": "Is pity secret?", "a": "No. It is shown on the altar on purpose."},
+    {"q": "Must I pull forever to grow?", "a": "No. Wild joins and other intakes exist — gacha is one path."}
+  ],
+  "next": ["pacts-loyalty"],
+  "related": ["souls", "specimens", "wild-joins", "specimen-fusion"],
+  "sources": [
+    "docs/guide/creatures.md §Summon",
+    "docs/architecture/demons/spec-demon-summoning.md",
+    "docs/guide/mechanisms/summoning-altar.md (prior stub)"
+  ]
+}

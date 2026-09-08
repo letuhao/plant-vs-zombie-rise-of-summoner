@@ -1,0 +1,98 @@
+using FusionRpg.Contracts;
+using FusionRpg.Core.ActorSurface;
+using FusionRpg.Core.Stats.Derived;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.ActorSurface;
+
+public sealed class DerivedAuditCoverageTests
+{
+    [Fact]
+    public void Registry_pin_stays_269()
+    {
+        Assert.Equal(DerivedAuditCoverage.RegistryPin, DerivedStatRegistry.CreateDefault().AllRegistered.Count);
+    }
+
+    [Fact]
+    public void Cook_expand_ids_are_subset_of_registry_and_classify_known_absences()
+    {
+        ConfigureAllSurfaceCatalogs();
+        var cook = DerivedSurfaceCook.Build("en", "plant");
+        var cookIds = DerivedAuditCoverage.EnumerateCookExpandIds(cook);
+        var registry = DerivedStatRegistry.CreateDefault();
+        var registered = registry.AllRegistered.Select(d => d.ChannelId).ToHashSet(StringComparer.Ordinal);
+        Assert.Equal(269, registered.Count);
+        Assert.NotEmpty(cookIds);
+        foreach (var id in cookIds)
+            Assert.True(registered.Contains(id), "cook expand missing from registry: " + id);
+
+        // Empty sheet → every cook id is missing; arm channels classify as no-producer.
+        var emptySheet = new ActorSheetDto { InstanceId = "x", Derived = Array.Empty<ActorSheetChannelDto>() };
+        var report = DerivedAuditCoverage.Build(cook, registry, emptySheet, treeAtomsPresent: false);
+        Assert.Equal(cookIds.Count, report.MissingCook.Count);
+        Assert.Equal(269, report.MissingRegistry.Count);
+        Assert.Contains(DerivedStatChannels.ProgressionBonusArm1, report.Classified.ExpectedNoProducer);
+        Assert.Contains(DerivedStatChannels.ProgressionBonusArm2, report.Classified.ExpectedNoProducer);
+        Assert.Contains("(tree-atoms-absent)", report.Classified.ExpectedInjectorTreeGap);
+        Assert.True(report.Classified.GapUnwired.Count > 0);
+    }
+
+    [Fact]
+    public void Full_registry_sheet_with_no_contribs_classifies_status_and_no_producer()
+    {
+        ConfigureAllSurfaceCatalogs();
+        var cook = DerivedSurfaceCook.Build("en", "plant");
+        var registry = DerivedStatRegistry.CreateDefault();
+        var sheet = new ActorSheetDto
+        {
+            InstanceId = "x",
+            Derived = registry.AllRegistered
+                .Select(d => new ActorSheetChannelDto
+                {
+                    ChannelId = d.ChannelId,
+                    Value = d.DefaultValue,
+                    Contributions = Array.Empty<ActorContributionDto>()
+                })
+                .ToList()
+        };
+        var report = DerivedAuditCoverage.Build(cook, registry, sheet, treeAtomsPresent: true);
+        Assert.Empty(report.MissingCook);
+        Assert.Empty(report.MissingRegistry);
+        Assert.Equal(report.CookExpandCount, report.PresentCount);
+        Assert.Empty(report.Touched);
+        Assert.Contains(DerivedStatChannels.ProgressionBonusArm1, report.Classified.ExpectedNoProducer);
+        Assert.Contains(report.Classified.ExpectedStatusSession, id => id.StartsWith("status.", StringComparison.Ordinal));
+        Assert.DoesNotContain("(tree-atoms-absent)", report.Classified.ExpectedInjectorTreeGap);
+        Assert.Contains(report.Classified.GapUnwired, id => id.StartsWith("combat.", StringComparison.Ordinal));
+    }
+
+    static void ConfigureAllSurfaceCatalogs()
+    {
+        ActorSurfaceCatalogHub.ConfigureAll(
+            AptitudeSurfaceCatalogLoader.Parse(ReadTuning("aptitude-catalog.v1.json")),
+            DerivedStatSurfaceCatalogLoader.Parse(ReadTuning("derived-stat-catalog.v2.json")),
+            StatusSurfaceCatalogLoader.Parse(ReadTuning("status-catalog.v1.json")),
+            ResourceSurfaceCatalogLoader.Parse(ReadTuning("resource-catalog.v1.json")),
+            ElementSurfaceCatalogLoader.Parse(ReadTuning("element-catalog.v1.json")),
+            ActorSheetSurfaceCatalogLoader.Parse(ReadTuning("actor-sheet.v1.json")));
+    }
+
+    static string ReadTuning(string fileName)
+    {
+        var root = FindRepoRoot();
+        return File.ReadAllText(Path.Combine(root, "data", "tuning", fileName));
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "RiseOfSummoner.sln"))
+                || File.Exists(Path.Combine(dir.FullName, "data", "tuning", "derived-stat-catalog.v2.json")))
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new InvalidOperationException("repo root not found");
+    }
+}

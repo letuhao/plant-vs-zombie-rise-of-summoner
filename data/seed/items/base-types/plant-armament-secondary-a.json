@@ -30,7 +30,7 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -70,7 +70,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.vaporous-prickle",
       "flavorKey": "flavor.base.vaporous-prickle",
       "flavor": "A mist guards the smallest points. What dissolves can still defend.",
@@ -107,7 +107,7 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.smoking-nettle",
       "flavorKey": "flavor.base.smoking-nettle",
       "flavor": "Contact feeds it. Every brush draws something back.",
@@ -141,13 +141,13 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.wafting-gum",
       "flavorKey": "flavor.base.wafting-gum",
-      "flavor": "Sticky vapor hangs in the air. It does not disperse \u2014 it settles.",
+      "flavor": "Sticky vapor hangs in the air. It does not disperse — it settles.",
       "tags": [
         "light",
         "organic",
@@ -181,7 +181,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.perfumed-aculeus",
       "flavorKey": "flavor.base.perfumed-aculeus",
       "flavor": "A Latin name for the sting. Beauty has teeth.",
@@ -218,7 +218,7 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.aromatic-spine",
       "flavorKey": "flavor.base.aromatic-spine",
       "flavor": "A scent that draws others near. Prey comes to the fragrance.",
@@ -252,10 +252,10 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.seeping-bracken",
       "flavorKey": "flavor.base.seeping-bracken",
       "flavor": "Moisture oozes from every frond. The wound will not close.",
@@ -363,7 +363,7 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -400,7 +400,7 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -441,7 +441,7 @@
         "family": "atom.warded",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.weeping-briar",
       "flavorKey": "flavor.base.weeping-briar",
       "flavor": "Thorns weep resin in constant tears. The shield is the sorrow.",

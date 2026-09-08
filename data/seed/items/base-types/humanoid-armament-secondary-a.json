@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "seed-contract.md \u00a72-6, \u00a79; classes.v1.json implicit slates for armament-secondary; words.v1.json armament-secondary.humanoid noun pool and offhand.humanoid class rung adjective pools"
+    "sourceRef": "seed-contract.md §2-6, §9; classes.v1.json implicit slates for armament-secondary; words.v1.json armament-secondary.humanoid noun pool and offhand.humanoid class rung adjective pools"
   },
   "entries": [
     {
@@ -66,10 +66,10 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.retribution",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.studded-tray",
       "flavorKey": "flavor.base.studded-tray",
       "flavor": "A serving tray with nails driven through from below. Grim, but effective.",
@@ -139,10 +139,10 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.warded-clipboard",
       "flavorKey": "flavor.base.warded-clipboard",
       "flavor": "A clipboard reinforced with straps and bindings. Meant to hold documents; now holds the line.",
@@ -175,10 +175,10 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.bright-flashlight",
       "flavorKey": "flavor.base.bright-flashlight",
       "flavor": "A rechargeable torch with batteries that never seem to die. Blinds and dazzles in equal measure.",
@@ -248,7 +248,7 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -284,7 +284,7 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -323,7 +323,7 @@
         "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.battered-shutter",
       "flavorKey": "flavor.base.battered-shutter",
       "flavor": "A wooden window shutter warped from years of weather and stripped of its hinges. Heavy, blocky, effective.",
@@ -393,7 +393,7 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -429,10 +429,10 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.retribution",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.latticed-grate",
       "flavorKey": "flavor.base.latticed-grate",
       "flavor": "A cast-iron storm drain grate, still caked with rust and soil. Heavier than it should be, more effective than it looks.",

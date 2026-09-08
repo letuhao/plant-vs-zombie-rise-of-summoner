@@ -1,6 +1,6 @@
 # Combat damage SSOT — RPG overlay damage layer
 
-**Status:** **Shipped (flag-gated)** — TargetResolver, instant Funnel fan-out, LIVE board snapshot, Element Hub ring-cycle runtime, and overlay combat calculator (`OverlayCombatMath`) are in code. Enable with cheat `OVERLAY-COMBAT` or env `FUSIONRPG_OVERLAY_COMBAT=1`. Packets without `elementPayload` still pass-through. Legacy Counter/DoT delivery may still use `DeliverySpec` until fully on StatusRuntime.  
+**Status:** **Shipped, default-on** (2026-08-30, aura-skill T8) — TargetResolver, instant Funnel fan-out, LIVE board snapshot, Element Hub ring-cycle runtime, and overlay combat calculator (`OverlayCombatMath`) are in code and proven C1–C13 green on a real lawn (`docs/runbook/melon-live-checklist.md` §8b). Cheat `OVERLAY-COMBAT` (or env `FUSIONRPG_OVERLAY_COMBAT=1`) now defaults **on** in all three cheat registries; the toggle still exists to turn it off for isolation. Packets without `elementPayload` still pass-through. Legacy Counter/DoT delivery may still use `DeliverySpec` until fully on StatusRuntime.  
 **Parent:** [decisions.md](decisions.md) (ADR rows **Combat damage SSOT**, **Element Hub SSOT**, **Actor Hub SSOT**, **Status SSOT**). Targeting and apply path: [effect-funnel.md](effect-funnel.md), [effect-runtime.md](effect-runtime.md). Element input: [element-hub-ssot.md](element-hub-ssot.md) §8.5. Timed state stays in [status-ssot.md](status-ssot.md).
 
 This spec defines how FusionRpg computes **overlay damage only**. It does **not** replace Unity projectile, bite, or vanilla `TakeDamage` flow.
@@ -195,7 +195,7 @@ attackerPower(E) = combat.power.omni + combat.power.E
 defenderDefense(E) = combat.defense.omni + combat.defense.E
 ```
 
-Omni is additive-only.
+Omni is additive-only. **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 
 ### 6.2 Matchup bonus (per-component)
 

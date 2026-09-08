@@ -79,7 +79,15 @@ public class StatTaxonomyTests
             "StatusPotencyPoints", "PerMilleRatio", "Milliseconds", "Count", "Flag", "LadderIndex",
             // class-system additions, both authorised 2026-08-26 (spec-primary-stats.md §3.2,
             // spec-unit-class-close.md §3.3/§3.5) — ten classes become twelve.
-            "AptitudePoints", "ReciprocalPoints"
+            "AptitudePoints", "ReciprocalPoints",
+            // world-numbers W37/W38, authorised 2026-09-04 (spec-magnitude-and-units.md §3) — twelve
+            // become thirteen. ⚠️ Note what this list IS: a fourth hand-maintained copy of the member
+            // set, in a test named "referenced not redefined". The enum, the TypeScript union, the
+            // ledger doc and this array must all be edited together, and on 2026-09-04 three of the
+            // four were — the enum was missed, and `UnitClassContractParityTests` sat red until
+            // someone read it. The duplication is deliberate (each copy guards a different boundary),
+            // but it is exactly why adding a class needs all four touched in one change.
+            "LoamUnits"
         };
         Assert.Equal(expectedUnits.OrderBy(x => x), Enum.GetNames(unitClassTypes[0]).OrderBy(x => x));
 
@@ -141,14 +149,14 @@ public class StatTaxonomyTests
         // 157 -> 160 (class-system `poise-resource`, 2026-08-26: poise's three resource channels) ->
         // 31 (class-system P1.5 reader census, 2026-08-26): 129 channels gained a real Unit once their
         // production reader was found and verified (16 combat H.1 families x 7 slots = 112, plus 16
-        // status duration/intensity fixed-category channels, plus combat.heal.power = 129). The
+        // status duration/intensity fixed-category channels, plus resource.restore.hp = 129). The
         // remaining 31 are exactly the 8 reader-less families' channel counts (skill.cooldown 5 +
         // skill.effectiveness 5 + resource.max 6 + resource.regen 6 + resource.efficiency 6 +
         // move.range 1 + progression.xpRate 1 + progression.breakthroughSuccess 1 = 31) — every one of
         // which now carries a UnitClassNote instead (asserted separately, NoNullUnitClassWithoutANote
         // below), so a null Unit is never unexplained.
         var newNullUnitCount = AllRegistered.Count(d => !original.Contains(d.ChannelId) && d.Unit is null);
-        Assert.Equal(31, newNullUnitCount);
+        Assert.Equal(37, newNullUnitCount);
     }
 
     [Fact]
@@ -170,9 +178,11 @@ public class StatTaxonomyTests
     {
         // 9 progression (7 + H.7's 2) + 24 status constants (8 + H.2's 16) + 196 combat (84 + H.1's 112)
         // + 1 healing + 18 resource (15 + `poise`'s 3, 2026-08-26) + 1 move.range + 10 action-category
-        // + 2 turn (speed/haste, P0.5, 2026-08-28) = 261 (99 -> 256 T2 -> 259 class-system
-        // `poise-resource` -> 261 P0.5/battle-timeline B9).
-        Assert.Equal(261, AllRegistered.Count);
+        // + 2 turn (speed/haste, P0.5, 2026-08-28) + 1 loadout.slots (H.8, D4.25, 2026-09-06)
+        // + 1 ai.aggression (H.9, base-defense siege-ai §5.20 rule 4, 2026-09-07) = 269
+        // (99 -> 256 T2 -> 259 class-system `poise-resource` -> 267 P0.5/battle-timeline B9 -> 268
+        // party-dungeon D4.25 -> 269 base-defense siege-ai).
+        Assert.Equal(269, AllRegistered.Count);
 
         // Every def classifies except five non-combat channels the counterbalance rule does not apply
         // to: the two Theta/progression channels (actor-hub-ssot.md §H.0's "Non-combat" row), plus

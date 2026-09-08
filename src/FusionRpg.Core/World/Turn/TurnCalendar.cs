@@ -7,7 +7,7 @@ namespace FusionRpg.Core.World.Turn;
 /// sector-development, which is the module that owns growth.
 /// </summary>
 public readonly record struct CalendarRoll(
-    bool WeekBoundary, bool MonthBoundary, bool SpecialWeek, bool SpecialMonth, bool Plague);
+    bool WeekBoundary, bool MonthBoundary, bool SpecialWeek, bool SpecialMonth, bool Plague, int Season);
 
 /// <summary>
 /// A turn is a day, seven days a week, four weeks a month (spec-turn-engine.md §Calendar). The
@@ -28,13 +28,27 @@ public static class TurnCalendar
     public static int SpecialMonthChanceMilli => World.WorldTuningHub.Tuning.Calendar.SpecialMonthChanceMilli;
     public static int PlagueChanceMilli => World.WorldTuningHub.Tuning.Calendar.PlagueChanceMilli;
 
+    /// <summary>world-map W47 (spec-sector-development.md §2): count and length come from the same tuning file, beside `Calendar`, because a season *is* the calendar.</summary>
+    public static int SeasonCount => World.WorldTuningHub.Tuning.Seasons.Count;
+    public static int MonthsPerSeason => World.WorldTuningHub.Tuning.Seasons.MonthsPerSeason;
+
+    /// <summary>
+    /// world-map W47: a season is a pure function of the turn — no RNG, no state
+    /// (spec-sector-development.md §2). Unlike every other member of <see cref="CalendarRoll"/>,
+    /// this is meaningful on **every** turn, not only a week boundary — "what season is it" is never
+    /// fogged and never gated, so it is computed unconditionally before any of <see cref="Roll"/>'s
+    /// early returns rather than defaulting to zero on a turn that happens not to be a boundary.
+    /// </summary>
+    public static int SeasonOf(int turn) => turn / (DaysPerMonth * MonthsPerSeason) % SeasonCount;
+
     public static CalendarRoll Roll(int turn, ulong seed)
     {
-        if (turn <= 0) return default;
+        var season = SeasonOf(turn);
+        if (turn <= 0) return new CalendarRoll(false, false, false, false, false, season);
 
         var weekBoundary = turn % DaysPerWeek == 0;
         var monthBoundary = turn % DaysPerMonth == 0;
-        if (!weekBoundary) return default;
+        if (!weekBoundary) return new CalendarRoll(false, false, false, false, false, season);
 
         // One stream per boundary kind, derived from the turn: an extra roll in one never shifts
         // the other, which is the same discipline the battle engine uses.
@@ -54,6 +68,6 @@ public static class TurnCalendar
             if (plague) specialMonth = false;
         }
 
-        return new CalendarRoll(weekBoundary, monthBoundary, specialWeek, specialMonth, plague);
+        return new CalendarRoll(weekBoundary, monthBoundary, specialWeek, specialMonth, plague, season);
     }
 }

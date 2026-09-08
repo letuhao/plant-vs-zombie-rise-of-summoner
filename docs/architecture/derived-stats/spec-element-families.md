@@ -54,10 +54,10 @@ lowers, same quantity); only ownership flips. Per Q2 the genre names stay and th
 module fixes only the column above — *which side of mitigation* — because that is what decides
 `Contest` vs `Feeder` and therefore whether the pair is required at all.
 
-### 2.1 Omni stays additive-only
+### 2.1 Omni stays additive-only **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 
 `totalX = X.omni + X.{element}` for every new family, exactly as §7 locks for the shipped eight.
-The bans extend unchanged: no `omni × element` for penetration, parry, block or reflection.
+~~The bans extend unchanged~~ **Bans removed 2026-09-02** — the default stays `omni + element` for penetration, parry, block and reflection.
 
 ### 2.2 Matchup interaction — the one real design question, answered
 
@@ -156,7 +156,7 @@ got 44 channels out of date in the first place.
 
 ## 7. Boundaries
 
-**Always** — generate, never hand-list. Omni additive-only. Cite §8.6 when touching matrix authority.
+**Always** — generate, never hand-list. Omni additive-only. **[Ban removed 2026-09-02 — `element-hub-ssot.md` §7; combination is tunable, default additive.]** Cite §8.6 when touching matrix authority.
 
 **Ask first** — any new family reading the matchup matrix (§2.2 says none do). Adding a 7th element
 (free by generation, but Element Hub's decision).

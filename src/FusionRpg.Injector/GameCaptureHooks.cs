@@ -113,6 +113,16 @@ public static class GameCaptureHooks
                 ["plantPtr"] = plant != null ? GameDumps.Ptr(plant) : "",
                 ["row"] = theRow
             });
+            if (plant != null)
+            {
+                try
+                {
+                    var ptr = GameDumps.Ptr(plant);
+                    Hud.ActorHudUniqueFlags.Mark(ptr);
+                    Hud.ActorHudCache.MarkDirty(ptr);
+                }
+                catch { }
+            }
         }
     }
 

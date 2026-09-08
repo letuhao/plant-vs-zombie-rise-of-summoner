@@ -17,6 +17,20 @@ public static class EffectTriggers
     public const string OnGranted = "OnGranted";
     public const string OnRemoved = "OnRemoved";
     public const string OnTimer = "OnTimer";
+
+    /// <summary>E33 (spec-activation-edge.md §2.1): an actor's own decision to act. Mirrors
+    /// AtomTriggers.OnActivate (A18b) — the two constants must be byte-identical, because EffectBag
+    /// matches by string.</summary>
+    public const string OnActivate = "OnActivate";
+
+    // E34 (spec-trigger-vocabulary.md §2.1): five match/board-economy triggers — input only, no kind
+    // or executor of their own (that is E35/E36's job). Mirrors AtomTriggers.OnWave etc. exactly, for
+    // the same byte-identical reason as OnActivate above.
+    public const string OnWave = "OnWave";
+    public const string OnMatchStart = "OnMatchStart";
+    public const string OnMatchEnd = "OnMatchEnd";
+    public const string OnSunCollect = "OnSunCollect";
+    public const string OnGridPlace = "OnGridPlace";
 }
 
 public static class EffectActions
@@ -32,6 +46,71 @@ public static class EffectActions
     public const string Economy = "Economy";
     public const string ApplyResourceDelta = "ApplyResourceDelta";
     public const string GrantShield = "GrantShield";
+
+    /// <summary>
+    /// aura-skill-todo.md Phase 5 / TC2 — the derived-channel write. Unlike every opcode above it,
+    /// this one is DECLARATIVE: nothing executes it. A `stat.derived` atom is a permanent modifier
+    /// that declares no trigger (AtomKindRegistry: "Permanent modifier: declares no trigger"), so the
+    /// bag never fires it; the grant's mere presence is the effect, folded at resolve time by
+    /// `GrantedDerivedAtomReader` -> `AtomDerivedSubsystem` -> `ActorHub`. It therefore needs no sink
+    /// executor, which is why adding it does not touch `InjectorEffectActionSink` or `BattleEffectSink`.
+    /// </summary>
+    public const string ModifyDerivedStat = "ModifyDerivedStat";
+
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.5): match.modify's opcode — sets one `Board.config` field for the
+    /// match through `CheatState` + `CheatActions.ApplyBoardConfig`. `/effects/contract`'s `actions`
+    /// array already reflects every public const on this class (`DebugEndpoints.cs`,
+    /// `PublicConstStrings(typeof(EffectActions))`), so this constant publishing itself is the whole
+    /// of this module's own "grow the published list" obligation — no endpoint edit needed.
+    /// </summary>
+    public const string ModifyMatch = "ModifyMatch";
+
+    /// <summary>
+    /// E36 (spec-wave-control.md §2.1): wave.control's opcode — summon|huge|setTimer|hold, all four
+    /// against existing `CheatActions`/`DebugActions` entry points, no new host write. Refused at
+    /// `EffectEventDto.ChainDepth > 0` (§2.3) — `summon`/`huge` cause spawns, which re-emit the events
+    /// that could re-trigger this same atom, and that loop cannot be diagnosed after the fact. Same
+    /// reflection-published obligation as `ModifyMatch` above — declaring this constant is the whole
+    /// of the "grow the published list" requirement.
+    /// </summary>
+    public const string WaveControl = "WaveControl";
+
+    /// <summary>
+    /// E37 (spec-projectile-control.md §2b): <c>bullet.modify</c>'s opcode — changes the damage/type/
+    /// moveWay of a bullet the GAME fires (not one <c>spawn.entity{kind:bullet}</c> creates). Like
+    /// <see cref="ModifyDerivedStat"/> this is DECLARATIVE: a permanent modifier with no trigger, read
+    /// as a resolved grant inside <c>Bullet.InitData</c>'s existing postfix
+    /// (<c>CheatPrefixes.BulletInitCheat</c>) rather than executed by either sink. Same reflection-
+    /// published obligation as <see cref="ModifyMatch"/>/<see cref="WaveControl"/> — declaring this
+    /// constant is the whole of the "grow the published /effects/contract list" requirement.
+    /// </summary>
+    public const string BulletModify = "BulletModify";
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): <c>ui.present</c>'s opcode. Bag-side, the same shape
+    /// <see cref="GrantShield"/> and <see cref="ApplyResourceDelta"/> already use — <c>EffectBag.FireGrant</c>
+    /// handles it inline and it never becomes an <c>EffectActionPlanItem</c> that reaches
+    /// <c>InjectorEffectActionSink</c>'s stat/resource/status/shield/board arms, which is what makes the
+    /// <c>Ui</c> attach point's read-only rule structural rather than a convention nobody enforces.
+    /// `op:number` reuses the existing <c>IDamageFxSink</c> floater path; `op:meter`/`op:banner` go
+    /// through the new <c>IUiPresentSink</c>. Same reflection-published obligation as
+    /// <see cref="ModifyMatch"/>/<see cref="WaveControl"/>/<see cref="BulletModify"/> — declaring this
+    /// constant is the whole of the "grow the published /effects/contract list" requirement.
+    /// </summary>
+    public const string PresentUi = "PresentUi";
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): <c>structure.place</c>'s opcode.
+    /// Acts on the tactical siege board (<c>FusionRpg.Core.Battle.Board.BoardState</c>), never Unity —
+    /// the first opcode `BattleEffectSink` handles that `InjectorEffectActionSink` never implements at
+    /// all (there is no Lawn executor for this one; see `FusionRpg.Core.Effects.Atoms.AttachPoint.Siege`'s
+    /// own doc comment). Same reflection-published
+    /// obligation as <see cref="ModifyMatch"/>/<see cref="WaveControl"/>/<see cref="BulletModify"/>/
+    /// <see cref="PresentUi"/> — declaring this constant is the whole of the "grow the published
+    /// `/effects/contract` list" requirement.
+    /// </summary>
+    public const string PlaceStructure = "PlaceStructure";
 }
 
 public static class EffectTypes
@@ -42,15 +121,31 @@ public static class EffectTypes
 
 /// <summary>
 /// Owner key grammar: <c>match</c>, <c>plant:{typeId}</c>, <c>zombie:{typeId}</c>, <c>entity:{ptr}</c>, <c>player:{id}</c>.
+///
+/// <para><c>instance:{id}</c> is the one DURABLE key in the grammar and the one the hot path refuses
+/// (<c>EffectBag.Grant</c> throws on it) — it names a persistent actor that has no live pointer yet, so
+/// it only ever travels between the Server and a deploy binder. <c>UniqueOwnerBinder</c> rewrites it to
+/// <see cref="Entity"/> once the pointer exists.</para>
 /// </summary>
 public static class EffectOwnerKeys
 {
     public const string Match = "match";
 
+    /// <summary>The <c>ownerKind</c> that accompanies an <see cref="Instance"/> key, matching the shape
+    /// <c>UniqueEquipmentCatalog.Grant</c> / <c>RelicCatalog.TryGetGrant</c> already ship.</summary>
+    public const string InstanceKind = "instance";
+
     public static string PlantType(int typeId) => "plant:" + typeId;
     public static string ZombieType(int typeId) => "zombie:" + typeId;
     public static string Entity(string ptr) => "entity:" + ptr;
     public static string Player(long id) => "player:" + id;
+
+    /// <summary>
+    /// A durable actor key. Deliberately NOT resolvable on the hot path: <c>StatApplyScope.Matches</c>
+    /// returns false for it and <c>EffectBag.Grant</c> throws, so a producer that stamps one and never
+    /// binds it fails loudly rather than applying to the wrong scope.
+    /// </summary>
+    public static string Instance(string instanceId) => "instance:" + instanceId;
 }
 
 public sealed class EffectEventDto
@@ -70,6 +165,25 @@ public sealed class EffectEventDto
     [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
     /// <summary>Merged physical hits this event represents (v2 coalescing); 1 = a single hit.</summary>
     [JsonPropertyName("hitCount")] public int HitCount { get; set; } = 1;
+    /// <summary>E34 (spec-trigger-vocabulary.md §2.2): the wave number for OnWave. Additive nullable —
+    /// breaks no existing shape, so FoundationContractVersion.Current stays at its current value.</summary>
+    [JsonPropertyName("wave")] public int? Wave { get; set; }
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): the tactical siege board cell this
+    /// event targets — `structure.place`'s own target, chosen at declare time (adjacent to the acting
+    /// unit, `ConstructionPlacement.CanPlace`-validated), never authored content. Plain ints, not
+    /// `GridPos`: this project cannot reference `FusionRpg.Core.Actions` (the dependency runs the other
+    /// way), the same boundary `grid.spawn`'s own bare `row`/`col` atom PARAMS already cross — those are
+    /// static content, though, while these two are per-event and dynamic, which is why they live on the
+    /// EVENT rather than an atom param. Both null for every trigger that predates this field (every
+    /// existing `EffectEventDto` construction site) — additive nullable, breaks no existing shape, so
+    /// `FoundationContractVersion.Current` stays at its current value.
+    /// </summary>
+    [JsonPropertyName("targetRow")] public int? TargetRow { get; set; }
+
+    /// <summary>See <see cref="TargetRow"/>.</summary>
+    [JsonPropertyName("targetCol")] public int? TargetCol { get; set; }
 }
 
 public sealed class EffectGrantDto

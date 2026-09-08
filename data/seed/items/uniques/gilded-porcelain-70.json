@@ -45,7 +45,7 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "The blade half of the build is deliberately modest (one Flat and one Increased attack line, both role-legal on armament-primary) \u2014 the reason to equip it is what happens the moment the wearer falls, not the swing before that. atom.martyrdom sits in the fixed core, which seed-contract.md \u00a710 and ssot-uniques.md \u00a73.7 device 2 both confirm is never pool-filtered, so its role legality is a bonus here, not a requirement."
+        "note": "The blade half of the build is deliberately modest (one Flat and one Increased attack line, both role-legal on armament-primary) — the reason to equip it is what happens the moment the wearer falls, not the swing before that. atom.martyrdom sits in the fixed core, which seed-contract.md §10 and ssot-uniques.md §3.7 device 2 both confirm is never pool-filtered, so its role legality is a bonus here, not a requirement."
       },
       "tags": [
         "light",
@@ -58,8 +58,9 @@
       "flavor": "Six little fingers, each one sharpened after the last collector who wound it too far.",
       "flavorKey": "flavor.unique.dollhand",
       "iconKey": "icon.unique.dollhand",
-      "notes": "Role armament-primary / axis survivability, row 1 of the brief's 8-row table. baseType item.humanoid-main-hand-a-002 ('Slashing Clipper', class blade, band a) confirmed present in data/seed/items/base-types/humanoid-armament-primary-a.json. Name is naming.v1.json's 'fusion' pattern using uniqueSetSeedPools['gilded-porcelain']'s own atomic seed word 'Dollhand' (whole-token resolution, rule 2a \u2014 never decomposed). RUNTIME HONESTY: atom.martyrdom is resource.delta, one of the shipped kinds but lawn-live/battle-pending per the same caveat seed-contract.md \u00a710's own unique example carries for atom.searing-strike \u2014 authored now, exactly as that worked example authorizes.",
-      "acquisition": "source-locked"
+      "notes": "Role armament-primary / axis survivability, row 1 of the brief's 8-row table. baseType item.humanoid-main-hand-a-002 ('Slashing Clipper', class blade, band a) confirmed present in data/seed/items/base-types/humanoid-armament-primary-a.json. Name is naming.v1.json's 'fusion' pattern using uniqueSetSeedPools['gilded-porcelain']'s own atomic seed word 'Dollhand' (whole-token resolution, rule 2a — never decomposed). RUNTIME HONESTY: atom.martyrdom is resource.delta, one of the shipped kinds but lawn-live/battle-pending per the same caveat seed-contract.md §10's own unique example carries for atom.searing-strike — authored now, exactly as that worked example authorizes.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-002",
@@ -85,7 +86,7 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "The raw side is one Increased-maxHp line plus a Flat-maxHp variance roll \u2014 a plain, unremarkable torso stat block. The whole reason to wear it is the jammed-mechanism proc, which no rare torso piece can roll at all."
+        "note": "The raw side is one Increased-maxHp line plus a Flat-maxHp variance roll — a plain, unremarkable torso stat block. The whole reason to wear it is the jammed-mechanism proc, which no rare torso piece can roll at all."
       },
       "tags": [
         "medium-heavy",
@@ -98,7 +99,7 @@
       "flavor": "It has stood guard over the cabinet since before the family that built the cabinet stopped visiting.",
       "flavorKey": "flavor.unique.clockwork-sentinel",
       "iconKey": "icon.unique.clockwork-sentinel",
-      "notes": "Role core-guard / axis control, row 2. baseType item.humanoid-torso-b-004 ('Industrial Gridiron', class scale, band b) confirmed in humanoid-core-guard-b.json. Name is the 'compound' pattern: adjective 'Clockwork' from themeAdjectivePools['gilded-porcelain'], noun 'Sentinel' invented per naming.v1.json's allowance for a unique's own noun. atom.freezing (status.apply) is legal for armament-primary/secondary/manipulator/jewel-major/jewel-minor/sense per g-affliction.json, not core-guard \u2014 a deliberate fixed-core placement (bypasses pool filtering, ssot-uniques.md \u00a73.7 device 2), read as a chest mechanism that jams whatever strikes it. The two raw-stat atoms (fortitude fixed, vitality variance) are both role-legal on core-guard and mutually distinct families, satisfying DuplicateAtomInContainer.",
+      "notes": "Role core-guard / axis control, row 2. baseType item.humanoid-torso-b-004 ('Industrial Gridiron', class scale, band b) confirmed in humanoid-core-guard-b.json. Name is the 'compound' pattern: adjective 'Clockwork' from themeAdjectivePools['gilded-porcelain'], noun 'Sentinel' invented per naming.v1.json's allowance for a unique's own noun. atom.freezing (status.apply) is legal for armament-primary/secondary/manipulator/jewel-major/jewel-minor/sense per g-affliction.json, not core-guard — a deliberate fixed-core placement (bypasses pool filtering, ssot-uniques.md §3.7 device 2), read as a chest mechanism that jams whatever strikes it. The two raw-stat atoms (fortitude fixed, vitality variance) are both role-legal on core-guard and mutually distinct families, satisfying DuplicateAtomInContainer.",
       "acquisition": "source-locked"
     },
     {
@@ -126,7 +127,7 @@
       "counterPressure": {
         "kind": "conditional",
         "condition": "actor-is-killer",
-        "note": "The spawn-on-death rider only ever fires off the wearer's own killing blow (actorIsKiller, core.v1.json counterPressure.conditions), never off an ally's death nearby \u2014 a display piece that only ever helps once, and only at the one moment it can no longer help the wearer directly."
+        "note": "The spawn-on-death rider only ever fires off the wearer's own killing blow (actorIsKiller, core.v1.json counterPressure.conditions), never off an ally's death nearby — a display piece that only ever helps once, and only at the one moment it can no longer help the wearer directly."
       },
       "tags": [
         "medium",
@@ -138,8 +139,9 @@
       "flavor": "It kept its post through the fall of three gardens, and counts that as a promotion.",
       "flavorKey": "flavor.unique.shelfwarden",
       "iconKey": "icon.unique.shelfwarden",
-      "notes": "Role ward-array / axis utility, row 3. baseType item.humanoid-shoulders-b-005 ('Articulated Yoke', class scale, band b) confirmed in humanoid-ward-array-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Shelfwarden'. atom.gardener (spawn.entity, tag utility) has no ward-array in its g-on-death.json roles list \u2014 fixed core, not pool-filtered, same device as the other rule-broken capabilities in this file. The two raw armour atoms (arm-riveting fixed, arm-welding variance) are g-armour's zombie-side Increased siblings, both role-legal on ward-array and both distinct from atom.plating/atom.carapace's excluded Flat channel.",
-      "acquisition": "source-locked"
+      "notes": "Role ward-array / axis utility, row 3. baseType item.humanoid-shoulders-b-005 ('Articulated Yoke', class scale, band b) confirmed in humanoid-ward-array-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Shelfwarden'. atom.gardener (spawn.entity, tag utility) has no ward-array in its g-on-death.json roles list — fixed core, not pool-filtered, same device as the other rule-broken capabilities in this file. The two raw armour atoms (arm-riveting fixed, arm-welding variance) are g-armour's zombie-side Increased siblings, both role-legal on ward-array and both distinct from atom.plating/atom.carapace's excluded Flat channel.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-004",
@@ -165,7 +167,7 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "A single Increased-maxHp fixed line plus a wide-rolled Flat-maxHp variance slot is a thin defensive package for a neck slot at this rung \u2014 the currency-on-death payout is the entire pitch, and a build that does not need the extra money gets nothing else from it."
+        "note": "A single Increased-maxHp fixed line plus a wide-rolled Flat-maxHp variance slot is a thin defensive package for a neck slot at this rung — the currency-on-death payout is the entire pitch, and a build that does not need the extra money gets nothing else from it."
       },
       "tags": [
         "light",
@@ -177,7 +179,7 @@
       "flavor": "Appraised twice, buried once, and dug back up the week the garden went quiet.",
       "flavorKey": "flavor.unique.pricelesstoy",
       "iconKey": "icon.unique.pricelesstoy",
-      "notes": "Role jewel-major / axis economy, row 4. baseType item.humanoid-neck-a-004 ('Official Locket', class seal, band a) confirmed in humanoid-jewel-major-a.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Pricelesstoy' \u2014 deliberately chosen for the economy axis. atom.midas (resource.economy, currency money, OnDeath) and both raw-stat atoms are role-legal on jewel-major per their own roles lists (g-economy.json, g-life.json) \u2014 no fixed-core rule-break needed on this entry.",
+      "notes": "Role jewel-major / axis economy, row 4. baseType item.humanoid-neck-a-004 ('Official Locket', class seal, band a) confirmed in humanoid-jewel-major-a.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Pricelesstoy' — deliberately chosen for the economy axis. atom.midas (resource.economy, currency money, OnDeath) and both raw-stat atoms are role-legal on jewel-major per their own roles lists (g-economy.json, g-life.json) — no fixed-core rule-break needed on this entry.",
       "acquisition": "source-locked"
     },
     {
@@ -219,8 +221,9 @@
       "flavor": "Its expression was painted on once, a century before it learned to change it.",
       "flavorKey": "flavor.unique.glazeface",
       "iconKey": "icon.unique.glazeface",
-      "notes": "Role sense / axis offense, row 5. baseType item.humanoid-face-b-004 ('Articulated Mask', class scale, band b) confirmed in humanoid-sense-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Glazeface' \u2014 a direct fit for the face role. element 'dark' is one of the six concrete ids in core.v1.json elements (fire/ice/air/earth/light/dark) plus omni; gilded-porcelain carries no elementAffinity of its own so any concrete element is legal here. RUNTIME HONESTY: atom.searing-strike is resource.delta, lawn-live/battle-pending per the same caveat seed-contract.md \u00a710's own unique example (unique.ember-014) carries for the identical family.",
-      "acquisition": "source-locked"
+      "notes": "Role sense / axis offense, row 5. baseType item.humanoid-face-b-004 ('Articulated Mask', class scale, band b) confirmed in humanoid-sense-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Glazeface' — a direct fit for the face role. element 'dark' is one of the six concrete ids in core.v1.json elements (fire/ice/air/earth/light/dark) plus omni; gilded-porcelain carries no elementAffinity of its own so any concrete element is legal here. RUNTIME HONESTY: atom.searing-strike is resource.delta, lawn-live/battle-pending per the same caveat seed-contract.md §10's own unique example (unique.ember-014) carries for the identical family.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-006",
@@ -246,7 +249,7 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One Increased-maxHp fixed line and a narrow-rolled Flat-hp variance slot are both deliberately small \u2014 the shield grant on spawn is the actual survivability, and it is a one-time buffer rather than a recurring stat, so it cannot be stacked the way a rare's raw lines can."
+        "note": "One Increased-maxHp fixed line and a narrow-rolled Flat-hp variance slot are both deliberately small — the shield grant on spawn is the actual survivability, and it is a one-time buffer rather than a recurring stat, so it cannot be stacked the way a rare's raw lines can."
       },
       "tags": [
         "medium",
@@ -259,7 +262,7 @@
       "flavor": "Every step still creaks in the key it was wound to, long after the winding stopped mattering.",
       "flavorKey": "flavor.unique.goldjoint",
       "iconKey": "icon.unique.goldjoint",
-      "notes": "Role footing / axis survivability, row 6. baseType item.humanoid-feet-b-004 ('Articulated Boot', class scale, band b) confirmed in footing/humanoid/b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Goldjoint' \u2014 a joint word fitting a feet-role item. atom.warded (shield.grant), atom.fortitude and atom.mending are all role-legal on footing per their own roles lists (g-sustain.json, g-life.json) \u2014 no fixed-core rule-break needed. atom.warded's channel is already implemented end to end per ShieldRuntime (shield-system-spec.md SS2.6), unlike the shield-stat family group, which stays fully avoided in this file.",
+      "notes": "Role footing / axis survivability, row 6. baseType item.humanoid-feet-b-004 ('Articulated Boot', class scale, band b) confirmed in footing/humanoid/b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Goldjoint' — a joint word fitting a feet-role item. atom.warded (shield.grant), atom.fortitude and atom.mending are all role-legal on footing per their own roles lists (g-sustain.json, g-life.json) — no fixed-core rule-break needed. atom.warded's channel is already implemented end to end per ShieldRuntime (shield-system-spec.md SS2.6), unlike the shield-stat family group, which stays fully avoided in this file.",
       "acquisition": "source-locked"
     },
     {
@@ -288,7 +291,7 @@
         "kind": "drawback",
         "severityBand": "moderate",
         "channel": "arm1Max",
-        "note": "The bandolier trades away part of its own arm1Max ceiling (severityBand moderate) to keep the vial cold enough to hold the hypno mixture stable \u2014 a real, authored cost on the same channel arm-riveting otherwise raises, not a free proc."
+        "note": "The bandolier trades away part of its own arm1Max ceiling (severityBand moderate) to keep the vial cold enough to hold the hypno mixture stable — a real, authored cost on the same channel arm-riveting otherwise raises, not a free proc."
       },
       "tags": [
         "light",
@@ -299,8 +302,9 @@
       "flavor": "Bottled from whatever the last harvest left too strange to plant.",
       "flavorKey": "flavor.unique.cordial-of-the-kilnborn",
       "iconKey": "icon.unique.cordial-of-the-kilnborn",
-      "notes": "Role infusion / axis control, row 7. baseType item.humanoid-bandolier-a-006 ('Treated Tin', class leather, band a) confirmed in infusion/humanoid/base-types-infusion-humanoid-a.json. Name is the 'of-construct' pattern: Base 'Cordial' (invented noun fitting a bandolier's vials) + concept 'Kilnborn' from uniqueSetSeedPools['gilded-porcelain'] (ofConcept surface form). atom.mesmerizing (status.apply) is legal for armament-primary/secondary/manipulator/jewel-major/jewel-minor/sense per g-affliction.json, not infusion \u2014 fixed core, not pool-filtered, per ssot-uniques.md \u00a73.7 device 2. The two raw armour atoms are g-armour's role-legal zombie-side Increased siblings on infusion, distinct families, satisfying DuplicateAtomInContainer.",
-      "acquisition": "source-locked"
+      "notes": "Role infusion / axis control, row 7. baseType item.humanoid-bandolier-a-006 ('Treated Tin', class leather, band a) confirmed in infusion/humanoid/base-types-infusion-humanoid-a.json. Name is the 'of-construct' pattern: Base 'Cordial' (invented noun fitting a bandolier's vials) + concept 'Kilnborn' from uniqueSetSeedPools['gilded-porcelain'] (ofConcept surface form). atom.mesmerizing (status.apply) is legal for armament-primary/secondary/manipulator/jewel-major/jewel-minor/sense per g-affliction.json, not infusion — fixed core, not pool-filtered, per ssot-uniques.md §3.7 device 2. The two raw armour atoms are g-armour's role-legal zombie-side Increased siblings on infusion, distinct families, satisfying DuplicateAtomInContainer.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-008",
@@ -327,7 +331,7 @@
       "counterPressure": {
         "kind": "conditional",
         "condition": "target-is-zombie",
-        "note": "Every board effect this horn carries only ever resolves against a zombie-side target (sideIs, core.v1.json counterPressure.conditions) \u2014 on a humanoid-frame item that is most of what the wearer ever fights, but the one match where it is not, the horn is decorative and nothing more."
+        "note": "Every board effect this horn carries only ever resolves against a zombie-side target (sideIs, core.v1.json counterPressure.conditions) — on a humanoid-frame item that is most of what the wearer ever fights, but the one match where it is not, the horn is decorative and nothing more."
       },
       "tags": [
         "medium",
@@ -338,8 +342,103 @@
       "flavor": "It has never once sounded off-key, which is the part that unsettles the collection most.",
       "flavorKey": "flavor.unique.clarion-of-poise",
       "iconKey": "icon.unique.clarion-of-poise",
-      "notes": "Role retinue / axis utility, row 8. baseType item.humanoid-horn-b-009 ('Polished Horn', class torc, band b) confirmed in retinue/humanoid/b.json. Name is the 'of-construct' pattern: Base 'Clarion' (invented noun fitting a horn) + concept 'Poise' from conceptPools['gilded-porcelain']. All three atoms (atom.dooming, atom.terraforming, atom.gravedigging \u2014 board.action/box.set/grid.clear) are role-legal on retinue per g-board.json's own roles list, so no fixed-core rule-break is needed on this entry, and none of the three needs an element or other params override.",
+      "notes": "Role retinue / axis utility, row 8. baseType item.humanoid-horn-b-009 ('Polished Horn', class torc, band b) confirmed in retinue/humanoid/b.json. Name is the 'of-construct' pattern: Base 'Clarion' (invented noun fitting a horn) + concept 'Poise' from conceptPools['gilded-porcelain']. All three atoms (atom.dooming, atom.terraforming, atom.gravedigging — board.action/box.set/grid.clear) are role-legal on retinue per g-board.json's own roles list, so no fixed-core rule-break is needed on this entry, and none of the three needs an element or other params override.",
       "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.gilded-porcelain-70-010",
+      "nameKey": "unique.gilded-porcelain-70-010",
+      "iconKey": "icon.unique.gilded-porcelain-70-010",
+      "flavorKey": "flavor.unique.gilded-porcelain-70-010",
+      "frame": "humanoid",
+      "powerAxis": "offense",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Shattered Sun-Glass",
+      "flavor": "A delicate lattice of enchanted porcelain that vibrates with the heat of a dying star. It seeks to crack the very air to release its stored fury.",
+      "baseType": "item.humanoid-shoulders-a-010",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.ferocity",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The fragile structure risks total disintegration when struck by heavy blunt force."
+      },
+      "tags": [
+        "light",
+        "arcane",
+        "offensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-011",
+      "nameKey": "unique.gilded-porcelain-70-011",
+      "iconKey": "icon.unique.gilded-porcelain-70-011",
+      "flavorKey": "flavor.unique.gilded-porcelain-70-011",
+      "frame": "plant",
+      "powerAxis": "survivability",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Verdant Aegis",
+      "flavor": "Woven from living vines and reinforced with ancient sap, this ward pulses with a rhythmic, life-giving heartbeat. It seeks to mend the wearer even as the world attempts to tear them asunder.",
+      "baseType": "item.plant-sheath-a-011",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The constant surge of restorative energy leaves the wielder sluggish and prone to exhaustion."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-012",
+      "nameKey": "unique.gilded-porcelain-70-012",
+      "iconKey": "icon.unique.gilded-porcelain-70-012",
+      "flavorKey": "flavor.unique.gilded-porcelain-70-012",
+      "frame": "plant",
+      "powerAxis": "offense",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Thorned Bulwark",
+      "flavor": "Jagged vines wrap around the core to strike at anything that dares approach. The sap pulses with a violent hunger for life.",
+      "baseType": "item.plant-stem-a-012",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The rapid growth drains the user of vitality."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "offensive",
+        "signature"
+      ]
     }
   ]
 }

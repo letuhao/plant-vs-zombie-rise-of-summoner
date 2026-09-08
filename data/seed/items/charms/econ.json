@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "kind": "charm",
   "_meta": {
+    "batch": "charm-gen-econ",
     "partition": "charms/econ",
     "contractVersion": 1,
-    "exemplarVersion": 1,
-    "promptVersion": 1,
-    "batch": "charms-1c",
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "docs/architecture/item/entry-shapes.md#7",
     "registryVersions": {
-      "core": 1,
       "bands": 1,
-      "themes": 1,
+      "core": 2,
+      "naming": 6,
       "tags": 4,
-      "classes": 2,
-      "naming": 4,
+      "classes": 3,
+      "themes": 1,
       "words": 5
-    }
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
   },
   "entries": [
     {
@@ -30,10 +30,17 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.hoarded-kernel",
       "flavorKey": "flavor.charm.hoarded-kernel",
       "flavor": "Every dwindling ember spares one grain for later. This one remembers why.",
@@ -48,10 +55,17 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "mechanical"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "mechanical"
+      ],
       "iconKey": "icon.charm.gilded-husk",
       "flavorKey": "flavor.charm.gilded-husk",
       "flavor": "Painted over what it used to be, and prouder for it.",
@@ -66,10 +80,17 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "mechanical"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "mechanical"
+      ],
       "iconKey": "icon.charm.lacquerclip",
       "flavorKey": "flavor.charm.lacquerclip",
       "flavor": "A single clasp, lacquered past its worth and carried anyway.",
@@ -84,10 +105,16 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.scavenged-purse",
       "flavorKey": "flavor.charm.scavenged-purse",
       "flavor": "Whatever the quartermaster didn't want, the pouch took gladly.",
@@ -102,10 +129,17 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.bead-of-ash",
       "flavorKey": "flavor.charm.bead-of-ash",
       "flavor": "What the last fire couldn't finish burning, it left behind as currency.",
@@ -120,10 +154,16 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.rustloop",
       "flavorKey": "flavor.charm.rustloop",
       "flavor": "Rings rust; the habit of keeping one does not.",
@@ -138,11 +178,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.burgeoning-silo",
       "flavorKey": "flavor.charm.burgeoning-silo",
       "flavor": "Full past its seams, and still someone keeps filling it.",
@@ -157,11 +207,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.holding-coffer",
       "flavorKey": "flavor.charm.holding-coffer",
       "flavor": "The roots hold the wall. The coffer holds everything else.",
@@ -176,11 +236,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.token-of-the-ledger",
       "flavorKey": "flavor.charm.token-of-the-ledger",
       "flavor": "A single page, copied so many times no one remembers the first hand.",
@@ -195,11 +265,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility", "mechanical"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "mechanical"
+      ],
       "iconKey": "icon.charm.locket-of-appraisal",
       "flavorKey": "flavor.charm.locket-of-appraisal",
       "flavor": "Opened once by an expert, and never quite closed the same way since.",
@@ -214,11 +294,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.earthpod",
       "flavorKey": "flavor.charm.earthpod",
       "flavor": "Buried on purpose, dug up on schedule.",
@@ -233,11 +323,20 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
-      "tags": ["utility"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.pouch-of-requisition",
       "flavorKey": "flavor.charm.pouch-of-requisition",
       "flavor": "Signed, stamped, and somehow still empty when it arrives.",
@@ -252,11 +351,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.wandering-trinket",
       "flavorKey": "flavor.charm.wandering-trinket",
       "flavor": "It rode one spore farther than the garden that grew it.",
@@ -271,11 +380,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "medium" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.tended-bloom",
       "flavorKey": "flavor.charm.tended-bloom",
       "flavor": "Someone waters it who has no further use for water.",
@@ -290,11 +409,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.root-of-the-foundation",
       "flavorKey": "flavor.charm.root-of-the-foundation",
       "flavor": "Every wall the garden ever built started as one stubborn root.",
@@ -309,11 +438,21 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "medium" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.seed-of-the-glut",
       "flavorKey": "flavor.charm.seed-of-the-glut",
       "flavor": "Plant enough and eventually the ground stops asking for more.",
@@ -328,11 +467,20 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.patched-satchel",
       "flavorKey": "flavor.charm.patched-satchel",
       "flavor": "Held together by whoever needed it to hold one more thing.",
@@ -347,11 +495,20 @@
       "axis": "economy",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "medium" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
-      "tags": ["utility"],
+      "roleGroups": [
+        "atom.sunbloom",
+        "atom.midas"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.twinbead",
       "flavorKey": "flavor.charm.twinbead",
       "flavor": "Grown as one, carried as two, spent as either.",
@@ -367,11 +524,24 @@
       "frameHint": "any",
       "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "high" },
-        { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "iconKey": "icon.charm.signet-of-the-coalbed",
       "flavorKey": "flavor.charm.signet-of-the-coalbed",
       "flavor": "Every coin it grants is a coal it stops banking for winter.",
@@ -387,15 +557,51 @@
       "frameHint": "any",
       "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "high" },
-        { "family": "atom.might", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.midas",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "iconKey": "icon.charm.signet-of-annexation",
       "flavorKey": "flavor.charm.signet-of-annexation",
       "flavor": "Claim the neighbor's yield, and the strength to defend your own thins to pay for it.",
       "notes": "themeId: verdant-graft"
+    },
+    {
+      "id": "charm.econ-021",
+      "nameKey": "charm.twin-sun-gleaner",
+      "name": "Twin Sun-Gleaner",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, golden vessel shaped like a blooming sunflower, forged from solidified sunlight and packed with endless, shimmering seeds.",
+      "notes": "themeKey: demon.twinflower"
     }
   ]
 }

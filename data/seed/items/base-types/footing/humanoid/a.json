@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -67,10 +67,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-slipper",
       "flavorKey": "flavor.base.spun-slipper",
       "flavor": "Loose and breathable, it does not hold heat from the ground.",
@@ -104,10 +104,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-sneaker",
       "flavorKey": "flavor.base.secondhand-sneaker",
       "flavor": "A sole that found its owner; a toe that knows the fit.",
@@ -141,7 +141,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -178,10 +178,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.insulated-clog",
       "flavorKey": "flavor.base.insulated-clog",
       "flavor": "A thick sole keeps what matters warm and stable.",
@@ -215,10 +215,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-shoe",
       "flavorKey": "flavor.base.woven-shoe",
       "flavor": "Made of grass and luck, it bends with every step.",
@@ -252,7 +252,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -289,10 +289,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.supple-flipper",
       "flavorKey": "flavor.base.supple-flipper",
       "flavor": "Does not tell you whether it belonged to fish or to fate. Bends either way.",
@@ -326,7 +326,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -363,10 +363,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.boiled-sole",
       "flavorKey": "flavor.base.boiled-sole",
       "flavor": "Hard as the kitchen it came from, shaped to a foot that trusted it.",
@@ -400,13 +400,13 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.evasion",
         "powerBand": "trivial"
       },
       "socketMax": 1,
       "iconKey": "icon.base.studded-tread",
       "flavorKey": "flavor.base.studded-tread",
-      "flavor": "Metal nubs catch on everything \u2014 pavement, rust, the day's last inch of hope.",
+      "flavor": "Metal nubs catch on everything — pavement, rust, the day's last inch of hope.",
       "tags": [
         "medium-light",
         "metal",
@@ -437,10 +437,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.evasion",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.weathered-skate",
       "flavorKey": "flavor.base.weathered-skate",
       "flavor": "The blade keeps the polish. The leather gives it character. You take the one and keep the other.",

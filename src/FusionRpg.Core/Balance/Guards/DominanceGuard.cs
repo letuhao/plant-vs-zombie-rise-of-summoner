@@ -1,5 +1,7 @@
 using FusionRpg.Core.Balance.Analytic;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 
 namespace FusionRpg.Core.Balance.Guards;
 
@@ -34,15 +36,23 @@ public static class DominanceGuard
     /// magic-numbers audit's balance-vocabulary match on "threshold".</summary>
     public const double MajorityWinShare = 0.5;
 
-    public static DominanceReport Measure(IReadOnlyList<AptitudeAllocation> builds, long theta)
+    /// <param name="gear">Optional equipped `stat.derived` atoms, one list per build, positionally
+    /// aligned with <paramref name="builds"/> — item-todo.md P1.5's geared corner run. Additive:
+    /// omitting it resolves every corner exactly as before, because
+    /// <see cref="TerminationGuard.ToActor"/> then registers no equipment subsystem at all (see its
+    /// own doc for why that is by construction rather than by arithmetic).</param>
+    public static DominanceReport Measure(IReadOnlyList<AptitudeAllocation> builds, long theta,
+        IReadOnlyList<IReadOnlyList<BoundDerivedAtom>>? gear = null)
     {
         if (builds is null) throw new ArgumentNullException(nameof(builds));
         if (builds.Count == 0) throw new ArgumentException("must contain at least one build", nameof(builds));
         if (theta <= 0) throw new ArgumentOutOfRangeException(nameof(theta), theta, "must be positive");
+        if (gear is not null && gear.Count != builds.Count)
+            throw new ArgumentException($"gear must be positionally aligned with builds ({gear.Count} vs {builds.Count})", nameof(gear));
 
         var actors = new Predictor.Actor[builds.Count];
         for (var i = 0; i < builds.Count; i++)
-            actors[i] = TerminationGuard.ToActor($"corner{i}", builds[i], theta);
+            actors[i] = TerminationGuard.ToActor($"corner{i}", builds[i], theta, gear?[i]);
 
         var matrix = new List<DominanceArrow>();
         var winShareAgainst = new Dictionary<(int, int), double>();
@@ -79,13 +89,46 @@ public static class DominanceGuard
     /// scope cannot exercise, rather than a shorter list guessed independently.</summary>
     public static CoverageReport StandardCoverage() => new(
         ElementAxis: "NEUTRALISED -- StrikeMixture is omni-only (P4.1); every corner here is a 1-D slice of a live element axis",
-        ReservedFamilies: new[]
+        ReservedFamilies: BuildReservedFamilies());
+
+    /// <summary>
+    /// DERIVED from <see cref="DerivedStatChannels.ResourceIds"/>, never hand-listed — Phase 0,
+    /// 2026-09-02. The previous version enumerated eleven resource channels by hand and so silently
+    /// omitted three (`resource.efficiency.hp/spirit`, and every `poise` channel once `poise` became
+    /// the sixth resource). That is not cosmetic: a channel missing from this list is treated as
+    /// EXERCISED by the guard, so the six-resource coverage pass moved six aptitudes to 0/11 wins
+    /// purely because their new points landed in channels the predictor cannot read and this list did
+    /// not excuse. Deriving it means a seventh resource is covered by construction.
+    ///
+    /// <para><b>The one exception, and why it is not drift:</b> <c>resource.max.hp</c> and
+    /// <c>resource.regen.hp</c> ARE read by the prediction path (<c>Predictor</c> reads hp regen,
+    /// <c>TerminationGuard</c> reads hp), so they are genuinely exercised and must NOT be reserved.
+    /// Every other resource channel has no prediction reader: `efficiency` has none at all until the
+    /// action-cost layer ships (`spec-action-costs.md` §1), and `max`/`regen` for the other five are
+    /// pools no closed-form duel spends.</para>
+    /// </summary>
+    static IReadOnlyList<string> BuildReservedFamilies()
+    {
+        var reserved = new List<string> { "move.range" };
+
+        foreach (var id in DerivedStatChannels.ResourceIds)
         {
-            "move.range",
-            "resource.efficiency.hunger", "resource.efficiency.qi", "resource.efficiency.stamina",
-            "resource.max.hunger", "resource.max.qi", "resource.max.spirit", "resource.max.stamina",
-            "resource.regen.hunger", "resource.regen.qi", "resource.regen.spirit", "resource.regen.stamina",
-            "skill.cooldown.attack", "skill.cooldown.defense", "skill.cooldown.movement", "skill.cooldown.status", "skill.cooldown.support",
-            "skill.effectiveness.attack", "skill.effectiveness.defense", "skill.effectiveness.movement", "skill.effectiveness.status", "skill.effectiveness.support",
-        });
+            reserved.Add(DerivedStatChannels.ResourceEfficiency(id));   // no reader for ANY id
+            if (id == "hp") continue;                                   // max/regen/gen for hp ARE read
+            reserved.Add(DerivedStatChannels.ResourceMax(id));
+            reserved.Add(DerivedStatChannels.ResourceRegen(id));
+            // resource.restore.hp is OverlayCombatMath's heal term and is exercised; the other five have no
+            // consumer until the action layer grants a non-hp resource (0.8, 2026-09-02).
+            reserved.Add(DerivedStatChannels.ResourceRestore(id));
+        }
+
+        foreach (var category in DerivedStatChannels.ActionCategories)
+        {
+            reserved.Add(DerivedStatChannels.SkillCooldown(category));
+            reserved.Add(DerivedStatChannels.SkillEffectiveness(category));
+        }
+
+        reserved.Sort(StringComparer.Ordinal);
+        return reserved;
+    }
 }

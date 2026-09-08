@@ -1,0 +1,80 @@
+{
+  "slug": "zomboss-commander",
+  "title": "Zomboss as commander",
+  "status": "Shipped",
+  "kicker": "World and empire · enemy commander",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure · Farm / hunt / defend",
+  "hook": "**Zomboss** is the enemy commander — he runs his own war from his own fog while you hunt his fortress and guard the homeworld.",
+  "blindSpots": [
+    {"term": "Zomboss", "meaning": "The opposing commander on the rift — not a lawn-only boss sprite and not a cheat that reads your save."},
+    {"term": "Fortress", "meaning": "His capital sector. Taking it is the win condition — see [The game](^the-game.md)."},
+    {"term": "Homeworld", "meaning": "Dave’s capital. Losing it is losing the world."},
+    {"term": "His fog", "meaning": "He decides with incomplete information, same as you — fair opposing play."}
+  ],
+  "alsoTrue": [
+    "Enemy counter-development (the war shifting resists from how you play) is Vision — see [counter-development](counter-development).",
+    "Siege of the Seat is Vision as a finished stage — see [siege](siege)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Zomboss is a real opponent on the map: he marches, claims, and pressures under his own fog.",
+        "Your job is to find his fortress and take it before yours falls."
+      ],
+      "note": "Win and lose are defined on [The game](^the-game.md) — keep who you are; lose where you were."
+    },
+    {
+      "title": "How it works",
+      "intro": "He shares the virtual-turn clock:",
+      "cards": [
+        {"name": "Orders", "body": "He commits on the same End Turn resolve you do."},
+        {"name": "Fog", "body": "He does not peek at your save — he plays from uncertainty."},
+        {"name": "Pressure", "body": "Defend the homeworld while you hunt his fortress."}
+      ],
+      "diagram": [
+        "  you End Turn  ->  resolve",
+        "                    |",
+        "                    +->  your legions",
+        "                    +->  Zomboss (from his fog)"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the World map",
+          "intro": "Advance, End Turn, and read what he did.",
+          "steps": [
+            "Travel to World and expand through fog.",
+            "Press End Turn and watch opposing motion.",
+            "Treat fortress hunt and homeworld defence as the same war — not two separate modes."
+          ],
+          "note": "Richer ecology and counter-builds come later as Vision."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Open the world map and note your homeworld.",
+    "End Turn at least once and look for opposing movement.",
+    "Keep expanding with homeworld safety in mind — losing it ends the world."
+  ],
+  "doNote": "Stop when Zomboss ≠ a scripted cutscene villain only. Related: [virtual turns](virtual-turns), [farm / hunt / defend](farm-hunt-defend).",
+  "mixUps": [
+    {"q": "Does he see my whole roster?", "a": "No. He evaluates from his fog."},
+    {"q": "How do I win?", "a": "Find and take his fortress sector before the homeworld falls."},
+    {"q": "Is siege playable today?", "a": "Siege as a tactical Seat board is Vision. Map pressure from Zomboss already ships."},
+    {"q": "Does he scale to my Dave level only?", "a": "Matched-level padding is not the design. Counter-development is Vision — see [counter-development](counter-development)."}
+  ],
+  "next": ["farm-hunt-defend"],
+  "related": ["world-map", "virtual-turns", "fog-of-war", "farm-hunt-defend", "counter-development"],
+  "sources": [
+    "docs/guide/the-rift.md §World map — adventure",
+    "docs/guide/the-game.md §Win and lose",
+    "docs/guide/mechanisms/zomboss-commander.md (prior stub)",
+    "docs/guide/glossary.md §Zomboss"
+  ]
+}

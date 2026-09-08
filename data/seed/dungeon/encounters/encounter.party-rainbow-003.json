@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.party-rainbow-003",
+  "formation": "party",
+  "name": "The Vanguard of the Prismatic Accord",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A high-tier elite encounter designed to force tactical repositioning through diverse elemental coverage and high individual threat.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Force",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "marauder"
+  }
+}

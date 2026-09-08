@@ -1,0 +1,83 @@
+{
+  "slug": "layer-rail",
+  "title": "Layer rail and hotkeys",
+  "status": "Shipped",
+  "kicker": "Session and shell · how you play",
+  "pillar": {"text": "Sanctum", "href": "sanctum.md"},
+  "loopLine": "Session — how you play",
+  "hook": "The **layer rail** is the shared set of menus and hotkeys — Creatures, Fusion, Expeditions, and the rest — that open over whatever stage you are on.",
+  "blindSpots": [
+    {"term": "Rail", "meaning": "Not a train. The fixed list of layers and keys available from any stage."},
+    {"term": "Layer", "meaning": "A panel drawn over the current stage. Closing it returns you exactly where you were."},
+    {"term": "Hotkey", "meaning": "One letter (or Esc) that opens that layer. Same letter on Sanctum, lawn, or map."},
+    {"term": "Stack", "meaning": "Layers can pile up. Esc closes the top one; on an empty stack, Esc opens System."}
+  ],
+  "alsoTrue": [
+    "Locked layers stay visible and say what unlocks them — see [unlock beats](unlock-beats).",
+    "You are usually standing in the [Sanctum](sanctum) when you first learn the rail."
+  ],
+  "sections": [
+    {
+      "title": "The keys",
+      "intro": "Memorize the verb, not a different shortcut per screen:",
+      "table": {
+        "cols": ["Key", "Layer"],
+        "rows": [
+          ["C", "Creatures"],
+          ["K", "Commanders"],
+          ["R", "Relics"],
+          ["F", "Fusion"],
+          ["P", "Pacts"],
+          ["E", "Expeditions"],
+          ["A", "Almanac"],
+          ["H", "Chronicle"],
+          ["Esc", "Close top layer; on empty stack → System"]
+        ]
+      },
+      "note": "Travel to the world map is `M` — that changes stage, it is not a layer on the rail."
+    },
+    {
+      "title": "How it feels",
+      "paras": [
+        "Open Creatures mid-hall, check a demon, close — you are still in the Sanctum.",
+        "The same C works if you later open the rail from another stage. You do not learn a second UI language."
+      ],
+      "diagram": [
+        "  [ stage: Sanctum / Lawn / World ]",
+        "           ^",
+        "           |  open C / F / E / …",
+        "           v",
+        "  [ layer over the stage ]  --Esc-->  back to stage"
+      ]
+    },
+    {
+      "title": "What the rail is not",
+      "paras": [
+        "It is not a website sidebar of separate pages you navigate away to.",
+        "It is not the lawn game’s own pause menu — that is the host pack. This rail is Rise of Summoner’s control-room chrome."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "In the Sanctum, press `C` — Creatures should open over the hall.",
+    "Press Esc (or the close control) and confirm you are still in the Sanctum.",
+    "Press `?` or open System and confirm the keymap matches this table."
+  ],
+  "doNote": "Stop when one key feels global. Next: [unlock beats](unlock-beats) so locked entries make sense.",
+  "mixUps": [
+    {"q": "Why can’t I open Relics yet?", "a": "It unlocks when you hold your first item. The entry should say so — see [unlock beats](unlock-beats)."},
+    {"q": "Is Fusion the host game’s name?", "a": "No. On the rail, Fusion (`F`) is specimen merge. The host pack is Plants vs. Zombies: Fusion."},
+    {"q": "Does Esc always quit the game?", "a": "No. Esc closes the top layer first. Only on an empty stack does it open System (quit lives there)."},
+    {"q": "Is M on the rail?", "a": "M travels to the world map — a stage change, not a layer."},
+    {"q": "Do keys change on the lawn stage?", "a": "No. Same rail letters. That is the point of one rail."}
+  ],
+  "next": ["unlock-beats"],
+  "related": ["sanctum", "unlock-beats", "system-settings", "specimen-fusion"],
+  "sources": [
+    "docs/guide/sanctum.md §Layers over the Sanctum",
+    "docs/guide/how-you-play.md §Hotkeys",
+    "docs/architecture/game-gui-principles.md §GG-1",
+    "docs/guide/mechanisms/layer-rail.md (prior stub)"
+  ]
+}

@@ -30,7 +30,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -104,10 +104,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.shingled-windshield",
       "flavorKey": "flavor.base.shingled-windshield",
       "flavor": "Angled panes of reinforced material, each one shedding blows meant for the head.",
@@ -141,10 +141,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.articulated-mask",
       "flavorKey": "flavor.base.articulated-mask",
       "flavor": "Jointed sections follow the jaw's motion, never binding, never slipping.",
@@ -251,10 +251,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.splinted-scope",
       "flavorKey": "flavor.base.splinted-scope",
       "flavor": "Reinforced ribs run the length of the viewing tube, bristling like a sea urchin.",
@@ -291,7 +291,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.corrugated-face",
       "flavorKey": "flavor.base.corrugated-face",
       "flavor": "Ridged metal flexes and springs back without crumpling.",
@@ -362,13 +362,13 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.stapled-visor",
       "flavorKey": "flavor.base.stapled-visor",
-      "flavor": "Piecemeal construction \u2014 salvaged materials riveted together with military precision.",
+      "flavor": "Piecemeal construction — salvaged materials riveted together with military precision.",
       "tags": [
         "medium-heavy",
         "metal",
@@ -436,10 +436,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.clattering-windshield",
       "flavorKey": "flavor.base.clattering-windshield",
       "flavor": "Heavy plates sound the alarm before a foe even lands the blow.",

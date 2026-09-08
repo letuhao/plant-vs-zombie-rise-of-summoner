@@ -6,6 +6,7 @@ using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
 using FusionRpg.Injector.Fx;
+using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector.Effects;
@@ -66,6 +67,12 @@ public static class EffectRuntime
                 ["delta"] = ev.Delta,
                 ["at"] = ev.At.ToString("o")
             });
+            // passive-tree-todo.md G6 (spec-gate-counters.md §2.1, §7 P2) -- the FIRST production
+            // caller `OnFreshApplication` has had since G1 shipped it. Wired beside `OnApplied` rather
+            // than folded into it: `OnApplied` is single-assignment with three OTHER assigning sites
+            // (StatusRuntime.cs's own doc comment), and `OnFreshApplication` exists specifically so
+            // this counter never has to touch that shared, already-fragile delegate.
+            _status.OnFreshApplication = GateCounterHost.StatusCounter.Handle;
             _status.OnApplied = inst =>
             {
                 try { VfxDirector.Play(Core.Vfx.StatusVfxCues.Cue(inst)); } catch { }
@@ -98,7 +105,15 @@ public static class EffectRuntime
                 catch (Exception ex) { CheatState.Error("status stat withdraw: " + ex.Message); }
             };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
+            // base-defense Gate 0 (audit C4): explicit at THIS composition root, on purpose — the
+            // injector applies effects to the live, real-time PvZ match, which is the one legitimate
+            // non-replayed caller. EffectBag.UtcNow no longer defaults silently (see its own doc
+            // comment); every host, including this one, must now say which clock it wants.
+            _bag.UtcNow = () => DateTimeOffset.UtcNow;
             _bag.Status = _status;
+            // E41 (spec-ui-attach-point.md §2b): op:meter/op:banner's own collaborator, wired the same
+            // way DamageFxCueAdapter.Sink is wired onto the Funnel below for op:number.
+            _bag.UiPresent = InjectorUiPresentSink.Instance;
             WireCombatMath(_bag);
             _ = new EffectFunnel(_bag, DamageFxCueAdapter.Sink);
             _plugins = EffectPluginHostFactory.Create(_bag);
@@ -116,6 +131,9 @@ public static class EffectRuntime
             _status = null;
             DealtIdentity.Clear();
             _dotAccum = 0;
+            // E35: a stale match.modify write set must never survive into the next test/match — it is
+            // per-match state, and TakeAll's own drain-and-clear is exactly what a reset needs too.
+            MatchModifyWrites.TakeAll();
             Ensure();
         }
     }
@@ -130,7 +148,31 @@ public static class EffectRuntime
     public static void NotifyMatchEnd(string? matchKey)
     {
         Ensure();
+        // passive-tree-todo.md G6 (spec-gate-counters.md §4.3) -- the "unconditionally at match end"
+        // half of the flush contract, alongside InjectorLoop's timer-driven half. Best-effort, same as
+        // every other periodic reporter this loop drives (PerfReporter.Flush): a lost window costs a
+        // little progress, never correctness.
+        try { GateCounterHost.Flush(RpgHost.Client); } catch { }
         _plugins!.NotifyRemoved(matchKey ?? "");
+
+        // E35 (spec-match-modify.md §2.6): restore ONLY the E-* ids a live match.modify grant wrote
+        // this match, by clearing them — never CheatActions.LoadBoardConfigIntoCheats(), which reads
+        // Board.config back into EVERY E-* id unconditionally and would silently overwrite an
+        // operator's own hand-set cheat values with the level's own shipped values, every match end,
+        // with no log. The two existing callers of ApplyBoardConfig/LoadBoardConfigIntoCheats
+        // (GameHooks.cs's Board.Awake handler, CheatCommandRunner.cs's operator command) are
+        // untouched by this — this is a narrower, additional restore path for this module's own
+        // writes specifically. MatchModifyRestore is the extracted, Unity-free half of this call —
+        // see its own doc comment for why the logic lives there rather than inline here.
+        MatchModifyRestore.Restore(MatchModifyWrites.TakeAll, id => CheatState.ClearField(id, "match-end"));
+
+        // E36 (spec-wave-control.md §2.5): F-WAVE-FREEZE is a plain CheatState toggle, not one of
+        // match.modify's own E-* fields -- MatchModifyWrites/MatchModifyRestore above is that
+        // mechanism's alone. A bound `hold` op sets this toggle and nothing else clears it between
+        // matches, so it gets its own, smaller clear here rather than folding into the machinery
+        // above -- the same reason E35's own scoped restore exists: a toggle surviving past its match
+        // leaks silently and permanently into the next one.
+        CheatState.SetToggle("F-WAVE-FREEZE", false, "match-end");
     }
 
     public static long NextTick() => Interlocked.Increment(ref _tick);
@@ -157,6 +199,12 @@ public static class EffectRuntime
         DebugRuntime.ShouldEmitHit() || HasOnDamageDealtGrant();
 
     public static bool HasOnDeathGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnDeath);
+
+    /// <summary>E33 (spec-activation-edge.md §2.4): the fast gate a producer calls before building an
+    /// `actor.activate` payload — the same shape as the four gates above, so an ungated activation
+    /// emit does not repeat the per-hit-allocation/uncached-resolve shape the 2026-08 perf audit
+    /// blamed. E33 ships no producer of its own; `A9 movement-actions` is the first caller.</summary>
+    public static bool HasOnActivateGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnActivate);
 
     public static EffectGrant Grant(EffectGrantDto dto)
     {
@@ -219,6 +267,11 @@ public static class EffectRuntime
         try { CheatActions.ReapplyAllLiving(); } catch { }
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        // E41: an atom-authored meter is per-match state, the same reason match.modify's own
+        // MatchModifyWrites drains on this same path — leaving one set would leak silently into the
+        // next match's HUD.
+        Hud.ActorHudMeterOverride.Clear();
+        try { Hud.ActorHudCache.Clear(); } catch { }
 
         DebugRuntime.Emit("debug.effect.cleared", new Dictionary<string, object>
         {
@@ -359,7 +412,26 @@ public static class EffectRuntime
 
         _dotAccum += unscaledDeltaTime;
         if (_dotAccum < 0.1f) return;
-        _dotAccum = 0;
+        // Subtract rather than zero. Zeroing DISCARDS the overshoot, so this grid drifted slow and
+        // could never catch up after a long frame — while its shield sibling twenty lines down has
+        // always subtracted. Found by reading the two side by side during T13 (B24 spec §3.4).
+        // The kernel path is carry-correct by construction; this keeps the legacy path honest too.
+        _dotAccum -= 0.1f;
+        PulseDotsNow();
+    }
+
+    /// <summary>
+    /// The DoT/status pulse itself, with no accumulator — T13/B26's seam. The kernel schedules this on
+    /// a 100 ms event; the legacy grid above still calls it when the kernel is not driving.
+    ///
+    /// <para>The <b>period stays 100 ms</b>. This is a substitution, not a redesign: shield regen
+    /// carries in integer milli-HP and a 1 ms drive would truncate it toward zero, so only the
+    /// <i>scheduling</i> moves onto the kernel, never the granularity.</para>
+    /// </summary>
+    public static void PulseDotsNow()
+    {
+        Ensure();
+        if (!Status.HasAnyInstances()) return;
         FreezeBoard();
         var n = Bag.TickDots();
         if (n > 0)
@@ -430,6 +502,16 @@ public static class EffectRuntime
         bag.ShieldGate = new FusionRpg.Core.Combat.Shield.ShieldGate(
             new FusionRpg.Core.Combat.Shield.ShieldRuntime(),
             InjectorCombatBridge.ResolveActor);
+        // aura-skill T20 (audit): the SAME resolve, threaded to DispatchInstant's actorResolve
+        // parameter so Retribution/reflect actually fires — it shipped with the math but no
+        // production caller ever passed this argument.
+        bag.ActorResolve = InjectorCombatBridge.ResolveActor;
+        // passive-tree-todo.md G6 (spec-gate-counters.md §2.2, §7 P1) -- ElementMasteryCounter's real
+        // production caller. Fires for every DispatchInstant call this bag makes, direct hit AND DoT
+        // pulse alike (EffectBag.OnDamageApplied's own doc comment), correctly tagged by DamageOrigin
+        // in each case so a DoT tick never double-credits the one application status_applied already
+        // credited.
+        bag.OnDamageApplied = GateCounterHost.HandleDamageApplied;
     }
 
     // ---- Shield tick host — 100 ms grid, own guard (NOT TickDots' status guard) ----
@@ -468,14 +550,38 @@ public static class EffectRuntime
             ticked = true;
         }
 
-        // Flush the event window on the same 100 ms grid (absorbed aggregates included).
-        if (ticked && runtime.DrainEvents(_shieldEventScratch) > 0)
+        if (ticked) FlushShieldEvents(runtime);
+    }
+
+    /// <summary>
+    /// One 100 ms shield upkeep step, with no accumulator — T13/B26's seam. Same period as the grid it
+    /// replaces, for the reason given on <see cref="PulseDotsNow"/>: regen carries in integer milli-HP
+    /// and a finer drive would truncate it away.
+    ///
+    /// <para>This also retires a real per-frame spike. The legacy loop above is an <b>unbounded</b>
+    /// <c>while</c>: after a 2 s hitch it runs 20 upkeep steps inside one Unity frame on the main
+    /// thread. Driven by the kernel, catch-up is paced by the drain budget instead.</para>
+    /// </summary>
+    public static void PulseShieldsNow()
+    {
+        Ensure();
+        var runtime = Bag.ShieldGate?.Runtime;
+        if (runtime == null || !runtime.HasPendingWork) return;
+        runtime.Tick(_shieldTickNo++, 100, ShieldOwnerResolver);
+        FlushShieldEvents(runtime);
+    }
+
+    /// <summary>Flush the shield event window (absorbed aggregates included) — shared by both paths.</summary>
+    static void FlushShieldEvents(FusionRpg.Core.Combat.Shield.ShieldRuntime runtime)
+    {
+        if (runtime.DrainEvents(_shieldEventScratch) > 0)
         {
             foreach (var rec in _shieldEventScratch)
             {
                 var ptr = rec.OwnerKey.StartsWith("entity:", StringComparison.Ordinal)
                     ? rec.OwnerKey.Substring("entity:".Length)
                     : rec.OwnerKey;
+                try { Hud.ActorHudInvalidator.MarkDirtyFromOwnerKey(rec.OwnerKey); } catch { }
                 GameHooks.Emit(rec.Kind, new Dictionary<string, object>
                 {
                     ["targetPtr"] = ptr,

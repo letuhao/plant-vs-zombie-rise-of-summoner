@@ -51,9 +51,17 @@ public static class LoamPhases
 
     /// <summary>
     /// <see cref="LoamPolicy.LoamCapacity"/>, plus any active granary's <c>CapacityBonus</c>
-    /// (spec-loam-texture.md) — additive to the shape `LoamProduction`'s own well multiplier already
-    /// uses. Public and shared with <see cref="LoamForecast.ProjectedStock"/> so the engine and the
-    /// player-facing forecast read the same ceiling rather than risking two copies drifting apart.
+    /// (spec-loam-texture.md), plus base-defense `structure-state`'s F12 growth term
+    /// (<see cref="StructurePolicy.CapacityGrowthFor"/>) — additive to the shape `LoamProduction`'s own
+    /// well multiplier already uses. Public and shared with <see cref="LoamForecast.ProjectedStock"/>
+    /// so the engine and the player-facing forecast read the same ceiling rather than risking two
+    /// copies drifting apart.
+    ///
+    /// <para><b>F12, base-defense audit finding</b>: decision 21 grows a sector's rootbed SLOTS with
+    /// `DevelopmentLevel`, but a fixed storage cap meant a new slot's entire output became overflow the
+    /// moment the cap was already full — "decision 21 buys zero economy" at equilibrium. The growth
+    /// term here is what makes a new slot actually produce, additive to the base/granary capacity
+    /// above, never a replacement of it.</para>
     /// </summary>
     public static long EffectiveCapacity(WorldSector sector)
     {
@@ -68,7 +76,7 @@ public static class LoamPhases
             if (structure.Kind == StructureKind.Storage) bonus += structure.CapacityBonus;
         }
 
-        return LoamPolicy.LoamCapacity + bonus;
+        return checked(LoamPolicy.LoamCapacity + bonus + StructurePolicy.CapacityGrowthFor(sector.DevelopmentLevel));
     }
 
     /// <summary>Every slot still under construction counts down by one, this pass, before anything reads it.</summary>
@@ -96,8 +104,16 @@ public static class LoamPhases
     /// One sector absorbs one turn's fade; if it is lost, the component recomputes next turn with
     /// one fewer member and a new weakest takes over. That is the countdown the design calls for,
     /// not a same-turn cascade across every member at once.
+    ///
+    /// <paramref name="ceded"/> is a faction id → sector id map built by <see cref="Turn.TurnEngine"/>
+    /// from this turn's `cede` orders (world-stage W25), the same way it already derives `postures`
+    /// from `stance` orders — a plain map, never a service or a lookup, passed straight into the one
+    /// <see cref="LoamForecast.Weakest"/> selection so a filed order is an input to that choice, not
+    /// a second rule that could disagree with it.
     /// </summary>
-    public static WorldState Pressure(WorldState world, TurnReport report, string phase, int turn = 0, ulong seed = 0)
+    public static WorldState Pressure(
+        WorldState world, TurnReport report, string phase, int turn = 0, ulong seed = 0,
+        IReadOnlyDictionary<string, string>? ceded = null)
     {
         var stockById = world.Sectors.ToDictionary(s => s.SectorId, s => s.LoamStock, StringComparer.Ordinal);
         var stabilityById = world.Sectors.ToDictionary(s => s.SectorId, s => s.StabilityMilli, StringComparer.Ordinal);
@@ -117,7 +133,7 @@ public static class LoamPhases
             // sectors that faction's upkeep touches this turn.
             if (faction.UpkeepHandicapMilli != 1000)
                 report.Add(phase, TurnReportKinds.Event, faction.FactionId,
-                    "loam.handicap:" + faction.UpkeepHandicapMilli);
+                    "loam.handicap:" + faction.UpkeepHandicapMilli, audience: faction.FactionId);
 
             foreach (var component in TerritoryComponents.For(world, faction.FactionId))
             {
@@ -135,10 +151,13 @@ public static class LoamPhases
                     // Null here means every member is warded (spec-loam-texture.md's Wardens): there
                     // is no eligible fade target, so the shortfall is named and otherwise goes
                     // unapplied this turn, rather than throwing on an empty candidate list.
-                    var weakest = LoamForecast.Weakest(world, component, available, upkeep);
+                    var factionCeded = ceded != null && ceded.TryGetValue(faction.FactionId, out var cededSector)
+                        ? cededSector
+                        : null;
+                    var weakest = LoamForecast.Weakest(world, component, available, upkeep, factionCeded);
                     if (weakest is null)
                     {
-                        report.Add(phase, TurnReportKinds.Event, faction.FactionId, "loam.shortfall.unresolved:" + shortfall);
+                        report.Add(phase, TurnReportKinds.Event, faction.FactionId, "loam.shortfall.unresolved:" + shortfall, audience: faction.FactionId);
                         continue;
                     }
 
@@ -182,7 +201,13 @@ public static class LoamPhases
                     // behaviour that already existed: this branch never touched `s.Slots` before.
                     Slots = s.Slots
                         .Select(sl => sl with { StructureId = null, ConstructionTurnsRemaining = null })
-                        .ToList()
+                        .ToList(),
+                    // A half-finished sector-wide project is the identical loss, one level up
+                    // (world-map W52, spec-sector-development.md §3) — a ghost `ProjectId` that
+                    // `Growth` never sees again (this sector is unowned from here on, and a lost
+                    // sector's own recapture starts fresh) would otherwise sit on the sector forever,
+                    // permanently blocking a future `develop` order via `develop.already-developing`.
+                    ProjectId = null, ProjectTurnsRemaining = null
                 };
             }
 

@@ -1,0 +1,1005 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/1"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The air thickens around the vessel, holding its essence within a pressurized shell.",
+      "id": "skill.air-def-t1-n0",
+      "name": "High-Pressure Containment",
+      "nameKey": "tree.node.high-pressure-containment",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A thin, vibrating layer of pressurized air that hardens upon impact, turning kinetic energy into a protective barrier.",
+      "id": "skill.air-def-t10-n0",
+      "name": "Aero-Static Membrane",
+      "nameKey": "tree.node.aero-static-membrane",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very air that strikes you is caught in a localized vortex, feeding the kinetic energy back into your protective layers.",
+      "id": "skill.air-def-t10-n1",
+      "name": "Turbulence Recirculation",
+      "nameKey": "tree.node.turbulence-recirculation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The pressure differential creates a self-sustaining loop of kinetic energy.",
+      "id": "skill.air-def-t10-n2",
+      "name": "Cyclonic Recirculation",
+      "nameKey": "tree.node.cyclonic-recirculation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The wind fills the gaps in the armor, making the weight feel lighter than the protection it provides.",
+      "id": "skill.air-def-t2-n0",
+      "name": "Aerated Shell",
+      "nameKey": "tree.node.aerated-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evasion"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The wind does not resist the obstacle; it simply flows around it.",
+      "id": "skill.air-def-t3-n0",
+      "name": "Drifting Grace",
+      "nameKey": "tree.node.drifting-grace",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air thickens around the skin, turning breath into a protective shroud.",
+      "id": "skill.air-def-t3-n1",
+      "name": "Layered Atmosphere",
+      "nameKey": "tree.node.layered-atmosphere",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The air thickens around the skin, turning impact into a swirling, redirecting force.",
+      "id": "skill.air-def-t4-n0",
+      "name": "Cyclonic Buffer",
+      "nameKey": "tree.node.cyclonic-buffer",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The air thickens around the user, turning sudden movements into a protective shroud.",
+      "id": "skill.air-def-t4-n1",
+      "name": "Turbulence Dampening",
+      "nameKey": "tree.node.turbulence-dampening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The air thickens around the skin, turning impact into a mere ripple in the wind.",
+      "id": "skill.air-def-t5-n0",
+      "name": "Barometric Seal",
+      "nameKey": "tree.node.barometric-seal",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-regen"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The air thickens around the skin, turning every impact into a mere ripple in the wind.",
+      "id": "skill.air-def-t5-n1",
+      "name": "Barometric Plating",
+      "nameKey": "tree.node.barometric-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A hollowed core that captures the momentum of passing gusts to swell the protective veil.",
+      "id": "skill.air-def-t6-n0",
+      "name": "Vortex Reservoir",
+      "nameKey": "tree.node.vortex-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The very air thickens around the traveler, turning a mere breeze into a crushing weight that sustains the spirit.",
+      "id": "skill.air-def-t6-n1",
+      "name": "Atmospheric Density",
+      "nameKey": "tree.node.atmospheric-density",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "A pressurized layer of air that hardens upon impact, converting kinetic force into a sudden surge of protective energy.",
+      "id": "skill.air-def-t7-n0",
+      "name": "Isobaric Shell",
+      "nameKey": "tree.node.isobaric-shell",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The weight of the atmosphere compresses the skin into a dense, unyielding shell.",
+      "id": "skill.air-def-t7-n1",
+      "name": "Pressure Hardening",
+      "nameKey": "tree.node.pressure-hardening",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very air thickens into a structural barrier, turning atmospheric weight into a physical shell.",
+      "id": "skill.air-def-t8-n0",
+      "name": "High-Pressure Bulkhead",
+      "nameKey": "tree.node.high-pressure-bulkhead",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The air thickens around the user, cycling kinetic energy into a rhythmic, protective pulse.",
+      "id": "skill.air-def-t8-n1",
+      "name": "Cyclonic Buffer",
+      "nameKey": "tree.node.cyclonic-buffer-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very weight of the sky provides a lifting force for the spirit, turning pressure into a protective swell.",
+      "id": "skill.air-def-t9-n0",
+      "name": "Barometric Buoyancy",
+      "nameKey": "tree.node.barometric-buoyancy",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air thickens into a viscous, protective membrane that absorbs the impact of the world.",
+      "id": "skill.air-def-t9-n1",
+      "name": "Sublimation Layer",
+      "nameKey": "tree.node.sublimation-layer",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "Rising heat creates a cushion of resistance against the descent of impact.",
+      "id": "skill.air-def-t9-n2",
+      "name": "Thermal Updraft",
+      "nameKey": "tree.node.thermal-updraft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The wind does not just blow; it accelerates the very intent of the strike.",
+      "id": "skill.air-off-t1-n0",
+      "name": "Zephyr's Momentum",
+      "nameKey": "tree.node.zephyr-s-momentum",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-override"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very air ceases to be a medium and becomes a catalyst, rewriting the fundamental properties of the storm.",
+      "id": "skill.air-off-t10-n0",
+      "name": "Atmospheric Transmutation",
+      "nameKey": "tree.node.atmospheric-transmutation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The air does not merely move; it follows the path of least resistance with violent intent.",
+      "id": "skill.air-off-t10-n1",
+      "name": "Kinetic Wake",
+      "nameKey": "tree.node.kinetic-wake",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air does not merely move; it accelerates, feeding upon its own momentum to tear through the stillness.",
+      "id": "skill.air-off-t10-n2",
+      "name": "Vortex Engine",
+      "nameKey": "tree.node.vortex-engine",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "occasional",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.quickening",
+        "atom.swiftness",
+        "atom.tempo-haste"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "The wind does not just blow; it accelerates the very rhythm of the strike.",
+      "id": "skill.air-off-t2-n0",
+      "name": "Gale Force",
+      "nameKey": "tree.node.gale-force",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.swiftness",
+        "atom.tempo-haste"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The weight of the sky descends upon the target.",
+      "id": "skill.air-off-t3-n0",
+      "name": "Atmospheric Pressure",
+      "nameKey": "tree.node.atmospheric-pressure",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.swiftness",
+        "atom.tempo-haste"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The wind does not just blow; it carves a path through the chaos.",
+      "id": "skill.air-off-t3-n1",
+      "name": "Aero-Calibration",
+      "nameKey": "tree.node.aero-calibration",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The vacuum left behind is as lethal as the gust that preceded it.",
+      "id": "skill.air-off-t4-n0",
+      "name": "Pressure Differential",
+      "nameKey": "tree.node.pressure-differential",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air itself becomes a lens for your intent.",
+      "id": "skill.air-off-t4-n1",
+      "name": "Aetheric Focus",
+      "nameKey": "tree.node.aetheric-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air does not merely push; it carves a path through the very essence of the target.",
+      "id": "skill.air-off-t5-n0",
+      "name": "Vortex Penetration",
+      "nameKey": "tree.node.vortex-penetration",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The wind does not merely blow; it hunts.",
+      "id": "skill.air-off-t5-n1",
+      "name": "Jetstream Velocity",
+      "nameKey": "tree.node.jetstream-velocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The wind does not merely push; it carves a path through the resistance of the world.",
+      "id": "skill.air-off-t6-n0",
+      "name": "Jetstream Vector",
+      "nameKey": "tree.node.jetstream-vector",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air itself yields to your momentum, pulling you forward through the gaps in the resistance.",
+      "id": "skill.air-off-t6-n1",
+      "name": "Slipstream Velocity",
+      "nameKey": "tree.node.slipstream-velocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-override"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The air itself becomes a conductor for the rhythm of the strike.",
+      "id": "skill.air-off-t7-n0",
+      "name": "Aero-Kinetic Conduit",
+      "nameKey": "tree.node.aero-kinetic-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.swiftness",
+        "atom.tempo-haste"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air thins, but the potency of the currents only intensifies.",
+      "id": "skill.air-off-t7-n1",
+      "name": "High-Altitude Stratification",
+      "nameKey": "tree.node.high-altitude-stratification",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air itself becomes a conductor, stripping away the resistance of the medium to force the current through.",
+      "id": "skill.air-off-t8-n0",
+      "name": "Ionization Chamber",
+      "nameKey": "tree.node.ionization-chamber",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air does not merely move; it collapses, leaving nothing for the enemy to breathe.",
+      "id": "skill.air-off-t8-n1",
+      "name": "Vacuum Compression",
+      "nameKey": "tree.node.vacuum-compression",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air does not merely move; it vibrates with the frequency of the storm itself.",
+      "id": "skill.air-off-t9-n0",
+      "name": "Turbulence Resonance",
+      "nameKey": "tree.node.turbulence-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air does not merely move; it carves a path through the very essence of resistance.",
+      "id": "skill.air-off-t9-n1",
+      "name": "Vortex Piercing",
+      "nameKey": "tree.node.vortex-piercing",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The air grows heavy with the scent of ozone as the atmosphere begins to bleed raw energy.",
+      "id": "skill.air-off-t9-n2",
+      "name": "Aetheric Saturation",
+      "nameKey": "tree.node.aetheric-saturation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "air"
+}

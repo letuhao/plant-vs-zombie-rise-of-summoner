@@ -55,6 +55,14 @@ public sealed partial class RpgStore
         // column rather than a field on WorldCommand because that record is the replay unit — an
         // audit string inside it would travel through the engine and the hash for no reason.
         EnsureColumn(db, "rpg_world_commands", "reason", "TEXT");
+
+        // `TurnReport.Phases` (the locked phase order, made observable) was never persisted
+        // alongside `Entries`, only re-derivable from them — and a phase that ran with zero entries
+        // (`Growth`'s own named no-op, most turns) leaves nothing behind to re-derive it from, so it
+        // silently vanished from every already-stored turn's report. Found by actually watching a
+        // turn play back, not by a test. A legacy row with no `phases_json` falls back to that lossy
+        // reconstruction (`TurnReport.FromEntries`) rather than refusing.
+        EnsureColumn(db, "rpg_world_turn_log", "phases_json", "TEXT");
     }
 
     /// <summary>Files one order against the world's open turn.</summary>
@@ -82,6 +90,16 @@ public sealed partial class RpgStore
         if (world is null)
             return commands
                 .Select(c => new WorldCommandOutcome(c.CommandId, false, "world.unknown", false))
+                .ToList();
+
+        // party-dungeon delve-scope (2026-09-05): a delve world is never iterated by the map's
+        // turn — rooms are moved through by RpgStore.Delve.MoveParty, never TurnEngine.Step.
+        // WorldState itself carries no Kind field on purpose (WorldCanonical hashing is untouched),
+        // so the check reads the header, refusing BEFORE any write.
+        var header = GetWorldHeader(worldId);
+        if (header != null && header.Kind != "map")
+            return commands
+                .Select(c => new WorldCommandOutcome(c.CommandId, false, "world.not-a-map", false))
                 .ToList();
 
         var turn = world.CurrentTurn;
@@ -166,7 +184,8 @@ public sealed partial class RpgStore
         ins.Parameters.AddWithValue("$seq", seq);
         ins.Parameters.AddWithValue("$kind", command.Kind);
         ins.Parameters.AddWithValue("$payload", JsonSerializer.Serialize(new CommandPayload(
-            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance)));
+            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance,
+            command.Amount, command.StructureId, command.WardenId, command.ProjectId)));
         ins.Parameters.AddWithValue("$now", now);
         // Bounded at the boundary like every other free-text field: an audit string is not worth
         // failing a turn over, and an unbounded one is a row nobody budgeted for.
@@ -209,7 +228,14 @@ public sealed partial class RpgStore
             // log and finding orders in it that nobody had written.
             if (HasCommandsUnlocked(db, tx, worldId, turn, faction.FactionId)) continue;
 
-            var view = new BelievedWorldView(world, faction.FactionId);
+            // Momentum's input (spec-ai-commander.md §Momentum). Derived from the command log, which
+            // IS the save -- commands are never trimmed -- so nothing new is stored to support it,
+            // and it cannot reach a replayed hash because replay never re-runs a policy. Turn 0 has
+            // no predecessor, which simply reads as "no standing choice" and disables hysteresis.
+            var lastOrders = turn > 0
+                ? LastOrderedDestinationsUnlocked(db, tx, worldId, turn - 1, faction.FactionId, world)
+                : null;
+            var view = new BelievedWorldView(world, faction.FactionId, lastOrders);
             var seed = SeededRng.DeriveStream(worldSeed, $"ai:{faction.FactionId}:{turn}").NextULong();
             var orders = resolve(policyId).Decide(view, seed);
 
@@ -291,6 +317,86 @@ public sealed partial class RpgStore
     /// A turn's orders with the reasoning behind them — what the turn report shows so a player can
     /// tell an AI's mistake from a bug. Commands are never trimmed, so neither is this.
     /// </summary>
+    /// <summary>
+    /// Entity id → the sector a faction's own orders sent it to on <paramref name="turn"/>.
+    ///
+    /// <para>Only <c>Move</c> carries a destination, and the destination is the <b>last</b> sector of
+    /// its lane path. Later orders for one entity win, matching the log's own ordering — a policy
+    /// files at most one order per entity, but the log does not enforce that and the read should not
+    /// assume what it can simply honour.</para>
+    /// </summary>
+    static Dictionary<string, string> LastOrderedDestinationsUnlocked(
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, string factionId,
+        WorldState world)
+    {
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        // The entity id is NOT a column -- it lives inside payload_json, like every other
+        // command field except the five the table indexes on. Selecting `entity_id` threw
+        // "no such column" against every real world, which the Data suite caught on the first run.
+        cmd.CommandText = """
+            SELECT payload_json
+            FROM rpg_world_commands
+            WHERE world_id = $w AND turn = $t AND commander_id = $c
+            ORDER BY seq;
+            """;
+        cmd.Parameters.AddWithValue("$w", worldId);
+        cmd.Parameters.AddWithValue("$t", turn);
+        cmd.Parameters.AddWithValue("$c", factionId);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.IsDBNull(0)) continue;
+            var payloadJson = r.GetString(0);
+            if (string.IsNullOrWhiteSpace(payloadJson)) continue;
+
+            CommandPayload? payload;
+            try { payload = JsonSerializer.Deserialize<CommandPayload>(payloadJson); }
+            catch (JsonException) { continue; }
+            if (payload?.EntityId is not { } entityId) continue;
+
+            var dest = WalkToDestination(world, entityId, payload);
+            if (dest is not null) result[entityId] = dest;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Where a stored <c>Move</c> was actually headed.
+    ///
+    /// <para>The command records a <b>lane</b> path and a null <c>SectorId</c>, so the destination is
+    /// not stored and must be walked: start at the entity's origin — the same
+    /// <c>AtSectorId ?? OnLaneTowardSectorId</c> the policy's own <c>Route</c> uses as its origin —
+    /// and step across each lane to whichever end is not the one just left.</para>
+    ///
+    /// <para>Returns null for anything that cannot be resolved (not a move, empty path, a lane that
+    /// no longer exists, an entity that is gone). A null simply reads as "no standing choice" and
+    /// disables hysteresis for that entity, which is the right failure: momentum is a damping term,
+    /// and a damping term that guesses is worse than one that abstains.</para>
+    /// </summary>
+    static string? WalkToDestination(WorldState world, string entityId, CommandPayload payload)
+    {
+        var lanePath = payload.LanePath;
+        if (lanePath is null || lanePath.Count == 0) return null;
+
+        var entity = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, entityId, StringComparison.Ordinal));
+        var at = entity?.AtSectorId ?? entity?.OnLaneTowardSectorId;
+        if (at is null) return null;
+
+        foreach (var laneId in lanePath)
+        {
+            var lane = world.Lanes.FirstOrDefault(l => string.Equals(l.LaneId, laneId, StringComparison.Ordinal));
+            if (lane is null) return null;
+            if (string.Equals(lane.FromSectorId, at, StringComparison.Ordinal)) at = lane.ToSectorId;
+            else if (string.Equals(lane.ToSectorId, at, StringComparison.Ordinal)) at = lane.FromSectorId;
+            else return null;   // the path does not actually start where the entity stands
+        }
+
+        return at;
+    }
+
     public IReadOnlyList<LoggedWorldCommand> ListLoggedWorldCommands(string worldId, int turn)
     {
         lock (_gate)
@@ -354,7 +460,8 @@ public sealed partial class RpgStore
     /// </summary>
     sealed record CommandPayload(
         string? EntityId, string? SectorId, int? SlotIndex, IReadOnlyList<string>? LanePath,
-        string? Stance = null);
+        string? Stance = null, long? Amount = null, string? StructureId = null, string? WardenId = null,
+        string? ProjectId = null);
 
     /// <summary>Reports are kept for the most recent turns; older ones are re-derived on demand.</summary>
     public const int ReportHotTail = 50;
@@ -388,6 +495,9 @@ public sealed partial class RpgStore
                 return new WorldTurnCommitResult(false, "commander.unknown", false, null);
 
             var header = GetWorldHeader(worldId)!;
+            // party-dungeon delve-scope: refused before MarkCommittedUnlocked's first write.
+            if (header.Kind != "map") return new WorldTurnCommitResult(false, "world.not-a-map", false, null);
+
             var turn = world.CurrentTurn;
 
             // Checked after "who are you", so a stranger cannot learn which turn is open, and
@@ -418,18 +528,21 @@ public sealed partial class RpgStore
             // Everyone is in: resolve. The seed is per world; each turn derives its own stream so
             // one turn's rolls never shift another's.
             var commands = ListWorldCommandsUnlocked(db, tx, worldId, turn);
-            var result = TurnEngine.Step(world, commands, header.Seed);
+            var result = TurnEngine.Step(world, commands, header.Seed, DistrictAssaultResolver.Instance);
 
-            ClearWorldGraphUnlocked(db, tx, worldId);
-            WriteWorldGraphUnlocked(db, tx, result.World);
+            // base-defense world-graph-diff 3.2/3.3: turn commit writes only what changed, not the
+            // whole graph — `world` (pre-step) and `result.World` (post-step) are exactly `previous`
+            // and `next`. World *creation* (CreateWorld) is unaffected and still uses
+            // WriteWorldGraphUnlocked on an empty graph, which is already the cheapest possible case.
+            DiffWorldGraphUnlocked(db, tx, world, result.World);
 
             using (var log = db.CreateCommand())
             {
                 log.Transaction = tx;
                 log.CommandText = """
                     INSERT OR REPLACE INTO rpg_world_turn_log
-                        (world_id, turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json)
-                    VALUES ($w, $t, $hash, $ev, $rv, $seed, $now, $report);
+                        (world_id, turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json, phases_json)
+                    VALUES ($w, $t, $hash, $ev, $rv, $seed, $now, $report, $phases);
                     """;
                 log.Parameters.AddWithValue("$w", worldId);
                 log.Parameters.AddWithValue("$t", turn);
@@ -439,6 +552,7 @@ public sealed partial class RpgStore
                 log.Parameters.AddWithValue("$seed", header.Seed.ToString());
                 log.Parameters.AddWithValue("$now", now);
                 log.Parameters.AddWithValue("$report", JsonSerializer.Serialize(result.Report.Entries));
+                log.Parameters.AddWithValue("$phases", JsonSerializer.Serialize(result.Report.Phases));
                 log.ExecuteNonQuery();
             }
 
@@ -469,7 +583,7 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json
+                SELECT turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json, phases_json
                 FROM rpg_world_turn_log WHERE world_id = $w AND turn = $t;
                 """;
             cmd.Parameters.AddWithValue("$w", worldId);
@@ -478,7 +592,8 @@ public sealed partial class RpgStore
             if (!r.Read()) return null;
             return new WorldTurnLogRow(
                 r.GetInt32(0), r.GetString(1), r.GetInt32(2), r.GetInt32(3),
-                ulong.Parse(r.GetString(4)), r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6));
+                ulong.Parse(r.GetString(4)), r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6),
+                r.IsDBNull(7) ? null : r.GetString(7));
         }
     }
 
@@ -499,6 +614,16 @@ public sealed partial class RpgStore
         if (log.ReportJson is { } json)
         {
             var entries = JsonSerializer.Deserialize<List<TurnReportEntry>>(json) ?? new List<TurnReportEntry>();
+
+            // A row committed before `phases_json` existed has no phase list to trust — fall back to
+            // the lossy entries-only reconstruction rather than refusing a report that is otherwise
+            // still perfectly good.
+            if (log.PhasesJson is { } phasesJson)
+            {
+                var phases = JsonSerializer.Deserialize<List<string>>(phasesJson) ?? new List<string>();
+                return TurnReport.FromStored(phases, entries);
+            }
+
             return TurnReport.FromEntries(entries);
         }
 
@@ -507,12 +632,16 @@ public sealed partial class RpgStore
 
         var header = GetWorldHeader(worldId);
         if (header is null) return null;
+        // party-dungeon delve-scope: a delve's TemplateId is a layout id, not a map size tier —
+        // WorldTemplateCatalog.Build would throw on it. Refuse on purpose rather than fail loudly
+        // by accident (replay is never meaningful for a delve: TurnEngine.Step never runs on one).
+        if (header.Kind != "map") return null;
 
         var world = WorldTemplateCatalog.Build(header.TemplateId, header.Seed, worldId);
         TurnReport? replayed = null;
         for (var t = 0; t <= turn; t++)
         {
-            var result = TurnEngine.Step(world, ListWorldCommands(worldId, t), header.Seed);
+            var result = TurnEngine.Step(world, ListWorldCommands(worldId, t), header.Seed, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed = result.Report;
         }
@@ -534,7 +663,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            UPDATE rpg_world_turn_log SET report_json = NULL
+            UPDATE rpg_world_turn_log SET report_json = NULL, phases_json = NULL
             WHERE world_id = $w AND report_json IS NOT NULL AND turn <= (
               SELECT COALESCE(MAX(turn), -1) - $keep FROM rpg_world_turn_log WHERE world_id = $w
             );
@@ -571,7 +700,11 @@ public sealed partial class RpgStore
             SectorId = payload.SectorId,
             SlotIndex = payload.SlotIndex,
             Stance = payload.Stance,
-            LanePath = payload.LanePath ?? Array.Empty<string>()
+            LanePath = payload.LanePath ?? Array.Empty<string>(),
+            Amount = payload.Amount,
+            StructureId = payload.StructureId,
+            WardenId = payload.WardenId,
+            ProjectId = payload.ProjectId
         };
     }
 
@@ -606,21 +739,7 @@ public sealed partial class RpgStore
         var list = new List<WorldCommand>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
-        {
-            var payload = JsonSerializer.Deserialize<CommandPayload>(r.GetString(3))
-                          ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
-            list.Add(new WorldCommand
-            {
-                CommanderId = r.GetString(0),
-                CommandId = r.GetString(1),
-                Kind = r.GetString(2),
-                EntityId = payload.EntityId,
-                SectorId = payload.SectorId,
-                SlotIndex = payload.SlotIndex,
-                Stance = payload.Stance,
-                LanePath = payload.LanePath ?? Array.Empty<string>()
-            });
-        }
+            list.Add(ReadCommandRow(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)));
 
         return list;
     }
@@ -632,10 +751,13 @@ public sealed record LoggedWorldCommand(WorldCommand Command, string? Reason);
 /// <summary>Outcome of a commit: did it land, and did it release the turn?</summary>
 public sealed record WorldTurnCommitResult(bool Ok, string Reason, bool Advanced, string? StateHash);
 
-/// <summary>A turn's durable record. `ReportJson` is null once the body has been trimmed.</summary>
+/// <summary>A turn's durable record. `ReportJson`/`PhasesJson` are null once the body has been
+/// trimmed — always both together, never one without the other (`TrimWorldTurnReportsUnlocked`).
+/// `PhasesJson` is also null on its own for a row committed before it existed; that legacy case
+/// falls back to `TurnReport.FromEntries`'s lossy reconstruction rather than refusing.</summary>
 public sealed record WorldTurnLogRow(
     int Turn, string StateHash, int EngineVersion, int RulesetVersion,
-    ulong Seed, string CommittedUtc, string? ReportJson);
+    ulong Seed, string CommittedUtc, string? ReportJson, string? PhasesJson);
 
 /// <summary>Per-command result of a submission — a batch never fails as a whole.</summary>
 public sealed record WorldCommandOutcome(string CommandId, bool Ok, string Reason, bool Replayed);

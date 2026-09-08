@@ -27,22 +27,33 @@ already shipped three incompatible level curves before anyone wrote one down.
 
 ---
 
-## 1. Three classes, and the one test that separates them
+## 1. Four classes, and the tests that separate them
 
-> **The test: would a balance pass ever want to change this number?**
+> **The number test: would a balance pass ever want to change this number?**
 > If yes, it is a **tunable** and belongs in config. If changing it breaks *whether the system works*
 > rather than *how the game feels*, it is **structural**. Everything else is a literal.
+
+> **The surface test (added 2026-09-07):** would adding or renaming this identity force a FE (or HUD)
+> rebuild? If yes, and it is a closed vocabulary the player sees (derived family, status, resource,
+> aptitude, element, kit label), it is a **runtime catalog** — not a C# `All` array and not a seed
+> mirror the FE never loads.
 
 | Class | Examples | Where it lives |
 |---|---|---|
 | **Tunable** — balance surface | costs, yields, rates, chances, durations, gains, decay, weights, multipliers, thresholds, soft caps, XP steps, drop odds | `data/tuning/<domain>.v{n}.json` |
-| **Structural** — correctness | buffer sizes, recursion depth, contract/protocol versions, id-namespace offsets, byte widths, hash depth | named `const`, **with a comment saying why it is not tunable** |
+| **Runtime catalog** — identity + player English | displayName, reading, icon, hudToken, color, roster membership, sheet group, tab labels/order | `data/tuning/<domain>-catalog.v{n}.json` (or `actor-sheet.v{n}.json` for sheet chrome). **Never mixed into the number file for the same domain** |
+| **Structural** — correctness | buffer sizes, recursion depth, contract/protocol versions, id-namespace offsets, byte widths, hash depth, closed renderer kinds / `UnitClass` / `StatusKind` enums | named `const` or C# enum, **with a comment saying why it is not tunable** |
 | **Literal** — arithmetic | `0`, `1`, `-1`, `2` in `/2`, the per-mille `1000`, array indices, identity values | inline, no ceremony |
 
 **The grey zone is real, and the tiebreaker is ownership.** `MaxRounds = 50` bounds a battle so it
 cannot hang — structural. But a designer might well want 30 or 80 for pacing — tunable. When both
 readings are defensible, **it is tunable**: the cost of a needless config row is one line; the cost of
 a needed one is a rebuild loop during the week you are least able to afford it.
+
+**Runtime catalog vs tunable:** Crit chance's *English* is a catalog row. Crit chance's *cap* (if any)
+is a tunable number. Putting both in `derived-stats.v2.json` would make a rename indistinguishable
+from a rebalance (T7). Owner lock 2026-09-07: ActorSheet / Actor HUD load catalogs from
+`data/tuning/` — see [actor-sheet-ideal.md](actor-sheet-ideal.md) § Runtime catalog SSOT.
 
 ---
 
@@ -67,9 +78,13 @@ already set:
 }
 ```
 
-**One domain, one file.** `contracts`, `souls`, `loam`, `shield`, `status`, `battle`, `power-scale`,
-`vfx`. A number two domains need belongs to whichever **owns the concept**; the other reads it rather
-than copying it. A copied number is a future drift bug with a delay fuse.
+**One domain, one file for numbers.** `contracts`, `souls`, `loam`, `shield`, `status`, `battle`,
+`power-scale`, `vfx`. A number two domains need belongs to whichever **owns the concept**; the other
+reads it rather than copying it. A copied number is a future drift bug with a delay fuse.
+
+**Catalogs are sibling files, not sections of the number file.** `status.v1.json` keeps policy
+numbers; `status-catalog.v1.json` keeps ids + displayName + hudToken. Same pattern for aptitudes /
+derived-stats / resources / elements.
 
 ---
 
@@ -99,6 +114,12 @@ than copying it. A copied number is a future drift bug with a delay fuse.
 > **T7. A tuning change must not be able to hide a code regression.** Because config is versioned and
 > separate, a golden that moves is attributable to exactly one of them. This is `power-dial`'s
 > two-step rule generalised: never land a refactor and a rebalance in one change.
+> **A copy-only catalog bump must not move combat goldens** — keep runtime catalogs out of the
+> number files so a rename of Crit chance cannot be confused with a change to `categoryResistCap`.
+
+> **T8. A runtime catalog is host-injected like a tunable (T7.2).** Core never reads the file.
+> Missing catalog, unknown kind enum, or incomplete expand axis is a load rejection naming the key
+> (same spirit as T5). FE/HUD iterate the injected surface; they do not hardcode roster unions.
 
 ---
 
@@ -156,6 +177,9 @@ T7. Extract to config, prove byte-identical behaviour, then tune in a separate c
 - **Not retroactive on structural constants.** They stay `const`; T2 asks only for a comment.
 - **Not a licence to add config rows nobody reads.** A tunable with one value and no plausible second
   value is a literal with extra ceremony.
+- **Not a claim that every new catalog row is file-save-only.** A new `UnitClass`, Funnel consumer,
+  13th aptitude closed-form, or incomplete element matrix still needs code — see
+  [actor-sheet-ideal.md](actor-sheet-ideal.md) file-save vs code table.
 
 ---
 

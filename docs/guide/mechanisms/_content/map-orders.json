@@ -1,0 +1,77 @@
+{
+  "slug": "map-orders",
+  "title": "Map tools and orders",
+  "status": "WIP",
+  "kicker": "World and empire · beyond march and claim",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure",
+  "hook": "**WIP:** tools and orders beyond basic march and claim — wardens, cede, dowse, lenses, outliner. Not finished / not fully playable yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. Basic march and claim ship; this richer toolkit is still hardening."},
+    {"term": "Warden", "meaning": "A demon bound to hold ground on the map — not a lawn-only role."},
+    {"term": "Cede", "meaning": "Give up a sector on purpose — a deliberate retreat, not only a Fracture loss."},
+    {"term": "Lens", "meaning": "A way to recolour how the map reads (supply, fog, and more) — not a combat element."}
+  ],
+  "alsoTrue": [
+    "Dowse is a stance for reading the ground. Outliner lists legions and held sectors without hunting the canvas.",
+    "March, claim, End Turn, fog, and Zomboss already ship without this full toolkit."
+  ],
+  "sections": [
+    {
+      "title": "What it will feel like",
+      "intro": "Orders and tools the adventure graph wants:",
+      "cards": [
+        {"name": "Wardens", "body": "Bind demons to hold ground."},
+        {"name": "Cede", "body": "Give up a sector on purpose."},
+        {"name": "Dowse", "body": "A stance for reading the ground."},
+        {"name": "Lenses / outliner", "body": "Switch map reads; list legions and holdings without hunting the canvas."}
+      ],
+      "diagram": [
+        "  basic today: march / claim / End Turn",
+        "  WIP toolkit: wardens / cede / dowse / lenses / outliner"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Use march, claim, and End Turn on the shipped map.",
+        "Treat missing warden or cede controls as unfinished work."
+      ]
+    },
+    {
+      "title": "Where it will live",
+      "groups": [
+        {
+          "title": "On the World map",
+          "intro": "When tools ship, they hang on the same adventure surface.",
+          "steps": [
+            "Open World as you do now.",
+            "Look for order / tool controls beyond move and claim.",
+            "Until they appear, do not invent hotkeys — play the shipped verbs."
+          ],
+          "note": "Not finished yet."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Practice march, claim, and End Turn — those are live.",
+    "When warden or cede appears, follow on-screen prompts.",
+    "Do not assume every fog or supply colouring tool exists yet."
+  ],
+  "doNote": "Stop when toolkit ≠ required for basic adventure. Related: [world map](world-map), [farm / hunt / defend](farm-hunt-defend).",
+  "mixUps": [
+    {"q": "Why can’t I cede a sector?", "a": "Cede is WIP. You can still lose ground to neglect / Fracture."},
+    {"q": "Are wardens the same as commanders?", "a": "No. Wardens bind demons to hold ground; commanders lead runs or legions."},
+    {"q": "Is the outliner required to play?", "a": "No. It is a WIP convenience over the canvas."},
+    {"q": "Do lenses change combat elements?", "a": "No. They change how the map reads."}
+  ],
+  "next": ["map-battle-handoff"],
+  "related": ["world-map", "farm-hunt-defend", "fog-of-war"],
+  "sources": [
+    "docs/guide/the-rift.md §Map tools and orders",
+    "docs/guide/mechanisms/map-orders.md (prior stub)",
+    "docs/guide/glossary.md §Warden · Cede"
+  ]
+}

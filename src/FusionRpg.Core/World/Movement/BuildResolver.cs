@@ -98,7 +98,7 @@ public static class BuildResolver
                 continue;
             }
 
-            if (entity.CarriedLoam < structure.CostMilli)
+            if (entity.CarriedLoam < structure.Cost)
             {
                 Drop(report, phase, command, "build.cannot-afford");
                 continue;
@@ -112,7 +112,7 @@ public static class BuildResolver
             {
                 Entities = next.Entities
                     .Select(e => string.Equals(e.EntityId, entityId, StringComparison.Ordinal)
-                        ? e with { CarriedLoam = e.CarriedLoam - structure.CostMilli }
+                        ? e with { CarriedLoam = e.CarriedLoam - structure.Cost }
                         : e)
                     .ToList(),
                 Sectors = next.Sectors

@@ -1,8 +1,13 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Battle;
 
@@ -23,7 +28,21 @@ public static partial class BattleEngine
     public static readonly ActionEnvelope BasicAttackEnvelope = ActionEnvelope.NoOp with
     {
         ActionId = "act.attack",
-        Commitment = Commitment.LateBound,
+        // `battle-tempo` `timeline-dispatch` (D14, found 2026-09-05): Commitment is left UNSET
+        // (null = "inherit the active profile's DefaultCommitment", D6) rather than hardcoded to
+        // `Commitment.LateBound` as an earlier draft had it. `ActionRunner.TryCommit`'s own precedence
+        // (`envelope.Commitment ?? _defaultCommitment`) means a hardcoded value here would make EVERY
+        // profile's own `DefaultCommitment` permanently unreachable for the basic attack -- the ONLY
+        // action any live battle dispatches today -- regardless of how complete a future dispatch
+        // branch is. Confirmed inert for the atomic path: `RunBasicAttackStep`/`DeclareBasicAttack`
+        // never read `envelope.Commitment` at all (grep-confirmed) -- only `ActionRunner` does, and it
+        // has no production caller yet, so this changes nothing observable until one exists.
+        // S2/S3 (species-skills): the basic attack opts BOTH readers in, so the two channels are live
+        // in every battle rather than sitting behind content that does not exist yet. Byte-identical
+        // today because both channels register with a default of 0, which is neutral for each: 0%
+        // cooldown reduction, and a x1.0 effectiveness multiplier.
+        CooldownChannel = DerivedStatChannels.SkillCooldown(DerivedStatChannels.ActionCategoryAttack),
+        EffectivenessChannel = DerivedStatChannels.SkillEffectiveness(DerivedStatChannels.ActionCategoryAttack),
     };
 
     /// <summary>
@@ -51,6 +70,15 @@ public static partial class BattleEngine
         Break,
         /// <summary>A hit landed; the caller applies it and runs the trait tail.</summary>
         Proceed,
+        /// <summary>
+        /// base-defense `siege-construction`/`siege-ai` (2026-09-07, session 5): the actor had no
+        /// combat target (what would otherwise be <see cref="Break"/>'s own "hazard 3" case) but
+        /// placed a structure instead — <see cref="ConstructionActivation.Fire"/> already ran the
+        /// ENTIRE effect synchronously, so there is nothing left to dispatch (no target, no damage).
+        /// The pass continues to the next actor rather than breaking the whole round, and counts as
+        /// this actor having acted (<c>anyActed = true</c>) since something real happened.
+        /// </summary>
+        ActedWithNoTarget,
     }
 
     readonly record struct AttackStep(AttackStepOutcome Outcome, ActorState? Target, long SignedDelta);
@@ -62,23 +90,115 @@ public static partial class BattleEngine
     /// <see cref="BloodthirstyViewFor"/> to steer it exactly where the old bloodthirsty branch did,
     /// without teaching it the trait. Everything from the berserker ramp onward is `EngineBehavior`
     /// trait logic and stays in the loop.
+    ///
+    /// <para>`battle-tempo` `timeline-dispatch` (D14, spec-timeline-dispatch.md §2.2): split into
+    /// <see cref="DeclareBasicAttack"/> (who, with what envelope) and <see cref="ApplyBasicAttack"/>
+    /// (the hit itself) so a future timeline-dispatch path can commit at one tick and apply at a
+    /// later one. This method is now a two-line wrapper calling both in sequence — same statements,
+    /// same order, same early-return conditions as before the split. The atomic dispatch call site
+    /// (`BattleEngine.cs`'s round loop) is unchanged by this split.</para>
     /// </summary>
     static AttackStep RunBasicAttackStep(
         ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
-        OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round)
+        OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round,
+        IIntentSource? intentSource = null)
     {
-        if (!attacker.Active) return new AttackStep(AttackStepOutcome.Continue, null, 0);
-        if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return new AttackStep(AttackStepOutcome.Continue, null, 0);
+        var (outcome, target, envelope) = DeclareBasicAttack(attacker, state, now, nowTick, trace, round, intentSource);
+        if (outcome != AttackStepOutcome.Proceed) return new AttackStep(outcome, target, 0);
+
+        // A19 (T56.2): the atomic path's own point of no return -- OnActivate has already fired
+        // inside DeclareBasicAttack and nothing after this can un-declare the intent, so this is
+        // where "committing is what costs, not landing" (spec-action-costs.md §3) actually happens.
+        // `null` rng: every authored cost today is a Fixed ValueSpec (no spread), so ScaledAmount
+        // never rolls; a real Spread-costed action would need a dedicated cost-roll stream here,
+        // mirroring EssenceRng/RidersRng's own "never a second roll butterfly" convention -- not
+        // built speculatively ahead of content that needs it (AuraUpkeepDriver's own real caller
+        // defaults to the same `null`).
+        state.CostLedger.TryPay(attacker.Setup.Key, envelope.ActionId, ActionCostTiming.OnCommit, rng: null);
+
+        // The commit-time half of the `holdsStock` precondition (spec-siege-construction.md §11 /
+        // action-program's "ActionStockCommit.TryCommit has ZERO production callers" bug): same
+        // point of no return as the cost line above, same discard-the-result posture (affordability
+        // and stock are both already gated pre-commit, by CostLedger.Check and the `holdsStock` leaf
+        // respectively — a commit-time shortfall here is the same rare TOCTOU race CostLedger.TryPay
+        // already accepts without branching on). An action with no compiled `StockDemands` — every
+        // action shipped today — never reaches the ledger at all (ActionStockCommit.TryCommit's own
+        // early-out).
+        if (state.ActionCatalog?.Get(envelope.ActionId) is { } stockAction)
+            new ActionStockCommit(state.StockLedger).TryCommit(attacker.Setup.Key, stockAction);
+
+        return ApplyBasicAttack(attacker, target!, envelope, state, now, nowTick, calculator, critRng);
+    }
+
+    /// <summary>
+    /// `timeline-dispatch` (D14) front half: active check → CC-lock → declare → bodyguard redirect →
+    /// `OnActivate` → trace. Everything `RunBasicAttackStep` did before calling `calculator.Compute`,
+    /// verbatim — the only change from the pre-split code is returning the resolved target and
+    /// envelope instead of falling through to the hit computation inline.
+    /// </summary>
+    static (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) DeclareBasicAttack(
+        ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
+        BattleTrace? trace, int round, IIntentSource? intentSource = null)
+    {
+        if (!attacker.Active) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
+        if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
+
+        // A19 (T56.1): CostLedger's own Func<long> nowTick reads this -- assigned here, at the one
+        // point every dispatch path (atomic and timeline) already knows the real current tick,
+        // before it is ever consulted for affordability below.
+        state.NowTick = nowTick;
 
         var view = BloodthirstyViewFor(state, attacker);
-        var source = new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
+        // T6/B20: an injected source is how an interactive battle occupies the `Ready` dwell, and how a
+        // replay reads its decision trace instead of re-deciding. `null` keeps the shipped AI policy,
+        // which is every battle today — so this is byte-identical until a caller passes one.
+        // A19 (T56.1): AlwaysAffordable.Instance -> state.CostLedger -- the real, first production
+        // affordability check. Vacuously affordable for every action with no authored cost row
+        // (CostLedger.Check's own early return), so this is byte-identical until content opts in.
+        // base-defense siege-ai (2026-09-07, session 5, owner-authorized): SiegeAiIntentSource tried
+        // SECOND, only when no explicit override was supplied -- `state.DefaultAiIntentSource` is null
+        // for every battle that didn't opt in via `aiTuning` (every battle before this task, and every
+        // non-siege battle today), so this is byte-identical until a caller opts in.
+        var source = intentSource
+            ?? state.DefaultAiIntentSource
+            ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, state.CostLedger);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
-        if (intent.IsNone) return new AttackStep(AttackStepOutcome.Break, null, 0); // hazard 3: round breaks
+        if (intent.IsNone)
+        {
+            // base-defense siege-ai/siege-construction (2026-09-07, session 5, owner-authorized
+            // default policy): before conceding hazard 3's own round-break, give an actor holding the
+            // `Built` acquisition path one last option -- construction is tried ONLY when combat
+            // found nothing at all, matching ActionTagPreference.Rank's own already-shipped ordering
+            // (Construct ranks last, "the least urgent default"). A no-op for every actor that does
+            // not hold ConstructionActions.BuiltActionId (every battle before this session) or whose
+            // battle never wired a ConstructionBoard (every non-siege battle kind) -- both checked
+            // before touching anything, so this is provably byte-identical until both are true.
+            if (TryDeclareBuilt(attacker, state, nowTick, out var builtIntent))
+                return builtIntent;
+            // siege-ai R3 (spec-siege-ai.md §4, 2026-09-07): the SAME "combat found nothing at all"
+            // gate, tried second -- an actor with no target in reach advances toward its own objective
+            // instead of standing idle. A no-op for every actor holding no Movement-tagged action, every
+            // battle with no siege objective wired (every non-siege battle kind), and every battle where
+            // no path exists at all ("hold and defend, never a random move" -- the spec's own words).
+            if (TryDeclareObjectiveAdvance(attacker, state, out var advanceIntent))
+                return advanceIntent;
+            return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
+        }
 
         var target = state.ByKey[intent.TargetKey!];
         var bodyguard = FindAdjacentWithTrait(state.Actors, target, "loyal");
         if (bodyguard != null && !IsCcLocked(state.Status, bodyguard.Setup.Key, now))
             target = bodyguard;
+
+        // A25 (battle-runner-path-integration): the runner runs BEFORE the bag, not after --
+        // EffectBag.OnEvent calls Funnel.Flush() inside itself, so a dispatch enqueued afterwards
+        // would sit in the mailbox until the next event (spec-atom-runner.md's own documented trap,
+        // already avoided once by SimEffectHost.OnEvent, mirrored here). A no-op (`Runner` null) for
+        // every battle with no runner-path atom bound -- byte-identical to today.
+        state.Host.Runner?.OnEvent(new RunnerEvent(
+            TriggerIndex.Ordinal(AtomTriggers.OnActivate),
+            attacker.Setup.Key, target.Setup.Key,
+            state.FactsOf(attacker.Setup.Key), state.FactsOf(target.Setup.Key)));
 
         // A18b (spec-on-activate-trigger.md §2): fires once per resolved (non-Break) intent,
         // independent of hit/miss -- a cast succeeds even if the attack roll misses -- at the
@@ -96,6 +216,151 @@ public static partial class BattleEngine
 
         trace?.Target(round, attacker.Setup.Key, target.Setup.Key);
 
+        return (AttackStepOutcome.Proceed, target, intent.Envelope);
+    }
+
+    /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, session 5, owner-authorized): the
+    /// live construction decision this program's own `ConstructionAi.ChooseBuiltSite` proved
+    /// standalone. Returns `true` (with a ready-to-return outcome tuple) when it found and fired a
+    /// legal, affordable `Built`-path placement; `false` when nothing changed — the caller's own
+    /// existing `Break` fires unaltered in that case. Deliberately scoped to `Built` only: `Assembled`/
+    /// `Summoned`/`Laboured` cost through the ordinary `ActionCostRow`/`CostLedger` mechanism already
+    /// (no world-scoped budget to source here), and `Built` is the one path `ConstructionAi`/
+    /// `ConstructionCost` were built for.
+    /// </summary>
+    static bool TryDeclareBuilt(
+        ActorState attacker, BattleRunState state, long nowTick,
+        out (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) result)
+    {
+        result = (AttackStepOutcome.Break, null, ActionEnvelope.NoOp);
+
+        // Every battle without a wired siege board (every non-siege battle kind, and every siege
+        // battle before DistrictAssaultResolver's own onEffectHostReady hook runs) reads null here —
+        // a quiet no-op, the same posture ExecPlaceStructure's own unwired case already establishes.
+        var constructionBoard = state.Host.ConstructionBoard;
+        if (constructionBoard is null) return false;
+
+        var held = state.HeldActionsOf(attacker.Setup.Key);
+        var holdsBuilt = false;
+        for (var i = 0; i < held.Count; i++)
+        {
+            if (!string.Equals(held[i].ActionId, ConstructionActions.BuiltActionId, StringComparison.Ordinal)) continue;
+            holdsBuilt = true;
+            break;
+        }
+        if (!holdsBuilt) return false;
+
+        if (!constructionBoard.Board.Positions.TryGetValue(attacker.Setup.Key, out var builderPos))
+            return false; // off-board -- cannot measure adjacency to build
+
+        // Content-scope reality, not a shortcut: `moat` is the ONE real structure the shipped
+        // `Built` action's own atom names (ConstructionActions.cs's own hardcoded `structureId`) —
+        // a fuller roster is structure-corpus's own future content job, not invented here.
+        var moat = StructureCatalog.Get("moat");
+        var choice = ConstructionAi.ChooseBuiltSite(
+            new[] { moat }, builderPos, constructionBoard.Board, constructionBoard.Board.Spec,
+            constructionBoard.BoardSide, constructionBoard.CoreSideMilli, constructionBoard.RampartThickness,
+            constructionBoard.RemainingRubble, constructionBoard.RemainingIronwork,
+            requiredSlotKindSatisfiedAt: (def, cell) =>
+                constructionBoard.SlotByCell.TryGetValue(cell, out var slot) && slot.Kind == def.RequiredSlotKind);
+        if (choice is null) return false; // nothing affordable and legal right now
+
+        constructionBoard.SpendBuilt(choice.Value.Structure);
+        ConstructionActivation.Fire(state.Host, attacker.Setup.Key, choice.Value.Cell.Row, choice.Value.Cell.Col, nowTick);
+
+        result = (AttackStepOutcome.ActedWithNoTarget, null, ActionEnvelope.NoOp);
+        return true;
+    }
+
+    /// <summary>
+    /// base-defense `siege-ai` R3 (spec-siege-ai.md §4, 2026-09-07): "no target in reach -> path
+    /// toward the objective." Tried after <see cref="TryDeclareBuilt"/>, same shape (returns `true`
+    /// with a ready outcome when it moved the actor at least one cell; `false` when nothing changed —
+    /// the caller's own `Break` fires unaltered). The actual pathing/stepping is
+    /// <see cref="BattleRunState.TryMoveTowardObjective"/> — this method is purely the two gate checks
+    /// that decide whether to even attempt it (holds a Movement-tagged action; has positive move
+    /// range), matching <see cref="ApplyBasicAttack"/>'s own existing A9 Movement-category dispatch
+    /// gate exactly so a real battle behaves the same way whether it reaches this fallback or the
+    /// ordinary dispatch path.
+    /// </summary>
+    static bool TryDeclareObjectiveAdvance(
+        ActorState attacker, BattleRunState state,
+        out (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) result)
+    {
+        result = (AttackStepOutcome.Break, null, ActionEnvelope.NoOp);
+
+        var held = state.HeldActionsOf(attacker.Setup.Key);
+        var holdsMovement = false;
+        for (var i = 0; i < held.Count; i++)
+        {
+            var tags = held[i].Tags;
+            var tagged = false;
+            for (var t = 0; t < tags.Count; t++)
+            {
+                if (tags[t] != FusionRpg.Core.Actions.ActionTag.Movement) continue;
+                tagged = true;
+                break;
+            }
+            if (!tagged) continue;
+            holdsMovement = true;
+            break;
+        }
+        if (!holdsMovement) return false;
+
+        var moveRange = (int)Math.Round(attacker.Derived.Get(DerivedStatChannels.MoveRange));
+        if (moveRange <= 0) return false; // byte-identical for every actor shipped today (move.range defaults to 0)
+
+        if (state.TryMoveTowardObjective(attacker.Setup.Key, moveRange) == 0) return false;
+
+        result = (AttackStepOutcome.ActedWithNoTarget, null, ActionEnvelope.NoOp);
+        return true;
+    }
+
+    /// <summary>
+    /// `timeline-dispatch` (D14) back half: `calculator.Compute` → `OnDamageDealt` → cooldown arm.
+    /// Everything `RunBasicAttackStep` did after resolving the target, verbatim, against a target
+    /// that is now a parameter (already resolved — by <see cref="DeclareBasicAttack"/> on the atomic
+    /// path, or by <c>ActionRunner.CurrentTarget</c> after commitment-binding re-selection on the
+    /// timeline-dispatch path).
+    /// </summary>
+    static AttackStep ApplyBasicAttack(
+        ActorState attacker, ActorState target, ActionEnvelope envelope, BattleRunState state,
+        DateTimeOffset now, long nowTick, OverlayCombatCalculator calculator, ICombatRng critRng)
+    {
+        // A22 (spec-action-resolution-by-category.md §2): Category lives on CompiledAction, not on
+        // ActionEnvelope -- resolved here via the catalog reference BattleRunState now keeps as a
+        // field. null (every action authored before A-E1 shipped, and the basic attack itself, which
+        // is hand-built and never reaches this lookup at all since it is not in any real catalog) maps
+        // to Attack deliberately -- changing that reading would silently alter every already-blessed
+        // golden's own resolution.
+        var category = state.ActionCatalog?.Get(envelope.ActionId)?.Category ?? ActionCategory.Attack;
+        if (category != ActionCategory.Attack)
+        {
+            // A9 (spec-movement-actions.md §3): "destination legality is A10's, not a second rule" --
+            // this is the ONLY new behavior a Movement-category action adds to the existing
+            // Defense/Support/Status dispatch below; every existing atom-granted effect still resolves
+            // through the unconditional OnActivate path exactly as before. Byte-identical for every
+            // actor shipped today: move.range defaults to 0 (nothing grants it yet), and
+            // TryMoveTowardNearestEnemy returns 0 cells moved without touching the board at all when
+            // maxCells <= 0 -- confirmed by reading MoveAction.MoveToward directly, not assumed.
+            if (category == FusionRpg.Core.Actions.ActionCategory.Movement)
+            {
+                var moveRange = (int)Math.Round(attacker.Derived.Get(FusionRpg.Core.Stats.Derived.DerivedStatChannels.MoveRange));
+                if (moveRange > 0) state.TryMoveTowardNearestEnemy(attacker.Setup.Key, moveRange);
+            }
+
+            // Defense/Support/Movement/Status: the hit/crit roll is meaningless for a non-attack
+            // action (it was never supposed to "miss") -- calculator.Compute is never called, so its
+            // own OnDamageDealt trigger never fires either (there is no hit to trigger it; OnActivate,
+            // A18b, already covers this action's real effect, unconditionally, regardless of category).
+            // The cooldown arms the moment the action resolves -- unconditional, never gated on an
+            // outcome that was never rolled, unlike the Attack branch below.
+            state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
+                SkillCooldownReductionPm(attacker, envelope));
+            return new AttackStep(AttackStepOutcome.Proceed, target, 0);
+        }
+
         var (signedDelta, breakdown) = calculator.Compute(new OverlayCombatRequest
         {
             // A18e (spec-battle-live-stat-modifiers.md §2): the one production read-site this module
@@ -105,10 +370,23 @@ public static partial class BattleEngine
             Components = attacker.AttackComponents,
             Attacker = new CombatActorSnapshot(attacker.Derived, attacker.ElementTypes),
             Defender = new CombatActorSnapshot(target.Derived, target.ElementTypes),
+            // S3 (species-skills): the attacker's own `skill.effectiveness.{category}` scales the
+            // payload, applied INSIDE the resolver (never as a second multiplier afterwards, which
+            // would put combat math outside the SSOT and trip the parity tests by design). 0 is
+            // neutral and yields exactly 1.0, so an envelope that names no channel is byte-identical.
+            EffectivenessMultiplier =
+                OverlayCombatRequest.MultiplierFromPerMille(SkillEffectivenessPm(attacker, envelope)),
             Profile = CombatProfile.BattleSim
         }, critRng);
 
         if (!breakdown.Hit) return new AttackStep(AttackStepOutcome.Continue, null, 0);
+
+        // A25 (battle-runner-path-integration): same "runner before the bag" ordering as the
+        // OnActivate site above.
+        state.Host.Runner?.OnEvent(new RunnerEvent(
+            TriggerIndex.Ordinal(AtomTriggers.OnDamageDealt),
+            attacker.Setup.Key, target.Setup.Key,
+            state.FactsOf(attacker.Setup.Key), state.FactsOf(target.Setup.Key)));
 
         // A18c (spec-battle-resource-shield-grants.md §2): resource.delta's existing shipped content
         // (fx.poison_on_hit, fx.freeze_on_hit, ...) is OnDamageDealt-triggered, not OnActivate -- a
@@ -127,9 +405,44 @@ public static partial class BattleEngine
         });
         state.Host.Flush();
 
-        state.Cooldowns.Start(attacker.Setup.Key, intent.Envelope, nowTick); // T38: inert for Class.None
+        // S2 (species-skills): the cooldown is reduced by the attacker's own
+        // `skill.cooldown.{category}` — the channel the envelope itself names — resolved HERE, at the
+        // arming site, because CooldownLedger stores an absolute tick. An envelope with no
+        // CooldownChannel reads nothing and arms at base ticks; that is the neutral path and it stays
+        // allocation-free. Inert for Class.None, as before.
+        //
+        // Real, latent bug found and fixed 2026-09-07 (cooldown-arming-double-call, named 2026-09-06):
+        // this call was UNCONDITIONAL, with no `StartsAt` check at all -- independent of, and
+        // redundant with, ALL THREE of `ActionRunner`'s own StartsAt-gated arming sites
+        // (`ActionRunner.cs:236` Commit, `:361` Resolve, `:289` RecoveryEnd). Since
+        // `CooldownLedger.Start` is a plain overwrite, this call firing unconditionally after
+        // `ActionRunner.TryCommit`'s own `StartsAt==Commit` arm (or before `OnRecoveryDue`'s own
+        // `StartsAt==RecoveryEnd` arm) would silently re-arm at the WRONG tick the moment content ever
+        // authored `StartsAt: Commit`/`RecoveryEnd` -- latent only because no shipped content does yet.
+        // Gated behind `StartsAt == Resolve` (the enum's own declared default,
+        // `ActionEnvelope.cs:110`), matching `ActionRunner`'s own three-way split exactly and provably
+        // byte-identical for every envelope that does not override it, which is every one that exists
+        // today.
+        if (envelope.StartsAt == CooldownStart.Resolve)
+            state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
+                SkillCooldownReductionPm(attacker, envelope));
         return new AttackStep(AttackStepOutcome.Proceed, target, signedDelta);
     }
+
+    /// <summary>
+    /// The acting actor's cooldown reduction for this action, per-mille — 0 when the envelope names
+    /// no channel, which is every action that does not opt in. Reads the actor's already-composed
+    /// derived snapshot, so this adds no resolve.
+    /// </summary>
+    static long SkillCooldownReductionPm(ActorState actor, ActionEnvelope envelope) =>
+        envelope.CooldownChannel is { } channel ? (long)actor.Derived.Get(channel) : 0;
+
+    /// <summary>The acting actor's effectiveness bonus for this action, per-mille — 0 when the
+    /// envelope names no channel. Returns a <c>long</c> on purpose: the per-mille to multiplier
+    /// conversion is double arithmetic and belongs in <c>Combat/</c>, because this directory bans
+    /// floating point.</summary>
+    static long SkillEffectivenessPm(ActorState actor, ActionEnvelope envelope) =>
+        envelope.EffectivenessChannel is { } channel ? (long)actor.Derived.Get(channel) : 0;
 
     /// <summary>
     /// spec-action-selection-adoption.md §5: `bloodthirsty` stays engine-side, reimplemented as a
@@ -173,5 +486,10 @@ public static partial class BattleEngine
         public GridPos? PositionOf(string actorKey) => _inner.PositionOf(actorKey);
         public EntityFacts FactsOf(string actorKey) => _inner.FactsOf(actorKey);
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) => _inner.HeldActionsOf(actorKey);
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => _inner.DerivedOf(actorKey);
+        public string? GarrisonedStructureKeyOf(string actorKey) => _inner.GarrisonedStructureKeyOf(actorKey);
+        public GridPos? ObjectivePositionOf(string actorKey) => _inner.ObjectivePositionOf(actorKey);
+        public long? MaxHpOf(string actorKey) => _inner.MaxHpOf(actorKey);
+        public int AggressionOf(string actorKey) => _inner.AggressionOf(actorKey);
     }
 }

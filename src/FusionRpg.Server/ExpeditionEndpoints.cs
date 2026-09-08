@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Stats.Derived;
@@ -19,12 +20,15 @@ public sealed class ExpeditionService
     readonly RpgStore _store;
     readonly WebMatchService _webMatch;
     readonly IHubContext<RpgHub> _hub;
+    readonly FusionRpg.Core.Power.IPowerIndexProvider _powerIndex;
 
-    public ExpeditionService(RpgStore store, WebMatchService webMatch, IHubContext<RpgHub> hub)
+    public ExpeditionService(RpgStore store, WebMatchService webMatch, IHubContext<RpgHub> hub,
+        FusionRpg.Core.Power.IPowerIndexProvider powerIndex)
     {
         _store = store;
         _webMatch = webMatch;
         _hub = hub;
+        _powerIndex = powerIndex;
     }
 
     public async Task<(bool Ok, string Reason, ExpeditionRow? Row)> DispatchAsync(
@@ -56,7 +60,12 @@ public sealed class ExpeditionService
         return (ok, reason, row);
     }
 
-    public sealed record CollectBattleResult(int BattleIndex, bool Boss, string Outcome, long? RunId, string MatchKey);
+    /// <param name="TurnOrder">`battle-tempo` `forecast-rail` FR3 — the acting order this battle
+    /// actually recorded (spec-forecast-rail.md §6: rendered in the expedition result view, a
+    /// RECORD of what happened since the battle already resolved before the player collects).</param>
+    public sealed record CollectBattleResult(
+        int BattleIndex, bool Boss, string Outcome, long? RunId, string MatchKey,
+        IReadOnlyList<TurnOrderEntry> TurnOrder);
 
     public sealed record CollectResult(
         string State, int ElapsedTicks,
@@ -65,7 +74,7 @@ public sealed class ExpeditionService
         long SoulsAwarded,
         IReadOnlyList<MaterialDrop> Materials,
         IReadOnlyList<DemonSpecimenDto> WildJoins,
-        IReadOnlyList<(string InstanceId, double Xp)> SpecimenXp);
+        IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp);
 
     public async Task<(bool Ok, string Reason, CollectResult? Result)> CollectAsync(
         long expeditionId, long playerId, bool recall)
@@ -101,20 +110,39 @@ public sealed class ExpeditionService
 
         // Battles run first — each is correlation-idempotent, so a crashed collect replays them.
         var battleResults = new List<CollectBattleResult>();
-        var specimenXp = new Dictionary<string, double>(StringComparer.Ordinal);
+        // Accumulated in MILLI-XP as long, divided by 1000 exactly once at the award below —
+        // CLAUDE.md's numeric rule ("widen before multiplying, divide by 1000 last"). Summing
+        // `rate * xpMilli / 1000.0` per battle instead would accumulate float error into a value
+        // that is then persisted (progression-shape-audit-2026-09-04.md §4.1).
+        var specimenXpMilli = new Dictionary<string, long>(StringComparer.Ordinal);
         var victories = 0;
+        // species-build-todo.md T4.6, spec-zomboss-adaptive.md's own ⛔ seam: the enemy side actually
+        // carries a pattern only for the expedition's BOSS battle — the Zomboss's own real production
+        // caller. Resolved BEFORE RunPlannedMatchAsync (never during resolution), so `(setup, seed)`
+        // stays reproducible from that point on, matching every other planned-battle setup here.
+        var theta = (long)_powerIndex.ActorIndex(new FusionRpg.Core.Stats.StatContext { PlayerId = playerId });
         foreach (var plan in resolution.Battles)
         {
+            var correlation = BattleCorrelation(row.Id, plan.BattleIndex);
+            // Selection has a REAL side effect (advances rpg_zomboss_state) -- it must run exactly
+            // once per battle, never once per CollectAsync retry. A battle already logged under this
+            // correlation is a replay: RunPlannedMatchAsync's own replay branch ignores the setup
+            // BODY it is handed and returns the stored (already-enriched) one, so the plain plan.Setup
+            // below is only ever a placeholder for that call, never what actually resolves.
+            var setup = plan.Boss && _store.TryGetWebMatchLog(playerId, correlation) is null
+                ? _webMatch.ApplyZombossPattern(playerId, plan.Setup, theta, plan.BattleSeed)
+                : plan.Setup;
             var (ok, reason, outcome) = await _webMatch
-                .RunPlannedMatchAsync(playerId, BattleCorrelation(row.Id, plan.BattleIndex),
-                    BattleMatchKey(row.Id, plan.BattleIndex), plan.Setup, plan.BattleSeed)
+                .RunPlannedMatchAsync(playerId, correlation,
+                    BattleMatchKey(row.Id, plan.BattleIndex), setup, plan.BattleSeed)
                 .ConfigureAwait(false);
             if (!ok) return (false, "battle." + reason, null);
 
             var report = outcome!.Report;
             battleResults.Add(new CollectBattleResult(
                 plan.BattleIndex, plan.Boss,
-                report.Outcome.ToString().ToLowerInvariant(), outcome.RunId, outcome.MatchKey));
+                report.Outcome.ToString().ToLowerInvariant(), outcome.RunId, outcome.MatchKey,
+                outcome.TurnOrder));
 
             // Specimen XP per battle won: survivors earn the tier rate × their genius multiplier.
             if (report.Outcome == BattleOutcome.Victory)
@@ -126,9 +154,12 @@ public sealed class ExpeditionService
                     var slot = SlotIndex(actor.Key);
                     if (slot < 0 || slot >= squadIds.Count) continue;
                     var instanceId = squadIds[slot];
-                    specimenXp.TryGetValue(instanceId, out var have);
-                    specimenXp[instanceId] = have +
-                        resolution.Rewards.SpecimenXpPerBattleWon * actor.XpMilli / 1000.0;
+                    specimenXpMilli.TryGetValue(instanceId, out var haveMilli);
+                    checked
+                    {
+                        specimenXpMilli[instanceId] = haveMilli +
+                            (long)resolution.Rewards.SpecimenXpPerBattleWon * actor.XpMilli;
+                    }
                 }
             }
         }
@@ -153,8 +184,11 @@ public sealed class ExpeditionService
         }).ToList();
 
         var state = recall && elapsed < tier.TickCount ? ExpeditionStates.Recalled : ExpeditionStates.Collected;
-        var xpAwards = specimenXp.OrderBy(kv => kv.Key, StringComparer.Ordinal)
-            .Select(kv => (kv.Key, kv.Value)).ToList();
+        // The single divide, half away from zero — the same rounding direction PowerLadder and
+        // RpgXpAwardMap use, so every XP that reaches the store was rounded once and identically.
+        var xpAwards = specimenXpMilli.OrderBy(kv => kv.Key, StringComparer.Ordinal)
+            .Select(kv => (kv.Key, Xp: (kv.Value + (kv.Value >= 0 ? 500L : -500L)) / 1000L))
+            .ToList();
         var (applied, applyReason, minted) = _store.ApplyExpeditionRewards(
             row.Id, playerId, state,
             new RpgStore.ExpeditionRewardApply(

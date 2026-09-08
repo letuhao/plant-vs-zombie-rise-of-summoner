@@ -123,6 +123,112 @@ describe("lawnProjectorFold", () => {
     expect(findOccupant(model, "ABCD")?.instanceId).toBe("u-1");
   });
 
+  it("debug.snapshot folds match.commander into the lawn view model", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderId: "commander:dave",
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: "Might",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: "Might"
+    });
+  });
+
+  it("debug.snapshot commander with display name only sets null aura and fallback id", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: null,
+            activeAuraDisplayName: null
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: null
+    });
+  });
+
+  it("debug.snapshot commander with display name only sets null aura", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderId: "commander:dave",
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: null,
+            activeAuraDisplayName: null
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: null
+    });
+  });
+
+  it("board.end clears matchCommander chips", () => {
+    const seeded = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      }),
+      evt("plant.spawn", { ptr: "P", type: 1, row: 0, col: 0 })
+    ]);
+    expect(seeded.matchCommander?.displayName).toBe("Crazy Dave");
+    const ended = foldLawnEvents([evt("board.end", {})], seeded);
+    expect(ended.matchCommander).toBeUndefined();
+  });
+
+  it("debug.snapshot Ending clears matchCommander chips", () => {
+    const seeded = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      }),
+      evt("plant.spawn", { ptr: "P", type: 1, row: 0, col: 0 })
+    ]);
+    const ended = foldLawnEvents(
+      [evt("debug.snapshot", { match: { phase: "Ending", matchKey: "mk" } })],
+      seeded
+    );
+    expect(ended.phase).toBe("Idle");
+    expect(ended.matchCommander).toBeUndefined();
+  });
+
   it("publish bumps revision (replace semantics)", () => {
     const a = foldLawnEvents([evt("board.start", {})]);
     const b = foldLawnEvents([evt("plant.spawn", { ptr: "P", type: 1 })], a);
@@ -962,5 +1068,183 @@ describe("lawnProjectorFold", () => {
     );
     expect(findOccupant(walked, "Z")?.col).toBe(10);
     expect(walked.cols).toBe(12);
+  });
+
+  const goldenActorHud = {
+    identity: {
+      tier: "normal",
+      role: "vanilla",
+      levelBand: 12,
+      flags: [] as string[]
+    },
+    resources: {
+      shield: {
+        hp: 50,
+        max: 80,
+        stacks: [{ element: "fire", hp: 50, max: 80 }]
+      }
+    },
+    statuses: [
+      { id: "command", cc: false, magnitudeBand: "low" },
+      { id: "expose", cc: false, magnitudeBand: "mid" }
+    ],
+    overflow: { statusCount: 0 }
+  };
+
+  it("actorHud_from_entity_stats", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5, hp: 200, maxHp: 200 }),
+      evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: goldenActorHud })
+    ]);
+    const occ = findOccupant(model, "Z1");
+    expect(occ?.hud?.statuses).toHaveLength(2);
+    expect(occ?.hud?.resources?.shield?.stacks).toHaveLength(1);
+    expect(occ?.hud?.resources?.shield?.hp).toBe(50);
+    expect(occ?.hud?.identity.levelBand).toBe(12);
+  });
+
+  it("actorHud_from_board_stats", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("debug.board-stats", {
+        plants: [],
+        zombies: [
+          { ptr: "Z1", typeId: 0, row: 1, col: 5, hp: 200, actorHud: goldenActorHud },
+          { ptr: "Z2", typeId: 0, row: 2, col: 5, hp: 180 }
+        ]
+      })
+    ]);
+    expect(findOccupant(model, "Z1")?.hud?.statuses).toHaveLength(2);
+    expect(findOccupant(model, "Z2")?.hud).toBeUndefined();
+  });
+
+  it("status_chips_extended_to_custom_ids", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5 }),
+      evt("debug.status.applied", { ptr: "Z1", status: "spark" })
+    ]);
+    expect(findOccupant(model, "Z1")?.statusChips).toContain("spark");
+  });
+
+  it("debug.actor-hud patches single occupant hud", () => {
+    const seeded = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5 })
+    ]);
+    const model = foldLawnEvents(
+      [evt("debug.actor-hud", { ptr: "Z1", actorHud: goldenActorHud })],
+      seeded
+    );
+    expect(findOccupant(model, "Z1")?.hud?.statuses).toHaveLength(2);
+  });
+
+  it("entity.stats without actorHud preserves hud and legacy rpgShield", () => {
+    const seeded = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5, hp: 200, maxHp: 200 }),
+      evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: goldenActorHud, rpgShieldHp: 50, rpgShieldMax: 80 })
+    ]);
+    const model = foldLawnEvents(
+      [evt("entity.stats", { ptr: "Z1", side: "zombie", hp: 180, rpgShieldHp: 40, rpgShieldMax: 80 })],
+      seeded
+    );
+    const occ = findOccupant(model, "Z1");
+    expect(occ?.hud?.statuses).toHaveLength(2);
+    expect(occ?.rpgShield).toBe(40);
+  });
+
+  it("entity.stats actorHud shield break clears resources.shield", () => {
+    const seeded = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5 }),
+      evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: goldenActorHud })
+    ]);
+    const broken = {
+      ...goldenActorHud,
+      resources: { shield: { hp: 0, max: 0, stacks: [] } }
+    };
+    const model = foldLawnEvents(
+      [evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: broken })],
+      seeded
+    );
+    expect(findOccupant(model, "Z1")?.hud?.resources?.shield).toBeUndefined();
+    expect(findOccupant(model, "Z1")?.hud?.statuses).toHaveLength(2);
+  });
+
+  it("malformed actorHud on entity.stats clears hud", () => {
+    const seeded = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5 }),
+      evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: goldenActorHud })
+    ]);
+    const model = foldLawnEvents(
+      [
+        evt("entity.stats", {
+          ptr: "Z1",
+          side: "zombie",
+          actorHud: { identity: { tier: "bogus", role: "vanilla", flags: [] }, statuses: [] }
+        })
+      ],
+      seeded
+    );
+    expect(findOccupant(model, "Z1")?.hud).toBeUndefined();
+  });
+
+  it("debug.snapshot entity rebuild preserves hud", () => {
+    const seeded = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, col: 5 }),
+      evt("entity.stats", { ptr: "Z1", side: "zombie", actorHud: goldenActorHud })
+    ]);
+    const model = foldLawnEvents(
+      [
+        evt("debug.snapshot", {
+          match: {
+            phase: "InMatch",
+            entities: [{ ptr: "Z1", side: "zombie", typeId: 0 }]
+          }
+        })
+      ],
+      seeded
+    );
+    expect(findOccupant(model, "Z1")?.hud?.statuses).toHaveLength(2);
+  });
+
+  it("lawn-deploy-event.fired sets pendingLawnDeploy; a second fire replaces it; board.start clears it", () => {
+    const seeded = foldLawnEvents([evt("board.start", {}, "m1")]);
+    expect(seeded.pendingLawnDeploy).toBeUndefined();
+
+    const fired = foldLawnEvents(
+      [evt("lawn-deploy-event.fired", { caseId: "zombie-swarm", eligibleInstanceIds: ["a", "b"] })],
+      seeded
+    );
+    expect(fired.pendingLawnDeploy).toEqual({ caseId: "zombie-swarm", eligibleInstanceIds: ["a", "b"] });
+
+    const refired = foldLawnEvents(
+      [evt("lawn-deploy-event.fired", { caseId: "thin-defense", eligibleInstanceIds: ["c"] })],
+      fired
+    );
+    expect(refired.pendingLawnDeploy).toEqual({ caseId: "thin-defense", eligibleInstanceIds: ["c"] });
+
+    const restarted = foldLawnEvents([evt("board.start", {}, "m2")], refired);
+    expect(restarted.pendingLawnDeploy).toBeUndefined();
+  });
+
+  it("lawn-deploy-event.fired with no caseId is ignored", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("lawn-deploy-event.fired", { eligibleInstanceIds: ["a"] })
+    ]);
+    expect(model.pendingLawnDeploy).toBeUndefined();
+  });
+
+  it("lawn-deploy-event.fired tolerates a missing/non-array eligibleInstanceIds", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("lawn-deploy-event.fired", { caseId: "zombie-swarm" })
+    ]);
+    expect(model.pendingLawnDeploy).toEqual({ caseId: "zombie-swarm", eligibleInstanceIds: [] });
   });
 });

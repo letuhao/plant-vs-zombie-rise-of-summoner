@@ -75,6 +75,23 @@ public class PlaceholderBattleResolverTests
     }
 
     [Fact]
+    public void District_assault_reads_defender_bonus_as_zero_so_it_is_not_paid_twice()
+    {
+        // base-defense siege-objective section 7: the SAME entrenched matchup that flips a Sector-kind
+        // battle to the defender above must NOT flip a District-kind one -- structure-state/siege-cover
+        // model the real fortification bonus on the board itself, and stacking the placeholder's flat
+        // 1250 on top would pay the defender twice for the same thing.
+        var a = Force("a", "dave", 10, 100, 1);  // 1000
+        var b = Force("b", "wild", 9, 100, 1);   // 900
+
+        var districtRequest = Fight(defenderStationary: true) with { Kind = BattleKinds.District };
+        Assert.Equal("a", Resolver.Resolve(districtRequest, new[] { a, b }, seed: 1).WinnerEntityId);
+
+        // The non-district path is untouched -- still reads the real, tunable 1250.
+        Assert.Equal("b", Resolver.Resolve(Fight(defenderStationary: true), new[] { a, b }, seed: 1).WinnerEntityId);
+    }
+
+    [Fact]
     public void The_result_does_not_depend_on_which_side_is_listed_first()
     {
         var a = Force("a", "dave", 3, 110, 1);

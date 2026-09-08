@@ -1,19 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getLastHitEvent,
   getLawnMembershipRing,
+  newCorrelationId,
   subscribeLastHit,
   subscribeLog,
+  useCommanders,
+  useDemonRoster,
   useDeployUniqueActor,
   useLawnDebugPost,
+  usePlayers,
+  useSetDefaultCommander,
   useSpawnExtraIntent,
-  useUniqueActor
+  useSpeciesIndex,
+  useUniqueActor,
+  useUniqueActors
 } from "@/lib/bus";
 import type { LawnSelectPayload } from "@/game/EventBus";
 import { cn } from "@/lib/cn";
 import { claimStageEscape } from "@/shell/keymap";
 import { useDevModeLive } from "@/dev/useDevModeLive";
+import { adaptCommanderSheet, adaptActor } from "@/contract/adapt";
 import { Page } from "@/layouts/Page";
 import { Split } from "@/layouts/Split";
 import {
@@ -30,10 +38,19 @@ import {
   TypeIcon
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
-import { LawnHud } from "./LawnHud";
+import { ActorHudInspector } from "./ActorHudInspector";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
+import { ActorPanel, type ActorRungState } from "@/ui/actor";
+import { LawnMatchHud } from "@/ui/lawn/LawnMatchHud";
+import { CellOccupancyDock } from "@/ui/lawn/CellOccupancyDock";
+import { SpawnTray } from "@/ui/lawn/SpawnTray";
+import { CommanderActionBar } from "@/ui/lawn/CommanderActionBar";
+import { encodeLawnSel, type LawnCollectionRow } from "@/ui/lawn/adaptOccupant";
+import { logLawnInteractive } from "@/ui/lawn/lawnInteractiveObserve";
+import { setLawnKeyboardMuted } from "@/game/focusGate";
 import {
+  boardArrowsLive,
   canEnterSpawnTargeting,
   idleInteraction,
   reduceInteraction,
@@ -68,6 +85,12 @@ const VIEW_MODES: LawnViewMode[] = ["split", "large", "stack"];
  * PvzActivity rollups. Intent never writes Occupants (RT-12).
  */
 export function LawnPage() {
+  const navigate = useNavigate();
+  const players = usePlayers();
+  const playerId = players.data?.currentPlayerId ?? 1;
+  const commandersQuery = useCommanders(playerId);
+  const setDefaultCommander = useSetDefaultCommander(playerId);
+  const [commanderSheetOpen, setCommanderSheetOpen] = useState(false);
   const events = useSyncExternalStore(
     subscribeLog,
     getLawnMembershipRing,
@@ -106,6 +129,10 @@ export function LawnPage() {
   const [statusName, setStatusName] = useState("butter");
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionOk, setActionOk] = useState<string | null>(null);
+  const [spawnTrayOpen, setSpawnTrayOpen] = useState(false);
+  const [dockSelectionKey, setDockSelectionKey] = useState<string | null>(null);
+  const [sheetRow, setSheetRow] = useState<LawnCollectionRow | null>(null);
+  const [armedOrderId, setArmedOrderId] = useState<string | null>(null);
 
   const spawnExtra = useSpawnExtraIntent();
   const debugPost = useLawnDebugPost();
@@ -153,12 +180,18 @@ export function LawnPage() {
   const selectedMarker =
     !selected && interaction.ptr ? findMarker(model, interaction.ptr) : undefined;
 
-  const uniqueQ = useUniqueActor(selected?.instanceId);
+  const uniqueQ = useUniqueActor(sheetRow?.instanceId ?? selected?.instanceId);
 
   const onSelect = useCallback(
     (payload: LawnSelectPayload) => {
       setInteraction((prev) => {
         if (payload.kind === "occupant" && payload.ptr) {
+          // Occupant / Band B HUD hit → OccupantSelected → left dock (T12).
+          logLawnInteractive("hud.click_dock", {
+            ptr: payload.ptr,
+            row: payload.row,
+            col: payload.col
+          });
           return reduceInteraction(
             prev,
             {
@@ -171,6 +204,7 @@ export function LawnPage() {
           );
         }
         if (payload.kind === "tile" && payload.row != null && payload.col != null) {
+          logLawnInteractive("tile.dock", { row: payload.row, col: payload.col });
           return reduceInteraction(
             prev,
             { type: "selectTile", row: payload.row, col: payload.col },
@@ -183,20 +217,35 @@ export function LawnPage() {
     [model.phase]
   );
 
-  // T28 — the debug Spawn/Inspector/toolbar apparatus below stays exactly as it is (GG-41: a
-  // developer surface doesn't get deleted for a player-facing pass), gated behind the same
-  // developer-mode flag T12 already built rather than shown to every player by default. The new
-  // `LawnHud` and the deploy-targeting banner (T22, a real player feature) are unconditional.
+  // Developer Spawn/Inspector stays GG-41. Player chrome: LawnMatchHud + dock + tray + action bar.
   const devMode = useDevModeLive();
   const living = listOccupants(model);
   const livingCount = living.length;
   const deployedChips = useMemo(
     () =>
       living
-        .filter((o) => o.side === "plant")
-        .map((o) => ({ ptr: o.ptr, side: o.side, typeId: o.typeId, typeName: o.typeName })),
+        .filter((o) => Boolean(o.instanceId))
+        .map((o) => ({
+          ptr: o.ptr,
+          side: o.side,
+          typeId: o.typeId,
+          typeName: o.typeName,
+          instanceId: o.instanceId
+        })),
     [living]
   );
+  const uniqueActorsQ = useUniqueActors(playerId);
+  const spawnTrayEntries = useMemo(() => {
+    const items = uniqueActorsQ.data?.items ?? [];
+    const bound = new Set(
+      living.filter((o) => o.instanceId).map((o) => o.instanceId as string)
+    );
+    // Bound uniques stay visible as locked rows — never filtered out of the tray (T7).
+    return items.map((a) => ({
+      actor: a,
+      lockedReason: bound.has(a.instanceId) ? "Already Bound on the lawn" : undefined
+    }));
+  }, [uniqueActorsQ.data?.items, living]);
   const picked = pickPhaserOccupants(
     living,
     PHASER_OCCUPANT_BUDGET,
@@ -208,6 +257,44 @@ export function LawnPage() {
   const targetRow = interaction.row;
   const targetCol = interaction.col;
   const hasCell = targetRow != null && targetCol != null;
+  const dockOpen =
+    !spawnTrayOpen &&
+    (interaction.mode === "TileSelected" || interaction.mode === "OccupantSelected") &&
+    hasCell;
+  const cellOccupants =
+    hasCell && targetRow != null && targetCol != null
+      ? model.cells.get(`${targetRow},${targetCol}`) ?? []
+      : [];
+  const selectionLabel =
+    hasCell && targetRow != null && targetCol != null
+      ? `Lane ${targetRow + 1} · Column ${targetCol + 1}`
+      : undefined;
+
+  useEffect(() => {
+    const dockOrSheetOpen =
+      dockOpen || Boolean(sheetRow) || commanderSheetOpen || spawnTrayOpen;
+    // Spawn/Action targeting keep board arrows (GG-18); dock/sheet mute Idle inspect only.
+    setLawnKeyboardMuted(!boardArrowsLive(interaction.mode, dockOrSheetOpen));
+    return () => setLawnKeyboardMuted(false);
+  }, [dockOpen, spawnTrayOpen, sheetRow, commanderSheetOpen, interaction.mode]);
+
+  const matchCommanderChip = model.matchCommander;
+  const commanderListRow = matchCommanderChip
+    ? commandersQuery.data?.commanders.find((row) => row.id === matchCommanderChip.id)
+    : undefined;
+  const commanderSheetState: ActorRungState | null =
+    commanderListRow && matchCommanderChip
+      ? { kind: "ready", data: adaptCommanderSheet(commanderListRow, playerId) }
+      : null;
+
+  async function handleCommanderSetDefault(commanderId: string) {
+    await setDefaultCommander.mutateAsync(commanderId);
+  }
+
+  useEffect(() => {
+    if (!matchCommanderChip) setCommanderSheetOpen(false);
+  }, [matchCommanderChip]);
+
   const cellTiles =
     hasCell &&
     (interaction.mode === "TileSelected" || interaction.mode === "SpawnTargeting")
@@ -284,10 +371,47 @@ export function LawnPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deployInstanceId]);
 
-  // GG-6: Esc must cancel deploy-targeting rather than falling through to the empty-stack
-  // System fallback. This isn't a PanelShell layer (it's stage chrome, per the plate), so it
-  // registers directly on the real stack — the same single mechanism `handleEscape()` already
-  // walks, not a second Escape-handling path.
+  // Esc precedence (lawn-interactive §10.1): cancel armed order → pop sheet → pop dock/tray.
+  // claimStageEscape pushes LIFO — register lower layers first so ActionTargeting is topmost.
+  useEffect(() => {
+    if (!dockOpen) return undefined;
+    return claimStageEscape("lawn-occupancy-dock", () => {
+      setDockSelectionKey(null);
+      setSheetRow(null);
+      setInteraction(idleInteraction());
+    });
+  }, [dockOpen]);
+
+  useEffect(() => {
+    if (!spawnTrayOpen) return undefined;
+    return claimStageEscape("lawn-spawn-tray", () => {
+      setSpawnTrayOpen(false);
+      setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+    });
+  }, [spawnTrayOpen, model.phase]);
+
+  useEffect(() => {
+    if (!sheetRow) return undefined;
+    return claimStageEscape("lawn-actor-sheet", () => setSheetRow(null));
+  }, [sheetRow]);
+
+  useEffect(() => {
+    if (!commanderSheetOpen) return undefined;
+    return claimStageEscape("lawn-commander-sheet", () => setCommanderSheetOpen(false));
+  }, [commanderSheetOpen]);
+
+  useEffect(() => {
+    if (interaction.mode !== "ActionTargeting" && interaction.mode !== "SpawnTargeting") {
+      return undefined;
+    }
+    // Deploy URL path owns its own Esc claim; Field tray uses lawn-spawn-tray above.
+    if (deployInstanceId || spawnTrayOpen) return undefined;
+    return claimStageEscape("lawn-armed-order", () => {
+      setArmedOrderId(null);
+      setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+    });
+  }, [interaction.mode, deployInstanceId, spawnTrayOpen, model.phase]);
+
   useEffect(() => {
     if (!deployInstanceId) return undefined;
     return claimStageEscape("lawn-deploy-targeting", cancelDeploy);
@@ -312,6 +436,50 @@ export function LawnPage() {
     clearMsgs();
     clearDeploy();
     setInteraction(idleInteraction());
+  };
+
+  // demon-lawn-deploy T2.4 — a server-fired "reinforcements available" trigger (lawn-deploy-events'
+  // own evaluator), distinct from T22's own player-INITIATED deploy above: no cell-targeting, the
+  // server picks the spawn side/typeId from the specimen's own species (lawn-deploy-core). Stage
+  // chrome, same "no scrim, inline banner" convention as the T22 banner — this is a live-match
+  // reaction, blocking the board with a Dialog would hide the exact thing the player needs to see.
+  const [respondedLawnDeployCaseId, setRespondedLawnDeployCaseId] = useState<string | null>(null);
+  const pendingLawnDeploy = model.pendingLawnDeploy;
+  useEffect(() => {
+    // A new match can legitimately fire the same caseId again — the "already responded" memory is
+    // per-match, matching how pendingLawnDeploy itself resets on the fold's own board.start.
+    setRespondedLawnDeployCaseId(null);
+  }, [model.matchKey]);
+  const showLawnDeployPrompt =
+    !!pendingLawnDeploy && pendingLawnDeploy.caseId !== respondedLawnDeployCaseId;
+  const lawnDeployRosterQ = useDemonRoster(playerId);
+  const speciesIndex = useSpeciesIndex();
+  const lawnDeployMutation = useDeployUniqueActor();
+  const lawnDeployEligible = useMemo(() => {
+    if (!pendingLawnDeploy) return [];
+    const bySpecimenId = new Map(
+      (lawnDeployRosterQ.data?.items ?? []).map((it) => [it.actor.instanceId, it] as const)
+    );
+    return pendingLawnDeploy.eligibleInstanceIds
+      .map((id) => bySpecimenId.get(id))
+      .filter((it): it is NonNullable<typeof it> => !!it);
+  }, [pendingLawnDeploy, lawnDeployRosterQ.data]);
+
+  const dismissLawnDeployPrompt = () => {
+    if (pendingLawnDeploy) setRespondedLawnDeployCaseId(pendingLawnDeploy.caseId);
+  };
+
+  const acceptLawnDeployPrompt = (instanceId: string) => {
+    if (!pendingLawnDeploy) return;
+    const caseId = pendingLawnDeploy.caseId;
+    void runAction("Deployed reinforcement", async () => {
+      await lawnDeployMutation.mutateAsync({
+        instanceId,
+        correlationId: newCorrelationId(),
+        matchKey: model.matchKey ?? undefined
+      });
+      setRespondedLawnDeployCaseId(caseId);
+    });
   };
 
   const enqueueIntentSpawn = () => {
@@ -635,6 +803,7 @@ export function LawnPage() {
               <p className="font-mono text-xs text-muted">{selected.ptr}</p>
             </div>
           </div>
+          {selected.hud ? <ActorHudInspector hud={selected.hud} /> : null}
           <KeyValue
             items={[
               {
@@ -669,13 +838,17 @@ export function LawnPage() {
                     ? `${selected.armor2}/${selected.armor2Max ?? "?"}`
                     : "—"
               },
-              {
-                label: "Shield",
-                value:
-                  selected.rpgShield != null
-                    ? `${selected.rpgShield}/${selected.rpgShieldMax ?? "?"}`
-                    : "—"
-              },
+              ...(selected.hud
+                ? []
+                : [
+                    {
+                      label: "Shield",
+                      value:
+                        selected.rpgShield != null
+                          ? `${selected.rpgShield}/${selected.rpgShieldMax ?? "?"}`
+                          : "—"
+                    }
+                  ]),
               {
                 label: "Speed",
                 value: selected.speed != null ? String(selected.speed) : "—"
@@ -684,12 +857,16 @@ export function LawnPage() {
                 label: "Interval",
                 value: selected.interval != null ? String(selected.interval) : "—"
               },
-              {
-                label: "Chips",
-                value: selected.statusChips.length
-                  ? selected.statusChips.join(", ")
-                  : "—"
-              },
+              ...(selected.hud
+                ? []
+                : [
+                    {
+                      label: "Chips",
+                      value: selected.statusChips.length
+                        ? selected.statusChips.join(", ")
+                        : "—"
+                    }
+                  ]),
               {
                 label: "instanceId",
                 value: selected.instanceId ?? "binding unknown/stale"
@@ -996,6 +1173,7 @@ export function LawnPage() {
   );
 
   return (
+    <>
     <Page
       testId="page-lawn"
       title="Lawn"
@@ -1010,13 +1188,67 @@ export function LawnPage() {
         ) : undefined
       }
     >
-      <LawnHud
+      <LawnMatchHud
         sun={model.economy?.sun}
         wave={model.economy?.wave}
         maxWave={model.economy?.maxWave}
         hugeWave={model.economy?.hugeWave}
+        phase={model.phase}
+        connection={devMode ? "connected" : "optional"}
+        selectionLabel={selectionLabel}
+        matchCommander={matchCommanderChip}
         deployed={deployedChips}
+        onOpenCommanderSheet={
+          matchCommanderChip && commanderListRow ? () => setCommanderSheetOpen(true) : undefined
+        }
+        onField={() => {
+          setSpawnTrayOpen(true);
+          setInteraction((prev) => reduceInteraction(prev, { type: "enterSpawnTargeting" }, model.phase));
+        }}
       />
+
+      <div className="flex min-h-0 items-stretch gap-0" data-testid="lawn-board-chrome">
+        <CellOccupancyDock
+          open={dockOpen}
+          occupants={cellOccupants}
+          cellLabel={selectionLabel ?? "Cell"}
+          selectionKey={dockSelectionKey}
+          onClose={() => {
+            setDockSelectionKey(null);
+            setSheetRow(null);
+            setInteraction(idleInteraction());
+          }}
+          onSelectRow={(row) => {
+            setDockSelectionKey(row.key);
+            setSheetRow(row);
+            logLawnInteractive("sheet.push", { key: row.key, sel: encodeLawnSel(row) });
+            if (row.instanceId) {
+              setSearchParams((p) => {
+                const next = new URLSearchParams(p);
+                if (hasCell && targetRow != null && targetCol != null) {
+                  next.set("cell", `${targetRow},${targetCol}`);
+                }
+                next.set("sel", row.instanceId!);
+                return next;
+              });
+            }
+          }}
+        />
+        <SpawnTray
+          open={spawnTrayOpen}
+          entries={spawnTrayEntries}
+          canSpawn={canSpawn}
+          lockedReason={!canSpawn ? `Fielding disabled in ${model.phase}` : undefined}
+          onClose={() => {
+            setSpawnTrayOpen(false);
+            setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+          }}
+          onPick={(instanceId) => {
+            setSpawnTrayOpen(false);
+            navigate(`/lawn?deploy=${encodeURIComponent(instanceId)}`);
+          }}
+        />
+        <div className="min-w-0 flex-1" style={dockOpen || spawnTrayOpen ? { marginLeft: 0 } : undefined}>
 
       {actionError ? (
         <Banner tone="error" className="mb-3" data-testid="lawn-action-error">
@@ -1053,14 +1285,113 @@ export function LawnPage() {
           </span>
         </Banner>
       ) : null}
+      {showLawnDeployPrompt && pendingLawnDeploy ? (
+        <Banner
+          tone="info"
+          className="mb-3 flex flex-wrap items-center justify-between gap-2"
+          data-testid="lawn-deploy-event-banner"
+        >
+          <span className="flex flex-wrap items-center gap-2">
+            <span>Reinforcements available —</span>
+            {lawnDeployEligible.length === 0 ? (
+              <span>no eligible creature found</span>
+            ) : (
+              lawnDeployEligible.map((it) => {
+                const species = speciesIndex.get(it.profile.speciesId);
+                return (
+                  <Button
+                    key={it.actor.instanceId}
+                    size="sm"
+                    variant="ghost"
+                    disabled={lawnDeployMutation.isPending}
+                    title={lawnDeployMutation.isPending ? "Deploying…" : undefined}
+                    onClick={() => acceptLawnDeployPrompt(it.actor.instanceId)}
+                    data-testid="lawn-deploy-event-accept"
+                  >
+                    {species ? (
+                      <TypeIcon side={species.side} typeId={species.gameTypeId} size={20} />
+                    ) : null}
+                    {species?.name ?? it.profile.speciesId}
+                  </Button>
+                );
+              })
+            )}
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={dismissLawnDeployPrompt}
+            data-testid="lawn-deploy-event-dismiss"
+          >
+            Dismiss
+          </Button>
+        </Banner>
+      ) : null}
 
       {devMode ? (
         devToolbarAndInspector
       ) : (
         <div data-testid="lawn-canvas-plain">
-          <LawnGameHost model={model} interaction={interaction} viewMode="large" onSelect={onSelect} />
+          <LawnGameHost model={model} interaction={interaction} viewMode="stack" onSelect={onSelect} />
         </div>
       )}
+
+      <CommanderActionBar
+        slots={[]}
+        armedId={armedOrderId}
+        onArm={(slot) => {
+          setArmedOrderId(slot.id);
+          setInteraction((prev) =>
+            reduceInteraction(prev, { type: "enterActionTargeting", actionId: slot.id }, model.phase)
+          );
+        }}
+      />
+        </div>
+      </div>
     </Page>
+
+    {sheetRow?.instanceId ? (
+      <ActorPanel
+        state={
+          uniqueQ.data
+            ? { kind: "ready", data: adaptActor(uniqueQ.data) }
+            : selected?.instanceId === sheetRow.instanceId && uniqueQ.isLoading
+              ? { kind: "loading" }
+              : { kind: "empty" }
+        }
+        open={Boolean(sheetRow)}
+        onOpenChange={(open) => {
+          if (!open) setSheetRow(null);
+        }}
+        role="creature"
+      />
+    ) : null}
+
+    {commanderSheetState && commanderListRow && matchCommanderChip ? (
+      <ActorPanel
+        state={commanderSheetState}
+        open={commanderSheetOpen}
+        onOpenChange={setCommanderSheetOpen}
+        role="commander"
+        matchBanner={{
+          displayName: matchCommanderChip.displayName,
+          auraDisplayName: matchCommanderChip.auraDisplayName
+        }}
+        commanderMeta={{
+          isDefault: commanderListRow.isDefault,
+          activeAuraName: commanderListRow.activeAuraName,
+          locationStub: commanderListRow.locationStub,
+          legionStub: commanderListRow.legionStub
+        }}
+        setDefaultPending={setDefaultCommander.isPending}
+        onSetDefault={() => void handleCommanderSetDefault(commanderListRow.id)}
+        onDefendLawn={() => setCommanderSheetOpen(false)}
+        onOpenCommandersList={() => {
+          setCommanderSheetOpen(false);
+          navigate(`/sanctum?panel=commanders&sel=${encodeURIComponent(commanderListRow.id)}`);
+        }}
+      />
+    ) : null}
+    </>
   );
 }

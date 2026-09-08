@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Move"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 R5 Move's own named gap: 'nothing gives throughput' (waystation gives only range). Ties to WorldLane.Width, the shipped-but-unread logistics field \u00a75.21 names directly.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Move",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "causeway",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "causeway",
+      "name": "Causeway"
+    }
+  ],
+  "kind": "structure-anchor"
+}

@@ -1,0 +1,61 @@
+{
+  "slug": "patron",
+  "title": "Patron demon",
+  "status": "WIP",
+  "kicker": "Roster and summoning · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "**WIP:** name one demon your **patron** so its element colours the army — switching costs souls.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Designed and partly forged. Simulation paths exist; the live lawn aura is still unfinished."},
+    {"term": "Patron", "meaning": "One chosen specimen whose element tints side presence — not a second commander title by itself."},
+    {"term": "Colour the army", "meaning": "Element identity across your side — paired with the [element ring](element-ring), not a cosmetic nickname only."},
+    {"term": "Switch cost", "meaning": "Changing patron spends souls. Read the UI when it ships; do not assume it is free."}
+  ],
+  "alsoTrue": [
+    "Commanders are a separate WIP layer for who leads the next lawn — see [commanders](commanders).",
+    "You still play without a finished patron path."
+  ],
+  "sections": [
+    {
+      "title": "What it will be",
+      "paras": [
+        "Pick one demon from the roster as patron.",
+        "Its element becomes the army’s tint; changing that choice costs souls."
+      ]
+    },
+    {
+      "title": "In this build",
+      "paras": [
+        "The patron idea exists in simulation.",
+        "The live lawn aura and full player flow are still WIP — do not expect a finished patron button on every stage."
+      ]
+    },
+    {
+      "title": "Why it matters later",
+      "paras": [
+        "Without a patron, element identity is only on individual specimens.",
+        "With one, the side carries a readable elemental story into lawn and battles."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Raise specimens and learn elements on the roster.",
+    "Treat any partial patron UI as unfinished.",
+    "Use commanders and fusion as they exist today without waiting on patron."
+  ],
+  "doNote": "Stop when patron ≠ commander is clear. Other intakes: [wild joins](wild-joins), [capture](capture).",
+  "mixUps": [
+    {"q": "Is patron the same as commander?", "a": "No. Patron colours element identity; commanders pick who leads a lawn run."},
+    {"q": "Can I have three patrons?", "a": "Design is one patron. Do not plan multi-patron loadouts."},
+    {"q": "Is my build broken without it?", "a": "No. WIP means unfinished, not required to open the game."},
+    {"q": "Does patron replace essence?", "a": "No. Essence remains fusion’s element material."}
+  ],
+  "next": ["wild-joins"],
+  "related": ["specimens", "element-ring", "commanders", "souls"],
+  "sources": [
+    "docs/guide/creatures.md §Patron",
+    "docs/guide/mechanisms/patron.md (prior stub)"
+  ]
+}

@@ -91,7 +91,9 @@ test.describe("Bundle splitting (T13)", () => {
     await expect(page.getByTestId("creatures-layer")).toBeVisible();
 
     expect(jsRequests.some((u) => /LawnStage-.*\.js$/.test(u))).toBe(false);
-    expect(jsRequests.some((u) => /WorldPage-.*\.js$/.test(u))).toBe(false);
+    // `WorldStage` is the one chunk now, shared by both `#/world` and `#/world-stage` since the
+    // routing work that retired the old `@xyflow/react`-based `WorldPage` (world-stage, 2026-09-05).
+    expect(jsRequests.some((u) => /WorldStage-.*\.js$/.test(u))).toBe(false);
   });
 
   test("the developer tree's nine pages fetch only when the tree is actually opened", async ({ page }) => {

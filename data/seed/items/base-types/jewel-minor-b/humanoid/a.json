@@ -65,7 +65,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.engraved-badge",
       "flavorKey": "flavor.base.engraved-badge",
       "flavor": "A small badge bearing a single scratched line. The mark means nothing. Yet.",
@@ -94,7 +94,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -126,7 +126,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -161,7 +161,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.impressed-receipt",
       "flavorKey": "flavor.base.impressed-receipt",
       "flavor": "A faded receipt with a seal pressed deep. Someone once paid for something. The debt still echoes.",
@@ -190,7 +190,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -225,7 +225,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.unadorned-license",
       "flavorKey": "flavor.base.unadorned-license",
       "flavor": "A plain license, stripped of ceremony. Permission needs no ornament to be permission.",
@@ -286,10 +286,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.minute-label",
       "flavorKey": "flavor.base.minute-label",
       "flavor": "A tiny label, barely a whisper of text. The message is there for those small enough to read it.",
@@ -318,7 +318,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -353,7 +353,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.scratched-warranty",
       "flavorKey": "flavor.base.scratched-warranty",
       "flavor": "A warranty marked with use. The promise survives its own scars, mostly intact.",
@@ -382,7 +382,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,

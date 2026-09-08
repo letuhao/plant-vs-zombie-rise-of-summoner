@@ -1,0 +1,51 @@
+{
+  "slug": "passive-trees",
+  "title": "Passive trees",
+  "status": "Vision",
+  "kicker": "Power and builds · level up and power",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power",
+  "hook": "**Vision:** spend souls into trees for identity and risk — many trees can be equal in expected value; concentrating buys reward and risk.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not in the current loop. You cannot open finished trees as a live system yet."},
+    {"term": "Tree", "meaning": "A learnable passive catalog you spend into — a face for the build, not a class pick."},
+    {"term": "Concentrate", "meaning": "Stacking one tree harder for bigger reward and bigger risk."},
+    {"term": "Shared catalogs", "meaning": "Trees are meant to be learnable and shared — not locked behind a secret wiki."}
+  ],
+  "alsoTrue": [
+    "Respec costs souls in the design.",
+    "Live power today is aptitudes and Dave — see [aptitudes](aptitudes)."
+  ],
+  "sections": [
+    {
+      "title": "Not in the current loop",
+      "paras": [
+        "Treat this as future identity on the power spine.",
+        "Do not wait on trees to play lawn and roster loops."
+      ]
+    },
+    {
+      "title": "Design intent",
+      "paras": [
+        "Trees give a build a face.",
+        "Equal EV across many trees keeps choice honest; concentration is the risk knob."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Read it as Vision, not a missing button bug.",
+    "Spend souls on altar and pacts today.",
+    "Use aptitudes for live free-build power."
+  ],
+  "doNote": "Loadout fantasy: [build presets](build-presets).",
+  "mixUps": [
+    {"q": "Where is the tree UI?", "a": "Vision — not shipped."},
+    {"q": "Is this the same as aptitudes?", "a": "No. Aptitudes are the twelve free-build stats live now."},
+    {"q": "Do I need a wiki?", "a": "Design says catalogs are learnable and shared — no secret wiki lock."},
+    {"q": "Souls only for trees?", "a": "Trees would spend souls; souls already have altar and tribute sinks."}
+  ],
+  "next": ["build-presets"],
+  "related": ["dave-level", "aptitudes", "souls"],
+  "sources": ["docs/guide/relics-and-builds.md §Passive trees"]
+}

@@ -1,0 +1,88 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-07T10:16:18Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude",
+        "deployMode": "HypnoAlly",
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Sun-consuming Undead"
+    ],
+    "gameTypeId": 129,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "melee",
+    "reason": "Its high durability and ability to mitigate damage by consuming sun make it a significant threat to a player's economy and defense, fitting the raider classification.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "stamina",
+      "stamina",
+      "stamina",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "SuperSunNutZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "Solar-shielding",
+      "Damage-mitigation",
+      "Resource-drain",
+      "Multi-eyed"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ],
+    "verdict": "agree"
+  }
+]

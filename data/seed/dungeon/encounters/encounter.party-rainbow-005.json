@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.party-rainbow-005",
+  "formation": "party",
+  "name": "The Vanguard of Divergence",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "A high-tier elite encounter utilizing a diverse elemental spread to prevent party specialization from trivializing the fight.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Force",
+      "reach": "long",
+      "targetPreference": "swarm"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "tyrant"
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "bucketnutzombie": [
+    "bucket"
+  ],
+  "bucketzombie": [
+    "bucket"
+  ],
+  "cactus": [
+    "cactus"
+  ],
+  "cactusblover": [
+    "cactus"
+  ],
+  "cherrybomb": [
+    "cherry"
+  ],
+  "cherrygatling": [
+    "cherry"
+  ],
+  "cherrynut": [
+    "cherry"
+  ],
+  "cherrynutzombie": [
+    "cherry"
+  ],
+  "cherrypaperzombie": [
+    "cherry"
+  ],
+  "cherryshooter": [
+    "cherry"
+  ],
+  "cherrysplit": [
+    "cherry"
+  ],
+  "cornpot": [
+    "corn"
+  ],
+  "cornpult": [
+    "corn"
+  ],
+  "dollgold": [
+    "dolls"
+  ],
+  "dollsilver": [
+    "dolls"
+  ],
+  "doublecherry": [
+    "double"
+  ],
+  "doubleshooter": [
+    "double"
+  ],
+  "doublesnow": [
+    "double"
+  ],
+  "garlicpea": [
+    "garlic"
+  ],
+  "garlicthreepeater": [
+    "garlic"
+  ],
+  "hypnojalapeno": [
+    "hypno"
+  ],
+  "hypnopeashooter": [
+    "hypno"
+  ],
+  "hypnoshroom": [
+    "hypno"
+  ],
+  "icecaltrop": [
+    "ice"
+  ],
+  "iceshroom": [
+    "ice"
+  ],
+  "jalacaltrop": [
+    "fire"
+  ],
+  "jalagatling": [
+    "fire"
+  ],
+  "jalapeashooter": [
+    "fire"
+  ],
+  "jalapeno": [
+    "fire"
+  ],
+  "jalastar": [
+    "fire"
+  ],
+  "lanterncactus": [
+    "light"
+  ],
+  "lanternchomper": [
+    "light"
+  ],
+  "lanternpea": [
+    "light"
+  ],
+  "nutchomper": [
+    "chomper"
+  ],
+  "peachomper": [
+    "chomper"
+  ],
+  "peanut": [
+    "nut"
+  ],
+  "peashooter": [
+    "pea"
+  ],
+  "peashooterzombie": [
+    "pea"
+  ],
+  "peasquash": [
+    "pea"
+  ],
+  "peasunflower": [
+    "sun"
+  ],
+  "plantern": [
+    "sun"
+  ],
+  "pot": [
+    "base"
+  ],
+  "pumpkin": [
+    "base"
+  ],
+  "snowgatling": [
+    "ice"
+  ],
+  "snowpeashooter": [
+    "ice"
+  ],
+  "snowsplit": [
+    "pea"
+  ],
+  "splitpea": [
+    "pea"
+  ],
+  "starfruit": [
+    "fruit"
+  ],
+  "starpea": [
+    "fruit"
+  ],
+  "sunchomper": [
+    "sunflower"
+  ],
+  "sunflower": [
+    "sunflower"
+  ],
+  "threepeater": [
+    "line"
+  ],
+  "threeplantern": [
+    "line"
+  ]
+}

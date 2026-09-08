@@ -30,7 +30,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -70,7 +70,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.floating-anther",
       "flavorKey": "flavor.base.floating-anther",
       "flavor": "Held aloft by the faintest currents of its own making.",
@@ -104,7 +104,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -144,10 +144,10 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.ephemeral-catkin",
       "flavorKey": "flavor.base.ephemeral-catkin",
-      "flavor": "A scent that fades even as you catch it \u2014 all seduction, no holding.",
+      "flavor": "A scent that fades even as you catch it — all seduction, no holding.",
       "tags": [
         "light",
         "organic",
@@ -178,10 +178,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.stored-nectar",
       "flavorKey": "flavor.base.stored-nectar",
       "flavor": "Sweetness hoarded against the lean season, waiting to be spent.",
@@ -215,10 +215,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.latent-floret",
       "flavorKey": "flavor.base.latent-floret",
       "flavor": "A bloom that has not yet opened, charged and ready for the right moment.",
@@ -252,10 +252,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.engorged-stamen",
       "flavorKey": "flavor.base.engorged-stamen",
       "flavor": "Swollen with pollen that begs to be delivered, heavy with purpose.",
@@ -289,10 +289,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.potent-corymb",
       "flavorKey": "flavor.base.potent-corymb",
       "flavor": "A cluster of strength, each floret contributing its power to the whole.",
@@ -329,7 +329,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.cohered-stigma",
       "flavorKey": "flavor.base.cohered-stigma",
       "flavor": "Fused into one flesh, no longer asking but taking what it needs.",
@@ -366,10 +366,10 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.ingrown-pistil",
       "flavorKey": "flavor.base.ingrown-pistil",
-      "flavor": "Grown so deep into the plant it cannot be separated \u2014 the plant cannot live without it.",
+      "flavor": "Grown so deep into the plant it cannot be separated — the plant cannot live without it.",
       "tags": [
         "heavy",
         "organic",
@@ -403,7 +403,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.permanent-raceme",
       "flavorKey": "flavor.base.permanent-raceme",
       "flavor": "A flowering branch that will never drop, bound for as long as the plant stands.",
@@ -440,7 +440,7 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.indivisible-corolla",
       "flavorKey": "flavor.base.indivisible-corolla",
       "flavor": "Its petals are one piece, one purpose, one breath drawn from the root.",

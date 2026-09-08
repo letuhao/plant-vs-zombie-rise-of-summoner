@@ -4,9 +4,14 @@ namespace FusionRpg.Core.Demons.Patron;
 
 /// <summary>Patron balance surface (tunables-ssot.md T1) — loaded, not hard-coded. See
 /// <see cref="PatronPolicy.Configure"/> and <see cref="PatronTuningLoader"/>.</summary>
+/// <param name="PThetaKMilli">aura-skill T22 (owner sign-off 2026-08-30): the per-mille coefficient
+/// for patron.aura's P(Θ) term — `pThetaKMilli/1000 · P(Θ)`, read through the SAME shared
+/// `PowerLadder` every other magnitude uses (ssot-power-scale.md §10 row 16). Additive to the
+/// existing, still-clamped `rarityBase + perStar·star + level` part — that part stays a small
+/// early-game floor; this is what keeps patron relevant as Θ grows.</param>
 public sealed record PatronTuning(
     int SchemaVersion, int Version,
-    long SwitchCostSouls, int AuraClampMilli, int PerStarMilli,
+    long SwitchCostSouls, int AuraClampMilli, int PerStarMilli, long PThetaKMilli,
     IReadOnlyDictionary<DemonRarity, int> RarityBaseMilli);
 
 public sealed class PatronTuningRejection : Exception
@@ -34,6 +39,7 @@ public static class PatronTuningLoader
             var switchCostSouls = Long(root, "switchCostSouls", "$");
             var auraClampMilli = Int(root, "auraClampMilli", "$");
             var perStarMilli = Int(root, "perStarMilli", "$");
+            var pThetaKMilli = Long(root, "pThetaKMilli", "$");
 
             var rEl = Obj(root, "rarityBaseMilli", "$");
             var rarityBase = new Dictionary<DemonRarity, int>();
@@ -41,7 +47,7 @@ public static class PatronTuningLoader
                 rarityBase[rarity] = Int(rEl, rarity.ToString().ToLowerInvariant(), "rarityBaseMilli");
 
             return new PatronTuning(schemaVersion, version, switchCostSouls, auraClampMilli,
-                perStarMilli, rarityBase);
+                perStarMilli, pThetaKMilli, rarityBase);
         }
     }
 

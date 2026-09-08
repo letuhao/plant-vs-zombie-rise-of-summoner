@@ -18,7 +18,38 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-materials-crafting.md#6.1"
+    "sourceRef": "ssot-materials-crafting.md#6.1",
+    "amendments": [
+      {
+        "batch": "recipes-gen/trial-1",
+        "note": "Two new recipes authored via recipes-gen (tools/seedsmith/seedsmith/adapters/items/recipegen), a small trial batch run end-to-end through plan_run/run_draws/write_corpus and RunLedger (data/seed/items/_runs/recipes-gen.ledger.json) to prove this module's own generation path against real content before committing to a larger run. No live model call was reachable in this environment -- name/flavor were hand-authored as an honest stand-in, the same precedent gemgen used for g2.json (_meta.model 'gemgen/hand-authored-1') and materialgen used for its shard-rungs-1 amendment. recipe.031 (forge) targets an EXISTING, un-recipe'd base type (item.humanoid-head-a-001, head-guard:humanoid:a); recipe.032 (elevate) spends a REAL, currently-issuable shard id (shard.sprout) rather than one of the four legacy shard.* ids the pre-existing 7 broken cost lines in this same corpus use.",
+        "promptVersion": "recipe-gen/1",
+        "model": "recipegen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "sourceRef": "docs/architecture/item-seedgen/spec-recipes-gen.md",
+        "entries": [
+          "recipe.031",
+          "recipe.032"
+        ]
+      },
+      {
+        "batch": "recipegen/legacy-shard-migration-1",
+        "note": "Seven pre-existing cost lines named a retired legacy shard band id (shard.common/rare/epic/legendary), refused at real C# import time (MaterialCatalog.IsLegacyShardId / MaterialUnissuableRule via MaterialRecipeCatalog.Load -- these recipes could never be paid). Migrated via seedsmith.adapters.items.recipegen.migrate_legacy_shards, mirroring LegacyDemonRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder rung, spec-rarity-migration.md sec4 point 4): common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven. No live model call -- a mechanical id rewrite, no prompt involved, same 'hand-authored, no model' precedent recipegen's own trial-1 amendment used for its hand-authored name/flavor.",
+        "promptVersion": "n/a-mechanical-migration",
+        "model": "recipegen/legacy-shard-migration-1",
+        "authoredUtc": "2026-09-07T16:15:29Z",
+        "sourceRef": "docs/architecture/demon-seed/spec-rarity-migration.md#4",
+        "entries": [
+          "recipe.009",
+          "recipe.010",
+          "recipe.011",
+          "recipe.017",
+          "recipe.018",
+          "recipe.025",
+          "recipe.029"
+        ]
+      }
+    ]
   },
   "entries": [
     {
@@ -199,7 +230,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.common",
+          "material": "shard.chaff",
           "costBand": "standard"
         },
         {
@@ -224,7 +255,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {
@@ -249,7 +280,7 @@
           "costBand": "steep"
         },
         {
-          "material": "shard.epic",
+          "material": "shard.heirloom",
           "costBand": "steep"
         },
         {
@@ -327,7 +358,7 @@
       "id": "recipe.015",
       "nameKey": "recipe.reroll-single-common",
       "name": "Reroll: Reshape Common",
-      "operation": "reroll",
+      "operation": "reroll-one",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
@@ -344,7 +375,7 @@
       "id": "recipe.016",
       "nameKey": "recipe.reroll-single-elemental",
       "name": "Reroll: Reweave Element",
-      "operation": "reroll",
+      "operation": "reroll-one",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
@@ -365,13 +396,13 @@
       "id": "recipe.017",
       "nameKey": "recipe.reroll-all-rare",
       "name": "Reroll: Rework Rare",
-      "operation": "reroll",
+      "operation": "reroll-all",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
       "costLines": [
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {
@@ -386,13 +417,13 @@
       "id": "recipe.018",
       "nameKey": "recipe.reroll-all-epic",
       "name": "Reroll: Remake Epic",
-      "operation": "reroll",
+      "operation": "reroll-all",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
       "costLines": [
         {
-          "material": "shard.epic",
+          "material": "shard.heirloom",
           "costBand": "steep"
         },
         {
@@ -540,7 +571,7 @@
           "costBand": "exorbitant"
         },
         {
-          "material": "shard.legendary",
+          "material": "shard.sunwoven",
           "costBand": "exorbitant"
         },
         {
@@ -555,7 +586,7 @@
       "id": "recipe.026",
       "nameKey": "recipe.reroll-essence-fire",
       "name": "Reroll: Fiery Essence",
-      "operation": "reroll",
+      "operation": "reroll-one",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
@@ -576,7 +607,7 @@
       "id": "recipe.027",
       "nameKey": "recipe.reroll-essence-dark",
       "name": "Reroll: Shadow Weave",
-      "operation": "reroll",
+      "operation": "reroll-one",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
@@ -597,7 +628,7 @@
       "id": "recipe.028",
       "nameKey": "recipe.reroll-essence-air",
       "name": "Reroll: Windward Turn",
-      "operation": "reroll",
+      "operation": "reroll-one",
       "outputKind": "mutation",
       "outputQty": 1,
       "frame": "any",
@@ -628,7 +659,7 @@
           "costBand": "standard"
         },
         {
-          "material": "shard.rare",
+          "material": "shard.cultivated",
           "costBand": "standard"
         },
         {
@@ -659,6 +690,57 @@
       ],
       "soulsCostBand": "exorbitant",
       "tags": []
+    },
+    {
+      "id": "recipe.031",
+      "nameKey": "recipe.forge-cloth-hood",
+      "name": "Forge: Cloth Hood",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.humanoid-head-a-001",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [
+        "crafted-only"
+      ],
+      "flavor": "A cloth hood shaped at the workbench, light enough to forget you're wearing it."
+    },
+    {
+      "id": "recipe.032",
+      "nameKey": "recipe.elevate-take-root",
+      "name": "Elevate: Take Root",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "shard.sprout",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "The graft finally takes — a shard from something just beginning to grow."
     }
   ]
 }

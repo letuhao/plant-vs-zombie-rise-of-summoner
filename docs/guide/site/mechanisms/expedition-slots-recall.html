@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Slots let you run more than one expedition at once; recall brings a squad home early for what you have earned so far." />
+    <title>Expedition slots and recall — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/expedition-slots-recall.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Idle expeditions · parallelism and early return
+        </p>
+        <h1 class="teach-title">Expedition slots and recall</h1>
+        <p class="teach-hook"><strong>Slots</strong> let you run more than one expedition at once; <strong>recall</strong> brings a squad home early for what you have earned so far.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Slot</dt>
+              <dd>A parallel expedition berth. You start with a few and grow into more as the system allows — not infinite dispatches.</dd>
+            </div>
+            <div>
+              <dt>Recall</dt>
+              <dd>Pull an expedition home before the timer ends. Rewards pro-rate to completed ticks.</dd>
+            </div>
+            <div>
+              <dt>Pro-rate</dt>
+              <dd>You take what completed so far — not a full payout and not a wipe of the run.</dd>
+            </div>
+            <div>
+              <dt>Live task</dt>
+              <dd>A demon already out on an expedition (or another live assignment) cannot be double-booked.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Recall anytime is intentional — leave early, take earned so far. Nothing expires if you forget to collect.</li>
+            <li>How many slots you have grows with progression; trust the UI for the current count.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Parallelism is gated by expedition slots — you grow from a few to more as you progress.</p>
+          <p>Recall is the escape hatch when you need those demons back before the timer ends.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Two controls around the same dispatch loop:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  free slot  -&gt;  dispatch  -&gt;  wait
+                    |
+                    +-&gt;  collect (full timer)
+                    +-&gt;  recall  -&gt;  pro-rated return
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Slots</strong>
+              <p>Each free slot can hold one expedition. Fill what you have; unlock more when the system allows.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Recall</strong>
+              <p>End early. Rewards scale to completed ticks — you keep progress earned so far, not the full end payout.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On the Expeditions layer</h3>
+            <p>Open Expeditions (<code>E</code>) after you have a bound demon.</p>
+            <ol>
+              <li>Look at how many slots are free versus filled.</li>
+              <li>Dispatch into an empty slot.</li>
+              <li>If you need the squad back early, use recall and read the pro-rated report.</li>
+            </ol>
+            <p class="teach-note">Exact slot counts change with progression — read the live UI, not a remembered number.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Open Expeditions and note how many slots you have.</li>
+            <li>Fill one slot with a short dispatch.</li>
+            <li>Try recall once on a later run so you see a pro-rated report — then decide whether early return was worth it.</li>
+          </ol>
+          <p class="teach-note">Stop when slot ≠ infinite and recall ≠ full payout. Core loop: <a href="../../mechanisms/expeditions.md">expeditions</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Can I run unlimited expeditions at once?</dt>
+              <dd>No. Slots gate parallelism. You grow into more over time.</dd>
+            </div>
+            <div>
+              <dt>Does recall give the full reward?</dt>
+              <dd>No. You get what completed ticks earned — leave early, take less.</dd>
+            </div>
+            <div>
+              <dt>Do unfinished rewards expire?</dt>
+              <dd>No. Collect when ready; nothing times out from neglect.</dd>
+            </div>
+            <div>
+              <dt>Can I put the same demon on two slots?</dt>
+              <dd>No. Demons on a live task are not free to dispatch again.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/expeditions.md">Expeditions</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/expeditions.md">Expeditions</a> ·
+            <a href="specimens.html">Persistent specimens</a> ·
+            <a href="wild-joins.html">Wild joins</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/expedition-slots-recall.md">Markdown (editable SSOT)</a> ·
+            <a href="../../expeditions.md">Expeditions</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/expedition-slots-recall.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

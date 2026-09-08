@@ -37,11 +37,71 @@ public readonly record struct Classification(AtomPath Path, string Reason, AtomR
 /// </summary>
 public static class Compilability
 {
-    /// <summary>Kinds that map 1:1 to an FA opcode a sink implements.</summary>
-    static readonly HashSet<string> OpcodeKinds = new(StringComparer.Ordinal)
+    /// <summary>Kinds that map 1:1 to an FA opcode a sink implements. Internal (widened 2026-09-06,
+    /// `ConstructionActionCompilabilityGuardTests`) so a guard test can assert this set never again
+    /// drifts from <see cref="AtomCompiler.OpcodeOf"/>'s own switch — the fourth time the two lists
+    /// disagreed, this session's own `structure.place` addition being the latest (see this field's
+    /// own trailing comments for the first three).</summary>
+    internal static readonly HashSet<string> OpcodeKinds = new(StringComparer.Ordinal)
     {
         "stat.modify", "resource.delta", "resource.economy", "status.apply", "status.clear",
         "shield.grant", "spawn.entity", "board.action", "grid.spawn", "grid.clear", "box.set",
+        // aura-skill-todo.md Phase 5 / TC2 (2026-08-30). `stat.derived` now has an action --
+        // EffectActions.ModifyDerivedStat -- so it belongs on the COMPILED path, not the runner path.
+        // Without this entry Classify routes it to Runner ("has no FA opcode"), it never becomes an
+        // EffectDef, and the lawn executor has nothing to read: the atom compiles to a runtime entry
+        // that no derived consumer looks at. That is the fifth and last link in the chain.
+        //
+        // Unlike the other eleven, this opcode is DECLARATIVE: nothing executes it. A stat.derived
+        // atom is a permanent modifier declaring no trigger, so the bag never fires it -- the grant's
+        // presence is the effect, folded at resolve time. Hence no sink arm in either runtime.
+        "stat.derived",
+
+        // E35 (spec-match-modify.md §2.5): match.modify -> EffectActions.ModifyMatch. Params stay
+        // {field, amount} on both the compiled and runner paths (ToOpcodeShape only rewrites
+        // stat.modify/stat.derived), so this kind has no key-mismatch to guard against either.
+        "match.modify",
+
+        // E37 (spec-projectile-control.md §2b): bullet.modify -> EffectActions.BulletModify. Same
+        // DECLARATIVE shape as stat.derived immediately below in the historical ordering of this set —
+        // a permanent modifier (AtomTriggers.None) whose grant is read by a resolved-read reader
+        // (GrantedBulletModifyAtomReader -> CheatPrefixes.BulletInitCheat), never fired by the bag.
+        // Without this entry Classify would route every bullet.modify atom to the Runner path ("has no
+        // FA opcode") even though OpcodeOf above resolves one — Classify's OpcodeKinds membership is a
+        // SEPARATE gate from OpcodeOf, exactly the gap stat.derived's own comment documents. Params
+        // stay {op, amount, bulletType, moveWay} on both paths — ToOpcodeShape only rewrites
+        // stat.modify/stat.derived — so, like match.modify, there is no key-mismatch to guard here.
+        "bullet.modify",
+
+        // E36 (spec-wave-control.md §2.1) shipped wave.control -> EffectActions.WaveControl in
+        // OpcodeOf but never added this entry — found while re-verifying E37's own bullet.modify fix
+        // to this same set (this list and OpcodeOf are two SEPARATE gates, exactly the trap
+        // stat.derived's comment above already documents). Without it every wave.control atom
+        // silently routes to the Runner path ("has no FA opcode") and is never read there — the
+        // ChainDepth-guarded, ExecWaveControl-shaped opcode E36 built never actually runs. Params
+        // stay {op, wave, timerMs, enabled} on both paths — no key-mismatch to guard.
+        "wave.control",
+
+        // E41 (spec-ui-attach-point.md §2b): ui.present -> EffectActions.PresentUi. Unlike
+        // stat.derived/bullet.modify immediately above, this one is NOT declarative — it carries
+        // real triggers (AllTriggers) and a real per-fire executor (EffectBag.ExecPresentUi), the
+        // same shape shield.grant already has. Params stay {op, amount, tag, bannerId, meterId,
+        // ratio, durationMs} on both the compiled and runner paths (ToOpcodeShape only rewrites
+        // stat.modify/stat.derived), so there is no key-mismatch to guard here either.
+        "ui.present",
+
+        // base-defense `siege-construction` 15.3b (2026-09-06): structure.place -> EffectActions.
+        // PlaceStructure. THE FOURTH TIME this exact gap has bitten (stat.derived, bullet.modify,
+        // wave.control above each found and fixed it independently) — this list and OpcodeOf are two
+        // SEPARATE gates, and adding a kind to OpcodeOf alone routes every one of its atoms to the
+        // Runner path silently ("has no FA opcode"), where AtomCompiler.EmitRunnerDefs would still
+        // technically produce a working EffectDef, but never through the path this kind was actually
+        // built and tested against. Found by a real, failing end-to-end test (ConstructionActionsTests),
+        // not by inspection. NOT declarative, like ui.present/shield.grant: it carries a real trigger
+        // (OnActivate) and a real per-fire executor (BattleEffectSink.ExecPlaceStructure). Params stay
+        // {structureId, instant} on both paths (ToOpcodeShape only rewrites stat.modify/stat.derived),
+        // so there is no key-mismatch to guard here either.
+        "structure.place",
     };
 
     /// <summary>The only leaves a legacy grant overlay can express.</summary>

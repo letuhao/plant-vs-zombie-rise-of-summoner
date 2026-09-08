@@ -97,4 +97,17 @@ public class CrossProgramLandedFlagsTests
         var ticks = resolver.ToTicks(victimTurns: 1, "wave:0");
         Assert.True(ticks > 0);
     }
+
+    [Fact]
+    public void A3_ItemCostRowHasNotLandedProvenNotJustAssumed()
+    {
+        Assert.False(CrossProgramLandedFlags.ItemCostRowLanded);
+
+        // The flag means something real, the other direction: ActionCostRow's own fields are
+        // reflected to confirm there is genuinely no way to name an item id as a cost today, not
+        // just that nobody happened to build one yet.
+        var fields = typeof(ActionCostRow).GetProperties().Select(p => p.Name).ToArray();
+        Assert.Contains("ResourceId", fields);
+        Assert.DoesNotContain(fields, name => name.Contains("Item", StringComparison.OrdinalIgnoreCase));
+    }
 }

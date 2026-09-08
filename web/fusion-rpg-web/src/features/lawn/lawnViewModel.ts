@@ -17,6 +17,33 @@ export type OccupantFlags = {
   crashed?: boolean;
 };
 
+export type ActorHudTier = "normal" | "elite" | "boss" | "unique";
+export type MagnitudeBand = "low" | "mid" | "high";
+
+export type ActorHudSnapshot = {
+  identity: {
+    tier: ActorHudTier;
+    role: string;
+    levelBand?: number;
+    flags: string[];
+  };
+  resources?: {
+    shield?: {
+      hp: number;
+      max: number;
+      stacks: { element: string; hp: number; max: number }[];
+    };
+    hpSliver?: { ratio: number };
+    meters?: { id: string; ratio: number }[];
+  };
+  statuses: {
+    id: string;
+    cc: boolean;
+    magnitudeBand: MagnitudeBand;
+  }[];
+  overflow: { statusCount: number };
+};
+
 export type Occupant = {
   ptr: string;
   side: LawnSide;
@@ -42,6 +69,8 @@ export type Occupant = {
   flags: OccupantFlags;
   /** Only from Snapshot Bindings observe — never invent. */
   instanceId?: string;
+  /** Band B per-unit HUD — folded from injector actorHud wire only. */
+  hud?: ActorHudSnapshot;
 };
 
 /** Grid item (crater, grave, ice, …) — not a living Occupant. */
@@ -118,6 +147,20 @@ export type LawnViewModel = {
   lastAction?: LawnLastEvent;
   lastHit?: LawnLastHit;
   economy?: LawnEconomy;
+  /** Frozen at board.start via debug.snapshot match.commander (commander-surface P3). */
+  matchCommander?: {
+    id: string;
+    displayName: string;
+    auraDisplayName: string | null;
+  };
+  /**
+   * demon-lawn-deploy T2.4: the latest `lawn-deploy-event.fired` the fold has observed this match —
+   * server truth only (fires once per case per run, per the injector's own evaluator). Whether the
+   * player has already responded to THIS specific case is client-local UI state, deliberately not
+   * carried here (LawnPage.tsx tracks a respondedCaseId alongside this field) — the fold stays a pure
+   * reflection of server events, never owns "did the user dismiss this yet."
+   */
+  pendingLawnDeploy?: { caseId: string; eligibleInstanceIds: string[] } | null;
 };
 
 export const DEFAULT_ROWS = 5;

@@ -37,13 +37,17 @@ public class UnitClassContractParityTests
     }
 
     [Fact]
-    public void LedgerDocNamesAllTwelveClasses()
+    public void LedgerDocNamesEveryClass()
     {
         // spec-magnitude-and-units.md §3 is the authored ledger both the C# enum and the TS union
         // trace back to -- every enum member must appear there as a backtick-wrapped class name.
         var repoRoot = FindRepoRoot();
         var docText = File.ReadAllText(Path.Combine(repoRoot, "docs", "design", "spec-magnitude-and-units.md"));
-        Assert.Contains("twelve classes", docText, StringComparison.Ordinal);
+        // The ledger's own count line. It read "twelve classes" until the world-numbers program
+        // added `LoamUnits` on 2026-09-04 and updated the doc to "thirteen"; the C# enum was the
+        // side that lagged. Asserting the doc's CURRENT count keeps this honest -- but the real
+        // coverage is the per-member loop below, which does not depend on the prose at all.
+        Assert.Contains("thirteen classes", docText, StringComparison.Ordinal);
 
         foreach (var name in Enum.GetNames<UnitClass>())
             Assert.Contains($"`{name}`", docText, StringComparison.Ordinal);

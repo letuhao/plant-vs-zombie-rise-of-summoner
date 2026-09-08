@@ -1,0 +1,1204 @@
+{
+  "kind": "demon",
+  "_meta": {
+    "partition": "plant/common"
+  },
+  "entries": [
+    {
+      "id": "allpeater",
+      "nameKey": "demon.allpeater",
+      "name": "特种三线射手",
+      "gameTypeId": 1347,
+      "side": "plant",
+      "flavorInfo": "可在三种攻击模式之间切换，灵活分配火力。\n\n伤害：20×6/1.5秒\n特点：①拥有三种攻击模式，点击即可切换，索敌范围也会随之调整\n普通射击模式：向本行及邻行各发射2发子弹\n火力覆盖模式：向所有行各发射1发子弹\n火力集中模式：在本行发射6发子弹\n②处于火力覆盖模式时，如果地图行数少于6行，则损失的子弹伤害会均分给其他子弹\n融合配方：三线射手\u002B豌豆射手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          14
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "ashthreepeater",
+      "nameKey": "demon.ashthreepeater",
+      "name": "灰烬三线射手",
+      "gameTypeId": 918,
+      "side": "plant",
+      "flavorInfo": "被彻底烧焦的三线射手，无法攻击。\n\n使用条件：旅行模式\n融合配方：焦黑三线射手\u002B火爆辣椒\n特点：失去攻击能力",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          16,
+          1058
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "cactusblover",
+      "nameKey": "demon.cactusblover",
+      "name": "浮空仙人球",
+      "gameTypeId": 1082,
+      "side": "plant",
+      "flavorInfo": "小巧的无人机，发射对空尖刺。\n\n伤害：30×2/1.5秒（作为植物）；30×2/1秒（作为僚机）\n特点：飞行植物。发射只对空的尖刺。出场时释放三叶草效果\n融合配方：仙人掌\u002B三叶草",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          21
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "cherrygatling",
+      "nameKey": "demon.cherrygatling",
+      "name": "樱桃机枪射手",
+      "gameTypeId": 1017,
+      "side": "plant",
+      "flavorInfo": "发射粉樱桃子弹的机枪射手。\n\n伤害：40×4/1.5秒\n融合配方：豌豆射手×4\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          2,
+          1001,
+          1008,
+          1030,
+          1032,
+          1090,
+          1108
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "cherryshooter",
+      "nameKey": "demon.cherryshooter",
+      "name": "樱桃射手",
+      "gameTypeId": 1001,
+      "side": "plant",
+      "flavorInfo": "发射粉樱桃子弹的射手。\n\n伤害：40/1.5秒\n融合配方：豌豆射手\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          2
+        ],
+        "children": [
+          1008,
+          1017,
+          1108
+        ]
+      }
+    },
+    {
+      "id": "cherrysplit",
+      "nameKey": "demon.cherrysplit",
+      "name": "樱桃裂荚射手",
+      "gameTypeId": 1108,
+      "side": "plant",
+      "flavorInfo": "发射粉樱桃子弹的裂荚射手。\n\n伤害：40×3/1.5秒\n特点：子弹触碰到左侧屏幕边缘会反弹\n增生豆荚：出场15秒后手动点击，即可升级为樱桃机枪射手\n融合配方：豌豆射手×3\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          2,
+          1001,
+          1008,
+          1030,
+          1090
+        ],
+        "children": [
+          1017
+        ]
+      }
+    },
+    {
+      "id": "cherrythreepeater",
+      "nameKey": "demon.cherrythreepeater",
+      "name": "樱桃三线射手",
+      "gameTypeId": 1330,
+      "side": "plant",
+      "flavorInfo": "向三行发射半熟樱桃，留在僵尸身上一段时间后成熟并爆开。\n\n伤害：20×3/1.5秒\n特点：①子弹会挂载在目标身上，6秒后造成半径1格物理爆炸。每个目标身上最多挂载1个半熟樱桃\n②子弹挂载期间，目标僵尸受到的各类樱桃子弹和樱桃爆炸伤害的25%会累计到子弹伤害上\n融合配方：三线射手\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          2,
+          14
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "cornpot",
+      "nameKey": "demon.cornpot",
+      "name": "玉米花盆",
+      "gameTypeId": 1114,
+      "side": "plant",
+      "flavorInfo": "用玉米段制成的花盆，提升上方玉米投手类植物投出特殊子弹的概率。\n\n特性：可种裸地，低矮，载体\n特点：上方玉米投手类植物投出特殊子弹的概率由25%提升至50%\n融合配方：花盆（底座）\u002B玉米投手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          27,
+          28
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "darkthreepeater",
+      "nameKey": "demon.darkthreepeater",
+      "name": "焦黑三线射手",
+      "gameTypeId": 1058,
+      "side": "plant",
+      "flavorInfo": "倍增了火爆辣椒的效果，但自身被烧焦的三线射手。\n\n伤害：40×3/1.5秒\n特点：出场时在本行和邻行释放火爆辣椒效果\n融合配方：三线射手\u002B火爆辣椒",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          14,
+          16
+        ],
+        "children": [
+          918
+        ]
+      }
+    },
+    {
+      "id": "doomcactus",
+      "nameKey": "demon.doomcactus",
+      "name": "毁灭仙人掌",
+      "gameTypeId": 1191,
+      "side": "plant",
+      "flavorInfo": "发射毁灭尖刺的仙人掌，有概率一次发射大量毁灭尖刺。\n\n伤害：40/1.5秒\n特点：每次攻击有1/20概率触发大招，每次未触发，概率依次提升至1/19、1/18……直至100%。触发大招后重置概率\n大招：向前方上下各45°的扇形区域持续散射90发毁灭尖刺，可同时对空对地\n融合配方：仙人掌\u002B毁灭菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          21
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "doublecherry",
+      "nameKey": "demon.doublecherry",
+      "name": "樱桃双发射手",
+      "gameTypeId": 1008,
+      "side": "plant",
+      "flavorInfo": "发射粉樱桃子弹的双发射手。\n\n伤害：40×2/1.5秒\n增生豆荚：出场15秒后手动点击，即可升级为樱桃裂荚射手\n融合配方：豌豆射手×2\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          2,
+          1001,
+          1030
+        ],
+        "children": [
+          1017,
+          1108
+        ]
+      }
+    },
+    {
+      "id": "doubleshooter",
+      "nameKey": "demon.doubleshooter",
+      "name": "双发射手",
+      "gameTypeId": 1030,
+      "side": "plant",
+      "flavorInfo": "一次发射两颗豌豆。\n\n伤害：20×2/1.5秒\n增生豆荚：特定的双发射手出场15秒后，手动点击即可升级为对应的裂荚射手\n融合配方：豌豆射手×2",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0
+        ],
+        "children": [
+          1008,
+          1017,
+          1032,
+          1090,
+          1105,
+          1106,
+          1107,
+          1108,
+          1322
+        ]
+      }
+    },
+    {
+      "id": "doublesnow",
+      "nameKey": "demon.doublesnow",
+      "name": "寒冰双发射手",
+      "gameTypeId": 1105,
+      "side": "plant",
+      "flavorInfo": "发射寒冰豌豆的双发射手。\n\n伤害：20×2/1.5秒\n增生豆荚：出场15秒后手动点击，即可升级为寒冰裂荚射手\n融合配方：豌豆射手×2\u002B寒冰菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          10,
+          1030,
+          1034
+        ],
+        "children": [
+          1106,
+          1107
+        ]
+      }
+    },
+    {
+      "id": "garlic",
+      "nameKey": "demon.garlic",
+      "name": "大蒜",
+      "gameTypeId": 29,
+      "side": "plant",
+      "flavorInfo": "大蒜会使僵尸绕道而行。\n\n特性：低矮\n特点：①被啃咬时使啃咬者换行\n②受到的单次啃咬伤害不会超过15",
+      "flavorIntroduce": null,
+      "sunCost": 50,
+      "cooldownSec": 7.5,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "parsed",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": [
+          1328,
+          1385
+        ]
+      }
+    },
+    {
+      "id": "garlicpea",
+      "nameKey": "demon.garlicpea",
+      "name": "蒜毒豌豆射手",
+      "gameTypeId": 1385,
+      "side": "plant",
+      "flavorInfo": "发射蒜豌豆，使中毒的僵尸释放体内毒素，形成一片毒瘴。\n\n伤害：30/1.5秒\n特点：子弹命中时赋予1蒜值。如果目标处于中毒状态，在其位置生成一个毒瘴\n毒瘴：每行最多存在一个。半径0.74格，持续6秒。每1秒，赋予范围内的僵尸1点蒜值，造成本行所有蒜毒射手类植物一轮发射子弹量20倍的伤害\n融合配方：豌豆射手\u002B大蒜",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          29
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "garlicthreepeater",
+      "nameKey": "demon.garlicthreepeater",
+      "name": "蒜毒三线射手",
+      "gameTypeId": 1328,
+      "side": "plant",
+      "flavorInfo": "向三行发射蒜豌豆，使中毒的僵尸释放体内毒素，形成一片毒瘴。\n\n伤害：30×3/1.5秒\n特点：子弹命中时赋予1蒜值。如果目标处于中毒状态，在其位置生成一个毒瘴\n毒瘴：每行最多存在一个。半径0.74格，持续6秒。每1秒，赋予范围内的僵尸1点蒜值，造成本行所有蒜毒类射手植物一轮发射子弹量20倍的伤害\n融合配方：三线射手\u002B大蒜",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          14,
+          29
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "gatlingpea",
+      "nameKey": "demon.gatlingpea",
+      "name": "机枪射手",
+      "gameTypeId": 1032,
+      "side": "plant",
+      "flavorInfo": "一次发射四颗豌豆。\n\n伤害：20×4/1.5秒\n融合配方：豌豆射手×4",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          1030,
+          1090
+        ],
+        "children": [
+          1017,
+          1106,
+          1322
+        ]
+      }
+    },
+    {
+      "id": "hypnochomper",
+      "nameKey": "demon.hypnochomper",
+      "name": "魅惑大嘴花",
+      "gameTypeId": 1335,
+      "side": "plant",
+      "flavorInfo": "可以吞食魅惑僵尸，吃下僵尸部分，吐出魅惑成分。\n\n伤害：秒杀（吞食）\n消化时间：40秒\n特点：①可以吞食魅惑僵尸，并生成1张魅惑菇卡牌。吞食魅惑僵尸后，只需10秒即可完成消化\n②被啃咬时魅惑该僵尸并变回大嘴花\n融合配方：大嘴花\u002B魅惑菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          5,
+          8
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "hypnojalapeno",
+      "nameKey": "demon.hypnojalapeno",
+      "name": "魅惑辣椒",
+      "gameTypeId": 1336,
+      "side": "plant",
+      "flavorInfo": "用热辣的魅力炸翻僵尸，令其变心。\n\n伤害：1800（灰烬）\n特点：魅惑本行血量低于(0.5×本次伤害)的僵尸，如果不能魅惑，则仍旧造成伤害\n融合配方：火爆辣椒\u002B魅惑菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 1800,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          8,
+          16
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "hypnopeashooter",
+      "nameKey": "demon.hypnopeashooter",
+      "name": "魅惑豌豆射手",
+      "gameTypeId": 1267,
+      "side": "plant",
+      "flavorInfo": "发射魅惑豌豆，子弹击杀僵尸后会召唤魅惑豌豆射手僵尸为己方作战。\n\n伤害：30/1.5秒\n特点：杀死僵尸时，召唤一个植物方的魅惑豌豆射手僵尸\n魅惑豌豆射手僵尸：韧性270。每1.5秒发射一个伤害20的魅惑豌豆\n融合配方：豌豆射手\u002B魅惑菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          8
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "icecaltrop",
+      "nameKey": "demon.icecaltrop",
+      "name": "寒冰地刺",
+      "gameTypeId": 1180,
+      "side": "plant",
+      "flavorInfo": "触感冰凉的地刺。\n\n伤害：40/1秒\n特性：低矮\n特点：攻击施加寒冷状态，赋予10点冻结值\n融合配方：地刺\u002B寒冰菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          10,
+          17
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "jalacaltrop",
+      "nameKey": "demon.jalacaltrop",
+      "name": "火焰地刺",
+      "gameTypeId": 1062,
+      "side": "plant",
+      "flavorInfo": "触感火辣的地刺。\n\n伤害：40/1秒\n特性：低矮\n特点：攻击会施加红温状态\n融合配方：地刺\u002B火爆辣椒",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          16,
+          17
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "jalagatling",
+      "nameKey": "demon.jalagatling",
+      "name": "火辣机枪射手",
+      "gameTypeId": 1322,
+      "side": "plant",
+      "flavorInfo": "发射火辣豌豆的机枪射手。\n\n伤害：30×4/1.5秒\n特点：攻击施加红温状态\n融合配方：豌豆射手×4\u002B火爆辣椒",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          16,
+          1030,
+          1032,
+          1090,
+          1319
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "jalapeashooter",
+      "nameKey": "demon.jalapeashooter",
+      "name": "火辣豌豆射手",
+      "gameTypeId": 1319,
+      "side": "plant",
+      "flavorInfo": "发射施加红温状态的火辣豌豆。\n\n伤害：30/1.5秒\n特点：攻击施加红温状态\n火辣豌豆：被点燃时，变为伤害\u002B30的浴火豌豆\n融合配方：豌豆射手\u002B火爆辣椒",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          16
+        ],
+        "children": [
+          1322
+        ]
+      }
+    },
+    {
+      "id": "jalastar",
+      "nameKey": "demon.jalastar",
+      "name": "火爆杨桃",
+      "gameTypeId": 1198,
+      "side": "plant",
+      "flavorInfo": "易燃易爆炸的杨桃，释放火爆星星。\n\n伤害：100×25\n特点：融合时不会释放火爆辣椒效果。出场1秒后自爆。死亡时释放火爆辣椒效果，爆出25个火爆星星\n融合配方：火爆辣椒\u002B杨桃",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 1800,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          16,
+          23
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "lanterncactus",
+      "nameKey": "demon.lanterncactus",
+      "name": "流光仙人掌",
+      "gameTypeId": 1079,
+      "side": "plant",
+      "flavorInfo": "喜光的仙人掌，光照越强，伤害和穿透能力越高。\n\n伤害：30/1.5秒\n特点：发射光刺，优先对空。根据光照等级获得增强，1级：子弹能穿透2次；2级：改为发射激光，无限穿透，优先对空；3级：激光伤害翻倍。攻击飞行僵尸时攻击次数×2，激光伤害×3\n融合配方：仙人掌\u002B路灯花",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          20,
+          21
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "lanternchomper",
+      "nameKey": "demon.lanternchomper",
+      "name": "灯笼大嘴花",
+      "gameTypeId": 1241,
+      "side": "plant",
+      "flavorInfo": "利用灯光诱敌的大嘴花，光照越强，消化越快。\n\n伤害：秒杀（吞食）\n消化时间：40秒\n特点：每1级光照减少10秒消化时间，消化最少10秒。吞咽后若本行无僵尸，可以使上下两行附近的1个僵尸换行到本行\n融合配方：大嘴花\u002B路灯花",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          5,
+          20
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "lanternpea",
+      "nameKey": "demon.lanternpea",
+      "name": "流光豌豆射手",
+      "gameTypeId": 1373,
+      "side": "plant",
+      "flavorInfo": "高频发射靶向激光，吸收光能可增加威力。\n\n伤害：10\n特点：①每0.5秒，获得（光照等级）点光能，存储上限1000点。每道激光在攻击或输送时，均会消耗（1\u002B当前光能×10%）点光能\n②能锁定本行前方的流光中继射手（不可紧邻），每0.1秒输送一次，为目标补充攻击力×10%的光能，每点消耗的光能使补充量增加1倍\n③每0.2秒消耗光能攻击一次，使单次伤害增加（消耗光能）倍\n④手动点击会重新锁定目标\n融合配方：豌豆射手\u002B路灯花",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 10,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          20
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "marigold",
+      "nameKey": "demon.marigold",
+      "name": "金盏花",
+      "gameTypeId": 31,
+      "side": "plant",
+      "flavorInfo": "金盏花为你生产银币、金币和钻石。\n\n金钱产量：1次/25秒\n特点：有75%概率生产银币（100金钱）、20%概率生产金币（300金钱）、5%概率生产钻石（1000金钱）\n金钱：①每关的初始金钱为3000\n②1000金钱可以购买1个金咖啡豆（用于将银植物升级为金植物，或释放金植物的大招）\n③每消耗500金钱，赠送25阳光",
+      "flavorIntroduce": null,
+      "sunCost": 25,
+      "cooldownSec": 7.5,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "parsed",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "melonpult",
+      "nameKey": "demon.melonpult",
+      "name": "西瓜投手",
+      "gameTypeId": 32,
+      "side": "plant",
+      "flavorInfo": "西瓜投手投出带有溅射伤害的西瓜。\n\n伤害：80/3秒\n特点：西瓜造成半径1格的衰减溅射，伤害为子弹伤害×8/溅射的僵尸数量，上限为子弹伤害的1/3",
+      "flavorIntroduce": null,
+      "sunCost": 300,
+      "cooldownSec": 7.5,
+      "hp": 300,
+      "attack": 80,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "parsed",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "peachomper",
+      "nameKey": "demon.peachomper",
+      "name": "豌豆大嘴花",
+      "gameTypeId": 1011,
+      "side": "plant",
+      "flavorInfo": "咀嚼时吐出可以穿透的滚地尸块。\n\n伤害：秒杀（吞食）；80/3秒（尸块）\n消化时间：30秒\n特点：咀嚼时吐出滚地的尸块子弹，无限穿透\n融合配方：豌豆射手\u002B大嘴花",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 80,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          5
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "peasquash",
+      "nameKey": "demon.peasquash",
+      "name": "豌豆窝瓜",
+      "gameTypeId": 1366,
+      "side": "plant",
+      "flavorInfo": "籽用窝瓜，砸击时爆出大量子弹。\n\n伤害：1800（压扁）\n索敌范围：左侧0.5格~右侧1格\n特点：落地时，爆出3圈（共108颗）豌豆子弹\n融合配方：窝瓜\u002B豌豆射手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 1800,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          13
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "peasunflower",
+      "nameKey": "demon.peasunflower",
+      "name": "豌豆向日葵",
+      "gameTypeId": 1000,
+      "side": "plant",
+      "flavorInfo": "能生产阳光，并发射命中时获得阳光的子弹。\n\n阳光产量：25/25秒\n伤害：30/1.5秒\n特点：每第3发子弹，在命中目标时掉落5阳光\n融合配方：向日葵\u002B豌豆射手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          1
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "snowgatling",
+      "nameKey": "demon.snowgatling",
+      "name": "寒冰机枪射手",
+      "gameTypeId": 1106,
+      "side": "plant",
+      "flavorInfo": "发射寒冰豌豆的机枪射手。\n\n伤害：20×4/1.5秒\n融合配方：豌豆射手×4\u002B寒冰菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          10,
+          1030,
+          1032,
+          1034,
+          1090,
+          1105,
+          1107
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "snowpeashooter",
+      "nameKey": "demon.snowpeashooter",
+      "name": "寒冰射手",
+      "gameTypeId": 1034,
+      "side": "plant",
+      "flavorInfo": "发射施加寒冷状态的寒冰豌豆。\n\n伤害：20/1.5秒\n特点：攻击施加寒冷状态，赋予10点冻结值。对冻结的僵尸伤害x4\n融合配方：豌豆射手\u002B寒冰菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          10
+        ],
+        "children": [
+          1105,
+          1106,
+          1107
+        ]
+      }
+    },
+    {
+      "id": "snowsplit",
+      "nameKey": "demon.snowsplit",
+      "name": "寒冰裂荚射手",
+      "gameTypeId": 1107,
+      "side": "plant",
+      "flavorInfo": "发射寒冰豌豆的裂荚射手。\n\n伤害：20×3/1.5秒\n特点：子弹触碰到左侧屏幕边缘会反弹\n增生豆荚：出场15秒后手动点击，即可升级为寒冰机枪射手\n融合配方：豌豆射手×3\u002B寒冰菇",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          10,
+          1030,
+          1034,
+          1090,
+          1105
+        ],
+        "children": [
+          1106
+        ]
+      }
+    },
+    {
+      "id": "splitpea",
+      "nameKey": "demon.splitpea",
+      "name": "裂荚射手",
+      "gameTypeId": 1090,
+      "side": "plant",
+      "flavorInfo": "向前发射一颗豌豆，向后发射两颗会回弹的豌豆。\n\n伤害：20×3/1.5秒\n特点：子弹触碰到左侧屏幕边缘会反弹\n增生豆荚：特定的裂荚射手出场15秒后，手动点击即可升级为对应的机枪射手\n融合配方：豌豆射手×3",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          1030
+        ],
+        "children": [
+          1017,
+          1032,
+          1106,
+          1107,
+          1108,
+          1322
+        ]
+      }
+    },
+    {
+      "id": "starpea",
+      "nameKey": "demon.starpea",
+      "name": "杨桃豌豆射手",
+      "gameTypeId": 1412,
+      "side": "plant",
+      "flavorInfo": "发射杨桃豌豆，在命中前散播多次星星。\n\n伤害：20/1.5秒\n特点：子弹每0.5秒一次（首次0.2秒），向周围分裂出5个星星子弹，最多分裂5次\n融合配方：豌豆射手\u002B杨桃",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 20,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          0,
+          23
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "sunchomper",
+      "nameKey": "demon.sunchomper",
+      "name": "阳光大嘴花",
+      "gameTypeId": 1014,
+      "side": "plant",
+      "flavorInfo": "消化完成时能获得阳光的大嘴花。\n\n伤害：秒杀（吞食）\n消化时间：40秒\n特点：消化完成时获得100阳光\n融合配方：大嘴花\u002B向日葵",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          1,
+          5
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "threecabbage",
+      "nameKey": "demon.threecabbage",
+      "name": "三线卷心菜炮手",
+      "gameTypeId": 1439,
+      "side": "plant",
+      "flavorInfo": "向三行快速投出能够“弹射”的多层卷心菜。\n\n伤害：40×3/1.5秒\n特点：①每轮在本格及上下两格各攻击一次，攻击享受边路补偿\n②子弹命中后，向上下邻行最近的僵尸弹射一次。原本就在本行发射的子弹可以额外弹射一次\n融合配方：卷心菜投手\u002B三线射手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 40,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          14,
+          26
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "threeplantern",
+      "nameKey": "demon.threeplantern",
+      "name": "三线路灯花",
+      "gameTypeId": 1379,
+      "side": "plant",
+      "flavorInfo": "提供普通路灯花三倍的光照，能将激光分束为三道。\n\n光照范围：3×3,3级\n特点：流光大灯菇的激光/流光仙人掌的对地激光会在穿过时，额外在本行产生两束伤害30的激光\n融合配方：路灯花\u002B三线射手",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 30,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          14,
+          20
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "twinflower",
+      "nameKey": "demon.twinflower",
+      "name": "双子向日葵",
+      "gameTypeId": 1033,
+      "side": "plant",
+      "flavorInfo": "阳光产量是向日葵的两倍还多。\n\n阳光产量：25×2/20秒\n融合配方：向日葵×2",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 300,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          1
+        ],
+        "children": []
+      }
+    }
+  ]
+}

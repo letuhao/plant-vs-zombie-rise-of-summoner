@@ -189,7 +189,14 @@ Aptitude edges reach channels **outside** that set — `resource.max.*` and `res
 
 By family: `progression.bonus` 5 · `resource.max` 5 · `resource.regen` 5 · `skill.cooldown` 5 ·
 `skill.effectiveness` 5 · `status.duration` 4 · `status.durationReduction` 4 · `status.intensity` 4 ·
-`status.intensityReduction` 4 · `resource.efficiency` 3 · `progression.*` 2 · `move.range` 1.
+`status.intensityReduction` 4 · `resource.efficiency` **3 ⛔** · `progression.*` 2 · `move.range` 1.
+
+> **⛔ `resource.efficiency` 3 is a DEFECT, not a measurement to preserve (owner, 2026-09-02).** There
+> are **six** resources; a family covering three means only three resources have a stat that governs
+> them, while actions can cost all six. Same for the `5`s — they are missing `poise`. See the
+> six-coverage rule in [`resource-hub-ssot.md`](../resource-hub-ssot.md) and the audit at
+> [`../../research/resource-symmetry-audit-2026-09-02.md`](../../research/resource-symmetry-audit-2026-09-02.md).
+> **These counts describe the defect; they do not license it.**
 
 **So a `ChannelMod` on any of them throws today** — a loud `ArgumentException`, which is the good
 failure, and exactly the gap T3 found for `turn.*`. **But over half of what an aptitude buys is

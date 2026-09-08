@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Rise of Summoner — an RPG plus empire-building game that works with Plants vs. Zombies: Fusion. Raise demons, run idle expeditions, take back the multiverse."
+    />
+    <title>Rise of Summoner — Player guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage">
+      <header class="site-header">
+        <a class="brand" href="#welcome" data-open-tab="welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Player guide · vision skim</span>
+        </a>
+        <nav class="header-links" aria-label="Markdown guide">
+          <a href="#mechanisms" data-open-tab="mechanisms">Mechanisms</a>
+          <a href="../features.md">Brief list</a>
+          <a href="../mechanisms/">Handbook</a>
+          <a href="../README.md">Full catalog</a>
+          <a href="../../../README.md">Repo</a>
+        </nav>
+      </header>
+
+      <div
+        class="tab-strip"
+        role="tablist"
+        aria-label="Guide sections"
+        aria-orientation="horizontal"
+      >
+        <button type="button" class="tab" role="tab" id="tab-welcome" data-tab="welcome" aria-controls="panel-welcome" aria-selected="true">
+          Welcome
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-loops" data-tab="loops" aria-controls="panel-loops" aria-selected="false" tabindex="-1">
+          The loops
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-features" data-tab="features" aria-controls="panel-features" aria-selected="false" tabindex="-1">
+          Features
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-mechanisms" data-tab="mechanisms" aria-controls="panel-mechanisms" aria-selected="false" tabindex="-1">
+          Mechanisms
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-play" data-tab="play" aria-controls="panel-play" aria-selected="false" tabindex="-1">
+          How you play
+        </button>
+        <button type="button" class="tab" role="tab" id="tab-stakes" data-tab="stakes" aria-controls="panel-stakes" aria-selected="false" tabindex="-1">
+          Win &amp; lose
+        </button>
+      </div>
+
+      <main id="main" class="panels">
+        <!-- Welcome -->
+        <section
+          class="panel is-active"
+          role="tabpanel"
+          id="panel-welcome"
+          aria-labelledby="tab-welcome"
+        >
+          <div class="hero hero-tight">
+            <p class="hero-kicker">RPG · empire · local on your machine</p>
+            <h1>An RPG and empire war that grows from your lawn matches</h1>
+            <p class="hero-lead">
+              <strong>Rise of Summoner</strong> is an RPG plus empire-building game. You raise demons,
+              run idle expeditions, and fight for ground across a fractured multiverse. You play as
+              <strong>Crazy Dave</strong>. Everything runs on your machine — no account, no cloud.
+            </p>
+          </div>
+
+          <div class="welcome-stack">
+            <section class="welcome-block" aria-labelledby="welcome-what">
+              <h2 id="welcome-what" class="welcome-h2">What this is</h2>
+              <p>
+                A persistent summoner RPG and empire campaign. Matches on the board feed souls, levels,
+                and your roster. Away from the board you summon, fuse specimens, dispatch idle squads,
+                and march a war map. The lawn is the <strong>first</strong> core loop — not the whole
+                game.
+              </p>
+            </section>
+
+            <aside class="context-card" role="note" aria-labelledby="welcome-need">
+              <h2 id="welcome-need" class="welcome-h2">What you need</h2>
+              <p>
+                <strong>Plants vs. Zombies: Fusion</strong> is a fan-made Plants vs. Zombies game
+                (separate from EA’s official titles). You point the Rise of Summoner launcher at a
+                <strong>legal</strong> install of that pack.
+              </p>
+              <p>
+                Rise of Summoner does <strong>not</strong> replace it. It adds the RPG and empire layer
+                on top. In this guide, the <strong>lawn</strong> means those matches — the live board
+                where plants and zombies fight.
+              </p>
+              <dl class="def-list">
+                <div>
+                  <dt>Lawn</dt>
+                  <dd>A live board match in Plants vs. Zombies: Fusion</dd>
+                </div>
+                <div>
+                  <dt>Control room</dt>
+                  <dd>The local browser UI — Sanctum, roster, map, expeditions</dd>
+                </div>
+                <div>
+                  <dt>Fusion (in menus)</dt>
+                  <dd>Merging two demons into a stronger form — not the host game’s name</dd>
+                </div>
+              </dl>
+            </aside>
+
+            <section class="welcome-block" aria-labelledby="welcome-feel">
+              <h2 id="welcome-feel" class="welcome-h2">How a session feels</h2>
+              <ol class="feel-list">
+                <li>Play a lawn match — souls, almanac, and deploy progress land in your save</li>
+                <li>Raise demons at home — summon, bind pacts, fuse specimens</li>
+                <li>Dispatch idle expeditions while you do something else</li>
+                <li>March the rift map — claim ground, hold loam, End Turn against Zomboss</li>
+              </ol>
+              <p class="welcome-more">
+                The full named loop list lives under
+                <a href="#loops" data-open-tab="loops">The loops</a>.
+              </p>
+            </section>
+
+            <section class="welcome-block" aria-labelledby="welcome-stakes">
+              <h2 id="welcome-stakes" class="welcome-h2">Win and lose</h2>
+              <p class="stakes-line">
+                <strong>Win</strong> by finding Zomboss’s fortress and taking it.
+                <strong>Lose</strong> if the homeworld falls. You keep who you are; you lose where you
+                were.
+              </p>
+            </section>
+
+            <div class="cta-row">
+              <a class="btn btn-primary" href="#play" data-open-tab="play">How you play</a>
+              <a class="btn btn-ghost" href="#mechanisms" data-open-tab="mechanisms">Browse mechanisms</a>
+              <a class="btn btn-ghost" href="#features" data-open-tab="features">See the features</a>
+              <a class="btn btn-ghost" href="../README.md#feature-catalog">Full catalog</a>
+            </div>
+          </div>
+
+          <footer class="panel-foot">
+            What is playable vs coming lives in the
+            <a href="../README.md#feature-catalog">markdown catalog</a>. This page is the market skim.
+            · <a href="../features.md">Brief feature list</a> ·
+            <a href="../mechanisms/">Mechanisms handbook</a> ·
+            <a href="../the-game.md">The game</a>
+          </footer>
+        </section>
+
+        <!-- Loops -->
+        <section class="panel" role="tabpanel" id="panel-loops" aria-labelledby="tab-loops" hidden>
+          <h2 class="section-title">Ten named loops</h2>
+          <p class="section-lead">
+            Every feature hangs on one of these. Spine is what you always grow. Places are where you
+            play. No eleventh loop — and no diary meta-clock.
+          </p>
+          <blockquote class="hero-quote loop-breath">
+            Play the lawn → grow power, summon, and gear → dispatch idle expeditions → farm, hunt,
+            and defend the empire → adventure the map and build the stage → delve and quest → do it
+            again on ground that fights back.
+          </blockquote>
+
+          <div class="loop-grid">
+            <div class="loop-block">
+              <h3>Spine — always on</h3>
+              <ul>
+                <li><strong>Level up and power</strong> — Dave’s level has no cap; free-build aptitudes; you have no class</li>
+                <li><strong>Summon and fusion</strong> — souls, altar, pacts, fusion; gacha is one path, never the only one</li>
+                <li><strong>Item collection</strong> — find, vault, equip, craft relics as chapters open</li>
+              </ul>
+            </div>
+            <div class="loop-block">
+              <h3>Places — where you play</h3>
+              <ul>
+                <li><strong>Lawn</strong> — first core; feeds almost everything</li>
+                <li><strong>Idle expeditions</strong> — dispatch, wait, collect; no stamina; forever</li>
+                <li><strong>Farm / hunt / defend</strong> — yield, prey, homeworld</li>
+                <li><strong>World map</strong> — adventure; End Turn virtual turns</li>
+                <li><strong>World stage</strong> — where you stand to run the empire</li>
+                <li><strong>Delve</strong> — party crawl (coming)</li>
+                <li><strong>Quests and events</strong> — story clock, not only loot</li>
+              </ul>
+            </div>
+            <div class="loop-block">
+              <h3>Three clocks</h3>
+              <ul>
+                <li><strong>Lawn</strong> — live lawn match</li>
+                <li><strong>Expeditions</strong> — wall-clock (30 min–20 h) on purpose</li>
+                <li><strong>World</strong> — virtual turns; press End Turn</li>
+              </ul>
+            </div>
+          </div>
+
+          <footer class="panel-foot">
+            Full rules:
+            <a href="../the-loops.md">the-loops.md</a> ·
+            <a href="../features.md">Brief list</a> ·
+            <a href="../README.md#feature-catalog">Catalog</a>
+          </footer>
+        </section>
+
+        <!-- Features -->
+        <section class="panel" role="tabpanel" id="panel-features" aria-labelledby="tab-features" hidden>
+          <h2 class="section-title">What you get</h2>
+          <p class="section-lead">
+            Eight feature groups — the same skim as the brief list. Open a card’s pillar in the
+            markdown guide when you want depth.
+          </p>
+
+          <div class="feature-grid">
+            <article class="feature-card">
+              <h3>Play the lawn</h3>
+              <ul>
+                <li>Keep playing lawn matches — kills become souls; encounters fill the almanac</li>
+                <li>Demons you raised deploy back onto the board</li>
+                <li>After the first chapter, unlocked features stay playable with the lawn game closed</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>Raise demons</h3>
+              <ul>
+                <li>Every demon is a specimen — level, gear, history</li>
+                <li>Summon, bind pacts, fuse duplicates into stronger forms</li>
+                <li>Gacha is one path — wild joins and capture are others</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>Fight for real</h3>
+              <div class="el-row" aria-label="Elements">
+                <span class="el-chip" data-el="fire">Fire</span>
+                <span class="el-chip" data-el="ice">Ice</span>
+                <span class="el-chip" data-el="air">Air</span>
+                <span class="el-chip" data-el="earth">Earth</span>
+                <span class="el-chip" data-el="light">Light</span>
+                <span class="el-chip" data-el="dark">Dark</span>
+              </div>
+              <ul>
+                <li>Six elements in a ring — plus shields, crit, and statuses</li>
+                <li>The roster you build is the roster that performs</li>
+                <li>Skills and named reaction recipes grow on top of that ring</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>Idle forever</h3>
+              <ul>
+                <li>Dispatch spare demons — wait thirty minutes to twenty hours</li>
+                <li>No stamina gate — core loop forever</li>
+                <li>Sibling of the Delve, not a throwaway prototype</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>Build the empire</h3>
+              <ul>
+                <li>March the rift: sectors, lanes, legions, fog, End Turn</li>
+                <li>Hold loam — ground you neglect fades</li>
+                <li>Zomboss runs his own war. Take his fortress or lose yours</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>Grow forever</h3>
+              <ul>
+                <li>Dave’s level has no cap; free-build aptitudes — no class</li>
+                <li>Relics and crafting deepen as chapters open</li>
+                <li>Almanac and chronicle remember what you met</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <span class="badge">Vision</span>
+              <h3>Go deeper</h3>
+              <ul>
+                <li>Delves and sieges — party crawls and Seat defense</li>
+                <li>Quests, world events, failure that opens new ground</li>
+                <li>See the catalog for what is Vision vs shipped</li>
+              </ul>
+            </article>
+            <article class="feature-card">
+              <h3>On your machine</h3>
+              <ul>
+                <li>Local control room — no account, no cloud</li>
+                <li>Three stocks: souls, essence, and loam (loam never banks)</li>
+                <li>You keep who you are across worlds; you lose where you were</li>
+              </ul>
+            </article>
+          </div>
+
+          <footer class="panel-foot">
+            <a href="#mechanisms" data-open-tab="mechanisms">Mechanisms index</a> ·
+            <a href="../features.md">Brief feature list</a> ·
+            <a href="../README.md#feature-catalog">Full catalog</a> ·
+            <a href="../combat.md">Combat</a> ·
+            <a href="../the-rift.md">The rift</a>
+          </footer>
+        </section>
+
+        <!-- Mechanisms -->
+        <section class="panel" role="tabpanel" id="panel-mechanisms" aria-labelledby="tab-mechanisms" hidden>
+          <h2 class="section-title">Gameplay mechanisms</h2>
+          <p class="section-lead">
+            Every named system, by category. Each row has a full HTML teach guide (and matching
+            markdown). Deeper than the Features skim — hangs on the ten loops.
+          </p>
+          <nav class="mech-toc" aria-label="Mechanism categories">
+            <a href="#mech-cat-1">1. Session and shell</a>
+            <a href="#mech-cat-2">2. Stocks and economy</a>
+            <a href="#mech-cat-3">3. Roster and summoning</a>
+            <a href="#mech-cat-4">4. Power and builds</a>
+            <a href="#mech-cat-5">5. Combat language</a>
+            <a href="#mech-cat-6">6. Lawn</a>
+            <a href="#mech-cat-7">7. Idle expeditions</a>
+            <a href="#mech-cat-8">8. World and empire</a>
+            <a href="#mech-cat-9">9. Delve, siege, party</a>
+            <a href="#mech-cat-10">10. Quests, failure, memory</a>
+          </nav>
+          <section class="mech-cat" id="mech-cat-1" aria-labelledby="mech-cat-1-title">
+            <h3 id="mech-cat-1-title" class="mech-cat-title">1. Session and shell</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/local-control-room.html">Local control room</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/local-control-room.html">HTML guide</a> · <a href="../mechanisms/local-control-room.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/save-select.html">Title / save select</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/save-select.html">HTML guide</a> · <a href="../mechanisms/save-select.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/sanctum.html">Sanctum</a></td><td><span class="mech-status mech-status--shipped">Shipped (thin)</span></td><td><a href="mechanisms/sanctum.html">HTML guide</a> · <a href="../mechanisms/sanctum.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/layer-rail.html">Layer rail and hotkeys</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/layer-rail.html">HTML guide</a> · <a href="../mechanisms/layer-rail.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/unlock-beats.html">Unlock ladder (play beats)</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/unlock-beats.html">HTML guide</a> · <a href="../mechanisms/unlock-beats.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/unlock-chapters.html">Dave-level unlock chapters</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/unlock-chapters.html">HTML guide</a> · <a href="../mechanisms/unlock-chapters.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/system-settings.html">Settings and keymap</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/system-settings.html">HTML guide</a> · <a href="../mechanisms/system-settings.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/naming-ritual.html">First-run naming ritual</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/naming-ritual.html">HTML guide</a> · <a href="../mechanisms/naming-ritual.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-2" aria-labelledby="mech-cat-2-title">
+            <h3 id="mech-cat-2-title" class="mech-cat-title">2. Stocks and economy</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/souls.html">Souls</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/souls.html">HTML guide</a> · <a href="../mechanisms/souls.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/essence.html">Essence</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/essence.html">HTML guide</a> · <a href="../mechanisms/essence.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/loam.html">Loam and the Fracture</a></td><td><span class="mech-status mech-status--shipped">Shipped (thin)</span></td><td><a href="mechanisms/loam.html">HTML guide</a> · <a href="../mechanisms/loam.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-3" aria-labelledby="mech-cat-3-title">
+            <h3 id="mech-cat-3-title" class="mech-cat-title">3. Roster and summoning</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/specimens.html">Persistent specimens</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/specimens.html">HTML guide</a> · <a href="../mechanisms/specimens.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/summoning-altar.html">Summoning altar</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/summoning-altar.html">HTML guide</a> · <a href="../mechanisms/summoning-altar.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/pacts-loyalty.html">Pacts and loyalty</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/pacts-loyalty.html">HTML guide</a> · <a href="../mechanisms/pacts-loyalty.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/tribute.html">Tribute on pacts</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/tribute.html">HTML guide</a> · <a href="../mechanisms/tribute.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/specimen-fusion.html">Specimen fusion</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/specimen-fusion.html">HTML guide</a> · <a href="../mechanisms/specimen-fusion.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/patron.html">Patron demon</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/patron.html">HTML guide</a> · <a href="../mechanisms/patron.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/capture.html">In-run capture</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/capture.html">HTML guide</a> · <a href="../mechanisms/capture.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/wild-joins.html">Wild joins</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/wild-joins.html">HTML guide</a> · <a href="../mechanisms/wild-joins.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-4" aria-labelledby="mech-cat-4-title">
+            <h3 id="mech-cat-4-title" class="mech-cat-title">4. Power and builds</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/dave-level.html">Dave's level</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/dave-level.html">HTML guide</a> · <a href="../mechanisms/dave-level.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/type-specimen-xp.html">Type and specimen XP</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/type-specimen-xp.html">HTML guide</a> · <a href="../mechanisms/type-specimen-xp.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/aptitudes.html">Free-build aptitudes</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/aptitudes.html">HTML guide</a> · <a href="../mechanisms/aptitudes.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/species-builds.html">Species builds</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/species-builds.html">HTML guide</a> · <a href="../mechanisms/species-builds.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/passive-trees.html">Passive trees</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/passive-trees.html">HTML guide</a> · <a href="../mechanisms/passive-trees.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/build-presets.html">Build presets</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/build-presets.html">HTML guide</a> · <a href="../mechanisms/build-presets.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/commanders.html">Commanders</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/commanders.html">HTML guide</a> · <a href="../mechanisms/commanders.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/commander-auras.html">Commander auras</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/commander-auras.html">HTML guide</a> · <a href="../mechanisms/commander-auras.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/relics-armoury.html">Relics armoury</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/relics-armoury.html">HTML guide</a> · <a href="../mechanisms/relics-armoury.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/relic-crafting.html">Relic crafting</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/relic-crafting.html">HTML guide</a> · <a href="../mechanisms/relic-crafting.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-5" aria-labelledby="mech-cat-5-title">
+            <h3 id="mech-cat-5-title" class="mech-cat-title">5. Combat language</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/element-ring.html">Six elements and omni</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/element-ring.html">HTML guide</a> · <a href="../mechanisms/element-ring.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/shields-crit-resist.html">Shields, crit, and resistance</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/shields-crit-resist.html">HTML guide</a> · <a href="../mechanisms/shields-crit-resist.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/statuses.html">Statuses</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/statuses.html">HTML guide</a> · <a href="../mechanisms/statuses.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/actor-meters.html">Actor meters</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/actor-meters.html">HTML guide</a> · <a href="../mechanisms/actor-meters.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/skills-loadouts.html">Skills and loadouts</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/skills-loadouts.html">HTML guide</a> · <a href="../mechanisms/skills-loadouts.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/named-reactions.html">Named reactions / combo recipes</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/named-reactions.html">HTML guide</a> · <a href="../mechanisms/named-reactions.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/interactive-battles.html">Interactive battles</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/interactive-battles.html">HTML guide</a> · <a href="../mechanisms/interactive-battles.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-6" aria-labelledby="mech-cat-6-title">
+            <h3 id="mech-cat-6-title" class="mech-cat-title">6. Lawn</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/lawn-match.html">Lawn match (first core)</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/lawn-match.html">HTML guide</a> · <a href="../mechanisms/lawn-match.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/lawn-mirror-hud.html">Live mirror and unit HUD</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/lawn-mirror-hud.html">HTML guide</a> · <a href="../mechanisms/lawn-mirror-hud.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/lawn-deploy.html">Bound demon deploy</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/lawn-deploy.html">HTML guide</a> · <a href="../mechanisms/lawn-deploy.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/lawn-blessing.html">Lawn blessing</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/lawn-blessing.html">HTML guide</a> · <a href="../mechanisms/lawn-blessing.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/lawn-trophies.html">Lawn trophies</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/lawn-trophies.html">HTML guide</a> · <a href="../mechanisms/lawn-trophies.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/in-game-open.html">In-game open control room</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/in-game-open.html">HTML guide</a> · <a href="../mechanisms/in-game-open.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-7" aria-labelledby="mech-cat-7-title">
+            <h3 id="mech-cat-7-title" class="mech-cat-title">7. Idle expeditions</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/expeditions.html">Expeditions (dispatch / wait / collect)</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/expeditions.html">HTML guide</a> · <a href="../mechanisms/expeditions.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/expedition-slots-recall.html">Slots and early recall</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/expedition-slots-recall.html">HTML guide</a> · <a href="../mechanisms/expedition-slots-recall.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/expedition-event-ticks.html">Expedition quest / event ticks</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/expedition-event-ticks.html">HTML guide</a> · <a href="../mechanisms/expedition-event-ticks.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-8" aria-labelledby="mech-cat-8-title">
+            <h3 id="mech-cat-8-title" class="mech-cat-title">8. World and empire</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/world-map.html">Rift world map</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/world-map.html">HTML guide</a> · <a href="../mechanisms/world-map.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/virtual-turns.html">World virtual turns / End Turn</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/virtual-turns.html">HTML guide</a> · <a href="../mechanisms/virtual-turns.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/fog-of-war.html">Fog of war</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/fog-of-war.html">HTML guide</a> · <a href="../mechanisms/fog-of-war.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/zomboss-commander.html">Zomboss as commander</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/zomboss-commander.html">HTML guide</a> · <a href="../mechanisms/zomboss-commander.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/farm-hunt-defend.html">Farm / hunt / defend</a></td><td><span class="mech-status mech-status--shipped">Shipped (thin)</span></td><td><a href="mechanisms/farm-hunt-defend.html">HTML guide</a> · <a href="../mechanisms/farm-hunt-defend.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/sector-buildings.html">Sector buildings</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/sector-buildings.html">HTML guide</a> · <a href="../mechanisms/sector-buildings.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/map-orders.html">Map tools and orders</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/map-orders.html">HTML guide</a> · <a href="../mechanisms/map-orders.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/map-battle-handoff.html">Map to battle handoff</a></td><td><span class="mech-status mech-status--wip">WIP</span></td><td><a href="mechanisms/map-battle-handoff.html">HTML guide</a> · <a href="../mechanisms/map-battle-handoff.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/world-stage.html">World-stage empire</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/world-stage.html">HTML guide</a> · <a href="../mechanisms/world-stage.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/three-layer-world.html">Three-layer world</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/three-layer-world.html">HTML guide</a> · <a href="../mechanisms/three-layer-world.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/world-generator.html">World generator / deeper fog</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/world-generator.html">HTML guide</a> · <a href="../mechanisms/world-generator.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/counter-development.html">Enemy counter-development</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/counter-development.html">HTML guide</a> · <a href="../mechanisms/counter-development.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-9" aria-labelledby="mech-cat-9-title">
+            <h3 id="mech-cat-9-title" class="mech-cat-title">9. Delve, siege, party</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/delve.html">The Delve</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/delve.html">HTML guide</a> · <a href="../mechanisms/delve.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/pack-extract-oaths.html">Pack, extract, oaths, domains</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/pack-extract-oaths.html">HTML guide</a> · <a href="../mechanisms/pack-extract-oaths.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/party-formations.html">Party formations / combo skills</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/party-formations.html">HTML guide</a> · <a href="../mechanisms/party-formations.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/siege.html">Siege</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/siege.html">HTML guide</a> · <a href="../mechanisms/siege.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="mech-cat" id="mech-cat-10" aria-labelledby="mech-cat-10-title">
+            <h3 id="mech-cat-10-title" class="mech-cat-title">10. Quests, failure, memory</h3>
+            <table class="mech-table">
+              <thead><tr><th scope="col">Mechanism</th><th scope="col">Status</th><th scope="col">Detail</th></tr></thead>
+              <tbody>
+                <tr><td><a href="mechanisms/quest-log.html">Quest log</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/quest-log.html">HTML guide</a> · <a href="../mechanisms/quest-log.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/world-events.html">World events and raids</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/world-events.html">HTML guide</a> · <a href="../mechanisms/world-events.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/failure-branches.html">Failure branches</a></td><td><span class="mech-status mech-status--vision">Vision</span></td><td><a href="mechanisms/failure-branches.html">HTML guide</a> · <a href="../mechanisms/failure-branches.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/almanac.html">Almanac dossiers</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/almanac.html">HTML guide</a> · <a href="../mechanisms/almanac.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/chronicle.html">Chronicle</a></td><td><span class="mech-status mech-status--shipped">Shipped</span></td><td><a href="mechanisms/chronicle.html">HTML guide</a> · <a href="../mechanisms/chronicle.md">Markdown</a></td></tr>
+                <tr><td><a href="mechanisms/new-world-prestige.html">New world — keep who you are</a></td><td><span class="mech-status mech-status--shipped">Shipped (fiction)</span></td><td><a href="mechanisms/new-world-prestige.html">HTML guide</a> · <a href="../mechanisms/new-world-prestige.md">Markdown</a></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <footer class="panel-foot">
+            Markdown index:
+            <a href="../mechanisms/">mechanisms/</a> ·
+            <a href="../the-loops.md">The loops</a> ·
+            <a href="../README.md#feature-catalog">Feature catalog</a>
+          </footer>
+        </section>
+
+        <!-- How you play -->
+        <section class="panel" role="tabpanel" id="panel-play" aria-labelledby="tab-play" hidden>
+          <h2 class="section-title">How you play</h2>
+          <p class="section-lead">
+            Local control room on your machine. No account. No cloud. You start on the lawn, then the
+            rest of the war opens around it.
+          </p>
+
+          <ol class="steps">
+            <li>
+              <div>
+                <strong>Lawn</strong> — play a lawn match. Souls, experience, and almanac entries
+                land in your save. Deploy demons you raised.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Power</strong> — Dave levels. Specimens grow from work they did. Spend points
+                into free-build aptitudes.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Summon and fuse</strong> — altar, pacts, fusion. Keep demons loyal.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Items</strong> — find relics, vault them, equip and craft
+                (<strong>WIP</strong> as a full armoury; opens as a chapter in the Vision unlock ladder).
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Idle</strong> — dispatch spare demons on expeditions; collect later. No stamina.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Empire</strong> — march the map, farm and hunt ground, hold loam, defend the
+                Seat when the war reaches home.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Return home</strong> — every run ends at the Sanctum. Check what came back. Go
+                again.
+              </div>
+            </li>
+          </ol>
+
+          <footer class="panel-foot">
+            First session detail:
+            <a href="../how-you-play.md">how-you-play.md</a> ·
+            <a href="../the-loops.md">The loops</a> ·
+            <a href="../README.md#feature-catalog">Catalog</a>
+          </footer>
+        </section>
+
+        <!-- Win & lose -->
+        <section class="panel" role="tabpanel" id="panel-stakes" aria-labelledby="tab-stakes" hidden>
+          <h2 class="section-title">Win and lose</h2>
+          <p class="section-lead">
+            You are Crazy Dave. Your capital is his homeworld — the one timeline still yours. Find
+            Zomboss through the rift before yours falls.
+          </p>
+
+          <div class="split">
+            <div class="split-card win">
+              <h3>Win</h3>
+              <p>Find Zomboss’s fortress sector and take it.</p>
+            </div>
+            <div class="split-card lose">
+              <h3>Lose</h3>
+              <p>The homeworld falls.</p>
+            </div>
+          </div>
+
+          <p class="keep-line">You keep who you are. You lose where you were.</p>
+
+          <p class="section-lead" style="margin-top: 1.25rem; margin-bottom: 0">
+            Roster, souls, and essence bank across worlds. Loam and the holdings of a failed map do
+            not. Ending one world and starting another <em>is</em> the progression loop — not a soft
+            reset of your summoner.
+          </p>
+
+          <footer class="panel-foot">
+            Fiction and stakes:
+            <a href="../the-game.md">the-game.md</a> ·
+            <a href="../features.md">Brief list</a> ·
+            <a href="../README.md#feature-catalog">Catalog</a>
+          </footer>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · vision mirrors the
+        <a href="../README.md">player guide</a> · not a date promise
+      </footer>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>

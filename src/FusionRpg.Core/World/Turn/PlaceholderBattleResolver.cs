@@ -80,7 +80,16 @@ public sealed class PlaceholderBattleResolver : IBattleResolver
         // that is what it gave up its mobility for.
         var entrenched = request.DefenderStationary
                          || string.Equals(defender.Stance, Movement.MovementPolicy.Hold, StringComparison.Ordinal);
-        if (entrenched) defenderWeight = defenderWeight * DefenderBonusMilli / 1000;
+        // base-defense `siege-objective` §7 (spec-siege-objective.md): a district assault reads this
+        // bonus as 1000 (no-op), never the placeholder's own 1250. `structure-state`/`siege-cover`
+        // model real fortifications on the board itself — stacking this flat "standing still" bonus on
+        // top would pay the defender twice for the same thing. Every non-district battle (guard-clear
+        // is handled separately above and never reaches this branch; sector/lane contact battles) is
+        // untouched — still reads the real, tunable 1250.
+        var defenderBonusMilli = request.Kind == BattleKinds.District
+            ? Battle.Board.SiegeTuningPolicy.Objective.DistrictDefenderBonusMilli
+            : DefenderBonusMilli;
+        if (entrenched) defenderWeight = defenderWeight * defenderBonusMilli / 1000;
 
         if (attackerWeight == defenderWeight)
             return new BattleOutcome

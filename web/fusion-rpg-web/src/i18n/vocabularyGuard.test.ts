@@ -71,12 +71,132 @@ describe("vocabularyGuard — fixtures", () => {
     expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
   });
 
+  // The symbol half of GG-23. Both of these passed the guard before 2026-09-05: every BANNED_WORDS
+  // entry is wrapped in `\b...\b`, and neither symbol is a word character, so listing them there
+  // matched nothing at all. Written as fixtures rather than as a list assertion so the test fails
+  // if the *matching* regresses, not merely if the list is edited.
+  it("flags the power index letter rendered as JSX text on its own line", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Rogue.tsx"),
+      "export const Rogue = ({ theta }: { theta: number }) => (\n  <p>\n    spent (\u0398={theta})\n  </p>\n);\n"
+    );
+    const violations = scanForBannedVocabulary(fixtureDir);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatchObject({ file: "layers/Rogue.tsx", line: 3 });
+  });
+
+  it("flags the per-mille sign inside a rendered string literal", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Rogue.tsx"),
+      'export const label = "carrying 610\u2030 of the load";\n'
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toHaveLength(1);
+  });
+
+  it("does not flag an engine symbol inside a comment", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Clean.tsx"),
+      "// a stat modifier's own \"+400\u2030 more\" reading\nexport const x = 1;\n"
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
+  });
+
   it("does not flag an unrelated word that merely contains a banned substring", () => {
     fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
     mkdirSync(join(fixtureDir, "layers"));
     writeFileSync(
       join(fixtureDir, "layers", "Clean.tsx"),
       'export const label = "A coldwind swept the revisions of the plan";\n'
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
+  });
+});
+
+// D5.10 (spec-delve-stage.md §8, `:178-179`) — the ten words the delve stage's own vocabulary
+// extension adds. `stages/delve/` and `layers/delve/` are deliberately NOT allow-listed (§8: "this
+// is player chrome, with no developer exemption to claim"), so these fixtures use those exact
+// directory shapes rather than a generic `layers/` name, matching the spec's own testing table
+// (`:283`: "vocabularyGuard over stages/delve/ and layers/delve/ with the new words").
+describe("vocabularyGuard — delve extension, No_engine_token_reaches_player_text (D5.10)", () => {
+  let fixtureDir: string;
+
+  afterEach(() => {
+    if (fixtureDir) rmSync(fixtureDir, { recursive: true, force: true });
+  });
+
+  it("No_engine_token_reaches_player_text — each of the ten new words is caught, individually, when rendered as player text under stages/delve/", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-delve-"));
+    mkdirSync(join(fixtureDir, "stages", "delve"), { recursive: true });
+    const newWords = [
+      "bandDelta",
+      "dangerBand",
+      "PartyIndex",
+      "Retired",
+      "thetaOffset",
+      "rungId",
+      "delveId",
+      "sectorId",
+      "archetypeId",
+      "perMille"
+    ];
+    // One line per word, in one file — each line is its own independent match, so the count below
+    // proves every single word is caught, not just that the file as a whole is non-empty.
+    const body = newWords.map((w) => `<p>engine leaked the raw ${w} here</p>`).join("\n");
+    writeFileSync(join(fixtureDir, "stages", "delve", "Leaky.tsx"), `${body}\n`);
+
+    const violations = scanForBannedVocabulary(fixtureDir);
+    expect(violations).toHaveLength(newWords.length);
+    newWords.forEach((_, i) => expect(violations[i]).toMatchObject({ file: "stages/delve/Leaky.tsx", line: i + 1 }));
+  });
+
+  it("No_engine_token_reaches_player_text — the same ten words are also caught under layers/delve/, the panel-layer half of §8's own testing table", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-delve-"));
+    mkdirSync(join(fixtureDir, "layers", "delve"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "layers", "delve", "DomainOfferRow.tsx"),
+      'export const label = "rungId not yet resolved";\n'
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toHaveLength(1);
+  });
+
+  it("does not flag the ten new words used as code identifiers, not copy — the same copy-vs-code narrowing the rest of BANNED_WORDS already gets", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-delve-"));
+    mkdirSync(join(fixtureDir, "stages", "delve"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "stages", "delve", "Clean.ts"),
+      "export function f(room: { archetypeId: string; sectorId: string; rungId: string; delveId: number }) {\n" +
+        "  const bandDelta = 0; const dangerBand = 1; const thetaOffset = 2; const perMille = 3;\n" +
+        "  return room.archetypeId + room.sectorId + room.rungId + room.delveId + bandDelta + dangerBand + thetaOffset + perMille;\n" +
+        "}\n"
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
+  });
+
+  it("does not flag a word that merely contains a new banned word as a substring (word-boundary check, not just a doc claim)", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-delve-"));
+    mkdirSync(join(fixtureDir, "stages", "delve"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "stages", "delve", "Clean.tsx"),
+      // "perMilleRatio" contains "perMille"; "rungIdOrTailLabel" contains "rungId" — neither has a
+      // word boundary right after the banned substring, so `\bperMille\b`/`\brungId\b` must not match.
+      'export const a = "unit perMilleRatio shown as a percent";\n' +
+        'export const b = "resume carries rungIdOrTailLabel, not a rung on its own";\n'
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
+  });
+
+  it("`once` and `many` are deliberately not banned words — both render freely as ordinary English", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-delve-"));
+    mkdirSync(join(fixtureDir, "stages", "delve"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "stages", "delve", "Prose.tsx"),
+      'export const a = "You may only enter once."; export const b = "Many bands may enter here.";\n'
     );
     expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
   });

@@ -28,6 +28,7 @@ import {
   type LawnViewModel,
   type Occupant
 } from "./lawnViewModel";
+import { foldHudFromPayload, hudSnapshotsEqual } from "./foldActorHud";
 
 type Payload = Record<string, unknown>;
 
@@ -38,9 +39,18 @@ const OBSERVE_CHIPS = new Set([
   "poison",
   "hypno",
   "wither",
-  "bond",
   "blight",
-  "rot"
+  "rot",
+  "spark",
+  "spore",
+  "pact_mark",
+  "leech",
+  "expose",
+  "shatter",
+  "bond",
+  "rally",
+  "command",
+  "charm_pulse"
 ]);
 const CC_CHIPS = ["butter", "freeze", "cold", "poison"] as const;
 
@@ -60,6 +70,10 @@ function num(v: unknown): number | undefined {
   if (typeof v === "number" && Number.isFinite(v)) return v;
   if (typeof v === "string" && v.trim() && Number.isFinite(Number(v))) return Number(v);
   return undefined;
+}
+
+function strArray(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
 }
 
 function bool(v: unknown): boolean | undefined {
@@ -133,7 +147,27 @@ function cloneOccupant(o: Occupant): Occupant {
   return {
     ...o,
     statusChips: [...o.statusChips],
-    flags: { ...o.flags }
+    flags: { ...o.flags },
+    hud: o.hud
+      ? {
+          ...o.hud,
+          identity: { ...o.hud.identity, flags: [...o.hud.identity.flags] },
+          resources: o.hud.resources
+            ? {
+                ...o.hud.resources,
+                shield: o.hud.resources.shield
+                  ? {
+                      ...o.hud.resources.shield,
+                      stacks: o.hud.resources.shield.stacks.map((s) => ({ ...s }))
+                    }
+                  : undefined,
+                meters: o.hud.resources.meters?.map((m) => ({ ...m }))
+              }
+            : undefined,
+          statuses: o.hud.statuses.map((s) => ({ ...s })),
+          overflow: { ...o.hud.overflow }
+        }
+      : undefined
   };
 }
 
@@ -193,7 +227,8 @@ function clearLiving(m: LawnViewModel): LawnViewModel {
     tiles: new Map(),
     mowers: new Map(),
     pets: new Map(),
-    hand: []
+    hand: [],
+    matchCommander: undefined
   };
 }
 
@@ -276,7 +311,8 @@ function upsertLiving(
       hypnotized: extras?.flags?.hypnotized ?? existing?.flags.hypnotized,
       ...extras?.flags
     },
-    instanceId: extras?.instanceId ?? existing?.instanceId
+    instanceId: extras?.instanceId ?? existing?.instanceId,
+    hud: foldHudFromPayload(p, extras?.hud ?? existing?.hud)
   };
   return placeOccupant(m, occ);
 }
@@ -598,8 +634,17 @@ function rawPhaseName(raw: unknown): string | undefined {
   return typeof raw === "string" ? raw.trim() : undefined;
 }
 
+function applyDebugActorHud(m: LawnViewModel, p: Payload): LawnViewModel {
+  const ptr = str(p.ptr);
+  if (!ptr) return m;
+  const existing = findOccupant(m, ptr);
+  if (!existing) return m;
+  const hud = foldHudFromPayload(p, existing.hud);
+  if (hudSnapshotsEqual(hud, existing.hud)) return m;
+  return placeOccupant(m, { ...cloneOccupant(existing), hud });
+}
+
 /**
- * Snapshot membership from debug.board-stats plants/zombies arrays.
  * Replaces living set (RT-05 feed law when entity lists present).
  * Preserves grid tiles — board-stats is occupancy, not grid items.
  */
@@ -676,7 +721,8 @@ function applyBoardStatsMembership(m: LawnViewModel, p: Payload): LawnViewModel 
       interval: foldInterval(item, prev?.interval),
       statusChips: prev?.statusChips ?? [],
       flags: prev?.flags ?? {},
-      instanceId: prev?.instanceId
+      instanceId: prev?.instanceId,
+      hud: foldHudFromPayload(item, prev?.hud)
     });
   };
 
@@ -793,10 +839,30 @@ function applyDebugSnapshot(m: LawnViewModel, p: Payload): LawnViewModel {
         interval: foldInterval(e, prev?.interval),
         statusChips: prev?.statusChips ?? [],
         flags: prev?.flags ?? {},
-        instanceId: prev?.instanceId
+        instanceId: prev?.instanceId,
+        hud: foldHudFromPayload(e, prev?.hud) ?? prev?.hud
       });
     }
     next = rebuilt;
+    changed = true;
+  }
+
+  const commander = asObj(match.commander);
+  const leadingName = str(commander.leadingCommanderDisplayName);
+  if (leadingName) {
+    const auraName = str(commander.activeAuraDisplayName) ?? null;
+    const leadingId = str(commander.leadingCommanderId) ?? "commander:dave";
+    const nextCommander = { id: leadingId, displayName: leadingName, auraDisplayName: auraName };
+    if (
+      next.matchCommander?.id !== nextCommander.id ||
+      next.matchCommander?.displayName !== nextCommander.displayName ||
+      next.matchCommander?.auraDisplayName !== nextCommander.auraDisplayName
+    ) {
+      next = { ...next, matchCommander: nextCommander };
+      changed = true;
+    }
+  } else if (next.matchCommander != null) {
+    next = { ...next, matchCommander: undefined };
     changed = true;
   }
 
@@ -883,6 +949,14 @@ function applyOne(m: LawnViewModel, e: EventEnvelope): LawnViewModel {
           typeId: num(p.type) ?? num(p.typeId),
           typeName: str(p.typeName)
         }
+      });
+    }
+    case "lawn-deploy-event.fired": {
+      const caseId = str(p.caseId);
+      if (!caseId) return m;
+      return bump({
+        ...m,
+        pendingLawnDeploy: { caseId, eligibleInstanceIds: strArray(p.eligibleInstanceIds) }
       });
     }
     case "match.restart":
@@ -1114,6 +1188,8 @@ function applyOne(m: LawnViewModel, e: EventEnvelope): LawnViewModel {
       return maybeBump(m, applyEconomy(m, p));
     case "debug.board-stats":
       return maybeBump(m, applyBoardStatsMembership(m, p));
+    case "debug.actor-hud":
+      return maybeBump(m, applyDebugActorHud(m, p));
     case "debug.snapshot":
       return maybeBump(m, applyDebugSnapshot(m, p));
     default:

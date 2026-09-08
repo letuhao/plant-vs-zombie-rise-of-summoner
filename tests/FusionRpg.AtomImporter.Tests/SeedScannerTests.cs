@@ -1,4 +1,4 @@
-using FusionRpg.Tools.AtomImporter;
+using FusionRpg.Data.Seed;
 using Xunit;
 
 namespace FusionRpg.AtomImporter.Tests;
@@ -155,7 +155,7 @@ public class SeedScannerTests : IDisposable
     // ---- the real repo: curves/ and rarity/ (completeness-audit.md C3) -------------------------------
 
     [Fact]
-    public void The_real_curves_and_rarity_folders_exist_and_document_why_they_are_empty()
+    public void The_real_curves_and_rarity_folders_exist_and_document_why_they_are_empty_or_seeded()
     {
         // C3: two owned folders declared with no content looked identical to two forgotten ones.
         // The README in each is the distinction — a real, checked-in file, not a synthetic fixture.
@@ -168,14 +168,139 @@ public class SeedScannerTests : IDisposable
     }
 
     [Fact]
-    public void The_real_sweep_finds_zero_json_in_curves_and_rarity_the_readmes_do_not_count()
+    public void The_real_sweep_finds_zero_json_in_curves_still_empty_on_purpose()
     {
         var root = RepoRoot();
         var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
         var files = SeedScanner.Files(roots);
 
         Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/curves/", StringComparison.Ordinal));
-        Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/rarity/", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_real_sweep_finds_ratitys_seeded_ladder_item_ideal_rarity_bands_module_7()
+    {
+        // item-ideal.md, rarity-bands (module 7, 2026-09-04): rarity/ stopped being "empty on
+        // purpose" once the ten-rung ladder was seeded -- data/seed/rarity/README.md says so, and
+        // this is the sweep-level pin that a future regression can't silently re-empty the folder
+        // and have this suite stay green either way.
+        var root = RepoRoot();
+        var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
+        var files = SeedScanner.Files(roots);
+
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("/rarity/ladder.v1.json", StringComparison.Ordinal));
+    }
+
+    // ---- E32 test 9: the two halves of the affix write path ------------------------------------
+
+    /// <summary>The test 9 the spec's own §5 names as "the one that would have prevented this
+    /// module" — seedsmith wrote to a folder nothing swept and nobody noticed, because no test
+    /// compared the two. Reads seedsmith's own `OUTPUT_DIR` line directly (not the spec's prose
+    /// claim), so a future path change on either side fails this test rather than silently
+    /// reopening the gap.</summary>
+    [Fact]
+    public void AtomImporter_swept_folder_matches_seedsmiths_own_affix_write_path()
+    {
+        var root = RepoRoot();
+        var generatorPath = Path.Combine(root, "tools", "seedsmith", "seedsmith", "adapters", "effects", "affix", "generate_affixes.py");
+        Assert.True(File.Exists(generatorPath), $"seedsmith's affix generator moved or was renamed: {generatorPath}");
+
+        var source = File.ReadAllText(generatorPath);
+        var match = System.Text.RegularExpressions.Regex.Match(
+            source, @"OUTPUT_DIR\s*=\s*REPO_ROOT\s*/\s*""data""\s*/\s*""seed""\s*/\s*""effects""\s*/\s*""affixes""");
+        Assert.True(match.Success,
+            "seedsmith's OUTPUT_DIR no longer reads REPO_ROOT/data/seed/effects/affixes — " +
+            "update SeedScanner.OwnedFolders's \"effects/affixes\" entry to match, in the same change");
+
+        Assert.Contains("effects/affixes", SeedScanner.OwnedFolders);
+    }
+
+    // ---- T5.3 (species-effects, 2026-09-06): the same two-halves discipline, a second time -------
+
+    /// <summary>The exact same class of gap `effects/affixes`' own test above exists to catch,
+    /// applied to `species-effects`' own writer — found live, 2026-09-06, while verifying real
+    /// generated content actually imports: `data/seed/demons/species-effects/**` held real,
+    /// importer-clean content that nothing swept, because `demons/species-effects` was never added
+    /// to <see cref="SeedScanner.OwnedFolders"/> when the writer was built.</summary>
+    [Fact]
+    public void AtomImporter_swept_folder_matches_seedsmiths_own_species_effects_write_path()
+    {
+        var root = RepoRoot();
+        var generatorPath = Path.Combine(root, "tools", "seedsmith", "run_t53_claude_propose.py");
+        Assert.True(File.Exists(generatorPath), $"seedsmith's species-effects generator moved or was renamed: {generatorPath}");
+
+        var source = File.ReadAllText(generatorPath);
+        var match = System.Text.RegularExpressions.Regex.Match(
+            source, @"OUTPUT_DIR\s*=\s*REPO_ROOT\s*/\s*""data""\s*/\s*""seed""\s*/\s*""demons""\s*/\s*""species-effects""");
+        Assert.True(match.Success,
+            "seedsmith's species-effects OUTPUT_DIR no longer reads REPO_ROOT/data/seed/demons/species-effects — " +
+            "update SeedScanner.OwnedFolders's \"demons/species-effects\" entry to match, in the same change");
+
+        Assert.Contains("demons/species-effects", SeedScanner.OwnedFolders);
+    }
+
+    [Fact]
+    public void The_real_sweep_finds_the_committed_species_effects_pilot_batch()
+    {
+        // Pins that the folder is not just declared but actually reaches real committed content —
+        // the same class of silent gap the folder's own addition just closed.
+        var root = RepoRoot();
+        var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
+        var files = SeedScanner.Files(roots);
+
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("demons/species-effects/plant/pilot-batch.json", StringComparison.Ordinal));
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("demons/species-effects/zombie/pilot-batch.json", StringComparison.Ordinal));
+    }
+
+    // ---- D4.16 (spec-domain-catalog.md §1): the seven dungeon folders ----
+
+    [Fact]
+    public void OwnedFolders_carries_all_seven_dungeon_corpus_folders()
+    {
+        var expected = new[]
+        {
+            "dungeon/domains", "dungeon/rooms", "dungeon/layouts", "dungeon/events",
+            "dungeon/quests", "dungeon/encounters", "dungeon/supplies",
+        };
+        foreach (var folder in expected)
+            Assert.Contains(folder, SeedScanner.OwnedFolders);
+    }
+
+    [Fact]
+    public void The_seven_dungeon_folders_are_scanned_when_present_never_when_absent()
+    {
+        // "the seven folders are scanned" (D4.16's own Verify line): none exist under the real repo
+        // today (confirmed separately), so this proves the WIRING end to end against a fixture root
+        // rather than the real, still-empty data/seed/dungeon/ tree -- absent, Roots skips them
+        // (today's real behaviour); created, Roots includes them (the behaviour once content lands).
+        var beforeRoots = SeedScanner.Roots(_root, explicitRoot: false, Directory.Exists);
+        Assert.DoesNotContain(beforeRoots, r => r.Replace('\\', '/').EndsWith("dungeon/domains", StringComparison.Ordinal));
+
+        Dir("dungeon", "domains");
+        Dir("dungeon", "quests");
+
+        var afterRoots = SeedScanner.Roots(_root, explicitRoot: false, Directory.Exists);
+        Assert.Contains(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/domains", StringComparison.Ordinal));
+        Assert.Contains(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/quests", StringComparison.Ordinal));
+        // The five dungeon folders never created stay absent -- each folder is checked independently.
+        Assert.DoesNotContain(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/rooms", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_real_repo_dungeon_tree_has_all_seven_owned_corpus_folders()
+    {
+        // D4.16 content has landed since the original no-op pin. Keep this test tied to the real tree
+        // so ownership drift is visible, while the atom import path uses AtomRoots and excludes these
+        // dungeon-specific envelopes.
+        var root = RepoRoot();
+        var dungeonRoot = Path.Combine(root, "data", "seed", "dungeon");
+        Assert.True(Directory.Exists(dungeonRoot));
+        var subfolders = Directory.GetDirectories(dungeonRoot).Select(Path.GetFileName).ToList();
+        Assert.Contains("_containers", subfolders!);
+        Assert.Contains("_plan", subfolders!);
+        Assert.Contains("_registry", subfolders!);
+        foreach (var folder in new[] { "domains", "rooms", "layouts", "events", "quests", "encounters", "supplies" })
+            Assert.Contains(folder, subfolders!);
     }
 
     static string RepoRoot()

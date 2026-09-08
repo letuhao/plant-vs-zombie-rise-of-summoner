@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-demon.cherrypaperzombie-001",
+  "flavor": "A sudden, rhythmic thumping echoes through the corridor as the floorboards begin to heave. From the shadows, a pale, bloated 僵尸 emerges, its jaw unhinged and dripping with a thick, syrupy red liquid that smells intensely of fermented 樱桃. It begins to perform a grotesque, jerky dance, its movements part of a macabre 上演 that demands an audience.",
+  "kind": "trap",
+  "name": "The Maraschino Mime",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "medium"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggers a pressure plate that releases a reanimated corpse coated in sticky, acidic fruit nectar.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cherrypaperzombie"
+}

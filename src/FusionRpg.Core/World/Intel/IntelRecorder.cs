@@ -83,7 +83,10 @@ public static class IntelRecorder
         {
             Detail = remembered.Detail,
             Slots = remembered.Slots,
-            DevelopmentLevel = remembered.DevelopmentLevel
+            DevelopmentLevel = remembered.DevelopmentLevel,
+            RecruitStock = remembered.RecruitStock,
+            ProjectId = remembered.ProjectId,
+            ProjectTurnsRemaining = remembered.ProjectTurnsRemaining
         };
     }
 
@@ -98,6 +101,9 @@ public static class IntelRecorder
         DangerBand = sector.DangerBand,
         FractureIntensityMilli = sector.FractureIntensityMilli,
         DevelopmentLevel = level == SectorSight.Full ? sector.DevelopmentLevel : 0,
+        RecruitStock = level == SectorSight.Full ? sector.RecruitStock : 0,
+        ProjectId = level == SectorSight.Full ? sector.ProjectId : null,
+        ProjectTurnsRemaining = level == SectorSight.Full ? sector.ProjectTurnsRemaining : null,
 
         // A glimpse from next door tells you who holds the ground, not what is buried in it. That is
         // what keeps claiming a rich sector a gamble rather than a lookup.

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using FusionRpg.Core.Balance.Analytic;
 using FusionRpg.Core.Balance.Guards;
 using FusionRpg.Core.Stats.Aptitudes;
+using System.Linq;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Balance;
@@ -48,8 +49,17 @@ public class DominanceGuardTests
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {
-            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v2.json");
-            if (File.Exists(candidate)) return candidate;
+            // The LIVE shipped config = the highest aptitudes.v*.json, never a pinned literal
+            // (2026-09-02): pinning meant every publish broke a test that only wanted "whatever ships".
+            var tuningDir = Path.Combine(dir.FullName, "data", "tuning");
+            if (Directory.Exists(tuningDir))
+            {
+                var best = Directory.GetFiles(tuningDir, "aptitudes.v*.json")
+                    .Select(f => (Path: f, V: int.TryParse(
+                        Path.GetFileNameWithoutExtension(f).Split(".v").Last(), out var v) ? v : -1))
+                    .Where(x => x.V >= 0).OrderByDescending(x => x.V).FirstOrDefault();
+                if (best.Path is not null) return best.Path;
+            }
             dir = dir.Parent;
         }
         throw new InvalidOperationException("could not locate data/tuning/aptitudes.v2.json above " + AppContext.BaseDirectory);

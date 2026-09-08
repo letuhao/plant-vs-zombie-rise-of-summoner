@@ -37,7 +37,25 @@ public readonly record struct LoadoutValidation(bool Ok, LoadoutRejectionReason?
 /// </summary>
 public static class LoadoutSet
 {
+    // Structural base, not tunable (D4.25, spec-unique-pipeline.md §4): `loadout.slots`
+    // (DerivedStatChannels.LoadoutSlots) is the progression atop this number, so a balance pass
+    // reaches for the channel's granting atoms, never this constant. See EffectiveMaxSize.
     public const int MaxSize = 5;
+
+    /// <summary>
+    /// D4.25: `base + (channel > 0 ? 1 : 0)` — one extra slot at a time, however many extend-slot
+    /// items are worn. The single place this rule is written; <see cref="Validate"/>,
+    /// <see cref="AutoEquip.Select"/> and <see cref="FusionRpg.Core.Actions.Grants.CapPolicy.EquippedSkillCap"/> all
+    /// call through here rather than re-deriving it, so the three readers can never drift apart on
+    /// what "one at a time" means. <paramref name="loadoutSlotsChannel"/> is the actor's own composed
+    /// <see cref="FusionRpg.Core.Stats.Derived.DerivedStatChannels.LoadoutSlots"/> value (0 when
+    /// nothing worn grants it) — a Data/Battle-layer fact this pure module cannot read itself, same
+    /// reasoning as "held" and "is this actor mid-run" below. Whole-count `long`, not the channel's
+    /// own composed `double` (ActionsPurityGuardTests bans floating point anywhere under `Actions/`,
+    /// with no exceptions — the caller rounds at the Data-layer boundary before crossing in).
+    /// </summary>
+    public static int EffectiveMaxSize(long loadoutSlotsChannel = 0) =>
+        MaxSize + (loadoutSlotsChannel > 0 ? 1 : 0);
 
     /// <summary>
     /// Validates a proposed equipped set as a WHOLE — the first rule broken wins, and nothing about
@@ -47,7 +65,8 @@ public static class LoadoutSet
         IReadOnlyList<string> actionIds,
         Func<string, bool> isHeld,
         Func<string, ActionKind> kindOf,
-        Func<bool> isMidRun)
+        Func<bool> isMidRun,
+        long loadoutSlotsChannel = 0)
     {
         if (actionIds is null) throw new ArgumentNullException(nameof(actionIds));
         if (isHeld is null) throw new ArgumentNullException(nameof(isHeld));
@@ -57,7 +76,7 @@ public static class LoadoutSet
         if (isMidRun())
             return LoadoutValidation.Reject(LoadoutRejectionReason.MidRun);
 
-        if (actionIds.Count > MaxSize)
+        if (actionIds.Count > EffectiveMaxSize(loadoutSlotsChannel))
             return LoadoutValidation.Reject(LoadoutRejectionReason.LoadoutFull);
 
         var seen = new HashSet<string>(StringComparer.Ordinal);

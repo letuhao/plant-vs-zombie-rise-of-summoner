@@ -2,6 +2,8 @@ using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Demons.Materialise;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
 
@@ -14,11 +16,19 @@ public static class FusionModes
     public const string Recipe = "recipe";
 }
 
+/// <summary>WAVE F2.4 (demon-standalone, 2026-09-07): one player-selected inheritance pick — an atom
+/// a fusion output should carry verbatim from one of its two sacrifices' own materialised roll
+/// (F2.2). <see cref="SourceInstanceId"/> must name one of the request's own
+/// <see cref="FusionRequest.SacrificeInstanceIds"/>; <see cref="AtomId"/> must be an atom that
+/// specimen's own roll actually contains — both checked by name in <c>RecipeUnlocked</c>.</summary>
+public sealed record FusionPick(string SourceInstanceId, string AtomId);
+
 public sealed record FusionRequest(
     string Mode,
     string? BaseInstanceId,
     IReadOnlyList<string> SacrificeInstanceIds,
-    string? PickedTraitId);
+    string? PickedTraitId,
+    IReadOnlyList<FusionPick>? Picks = null);
 
 public sealed record FusionOutcome(
     bool Replayed,
@@ -151,7 +161,7 @@ public sealed partial class RpgStore
         if (!StarPolicy.CanPromote(baseRarity, baseProfile!.Star, baseProfile.Promoted))
             return (false, "promotion.not-ready", null);
 
-        var newRarity = (DemonRarity)((int)baseRarity + 1);
+        var newRarity = DemonRarityLadder.OneRungAbove(baseRarity);
         var cost = FusionCostTable.Promotion(newRarity);
         var spendReason = SpendFusionCostsUnlocked(db, playerId, corr, cost, baseProfile.ElementPrimary, now);
         if (spendReason != "") return (false, spendReason, null);
@@ -206,7 +216,77 @@ public sealed partial class RpgStore
             return (false, "trait.not-on-inputs", null);
 
         var output = DemonSpeciesCatalog.Get(recipe.OutputSpeciesId);
+
+        // WAVE F2.4 (demon-standalone, 2026-09-07): player-selected inheritance picks — validated
+        // and priced before any spend, matching this method's own established refusal order.
+        var picks = request.Picks ?? Array.Empty<FusionPick>();
+        IReadOnlyList<ForcedPoolPick> forcedPicks = Array.Empty<ForcedPoolPick>();
+        long picksSouls = 0;
+        MaterialisedRoll? sourceRollA = null;
+        MaterialisedRoll? sourceRollB = null;
+        ContainerRow? outputSpeciesContainer = null;
+
+        if (picks.Count > 0)
+        {
+            // `player_species` is shared per (player, species) and materialised once, never
+            // re-rolled (spec-player-materialise.md §3/§7: "a species already present... is
+            // neither an error nor rerolled"). A fusion's picks can only be honored the FIRST time
+            // this player ever gets this species — once a shared roll already exists, injecting
+            // picks would mean silently re-rolling it out from under every OTHER specimen of that
+            // species this player already owns.
+            if (ListPlayerSpeciesInstanceMapUnlocked(playerId).ContainsKey(output.SpeciesId))
+                return (false, "picks.already-materialised", null);
+
+            var slotCap = FusionRoller.SlotsFor(output.BaseRarity);
+            if (picks.Count > slotCap) return (false, "picks.exceeds-slots", null);
+
+            outputSpeciesContainer = GetContainer("species-passive." + output.SpeciesId);
+            if (outputSpeciesContainer is null) return (false, "picks.no-target-container", null);
+
+            var resolvedAtoms = new List<InstanceAtomRow>();
+            foreach (var pick in picks)
+            {
+                MaterialisedRoll? pickSourceRoll;
+                DemonProfileDto sourceProfile;
+                if (pick.SourceInstanceId == request.SacrificeInstanceIds[0])
+                {
+                    pickSourceRoll = sourceRollA ??= GetSpecimenMaterialisedRoll(pick.SourceInstanceId);
+                    sourceProfile = profileA;
+                }
+                else if (pick.SourceInstanceId == request.SacrificeInstanceIds[1])
+                {
+                    pickSourceRoll = sourceRollB ??= GetSpecimenMaterialisedRoll(pick.SourceInstanceId);
+                    sourceProfile = profileB;
+                }
+                else
+                {
+                    return (false, "picks.source-not-a-sacrifice", null);
+                }
+
+                if (pickSourceRoll is null) return (false, "picks.source-not-materialised", null);
+
+                var atom = pickSourceRoll.Instance.Atoms.FirstOrDefault(a => a.AtomId == pick.AtomId);
+                if (atom is null) return (false, "picks.atom-not-rolled", null);
+                resolvedAtoms.Add(atom);
+
+                if (!DemonRarityIds.TryParse(sourceProfile.Rarity, out var sourceRarity))
+                    return (false, "picks.source-rarity-unknown", null);
+                // InheritCostByRarity only covers OutputEligibilityFloor-and-above (Cultivated..
+                // Almanac, the same rung set RecipeCost itself covers) — a below-floor source has no
+                // entry, and FusionCostTable.InheritPick throws rather than guessing a price. Guard
+                // here so a below-floor pick is a named refusal, never an unhandled exception.
+                if (!DemonRarityLadder.AtLeast(sourceRarity, DemonRecipeCatalog.OutputEligibilityFloor))
+                    return (false, "picks.source-below-inherit-floor", null);
+                picksSouls += FusionCostTable.InheritPick(sourceRarity);
+            }
+
+            forcedPicks = resolvedAtoms
+                .Select(a => new ForcedPoolPick(a.AtomId, new[] { a }))
+                .ToList();
+        }
+
         var cost = FusionCostTable.Recipe(output.BaseRarity);
+        if (picksSouls > 0) cost = cost with { Souls = cost.Souls + picksSouls };
         var spendReason = SpendFusionCostsUnlocked(
             db, playerId, corr, cost, output.ElementPrimary.ToElementId(), now);
         if (spendReason != "") return (false, spendReason, null);
@@ -227,6 +307,76 @@ public sealed partial class RpgStore
             TraitIds = roll.TraitIds.ToList(),
             Origin = "fusion"
         }, now, out var speciesNewlyDiscovered);
+
+        // WAVE F2.4: honor the picks by materialising `player_species` for the output species RIGHT
+        // NOW, forcing them into the roll — the only moment this is legal, since the row above
+        // proved no shared roll exists yet for this player+species. Mirrors
+        // MaterialisePlayerSpecies's own write shape (effect_instance -> effect_instance_atom ->
+        // player_species, one transaction) rather than calling that method, which opens its own
+        // lock/connection and would re-decide "already owned" against a DIFFERENT snapshot than the
+        // one already proven inside this transaction.
+        if (picks.Count > 0)
+        {
+            var player = GetPlayerUnlocked(db, playerId)!;
+            var thetaContent = FusionRpg.Core.Power.PowerTuningHub.Tuning.Curve.PinIndex;
+            var rollSeed = WorldSeed.DeriveRollSeed(player.WorldSeed, "species", output.SpeciesId);
+            var catalogRevision = GetCatalogRevision();
+
+            var compose = InstanceProducer.Compose(
+                outputSpeciesContainer!, GetAtom, GetAffix, DomainMembers, rollSeed, thetaContent,
+                FusionRpg.Core.Power.PowerTuningHub.Tuning, out var speciesInstance,
+                variant: null, InstanceOrigin.Drop, catalogRevision, forcedPicks: forcedPicks);
+            if (!compose.IsOk)
+                return (false, "picks.compose-failed." + compose.Reason, null);
+
+            var speciesInstanceId = Guid.NewGuid().ToString("N");
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    INSERT INTO effect_instance
+                      (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+                       theta_content, content_scale_milli)
+                    VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale);
+                    """;
+                cmd.Parameters.AddWithValue("$id", speciesInstanceId);
+                cmd.Parameters.AddWithValue("$c", speciesInstance!.ContainerId);
+                cmd.Parameters.AddWithValue("$seed", speciesInstance.RollSeed);
+                cmd.Parameters.AddWithValue("$rev", speciesInstance.CatalogRevision);
+                cmd.Parameters.AddWithValue("$utc", now);
+                cmd.Parameters.AddWithValue("$origin", speciesInstance.Origin.ToString().ToLowerInvariant());
+                cmd.Parameters.AddWithValue("$theta", speciesInstance.ThetaContent);
+                cmd.Parameters.AddWithValue("$scale", speciesInstance.ContentScaleMilli);
+                cmd.ExecuteNonQuery();
+            }
+
+            foreach (var a in speciesInstance.Atoms)
+            {
+                using var cmd = db.CreateCommand();
+                cmd.CommandText =
+                    "INSERT INTO effect_instance_atom (instance_id, seq, atom_id, values_json, power_json) " +
+                    "VALUES ($id, $seq, $atom, $vals, $power);";
+                cmd.Parameters.AddWithValue("$id", speciesInstanceId);
+                cmd.Parameters.AddWithValue("$seq", a.Seq);
+                cmd.Parameters.AddWithValue("$atom", a.AtomId);
+                cmd.Parameters.AddWithValue("$vals", a.ValuesJson);
+                cmd.Parameters.AddWithValue("$power", (object?)a.PowerJson ?? DBNull.Value);
+                cmd.ExecuteNonQuery();
+            }
+
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    INSERT INTO player_species (player_id, species_id, instance_id, materialised_utc, catalog_revision)
+                    VALUES ($p, $s, $i, $u, $r);
+                    """;
+                cmd.Parameters.AddWithValue("$p", playerId);
+                cmd.Parameters.AddWithValue("$s", output.SpeciesId);
+                cmd.Parameters.AddWithValue("$i", speciesInstanceId);
+                cmd.Parameters.AddWithValue("$u", now);
+                cmd.Parameters.AddWithValue("$r", speciesInstance.CatalogRevision);
+                cmd.ExecuteNonQuery();
+            }
+        }
 
         // Recipe discovery: first-ever success pays the output rarity's discovery bonus once.
         // The ledger append's return is the last word — a hand-edited discovery table must not
@@ -547,5 +697,7 @@ public sealed partial class RpgStore
         stored.Mode == request.Mode
         && stored.BaseInstanceId == request.BaseInstanceId
         && stored.PickedTraitId == request.PickedTraitId
-        && stored.SacrificeInstanceIds.SequenceEqual(request.SacrificeInstanceIds, StringComparer.Ordinal);
+        && stored.SacrificeInstanceIds.SequenceEqual(request.SacrificeInstanceIds, StringComparer.Ordinal)
+        && (stored.Picks ?? Array.Empty<FusionPick>())
+            .SequenceEqual(request.Picks ?? Array.Empty<FusionPick>());
 }

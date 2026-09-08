@@ -73,9 +73,10 @@ static class AuraPool
     /// <summary>Advance one lease: follow the anchor and pulse-emit via pure VfxAuraMath.</summary>
     public static void Pulse(
         Lease lease, Vector3 world, VfxAuraStyle style,
-        (byte R, byte G, byte B) rgb, float span, float dt)
+        (byte R, byte G, byte B) rgb, float span, float dt, int sortingOrder = -1)
     {
         if (!lease.Active || lease.Ps == null || lease.Go == null) return;
+        if (sortingOrder >= 0) TrySetSortingOrder(lease, sortingOrder);
         try { lease.Go.transform.position = world; } catch { return; }
         lease.PulseAccum += dt;
         if (lease.PulseAccum < VfxSustainedRules.AuraPulseSeconds) return;
@@ -104,14 +105,15 @@ static class AuraPool
     }
 
     /// <summary>
-    /// Marker mode: keep exactly one bobbing particle alive above the anchor (vfx-v3 M5).
+    /// Marker mode: layered badge above the anchor — soft halo + pulsing core (vfx-v3 M5).
     /// Energy slightly outlasts the pulse interval so the badge reads continuous.
     /// </summary>
     public static void PulseSingle(
         Lease lease, Vector3 world, (byte R, byte G, byte B) rgb,
-        float size, float yOffset, float dt)
+        float size, float yOffset, float dt, int sortingOrder = -1)
     {
         if (!lease.Active || lease.Ps == null || lease.Go == null) return;
+        if (sortingOrder >= 0) TrySetSortingOrder(lease, sortingOrder);
         try { lease.Go.transform.position = world; } catch { return; }
         lease.PulseAccum += dt;
         if (lease.PulseAccum < VfxSustainedRules.AuraPulseSeconds) return;
@@ -120,17 +122,29 @@ static class AuraPool
 
         var live = 0;
         try { live = lease.Ps.particleCount; } catch { }
-        if (live >= 2) return;
-        var bob = MathF.Sin(lease.Phase * 3f) * size * 0.15f;
-        var c32 = new Color32(rgb.R, rgb.G, rgb.B, 235);
+        if (live >= 4) return;
+
+        var bob = MathF.Sin(lease.Phase * 3f) * size * 0.1f;
+        var pulse = 1f + MathF.Sin(lease.Phase * 4.5f) * 0.07f;
+        var coreSize = size * pulse;
+        var pos = new Vector3(0f, yOffset + bob, 0f);
+        var energy = VfxSustainedRules.AuraPulseSeconds + 0.18f;
+        var core = new Color32(rgb.R, rgb.G, rgb.B, 240);
+        var halo = new Color32(rgb.R, rgb.G, rgb.B, 110);
         try
         {
-            lease.Ps.Emit(
-                new Vector3(0f, yOffset + bob, 0f),
-                Vector3.zero,
-                size,
-                VfxSustainedRules.AuraPulseSeconds + 0.15f,
-                c32);
+            lease.Ps.Emit(pos, Vector3.zero, coreSize * 1.55f, energy * 0.75f, halo);
+            lease.Ps.Emit(pos, Vector3.zero, coreSize, energy, core);
+        }
+        catch { }
+    }
+
+    static void TrySetSortingOrder(Lease lease, int sortingOrder)
+    {
+        try
+        {
+            var renderer = lease.Go!.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null) renderer.sortingOrder = sortingOrder;
         }
         catch { }
     }

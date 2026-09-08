@@ -126,6 +126,40 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["types"] });
     };
 
+    const onCommandersUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.commanders(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["commanders"] });
+    };
+
+    // species-build-todo.md T5.1 — real gap found and fixed while wiring the species-build panel:
+    // the SERVER has broadcast "AptitudesUpdated" since `demon-type-allocation` (module 5) shipped,
+    // but nothing on the web side ever subscribed to it (confirmed by direct grep across this whole
+    // assembly). Every `useAptitudes`/species-aptitudes query relied entirely on its own
+    // `refetchInterval` fallback, which is disabled whenever the hub IS connected — so a commander or
+    // species allocation change from ANOTHER client (e.g. the injector reloading it) never live-
+    // updated a connected web client. Mirrors `onCommandersUpdated`'s exact shape: player-scoped when
+    // the payload carries one, plus a bare invalidation so an unscoped broadcast still refreshes.
+    const onAptitudesUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["aptitudes"] });
+      void qc.invalidateQueries({ queryKey: ["speciesAptitudes"] });
+    };
+
+    // passive-tree-todo.md I3 — PassiveTreeEndpoints.cs already broadcasts "PassiveTreeUpdated" to
+    // both groups (I2), but T5.1's exact gap (a broadcast with no web subscriber, relying entirely
+    // on the disabled-while-connected refetchInterval) repeats for every new endpoint that skips this
+    // wiring. Same shape as `onAptitudesUpdated`.
+    const onPassiveTreeUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["passiveTree"] });
+    };
+
     c.on("Event", onEvent);
     c.on("EventBatch", onBatch);
     c.on("Health", onHealth);
@@ -137,6 +171,9 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("DemonsUpdated", onDemonsUpdated);
     c.on("SoulsUpdated", onSoulsUpdated);
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
+    c.on("CommandersUpdated", onCommandersUpdated);
+    c.on("AptitudesUpdated", onAptitudesUpdated);
+    c.on("PassiveTreeUpdated", onPassiveTreeUpdated);
 
     c.onreconnecting(() => setStatus("off"));
     c.onreconnected(() => {
@@ -169,6 +206,9 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("AlmanacTextUpdated", onAlmanacTextUpdated);
       c.off("DemonsUpdated", onDemonsUpdated);
       c.off("SoulsUpdated", onSoulsUpdated);
+      c.off("CommandersUpdated", onCommandersUpdated);
+      c.off("AptitudesUpdated", onAptitudesUpdated);
+      c.off("PassiveTreeUpdated", onPassiveTreeUpdated);
       void c.stop();
     };
   }, [qc]);

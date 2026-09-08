@@ -1,0 +1,26 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "A long, narrow corridor of polished obsidian where the air feels unnaturally still, broken only by the rhythmic, metallic slice of something heavy passing overhead.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Pendulum Gallery",
+  "reason": "A series of weighted, razor-edged blades swing from the ceiling in a predictable but lethal pattern across the only path forward.",
+  "roomId": "room.trap-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

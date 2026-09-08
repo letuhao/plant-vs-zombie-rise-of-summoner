@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "bands": {
+    "dangerBand": {
+      "members": ["shallow", "mid", "deep", "abyssal"],
+      "displayNames": { "shallow": "Shallow", "mid": "Middling", "deep": "Deep", "abyssal": "Abyssal" }
+    },
+    "depthBand": {
+      "members": ["short", "medium", "long"],
+      "displayNames": { "short": "Short", "medium": "Medium", "long": "Long" }
+    },
+    "widthBand": {
+      "members": ["narrow", "mid", "wide"],
+      "displayNames": { "narrow": "Narrow", "mid": "Middling", "wide": "Wide" }
+    },
+    "branchiness": {
+      "members": ["linear", "forked", "webbed"],
+      "displayNames": { "linear": "Linear", "forked": "Forked", "webbed": "Webbed" }
+    },
+    "density": {
+      "members": ["none", "sparse", "dense"],
+      "displayNames": { "none": "None", "sparse": "Sparse", "dense": "Dense" }
+    },
+    "hazardBand": {
+      "members": ["none", "light", "heavy"],
+      "displayNames": { "none": "None", "light": "Light", "heavy": "Heavy" }
+    },
+    "sightBand": {
+      "members": ["dim", "lit", "scouting"],
+      "displayNames": { "dim": "Dim", "lit": "Lit", "scouting": "Scouting" }
+    },
+    "countBand": {
+      "members": ["lone", "few", "several", "many"],
+      "displayNames": { "lone": "Lone", "few": "Few", "several": "Several", "many": "Many" }
+    },
+    "elementSpread": {
+      "members": ["mono", "dual", "rainbow"],
+      "displayNames": { "mono": "Single Element", "dual": "Dual Element", "rainbow": "Mixed Elements" }
+    },
+    "formation": {
+      "members": ["pack", "party", "boss"],
+      "displayNames": { "pack": "Pack", "party": "Party", "boss": "Boss" }
+    },
+    "eventKind": {
+      "members": ["curio", "encounter-event", "shrine", "trap", "bargain", "story"],
+      "displayNames": {
+        "curio": "Curio", "encounter-event": "Encounter", "shrine": "Shrine",
+        "trap": "Trap", "bargain": "Bargain", "story": "Story"
+      }
+    },
+    "outcomeOrdinal": {
+      "members": ["good", "mixed", "bad", "nothing"],
+      "displayNames": { "good": "Good", "mixed": "Mixed", "bad": "Bad", "nothing": "Nothing" }
+    },
+    "repeatScope": {
+      "members": ["per-delve", "per-domain", "once-per-player"],
+      "displayNames": { "per-delve": "Per Delve", "per-domain": "Per Domain", "once-per-player": "Once Ever" }
+    },
+    "entry": {
+      "members": ["once", "many"],
+      "displayNames": { "once": "Single Descent", "many": "Open Ground" }
+    },
+    "phasing": {
+      "members": ["none", "breakpoint", "escalating"],
+      "displayNames": { "none": "No Phases", "breakpoint": "One Breakpoint", "escalating": "Escalating" }
+    },
+    "questScope": {
+      "members": ["delve", "domain", "roster"],
+      "displayNames": { "delve": "This Delve", "domain": "This Domain", "roster": "Your Roster" }
+    },
+    "rewardBand": {
+      "members": ["modest", "fair", "rich"],
+      "displayNames": { "modest": "Modest", "fair": "Fair", "rich": "Rich" }
+    },
+    "deltaBand": {
+      "members": ["far-below", "below", "even", "above", "far-above"],
+      "displayNames": {
+        "far-below": "Far Below", "below": "Below", "even": "Even",
+        "above": "Above", "far-above": "Far Above"
+      }
+    },
+    "hpBand": {
+      "members": ["low", "half", "high"],
+      "displayNames": { "low": "Low", "half": "Half", "high": "High" }
+    },
+    "nerveStage": {
+      "members": ["unsettled", "shaken", "afflicted"],
+      "displayNames": { "unsettled": "Unsettled", "shaken": "Shaken", "afflicted": "Afflicted" }
+    }
+  }
+}

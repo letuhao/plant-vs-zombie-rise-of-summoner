@@ -1,6 +1,7 @@
 namespace FusionRpg.Core.Status;
 
-/// <summary>Register all 21 locked status ids — status-ssot.md §9.</summary>
+/// <summary>Register all 24 locked status ids — status-ssot.md §9 (21 -> 24, `delve-attrition` D2.19's
+/// `nerve.*` block, spec-delve-attrition.md §4).</summary>
 public static class StatusCatalogBootstrap
 {
     public static StatusCatalog CreateDefault()
@@ -56,6 +57,14 @@ public static class StatusCatalogBootstrap
         Register(catalog, "spark", StatusKind.Contagion, "overlay", StatusL2bCategory.Contagion, StatusStacking.Refresh, StatusPayloadKind.Spread, StatusPayloadKind.PulseHp);
         Register(catalog, "pact_mark", StatusKind.Contagion, "overlay", StatusL2bCategory.Contagion, StatusStacking.Refresh, StatusPayloadKind.Spread, StatusPayloadKind.PulseHp);
         Register(catalog, "spore", StatusKind.Contagion, "overlay", StatusL2bCategory.Contagion, StatusStacking.Refresh, StatusPayloadKind.Spread, StatusPayloadKind.PulseHp);
+
+        // 9.5 Nerve (P3, delve-attrition D2.19) -- the Darkest Dungeon affliction ladder, one id per
+        // `nerveStage` registry member (bands.v1.json), in threshold order. The live instance is a
+        // PROJECTION of the stack counter in party state (`DelveMemberState.NerveStacks`), never the
+        // counter itself -- `NervePolicy.Sync` keeps at most one of these three live per demon.
+        Register(catalog, "nerve.unsettled", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
+        Register(catalog, "nerve.shaken", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
+        Register(catalog, "nerve.afflicted", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
     }
 
     static void Register(

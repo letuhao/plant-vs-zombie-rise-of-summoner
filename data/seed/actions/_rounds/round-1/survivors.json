@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "candidateSetHash": "51a084013dd97bf32a06bf5d3d4a3d8934a3f767ad2d245c8b44a7cacd21a365",
+    "corpusHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "partition": "rounds",
+    "round": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "id": "action.family.cactus.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.cherry.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.chomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.corn.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.double.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.fruit.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.garlic.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.garlic.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.hypno.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.hypno.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.nut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.pea.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.pea.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.sunflower.001",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0001",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0003",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0004",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0005",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0006",
+      "promoted": true
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

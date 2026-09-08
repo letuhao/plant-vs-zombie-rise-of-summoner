@@ -1,0 +1,20 @@
+{
+  "climate": "dark",
+  "dispositionBase": "open",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
+  ],
+  "flavor": "A thick, oily fog clings to the floor, swirling around the base of a jagged obsidian monolith. From the shadows beyond the light, a rhythmic, wet breathing echoes, accompanied by the faint, rhythmic clinking of heavy iron chains.",
+  "hazardBand": "heavy",
+  "kind": "wild",
+  "name": "The Silt-Choked Reliquary",
+  "reason": "The party encounters a bound entity of shadow that offers forbidden knowledge in exchange for a piece of their vitality.",
+  "roomId": "room.wild-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

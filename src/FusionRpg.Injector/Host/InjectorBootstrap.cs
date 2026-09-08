@@ -48,6 +48,9 @@ public static class InjectorBootstrap
         try { Effects.EffectRuntime.Ensure(); }
         catch (Exception ex) { RpgHost.Log.Warning("EffectRuntime: " + ex.Message); }
 
+        try { Hud.ActorHudInvalidator.Install(); }
+        catch (Exception ex) { RpgHost.Log.Warning("ActorHudInvalidator: " + ex.Message); }
+
         SafePatchAll();
         RpgHost.Log.Info("FusionRpg injector loaded, game=" + RpgHost.GameProfileId + " server=" + RpgHost.ServerUrl + " cheats=web-only overlay-hud=on");
     }

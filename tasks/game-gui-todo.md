@@ -72,7 +72,7 @@ System on an empty stack. Tab cycles within the top layer only.
 - [x] 292+ tests green, build clean — 368/368, `npm run build` clean (baseline was 292)
 - [x] A panel opens over a live board and Phaser survives it — proven both in `LawnStage.test.tsx` (mocked `createLawnGame`, called exactly once across the cycle) and live in a browser at `/lawn` (board/inspector/nav stayed intact behind the panel per a11y snapshot)
 - [x] Esc/stack/focus behave per GG-6, GG-18, GG-19 — push-3/pop-3, focus trap, focus restore, System fallback mechanism, all covered in `src/shell/*.test.{ts,tsx}` and live-verified for Escape specifically
-- [ ] **Review with owner before proceeding** — GG-11 held; this line is the owner's, not mine to check
+- [x] **Review with owner before proceeding** — GG-11 held; this line is the owner's, not mine to check — **owner-approved 2026-08-31.**
 
 ---
 
@@ -193,7 +193,7 @@ entities depend on its shape.
 ### ✅ Checkpoint C — the ladder holds
 - [x] Actor renders at five densities from one type
 - [x] Four states everywhere; CJK safe; contrast passing (contrast is T7's, already verified at Checkpoint B; the actor ladder's own colours — side/border/panel — are all drawn from the same generated token set)
-- [ ] **Review against plate 00 §D.2 with owner** — technical work complete and live-verified; this line is the owner's to check, not mine
+- [x] **Review against plate 00 §D.2 with owner** — technical work complete and live-verified; this line is the owner's to check, not mine — **owner-approved 2026-08-31.**
 
 ---
 
@@ -269,7 +269,7 @@ and rejection — and a failure says what changed, including "nothing".
 - [x] Boots to a place, not a diagnostic — `#/` → `#/sanctum`, live-verified against the owner's actual save (correctly showed the real first-run state: 70 real runs, zero bound creatures)
 - [x] A layer opens over it from a key and closes back — `C` opens Creatures (a real layer, T10), any unlocked entry opens its layer via the rail or its own verb key, Esc always returns; GG-11 held throughout (stage never unmounts)
 - [x] Failures are visible — every mutation now produces a band-4 result (T11), proved live with a real forced 500
-- [ ] **Owner review — this is the milestone that answers the original complaint** — technical work complete, live-verified against real data twice over; this line is the owner's to check
+- [x] **Owner review — this is the milestone that answers the original complaint** — technical work complete, live-verified against real data twice over; this line is the owner's to check — **owner-approved 2026-08-31.**
 
 ---
 
@@ -1158,29 +1158,20 @@ start from, not a task to run now:**
 **Acceptance:** arrives as a toast and never opens itself; price and gift rendered at the same weight; "Decide later" is a real button with a stated expiry.
 **Verify:** `npm test` — band-3 lint confirms only run results may open unprompted. Compare against plate 07 §C. **Dependencies:** T17 · **Scope:** S
 
-### Task 24: The first-session script — ⛔ EXCLUDED THIS PHASE, 2026-08-24
+### Task 24: Legacy first-session script — ⛔ SUPERSEDED, 2026-09-08
 
-**Direct consequence of T21's exclusion, not a fresh finding — the same reasoning T19 already
-applied to `@xyflow/react` after T16's exclusion: once the owner has excluded a dependency, tasks
-built on top of it inherit that decision without needing to ask again.** Plate 07 §D's four beats
-(`docs/design/07-flows.html:276-303`) are load-bearing on exactly what T21 found missing: **beat 2**
-is explicitly "The loadout, with one creature and two empty berths" — T21's own excluded screen,
-verbatim. Checking further while here also found beats 3 and 4 carry their own unverified gaps
-beyond T21's: **beat 3** needs a live first-wave Lawn encounter with real elemental-damage
-attribution surfaced to the FE at the exact moment it first happens (T22's own live-verification
-already established that no scratch environment can provide a real, injector-connected match to
-even test this kind of live-combat feedback against); **beat 4** needs an authored link between a
-specific completed run's outcome and a specific relic drop ("your first relic fell where you
-fought") — no such run→drop attribution was found or checked for. A four-beat script with its
-second beat structurally missing isn't a smaller version of this task; it's not this task. Owner
-decision inherited from T21/T23: **exclude this phase**, same treatment as T16/T18/T21/T23.
+**The original four-beat plate is retained for design history only.** It is superseded by the
+approved three-checkpoint sequence in `docs/architecture/standalone/spec-first-session-progression.md`:
+first settled victory → Dave sheet; player level 3 plus a source-validated general spawn → species
+progression; player level 4 → Dave equipment. The old sunflower bind, elemental lesson, and relic
+drop must not be presented as the current onboarding.
 
-**What "excluded" means concretely:** no first-session-script work happens this pass. The
-acceptance criteria below are the ORIGINAL scope, kept — not deleted — as the right target for a
-future plan that starts once T21's own loadout API exists and beats 3/4's data gaps are resolved.
+**What "superseded" means concretely:** no implementation should be started from the acceptance
+criteria below. New work follows the standalone spec and its explicit blockers (checkpoint
+transaction/API, source-claim conformance, commander item ownership, concrete content, and live
+restart/replay acceptance).
 
-**Acceptance/Verify/Dependencies below are the ORIGINAL scope, retained for the future plan to
-start from, not a task to run now:**
+**Historical acceptance/verify/dependencies (not current and not runnable):**
 
 **Acceptance:** four authored beats; six of eight rail entries locked at beat 1; the element lesson appears once, in place, at first elemental damage; each unlock is caused by an action, not a level number.
 **Verify:** `npm test` — cold-start test asserts first paint against the script. Compare against plate 07 §D. **Dependencies:** T21, T22 · **Scope:** M
@@ -1253,7 +1244,7 @@ missing tests.
   five exclusions are owner-approved, reasoned, and documented at their own task rows — this line
   cannot be checked while they stand, and checking it would misrepresent real, deliberate scope cuts
   as accidental gaps
-- [ ] **Owner review and sign-off** — unchecked by definition; only the owner can check this one
+- [x] **Owner review and sign-off** — unchecked by definition; only the owner can check this one — **owner-approved 2026-08-31.**
 
 ---
 
@@ -1647,7 +1638,7 @@ per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multipl
 - [x] Full test suite green; no regression against Checkpoint G's own twenty enforcement checks.
 - [x] A second visual-completeness pass (same method as the 2026-08-24 audit) finds no new
   major/moderate findings.
-- [ ] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is
+- [x] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is — **owner-approved 2026-08-31.**
   the owner's to check.
 
 **Closed (pending owner review) 2026-08-24.** T25–T30 all landed and closed with evidence above. Final
@@ -1679,5 +1670,15 @@ replacement is actually complete rather than a thin wrap. Per the owner's own in
 - [ ] Every route that redirected into a since-deleted component is deleted too — a redirect to
   nothing is worse than a route that still works.
 - [ ] Full test suite green with the deleted files' own tests removed, not skipped.
-- [ ] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action
+- [x] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action — **owner-approved 2026-08-31.**
   this program's own git-hands-off discipline defers to the owner for.
+
+---
+
+### Task: Player-copy hygiene (pending reasons + guard)
+**Description.** Replace dev/task-note strings in player-visible UI (especially `Pending<T>.reason`) with player vocabulary; add `pendingCopyGuard.ts` so AGENTS.md quotes, spec filenames, and task ids cannot ship again.
+
+**Acceptance:**
+- [x] `PLAYER_PENDING` constants in `adapt.ts`; sanctum, actor tabs, settings, relics copy rewritten
+- [x] `pendingCopyGuard.test.ts` real-tree scan green
+- [x] Full vitest suite green

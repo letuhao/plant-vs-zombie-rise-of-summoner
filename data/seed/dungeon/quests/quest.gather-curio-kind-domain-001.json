@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "many",
+  "flavor": "The local archives are incomplete, lacking the resonant crystals that hum with the history of the fallen kingdom. Recovering these relics will allow the High Scholar to restore the city's ancestral memory.",
+  "name": "The Echoes of Aethelgard",
+  "objectiveTemplate": "gather-curio-kind",
+  "prereqRefs": [],
+  "questId": "quest.gather-curio-kind-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "modest",
+  "scope": "domain",
+  "targetRef": "curio"
+}

@@ -1,0 +1,26 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, circular chamber of polished white marble is dominated by a massive, suspended crystal lens. Beams of concentrated sunlight pierce through high, narrow slits in the ceiling, dancing across the floor in blinding, rhythmic strobes.",
+  "hazardBand": "light",
+  "kind": "trap",
+  "name": "The Prism of Refracted Truth",
+  "reason": "A triggered mechanism shifts the ceiling slits, focusing the sunlight into a searing, concentrated beam that tracks movement across the room.",
+  "roomId": "room.trap-light-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

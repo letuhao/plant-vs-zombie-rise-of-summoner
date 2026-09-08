@@ -2,14 +2,32 @@ using System.Text.Json;
 
 namespace FusionRpg.Core.Progression;
 
-public sealed record XpCurveParams(double First, double Step);
+/// <summary>
+/// XP ladder parameters. <c>long</c>, not <c>double</c> (CLAUDE.md numeric rule — XP is a persisted
+/// magnitude): the config carries whole numbers today and <see cref="ProgressionTuningLoader"/>
+/// rejects a fractional one rather than silently truncating it.
+/// </summary>
+public sealed record XpCurveParams(long First, long Step);
 
-public sealed record XpAwardsTuning(double Kill, double Defeat, double Mower, double PlantPlace, double ZombieSpawn);
+/// <summary>Award deltas in whole XP — same integer rule as <see cref="XpCurveParams"/>.</summary>
+public sealed record XpAwardsTuning(long Kill, long Defeat, long Mower, long PlantPlace, long ZombieSpawn)
+{
+    /// <summary>Dedicated unique-specimen lawn kill award. Zero keeps older tuning documents
+    /// compatible until the balance file opts into the dedicated source.</summary>
+    public long SpecimenLawnKill { get; init; }
+
+    /// <summary>Active-match milliseconds in one dedicated participation interval.</summary>
+    public long SpecimenBoundIntervalMs { get; init; }
+
+    /// <summary>Dedicated unique-specimen XP awarded per completed active interval.</summary>
+    public long SpecimenBoundIntervalXp { get; init; }
+}
 
 /// <summary>Progression balance surface (tunables-ssot.md T1) — RpgXpCurve/RpgXpAwards.</summary>
 public sealed record ProgressionTuning(
     int SchemaVersion, int Version,
     XpCurveParams PlantCurve, XpCurveParams ZombieCurve, XpCurveParams PlayerCurve,
+    XpCurveParams SpecimenCurve,
     XpAwardsTuning Awards);
 
 public sealed class ProgressionTuningRejection : Exception
@@ -41,19 +59,25 @@ public static class ProgressionTuningLoader
                 PlantCurve: Curve(curve, "plant"),
                 ZombieCurve: Curve(curve, "zombie"),
                 PlayerCurve: Curve(curve, "player"),
+                SpecimenCurve: Curve(curve, "specimen"),
                 Awards: new XpAwardsTuning(
-                    Kill: Double(awards, "kill"),
-                    Defeat: Double(awards, "defeat"),
-                    Mower: Double(awards, "mower"),
-                    PlantPlace: Double(awards, "plantPlace"),
-                    ZombieSpawn: Double(awards, "zombieSpawn")));
+                    Kill: Long(awards, "kill"),
+                    Defeat: Long(awards, "defeat"),
+                    Mower: Long(awards, "mower"),
+                    PlantPlace: Long(awards, "plantPlace"),
+                    ZombieSpawn: Long(awards, "zombieSpawn"))
+                {
+                    SpecimenLawnKill = OptionalPositiveLong(awards, "specimenLawnKill"),
+                    SpecimenBoundIntervalMs = OptionalPositiveLong(awards, "specimenBoundIntervalMs"),
+                    SpecimenBoundIntervalXp = OptionalPositiveLong(awards, "specimenBoundIntervalXp")
+                });
         }
     }
 
     static XpCurveParams Curve(JsonElement parent, string key)
     {
         var el = Obj(parent, key);
-        return new XpCurveParams(Double(el, "first"), Double(el, "step"));
+        return new XpCurveParams(Long(el, "first"), Long(el, "step"));
     }
 
     static JsonElement Obj(JsonElement parent, string key)
@@ -70,11 +94,33 @@ public static class ProgressionTuningLoader
         return v;
     }
 
-    static double Double(JsonElement parent, string key)
+    /// <summary>
+    /// A whole-number reader that accepts JSON's `80` and `80.0` alike but REFUSES `80.5`. XP is an
+    /// integer magnitude end to end (CLAUDE.md: `long` for any magnitude, never a persisted `double`),
+    /// so a fractional tuning value is a balance mistake to report, not a value to round away.
+    /// </summary>
+    static long Long(JsonElement parent, string key)
     {
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number)
             throw new ProgressionTuningRejection($"progression tuning: missing or non-number '{key}'");
-        return el.GetDouble();
+        if (el.TryGetInt64(out var exact)) return exact;
+
+        var raw = el.GetDouble();
+        if (double.IsNaN(raw) || double.IsInfinity(raw) || raw != Math.Floor(raw))
+            throw new ProgressionTuningRejection(
+                $"progression tuning: '{key}' = {raw} is not a whole number — XP is an integer magnitude");
+        if (raw < long.MinValue || raw > long.MaxValue)
+            throw new ProgressionTuningRejection($"progression tuning: '{key}' = {raw} is out of range for long");
+        return (long)raw;
+    }
+
+    static long OptionalPositiveLong(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out _)) return 0L;
+        var value = Long(parent, key);
+        if (value <= 0)
+            throw new ProgressionTuningRejection($"progression tuning: '{key}' must be positive");
+        return value;
     }
 }
 

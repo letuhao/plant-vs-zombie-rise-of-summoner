@@ -11,7 +11,20 @@
 
 Prefix: `effect-atom`. Module specs at `docs/architecture/effect-atom/spec-<module-id>.md`; plan and tasks at `tasks/effect-atom-plan.md` / `tasks/effect-atom-todo.md` (AGENTS.md parallel-programs convention).
 
+> **New module proposed 2026-08-30: [`derived-write-lawn`](effect-atom/spec-derived-write-lawn.md) — needs a `decisions.md` row, not yet approved.**
+> `stat.derived` is `RuntimeSupportMatrix(None, Full, None)` (`AtomKindRegistry.cs:149`) — E12 gave
+> **battle** a consumer; the **lawn has none**, so no aura can reach a lawn entity through this layer.
+> That is why five features (patron, stars, injuries, contracts, and now commander aptitudes) each grew
+> a private derived-write path, exactly as [actor-hub-ssot.md §6.1](actor-hub-ssot.md) predicted. The
+> spec **extends the already-built buff/debuff scope primitive** (`ScopeCompatibility` +
+> `BattlefieldOwnSideReactor`, shipped 2026-08-29) rather than adding a sixth path — `decisions.md`'s
+> own Buff/debuff row already names this wiring as "a separate, later task". The delivery half is
+> **already fixed and live-proven** (`EntityFinal.DiffersFrom`, 2026-08-30): a lawn executor's output
+> reaches Unity the day it exists, with no edit to `EntityApply`.
+
 **Why this is being specced now:** the [action](action-map.md) program needs a real container contract, and the owner chose to spec atoms first rather than depend on a placeholder (decision D1, 2026-08-22). That makes this program the critical path for the action architecture, and through it for the battle-timeline gate.
+
+> **The vocabulary this program owns has since been extended by two OTHER programs, per each one's own reviewed spec — not new Wave-8 modules of this one.** base-defense's `siege-construction` (decision 27, 2026-09-06) added the `Siege` attach point and `structure.place` kind; passive-tree's [`element-conversion`](passive-tree/spec-element-conversion.md) (D56, 2026-09-07) added the `Element` attach point and `element.convert` kind. Neither is listed in §13's own Wave 8 module table below (that table is this program's own closed E33–E41 batch) — `decisions.md`'s "Atom attach points" row is the live, authoritative count (9 attach points, 18 kinds as of 2026-09-07), and `effect-atom/atom-catalog-ssot.md` §2 is the per-kind detail table. Read those two, not this file's own module list, for the vocabulary's current shape.
 
 ---
 
@@ -51,7 +64,7 @@ Four parallel content systems sharing no vocabulary, and skills would have becom
 
 | id | Name | Owns | Depends on |
 |---|---|---|---|
-| **E6** | `instance-and-binding` | `effect_instance` / `effect_instance_atom` (frozen moment-2 rolls, `roll_seed`, power at roll time) and `effect_binding`, which replaces the logical `foundation_effect_grant` and absorbs today's `mods_json` grant blobs. Runtime state (ICD clocks, stacks, status instances) stays in session RAM — **no new durable runtime table**. | E5 |
+| **E6** | `instance-and-binding` | `effect_instance` / `effect_instance_atom` (frozen moment-2 rolls, `roll_seed`, power at roll time) and `effect_binding`, which replaces the logical `foundation_effect_grant` and absorbs today's `mods_json` grant blobs — **named 2026-09-01: `effect-pipeline` module 5 `mods-absorption`** is what carries out this absorption (`effect-pipeline-map.md`), so the promise here is no longer aspirational. Runtime state (ICD clocks, stacks, status instances) stays in session RAM — **no new durable runtime table**. | E5 |
 | **E13** | `runtime-form-benchmark` | The build-time benchmark the ideal explicitly refused to decide on paper: typed object graph versus flattened non-recursive encoding, **against real content**. Settled already: no dictionaries and no string comparison on the per-hit path. *(The no-recursion law was withdrawn — the 7 ns winner recurses.)* | E4, E2, E3 |
 | **E7** | `atom-compiler` | Binding → Foundation grant / damage rider / status apply. Compiles at load into the form E13 picks. **Server compiles and pushes compiled output**; the injector never holds content rows. | E6, E13, E1 |
 | **E8** | `content-hash` | **BUILT.** A hash over atom / container / container_atom / container_pool / curve / rarity rows — never instances. Sort-then-concatenate, columns length-prefixed, covered set held in a **versioned registry** (`contentHashSchemaVersion`, v1 = the six tables that exist). The stamp carries per-table digests so a version bump can still compare the tables both versions share. Its consumer today is the boot sweep's replay refusal; stamping into the report is **E12**'s, because a new stamped field *is* a golden diff. | E4, E5 |
@@ -112,6 +125,20 @@ game. Full task detail: [tasks/effect-atom-todo.md](../../tasks/effect-atom-todo
 | **E23** | `content-codegen` | `tools/ElementEnumGen`: verifies + generates `ElementTypeId`/its three companion switches from the roster, `TraitAtomSource.Shipped()` from migrated trait containers, and `EffectAtomCatalog` (replacing `EffectSeedCatalog`) from `data/seed/atoms/fx-*.json` via `AtomCompiler.Compile` + `AtomPushCodec.ToDef` (E19) — proven by a new execution-parity suite, not just DTO comparison. Closes all four values authored twice. | — |
 | **E24** | `validation-in-ci` | `AtomImporter --validate` runs `ContentValidation.Lint`/`Drift` and fails the process on a finding (Budget skipped — no ceiling data exists in the schema); `Server.Tests` and `E2E.Tests` join `ci.yml`, plus a general guard for the next unwired suite. | — |
 | **E25** | `compose-channel-cache` | Caches `AllCombatChannelIds` by reference to `ElementTable.Current` — no version counter needed, since `Use`/`UseScoped` always assign a new immutable instance. Closes the uncached 84-string rebuild on every compose and every status-payload channel check. | — |
+
+**Wave 6 spec files — retrospective, written 2026-09-03.** Wave 6 shipped in one day with no specs; its
+only record was [tasks/effect-atom-todo.md](../../tasks/effect-atom-todo.md). These six backfill the
+module list so every id in this map points at a spec. **They describe what shipped, not what to build.**
+
+| id | Spec | Records |
+|---|---|---|
+| **E20** | [effect-atom/spec-content-boot.md](effect-atom/spec-content-boot.md) | `LoadContentIntoRuntime`, its one server call site, the `deploy-play.ps1` import step, and the empty-store fallbacks |
+| **E21** | [effect-atom/spec-status-stat-applier.md](effect-atom/spec-status-stat-applier.md) | The two `EffectRuntime` calls, the `entity:` owner-key fix, and why the battle runtime still has no applier |
+| **E22** | [effect-atom/spec-channel-policy-reader.md](effect-atom/spec-channel-policy-reader.md) | `ChannelPolicyTable`, `DirectionOf` reading it first, the seed/import author path, and the three columns still unread |
+| **E23** | [effect-atom/spec-content-codegen.md](effect-atom/spec-content-codegen.md) | `tools/ElementEnumGen`'s five modes, the generated `EffectAtomCatalog`, the five repointed call sites, and the frozen oracle |
+| **E24** | [effect-atom/spec-validation-in-ci.md](effect-atom/spec-validation-in-ci.md) | `--validate` and `ValidationGate`, the two CI test-project lines, the general CI wiring guard — and that the gate itself still runs in no CI step |
+| **E25** | [effect-atom/spec-compose-channel-cache.md](effect-atom/spec-compose-channel-cache.md) | The reference-keyed cache slot, its 2026-08-25 `AsyncLocal` correction, and the 84 → 196 count change |
+
 
 ## 4. Dependency graph and build order
 
@@ -260,3 +287,167 @@ The closed vocabulary lives in [effect-atom/atom-catalog-ssot.md](effect-atom/at
 | 11 effect-shaped sites | **12** — `ContractPolicy` also carries magnitudes |
 
 It also found a schema-level error worth repeating here, because E4 would have inherited it: **the documented `channel` enum in `effect-data.md` is fiction.** Four of its values are cheat-document keys that bypass the modifier bag and cannot be reached by an effect at all; four real armour channels are missing from it. The true primary set is eight: `hp · maxHp · atk · defense · arm1 · arm1Max · arm2 · arm2Max`.
+
+---
+
+# Waves 7 and 8 — added 2026-09-03
+
+Ideal: [effect-atom-ideal.md](effect-atom-ideal.md) §W7 (the pool) and §W8 (capability). **Wave 7 fills
+the pool for capabilities that exist. Wave 8 adds capabilities that do not.** They are independent.
+
+## 11. What changed the shape of Wave 7 before it started
+
+Three corrections from the 2026-09-03 adversarial pass, each of which makes a module smaller or removes
+one. **Read these before the module table or the table looks arbitrary:**
+
+1. **The pool is buckets, not a cartesian** (§W7.9). An atom names a **pool** of channels; element, tier
+   and cell resolve at **layer 4**, per player, at roll time. The owner's four-layer model
+   (`effect-pipeline-ideal.md` §5) already said so. **This removed a 41,550-row emitter and replaced it
+   with a vocabulary.**
+2. **98 atom families are already authored** in `data/seed/items/affix-families/`, all 12 kinds
+   (§W7.7.1). E30 reconciles and references; it does not author from scratch.
+3. **`effect-pipeline` is approved with ten written specs** and owns the slot declaration, the resolver,
+   affix generation, binding production and the authoring run. **Wave 7 states the split rather than
+   deleting modules** (§W7.11.1) — the seam table there is normative.
+
+## 12. Modules — Wave 7 (E26–E32, plus the backfill and residual-sweep ids E42–E51)
+
+| # | Module | Owns | Model? | Depends on |
+|---|---|---|---|---|
+| **E26** | `runner-def-emit` | Emit a def per `RunnerEntry` from its `Params`, so the runner path is deliverable. Closes the gap `AtomRunner.cs:207-209` names in its own comment: *"the def for a runner atom is not emitted by anything yet."* Today any atom with a per-hit roll range, `capPerMatch`, `charges`, `everyHits`, `maxStacks`, or a non-legacy predicate **throws `unknown effect_id` at grant time** | No | — |
+| **E27** | `lawn-element-bind` | Pass species `elementPrimary`/`Secondary` through `InjectorCombatBridge` / `InjectorStatusBridge` into `StatContextFactory`, mirroring `BattleEngine.cs:36`. **Nothing in `src/` passes `elementTypes:` today**, so every lawn actor is `ActorElementTypes.Neutral` and **196 element-expanded channels are inert on the lawn** | No | — |
+| **E28** | `param-parity` | The declared-but-dropped and honestly-refused params: `resource.delta` over all 6 resources · `board.action` `damage` · `status.clear` to 21-status parity · `grid.clear` cell targeting · `spawn.entity` `count`/`atk` · `grid.spawn` `graveType` · `box.set` `cells[]`. Plus the `fx.set_dirt_box` value fix (authors `boxType: 1` = **Water**, named "dirt") | No | — |
+| **E29** | `kind-value-guard` | A registry-backed value check **per kind** — today `AtomKindRegistry.Validate` value-checks only `stat.modify` (G6), so `status: "wither"`, `currency: "souls"` or `gridItemType: 999` validates, compiles, reaches the executor, matches no case and does nothing forever. **Includes the `stat.derived` registered-channel check** `AtomRowValidator.cs:296` explicitly defers to *"G6's job"* — which never runs for it | No | — |
+| **E30** | `channel-pool` | **L2 — the missing layer.** The atom-side contract: what a channel **pool** is (a named, authored set of channels with a count and per-member weights), and how `params.channel` may name one instead of a concrete channel. **Also owns pricing a pooled atom**, which `CostFunction`'s `(kindId, channel)` key cannot do today. Reconciles with the 98 authored families | No | E28, E29 |
+| ~~E31~~ | ~~`affix-pool-narrowing`~~ | **WITHDRAWN** — it existed only to shrink a 41,550-id prompt. §W7.9 removed the multiplication that created it. Not a scope cut: its reason no longer exists | — | — |
+| **E42** | `units-correction` | Correct `definitions.md` §2's units row — `combat.power.*` / `combat.defense.*` / `combat.shield.*` are **flat game units**, not resolver points, proven by the item program 2026-08-22 and never applied. `DESIGN-GATE.md` makes that file win over every spec, so no downstream module can fix it by being right. **Prerequisite of E30 and E38**, both of which author magnitudes from it | No | — |
+| **E43** | `family-expand` | The families→atoms rule, **specced nowhere after W7.9 replaced its module**. Reads the 98 authored family definitions, emits **one row per (family, tier) ≈ 490** — element is a **pool reference**, not seven rows; cells are targets, not identities. Owns getting the folder swept and fixing the two CI gates its output would otherwise trip | No | E30, E42 |
+| **E44** | `power-sweep` | **Research work with a deliverable**, not a code module: the fitted coefficients E9 was always scheduled for, and D2's close. All 20 coefficients are flat at `CoeffMilli = 1000` today. **Owner, 2026-09-03: the gate stays but may be passed deliberately — *"we cannot avoid tuning in this game, so that is normal."*** Success is measurable: `marginal(x, A)` must differ by `A` for crit rate × crit damage, the element ring and shield layers — the test **both prior attempts failed** | No | E9 (built) |
+| **E45** | `derived-write-lawn` | **Gets a module id at last.** A 22 KB spec (2026-08-30) that appears in no map table — only as a pre-§1 callout saying it *"needs a `decisions.md` row, not yet approved."* Spec exists; the ADR does not | — | — |
+| **E46** | `player-content-boot` | ⛔ **Found by the Wave 6 backfill.** `AtomImporter` is invoked from exactly one place — `scripts/deploy-play.ps1:218`, a dev script — so **a player install boots on the code fallback with the whole content layer inert.** Everything Wave 7 and the action corpus generate would reach the owner's deploy and no player. Owns the install-time import, and making the fallback **visible** rather than indistinguishable from success | No | — |
+| **E47** | `validate-gate-ci` | ⛔ **Also from the backfill.** E24 shipped `--validate` and wired two test projects; **it never wired the validate step**, so the gate it is named for is hand-run only. Owns the CI step **and the finding policy it needs first** — at ~490 generated rows `orphan` fires per unreferenced atom, and a gate that fires 83,100 times on its first real run is one that gets commented out | No | — |
+| **E48** | `reader-map-derive` | ⛔ **From the 2026-09-03 residual sweep.** `ContentTableReaderGuardTests` asserts a **hand-typed 18-table list** (`:77-85`) plus six text assertions, not the property the todo claims — *"every table in `ContentHashRegistry.Current` has a reader."* Derive the check from the registry (`ContentHashRegistry.cs:369`, `IReadOnlyList<ContentHashTable>` over `CurrentSchemaVersion = 9` at `:37`) so a new table fails for the right reason. Claims the same trip-wire from `spec-channel-policy-reader.md`'s residuals | No | — |
+| **E49** | `battle-status-stat` | ⛔ **From the 2026-09-03 residual sweep.** E21 wired the lawn half only: `StatusRuntime.OnApplied` (`StatusRuntime.cs:118`) has exactly **two** subscribers in `src/`, both injector (`EffectRuntime.cs:69`, `Hud/ActorHudInvalidator.cs:25`), so `rally`/`expose`/`command`/`shatter` **change no stat in battle**. Subscribe battle's status runtime to the same `ToModifiers`/`SourceIdOf` pair through its own modifier bag. The mechanism is already Core-proven by `StatusStatApplierSeamTests` — this is two subscriptions, not a design | No | — |
+| **E50** | `effect-check` | ⛔ **From the 2026-09-03 residual sweep.** `ElementEnumGen` has an `--effect-emit` (`Program.cs:25`, undocumented — the header at `:7-11` lists four modes) and **no `--effect-check`**, so a *value-only* edit to an `fx-*.json` atom leaves `EffectAtomCatalog.Generated.cs` stale and fails nothing. Add the check, wire it into CI beside `DemonSpeciesGen --check` (`ci.yml:50`), and fix the usage header. **Sequences after E43 and E26**, which own the two content-shaped gates it would otherwise trip | No | E43, E26 |
+| **E51** | `channel-count-drift` | ⛔ **From the 2026-09-03 residual sweep.** Documentation, not code: every `84` generated-channel figure in this map, `tasks/effect-atom-todo.md` and `completeness-audit.md` predates derived-stats H.1 (2026-08-24), which took families to 28 — it is `28 × 7 = 196` today (`DerivedStatChannels.cs:348`). Replace the figure, point at the source, add the doc-drift assertion | No | — |
+| **E32** | `affix-import-path` | The chain that makes an authored affix loadable: `SeedContent.Affixes` · an `"affix"` case in `AtomSeedFile.TryKind` (a file with that kind is **refused** today) · `effects` in `SeedScanner.OwnedFolders` · a production caller for `UpsertAffix` (zero today). **Also the container-pool key**: `AtomSeedFile.cs:253` reads JSON key `"atom"` into `ContainerPoolRow.AffixId`, whose own doc says *"references an AffixRow, never a bare atom directly"*. Latent only because no shipped container has a `pool`, and **no test pins the key** | No | E30 |
+
+**Every Wave 7 module is model-free.** No token is spent in this wave.
+
+## 13. Modules — Wave 8 (E33–E41)
+
+Ideal §W8. **E33 is the only one the action corpus is blocked on**; the rest are capability breadth.
+
+| # | Module | Owns | Depends on |
+|---|---|---|---|
+| **E33** | `activation-edge` | Raise `OnActivate` on the lawn. It is in `AtomTriggers.All` and `TriggerCount = 8`, **absent from `EffectDtos.EffectTriggers`, and raised nowhere in the injector** — so it works in Battle and is inert on the lawn. *"The actor decided to act"* is the trigger an **action** runs on. Carries the `decisions.md` row-97 amendment (already landed): the lawn does not **queue or sequence** actions; a lawn action is **activated**, not scheduled | — |
+| **E34** | `trigger-vocabulary` | New host event families → atom triggers. `EffectEventAdapterCore.TryMap` maps exactly **five** today. Adds `onWave`, `onMatchStart`/`onMatchEnd`, `onSunCollect`, `onGridPlace`. `06-unsourced.md` / `07-effect-opportunities.md` already class `onWave` and `onMindControl` **PROBE** and `onHitLand` **NOT SHIPPED** — consume that, do not re-derive it | — |
+| **E35** | `match-modify` | A new kind **on a new attach point** (`Match`) — none of the five existing points is a match. `Board.config`: zombie HP/damage/speed/count multipliers, starting armor, plant/zombie modify bands, `waveInterval`, `conveyInterval`. `CheatActions.ApplyBoardConfig` already writes it, reachable only from cheat state. **The entire "curse this level" axis** | E34 |
+| **E36** | `wave-control` | Summon a wave, huge wave, set/freeze the wave timer. **Needs both halves** — a kind *and* E34's `onWave` | E34, E35 |
+| **E37** | `projectile-control` | `Bullet.Damage` on fired **and** spawned bullets, homing, type swap, `moveWay`. `spawn.entity` can create a bullet and **cannot say how hard it hits**; `DebugActions.SpawnBullet` already reads `damage`/`y`/`moveWay` | E28 |
+| **E38** | `entity-fields-12plus` | Primary channels **12+** — `takeDmgMultiplier` (the *"takes +X% damage"* knob), `theArmor`, `theSpeed`/`theOriginSpeed`, `attackSpeedAdder`, attack/produce countdowns, plant `theShieldHealth`, `theLevel`/`shootingLevel`. All injector-writable today. **The same channel-extension shape E16 already ran once** for 8 → 11 | E30 |
+| **E39** | `plant-side-status` | Widen `ExecApplyStatus`, which iterates `FindObjectsOfType<Zombie>()` only, so **half the board cannot be statused**. Battle's path is already ptr-generic — this is a lawn-only asymmetry, not a vocabulary change | E28 |
+| **E40** | `spawn-non-grid` | Pets, buckets, presents, coins, mowers. `grid.spawn` covers `GridItemType` only (12 values) | E28 |
+| **E41** | `ui-attach-point` | A new **read-only** attach point: show a number, flash a banner, toggle a health bar. There is no UI attach point of any kind. A HUD **shows** state, never owns it | — |
+
+## 14. Dependency graph and build order
+
+```
+WAVE 7  (all model-free)
+  E42 units-correction ─► (E30, E38 may author magnitudes)
+  E26 ─┐
+  E27 ─┼─ independent, any order
+  E28 ─┤
+  E29 ─┘
+       └─► E30 channel-pool ─┬─► E32 affix-import-path
+                              └─► E43 family-expand (also needs E42)
+
+WAVE 8
+  E33 activation-edge      (independent — the action corpus's only Wave 8 blocker)
+  E41 ui-attach-point      (independent)
+  E34 trigger-vocabulary ─► E35 match-modify ─► E36 wave-control
+  E28 ─► E37 · E39 · E40
+  E30 ─► E38
+```
+
+**Build order, and the reason for it:** `E26 · E27 · E28 · E29` first — four independent wiring fixes,
+each of which makes a currently-silent failure loud. Then `E30`, which needs E28's params to exist and
+E29's guard to refuse a bad pool. Then `E32`. **`E33` may run at any point and should run early**,
+because `A9 movement-actions` is blocked on it and nothing else is.
+
+## 15. Checkpoints
+
+- **✅ Checkpoint G — the silent failures are loud.** E26/E28/E29 land. A runner atom no longer throws at
+  grant time; a declared param either works or is refused at load; an unknown value in **any** kind is a
+  load-time refusal, not a silent no-op. **Proof: a planted violation of each fails a test.**
+- **✅ Checkpoint H — the element axis is live on the lawn.** E27 lands. A species with
+  `elementPrimary: "fire"` resolves non-`Neutral` in `CombatActorSnapshot` on the lawn. **⚠️ Coordinate:
+  this moves the visual baseline the open VFX blind-identity trials score against, and the open shield
+  live-proof reads the same `ResolveActor`. Run those before E27 or after — never straddling.**
+- **✅ Checkpoint I — one row, many outcomes.** E30 lands. **An atom that names a channel pool resolves
+  to a different concrete channel across two roll seeds and to the same one on replay**, and it prices
+  without a concrete channel. This is the checkpoint that proves the four-layer model, and it is the one
+  worth failing the wave over.
+- **✅ Checkpoint J — an authored affix is loadable.** E32 lands. A `"kind": "affix"` file under
+  `data/seed/effects/` imports, and a container `pool` referencing it rolls.
+- **✅ Checkpoint K — an action fires on the lawn.** E33 lands. `OnActivate` is raised, and a movement
+  action's payload applies. **Unblocks `A9`.**
+
+## 16. Cross-program hazards
+
+| Hazard | Detail |
+|---|---|
+| **effect-pipeline overlap** | §W7.11.1's seam table is normative. E30 owns the pool **contract**; modules 1+2 own the **slot declaration and resolver**. E30 must not implement a resolver |
+| **VFX / shield live proofs vs E27** | Both open, both read the element path E27 rewires. Sequence them |
+| **battle-timeline B25/B26 vs E27/E28** | B26 freezes shield + DoT behaviour while E27/E28 edit the same `EffectRuntime` drain chain, and **the injector is not built by CI**. This is `effect-atom-map.md` §6's own H1 hazard recurring |
+| **CI gates that fail on the first generated row** | `EffectAtomCatalogGeneratedTests` asserts exactly **16 ids**; `EffectCatalogExecutionParityTests` asserts `Assert.Empty(compiled.Runtime)` — which **E26 deliberately violates**; `ElementEnumGen` globs `fx-*.json` **AllDirectories**. Each needs a named change, not a rename to dodge it |
+| **`AtomImporter` staleness trap** | Reports *"nothing changed"* when only compiler **code** changed, because the hash covers seed data — and **E26 is exactly a compiler-code change** |
+| **Stale instances** | Any `catalog_revision` bump makes every previously rolled `effect_instance` unbindable (`StaleInstance`). Pre-existing for any content change; state it in the rollout note |
+| **`definitions.md` §2 units** | Still carries the row the item program corrected on 2026-08-22 (`combat.power.*` etc. are **flat game units**, not resolver points). `DESIGN-GATE.md` makes that file win over any spec, and **E30/E38 author magnitudes from it** |
+
+## 17. What stays out
+
+- **Sim runtime.** `stat.derived` and `shield.grant` stay `RuntimeState.None` — `SimEffectHost` has no
+  consumer, and *"flipping it on the strength of the other two would re-create the quarantine's cause."*
+- **Generation itself.** effect-pipeline owns atoms→affixes, binding production and the authoring run.
+- **Product-OUT surface.** `Time.timeScale`, plant-anywhere, free `SetPlant`, auto-collect, card/tool
+  cooldowns. **Several are policy, not backlog** — say which before designing against any of them.
+- **Host-side NOT SHIPPED.** Fog, scene weather, ice trail. Not an atom gap.
+- **Fusion / mix.** Host is CAPTURE-only — a joint gap, not an atom gap.
+
+## 18. Success criteria
+
+1. **Every kind refuses a bad value at load.** No silent no-op survives in any of the 12.
+2. **A pooled atom resolves, replays identically, and prices.** Checkpoint I.
+3. **The element axis is live on both runtimes**, not battle-only.
+4. **`OnActivate` fires on the lawn**, so an action is a thing that can happen there.
+5. **No module authored twice.** The seam table holds; no Wave 7 or 8 module reimplements an
+   effect-pipeline one.
+6. **Every generation-adjacent module ships `--dry-run` and a small `--count`** (§W7.10) — a full run is
+   an owner decision behind a quality gate, never a step a plan schedules.
+
+## 19. Filed by the party-dungeon program (2026-09-05, specs approved or in wave 3)
+
+Two rows the delve modules need from this program; each is one reviewed change here, consumed there.
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| `InstanceOrigin.Delve` | `party-dungeon/spec-event-deck.md` §5 | a new member so an event's frozen instance says where it came from | v1 reads `Drop` with the binding source (`delve:{delveId}`) carrying scope |
+| `Freeze` leaves count-unit channels unscaled | `party-dungeon/spec-unique-pipeline.md` §4 | `Instantiator.Freeze` (`Instantiator.cs:313-315`) applies `ContentScale.Apply` to every fixed value; `Apply(1, 4235)` is 4, and a `stat.derived` on `loadout.slots` (a count) must stay 1 — one guard reading the channel's `UnitClass`, tested by *"frozen at Θ 100, still 1"* | the unique build refuses `unique.slot-scaled` rather than ship five extra slots |
+| `status.clear` admitted on `OnActivate` | `party-dungeon/spec-supplies-and-objects.md` §3 | one trigger row in `AtomKindRegistry` (today `Events`-only, `AtomKindRegistry.cs:638-646`) so an antidote supply can fire | the supply validator refuses such a row at import (`consumable.trigger-not-allowed`) |
+
+## 20. Filed by the item program (2026-09-06)
+
+Two rows the item program's own `item-map.md` §3 has carried since 2026-09-03/04 (`X7`, `D28`) without
+ever landing here — verified 2026-09-06 that neither term, nor `container_kind`/`gem`/`combo`, nor a
+family-tags row, appears anywhere in this map, `docs/architecture/effect-atom/`, `tasks/effect-atom-todo.md`
+or `tasks/content-stack-todo.md`. Recording the ask was not the same as filing it; this section is the
+filing. A third row, a live production defect rather than a capability ask, was added the same day.
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| Five `container_kind` values (D27): `gem` · `set` · `charm` · `combo` · `consumable` | `item-map.md` §3 row `X7`, `spec-sockets.md:30` | `ContainerRow.cs:9-18` ships **seven** kinds (⚠ corrected 2026-09-06 — a seventh, `Enemy`, landed the same day via party-dungeon's D2.6, commit `50fcdf8`; unrelated to this ask) and none of these five. This program's own `spec-container-schema.md:22` still enumerates only six (not yet updated for `Enemy` either), and `:153` already names adding a kind as **"Ask first"** — this is that ask | 111 item-program seeds have no legal container home (70 `charm` + 41 `insert`); item modules 12, 13, 16, 18 and 21 all ship with this half deferred and refused |
+| Real family tags stamped into `AtomRow.TagsJson`, not provenance-only | `item-map.md` §3 row `D28`, cross-referenced from `spec-eligibility-tags.md` | `FamilyExpansion.cs:194-198` (E43, already shipped and closed) emits exactly `{generatedFrom, generator}` per row — confirmed in shipped output (`data/seed/atoms/generated/family-expand.g-attack.json`). The authored families' own `tags` (`offensive`/`elemental`/etc., `data/seed/items/affix-families/*.json`; **100** as of a same-day 11:55 commit `5864231`, up from 98 when this was first counted a few hours earlier) never reach the atom row at all | item module 8: every tag-gated content rule is inert. **Also, found while verifying this, and worth fixing in the same pass:** `effect-pipeline/spec-eligibility-tags.md:40-43` was written on the premise that E43 *already* does this ("E43 stamps them onto every emitted row") — that premise is false in shipped code, so effect-pipeline's own `AffixTags.cs` (`ep-8`, shipped) unions provenance keys only, and every rule keyed on a real family tag is silently inert today, independent of when this row lands |
+| `AtomImporter`/`SeedScanner` refuses the WHOLE batch on ONE unrecognised file, rather than skipping and reporting just that file | Found independently twice while verifying the item audit (a battle-side crash trace, a generation-corpus check), same day | Measured directly: `dotnet run --project tools/AtomImporter -- --check --validate` returns **`1 error(s) — the files were refused; nothing was imported`** off a single kind-less file (`data/seed/atoms/vocabulary.json`, a `passive-tree` artefact wrongly placed in this program's swept folder — filed separately at `passive-tree-map.md`'s own "Filed by" section, since that half is theirs to fix). This program's own robustness gap is independent of who causes the next misplaced file: fail one, not all | Today, right now, anyone running `--validate` against this seed tree gets a total import failure, not a partial one |
+
+

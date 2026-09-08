@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "entries": [
+    {
+      "id": "nerve.unsettled",
+      "stage": "unsettled",
+      "stat": {
+        "combat.accuracy.omni": { "increased": -0.10 },
+        "combat.dodge.omni": { "increased": -0.10 }
+      }
+    },
+    {
+      "id": "nerve.shaken",
+      "stage": "shaken",
+      "stat": {
+        "combat.accuracy.omni": { "increased": -0.20 },
+        "combat.dodge.omni": { "increased": -0.20 }
+      }
+    },
+    {
+      "id": "nerve.afflicted",
+      "stage": "afflicted",
+      "stat": {
+        "combat.accuracy.omni": { "increased": -0.35 },
+        "combat.dodge.omni": { "increased": -0.35 }
+      }
+    }
+  ]
+}

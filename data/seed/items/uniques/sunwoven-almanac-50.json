@@ -57,7 +57,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-002",
@@ -96,7 +97,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-003",
@@ -136,7 +138,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-004",
@@ -175,7 +178,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-005",
@@ -213,7 +217,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-006",
@@ -251,7 +256,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-007",
@@ -297,7 +303,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.sunwoven-almanac-50-008",
@@ -336,7 +343,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

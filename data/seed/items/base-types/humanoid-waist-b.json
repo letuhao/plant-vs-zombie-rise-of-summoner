@@ -33,7 +33,7 @@
         "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.overlapping-hitch",
       "flavorKey": "flavor.base.overlapping-hitch",
       "flavor": "Metal plates lapped across each other, interlocked like roof tiles. Cinches without biting, holds without complaint.",
@@ -104,10 +104,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.sunbloom",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.shingled-innertube",
       "flavorKey": "flavor.base.shingled-innertube",
       "flavor": "Rubber tube wrapped in overlapping metal scales, cushioned and covered. Flexes with every breath.",
@@ -144,7 +144,7 @@
         "family": "atom.sunbloom",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.articulated-winch",
       "flavorKey": "flavor.base.articulated-winch",
       "flavor": "Hinged segments of forged plate joined with precision. A tension harness built like a catapult's arm.",
@@ -181,7 +181,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.jointed-belt",
       "flavorKey": "flavor.base.jointed-belt",
       "flavor": "Metal scales sewn to a base, each scale pivoting on its neighbour. Moves like a real thing's ribs.",
@@ -215,10 +215,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.midas",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.netted-buckle",
       "flavorKey": "flavor.base.netted-buckle",
       "flavor": "A plate clasp latticed with apertures, all pattern and function. Holds light and shadow both.",
@@ -255,7 +255,7 @@
         "family": "atom.sunbloom",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.soldered-strap",
       "flavorKey": "flavor.base.soldered-strap",
       "flavor": "Steel seams joined by heat and joined again. What's made this way does not come apart.",
@@ -326,10 +326,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.sunbloom",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.ponderous-bungee",
       "flavorKey": "flavor.base.ponderous-bungee",
       "flavor": "Heavy rubber cord wrapped in steel plate that barely flexes. Constrains with all the give of stone.",
@@ -366,7 +366,7 @@
         "family": "atom.sunbloom",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.beaten-sash",
       "flavorKey": "flavor.base.beaten-sash",
       "flavor": "Strips of metal hammered flat and overlapped in a wide band. Each blow left marks, each mark a story.",
@@ -403,7 +403,7 @@
         "family": "atom.midas",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.galvanised-drawstring",
       "flavorKey": "flavor.base.galvanised-drawstring",
       "flavor": "Metal cord coated in zinc, the silver finish unmarked. Ties precise and never slips or frays.",
@@ -437,7 +437,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 2,

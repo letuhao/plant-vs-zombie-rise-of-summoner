@@ -53,6 +53,29 @@ public class BattleShieldTests
     }
 
     [Fact]
+    public void Guardian_share_deaths_keep_the_initiating_attacker_as_killer()
+    {
+        var report = BattleEngine.Resolve(new BattleSetup
+        {
+            WaveId = "guardian-attribution",
+            Squad = new[] { Actor("squad:0", "squad", level: 10) },
+            Wave = new[]
+            {
+                Actor("wave:0", "wave", level: 1, maxHp: 1),
+                Actor("wave:1", "wave", level: 1, maxHp: 1, traits: new[] { "guardian" })
+            }
+        }, 5);
+
+        var deaths = report.Events
+            .Where(e => e.Kind == BattleEventKinds.Die)
+            .ToDictionary(e => e.ActorKey);
+
+        Assert.Equal(2, deaths.Count);
+        Assert.Equal("squad:0", deaths["wave:0"].KillerActorKey);
+        Assert.Equal("squad:0", deaths["wave:1"].KillerActorKey);
+    }
+
+    [Fact]
     public void Timed_innate_shield_expires_by_rounds()
     {
         // 2500 ms → ceil = 3 round-ticks. Give both sides huge HP so the battle outlives it.

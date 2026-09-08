@@ -18,8 +18,15 @@ public sealed class UnlockTuningRejection : Exception
 /// coefficient of `P(Θ)`, never a private `f(level)`. The coefficient itself is an explicit
 /// placeholder ("pick 0.01, 0.1, or any number, rebalance later") — the rule is decided, the number
 /// is not.</para>
+///
+/// <para><b>A-U1 (spec-rung-semantics.md §3.3, 2026-09-03): <c>Cap</c> split into
+/// <see cref="HeldCap"/> and <see cref="RungCap"/>.</b> One field served two unrelated meanings —
+/// <c>action-unlock.v1.json</c>'s own `_meta` said so verbatim ("cap 10 is both the max held count and
+/// the rung ceiling — one number, two uses"). Splitting them at the SAME starting value is
+/// behaviour-neutral by construction (nothing reads differently today) and is what makes raising the
+/// rung ceiling alone — without also handing every player more held unlocks — possible later.</para>
 /// </summary>
-public sealed record UnlockTuning(int P1Milli, int DeltaMilli, int FloorMilli, int Cap, int DiscardTaxCoeffMilli);
+public sealed record UnlockTuning(int P1Milli, int DeltaMilli, int FloorMilli, int HeldCap, int RungCap, int DiscardTaxCoeffMilli);
 
 /// <summary>Pure parser for `data/tuning/action-unlock.v{n}.json` (tunables-ssot.md §7.2 — no file I/O
 /// here). `floorMilli = 0` is rejected here specifically: a zero floor lets the ratchet decay the
@@ -44,7 +51,8 @@ public static class UnlockTuningLoader
             var p1 = Int(root, "p1Milli");
             var delta = Int(root, "deltaMilli");
             var floor = Int(root, "floorMilli");
-            var cap = Int(root, "cap");
+            var heldCap = Int(root, "heldCap");
+            var rungCap = Int(root, "rungCap");
             var discardTaxCoeff = Int(root, "discardTaxCoeffMilli");
 
             if (p1 <= 0 || p1 > 1000)
@@ -57,12 +65,14 @@ public static class UnlockTuningLoader
                     "to a mathematical zero, which is a hard progression ceiling wearing a different hat)");
             if (floor > p1)
                 throw new UnlockTuningRejection($"action unlock tuning: floorMilli {floor} exceeds p1Milli {p1}");
-            if (cap < 1)
-                throw new UnlockTuningRejection($"action unlock tuning: cap {cap} must be >= 1");
+            if (heldCap < 1)
+                throw new UnlockTuningRejection($"action unlock tuning: heldCap {heldCap} must be >= 1");
+            if (rungCap < 1)
+                throw new UnlockTuningRejection($"action unlock tuning: rungCap {rungCap} must be >= 1");
             if (discardTaxCoeff <= 0)
                 throw new UnlockTuningRejection("action unlock tuning: discardTaxCoeffMilli must be > 0 — a free discard makes the ratchet's own retraction (never rewinds) meaningless as a brake");
 
-            return new UnlockTuning(p1, delta, floor, cap, discardTaxCoeff);
+            return new UnlockTuning(p1, delta, floor, heldCap, rungCap, discardTaxCoeff);
         }
     }
 

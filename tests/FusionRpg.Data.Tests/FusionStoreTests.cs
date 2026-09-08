@@ -199,7 +199,7 @@ public class FusionStoreTests : IDisposable
 
     static readonly FusionRpg.Core.Demons.Fusion.DemonRecipeDef Recipe =
         FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.All
-            .First(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Rare);
+            .First(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Cultivated);
 
     void BankrollFor(FusionRpg.Core.Demons.Fusion.FusionCost cost, string elementId)
     {
@@ -266,13 +266,15 @@ public class FusionStoreTests : IDisposable
     public void Promotion_gates_on_max_stars_and_runs_once()
     {
         var common = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Common && s.Acquisition != DemonAcquisition.CaptureOnly);
-        _store.AwardSouls(1, 5000, "seed", "promo-bank");
+            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        _store.AwardSouls(1, 50_000, "seed", "promo-bank");
         _store.AddDemonMaterials(1, new[]
         {
-            ("shard." + DemonRarity.Common.ToId(), 20L),
-            ("shard." + DemonRarity.Rare.ToId(), 10L), // promotion charges the NEW rarity's shards
-            ("essence." + common.ElementPrimary.ToElementId(), 20L)
+            ("shard." + DemonRarity.Chaff.ToId(), 200L),
+            // Promotion advances exactly one ordinal rung (seed-to-concrete T4.1,
+            // DemonRarityLadder.OneRungAbove) — Chaff(0) -> Sprout(1), not a jump to Cultivated.
+            ("shard." + DemonRarity.Sprout.ToId(), 100L), // promotion charges the NEW rarity's shards
+            ("essence." + common.ElementPrimary.ToElementId(), 200L)
         });
         var baseId = Mint(common.SpeciesId);
         string MintCommon() => Mint(common.SpeciesId);
@@ -281,9 +283,11 @@ public class FusionStoreTests : IDisposable
         Assert.Equal("promotion.not-ready", _store.ExecuteFusion(1, "promo-early", new FusionRequest(
             FusionModes.Promotion, baseId, Array.Empty<string>(), null), 1).Reason);
 
-        // Climb to the common cap (3★): 2+3+4 sacrifices.
+        // Climb to the common cap. Read the cap rather than hardcoding it: it moved 3 -> 6 on
+        // 2026-09-05 when MaxStar went to 10, and a literal here would need chasing every time.
+        var chaffCap = FusionRpg.Core.Demons.Fusion.StarPolicy.StarCap(DemonRarity.Chaff);
         var corr = 0;
-        for (var star = 1; star <= 3; star++)
+        for (var star = 1; star <= chaffCap; star++)
         {
             var fuel = Enumerable.Range(0, star + 1).Select(_ => MintCommon()).ToArray();
             var merge = _store.ExecuteFusion(1, "promo-merge-" + corr++, new FusionRequest(
@@ -295,10 +299,13 @@ public class FusionStoreTests : IDisposable
             FusionModes.Promotion, baseId, Array.Empty<string>(), null), seed: 9);
         Assert.True(ok, reason);
         var profile = outcome!.Base!.Profile;
-        Assert.Equal(DemonRarity.Rare.ToId(), profile.Rarity);
+        Assert.Equal(DemonRarity.Sprout.ToId(), profile.Rarity);
         Assert.True(profile.Promoted);
         Assert.Equal(0, profile.Star); // stars reset with the new, higher cap
-        Assert.Equal(2, profile.TraitIds.Count); // rare = 2 slots, first trait kept
+        // sprout is still slotsByRarity=1 (fusion.v1.json — slot growth happens at Cultivated,
+        // not every single-rung promotion), so trait count does NOT grow on this hop; the
+        // original trait is kept, not doubled.
+        Assert.Equal(1, profile.TraitIds.Count);
         Assert.Contains(_store.ListDemonLineage(baseId), l => l.Event == "promotion");
 
         // Once only.
@@ -312,17 +319,19 @@ public class FusionStoreTests : IDisposable
     public void Post_promotion_merges_demand_the_new_rarity_fuel()
     {
         var common = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Common && s.Acquisition != DemonAcquisition.CaptureOnly);
-        _store.AwardSouls(1, 9000, "seed", "postpromo-bank");
+            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        _store.AwardSouls(1, 90_000, "seed", "postpromo-bank");
         _store.AddDemonMaterials(1, new[]
         {
-            ("shard." + DemonRarity.Common.ToId(), 30L),
-            ("shard." + DemonRarity.Rare.ToId(), 30L),
-            ("essence." + common.ElementPrimary.ToElementId(), 30L)
+            ("shard." + DemonRarity.Chaff.ToId(), 300L),
+            // Promotion advances exactly one ordinal rung (T4.1) — Chaff -> Sprout, not Cultivated.
+            ("shard." + DemonRarity.Sprout.ToId(), 300L),
+            ("essence." + common.ElementPrimary.ToElementId(), 300L)
         });
         var baseId = Mint(common.SpeciesId);
         var corr = 0;
-        for (var star = 1; star <= 3; star++)
+        var chaffCap = FusionRpg.Core.Demons.Fusion.StarPolicy.StarCap(DemonRarity.Chaff);
+        for (var star = 1; star <= chaffCap; star++)
         {
             var fuel = Enumerable.Range(0, star + 1).Select(_ => Mint(common.SpeciesId)).ToArray();
             Assert.True(_store.ExecuteFusion(1, "pp-m-" + corr++, new FusionRequest(
@@ -331,7 +340,7 @@ public class FusionStoreTests : IDisposable
         Assert.True(_store.ExecuteFusion(1, "pp-promo", new FusionRequest(
             FusionModes.Promotion, baseId, Array.Empty<string>(), null), 2).Ok);
 
-        // The base is RARE now — common fuel must refuse; the demon outgrew its old band.
+        // The base is SPROUT now (one rung up from Chaff) — chaff fuel must refuse; the demon outgrew its old band.
         var commonFuel = new[] { Mint(common.SpeciesId), Mint(common.SpeciesId) };
         Assert.Equal("sacrifice.rarity", _store.ExecuteFusion(1, "pp-wrongfuel", new FusionRequest(
             FusionModes.StarMerge, baseId, commonFuel, null), 3).Reason);

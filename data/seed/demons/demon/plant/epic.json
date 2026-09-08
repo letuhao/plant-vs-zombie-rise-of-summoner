@@ -1,0 +1,88 @@
+{
+  "kind": "demon",
+  "_meta": {
+    "partition": "plant/epic"
+  },
+  "entries": [
+    {
+      "id": "cherrynut",
+      "nameKey": "demon.cherrynut",
+      "name": "樱桃坚果",
+      "gameTypeId": 1003,
+      "side": "plant",
+      "flavorInfo": "喜爱樱桃爆炸的坚果。\n\n韧性：4000\n特点：①免疫樱桃爆炸伤害。受到各类樱桃爆炸效果时回血200\n②死亡时释放樱桃炸弹效果\n融合配方：坚果\u002B樱桃炸弹",
+      "flavorIntroduce": null,
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 4000,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [
+          2,
+          3
+        ],
+        "children": []
+      }
+    },
+    {
+      "id": "pumpkin",
+      "nameKey": "demon.pumpkin",
+      "name": "南瓜",
+      "gameTypeId": 24,
+      "side": "plant",
+      "flavorInfo": "南瓜可以保护壳内的植物。\n\n韧性：4000\n特点：能防止爆炸樱桃产生溅射，融合后保留该特点\n融合优先级：低，且只能作为底座融合",
+      "flavorIntroduce": null,
+      "sunCost": 125,
+      "cooldownSec": 30,
+      "hp": 4000,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "parsed",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "wallnut",
+      "nameKey": "demon.wallnut",
+      "name": "坚果",
+      "gameTypeId": 3,
+      "side": "plant",
+      "flavorInfo": "坚果有坚硬的外壳，可以用于保护其他植物。\n\n韧性：4000\n特点：难度5以下能防止爆炸樱桃产生溅射，融合后保留该特点",
+      "flavorIntroduce": null,
+      "sunCost": 50,
+      "cooldownSec": 30,
+      "hp": 4000,
+      "attack": 0,
+      "armor": null,
+      "armorMax": null,
+      "coverage": {
+        "cost": "parsed",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": [
+          1003,
+          1004,
+          1012,
+          1048
+        ]
+      }
+    }
+  ]
+}

@@ -95,7 +95,8 @@
       "iconKey": "icon.unique.vest-of-the-ossuary",
       "flavorKey": "flavor.unique.vest-of-the-ossuary",
       "flavor": "Stitched from grave-linen and stiffened with what the linen used to hold.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-003",
@@ -133,7 +134,8 @@
       "iconKey": "icon.unique.mournvine",
       "flavorKey": "flavor.unique.mournvine",
       "flavor": "It grows toward whatever screamed last.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-004",
@@ -209,7 +211,8 @@
       "iconKey": "icon.unique.mask-of-the-wake",
       "flavorKey": "flavor.unique.mask-of-the-wake",
       "flavor": "Worn to the vigil, kept after everyone else went home.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-006",
@@ -250,7 +253,8 @@
       "iconKey": "icon.unique.blighted-taproot",
       "flavorKey": "flavor.unique.blighted-taproot",
       "flavor": "It doesn't grip the soil so much as remember what's buried in it.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-007",
@@ -288,7 +292,8 @@
       "iconKey": "icon.unique.bloodgarland",
       "flavorKey": "flavor.unique.bloodgarland",
       "flavor": "A wreath meant for a grave, repurposed for a body that isn't ready for one yet.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-008",
@@ -326,7 +331,140 @@
       "iconKey": "icon.unique.runner-of-the-barrow",
       "flavorKey": "flavor.unique.runner-of-the-barrow",
       "flavor": "Send it ahead. It already knows where the ground gives way.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
+    },
+    {
+      "id": "unique.charnel-bloom-70-009",
+      "nameKey": "unique.charnel-bloom-70-009",
+      "iconKey": "icon.unique.charnel-bloom-70-009",
+      "flavorKey": "flavor.unique.charnel-bloom-70-009",
+      "frame": "plant",
+      "powerAxis": "control",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Charneled Bloom",
+      "flavor": "A pulsating, violet petal that rhythmically constricts the air around it. Those caught in its scent find their limbs turning to heavy, unyielding wood.",
+      "baseType": "item.plant-pollen-a-012",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.savagery",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The bloom withers rapidly when exposed to intense, direct sunlight."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.charnel-bloom-70-010",
+      "nameKey": "unique.charnel-bloom-70-010",
+      "iconKey": "icon.unique.charnel-bloom-70-010",
+      "flavorKey": "flavor.unique.charnel-bloom-70-010",
+      "frame": "humanoid",
+      "powerAxis": "control",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Charnel Bloom",
+      "flavor": "A pulsing, fleshy orb that beats in rhythm with the heartbeat of those it ensnares. It whispers of eternal stillness to the frantic mind.",
+      "baseType": "item.humanoid-face-a-001",
+      "fixedAtoms": [
+        {
+          "family": "atom.ferocity",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The psychic weight of the bloom drains the user's own vitality to sustain its grip."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.charnel-bloom-70-011",
+      "nameKey": "unique.charnel-bloom-70-011",
+      "iconKey": "icon.unique.charnel-bloom-70-011",
+      "flavorKey": "flavor.unique.charnel-bloom-70-011",
+      "frame": "plant",
+      "powerAxis": "economy",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Gilded Thistle",
+      "flavor": "Every petal is a crystallized coin, blooming only when fed upon the wealth of the fallen. Its thorns drip with a liquid gold that intoxicates the greedy.",
+      "baseType": "item.plant-muzzle-a-011",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The bloom withers and loses its luster if it is not constantly replenished with precious metals."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "offensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.charnel-bloom-70-012",
+      "nameKey": "unique.charnel-bloom-70-012",
+      "iconKey": "icon.unique.charnel-bloom-70-012",
+      "flavorKey": "flavor.unique.charnel-bloom-70-012",
+      "frame": "humanoid",
+      "powerAxis": "economy",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Gilded Siphon",
+      "flavor": "A heavy, ornate buckler etched with veins of pure gold that pulse in rhythm with the market's ebb and flow. It seems to drink the very essence of prosperity from the air around it.",
+      "baseType": "item.humanoid-torso-a-012",
+      "fixedAtoms": [
+        {
+          "family": "atom.mending",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "medium"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The weight of accumulated wealth makes the wielder sluggish in the heat of battle."
+      },
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "signature"
+      ]
     }
   ]
 }

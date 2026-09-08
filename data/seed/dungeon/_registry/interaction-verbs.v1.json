@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "interactionVerbs": {
+    "open": { "decision": null },
+    "disarm": { "decision": null },
+    "pray": { "decision": null },
+    "loot": { "decision": null },
+    "destroy": { "decision": 12 },
+    "garrison": { "decision": 15 }
+  }
+}

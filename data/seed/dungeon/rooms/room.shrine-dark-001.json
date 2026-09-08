@@ -1,0 +1,26 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
+  ],
+  "flavor": "A thick, cloying incense of dried hemlock and old bone dust hangs in the airless chamber. In the center, a jagged altar of obsidian is stained with something darker than any candle wax, surrounded by hundreds of small, hand-carved effigies that seem to watch the doorway.",
+  "hazardBand": "heavy",
+  "kind": "shrine",
+  "name": "The Ossuary of Unspoken Vows",
+  "reason": "The party must perform a ritual of desecration or atonement to unlock the heavy iron gate on the far side.",
+  "roomId": "room.shrine-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

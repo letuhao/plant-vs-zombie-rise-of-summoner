@@ -32,12 +32,12 @@ public class UnlockStateTests
         public int NextPerMille() => throw new InvalidOperationException("rng consulted despite no free slot");
     }
 
-    static UnlockTuning TinyTuning() => new(P1Milli: 1000, DeltaMilli: 999, FloorMilli: 1, Cap: 2, DiscardTaxCoeffMilli: 100);
+    static UnlockTuning TinyTuning() => new(P1Milli: 1000, DeltaMilli: 999, FloorMilli: 1, HeldCap: 2, RungCap: 2, DiscardTaxCoeffMilli: 100);
 
     [Fact]
     public void ARollMissDoesNotAdvanceEarnCountOrTheHeldSet()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         var state = UnlockState.Empty();
 
         var outcome = state.TryAccept("skill.fireball", tuning, new AlwaysMiss());
@@ -51,7 +51,7 @@ public class UnlockStateTests
     [Fact]
     public void ASuccessfulRollAdvancesEarnCountAndRecordsItOnTheHeldUnlock()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         var state = UnlockState.Empty();
 
         var outcome = state.TryAccept("skill.fireball", tuning, new AlwaysHit());
@@ -104,7 +104,7 @@ public class UnlockStateTests
         // earnCount and held-count happen to move together while nothing is discarded -- T20 is
         // where they diverge. This test pins the CURRENT wiring: TryAccept reads UnlockLadder.Chance
         // off state.EarnCount, proven by a roll landing exactly at the earn-2 boundary.
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         var state = UnlockState.Empty();
         state.TryAccept("a", tuning, new AlwaysHit()); // earnCount -> 1
 
@@ -126,7 +126,7 @@ public class UnlockStateTests
     [Fact]
     public void TheHeldUnlocksRungIsDerivedFromItsStoredEarnCountNeverAResolvedColumn()
     {
-        var tuning = new UnlockTuning(P1Milli: 1000, DeltaMilli: 500, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 1000, DeltaMilli: 500, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         var state = UnlockState.Empty();
         for (var i = 0; i < 5; i++)
             state.TryAccept($"skill.{i}", tuning, new AlwaysHit());
@@ -135,15 +135,15 @@ public class UnlockStateTests
         {
             // HeldUnlock exposes exactly two fields; there is no third "rung" field for a caller to
             // read a stale value from -- the rung is always this recomputation.
-            var rung = UnlockLadder.Rung(held.EarnCountAtAcceptance, tuning);
-            Assert.Equal(held.EarnCountAtAcceptance, rung); // cap (10) not yet reached at 5 earns
+            var rung = UnlockLadder.EffectiveRung(held.EarnCountAtAcceptance, tuning);
+            Assert.Equal(held.EarnCountAtAcceptance, rung.Value); // rungCap (10) not yet reached at 5 earns
         }
     }
 
     [Fact]
     public void SameSeedSameSequenceProducesIdenticalOutcomesAcrossTwoIndependentRuns()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 5, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 5, RungCap: 5, DiscardTaxCoeffMilli: 100);
         var ids = new[] { "skill.a", "skill.b", "skill.c", "skill.d", "skill.e", "skill.f", "skill.g" };
 
         UnlockState Run()
@@ -169,7 +169,7 @@ public class UnlockStateTests
     [Fact]
     public void RestoringFromPersistedHeldRowsInAShuffledOrderProducesTheSameRungsRegardlessOfOrder()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         var rows = new[]
         {
             new HeldUnlock("skill.a", 1),
@@ -183,7 +183,7 @@ public class UnlockStateTests
         long RungSum(UnlockState s)
         {
             long sum = 0;
-            foreach (var h in s.Held) sum += UnlockLadder.Rung(h.EarnCountAtAcceptance, tuning);
+            foreach (var h in s.Held) sum += UnlockLadder.EffectiveRung(h.EarnCountAtAcceptance, tuning).Value;
             return sum;
         }
 

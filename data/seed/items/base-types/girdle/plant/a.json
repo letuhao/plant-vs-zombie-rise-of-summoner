@@ -30,10 +30,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-furrow",
       "flavorKey": "flavor.base.downy-furrow",
       "flavor": "Soft ridges that hold the light the way pollen does.",
@@ -104,10 +104,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.wispy-topsoil",
       "flavorKey": "flavor.base.wispy-topsoil",
       "flavor": "The thinnest edge where the soil keeps the living things alive.",
@@ -144,7 +144,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.dried-clod",
       "flavorKey": "flavor.base.dried-clod",
       "flavor": "Baked hard in the sun, cracking at the edges but still whole.",
@@ -179,10 +179,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.layered-sod",
       "flavorKey": "flavor.base.layered-sod",
       "flavor": "Turf and root all the way through, each layer holding the last.",
@@ -217,10 +217,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.crackling-tilth",
       "flavorKey": "flavor.base.crackling-tilth",
       "flavor": "Prepared ground, worked and ready; it speaks when you walk on it.",
@@ -254,10 +254,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.parched-hollow",
       "flavorKey": "flavor.base.parched-hollow",
       "flavor": "A pocket in the earth that held water once, now dry enough to whisper.",
@@ -291,10 +291,10 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.grooved-soil",
       "flavorKey": "flavor.base.grooved-soil",
       "flavor": "Channeled by years of rain and roots, each groove a record.",
@@ -366,10 +366,10 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.hoary-bed",
       "flavorKey": "flavor.base.hoary-bed",
       "flavor": "Aged grey with frost and age; a bed that has cradled seasons.",
@@ -404,7 +404,7 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -442,10 +442,10 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.gnarled-mound",
       "flavorKey": "flavor.base.gnarled-mound",
       "flavor": "Twisted by wind and weather into a shape only earth remembers.",

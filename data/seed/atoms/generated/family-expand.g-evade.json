@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.evd-flinch",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Startle Reflex T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-dodge",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-flinch",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Startle Reflex T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-dodge",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-flinch",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Startle Reflex T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-dodge",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-flinch",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Startle Reflex T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-dodge",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-flinch",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Startle Reflex T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-dodge",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-harden",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Tempered Hide T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-harden",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Tempered Hide T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-harden",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Tempered Hide T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-harden",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Tempered Hide T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-harden",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Tempered Hide T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-seal",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Sealing Sap T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist-damage",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 13,
+          "max": 27,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-seal",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Sealing Sap T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist-damage",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-seal",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Sealing Sap T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist-damage",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-seal",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Sealing Sap T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist-damage",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    },
+    {
+      "family": "atom.evd-seal",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Sealing Sap T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-crit-resist-damage",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-evade.json",
+        "generator": "E43",
+        "defensive": "1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+"""seedsmith.pipeline.run_ledger — the shared resume/append/reconcile/overwrite base every
+item-seedgen generator builds on (docs/architecture/item-seedgen/spec-generator-harness.md).
+
+Generalizes `adapters.items.setgen.run`'s own proven ~1,800-entry-scale ledger (atomic write,
+idempotent resume) and adds the one thing that ledger does not do: validate an existing entry's
+actual shape before trusting a "done" hit, so a corpus a hand edit broke out of band gets reconciled
+on the next run rather than silently skipped forever.
+
+**Deterministic by construction.** Nothing in this module makes a model/LLM call. `write_done`
+canonicalizes with `sort_keys=True` — `setgen/run.py`'s own `write_ledger` does not do this
+(confirmed by reading it directly), so two runs of THAT ledger are not guaranteed byte-identical.
+This module does not inherit that gap.
+"""
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Callable, Iterable
+
+
+@dataclass
+class RunLedger:
+    """One ledger file, one corpus. `path` is the caller's own choice — each generator module gets
+    its own ledger under `data/seed/items/_runs/<module-id>.ledger.json`, matching `setgen`'s own
+    convention (`set-charm-gen.ledger.json`)."""
+
+    path: Path
+
+    def read_done(self) -> "dict[str, dict]":
+        if not self.path.exists():
+            return {}
+        doc = json.loads(self.path.read_text(encoding="utf-8"))
+        return dict(doc.get("done") or {})
+
+    def write_done(self, done: "dict[str, dict]") -> Path:
+        """Atomic replace via temp-file-then-os.replace — a killed process leaves either the old
+        ledger or the new one, never half of one. `sort_keys=True` is load-bearing: it is what makes
+        two writes of an unchanged `done` dict byte-identical, which `setgen/run.py`'s own writer does
+        not guarantee (no `sort_keys` there)."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        payload = json.dumps(
+            {"schemaVersion": 1, "done": done}, ensure_ascii=False, sort_keys=True, indent=2,
+        ) + "\n"
+        handle, tmp_name = tempfile.mkstemp(dir=str(self.path.parent), suffix=".tmp")
+        try:
+            with os.fdopen(handle, "w", encoding="utf-8") as fh:
+                fh.write(payload)
+            os.replace(tmp_name, self.path)
+        except BaseException:
+            Path(tmp_name).unlink(missing_ok=True)
+            raise
+        return self.path
+
+    def mark_done(self, subject_id: str, entry: dict) -> None:
+        done = self.read_done()
+        done[subject_id] = entry
+        self.write_done(done)
+
+    def plan(
+        self,
+        subject_ids: Iterable[str],
+        is_valid: Callable[[str, dict], bool],
+    ) -> "list[str]":
+        """Returns exactly the subject ids needing work: never-attempted ones, AND ones whose ledger
+        row claims "done" but whose real, current shape (whatever `is_valid` actually checks — the
+        caller decides what "current" means: re-reading a corpus file, checking a stored hash, etc.)
+        fails validation. This is the reconcile half `setgen/run.py`'s own `plan_run` does not have —
+        it only ever checks "is there a ledger row", never "is the thing the row describes still
+        real." Order-preserving over `subject_ids` so a caller controls report/log ordering; this
+        function itself makes the same decision regardless of dict iteration order internally.
+        """
+        done = self.read_done()
+        needing_work: "list[str]" = []
+        for subject_id in subject_ids:
+            entry = done.get(subject_id)
+            if entry is None or not is_valid(subject_id, entry):
+                needing_work.append(subject_id)
+        return needing_work
+
+    def force(self, subject_ids: Iterable[str], scope: str) -> "list[str]":
+        """The explicit `--overwrite` path — bypasses `is_valid`/ledger state entirely for the named
+        ids. `scope` must be either `"ids"` (named ids only) or the literal `"all"` (every id in
+        `subject_ids`) — a bare, unscoped overwrite is refused rather than silently defaulting to
+        "all", per the harness's own boundary ("a typo'd --overwrite fails loudly")."""
+        ids = list(subject_ids)
+        if scope == "all":
+            return ids
+        if scope == "ids":
+            return ids
+        raise ValueError(f"force() scope must be 'ids' or the literal 'all', got {scope!r}")

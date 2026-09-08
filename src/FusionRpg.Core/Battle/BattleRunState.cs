@@ -1,10 +1,17 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Actions.Movement;
+using FusionRpg.Core.Actions.Unlock;
+using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.Battle.Siege;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
+using FusionRpg.Core.World.District;
 
 namespace FusionRpg.Core.Battle;
 
@@ -42,8 +49,19 @@ public static partial class BattleEngine
         /// envelope was designed to sidestep. `TargetSpecCompiler.Compile` and `PredicateCompiler.Always`
         /// are still the REAL compiler pieces, reused rather than re-guessed, for the two fields that
         /// have one.
+        ///
+        /// <para><b>battle-tempo `action-timing` (2026-09-05):</b> this field moved from `static
+        /// readonly` to an ordinary instance field, computed once per `BattleRunState` (i.e. once per
+        /// battle) rather than once per process — the ONLY change that made room for
+        /// <see cref="ActionTimingDerivation.DeriveBasicAttack"/> to read
+        /// <see cref="ActionTimingPolicy.Tuning"/> here: a `static readonly` initializer runs at first
+        /// type touch, which could race host startup's `ActionTimingPolicy.Configure` call and throw
+        /// for any caller that reaches `BattleRunState` first. An instance initializer runs during
+        /// `new BattleRunState(...)`, by which point every real caller (`BattleEngine.Resolve`) has
+        /// already configured tuning — the same timing every other `Policy`/`Tuning` read in this
+        /// class already assumes.</para>
         /// </summary>
-        static readonly CompiledAction BasicAttackCompiled = new(
+        readonly CompiledAction BasicAttackCompiled = new(
             ActionId: BasicAttackEnvelope.ActionId,
             Kind: ActionKind.Basic,
             Rung: 0,
@@ -53,7 +71,7 @@ public static partial class BattleEngine
             Grantable: false,
             DefaultAttackEligible: true,
             ContainerId: "",
-            Envelope: BasicAttackEnvelope,
+            Envelope: ActionTimingDerivation.DeriveBasicAttack(BasicAttackEnvelope, ActionTimingPolicy.Tuning),
             Targeting: TargetSpecCompiler.Compile(BasicAttackTargeting),
             MinRange: 0,
             MaxRange: int.MaxValue,
@@ -62,6 +80,13 @@ public static partial class BattleEngine
             Condition: PredicateCompiler.Always,
             Costs: Array.Empty<CompiledActionCost>(),
             Scopes: Array.Empty<ActionScopeRow>());
+
+        /// <summary>`battle-tempo` `timeline-dispatch` (D14): the one field of
+        /// <see cref="BasicAttackCompiled"/> the timeline-dispatch action phase needs (the derived
+        /// wind-up/recovery envelope) — exposed narrowly rather than widening the whole field's
+        /// visibility, since nothing else outside this class needs the rest of it (targeting, costs,
+        /// scopes) today.</summary>
+        public Timeline.ActionEnvelope BasicAttackEnvelopeCompiled => BasicAttackCompiled.Envelope;
 
         public readonly List<ActorState> Actors;
         public readonly Dictionary<string, ActorState> ByKey;
@@ -75,6 +100,17 @@ public static partial class BattleEngine
         public readonly SeededRng InitiativeRng;
         public readonly ICombatRng CritRng;
         public readonly SeededRng EssenceRng;
+        public readonly SeededRng RidersRng;
+
+        /// <summary>D4.6 (spec-wild-room.md §5): `act.capture`'s own stream, "the battle's own seed,
+        /// never a second RNG" — one line beside `EssenceRng`/`RidersRng`, same reasoning: capture's
+        /// content (seal tiers, status bonuses) must not butterfly any other system's rolls.</summary>
+        public readonly SeededRng CaptureRng;
+
+        /// <summary>Wave E1: riders decide their own chance on <see cref="RidersRng"/>, so the
+        /// evaluator gets a scripted 0.0 rather than a second roll. Same object and same reasoning as
+        /// the scripted setup-status path.</summary>
+        static readonly FixedStatusRng RiderApplyRng = new(0.0);
         public readonly BattleStatusRng StatusRng;
         public readonly DateTimeOffset T0;
         public readonly List<BattleEventRec> Events = new();
@@ -86,24 +122,169 @@ public static partial class BattleEngine
         /// wiring here when they arrive.</summary>
         public readonly Timeline.CooldownLedger Cooldowns = new();
 
+        /// <summary>D4.6 (spec-wild-room.md §5): "each failed attempt on the same target shifts [the
+        /// delta band] toward `far-above`… kept in a per-battle `CaptureAttempts` ledger beside
+        /// `CooldownLedger`." Keyed on the target alone (`attempts(target)` in the spec's own
+        /// formula takes one argument) — `CooldownLedger`'s own compound actor×slot key is a
+        /// different shape for a different question, not a template here.</summary>
+        public readonly Dictionary<string, int> CaptureAttempts = new(StringComparer.Ordinal);
+
+        /// <summary>`battle-tempo` `reaction-lane` RL2: one registry per battle, mirroring
+        /// `Cooldowns`' own "fresh per battle, not per actor construction elsewhere" shape. Reuses
+        /// `LawnActorResourcePools` verbatim rather than a near-duplicate type — its own mechanism
+        /// (a `Dictionary&lt;ptr, ActorResourcePools&gt;`, lazily filled, full at first access) carries
+        /// no lawn-specific logic despite the name; a battle actor is exactly the second consumer its
+        /// own doc comment already anticipates ("Unity-free by construction"). No faction branch: a
+        /// `wave` actor gets a pool exactly like a `squad` actor does — resource-hub-ssot.md's own
+        /// rule ("one shared set... faction difference is a display label, never a branch").</summary>
+        public readonly LawnActorResourcePools ResourcePools = new();
+
+        /// <summary>A19 (spec-action-costs-cooldowns-adoption.md T56.1): whichever tick the caller
+        /// currently considers "now" — `BasicAttack.cs`'s functions and `TimelineDispatch`'s
+        /// `RunTimelineActionPhase` each compute a tick locally with no single shared read `CostLedger`
+        /// (a real, previously-unbuilt dependency) can point its own `Func&lt;long&gt; nowTick` at, so
+        /// every call site that already threads a tick locally also assigns it here first. Mutable by
+        /// design — this is a live pointer into "what tick is it right now for this battle", not a
+        /// snapshot; unlike `T0` (fixed at construction), it moves every time a caller advances.</summary>
+        public long NowTick;
+
+        /// <summary>A19 (T56.1): the real, first production `CostLedger` in this repo — grep-confirmed
+        /// zero prior construction sites anywhere in `src/`. Built once here, not per-call, mirroring
+        /// `Cooldowns`/`ResourcePools`' own "one instance for the whole battle" shape. `costsByActionId`
+        /// adapts `CompiledAction.Costs` (`CompiledActionCost`) into `ActionCostRow` — structurally
+        /// compatible fields, different types, because the compiled and authored shapes serve different
+        /// callers (`ActionCostRow` also carries `AllowLethal`, which a compiled cost's own consumer
+        /// never needed until now). Empty when `actionCatalog` is null — vacuously affordable, the same
+        /// "an action with no cost table is unaffected" additive discipline this program uses everywhere.</summary>
+        public readonly CostLedger CostLedger;
+
+        /// <summary>
+        /// base-defense `siege-ai` (2026-09-07, session 5, owner-authorized): a real, live consumer for
+        /// `SiegeAiIntentSource` — built once, here, for the whole battle (never per-call, matching
+        /// `Cooldowns`/`CostLedger`'s own "one instance" shape, and the reason `RetargetLedger` below
+        /// gets real accumulating state rather than resetting every call). Null unless the caller opts
+        /// in via `aiTuning` (every existing caller of `Resolve`/this constructor omits it, so this is
+        /// byte-identical to today for every battle that does not ask for it). `DeclareBasicAttack`'s own
+        /// fallback tries this SECOND, after any explicit `intentSource` override and BEFORE
+        /// `StubIntentSource` — an actor gets the smarter, scored decision the moment its battle opts in,
+        /// with zero change to any battle that doesn't.
+        /// </summary>
+        public readonly IIntentSource? DefaultAiIntentSource;
+
+        /// <summary>
+        /// B38 — one <see cref="Timeline.ActorTurnMachine"/> per actor, for the whole battle.
+        ///
+        /// <para>Before this the per-actor FSM existed and was fully tested but was never driven by a
+        /// real battle: `ActorTurnMachine` appeared nowhere in the engine. An interactive dwell needs a
+        /// `Ready` state to occupy, so B20/B21/B22 had nothing to attach to. These machines are what
+        /// give them one.</para>
+        ///
+        /// <para><b>Pure bookkeeping under `classic-round`</b>: with zero wind-up and zero recovery the
+        /// cycle collapses to Charging → Ready → Committed → Resolving → Recovering → Charging around
+        /// the same attack, in the same order, drawing the same RNG. Byte-identical by construction.</para>
+        /// </summary>
+        public readonly Dictionary<string, Timeline.ActorTurnMachine> TurnMachines = new(StringComparer.Ordinal);
+
+        public Timeline.ActorTurnMachine MachineFor(string actorKey) =>
+            TurnMachines.TryGetValue(actorKey, out var m)
+                ? m
+                : TurnMachines[actorKey] = new Timeline.ActorTurnMachine(actorKey);
+
         /// <summary>A18e (spec-battle-live-stat-modifiers.md §1): one instance per battle, same
         /// lifetime as Cooldowns/Shields above.</summary>
         public readonly BattleStatModifierLedger Ledger = new();
 
+        /// <summary>aura-skill T4: the recompose seam for `Derived` (`combat.*`) channels — one
+        /// instance per battle, same lifetime as <see cref="Ledger"/>. Nothing adds to this yet (no
+        /// aura wiring lands before T9); it exists so a later, real toggle event has a call to make
+        /// rather than a mechanism to invent under time pressure.</summary>
+        public readonly BattleDerivedModifierLedger DerivedLedger = new();
+
+        /// <summary>aura-skill T4: the explicit recompose entry point — deliberately not called
+        /// anywhere in `Resolve`'s own loop. "Explicit, never implicit per-tick" (the task's own
+        /// acceptance bar) means a real trigger (an aura toggling on/off, T13) calls this at the
+        /// moment it happens; nothing calls it on a schedule.</summary>
+        public void RecomposeDerived(string actorKey)
+        {
+            var actor = ByKey[actorKey];
+            DerivedLedger.Recompose(actorKey, actor.BaseDerived, actor.Derived);
+        }
+
+        /// <summary>passive-tree G2 (spec-mechanism-wiring.md §4.2): the per-round half of the recompose
+        /// seam. `RecomposeDerived` above stays explicit/per-actor for a live toggle event (aura-skill
+        /// T13's own job); this is the one new call site `BattleEngine.Resolve`'s round loop makes, once
+        /// per actor, at the start of every `RoundEventKind` — so a mechanism that changed
+        /// `DerivedLedger` after construction (a status applied mid-battle, a gate quantity crossing a
+        /// threshold) is composed into `Derived` before the round's regen/initiative/attacks read it,
+        /// rather than only ever being visible in the NEXT battle. Provably safe to call every round
+        /// even when nothing changed: `BattleDerivedModifierLedger.Recompose` always rebuilds from
+        /// `BaseDerived`, never from `Derived`'s own prior value, so repeated calls with an unchanged
+        /// ledger are byte-identical no-ops (`BattleDerivedModifierLedgerTests.An_empty_ledger_recomposes_nothing`).</summary>
+        public void RecomposeDerivedForAllActors()
+        {
+            foreach (var a in Actors)
+                RecomposeDerived(a.Setup.Key);
+        }
+
         readonly List<ShieldEventRec> _shieldEventScratch = new();
         readonly Dictionary<string, IReadOnlyList<CompiledAction>> _heldActions = new(StringComparer.Ordinal);
 
+        /// <summary>aura-skill T3 (audit D3): equipped-action ids that could not be resolved against
+        /// the supplied <see cref="ActionCatalog"/> — the actor degrades to the basic-attack fallback
+        /// instead of failing the whole battle. Empty on every setup a golden has ever blessed.</summary>
+        public readonly List<string> Warnings = new();
+
+        /// <summary>
+        /// base-defense siege-board (spec-siege-board.md §4): null for every caller that does not
+        /// supply one, which is every caller until siege-resolver. This is what keeps the module
+        /// golden-free — a field nothing sets changes no serialized bytes and no code path.
+        /// </summary>
+        readonly BoardState? _board;
+
+        /// <summary>base-defense `siege-positions` §3: null for every caller without a board (every
+        /// caller until this module wires siege battles through one) — the value `BattleEngine.Resolve`'s
+        /// round loop passes to `Status.Tick`'s own optional trailing `board` parameter.</summary>
+        public Combat.BoardSnapshot? CombatBoardSnapshot { get; }
+
+        /// <summary>A22 (spec-action-resolution-by-category.md §1): the constructor already received
+        /// this — captured only inside the `rungOf` closure below (`:493`), never kept as a field.
+        /// `ApplyBasicAttack` needs it too, to resolve `envelope.ActionId`'s own `Category` and branch
+        /// resolution shape — the reason this module exists at all.</summary>
+        public ActionCatalog? ActionCatalog { get; }
+
+        /// <summary>`ActionStockCommit`'s own ledger (spec-siege-construction.md §11 / action-program's
+        /// "ActionStockCommit.TryCommit has ZERO production callers" bug): defaults to
+        /// <see cref="NoStockLedger"/>, matching `ConstructionActivation.Fire`'s identical
+        /// "unwired means safe, not permissive" posture — every existing caller (no `stockLedger`
+        /// argument) is unaffected, since every action shipped today compiles zero `StockDemands`.
+        /// </summary>
+        public IStockLedger StockLedger { get; }
+
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
-            IContainerEffectResolver? containerResolver = null)
+            IContainerEffectResolver? containerResolver = null, BoardState? board = null,
+            Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null,
+            IReadOnlyList<RunnerBinding>? runnerBindings = null,
+            IReadOnlySet<string>? containersWithRunnerCoverage = null,
+            Func<string, IReadOnlyList<string>>? equipEffectIdsFor = null,
+            AiTuning? aiTuning = null, IStockLedger? stockLedger = null, Func<long, int>? roundOf = null)
         {
             Trace = trace;
+            _board = board;
+            ActionCatalog = actionCatalog;
+            StockLedger = stockLedger ?? NoStockLedger.Instance;
 
             InitiativeRng = SeededRng.DeriveStream(seed, "initiative");
             ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit"));
             if (trace != null) critRng = trace.WrapCombat("crit", critRng);
             CritRng = critRng;
             EssenceRng = SeededRng.DeriveStream(seed, "essence");
+            // Wave E1: riders draw from their OWN stream, never from "status". The status stream is
+            // already the contagion-spread stream, and sharing it would make every rider content
+            // change a full-battle butterfly -- the audit fix this wave's spec names explicitly, and
+            // the same one-system-one-stream rule `essence` above already follows.
+            RidersRng = SeededRng.DeriveStream(seed, "riders");
+            CaptureRng = SeededRng.DeriveStream(seed, "capture");
             StatusRng = new BattleStatusRng(seed, trace);
             Calculator = new OverlayCombatCalculator();
 
@@ -119,6 +300,16 @@ public static partial class BattleEngine
             // composed derived profiles; the clock is the synthetic round clock.
             Host = new BattleEffectHost(key => ByKey.TryGetValue(key, out var a) ? a : null, seed);
             T0 = Host.Clock.UtcNow;
+
+            // A25 (battle-runner-path-integration): built here, inside the constructor, rather than
+            // via `onEffectHostReady` -- that callback only receives `Host`, and the Secondary
+            // runner's own `nowMs` reader must close over THIS instance's own `NowTick` field (a
+            // frozen clock silently breaks every ICD gate, see UseRunner's own doc comment). `this` is
+            // valid throughout a constructor body, so the closure below is correct despite `NowTick`
+            // not yet having a meaningful value at construction time -- it is read lazily, per event,
+            // never at wiring time.
+            if (runnerBindings is { Count: > 0 })
+                Host.UseRunner(runnerBindings, seed, () => NowTick);
             Status = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(),
                 (ptr, attackerLess) => attackerLess || ptr == null || !ByKey.TryGetValue(ptr, out var a)
                     ? ActorDerivedSnapshot.AttackerLess()
@@ -139,6 +330,21 @@ public static partial class BattleEngine
             // comment) — wired here, to the SAME gate ordinary attacks already absorb through, so a
             // granted shield and a swing-dealt hit share one shield stack rather than two.
             Host.Bag.ShieldGate = ShieldGate;
+
+            // base-defense `siege-positions` §2-3: assigned once, only for a battle that HAS a board
+            // (whoever constructs the BoardState is responsible for having placed actors onto it
+            // before calling BattleEngine.Resolve — this module does not place them itself, see
+            // Board/Placement.cs's own doc comment for why). `Host.Bag.BoardSnapshot` is left at its
+            // default `BoardSnapshot.Empty` otherwise, which is every existing caller's exact current
+            // behaviour (this line does not even run for them). `CombatBoardSnapshot` is the SAME
+            // value but genuinely nullable (Empty is not null) — §3's `Status.Tick` needs true `null`
+            // for "no board", not an empty-but-non-null snapshot, to stay byte-identical for every
+            // existing battle.
+            if (_board is not null)
+            {
+                CombatBoardSnapshot = Board.BoardSnapshotAdapter.ToCombatSnapshot(this);
+                Host.Bag.BoardSnapshot = CombatBoardSnapshot;
+            }
 
             // A18c (spec-battle-resource-shield-grants.md §1): the SAME shape as ShieldGate above,
             // one line down. `EffectBag.cs:439`'s DoT/contagion piggyback (StatusEffectBridge.TryApplyFromGrant,
@@ -164,11 +370,21 @@ public static partial class BattleEngine
             // here too -- just returning the wider interface.
             Host.Ledger = Ledger;
             Host.ResolveStatTarget = key => ByKey.TryGetValue(key, out var a) ? a : null;
+
+            // G2 (spec-mechanism-wiring.md §4.2): forwards straight to DerivedLedger.Add, the one
+            // write this ledger has — a live mid-battle trigger (T13's still-unbuilt aura toggle, or a
+            // test simulating one) calls this through `onEffectHostReady` the same way every other
+            // Battle-adoption trigger reaches this host's own collaborators.
+            Host.AddDerivedContribution = DerivedLedger.Add;
             onEffectHostReady?.Invoke(Host);
 
-            PulseSink = new BattlePulseSink((hostPtr, amount, effectId) =>
+            // passive-tree G1 (spec-gate-counters.md §7 P1, R9): the pulse site — every status
+            // DoT/HoT delta Status.Tick delivers reaches HP through exactly this sink, so this is the
+            // one call P1's defaulted `origin` parameter existed for. Deferred while BattleEngine.cs/
+            // BattleRunState.cs were under another session's concurrent edit; both are clean now.
+            PulseSink = new BattlePulseSink((hostPtr, amount, effectId, components) =>
                 ByKey.TryGetValue(hostPtr, out var owner)
-                    ? ApplyHp(owner, amount, effectId)
+                    ? ApplyHp(owner, amount, effectId, components, origin: DamageOrigin.StatusPulse)
                     : new DamageApplyResult(DamageApplyOutcome.SinkRefused, 0, 0));
 
             foreach (var a in Actors)
@@ -221,45 +437,157 @@ public static partial class BattleEngine
                 }
             }
 
+            // aura-skill T12 (Gate B): "an aura is on" becomes "a channel has a value," via the T4
+            // recompose seam. Delivered once, at construction — a live mid-match toggle is T13's own
+            // job, not this one's. Friendly = same Setup.Side as the aura's own CommanderSide; battle's
+            // squad/wave partition already IS the own-side/enemy-side split (no oracle needed here —
+            // T21a's MechanicalOwnSideOracle answers a different, live-lawn question).
+            foreach (var aura in setup.ActiveAuras)
+            {
+                foreach (var a in Actors)
+                {
+                    if (a.Setup.Side != aura.CommanderSide) continue;
+                    DerivedLedger.Add(a.Setup.Key, aura.TargetChannel, aura.SourceId, aura.Value);
+                    RecomposeDerived(a.Setup.Key);
+                }
+            }
+
             // A17 (spec-action-selection-adoption.md §2): compile each actor's loadout ONCE, here —
             // never per decision, matching HeldActionsOf's own documented contract that the AI relies
             // on for its "Reads scales with targets, not actions" acceptance bar. Null or empty
             // EquippedActionIds (BattleModels.cs's own doc: "null when the caller has no
             // action/loadout system to consult") falls back to the single hand-built basic attack —
             // "no loadout" must still be a legal, single-action decision, never ActionIntent.None by
-            // construction. A non-empty list MUST resolve against a real, supplied ActionCatalog —
-            // loud failure on a missing id, never a silent skip, matching this codebase's standing
-            // "loud validation over silent corruption" stance.
+            // construction.
+            //
+            // aura-skill T3 (audit D3): a non-empty list that CANNOT resolve — no ActionCatalog
+            // supplied, or an id the catalog doesn't have — used to throw and fail the whole battle,
+            // which meant the first authored Skill grant broke every web battle AND poisoned any
+            // already-stored BattleSetup log row (it re-threw on every replay, forever). There is no
+            // production action-authoring path yet (aura-equip-path, unspecced): degrading to "no
+            // equipped actions" + a named warning is the honest behavior for content that cannot
+            // exist in production today, not a masked bug — T19 wires the real ActionCatalog and this
+            // degrade path stops firing for any actor whose loadout it can actually resolve.
+            var costsByActionId = new Dictionary<string, IReadOnlyList<ActionCostRow>>(StringComparer.Ordinal);
             foreach (var a in Actors)
             {
                 var ids = a.Setup.EquippedActionIds;
                 IReadOnlyList<CompiledAction> held;
-                if (ids is null || ids.Count == 0)
+                if (a.Setup.Kind == CombatantKind.Structure && (ids is null || ids.Count == 0))
                 {
+                    // base-defense `combatant-kind` §5: a structure with no actions has nothing to do
+                    // — it does not fall back to a basic attack. The fallback below exists so an
+                    // ANIMATE actor is never inert; a wall being inert is the point. This also keeps
+                    // "garrisoning a wall grants nothing" true in HeldActionsOf's union below, since
+                    // the empty list is what gets lent.
+                    held = Array.Empty<CompiledAction>();
+                }
+                else if (ids is null || ids.Count == 0)
+                {
+                    held = new[] { BasicAttackCompiled };
+                }
+                else if (actionCatalog is null)
+                {
+                    Warnings.Add(
+                        $"Actor '{a.Setup.Key}' has {ids.Count} equipped action id(s) but no ActionCatalog " +
+                        "was supplied to resolve them; falling back to the basic attack.");
                     held = new[] { BasicAttackCompiled };
                 }
                 else
                 {
-                    if (actionCatalog is null)
-                        throw new ArgumentException(
-                            $"Actor '{a.Setup.Key}' has {ids.Count} equipped action id(s) but no ActionCatalog was supplied to resolve them.",
-                            nameof(actionCatalog));
-
                     var list = new List<CompiledAction>(ids.Count);
+                    var unresolved = new List<string>();
                     foreach (var id in ids)
                     {
-                        var compiled = actionCatalog.Get(id)
-                            ?? throw new ArgumentException($"Actor '{a.Setup.Key}' has equipped action id '{id}', which is not in the supplied ActionCatalog.", nameof(actionCatalog));
-                        list.Add(compiled);
+                        var compiled = actionCatalog.Get(id);
+                        if (compiled is null) unresolved.Add(id);
+                        else list.Add(compiled);
                     }
 
-                    list.Sort(ActionTagPreference.Compare);
-                    held = list;
+                    if (unresolved.Count > 0)
+                    {
+                        Warnings.Add(
+                            $"Actor '{a.Setup.Key}' has equipped action id(s) [{string.Join(", ", unresolved)}] " +
+                            "not in the supplied ActionCatalog; falling back to the basic attack.");
+                        held = new[] { BasicAttackCompiled };
+                    }
+                    else
+                    {
+                        list.Sort(ActionTagPreference.Compare);
+                        held = list;
+                    }
                 }
 
+                // base-defense `siege-construction`/`siege-ai` (2026-09-07, MAJOR finding this
+                // session): purely additive, appended AFTER `held` is fully resolved above -- an
+                // actor's basic-attack fallback (or its real equipped loadout) is completely
+                // untouched; this only adds to it, never replaces it. `null`/empty for every actor
+                // outside `DistrictAssaultResolver`'s own siege setup -- the exact byte-identical-to-
+                // today default for every other battle mode.
+                if (a.Setup.AdditionalHeldActions is { Count: > 0 } additional)
+                    held = held.Concat(additional).ToList();
+
                 _heldActions[a.Setup.Key] = held;
-                BindContainers(a, held, containerResolver);
+                BindContainers(a, held, containerResolver, containersWithRunnerCoverage);
+                BindEquip(a, equipEffectIdsFor);
+
+                // A19 (T56.1): collect real cost rows for every action actually reachable in THIS
+                // battle -- ActionCatalog exposes no "all actions" enumerator (only Get(id)/Count),
+                // so building from each actor's own resolved `held` list is both sufficient (nothing
+                // outside a held loadout can ever be committed) and simpler than inventing one.
+                foreach (var action in held)
+                {
+                    if (action.Costs.Count == 0 || costsByActionId.ContainsKey(action.ActionId)) continue;
+                    var rows = new List<ActionCostRow>(action.Costs.Count);
+                    foreach (var cost in action.Costs)
+                        rows.Add(new ActionCostRow(action.ActionId, cost.ResourceId, cost.ScaledAmount, cost.When));
+                    costsByActionId[action.ActionId] = rows;
+                }
             }
+
+            CostLedger = new CostLedger(
+                costsByActionId,
+                poolsFor: key => ResourcePools.GetOrCreate(key, ByKey[key].Derived, NowTick),
+                derivedFor: key => ByKey[key].Derived,
+                rungOf: (actorKey, actionId) =>
+                    EffectiveRungOf(actorKey, actionId, actionCatalog, unlockStateFor, unlockTuning),
+                nowTick: () => NowTick);
+
+            // base-defense siege-ai: built AFTER Cooldowns/CostLedger exist (both are constructor-scope
+            // fields SiegeAiIntentSource reads as `cooldowns`/`affordability`) and using `this` as the
+            // live `IBattleView` -- valid here for the same reason Host.UseRunner's own closure over
+            // `this`/NowTick above is: SiegeAiIntentSource only reads the view lazily, per ChooseTarget
+            // call, never during construction. NoStanceHeld.Instance/a fresh RetargetLedger match
+            // StubIntentSource's own and 17.8's own "one ledger per battle" shape respectively.
+            if (aiTuning != null)
+                DefaultAiIntentSource = new SiegeAiIntentSource(
+                    this, Cooldowns, NoStanceHeld.Instance, CostLedger, aiTuning,
+                    roundOf ?? (tick => (int)tick), retarget: new RetargetLedger(), trace: trace);
+        }
+
+        /// <summary>
+        /// A23 (spec-cost-scaling-holder-rung.md §2): `CostLedger` must scale by the HOLDER's
+        /// `effectiveRung` (progression-derived), never the content's authored `Rung`
+        /// (spec-rung-semantics.md §3.1 — `StructureBudgetGuard` is the reader that wants the authored
+        /// value; this ledger is not). A match in the actor's own <see cref="UnlockState.Held"/> list
+        /// resolves through <see cref="UnlockLadder.EffectiveRung"/>; no match (every intrinsic/basic
+        /// action, and every caller that supplies no <paramref name="unlockStateFor"/> at all — the
+        /// exact byte-identical-to-today default) falls back to the authored `Rung`, unchanged.
+        /// </summary>
+        static int EffectiveRungOf(string actorKey, string actionId, ActionCatalog? actionCatalog,
+            Func<string, UnlockState>? unlockStateFor, UnlockTuning? unlockTuning)
+        {
+            var state = unlockStateFor?.Invoke(actorKey);
+            if (state is not null && unlockTuning is not null)
+            {
+                foreach (var held in state.Held)
+                {
+                    if (held.UnlockId == actionId)
+                        return UnlockLadder.EffectiveRung(held.EarnCountAtAcceptance, unlockTuning).Value;
+                }
+            }
+
+            return actionCatalog?.Get(actionId)?.Rung ?? 0;
         }
 
         /// <summary>
@@ -270,20 +598,32 @@ public static partial class BattleEngine
         /// real, supplied resolver — loud failure on a missing container or an empty result, never a
         /// silent skip, matching this codebase's standing "loud validation over silent corruption"
         /// stance (the same shape the `ActionCatalog` check just above already uses).
+        ///
+        /// <para>A25 (battle-runner-path-integration): a container whose atoms are ENTIRELY
+        /// Runner-path has, correctly, zero Compiled-path effect ids — `IContainerEffectResolver`'s own
+        /// contract never covered the Runner path (A18a scoped it to Defs only). Found empirically, not
+        /// designed for up front: a real end-to-end test with a purely-Runner-path action threw here
+        /// even though `Host.Runner` was correctly wired, because this check could not tell "genuinely
+        /// unresolvable" apart from "resolved elsewhere, via the runner." <paramref
+        /// name="containersWithRunnerCoverage"/> (built the same pass as `runnerBindings`, from the
+        /// SAME per-container loop, never string-parsed back out of a binding id) is what makes that
+        /// distinction — a container in this set is real, known content, just not Compiled-path at
+        /// all, so the throw below no longer fires for it.</para>
         /// </summary>
-        void BindContainers(ActorState a, IReadOnlyList<CompiledAction> held, IContainerEffectResolver? containerResolver)
+        void BindContainers(ActorState a, IReadOnlyList<CompiledAction> held, IContainerEffectResolver? containerResolver,
+            IReadOnlySet<string>? containersWithRunnerCoverage)
         {
             foreach (var action in held)
             {
                 if (string.IsNullOrEmpty(action.ContainerId)) continue;
 
-                if (containerResolver is null)
+                if (containerResolver is null && containersWithRunnerCoverage?.Contains(action.ContainerId) != true)
                     throw new ArgumentException(
                         $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}' but no IContainerEffectResolver was supplied to resolve it.",
                         nameof(containerResolver));
 
-                var effectIds = containerResolver.EffectIdsFor(action.ContainerId);
-                if (effectIds.Count == 0)
+                var effectIds = containerResolver?.EffectIdsFor(action.ContainerId) ?? Array.Empty<string>();
+                if (effectIds.Count == 0 && containersWithRunnerCoverage?.Contains(action.ContainerId) != true)
                     throw new ArgumentException(
                         $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}', which the supplied IContainerEffectResolver could not resolve.",
                         nameof(containerResolver));
@@ -303,9 +643,41 @@ public static partial class BattleEngine
             }
         }
 
+        /// <summary>
+        /// spec-equip-runtime.md's Battle-half amendment (2026-09-07): the SAME grant pattern
+        /// <see cref="BindContainers"/> uses for a held action's container, applied to a specimen's
+        /// equipped `stat.modify` atoms instead — <see cref="ActionContainerEffectResolverFactory.BuildEquip"/>
+        /// already compiled them (Data layer, where `RpgStore.ResolveBindings` lives) and registered
+        /// the resulting defs via the caller's own `onEffectHostReady`; this method's whole job is the
+        /// per-actor grant, mirroring `BindContainers` line for line except the source of `effectIds`.
+        /// A no-op when the actor carries no `SpecimenId` (every wave/enemy actor, every synthetic SIM
+        /// actor) or no resolver was supplied (every caller that hasn't wired equip yet) — exactly as
+        /// inert as `containerResolver` being null already is for an actor with no held actions.
+        /// </summary>
+        void BindEquip(ActorState a, Func<string, IReadOnlyList<string>>? equipEffectIdsFor)
+        {
+            if (equipEffectIdsFor is null) return;
+            if (string.IsNullOrWhiteSpace(a.Setup.SpecimenId)) return;
+
+            var effectIds = equipEffectIdsFor(a.Setup.SpecimenId!);
+            foreach (var effectId in effectIds)
+            {
+                Host.Bag.Grant(new Contracts.EffectGrantDto
+                {
+                    GrantId = $"battle:{a.Setup.Key}:equip:{effectId}",
+                    EffectId = effectId,
+                    OwnerKind = "entity",
+                    OwnerKey = Contracts.EffectOwnerKeys.Entity(a.Setup.Key),
+                    PluginId = "battle",
+                    Priority = 0,
+                });
+            }
+        }
+
         // ---- IBattleView (A17): the read seam StubIntentSource is confined to — never a direct
-        // read of Actors/ByKey from outside this class. PositionOf is always null (no board exists
-        // yet), which is what makes NearestEnemy's own SourceOrder fallback the live behavior today.
+        // read of Actors/ByKey from outside this class. PositionOf is null with no board (every
+        // caller until siege-resolver), which is what makes NearestEnemy's own SourceOrder fallback
+        // the live behavior today; a real board makes it return real positions (siege-board §4).
         public IReadOnlyList<string> LiveActorKeys
         {
             get
@@ -318,7 +690,72 @@ public static partial class BattleEngine
 
         public int SideOf(string actorKey) => ByKey[actorKey].Setup.Side == "squad" ? 0 : 1;
 
-        public GridPos? PositionOf(string actorKey) => null;
+        public GridPos? PositionOf(string actorKey) =>
+            _board is null ? null : _board.Positions.TryGetValue(actorKey, out var p) ? p : null;
+
+        /// <summary>
+        /// A9 `movement-actions` (spec-movement-actions.md §3): resolves `AnchorSource.ChosenCell` as
+        /// "move toward the nearest living enemy" (owner-confirmed 2026-09-07 -- no spec anywhere
+        /// resolved it before this). No board, no opposing actor with a real position, or already
+        /// adjacent all resolve to zero cells moved -- never a throw, since none of those are a caller
+        /// error for a movement action (the same "byte-identical when inert" posture <see cref="UseRunner"/>
+        /// and every other A24/A25-era wiring this session added already follows).
+        /// </summary>
+        public int TryMoveTowardNearestEnemy(string actorKey, int maxCells)
+        {
+            if (_board is null) return 0;
+            if (!_board.Positions.TryGetValue(actorKey, out var from)) return 0;
+
+            var mySide = ByKey[actorKey].Setup.Side;
+            GridPos? nearestPos = null;
+            var nearestDistance = int.MaxValue;
+            foreach (var candidate in Actors)
+            {
+                if (!candidate.Active || candidate.Setup.Side == mySide) continue;
+                if (!_board.Positions.TryGetValue(candidate.Setup.Key, out var candidatePos)) continue;
+                var d = GridDistance.Chebyshev(from, candidatePos);
+                if (d < nearestDistance) { nearestDistance = d; nearestPos = candidatePos; }
+            }
+            if (nearestPos is not { } target) return 0;
+
+            return MoveAction.MoveToward(_board, actorKey, target, maxCells);
+        }
+
+        /// <summary>
+        /// base-defense `siege-ai` R3 (spec-siege-ai.md §4): "no target in reach -> path toward the
+        /// objective using TerrainOnlyOccupancy." Deliberately NOT <see cref="MoveAction.MoveToward"/>'s
+        /// own greedy Chebyshev step (that primitive's own doc comment: allies block it, which is
+        /// exactly the "boxed in by my own units" failure R3 exists to avoid) -- this walks a REAL
+        /// <see cref="BoardPathfinder"/> route instead, planned as if allies were not there
+        /// (<see cref="TerrainOnlyOccupancy"/>), then executed one real step at a time
+        /// (<see cref="BoardState.CanEnter"/>, the same instant-occupancy gate <see cref="MoveAction"/>
+        /// itself uses) so a currently-occupied next cell simply stops the advance rather than
+        /// skipping past it. "No path at all -> hold and defend, never a random move" (the spec's own
+        /// words) is honored by construction: <see cref="BoardPathfinder.Find"/> returning `null` or the
+        /// very first real step being blocked both return 0, the same "nothing happened" contract
+        /// <see cref="TryMoveTowardNearestEnemy"/> already has.
+        /// </summary>
+        public int TryMoveTowardObjective(string actorKey, int maxCells)
+        {
+            if (_board is null) return 0;
+            if (!_board.Positions.TryGetValue(actorKey, out var from)) return 0;
+            if (ObjectivePositionOf(actorKey) is not { } objective || from == objective) return 0;
+
+            var costs = new MoveCosts(
+                SiegeTuningPolicy.MoveCostOpen, SiegeTuningPolicy.MoveCostRough, SiegeTuningPolicy.DiagonalSurcharge);
+            var path = BoardPathfinder.Find(_board.Spec, new TerrainOnlyOccupancy(_board.Spec), from, objective, costs);
+            if (path is null) return 0;
+
+            var moved = 0;
+            for (var i = 1; i < path.Steps.Count && moved < maxCells; i++)
+            {
+                var next = path.Steps[i];
+                if (!_board.CanEnter(next)) break; // a real occupant stands here right now -- stop, do not skip past it
+                _board.Move(actorKey, next);
+                moved++;
+            }
+            return moved;
+        }
 
         public EntityFacts FactsOf(string actorKey)
         {
@@ -330,18 +767,94 @@ public static partial class BattleEngine
                 Row: 0, Col: 0, IsMindControlled: false, IsKiller: false, StatusMask: 0);
         }
 
-        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
-            _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
+        /// <summary>
+        /// base-defense `combatant-kind` §4: a garrisoned structure lends its actions to its occupant —
+        /// the union of the occupant's own held actions and the structure it currently occupies, found
+        /// by a linear scan of <see cref="Actors"/> for the one whose <c>GarrisonedBy</c> names this
+        /// key (small counts, the same discipline <c>FindAdjacentWithTrait</c> already uses; there is
+        /// no reverse index and none is needed at this scale). Byte-identical for every existing
+        /// battle: <c>GarrisonedBy</c> is null on every actor there, so the scan never matches and this
+        /// always returns exactly <c>own</c>.
+        /// </summary>
+        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey)
+        {
+            var own = _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
+            var garrisonedStructureKey = FindGarrisonedStructureKey(actorKey);
+            if (garrisonedStructureKey is null) return own;
+
+            var lent = _heldActions.TryGetValue(garrisonedStructureKey, out var structureHeld)
+                ? structureHeld : Array.Empty<CompiledAction>();
+            if (lent.Count == 0) return own;
+            var union = new List<CompiledAction>(own.Count + lent.Count);
+            union.AddRange(own);
+            union.AddRange(lent);
+            return union;
+        }
+
+        /// <summary>
+        /// base-defense `siege-ai` 17.9 (spec-siege-ai.md §5.20 rule 5): the SAME "which structure names
+        /// this actor as its garrison" scan <see cref="HeldActionsOf"/> already performs, shared rather
+        /// than duplicated — <see cref="IBattleView.GarrisonedStructureKeyOf"/>'s own real implementation.
+        /// Returns the garrisoned structure's key, or `null` when `actorKey` garrisons nothing (every
+        /// existing battle: `GarrisonedBy` is null on every actor, so this always returns `null`).
+        /// </summary>
+        string? FindGarrisonedStructureKey(string actorKey)
+        {
+            foreach (var a in Actors)
+            {
+                if (a.Setup.Kind != CombatantKind.Structure || a.Setup.GarrisonedBy != actorKey) continue;
+                return a.Setup.Key;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// base-defense `siege-ai` R3 (spec-siege-ai.md §4), `IBattleView`'s own real implementation.
+        /// `null` when no siege context is wired (<see cref="BattleEffectHost.AttackerEdge"/> unset —
+        /// every non-siege battle, and every siege battle before <c>DistrictAssaultResolver</c> sets it)
+        /// or there is no board at all, both byte-identical to every battle before this task. `side ==
+        /// "squad"` means attacker — <c>DistrictAssaultResolver.AttackerSide</c>'s own real convention,
+        /// read directly rather than assumed, matching <see cref="SideOf"/>'s existing 0-means-squad
+        /// mapping.
+        /// </summary>
+        public GridPos? ObjectivePositionOf(string actorKey)
+        {
+            if (Host.AttackerEdge is not { } attackerEdge) return null;
+            if (_board is null) return null;
+            var isAttacker = SideOf(actorKey) == 0;
+            return DistrictLayout.ObjectivePositionFor(isAttacker, attackerEdge, _board.Spec.Rows);
+        }
+
+        public long? MaxHpOf(string actorKey) => ByKey[actorKey].MaxHp;
+
+        // Reads the ai.aggression derived channel (DerivedStatChannels.cs H.9, resolved 2026-09-07).
+        // No taunt/stealth/decoy status content exists anywhere in the game yet (repo-wide search,
+        // 2026-09-07) -- ActorDerivedSnapshot.Get defaults an untouched channel to 0, so this returns
+        // 0 (neutral) for every actor today, byte-for-byte identical to the previous hardcoded return.
+        // A future taunt/stealth status would contribute to this channel (ActorDerivedSnapshot.OverlayAdd,
+        // matching how a patron/commander aura already composes) rather than needing a second mechanism.
+        public int AggressionOf(string actorKey) =>
+            (int)Math.Round(ByKey[actorKey].Derived.Get(DerivedStatChannels.AiAggression));
+
+        public string? GarrisonedStructureKeyOf(string actorKey) => FindGarrisonedStructureKey(actorKey);
+
+        /// <summary>base-defense `siege-ai` (module 17): the SAME `Derived` snapshot `CostLedger`'s own
+        /// `poolsFor`/`derivedFor` callbacks already read from `ByKey[key].Derived` (`:500-501` above) —
+        /// exposed here, never recomputed, so a live scoring AI's hit-chance estimate reads the exact
+        /// stats every other system in this class already does.</summary>
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) =>
+            ByKey.TryGetValue(actorKey, out var a) ? a.Derived : null;
 
         public DamageApplyResult ApplyHp(
             ActorState owner, long amount, string effectId,
-            ElementPayloadComponent[]? components = null, ActorState? attacker = null, string? grantId = null)
+            ElementPayloadComponent[]? components = null, ActorState? attacker = null, string? grantId = null,
+            DamageOrigin origin = DamageOrigin.DirectHit)
         {
             var result = DamageApplyPipeline.Apply(
                 owner.Setup.Key, amount, hitCount: 1,
                 components ?? Array.Empty<ElementPayloadComponent>(),
                 attacker?.Derived, owner.Derived, ShieldGate, HpSink,
-                pluginId: "battle", effectId: effectId, grantId: grantId);
+                pluginId: "battle", effectId: effectId, grantId: grantId, origin: origin);
             owner.ShieldAbsorbed += result.AbsorbedAmount;
             return result;
         }
@@ -418,6 +931,53 @@ public static partial class BattleEngine
         }
 
         /// <summary>Immortal death refusal: a queued +1 through the pipeline turns the death into survive-at-1.</summary>
+        /// <summary>
+        /// Wave E1 — the attacker's on-hit riders, applied to the actor it just LANDED a hit on.
+        ///
+        /// <para><b>Byte-identical when nobody has riders</b>, and structurally rather than luckily:
+        /// the method returns before touching any RNG for an empty list, so the `riders` stream is
+        /// never drawn from and no other stream is perturbed. That is the wave's zero-rider invariant.</para>
+        ///
+        /// <para>Riders carry the ATTACKER, unlike the t0 initial statuses which land attacker-less —
+        /// so resist and potency evaluate against real attacker context, which is the point of applying
+        /// a status on a hit rather than at setup. The chance roll is the rider's own
+        /// `GrantChanceMilli`, drawn from the dedicated stream; the L2b evaluator still independently
+        /// blocks on immunity and the potency floor, exactly as it does for scripted statuses.</para>
+        /// </summary>
+        void ApplyOnHitRiders(ActorState attacker, ActorState target)
+        {
+            foreach (var traitId in attacker.Setup.TraitIds)
+            foreach (var spec in TraitBattleCatalog.Get(traitId).OnHitRiders)
+            {
+                var roll = RidersRng.NextPerMille();
+                Trace?.Draw("riders", roll);
+                if (roll >= spec.GrantChanceMilli) continue;
+
+                Status.Apply(new StatusApplyInput(
+                    spec.StatusId,
+                    HostPtr: target.Setup.Key,
+                    AttackerPtr: attacker.Setup.Key,
+                    GrantId: "battle:rider:" + attacker.Setup.Key + ":" + spec.StatusId,
+                    BaseMagnitude: spec.MagnitudePerPulse,
+                    BaseDuration: spec.DurationMs,
+                    PeriodMs: spec.PeriodMs,
+                    DurationMs: spec.DurationMs,
+                    // Already rolled on the riders stream above; the evaluator must not roll a SECOND
+                    // time on the status stream, which would both double-gate the rider and consume a
+                    // draw that belongs to contagion.
+                    GrantChance: 1.0,
+                    EffectId: "battle.rider." + spec.StatusId,
+                    PluginId: "battle",
+                    // Attacker-ful, unlike the t0 initial statuses: the whole point of a rider is that
+                    // the attacker's potency meets the defender's resist.
+                    AttackerLess: false),
+                    // The chance was already decided above on the riders stream, so the evaluator is
+                    // handed a scripted 0.0 -- the same FixedStatusRng the scripted setup path uses,
+                    // and for the same reason: one roll per decision, on the stream that owns it.
+                    RiderApplyRng, Host.Clock.UtcNow);
+            }
+        }
+
         public void ReviveImmortals()
         {
             var queued = false;
@@ -435,6 +995,20 @@ public static partial class BattleEngine
                 Host.Flush();
         }
 
+        /// <summary>
+        /// party-dungeon D2.10 — lifted out of <see cref="CheckRetreats"/> with **no behaviour
+        /// change** (the coward-retreat call site below is byte-identical to what it inlined
+        /// before), so it can gain producers beyond the coward trait: a capture (`wild-room`) and a
+        /// player-issued retreat (`delve-attrition`) both leave a battle the same way a coward
+        /// does — alive, no die event, shields released.
+        /// </summary>
+        public void Withdraw(ActorState actor)
+        {
+            actor.Retreated = true;
+            Status.WithdrawEntity(actor.Setup.Key);
+            Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(actor.Setup.Key));
+        }
+
         /// <summary>Coward retreat: below the threshold the actor leaves the battle alive (no die event).</summary>
         public void CheckRetreats()
         {
@@ -443,11 +1017,7 @@ public static partial class BattleEngine
                 if (!a.Active || !a.Has("coward")) continue;
                 var def = TraitBattleCatalog.Get("coward");
                 if ((long)a.Hp * 1000 < (long)a.MaxHp * def.RetreatBelowMilli)
-                {
-                    a.Retreated = true;
-                    Status.WithdrawEntity(a.Setup.Key);
-                    Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
-                }
+                    Withdraw(a);
             }
         }
 
@@ -459,6 +1029,51 @@ public static partial class BattleEngine
         }
 
         public bool AnyActive(string side) => BattleEngine.AnyActive(Actors, side);
+
+        /// <summary>
+        /// base-defense `siege-waves` §3: roster growth — a reinforcement joining mid-battle.
+        ///
+        /// <para><b>Runs the SAME key validation `Resolve` applies at setup</b> (extracted to
+        /// <see cref="ValidateActorKey"/> for exactly this reuse) — a mid-battle actor that bypassed
+        /// those checks would be silently unhittable at the shield gate.</para>
+        ///
+        /// <para><b>Appends, never inserts or reorders</b> — <see cref="Actors"/> is a plain
+        /// <see cref="List{T}"/>; an index shift mid-battle would invalidate every in-flight effect
+        /// that captured one (a shield grant, a status instance, anything keyed by list position rather
+        /// than actor key). <see cref="ActorState.SideIndex"/> for the newcomer is the count of actors
+        /// already on its own side — the same 0-based-per-side numbering the constructor's own
+        /// <c>Squad.Select((a,i) => ...)</c>/<c>Wave.Select((a,i) => ...)</c> already establish.</para>
+        ///
+        /// <para><b>Placed on the board only when both a board exists AND a position is supplied</b> —
+        /// resolving a district edge into a real candidate cell is `siege-resolver`'s job (a later
+        /// module), the same scoping <see cref="Board.Placement"/> already states.</para>
+        ///
+        /// <para><b>Scoped out, stated rather than silently skipped</b>: unlike the constructor's own
+        /// per-actor setup, this method does not apply <see cref="BattleActorSetup.InnateShield"/>,
+        /// <see cref="BattleActorSetup.InitialStatuses"/>, active-aura membership, or loadout/container
+        /// compilation for the newcomer — none of those are in this task's own stated contract (append,
+        /// validate, place, never reorder), and building them against no real caller yet would be
+        /// exactly the unrequested surface this program's standing rule warns against. A reinforcement
+        /// still fights (it is `Active`/`Alive`/targetable/damageable the moment it is added) — it just
+        /// arrives without whatever a fresh setup-time actor would have gotten from those four systems,
+        /// until a real caller (`siege-resolver`) needs one of them.</para>
+        /// </summary>
+        public void AddActor(BattleActorSetup setup, Actions.GridPos? position, int round)
+        {
+            var seenKeys = new HashSet<string>(ByKey.Keys, StringComparer.Ordinal);
+            BattleEngine.ValidateActorKey(setup, seenKeys);
+
+            var sideIndex = Actors.Count(a => a.Setup.Side == setup.Side);
+            var actor = new ActorState(setup, sideIndex);
+            Actors.Add(actor);
+            ByKey[setup.Key] = actor;
+            // Round is the actual arrival round, unlike the constructor's own initial-roster loop
+            // (which spawns everyone at round 0, correctly, since that IS when they arrive).
+            Events.Add(new BattleEventRec(round, BattleEventKinds.Spawn, setup.Key, setup.TypeId, setup.Side));
+
+            if (_board is not null && position is { } p)
+                _board.Place(setup.Key, p);
+        }
 
         /// <summary>
         /// The per-attacker tail (spec-basic-attack-adoption.md's boundary: everything from the
@@ -506,6 +1121,8 @@ public static partial class BattleEngine
                 Trace?.Apply(round, guardian!.Setup.Key, -share);
             }
 
+            ApplyOnHitRiders(attacker, target);
+
             Host.Flush();
             attacker.DamageDealt += damage + rider;   // resolver output, pre-absorb (spec)
 
@@ -517,7 +1134,9 @@ public static partial class BattleEngine
                 {
                     attacker.Kills++;
                     killsThisHit++;
-                    Events.Add(new BattleEventRec(round, BattleEventKinds.Die, victim.Setup.Key, victim.Setup.TypeId, victim.Setup.Side));
+                    Events.Add(new BattleEventRec(
+                        round, BattleEventKinds.Die, victim.Setup.Key, victim.Setup.TypeId, victim.Setup.Side,
+                        KillerActorKey: attacker.Setup.Key));
                     Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(victim.Setup.Key));
                 }
             }
@@ -534,5 +1153,49 @@ public static partial class BattleEngine
 
             CheckRetreats();
         }
+    }
+
+    /// <summary>
+    /// Test-only seam (matching <c>RpgStore.DiffCommitForTest</c>'s established precedent): constructs
+    /// a real <see cref="BattleRunState"/> and returns <c>HeldActionsOf(actorKey)</c>'s action ids
+    /// directly. base-defense `combatant-kind` §4's garrison union has no production reader yet —
+    /// exactly like the pre-existing loadout-compile mechanism it sits beside
+    /// (<c>EquippedActionIdsReportingTests</c>'s own comment: "nothing reads <c>HeldActionsOf</c> for
+    /// real behavior") — and <see cref="BattleRunState"/> itself is private/nested per B13's own
+    /// deviation note, so this is the only way to prove the mechanism without waiting for
+    /// `siege-resolver` to wire a real caller.
+    /// </summary>
+    internal static IReadOnlyList<string> HeldActionIdsForTest(
+        BattleSetup setup, ulong seed, string actorKey, ActionCatalog? actionCatalog = null)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, actionCatalog: actionCatalog);
+        return state.HeldActionsOf(actorKey).Select(a => a.ActionId).ToList();
+    }
+
+    /// <summary>
+    /// Test-only seam, same shape and same reason as <see cref="HeldActionIdsForTest"/>: base-defense
+    /// `siege-positions`'s <c>PositionOf</c>/<c>CombatBoardSnapshot</c> live on the private/nested
+    /// <see cref="BattleRunState"/>, so this is the only way to prove them without a production caller
+    /// (that is `siege-resolver`'s job, a later module) yet threading a board all the way through
+    /// <see cref="Resolve"/>.
+    /// </summary>
+    internal static (GridPos? Position, Combat.BoardSnapshot? Snapshot) PositionAndSnapshotForTest(
+        BattleSetup setup, ulong seed, string actorKey, Board.BoardState? board)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, board: board);
+        return (state.PositionOf(actorKey), state.CombatBoardSnapshot);
+    }
+
+    /// <summary>
+    /// Test-only seam, same shape and same reason as <see cref="PositionAndSnapshotForTest"/>: A9
+    /// `movement-actions`' own nearest-enemy orchestration (<see cref="BattleRunState.TryMoveTowardNearestEnemy"/>)
+    /// reads <c>Actors</c>/<c>ByKey</c>, which live on the private/nested <see cref="BattleRunState"/>.
+    /// </summary>
+    internal static (int CellsMoved, GridPos? FinalPosition) TryMoveTowardNearestEnemyForTest(
+        BattleSetup setup, ulong seed, string actorKey, int maxCells, Board.BoardState board)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, board: board);
+        var moved = state.TryMoveTowardNearestEnemy(actorKey, maxCells);
+        return (moved, state.PositionOf(actorKey));
     }
 }

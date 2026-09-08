@@ -12,7 +12,7 @@ namespace FusionRpg.Core.Battle.Timeline;
 /// newRate)</c>" would be wrong the moment a rate changes mid-flight, because "remaining time" at
 /// the OLD rate is not the same quantity at the NEW one. Every rebase first converts elapsed
 /// wall-of-the-clock ticks into work already done at the rate that was active for that span
-/// (<c>elapsed × oldRate / BaseSpeed</c>), subtracts it from the stored remainder, and only then
+/// (<c>elapsed × oldRate / SpeedScale</c>), subtracts it from the stored remainder, and only then
 /// computes the new arrival from the fresh rate — reproducing the spec's own locked example
 /// exactly: speed 100, haste 1000→500 half-way through a 1000-tick wait arrives at <c>t+750</c>,
 /// not <c>t+1000</c>.</para>
@@ -69,7 +69,7 @@ public sealed class ReadinessDriver
         if (!_tracks.TryGetValue(actorKey, out var track) || !track.Active) return;
 
         var elapsed = nowTick - track.RebasedAtTick;
-        var workDone = elapsed * track.Rate / DerivedTurnChannels.BaseSpeed;
+        var workDone = elapsed * track.Rate / TurnReadiness.SpeedScale;
         track.RemainingWork = Math.Max(0, track.RemainingWork - workDone);
         track.Rate = newRate;
         track.RebasedAtTick = nowTick;

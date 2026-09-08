@@ -77,6 +77,34 @@ public sealed class ActorResourcePools
         return true;
     }
 
+    /// <summary>
+    /// Adds <paramref name="amount"/> to one pool — the signed-delta complement to
+    /// <see cref="TrySpend"/>, for a caller that is not gating an affordability check (a cost) but
+    /// applying a generic delta (E28 fix #1, spec-param-parity.md §3 row 1: a <c>resource.delta</c>
+    /// atom, which can restore or drain any of the six resources, not only spend one against a
+    /// pre-checked cost). <paramref name="amount"/> may be positive or negative; either way the pool
+    /// is first settled at <paramref name="nowTick"/> (so regen accrued since the last touch is
+    /// folded in before the delta lands, exactly like <see cref="TrySpend"/> does) and the result is
+    /// clamped to <c>[0, max]</c> — never a raw dictionary write that could push a pool past its own
+    /// rails. Unlike <see cref="TrySpend"/> this never refuses: a drain larger than the current value
+    /// clamps to 0 rather than leaving the pool untouched, matching <see cref="ResourcePoolState.Resolve"/>'s
+    /// own clamp for a decayed value nothing has settled in a while.
+    /// </summary>
+    public long Add(string resourceId, long amount, long nowTick, ActorDerivedSnapshot derived)
+    {
+        var idx = IndexOf(resourceId);
+        var max = ResourceChannelReader.Max(derived, resourceId);
+        var rate = ResourceChannelReader.RegenPerTick(derived, resourceId);
+        var settled = _states[idx].Settle(nowTick, rate, max);
+
+        var next = settled.Stored + amount;
+        if (next < 0) next = 0;
+        else if (next > max) next = max;
+
+        _states[idx] = settled with { Stored = next };
+        return next;
+    }
+
     /// <summary>Resolves and anchors every pool at <paramref name="nowTick"/>, returning the
     /// battle-end persistence shape: a bare id→value map with no clock attached (spec §2 —
     /// "lastTick is dropped"). Also advances this instance's own state, so a caller that keeps using

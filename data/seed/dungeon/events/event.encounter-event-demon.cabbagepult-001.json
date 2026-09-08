@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-demon.cabbagepult-001",
+  "flavor": "In the center of the courtyard, a bloated, undead 僵尸 stands atop a stone pedestal, frantically loading massive, magically-infused 卷心菜 into a heavy catapult. Every time the mechanism clicks, a high-pitched whistle echoes through the air, signaling a heavy 攻击 is imminent.",
+  "kind": "encounter-event",
+  "name": "The Gardener's Artillery",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to focus fire on the siege-engine zombie to stop the projectiles or ignore it to clear the smaller threats, risking heavy area damage.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cabbagepult"
+}

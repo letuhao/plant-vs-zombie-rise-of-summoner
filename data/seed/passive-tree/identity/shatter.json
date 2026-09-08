@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn the force of incoming strikes into a frozen, unyielding defense that reinforces their very core.",
+  "name": "Glacial Bastion",
+  "treeId": "shatter"
+}

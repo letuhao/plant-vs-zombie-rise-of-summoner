@@ -71,16 +71,13 @@ test.describe("Almanac layer (T19)", () => {
     await expect(page.getByTestId("sanctum-hud")).toBeVisible();
   });
 
-  test("#/types and #/recipes redirect into the layer, and neither is in AuditNav", async ({ page }) => {
+  // AuditNav (the flat leftover sidebar this test used to check for redundant links) is gone
+  // entirely (GG-40, foundation.html F.2) — Types/Recipes are reachable only through the rail now.
+  test("#/types and #/recipes redirect into the layer", async ({ page }) => {
     await mockSanctum(page, { runs: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] });
     await page.goto("/#/types");
     await expect(page).toHaveURL(/#\/sanctum\?panel=almanac/);
     await expect(page.getByTestId("almanac-layer")).toBeVisible();
-
-    await page.keyboard.press("Escape");
-    const nav = page.getByTestId("audit-nav");
-    await expect(nav.getByText("Types", { exact: true })).toHaveCount(0);
-    await expect(nav.getByText("Recipes", { exact: true })).toHaveCount(0);
   });
 });
 
@@ -106,7 +103,9 @@ test.describe("Chronicle layer (T19)", () => {
     await expect(page.getByTestId("sanctum-hud")).toBeVisible();
   });
 
-  test("#/rpg-progression, #/pvz-stats and #/metrics all redirect into the layer, and none is in AuditNav", async ({ page }) => {
+  // AuditNav (the flat leftover sidebar this test used to check for redundant links) is gone
+  // entirely (GG-40, foundation.html F.2) — none of these have a standing nav link anywhere now.
+  test("#/rpg-progression, #/pvz-stats and #/metrics all redirect into the layer", async ({ page }) => {
     await mockSanctum(page, { runs: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] });
 
     await page.goto("/#/rpg-progression");
@@ -120,9 +119,5 @@ test.describe("Chronicle layer (T19)", () => {
 
     await page.goto("/#/metrics");
     await expect(page).toHaveURL(/#\/sanctum\?panel=chronicle/);
-
-    const nav = page.getByTestId("audit-nav");
-    await expect(nav.getByText("PvzStats", { exact: true })).toHaveCount(0);
-    await expect(nav.getByText("Progression", { exact: true })).toHaveCount(0);
   });
 });

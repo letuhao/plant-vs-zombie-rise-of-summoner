@@ -24,11 +24,19 @@ public sealed class CheatAbsoluteStatPlugin : IStatModifierPlugin
         // used to be written straight to the Unity field from their cheat keys, behind the
         // composer's back; now they arrive here as Overrides like P-HP and P-ATK always have, so
         // there is one path to the field and the single-writer law holds.
+        //
+        // E38 (spec-entity-fields-12plus.md §2b): this loop used to skip any non-positive value,
+        // which was harmless while every real-valued key refused zero anyway (E16's three, and
+        // E38's own P-SPEED/P-MOVE/Z-SPD/Z-SPD-O). It stopped being harmless the moment this map
+        // started carrying keys where zero is a LEGAL value (P-SHIELD, P-ATK-CD, P-PROD-CD, P-LEVEL,
+        // P-SHOOTLVL, Z-ARMOR-F, Z-TAKEMULT — "no shield", "ready now", "immune" are things an
+        // operator can mean) and one where NEGATIVE is legal too (P-ATK-ADD — an unguarded signed
+        // delta, §2b, decided 2026-09-03). A blanket sign filter here would silently break both.
+        // CheatState.BuildPlantAbsoluteReal / BuildZombieAbsoluteReal already apply the correct
+        // per-key guard (three different shapes — see that method's own doc comment) before a value
+        // ever reaches this dictionary, so nothing needs re-checking here.
         if (ctx.CheatAbsoluteReal != null)
             foreach (var kv in ctx.CheatAbsoluteReal)
-            {
-                if (kv.Value <= 0) continue; // same convention, and a zero interval is never a value
                 bag.Upsert(_mods.Override(Id, Id, "tabBC", kv.Key, kv.Value, priority: 100));
-            }
     }
 }

@@ -12,7 +12,9 @@ Related: [debug-pipeline.md](debug-pipeline.md) (API recipes), [level-entry.md](
 | Injector | `injectorConnected=true` (heartbeat ≤5s) |
 | SIM | `simEnabled=false` for LIVE |
 | Melon env | `$env:FUSIONRPG_ML_GAMEDIR` = Melon pack (3.9) |
-| Game | Adventure/Challenge **day** lawn live — not Explore / Travel / Idle |
+| Game | Injector connected — **no manual lawn** when using `Ensure-LiveLabBoard` / `audit -Live` |
+
+All-in-one board setup (preferred): [`scripts/lib/LiveLawnSetup.ps1`](../../scripts/lib/LiveLawnSetup.ps1) / Python `ensure_lab_board()` / skill [live-lawn-quick-start](../../.claude/skills/live-lawn-quick-start/SKILL.md). Legacy mid-match: operator in Adventure day + `setup-lab-run.ps1`.
 
 Deploy (Melon, reuse server):
 
@@ -148,9 +150,12 @@ Run: `python -m live_test run <id>` (from `tools/live_test`).
 
 | Id | Prove | Auto assert |
 |---|---|---|
-| `status.apply` | apply-status | status present |
+| `status.apply` | Unity CC `/apply-status` | `debug.apply-status` (no custom VFX) |
 | `status.clear` | clear-status | cleared |
-| `status.catalog` | small id subset | each apply+clear or skip |
+| `status.catalog` | Unity CC subset (butter/freeze/cold) | each apply ack |
+| `status.l2.apply` | `/status/apply` wither | `debug.fx.state.started` + retry |
+| `status.l2.catalog` | 5 custom ids via L2 path | each sustained start |
+| `status.l2.organic` | scenario `status-l2-wither` | apply or fx started after fire-synthetic |
 
 ### Pack `vfx`
 
@@ -195,8 +200,9 @@ Flags: `--base-url`, `--enter-level`, `--force-setup`, `--amount` (shield absorb
 | `probe-shield-damage.ps1` | `run shield.absorb` / `shield.decade` | ≈ (decade stronger in Python) |
 | `setup-lab-run.ps1` | `run lab.overlay` / `lab.empty` | ≈ (PS1 has richer lawn refuse / `-ThenProve`) |
 | `prove-overlay-combat.ps1` | `run combat.probe` | **PS1 stronger** (C1–C10 matrix) |
-| `prove-status-full.ps1` | `run status.catalog` | **mis-mapped** — L2 F52–F78 vs Unity CC smoke subset |
-| `prove-vfx.ps1` | `run vfx.play` / `vfx.shaders` | **PS1 stronger** (shown/mute/rate/state) |
+| `prove-status-full.ps1` | `run status.l2.catalog` / organic | **PS1 stronger** (full status-l2-* matrix) |
+| `prove-status-l2-one.ps1` | `run status.l2.organic` | ≈ single scenario |
+| `prove-vfx.ps1` | `run vfx.play` / `status.l2.apply` | **PS1 stronger** (shown/mute/rate/state + organic) |
 | `stress-test.ps1` | `run stress.fill` | **PS1 stronger** (census settle + perf window) |
 | `smoke-melon-live.ps1` | *(no Python pack)* | checklist / Melon host smoke |
 | `smoke-effect-scoped-atk.ps1` | *(no Python pack)* | effect scope S1–S5 |
@@ -213,7 +219,8 @@ Three tiers — a matrix row alone is **not** covered until product fields use `
 | Tier | Meaning | Examples |
 |---|---|---|
 | **Python hard** | `Report.require` on product fields | `shield.bar`, `shield.absorb`, `shield.decade`, `shield.hide` |
-| **Python smoke** | Event ack / soft `check` / explicit SKIP | `shield.toggle` (F9 manual), `combat.probe` payload soft, `status.*` Unity CC only |
+| **Python smoke** | Event ack / soft `check` / explicit SKIP | `shield.toggle` (F9 manual), `combat.probe` payload soft, `status.apply` Unity CC only |
+| **Python L2 hard** | `Report.require` on sustained VFX | `status.l2.apply`, `status.l2.catalog`, `status.l2.organic` |
 | **PS1 / checklist only** | Full regression surface | F1–F78, C1–C10, Melon host X/H/S, effect L1–L14, `prove-*.ps1` |
 
 **Python encodes well:** tip cursor, Adventure lawn gate, `--enter-level`, Melon deploy, shield lab→bar→absorb→decade→hide, per-target clear → emit kind `debug.shield.cleared`.

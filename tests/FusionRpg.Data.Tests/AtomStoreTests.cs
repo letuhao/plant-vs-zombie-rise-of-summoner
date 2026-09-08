@@ -207,7 +207,13 @@ public class AtomStoreTests : IDisposable
     [Fact]
     public void An_unknown_trigger_is_rejected()
     {
-        var r = _store.UpsertAtom(SearingStrike() with { WhenJson = """{"trigger":"OnWave"}""" });
+        // ⚠️ The fixture used "OnWave" until 2026-09-04, when the atom stream ADDED that trigger to
+        // the vocabulary — so this test started reporting `TriggerNotAllowed` (known, but illegal for
+        // this kind) and looked like a regression when it was a stale fixture. `ValidateTrigger`
+        // checks unknown-first, then allowed, and `DropTableValidator.cs:262` is explicit that the two
+        // codes are "different author mistakes" worth telling apart — so the intent is preserved and
+        // only the value changed, to one that cannot join the vocabulary by accident.
+        var r = _store.UpsertAtom(SearingStrike() with { WhenJson = """{"trigger":"OnNotARealTrigger"}""" });
         Assert.Equal(AtomRejectionReason.UnknownTrigger, r.Reason);
     }
 

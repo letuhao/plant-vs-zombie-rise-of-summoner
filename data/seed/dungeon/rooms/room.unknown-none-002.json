@@ -1,0 +1,27 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001",
+    "event.encounter-event-demon.dolldiamond-001"
+  ],
+  "flavor": "The air here lacks weight, and the silence is so absolute it feels like a physical pressure against the eardrums. There is no horizon, only a seamless transition from the floor to the ceiling in a grey, featureless expanse.",
+  "hazardBand": "none",
+  "kind": "unknown",
+  "name": "The Threshold of Unbecoming",
+  "reason": "The room's geometry and purpose are obscured by a localized sensory nullification field, making it impossible to discern if it is a corridor, a trap, or a sanctum until the party is fully inside.",
+  "roomId": "room.unknown-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

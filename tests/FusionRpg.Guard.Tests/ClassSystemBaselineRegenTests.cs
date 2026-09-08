@@ -56,7 +56,14 @@ public class ClassSystemBaselineRegenTests
         // gap discovered while doing this task (trinity reads tools/CombatSim's own internal,
         // still-v1-only tuning copy, not the shipped v2 config P8.2/P8.3 published) — asserted content,
         // not just presence, so the specific claim it makes cannot silently drift from what is true.
+        //
+        // 2026-09-02: that assertion used to name "aptitudes.v2.json" as a literal, and the regen
+        // script pinned v2 to match — so script, baselines and test agreed with each other while all
+        // three disagreed with the shipped config (v5 by then). A version literal here means "whatever
+        // shipped the day this line was written", which is exactly the drift the test exists to catch.
+        // Both sides now resolve the LIVE config the same way: highest data/tuning/aptitudes.v*.json.
         var repoRoot = FindRepoRoot();
+        var liveAptitudes = LiveAptitudesFileName(repoRoot);
         var path = Path.Combine(repoRoot, "docs", "research", "class-system", "_baseline-dominance.json");
         Assert.True(File.Exists(path), $"missing {path} — run scripts\\regen-class-system-baselines.ps1");
 
@@ -68,8 +75,25 @@ public class ClassSystemBaselineRegenTests
 
         var tuningSync = coverage.GetProperty("tuningSync").GetString();
         Assert.False(string.IsNullOrWhiteSpace(tuningSync), "coverage.tuningSync must not be empty — an honest gap still needs its own record");
-        Assert.Contains("aptitudes.v2.json", tuningSync, StringComparison.Ordinal);
+        Assert.Contains(liveAptitudes, tuningSync, StringComparison.Ordinal);
         Assert.Contains("tools/CombatSim", tuningSync, StringComparison.Ordinal);
+    }
+
+    /// <summary>The LIVE shipped aptitude tuning file name — the highest
+    /// <c>data/tuning/aptitudes.v*.json</c>, never a pinned literal. Tuning files are never
+    /// hand-edited (tunables-ssot.md T4 publishes v{n+1}), so the newest file is the live one.
+    /// Ordered NUMERICALLY on the version: a lexical sort puts v9 above v10.</summary>
+    static string LiveAptitudesFileName(string repoRoot)
+    {
+        var dir = Path.Combine(repoRoot, "data", "tuning");
+        var best = Directory.GetFiles(dir, "aptitudes.v*.json")
+            .Select(p => (Path: p, V: int.TryParse(
+                Path.GetFileNameWithoutExtension(p).Split(".v").Last(), out var v) ? v : -1))
+            .Where(x => x.V >= 0)
+            .OrderByDescending(x => x.V)
+            .FirstOrDefault();
+        if (best.Path is null) throw new InvalidOperationException("no data/tuning/aptitudes.v*.json under " + dir);
+        return Path.GetFileName(best.Path);
     }
 
     [Fact]

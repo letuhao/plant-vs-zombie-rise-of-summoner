@@ -1,0 +1,14 @@
+{
+  "branchiness": "forked",
+  "gateDensity": "sparse",
+  "layoutId": "layout.short-mid-forked-001",
+  "oneWayDensity": "none",
+  "raidModes": [
+    "solo",
+    "pair",
+    "quad"
+  ],
+  "secretDensity": "sparse",
+  "sizeBand": "short",
+  "widthBand": "mid"
+}

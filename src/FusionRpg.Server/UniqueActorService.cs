@@ -1,4 +1,6 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Match;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -34,7 +36,16 @@ public sealed class UniqueActorService
     public UniqueEquipmentListDto? GetEquipment(string instanceId) =>
         _store.GetUniqueEquipment(instanceId);
 
-    /// <summary>Roster-only equip. Rebuilds mods_json grants from stub catalog.</summary>
+    /// <summary>Roster-only equip. Rebuilds mods_json grants from stub catalog.
+    ///
+    /// <para>⛔ <b><c>slot.claimed_by_item</c> is the symmetric half of the item route's
+    /// <c>equip.role-held-by-relic</c></b> (defect R1, fixed 2026-09-06). Two flows write
+    /// <c>rpg_item_assignment</c>; the item route refused a relic's role by name from the day it
+    /// shipped and this one refused nothing, so a <c>PUT</c> here answered 200 and quietly took a
+    /// player's equipped item off. The check itself lives in the store, inside the same lock as the
+    /// write — see <c>RefuseIfRoleHeldByAnItemUnlocked</c>. It is <b>not</b> in
+    /// <see cref="UniqueActorEndpoints"/>'s validation-reason list, so it answers <b>409</b>, matching
+    /// the 409 the mirror refusal already answers.</para></summary>
     public (bool Ok, string Reason, UniqueEquipmentListDto? Equipment) PutEquipment(
         string instanceId, string slot, string? itemId)
     {
@@ -46,6 +57,10 @@ public sealed class UniqueActorService
         {
             var eq = _store.UpsertUniqueEquipment(instanceId, slot, itemId);
             return (true, "", eq);
+        }
+        catch (UniqueEquipmentSlotClaimed)
+        {
+            return (false, "slot.claimed_by_item", _store.GetUniqueEquipment(instanceId));
         }
         catch (ArgumentException ex)
         {
@@ -64,7 +79,7 @@ public sealed class UniqueActorService
         PutEquipment(instanceId, slot, "");
 
     public (bool Ok, string Reason, UniqueActorDto? Actor) AwardXp(
-        string instanceId, double delta, string? reason) =>
+        string instanceId, long delta, string? reason) =>
         _store.AwardUniqueActorXp(instanceId, delta, reason);
 
 
@@ -175,13 +190,67 @@ public sealed class UniqueActorService
     public void ObserveEvents(IReadOnlyList<EventEnvelope> batch)
     {
         if (batch.Count == 0) return;
-        var mapped = new List<(string Kind, string? MatchKey, string PayloadJson)>(batch.Count);
+        var mapped = new List<(string Kind, string? MatchKey, string PayloadJson, string? EventTime)>(batch.Count);
         foreach (var e in batch)
         {
             if (string.IsNullOrWhiteSpace(e.Kind)) continue;
-            mapped.Add((e.Kind, e.MatchKey, RpgStore.PayloadToJson(e.Payload)));
+            mapped.Add((e.Kind, e.MatchKey, RpgStore.PayloadToJson(e.Payload), e.T));
         }
-        _store.ObserveUniqueActorEvents(mapped);
+        var affectedPlayers = _store.ObserveUniqueActorEvents(mapped);
+        foreach (var playerId in affectedPlayers)
+            _ = PushAtomUnionAsync(playerId);
+    }
+
+    /// <summary>
+    /// T6.1 (2026-09-06, `mods-absorption`) — the real remaining gap the audit found: the Hello-time
+    /// owner union (<see cref="AtomPushService.OwnersForPlayer"/>) never re-fired mid-session, so a
+    /// unique actor that deployed (or recovered) after Hello never actually reached the runner. Fires
+    /// on exactly the phase transitions <see cref="RpgStore.ObserveUniqueActorEvents"/> reports
+    /// (bind ↔ ActiveBound), reusing the SAME union Hello already builds — never a second, divergent
+    /// list — and sends it as an atom rehydrate <c>effects.grants.apply</c>. The payload carries the
+    /// compiled grants for the affected owners but no player-session grant, so a mid-match equip or
+    /// unequip never touches the player's own session Effect-bag state.
+    ///
+    /// <para>P1.5-L (2026-09-07): also the real remaining half of a rolled item's LAWN wiring. Made
+    /// public so <see cref="ItemEquipEndpoints"/> can call it — bind/unbind was never the only
+    /// transition that changes what a bound specimen's `effect_binding` rows should say; equipping or
+    /// unequipping a rolled item on an ALREADY-bound specimen does too, and nothing fired this before.
+    /// See <see cref="RpgStore.MaterializeRolledEquipRuntime"/>, whose only production caller before
+    /// this was `WebMatchService.BuildSquad` (the Battle/expedition path) — the Lawn specimen never
+    /// had its equip bindings materialized at all.</para>
+    /// </summary>
+    public async Task PushAtomUnionAsync(long playerId)
+    {
+        AtomPushDto atoms;
+        try
+        {
+            var owners = AtomPushService.OwnersForPlayer(_store, playerId);
+            atoms = new AtomPushService(_store).Build(owners, new BindContext(RuntimeId.Lawn), matchSeed: 0);
+        }
+        catch (Exception ex)
+        {
+            // Matches BuildApplyCommand's own rule: a failed atom push must never throw into an
+            // unrelated caller (here, event ingestion) — log and drop, the next real trigger retries.
+            Console.Error.WriteLine("[atom-push] mid-session re-push failed: " + ex.Message);
+            return;
+        }
+
+        // T6.2 (2026-09-06): assembled by AtomPushService.BuildApplyPayload, the one place this shape
+        // is built. It was hand-rolled here and again in RpgHub.BuildApplyCommand, and BOTH copies
+        // dropped `atoms.Grants` — the compiled (passive) half of the push — which is exactly the
+        // drift a second hand-rolled copy invites. The `grants` array is still always present (the
+        // injector's RunEffectsGrantsApply, CheatCommandRunner.cs:777-814, refuses the WHOLE command
+        // — InstallAtomPush never reached — when it is absent or not an array), and it still carries
+        // no SESSION grant: a mid-match equip/unequip never touches the player's own Effect-bag
+        // snapshot. What it now carries is this push's own compiled grants, which is the point.
+        var payload = AtomPushService.BuildApplyPayload(atoms, sessionGrants: null);
+
+        await SendInjectorCommand(_hub, _inbox, new CommandDto
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = EffectGrantRehydrate.ApplyCommandName,
+            Payload = payload,
+        }).ConfigureAwait(false);
     }
 
     Task NotifyBindingClearAsync(string? instanceId, string? correlationId)

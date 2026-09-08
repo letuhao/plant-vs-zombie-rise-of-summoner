@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commanders — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Draft-only — promote into _kit if approved */
+  .lrow.is-active { border-color: var(--lawn-hot); background: rgb(72 120 48 / .08); }
+  .lrow.is-active .nm { color: var(--text); }
+  .deploystrip { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--sp-3);
+      align-items: center; padding: var(--sp-3); border: 1px solid var(--lawn-hot);
+      border-radius: var(--r-md); background: rgb(72 120 48 / .06); }
+  .locstub, .legionlink { font-size: var(--text-xs); color: var(--muted); }
+  .locstub.is-pending { border-bottom: 1px dashed var(--faint); cursor: default; }
+  .legionlink { text-decoration: underline; text-decoration-style: dashed; cursor: pointer; }
+  .stubpanel { border: 1px dashed var(--border-control); border-radius: var(--r-md);
+      padding: var(--sp-4); background: var(--panel-inset); opacity: .85; }
+  .stubpanel .tag { vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Commanders</h1>
+  <p>
+    The player empire's commanders — who leads your legions on the world map and whose auras reach
+    the lawn. Today that roster is one person: Crazy Dave. The list is the missing door into the
+    same Actor sheet creatures use, with commander-only tabs (aura loadout, banner, account-wide
+    aptitudes). It also carries the <b>persisted default lawn commander</b> (Crazy Dave initially,
+    swappable when the roster grows — never a pre-run gate), plus <b>stubs</b> for map location and
+    legion detail — reverse hooks for
+    when the world map ships so you can monitor a commander and their legion from here. This plate
+    does not re-spec auras; the aura-skill program already owns that stack.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 09</span>
+    <span class="tag">GG-1 · GG-9 · GG-17 · GG-44</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="08-actor-sheet.html">← Actor sheet</a>
+  <a href="#a">A · Why a list</a>
+  <a href="#b">B · Commander list layer</a>
+  <a href="#c">C · List → Actor sheet</a>
+  <a href="#d">D · Lawn run deploy</a>
+  <a href="#e">E · Location &amp; legion stubs</a>
+  <a href="#f">F · Genre ideal</a>
+  <a href="#g">G · What this plate settles</a>
+  <a href="#h">H · Dependencies</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Why a list — and whose commanders belong here</h2>
+  <p class="lede">
+    Dave is implicit everywhere today: Sanctum skips straight to the lawn, aptitudes assume one
+    commander, loadout APIs key to the player id with no picker. That worked while there was only
+    one commander and no menu — it fails the moment the empire can field more than one leader or the
+    player needs to review aura loadout before a run.
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Who</th><th>Empire</th><th>Player commander list?</th><th>Where instead</th></tr></thead>
+      <tbody>
+        <tr><td><b>Crazy Dave</b></td><td>Player empire (Plants)</td><td><b>Yes</b> — editable roster</td><td>This layer → <a href="08-actor-sheet.html#i">Actor sheet §I</a></td></tr>
+        <tr><td><b>Dr. Zomboss</b></td><td>Enemy empire (Zombies)</td><td><b>No</b> — not your roster</td><td><a href="03-world.html">World map</a> faction · AI turn data · intel when scouted</td></tr>
+        <tr><td>Future commanders</td><td>Player empire only</td><td>Yes, when recruited</td><td>Same list pattern — row count grows, shell stays</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Empire boundary, not a global roster.</strong> Two empires exist on the Two Hearths
+      world map from the first campaign gate — Dave's hearth and Zomboss's fortress cluster — but
+      the player manages <em>their</em> empire's commanders here. The opposing commander is map and
+      AI data, the same way you do not edit the enemy's creature roster in your Creatures layer.
+      Symmetric loam rules on the map do not mean symmetric UI.
+    </div>
+    <div class="note">
+      <strong>Not the Aptitudes rail layer.</strong> Primary Stats (<span class="hotkey">◎</span>)
+      remains a fast-path into commander-scope point spending. This list answers <em>which commander</em>
+      and opens their full sheet — identity, loadout, banner — not "how many points in Might."
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Commander list layer <span class="hotkey">K</span></h2>
+  <p class="lede">
+    Same shell as Creatures (<a href="02-collection.html">plate 02 §A</a>): rail, scrim, stage still
+    mounted underneath, one panel over wherever the player already is. At N=1 today the body is a
+    single selectable row, not a card grid — the grid earns its filter bar when the roster grows.
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">&#8962;</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">&#10022;</span>Creatures</button>
+          <button class="is-active"><span class="g">&#9873;</span>Commanders</button>
+          <button><span class="g">&#9672;</span>Relics</button>
+          <button><span class="g">&#9879;</span>Fusion</button>
+          <button><span class="g">&#128121;</span>Pacts</button>
+          <button><span class="g">&#9973;</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">&#128214;</span>Almanac</button>
+          <button><span class="g">&#128366;</span>Chronicle</button>
+        </nav>
+        <div class="stagearea">
+          <div class="sanctum" style="filter:saturate(.6)">
+            <div class="shelf" style="opacity:.5"><header><h3>Your hearth</h3></header></div>
+          </div>
+          <div class="scrim"></div>
+
+          <div style="position:absolute;inset:12px;z-index:var(--band-panel)">
+            <div class="panel-shell" style="height:100%;display:grid;grid-template-rows:auto 1fr auto">
+              <header>
+                <div style="flex:1">
+                  <h3>Commanders</h3>
+                  <div class="sub">Your empire · 2 commanders · Dave is default</div>
+                </div>
+                <span class="esc">Esc</span>
+                <button class="btn btn--icon btn--ghost" aria-label="Close">✕</button>
+              </header>
+              <div class="body" style="display:grid;grid-template-rows:auto auto 1fr;gap:var(--sp-3);min-height:0">
+                <div class="deploystrip">
+                  <div>
+                    <p class="spec-label" style="margin:0 0 var(--sp-1)">Default lawn commander</p>
+                    <span class="seg">
+                      <button class="is-active">Crazy Dave</button>
+                      <button>Penny</button>
+                    </span>
+                    <p class="statenote" style="margin:var(--sp-1) 0 0">Saved default · change anytime · never required before play</p>
+                  </div>
+                  <button class="btn btn--ghost">Set default</button>
+                  <button class="btn">Defend the lawn <span class="hotkey">↵</span></button>
+                </div>
+                <p class="statenote" style="margin:0">
+                  Your empire's commanders. Opposing empires appear on the
+                  <a href="03-world.html">world map</a>, not here.
+                </p>
+                <div class="col-flex" style="align-content:start;gap:var(--sp-2);overflow:auto">
+                  <div class="lrow is-active" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;cursor:pointer;border:1px solid var(--lawn-hot);border-radius:var(--r-sm)">
+                    <span class="frame frame--row" data-rarity="4">🧑‍🌾</span>
+                    <span style="min-width:0">
+                      <span class="nm">Crazy Dave</span>
+                      <p class="sub row-flex" style="gap:var(--sp-2);flex-wrap:wrap">
+                        <span class="side" data-side="plant"><i class="pip"></i>Plants</span>
+                        <span class="tag">Commander</span>
+                        <span class="tag tag--warn">default</span>
+                      </p>
+                      <p class="sub locstub is-pending" title="Links to world map when shipped">
+                        📍 Hearth capital <span class="tag" style="font-size:9px">map stub</span>
+                        · <span class="legionlink">Legion 1</span> <span class="readout">3 units</span>
+                      </p>
+                    </span>
+                    <span class="readout" style="white-space:nowrap;text-align:right">
+                      <span class="chip" style="display:inline-flex;max-width:120px;margin-bottom:4px"><span class="frame frame--chip" data-rarity="3">☀</span><span class="nm">Sun Blessing</span></span><br>Lv 30
+                    </span>
+                  </div>
+                  <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;cursor:pointer;border:1px solid var(--border);border-radius:var(--r-sm);opacity:.92">
+                    <span class="frame frame--row" data-rarity="3">👩‍🔬</span>
+                    <span style="min-width:0">
+                      <span class="nm">Penny</span>
+                      <p class="sub row-flex" style="gap:var(--sp-2);flex-wrap:wrap">
+                        <span class="side" data-side="plant"><i class="pip"></i>Plants</span>
+                        <span class="tag">Commander</span>
+                      </p>
+                      <p class="sub locstub is-pending">
+                        📍 Outpost corridor <span class="tag" style="font-size:9px">map stub</span>
+                        · <span class="legionlink">Legion 2</span> <span class="readout">1 unit</span>
+                      </p>
+                    </span>
+                    <span class="readout" style="white-space:nowrap">Lv 12</span>
+                  </div>
+                  <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr);border:1px dashed var(--border-control);border-radius:var(--r-sm);opacity:.45">
+                    <span class="frame is-missing">+</span>
+                    <span><span class="nm">Empty berth</span><p class="sub">More commanders when your empire recruits them</p></span>
+                  </div>
+                </div>
+              </div>
+              <footer>
+                <span class="readout" style="margin-right:auto">Select · open sheet · <span class="hotkey">Esc</span> closes</span>
+                <button class="btn btn--ghost">Open sheet</button>
+                <button class="btn btn--ghost">Set default</button>
+                <button class="btn">Defend the lawn</button>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Default lawn commander is a first-class control.</strong> The deploy strip and row badges
+      share one persisted choice — default Crazy Dave until the player sets another default. Defend the
+      lawn travels with that commander's saved auras; it is not a per-run picker or a hidden second default.
+    </div>
+    <div class="note">
+      <strong>Penny is a layout stub for multi-commander select,</strong> not a shipped roster claim.
+      Dave alone is true in code today; the second row shows how Set default / seg control behave
+      when the empire fields more leaders. Set default / Defend the lawn — not Set for lawn run.
+    </div>
+    <div class="note">
+      <strong>No filter bar until the roster outgrows the screen.</strong> Search and faction filters
+      wait for content — same rule as N=1, applied here at N=2 mock rows.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · List → Actor sheet — same panel, commander role</h2>
+  <p class="lede">
+    GG-9: one detail component for every actor kind. Creatures and commanders differ in tabs and
+    footer actions, not in shell. Selecting Dave and pressing Open sheet (or double-clicking the row)
+    opens the commander variant drawn in <a href="08-actor-sheet.html#i">plate 08 §I</a> — aura
+    group on Actions, banner on Gear, Set default / Defend the lawn mirrors in the footer. Location and legion
+    lines on the list row are map reverse stubs until those programs ship.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div style="position:relative;height:320px;background:var(--soil-raised);border-radius:var(--r-md);border:1px solid var(--border);overflow:hidden">
+        <div class="sanctum" style="filter:saturate(.5);height:100%;opacity:.6"></div>
+        <div class="scrim"></div>
+        <div style="position:absolute;inset:8px 28% 8px 8px;z-index:var(--band-panel);display:grid">
+          <div class="panel-shell" style="height:100%;opacity:.92">
+            <header><div style="flex:1"><h3>Commanders</h3><div class="sub">Dave selected</div></div></header>
+            <div class="body" style="padding:var(--sp-2)">
+              <div class="lrow is-active" style="grid-template-columns:var(--icon-row) minmax(0,1fr);border-radius:var(--r-sm)">
+                <span class="frame">🧑‍🌾</span>
+                <span><span class="nm">Crazy Dave</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:8px 8px 8px 72%;z-index:calc(var(--band-panel) + 1);display:grid;place-items:stretch">
+          <div class="panel-shell actor-panel" style="height:100%;font-size:var(--text-sm)">
+            <header style="padding:var(--sp-2) var(--sp-3)">
+              <span class="frame frame--panel" data-rarity="4">🧑‍🌾</span>
+              <div style="flex:1;min-width:0"><h3 style="font-size:var(--text-md)">Crazy Dave</h3>
+                <div class="meta"><span class="tag">Commander</span></div></div>
+            </header>
+            <div class="body" style="padding:var(--sp-3);color:var(--muted);font-size:var(--text-xs)">
+              Full six-tab sheet — see plate 08 §I
+            </div>
+            <footer style="padding:var(--sp-2)"><button class="btn btn--sm" style="width:100%">Defend the lawn</button></footer>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Stacked on narrow viewports, side-by-side on wide.</strong> The list can stay open while
+      the sheet is edited — same pattern as Relics master-detail on plate 02 §B. Exact breakpoint
+      is implementation; the behaviour is "list does not unmount when detail opens."
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Async default — no pre-run gate</h2>
+  <p class="lede">
+    The lawn run is led by one commander, but the web FE never blocks play to ask who. The save carries
+    a <b>persisted default</b> (Crazy Dave on first launch). The player changes it here when they want —
+    not before every match. Sanctum's <em>Defend the lawn</em> and the PvZ game menu are separate
+    clients; the overlay reads the same default asynchronously when a match starts, the same shape as
+    aptitude polling today.
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Control</th><th>Job</th><th>Gate before play?</th></tr></thead>
+      <tbody>
+        <tr><td><b>Row / seg select</b></td><td>Highlight commander in list</td><td>No</td></tr>
+        <tr><td><b>Set default</b></td><td>Persist who leads the <em>next</em> lawn run</td><td>No — optional anytime</td></tr>
+        <tr><td><b>Defend the lawn</b></td><td>Travel / start with saved default + auras</td><td>No — same as Sanctum ↵</td></tr>
+      </tbody>
+    </table>
+    <div class="viewport short">
+      <div class="deploystrip" style="max-width:640px;margin:0 auto">
+        <div>
+          <p class="spec-label" style="margin:0 0 var(--sp-1)">Default lawn commander</p>
+          <span class="seg"><button class="is-active">Crazy Dave</button><button>Penny</button></span>
+          <p class="statenote" style="margin:var(--sp-1) 0 0">Saved default · applies to next match</p>
+        </div>
+        <button class="btn btn--ghost">Set default</button>
+        <button class="btn">Defend the lawn</button>
+      </div>
+    </div>
+    <div class="note">
+      <strong>No pre-run dialog for commander.</strong> We do not add a commander row to
+      <a href="07-flows.html">plate 07 §A</a> or force a web step before the game menu runs. Creature
+      loadout in 07 is a separate concern — also async where the dual-client constraint applies.
+    </div>
+    <div class="note">
+      <strong>Strip, footer, and sheet buttons are mirrors, not gates.</strong> They all read or write
+      the same persisted default. None of them block play if the player never opens this layer.
+    </div>
+    <div class="note">
+      <strong>Active aura ≠ default commander.</strong> Loadout and runtime toggles live on the Actor
+      sheet Actions tab. Default names <em>who</em> leads; which aura is live follows that commander's save.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Location and legion — map reverse stubs</h2>
+  <p class="lede">
+    When the world map ships, the player monitors commanders and legions on the map — sector markers,
+    march lines, fog. This list is the <b>reverse hook</b>: each row shows where that commander sits
+    on the map and which legion they lead, so you can jump map ↔ roster without re-searching. Neither
+    path is built yet; both render as honest stubs (GG-17).
+  </p>
+  <div class="spec">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)">
+      <div>
+        <p class="spec-label">Current location — stub</p>
+        <div class="stubpanel">
+          <p class="locstub is-pending" style="font-size:var(--text-sm);margin:0 0 var(--sp-2)">
+            📍 <b>Hearth capital</b> · sector <span class="readout">d-home</span>
+          </p>
+          <p class="statenote" style="margin:0">
+            Not clickable yet. When the map exists: opens sector inspector on
+            <a href="03-world.html">plate 03</a> focused on this sector.
+          </p>
+          <span class="tag tag--info" style="margin-top:var(--sp-2);display:inline-block">pending world map</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Legion detail — stub</p>
+        <div class="stubpanel">
+          <p style="margin:0 0 var(--sp-2)"><b>Legion 1</b> · 3 units · garrison</p>
+          <div class="col-flex" style="gap:var(--sp-1);font-size:var(--text-xs);color:var(--muted)">
+            <span>Emberling · Thornlet · Ashkell</span>
+          </div>
+          <p class="statenote" style="margin:var(--sp-2) 0 0">
+            Full legion menu is a future layer — composition, march orders, attach to commander.
+            Clicking the legion link on a row opens this stub panel until that program lands.
+          </p>
+          <span class="tag tag--info" style="margin-top:var(--sp-2);display:inline-block">pending legion menu</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Reverse navigation is the design goal.</strong> Map → select legion marker → commander
+      sheet; commander list → location stub → map sector. Same entities, two entry points — the stub
+      copy says which direction is not wired yet.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · Genre ideal (in-repo only)</h2>
+  <p class="lede">
+    No external command-list scrape was run for this plate. The analogies below come from
+    <code>aura-skill-ideal.md</code> §3 and the commander FE audit — leader-slot and pre-battle
+    review patterns, not a pixel copy of any one game.
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Pattern elsewhere</th><th>What we keep</th><th>What we refuse</th></tr></thead>
+      <tbody>
+        <tr><td>FEH / gacha <em>one leader slot</em></td><td>Army-wide aura is exclusive by design — cap of one active</td><td>Showing enemy leader in the player's roster UI</td></tr>
+        <tr><td>HoMM3 pre-battle <em>hero + army review</em></td><td>List → sheet when player chooses to prep</td><td>Mandatory pre-run web gate — dual-client cannot enforce it</td></tr>
+        <tr><td>TD hero bar</td><td>Commander identity visible before and during lawn</td><td>Real-time command buttons on the Sanctum rail</td></tr>
+        <tr><td>Summoners War / Raid leader stays after death</td><td>Aura delivery off-board — commander never needs a lawn tile</td><td>Re-implementing leader death as a lawn mechanic</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>New rail entry?</td><td>Yes — Commanders, hotkey K</td><td><code>information-architecture.md</code> §3 — ninth player layer, rail after Creatures</td></tr>
+      <tr><td>Who appears in the list?</td><td>Player-empire commanders only</td><td>Zomboss never rows here; world map owns opposing empire</td></tr>
+      <tr><td>Default lawn commander?</td><td>Crazy Dave until player sets another default</td><td>Persisted save · async read on match start</td></tr>
+      <tr><td>Pre-run dialog for commander?</td><td><b>No</b></td><td>Web FE and PvZ menu independent — §D</td></tr>
+      <tr><td>How do you start a lawn run?</td><td>Defend the lawn with saved default</td><td>Sanctum ↵ or same button here — not a picker gate</td></tr>
+      <tr><td>Map location on row?</td><td>Stub now · deep-link to sector later</td><td>Reverse hook for world map program</td></tr>
+      <tr><td>Legion on row?</td><td>Stub link · legion detail panel later</td><td>Future legion menu — not designed here</td></tr>
+      <tr><td>Detail surface?</td><td>Same <code>ActorPanel</code> as creatures</td><td>Plate 08 §I draws commander role extensions</td></tr>
+      <tr><td>Re-spec auras?</td><td>No</td><td>UI door only; aura-skill program owns mechanics</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ==================================================================== H -->
+<section class="sec" id="h">
+  <h2>H · Dependencies — design honesty, not a build spec</h2>
+  <p class="lede">
+    This plate is static HTML. A future implementation needs backend joins the mock assumes exist.
+    Named here so the layout is not mistaken for shipped behaviour (GG-17).
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Need</th><th>Today</th><th>Plate shows anyway</th></tr></thead>
+      <tbody>
+        <tr><td>Commander list API (player empire only)</td><td>Missing — enum in Core only</td><td>Dave + Penny layout rows</td></tr>
+        <tr><td>Persisted default lawn commander</td><td>Implicit Dave, not persisted</td><td>Set default · async handoff</td></tr>
+        <tr><td>Pre-run commander gate</td><td>Does not exist — refused by design</td><td>Not in 07 §A</td></tr>
+        <tr><td>Defend the lawn / travel</td><td>Sanctum skips to <code>/lawn</code></td><td>Uses saved default at match start</td></tr>
+        <tr><td>Commander map location</td><td>Not built</td><td>Location stub on row · §E</td></tr>
+        <tr><td>Legion menu / detail</td><td>Not built</td><td>Legion link stub · §E panel</td></tr>
+        <tr><td>Aptitudes / loadout / aura runtime</td><td>Dave endpoints exist; partial FE</td><td>Aura chip on row; sheet §I</td></tr>
+        <tr><td>Enemy commander (Zomboss)</td><td>World faction + AI patterns</td><td>Named in §A only — not in list mock</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Nothing in §G authorizes code.</strong> It is the ideal boundary between what this
+      drawing proposes and what the repo still lacks — for owner review before any program lands in
+      <code>tasks/</code> or <code>src/</code>.
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 09 · Commanders · draft 2026-08-30 · governed by architecture/game-gui-principles.md ·
+  genre notes from aura-skill-ideal.md §3 and commander-fe-audit-2026-08-30.md (in-repo only)
+</footer>
+
+</div>
+</body>
+</html>

@@ -53,10 +53,10 @@ public class ContractPolicyTests
     }
 
     [Theory]
-    [InlineData(DemonRarity.Common, 2)]
-    [InlineData(DemonRarity.Rare, 5)]
-    [InlineData(DemonRarity.Epic, 12)]
-    [InlineData(DemonRarity.Legendary, 25)]
+    [InlineData(DemonRarity.Chaff, 2)]
+    [InlineData(DemonRarity.Cultivated, 5)]
+    [InlineData(DemonRarity.Heirloom, 12)]
+    [InlineData(DemonRarity.Sunwoven, 25)]
     public void Base_upkeep_is_rarity_scaled(DemonRarity rarity, int expected) =>
         Assert.Equal(expected, ContractPolicy.BaseUpkeepPerDay(rarity));
 
@@ -64,11 +64,11 @@ public class ContractPolicyTests
     public void Upkeep_applies_personality_percent_with_integer_truncation()
     {
         // feral legendary: 25 × 70 / 100 = 17.5 → 17. Truncation always favours the player.
-        Assert.Equal(17, ContractPolicy.UpkeepPerDay(DemonRarity.Legendary, DemonPersonality.Feral));
-        Assert.Equal(32, ContractPolicy.UpkeepPerDay(DemonRarity.Legendary, DemonPersonality.Proud));
-        Assert.Equal(2, ContractPolicy.UpkeepPerDay(DemonRarity.Common, DemonPersonality.Loyal));
+        Assert.Equal(17, ContractPolicy.UpkeepPerDay(DemonRarity.Sunwoven, DemonPersonality.Feral));
+        Assert.Equal(32, ContractPolicy.UpkeepPerDay(DemonRarity.Sunwoven, DemonPersonality.Proud));
+        Assert.Equal(2, ContractPolicy.UpkeepPerDay(DemonRarity.Chaff, DemonPersonality.Loyal));
         // A cheap demon with a discount personality still costs something: never free, never negative.
-        Assert.Equal(1, ContractPolicy.UpkeepPerDay(DemonRarity.Common, DemonPersonality.Feral));
+        Assert.Equal(1, ContractPolicy.UpkeepPerDay(DemonRarity.Chaff, DemonPersonality.Feral));
     }
 
     [Fact]
@@ -116,10 +116,10 @@ public class ContractPolicyTests
     {
         Assert.Equal(120, ContractPolicy.RitualGainFor(DemonPersonality.Loyal));  // 100 × 120 / 100
         Assert.Equal(80, ContractPolicy.RitualGainFor(DemonPersonality.Feral));
-        Assert.Equal(50, ContractPolicy.RitualPrice(DemonRarity.Common));
-        Assert.Equal(100, ContractPolicy.RitualPrice(DemonRarity.Rare));
-        Assert.Equal(200, ContractPolicy.RitualPrice(DemonRarity.Epic));
-        Assert.Equal(400, ContractPolicy.RitualPrice(DemonRarity.Legendary));
+        Assert.Equal(50, ContractPolicy.RitualPrice(DemonRarity.Chaff, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.Equal(100, ContractPolicy.RitualPrice(DemonRarity.Cultivated, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.Equal(200, ContractPolicy.RitualPrice(DemonRarity.Heirloom, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.Equal(400, ContractPolicy.RitualPrice(DemonRarity.Sunwoven, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
     }
 
     [Fact]
@@ -131,9 +131,9 @@ public class ContractPolicyTests
         // 300 x (purchased+1), so the price to reach TOTAL slot N (purchased = N-12) is
         // 300 x (N-11), and the cumulative cost to reach N is a triangular sum.
         Assert.Equal(12, ContractPolicy.Capacity(0));
-        Assert.Equal(300, ContractPolicy.NextSlotPrice(0));
-        Assert.Equal(600, ContractPolicy.NextSlotPrice(1));
-        Assert.Equal(900, ContractPolicy.NextSlotPrice(2));
+        Assert.Equal(300, ContractPolicy.NextSlotPrice(0, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.Equal(600, ContractPolicy.NextSlotPrice(1, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.Equal(900, ContractPolicy.NextSlotPrice(2, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
 
         // Past the OLD 48-slot ceiling, capacity keeps climbing and buying never refuses.
         Assert.Equal(48, ContractPolicy.Capacity(36));
@@ -146,10 +146,10 @@ public class ContractPolicyTests
         // SSOT §11.1a's own table, exact: total slot 512 (purchased=500) prices at 150,300, cumulative
         // 37,575,000 -- the argument the whole deletion rests on, asserted precisely, not approximately.
         Assert.Equal(512, ContractPolicy.Capacity(500));
-        Assert.Equal(150_300, ContractPolicy.NextSlotPrice(500));
+        Assert.Equal(150_300, ContractPolicy.NextSlotPrice(500, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
 
         long cumulative = 0;
-        for (var k = 0; k < 500; k++) cumulative += ContractPolicy.NextSlotPrice(k);
+        for (var k = 0; k < 500; k++) cumulative += ContractPolicy.NextSlotPrice(k, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning);
         Assert.Equal(37_575_000, cumulative);
     }
 
@@ -159,8 +159,8 @@ public class ContractPolicyTests
         // SSOT §11.1a: "the warden mechanic survives intact... because of the price formula, not
         // because of the cap." Proven directly: binding a warden still consumes a slot and the Nth
         // slot still costs strictly more than the (N-1)th, arbitrarily far past the old 48 ceiling.
-        Assert.Equal(600_300, ContractPolicy.NextSlotPrice(2000)); // the 2,012th total slot, SSOT's own row
-        Assert.True(ContractPolicy.NextSlotPrice(2000) > ContractPolicy.NextSlotPrice(1999));
+        Assert.Equal(600_300, ContractPolicy.NextSlotPrice(2000, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning)); // the 2,012th total slot, SSOT's own row
+        Assert.True(ContractPolicy.NextSlotPrice(2000, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning) > ContractPolicy.NextSlotPrice(1999, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
         Assert.Equal(2012, ContractPolicy.Capacity(2000));
     }
 

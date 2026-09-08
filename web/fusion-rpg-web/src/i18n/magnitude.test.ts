@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Magnitude } from "@/contract/types";
+import type { Magnitude, UnitClass } from "@/contract/types";
 import { formatMagnitude, formatSigmoidContext } from "./magnitude";
 
 function mag(unit: Magnitude["unit"], value: number, extra?: Partial<Magnitude>): Magnitude {
@@ -30,7 +30,8 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
   });
 
   it("perMilleRatio increased: +15% (per-mille divided by 10, SC4 display posture)", () => {
-    expect(formatMagnitude(mag("perMilleRatio", 150, { op: "increased" }))).toBe("+15.0%");
+    // world-numbers W37: a trailing ".0" is trimmed — 15.0% reads as 15%.
+    expect(formatMagnitude(mag("perMilleRatio", 150, { op: "increased" }))).toBe("+15%");
   });
 
   it("perMilleRatio more: ×1.15 — a multiplier, not a percentage (Guard #5: increased/more differ)", () => {
@@ -44,7 +45,44 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
   });
 
   it("perMilleRatio flat: a plain percentage (chance/share)", () => {
-    expect(formatMagnitude(mag("perMilleRatio", 250, { op: "flat" }))).toBe("25.0%");
+    // world-numbers W37: a trailing ".0" is trimmed — 25.0% reads as 25%.
+    expect(formatMagnitude(mag("perMilleRatio", 250, { op: "flat" }))).toBe("25%");
+  });
+
+  it("perMilleRatio absolute: ×1.40 from the raw 1400 — no delta-from-1000 arithmetic (world-numbers W37, the verified defect's fix)", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 1400, { op: "absolute" }))).toBe("×1.40");
+    // The neutral baseline itself renders neutral.
+    expect(formatMagnitude(mag("perMilleRatio", 1000, { op: "absolute" }))).toBe("×1.00");
+  });
+
+  it("perMilleRatio flat: StabilityMilli 240 renders 24%, not 24.0% — the acceptance's own named example", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 240, { op: "flat" }))).toBe("24%");
+  });
+
+  it("perMilleRatio: a non-trivial decimal is not trimmed away", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 245, { op: "flat" }))).toBe("24.5%");
+  });
+
+  it("perMilleRatio: a small non-zero value never renders as 0% — the smallest per-mille integer already clears one decimal", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 1, { op: "flat" }))).toBe("0.1%");
+    expect(formatMagnitude(mag("perMilleRatio", 1, { op: "flat" }))).not.toBe("0%");
+  });
+
+  it("perMilleRatio: a genuine zero still renders 0%, not merely trimmed away to nothing", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 0, { op: "flat" }))).toBe("0%");
+  });
+
+  it("loamUnits: a whole, unsigned count — the class the four …Milli loam-cost fields actually are", () => {
+    expect(formatMagnitude(mag("loamUnits", 200))).toBe("200");
+    expect(formatMagnitude(mag("loamUnits", 0))).toBe("0");
+  });
+
+  it("movementRemaining (perMilleRatio, op flat) renders as a fraction of the march budget, never a bare count", () => {
+    // 750‰ of one turn's march budget — never "750 movement".
+    const rendered = formatMagnitude(mag("perMilleRatio", 750, { op: "flat" }));
+    expect(rendered).toBe("75%");
+    expect(rendered).not.toContain("movement");
+    expect(rendered).not.toBe("750");
   });
 
   it("milliseconds under one second render as ms", () => {
@@ -63,6 +101,56 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
     expect(formatMagnitude(mag("flag", 1))).toBe("present");
     expect(formatMagnitude(mag("flag", 0))).toBe("absent");
     expect(formatMagnitude(mag("flag", 1))).not.toMatch(/\d/);
+  });
+});
+
+/**
+ * party-dungeon D5.3 (spec-delve-stage.md §13, §14's own named test row) — "a value above
+ * `MAX_SAFE_INTEGER` renders digit for digit through `exact`". Uses a souls-shaped fixture (`count`)
+ * since that is this task's own concrete, named example (`DelveRow.SoulsUnbanked`), but the mechanism
+ * under test is generic to any `Magnitude` carrying `exact` — see `types.ts`'s own `Magnitude.exact`
+ * doc comment for the real, separate gap in how far this precision survives the live delve wire today.
+ */
+describe("formatMagnitude — Magnitude.exact (D5.3, a long figure past Number.MAX_SAFE_INTEGER)", () => {
+  it("A_long_soul_balance_renders_exactly: a value already mangled by IEEE754 still renders the true digits", () => {
+    // The true server-side long value — one past Number.MAX_SAFE_INTEGER, so an ordinary `number`
+    // cannot hold it exactly. `value` below is deliberately a WRONG, already-rounded reading (as it
+    // would arrive after a lossy JSON round-trip) to prove the renderer prefers `exact` over it, not
+    // merely that it renders correctly when the two happen to agree.
+    const trueValue = "9007199254740993"; // Number.MAX_SAFE_INTEGER + 2, not representable exactly
+    const mangled = Number(trueValue); // rounds to 9007199254740992 — provably not equal to trueValue
+    expect(String(mangled)).not.toBe(trueValue);
+
+    const rendered = formatMagnitude(mag("count", mangled, { exact: trueValue }));
+    expect(rendered).toBe("9,007,199,254,740,993");
+    expect(rendered).not.toBe(new Intl.NumberFormat("en").format(mangled));
+  });
+
+  it("renders a genuinely huge long (near Int64.MaxValue) digit for digit, grouped", () => {
+    const trueValue = "9223372036854775807"; // long.MaxValue
+    const rendered = formatMagnitude(mag("count", 0, { exact: trueValue }));
+    expect(rendered).toBe("9,223,372,036,854,775,807");
+  });
+
+  it("a negative exact figure renders with its sign, via BigInt, no Number(...) round-trip", () => {
+    const rendered = formatMagnitude(mag("gameUnits", 0, { exact: "-9223372036854775808" }));
+    expect(rendered).toBe("-9,223,372,036,854,775,808");
+  });
+
+  it("exact is respected regardless of unit class — the field wins before the unit switch runs", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 500, { op: "flat", exact: "123456789012345678" }))).toBe(
+      "123,456,789,012,345,678"
+    );
+  });
+
+  it("a Magnitude with no exact field still renders through the ordinary value path (no regression)", () => {
+    expect(formatMagnitude(mag("count", 42))).toBe("42");
+  });
+
+  it("an in-range value with exact set still prefers exact, byte for byte", () => {
+    // Even when value is already correct, exact — when present — is the one source of truth; this
+    // proves the branch is unconditional on `m.exact !== undefined`, not a magnitude-size heuristic.
+    expect(formatMagnitude(mag("count", 42, { exact: "42" }))).toBe("42");
   });
 });
 
@@ -98,5 +186,45 @@ describe("formatSigmoidContext — the corrected two-part-line shape", () => {
     expect(text).not.toContain("%");
     expect(text).not.toContain("->");
     expect(text).not.toContain("→");
+  });
+});
+
+/**
+ * Task I9 (spec-tree-surface.md §6, §14 test 15) -- "Focus_renders_as_prose_and_creates_no_unit_class:
+ * the UnitClass union is byte-identical before and after this module." The Passives Focus line (`1/H`,
+ * "about N paths") deliberately renders as plain prose in `passivesYours.ts`'s own `focusReading`/
+ * `draftFocusPreview` and `PassivesTab.tsx`/`PlanPanel.tsx`'s own JSX -- never through
+ * `formatMagnitude`, never a `Magnitude` -- so no fourteenth `UnitClass` is needed or added.
+ *
+ * `ALL_UNIT_CLASSES` below is a `Record<UnitClass, true>` object literal assigned directly to that
+ * type, which makes BOTH directions of drift a real `tsc` compile error at `npm run build`'s
+ * `--noEmit` step, not just a runtime count:
+ *  - adding a 14th member to `UnitClass` makes this object literal miss a required key (a
+ *    "Property '...' is missing" error) until this file is updated to acknowledge it;
+ *  - removing a member from `UnitClass` makes this object literal carry an EXCESS key TypeScript's
+ *    own excess-property check on a directly-assigned object literal flags.
+ * The runtime assertion below is the same guarantee restated as something `vitest run` can also see
+ * (vitest's transform strips types without checking them, so the compile-time half above only fires
+ * under `tsc --noEmit`; this count is the fast, always-on half of the same proof).
+ */
+describe("UnitClass union — byte-identical guard (task I9)", () => {
+  const ALL_UNIT_CLASSES: Record<UnitClass, true> = {
+    gameUnits: true,
+    gameUnitsPerSecond: true,
+    sigmoidPoints: true,
+    sigmoidMultiplierPoints: true,
+    statusPotencyPoints: true,
+    perMilleRatio: true,
+    milliseconds: true,
+    count: true,
+    flag: true,
+    ladderIndex: true,
+    aptitudePoints: true,
+    reciprocalPoints: true,
+    loamUnits: true
+  };
+
+  it("still has exactly thirteen members -- spec-tree-surface.md §6: 'thirteen and none of them has to grow'", () => {
+    expect(Object.keys(ALL_UNIT_CLASSES)).toHaveLength(13);
   });
 });

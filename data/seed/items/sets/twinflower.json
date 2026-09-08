@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-twinflower",
+    "partition": "sets/twinflower",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.twinflower-001",
+      "nameKey": "set.twin-sunflower",
+      "name": "Twin Sunflower",
+      "themeKey": "demon.twinflower",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.econ-bounty",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.flourishing",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A golden bloom that feeds on the radiance of a thousand suns to yield endless bounty.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

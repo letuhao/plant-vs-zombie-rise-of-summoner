@@ -6,8 +6,23 @@ public static class RpgActorKinds
     public const string Plant = "plant";
     public const string Zombie = "zombie";
 
+    /// <summary>`species-build` T1.1 — a demon SPECIES' own per-player level (module 3, `species-xp`),
+    /// distinct from the `Plant`/`Zombie` PvZ-TYPE rows above: those key on the PvZ engine's own type
+    /// id and are read by other things today, so they stay untouched. A species row keys on
+    /// <c>DemonSpeciesDef.DemonTypeId</c> (the disjoint ≥10000 id space, already unique per species —
+    /// `DemonSpeciesCatalog.Validate`) — spec-species-xp.md §1 Option A: reuse
+    /// <c>rpg_actor_progression</c>/<c>rpg_xp_ledger</c> with a new `kind`, never a second store.</summary>
+    public const string Species = "species";
+
+    /// <summary>A unique demon INSTANCE's own level (`rpg_unique_actors`), distinct from
+    /// <see cref="Species"/>, which is the per-player level of a species TYPE. Added 2026-09-05 by the
+    /// effort-power reconciliation: this level feeds the same quadratic `P(Theta)` as every other, but
+    /// its cost was a flat, hardcoded 100 XP per level, which made specimen power quadratic IN EFFORT
+    /// where ssot-power-scale.md &sect;10.5 requires linear. It now reads the shared arithmetic ladder.</summary>
+    public const string Specimen = "specimen";
+
     public static bool IsKnown(string? kind) =>
-        kind is Player or Plant or Zombie;
+        kind is Player or Plant or Zombie or Species or Specimen;
 }
 
 public static class RpgXpReasons
@@ -17,6 +32,18 @@ public static class RpgXpReasons
     public const string Mower = "mower";
     public const string PlantPlace = "plant_place";
     public const string ZombieSpawn = "zombie_spawn";
+
+    /// <summary>`species-build` T1.3 — the "outcome" term of the two-term species faucet
+    /// (spec-species-xp.md §3), fired once per resolved match a species was fielded in. The
+    /// per-placement term reuses <see cref="PlantPlace"/>/<see cref="ZombieSpawn"/> as its reason.</summary>
+    public const string SpeciesRunComplete = "species_run_complete";
+
+    /// <summary>`species-build` T1.4 — the non-lawn source (spec-species-xp.md §2 "Expedition"):
+    /// a specimen's battle-won xp also levels its species row, in the same transaction as the
+    /// specimen award. The standalone-first proof source — reachable with the game closed.</summary>
+    public const string SpeciesExpedition = "species_expedition";
+    public const string SpecimenLawnKill = "specimen_lawn_kill";
+    public const string SpecimenLawnDuration = "specimen_lawn_duration";
 }
 
 /// <summary>Arithmetic XP curve per actor kind (POC-tuned; faster early levels). Config-backed
@@ -32,31 +59,47 @@ public static class RpgXpCurve
         "RpgXpCurve.Configure(...) has not run. Every XP curve reads " +
         "data/tuning/progression.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 
-    public static (double First, double Step) ParamsFor(string kind) => kind switch
+    public static (long First, long Step) ParamsFor(string kind) => kind switch
     {
+        // Species reads its OWN tunable pair from its own file (species-progression.v1.json), not
+        // progression.v1.json's xpCurve — a species' pace is this program's own balance surface, not
+        // plant/zombie/player progression's (spec-species-xp.md §4). Matched first and evaluated
+        // lazily by the switch, so a caller that never touches Species never needs this hub configured.
+        RpgActorKinds.Species => (SpeciesProgressionTuningHub.Tuning.CurveFirst, SpeciesProgressionTuningHub.Tuning.CurveStep),
+        RpgActorKinds.Specimen => (Tuning.SpecimenCurve.First, Tuning.SpecimenCurve.Step),
         RpgActorKinds.Plant => (Tuning.PlantCurve.First, Tuning.PlantCurve.Step),
         RpgActorKinds.Zombie => (Tuning.ZombieCurve.First, Tuning.ZombieCurve.Step),
         // player — first match clears L1; mid-game paces ~L12–18 / 20 wins
         _ => (Tuning.PlayerCurve.First, Tuning.PlayerCurve.Step)
     };
 
-    public static double XpToNext(string kind, long level)
+    /// <summary>
+    /// The arithmetic cost ladder `first + (L−1)·step` — ssot-power-scale.md §10 row 6, kept
+    /// unchanged as a COST ladder (exempt from the one-ladder rule; only its ratio against `P(Θ)`
+    /// matters, §10.5). `long` end to end: XP is a persisted magnitude, so overflow throws rather
+    /// than silently losing precision the way a `double` would past 2^53.
+    /// </summary>
+    public static long XpToNext(string kind, long level)
     {
         if (level < 1) level = 1;
         var (first, step) = ParamsFor(kind);
-        var need = first + (level - 1) * step;
-        if (double.IsNaN(need) || double.IsInfinity(need) || need < 1.0)
-            return 1.0;
-        return need;
+        long need;
+        checked { need = first + (level - 1) * step; }
+        return need < 1 ? 1 : need;
     }
 
-    public static double TotalToReach(string kind, long level)
+    /// <summary>
+    /// Cumulative XP to reach `level` — the triangular sum of the arithmetic ladder above, which is
+    /// why total cost is QUADRATIC while each step is linear (§10.5). `n·(2·first + (n−1)·step)` is
+    /// always even, so the halving is exact and no rounding decision exists to get wrong.
+    /// </summary>
+    public static long TotalToReach(string kind, long level)
     {
         if (level <= 1) return 0;
         var (first, step) = ParamsFor(kind);
         // sum_{i=0}^{L-2} (first + i*step)
         var n = level - 1;
-        return n * (2 * first + (n - 1) * step) / 2.0;
+        checked { return n * (2 * first + (n - 1) * step) / 2; }
     }
 }
 
@@ -76,17 +119,21 @@ public static class RpgXpAwards
         "RpgXpAwards.Configure(...) has not run. Every award reads data/tuning/progression.v{n}.json " +
         "(tunables-ssot.md T5) — there is no built-in default to fall back to.")).Awards;
 
-    public static double Kill => Tuning.Kill;
-    public static double Defeat => Tuning.Defeat;
-    public static double Mower => Tuning.Mower;
-    public static double PlantPlace => Tuning.PlantPlace;
-    public static double ZombieSpawn => Tuning.ZombieSpawn;
+    public static long Kill => Tuning.Kill;
+    public static long Defeat => Tuning.Defeat;
+    public static long Mower => Tuning.Mower;
+    public static long PlantPlace => Tuning.PlantPlace;
+    public static long ZombieSpawn => Tuning.ZombieSpawn;
+    public static long SpecimenLawnKill => Tuning.SpecimenLawnKill;
+    public static long SpecimenBoundIntervalMs => Tuning.SpecimenBoundIntervalMs;
+    public static long SpecimenBoundIntervalXp => Tuning.SpecimenBoundIntervalXp;
 }
 
 public sealed class RpgActorState
 {
     public long Level { get; set; } = 1;
-    public double Xp { get; set; }
+    /// <summary>Whole XP. `long`, never `double` — this value is persisted (CLAUDE.md numeric rule).</summary>
+    public long Xp { get; set; }
     public long HighestLevel { get; set; } = 1;
     public long DemotionCount { get; set; }
     public long Revision { get; set; }
@@ -99,7 +146,7 @@ public sealed class LevelChangeEvent
     public int TypeId { get; init; }
     public long LevelBefore { get; init; }
     public long LevelAfter { get; init; }
-    public double XpAfter { get; init; }
+    public long XpAfter { get; init; }
     public long DemotionCount { get; init; }
     public string Reason { get; init; } = "";
     public string Direction { get; init; } = "up"; // up | down
@@ -113,10 +160,17 @@ public sealed class RpgXpApplyResult
 
 public static class RpgXpApply
 {
+    /// <summary>
+    /// Applies a whole-XP delta. `delta` is `long` because XP is a persisted magnitude: any
+    /// fractional scaling (today `RpgXpAwardMap.NoKillPowerScaleYet = 1.0`, tomorrow content-scale)
+    /// is rounded ONCE at the award boundary in <see cref="RpgXpAwardMap"/>, never accumulated as a
+    /// fraction here — an XP total built from repeated fractional adds is order-dependent, and
+    /// `state.Xp >= need` would then compare accumulated error against a threshold.
+    /// </summary>
     public static RpgXpApplyResult Apply(
         string kind,
         RpgActorState state,
-        double delta,
+        long delta,
         long playerId = 0,
         int typeId = 0,
         string reason = "")
@@ -126,7 +180,12 @@ public static class RpgXpApply
         var demotion = state.DemotionCount;
         var changes = new List<LevelChangeEvent>();
 
-        state.Xp += delta;
+        // species-build T1.1: XP is a persisted magnitude (CLAUDE.md numeric-overflow rule) -- this
+        // project does not set <CheckForOverflowUnderflow>, so a plain `+=` here wrapped silently
+        // instead of throwing (caught by SpeciesProgressionTests.Apply_overflow_throws_neverWraps,
+        // species-xp's own "overflow throws" acceptance criterion). `checked` applies to every kind,
+        // not just species -- player/plant/zombie XP is exactly as much a magnitude as a species level.
+        checked { state.Xp += delta; }
 
         if (delta > 0)
         {
@@ -164,7 +223,7 @@ public static class RpgXpApply
             state.Level--;
             demotion++;
             state.DemotionCount = demotion;
-            state.Xp += RpgXpCurve.XpToNext(kind, state.Level);
+            checked { state.Xp += RpgXpCurve.XpToNext(kind, state.Level); }
             changes.Add(new LevelChangeEvent
             {
                 PlayerId = playerId,

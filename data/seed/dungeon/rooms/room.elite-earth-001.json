@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-dual-001",
+  "eventPool": [],
+  "flavor": "The air here is thick with the scent of pulverized flint and ancient dust. Massive, jagged pillars of obsidian rise from a floor of shifting shale, vibrating with a low, rhythmic thrum that rattles the teeth.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Lithic Crucible",
+  "reason": "A concentrated cluster of earth elementals guards a narrow choke point, forcing the party into a high-stakes skirmish within a cramped, uneven terrain.",
+  "roomId": "room.elite-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

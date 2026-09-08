@@ -1,0 +1,26 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "A narrow, circular corridor where the floor is polished to a mirror sheen. A constant, low-frequency hum vibrates through the soles of your boots, and the air feels unnaturally thin, as if something is being sucked toward the far end of the hall.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Zephyr's Throat",
+  "reason": "The room is designed to trigger a sudden, high-pressure vacuum event when a weight-sensitive plate is tripped, pulling all loose objects and creatures toward a central vent.",
+  "roomId": "room.trap-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

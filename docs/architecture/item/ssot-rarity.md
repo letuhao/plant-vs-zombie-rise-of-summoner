@@ -128,6 +128,39 @@ grades objects the way a nursery grades stock, not the way a dungeon grades swor
 **Rung 10 (`chaff`) is the only rung with no pool.** Base type plus implicit, `pool_rolls = 0` —
 item-ideal §6.2's "Normal". It exists because salvage, promotion, and crafting all need a bottom.
 
+**Added 2026-09-01 (T0.2, alongside T0.4's `pool_rolls` split):** the *Count band* column above is the
+combined total across both affix classes. Each rung's total splits into a **prefix band and a suffix
+band**, one-per-group within each class (`spec-container-schema.md`, `seed-contract.md` §2.1):
+
+| Ordinal | Prefix band | Suffix band |
+|---|---|---|
+| 10 `chaff` | 0 | 0 |
+| 20 `sprout` | 0–1 | 1–1 |
+| 30 `grafted` | 0–1 | 1–1 |
+| 40 `cultivated` | 1–2 | 1–1 |
+| 50 `fused` | 1–2 | 1–1 |
+| 60 `chimeric` | 1–2 | 2–2 |
+| 70 `heirloom` | 1–2 | 2–2 |
+| 80 `firstseed` | 2–3 | 2–2 |
+| 90 `sunwoven` | 2–3 | 2–2 |
+| 100 `almanac` | 3–3 | 2–3 |
+
+✅ **E3 (item-ideal.md, `rarity-bands`, 2026-09-04): `sprout` and `heirloom` corrected before the first
+seed.** As originally published, `sprout` was `0–1 + 0–1 = 0–2` against a published Count band of
+`1–2`, and `heirloom` was `2–2 + 2–2 = 4–4` against a published band of `3–4` — both wrong. §3.4's own
+ladder alternates strictly (odd steps widen the pool, even steps add an affix), and that alternation
+derives the fix directly: **a window step keeps the halves of the rung below it; only a count step may
+move them.** `sprout` (a count step) inherits `grafted`'s eventual suffix half rather than repeating
+`chaff`'s zero; `heirloom` (a window step) keeps `chimeric`'s halves rather than incrementing them a
+second time. Every row now sums to its published band. Ordinals are append-only, so this correction
+landed **before** seeding — a post-seed fix would have been a migration.
+
+Each half sums to the same combined *Count band* the ladder already published, so no existing total
+changes — only which roll pool an affix comes from is now visible. A **mixed bundle** (`seed-contract.md`
+§2.1's `affixClass`) consumes one prefix roll and one suffix roll simultaneously, never doubling either
+band. Starting values, tunable per rung in `data/tuning/` — a balance pass moving the split costs a
+file save, not a re-derivation of this table.
+
 ### 3.4 Why exactly ten — the staircase, and why an eleventh breaks
 
 Take the count bands a six-affix maximum allows — `1-2`, `2-3`, `3-4`, `4-5`, `5-6` — and the tier
@@ -240,9 +273,15 @@ hard pity at 55, and a 10-pull rare floor (`SummonRoller.cs:8-30,63-80`).
 
 **Items reuse the shape, not the counters, and only on counted sources.**
 
+✅ **E1 (item-ideal.md, `rarity-bands`, D31, 2026-09-04 — lands before D7):** the rule below is scoped
+to **drop** pity. Craft pity (module 15, `spec-enhance-reroll.md` §5) is a **placement** — at threshold
+it sets the tier directly to the container's `max_tier`, and the weighted draw never runs — so it does
+not touch the independent-draws measurement §3.5 rests on, and D7's tier guarantee on crafting is
+implementable without contradicting the rule below.
+
 | Rule | Why |
 |---|---|
-| Pity may key on **rung only** — never on roll quality, never on tier | A quality pity makes draws non-independent, and §3.5's invariant is measured on independent draws. It also teaches players to bank drops |
+| **Drop** pity may key on rung only — never on roll quality, never on tier. Craft pity is module 15's and is a placement, not a weight shift | A quality pity makes draws non-independent, and §3.5's invariant is measured on independent draws. It also teaches players to bank drops |
 | **Two guarded rungs: 70 (Heirloom) and 90 (Sunwoven)** | Mirrors the summon precedent's two counters. Ordinal 100 is deliberately unguarded |
 | **Rung 100 must have at least one deterministic source** | An unreachable top rung is a frustration, not a fantasy. If it is not pity-guaranteed it must be quest- or boss-guaranteed. I12 owns which |
 | Pity counters apply to **counted sources only** — expedition completion, boss kill, chest open | A shared counter over a high-volume incidental drop stream converts into "farm trash mobs to force a Sunwoven" |
@@ -257,7 +296,7 @@ hard pity at 55, and a 10-pull rare floor (`SummonRoller.cs:8-30,63-80`).
 
 | Option | Shape | Verdict |
 |---|---|---|
-| **A — four rungs, shared with `DemonRarity`** | common / rare / epic / legendary | Rejected. One enum for everything and no new table, but it defies OD4's "long ladder", and growing `DemonRarity` to ten breaks summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, and the `shard.{rarity}` material ids — five consumers, for zero item-side gain |
+| **A — four rungs, shared with `DemonRarity`** | common / rare / epic / legendary | Rejected as *items shrinking to four*. It defies OD4's "long ladder" for zero item-side gain. **The mirror move — `DemonRarity` growing to this document's ten — was reversed into acceptance 2026-09-01** (§4.3, T0.2): the five consumers named here (summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, `shard.{rarity}`) are exactly `demon-seed` T4.1–T4.3's task list, done as a reviewed migration rather than avoided |
 | **B — five rungs, D2 shape** | normal / magic / rare / set / unique | Rejected. Familiar, but it mixes a *power* axis with two *authoring* axes (set, unique), which is exactly the confusion §3.6 exists to prevent |
 | **C — ten-rung staircase** ✅ | §3.3 | **Recommended.** Longest legible chain the machinery admits (§3.4), and the alternating steps give a one-sentence upgrade story |
 | **D — no rungs, a continuous quality score** | one 0–1000 number | Rejected. Maximum gradation, zero legibility: nothing to name in a tooltip, nothing for I12 to weight, nothing for I4/I6 to key a budget on. A score without rungs moves the whole registry problem into a formula |
@@ -300,18 +339,30 @@ read only `ordinal`, `color_hex`, `pip_count` and `display_key`, because those a
 consumer (the UI) always exists. Nothing forces every category to use all ten — materials will
 plausibly stop at 70.
 
-**Demons keep their own ladder.** `DemonRarity` stays a four-value code enum, and a one-way band map
-lets the two be compared without being fused:
+**Reversed 2026-09-01 (`seed-to-concrete` T0.2, owner Q24: *"Migrate `DemonRarity` to 10 values
+now"*).** Demons no longer keep a separate four-value ladder — they adopt this document's own
+ten-rung ladder directly, the same `rarity_id`/ordinal/colour/pip columns every other category reads
+(§4.3's "one ladder; every category free to use a subset of the rungs" already covers this; demons
+simply stop being the one holdout). The reason to reverse: `demon-seed` (T4.1 `rarity-migration`)
+needs demon rarity on the same closed inventory `power-scale` and `threat-band` already read from, and
+a second four-value ladder living beside it was exactly the "two ladders that can be confused" problem
+§3.3's design was built to avoid — it just took until the demon program actually needed magnitude
+parity with items to become visible.
 
-| `DemonRarity` | Item ordinal band |
-|---|---|
-| `Common` | 10 – 30 |
-| `Rare` | 40 – 60 |
-| `Epic` | 70 – 80 |
-| `Legendary` | 90 – 100 |
+The four-row band map below is **kept as a migration shim only** — the lookup `DemonMigration.LegacyRarityToRung`
+uses once, at data-migration time (T4.3), to place every existing `DemonRarity.{Common,Rare,Epic,Legendary}`
+value onto the new ten-rung ladder. It is not a permanent wall between two systems, and no new code
+may branch on it after the migration completes:
 
-Four rows, no table needed. The map exists so a legendary demon's drop table can be written in item
-rungs and so `shard.legendary` can be priced — **not** so the two ladders can be merged later.
+| Old `DemonRarity` | New rung (ordinal) | Migration rule |
+|---|---|---|
+| `Common` | 10–30 | maps to the band's **lowest** rung (`chaff`, ordinal 10) — nobody gains value on migration |
+| `Rare` | 40–60 | maps to `cultivated`, ordinal 40 |
+| `Epic` | 70–80 | maps to `heirloom`, ordinal 70 |
+| `Legendary` | 90–100 | maps to `sunwoven`, ordinal 90 |
+
+T4.1's guard test (forbidding bare int↔`DemonRarity` casts and relational comparisons against named
+members) is what keeps this shim from becoming a silent second ladder again.
 
 ### 4.4 THE REGISTRY — a table, not a widening row
 
@@ -339,14 +390,15 @@ the key name, and the constraint the value must satisfy.
 | `color_hex`, `pip_count`, `display_key` | the three UI channels | I13, launcher overlay | **I1** | set — §3.3 |
 | *(keys in `rarity_budget`)* | | | | |
 | `socket_min` / `socket_max` | sockets a rung grants | I4 | **I4** | awaiting — must also declare whether the count is *rolled*, because a rolled socket count is a fourth variance and moves every number in §3.5 |
-| `set_eligible` | 0/1 — may a piece of this rung belong to a set | I5 | **I5** | awaiting |
-| `enhance_cap` | enhancement ceiling | I6 | **I6** | awaiting — constrained: total gain at cap ≤ one rung step in expectation (§9.5) |
-| `promote_from` | 0/1 — may an item at this rung be promoted upward | I6 | **I1** | set — 1 for ordinals 10–70, 0 for 80–100 (§3.7 rule 7) |
+| ~~`set_eligible`~~ | — | — | — | ✅ **DROPPED (item-ideal.md 2026-09-04, `rarity-bands`).** D15: a set has no rarity and completes from pieces of any rung, so this key could only ever hold `1`. `spec-set-charm-gen.md` never mentions it, and SC7 rejects a registered key with no shipped consumer — deferring it again would ship a seed file that fails to load |
+| `enhance_cap` | ✅ **re-specified 2026-09-04**: no longer a `+X` ceiling — the **‰ asymptote** of total enhancement gain, `gain(n) = enhance_cap(rung) × n/(n+K)`. Never a hard stop | I6 | **I1**, curve consumed by module 15 | ✅ set — the shrinking-step table, §9.5's derivation below |
+| `promote_from` | 0/1 — may an item at this rung be promoted upward | I6 | **I1** | ✅ **set — 1 on all ten rungs (D7, item-ideal.md).** The row this replaces read "1 for ordinals 10–70, 0 for 80–100" (§3.7 rule 7) — stale: D7 lifted rule 7, so no rung is drop-only on any axis and the strongest affix family is never gated by luck alone |
 | `reroll_cost_mult` | reroll price multiplier | I7 | **I7** | awaiting — must also scale with **affix count**, not rung alone (§9.7) |
-| `drop_weight_default` | baseline weight per source | I12 | **I12** | awaiting |
+| `drop_weight_default` | baseline weight per source | I12 | **I12** | ✅ set — item-ideal.md's ten-rung re-derivation, `data/tuning/item-rarity.v1.json` |
 | `pity_guarded` | 0/1 — does a counter guarantee this rung | I12 | **I1** picks the rungs, **I12** the thresholds | set — 1 at 70 and 90 (§3.8) |
+| `power_ceiling` | ‰-of-top price share, for module 9's `ceilingFor` | I3 (D11 lint) | **I1** | ✅ **set — provisional**, ratio-exact under a uniform coefficient rescale (item-ideal.md §2h.2 #8) |
 | `salvage_yield` | material quantity on salvage | I9 / I13 | **I9** | awaiting — must **not** reuse `shard.{DemonRarity}` ids (§9.8) |
-| `charm_potency` | charm scaling | I10 | **I10** | awaiting |
+| ~~`charm_potency`~~ | — | — | — | ✅ **NOT REGISTERED (item-ideal.md 2026-09-04, `rarity-bands`).** I10 defines it; `spec-set-charm-gen.md` never reads it. SC7 forbids registering a key ahead of its consumer — module 13 registers it **with** its consumer when it needs it |
 | — | **nothing.** Rarity is not an equip gate | I11 | **I1** | set — negative registration |
 
 ### 4.5 Colour, and the readability argument
@@ -470,9 +522,9 @@ SC7 in table form. A category with no pool never reads a pool column, and that i
 |---|---|---|
 | `item` (equipment) | everything | — |
 | `gem` (I4 insert) | ordinal, colour, pips, name, socket budgets | count band, tier window |
-| `charm` (I10) | ordinal, colour, pips, name, `charm_potency` | count band, tier window |
+| `charm` (I10) | ordinal, colour, pips, name | count band, tier window, ~~`charm_potency`~~ (not registered — SC7, see §5) |
 | Material / consumable / currency *(plain rows, no container)* | ordinal, colour, pips, name | everything else |
-| `set` (I5 tier) | ordinal, `set_eligible` | count band, tier window |
+| `set` (I5 tier) | ordinal | count band, tier window, ~~`set_eligible`~~ (dropped — D15, see §5) |
 
 ### 6.3 Guard tests this lane owes
 

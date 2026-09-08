@@ -19,14 +19,16 @@ public static class PatronCommand
         var aura = new PatronAura(
             elementPrimary!,
             root.TryGetProperty("elementSecondary", out var es) ? es.GetString() : null,
-            GetInt(root, "powerMilli"),
-            GetInt(root, "defenseMilli"),
-            GetInt(root, "secondaryPowerMilli"),
-            GetInt(root, "secondaryDefenseMilli"));
+            GetLong(root, "powerMilli"),
+            GetLong(root, "defenseMilli"),
+            GetLong(root, "secondaryPowerMilli"),
+            GetLong(root, "secondaryDefenseMilli"));
         var playerId = root.TryGetProperty("playerId", out var pid) && pid.TryGetInt64(out var p) ? p : 0;
         PatronRuntimeState.Set(playerId, aura);
     }
 
-    static int GetInt(JsonElement root, string name) =>
-        root.TryGetProperty(name, out var v) && v.TryGetInt32(out var i) ? i : 0;
+    // aura-skill T22: widened from GetInt to GetLong — PatronAura's fields are `long` now (the P(Θ)
+    // term makes this magnitude scale with the power ladder instead of staying int-safe forever).
+    static long GetLong(JsonElement root, string name) =>
+        root.TryGetProperty(name, out var v) && v.TryGetInt64(out var i) ? i : 0;
 }

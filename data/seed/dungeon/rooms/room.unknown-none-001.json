@@ -1,0 +1,27 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001",
+    "event.encounter-event-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, featureless expanse of grey mist where the sound of your own breathing feels unnaturally loud, as if the air itself is waiting for you to speak.",
+  "hazardBand": "none",
+  "kind": "unknown",
+  "name": "The Echoing Void",
+  "reason": "The room's geometry and contents are obscured by a magical shroud that only dissipates once the threshold is crossed.",
+  "roomId": "room.unknown-none-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

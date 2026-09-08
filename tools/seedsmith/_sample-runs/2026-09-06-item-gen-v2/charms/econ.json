@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "charm",
+  "_meta": {
+    "batch": "charm-gen-econ",
+    "partition": "charms/econ",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 4,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-09-06T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "charm.econ-021",
+      "nameKey": "charm.cinder-tally",
+      "name": "Cinder Tally",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "Burnt through three times and re-strung with wire each time. It counts what the fire finished rather than what it started, which is the only count anyone has ever been paid on.",
+      "notes": "themeKey: demon.ashthreepeater"
+    }
+  ]
+}

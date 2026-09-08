@@ -51,9 +51,74 @@ public enum RollPolicy
 /// <see cref="AtomJson.TryReadValueSpec"/>, never silently defaulted) since it is authored content,
 /// not a structural constant; unused and ignored otherwise.
 /// </param>
+/// <param name="PowerLadder">
+/// T6.2 (`patron-absorption`, `tasks/seed-to-concrete-open-decisions.md` §2, owner-approved
+/// 2026-09-02): the same "a magnitude needs something outside <see cref="Resolve"/>'s own scope"
+/// shape <see cref="EventField"/> already solved for firing-event fields, applied here to an
+/// owner's own power index — read <c>PowerLadder.Value(Θ)</c> (`Power/PowerLadder.cs`, the one
+/// shared ladder every magnitude in this codebase reads) instead of rolling Min/Max. Mutually
+/// exclusive with Min/Max/Roll/CurveId/EventField. Unlike <see cref="EventField"/>, Θ is known at
+/// COMPILE time (an owner's own power index, not something a hit produces), so this resolves in
+/// <c>AtomCompiler.ResolvedParams</c> directly, never deferred to an apply-time consumer.
+/// </param>
+/// <param name="PowerLadderKMilli">
+/// Per-mille multiplier applied to <c>PowerLadder.Value(Θ)</c> — the balance number, matching
+/// <c>PatronPolicy.PThetaKMilli</c>'s own role. <b>Required whenever <paramref name="PowerLadder"/>
+/// is set</b> (enforced in <see cref="AtomJson.TryReadValueSpec"/>, never silently defaulted);
+/// unused and ignored otherwise.
+/// </param>
+/// <param name="PowerLadderKMicro">
+/// task B3 (spec-tree-binder.md §3.5, §7): a per-million sibling of <paramref name="PowerLadderKMilli"/>,
+/// for the one caller a per-mille coefficient is too coarse for — `tree-binder`'s `kMicro`
+/// (spec-tree-catalog.md §2.3). At per-mille, `gated-deep` stores `kMilli = 0` for 12 of 40 nodes
+/// (silently inert, in the shallow tiers every build buys first); at per-million the same worst
+/// case is 0.04% error. Constructed programmatically by `tree-binder`, never authored as JSON
+/// (`AtomJson.TryReadValueSpec` is untouched — this field has no grammar branch there), so
+/// <see cref="PowerLadderKMilli"/>'s existing authored-content consumers are completely unaffected.
+/// Non-zero selects this field over <see cref="PowerLadderKMilli"/> in <c>AtomCompiler</c>.
+/// </param>
+/// <param name="ClampedLevelScale">
+/// T6.2's own second gap, found while resuming it: `AuraMilli`'s flat part is
+/// <c>clamp(base + level, 0, cap)</c> — a clamp has no home in the closed FA1 op vocabulary
+/// (`AtomRowValidator.StatOps`/`DerivedOps` — no cap/min/max op exists) or in any channel-level
+/// policy. Owner-approved as "a new FA1 op" (2026-09-02), then found not to need one: `level` is
+/// the only true per-owner runtime input here (rarity/star are fixed per authored container), and
+/// it is already available at compile time — the same <c>ownerLevel</c> parameter curve-scaled
+/// values already read. Resolves to <c>Math.Clamp(BaseMilli + ownerLevel, 0, CapMilli)</c> in
+/// `AtomCompiler.ResolvedParams`, exactly like <see cref="PowerLadder"/> — no Injector-side change,
+/// no new runtime opcode. Mutually exclusive with Min/Max/Roll/CurveId/EventField/PowerLadder.
+/// </param>
+/// <param name="ClampedLevelScaleBaseMilli">
+/// The authored constant — <c>RarityBaseMilli(rarity) + PerStarMilli·star</c> for this container's
+/// own (rarity, star). Required whenever <see cref="ClampedLevelScale"/> is set.
+/// </param>
+/// <param name="ClampedLevelScaleCapMilli">
+/// The ceiling — matches <c>PatronPolicy.AuraClampMilli</c>'s own role. Required whenever
+/// <see cref="ClampedLevelScale"/> is set, never silently defaulted.
+/// </param>
+/// <param name="ExternalRef">
+/// `patron-absorption` (`spec-patron-absorption.md`'s own 2026-09-06 amendment) — the "referenced,
+/// not re-expressed" shape that spec decided on: some magnitudes are not safely RE-DERIVABLE as an
+/// atom formula at all, because the real value is per-player-varying and already computed by a
+/// SHIPPED function elsewhere (`PatronPolicy.AuraMilli`) — reproducing it as composed
+/// <see cref="PowerLadder"/>/<see cref="ClampedLevelScale"/> atoms would satisfy the letter of "an
+/// atom carries the number" while leaving TWO independently-expressed formulas that are only
+/// PROVABLY equal by a sweep, never by construction, and can drift the moment either is tuned alone.
+/// A closed, literal, reviewed string id (never a free-form expression or a reflected method name),
+/// resolved by <c>AtomCompiler.ResolvedParams</c> via a caller-supplied
+/// <c>externalRefs: Func&lt;string, long&gt;?</c> callback — the exact same shape
+/// <c>curves: Func&lt;string, CurveTable?&gt;</c> already has, so <c>AtomCompiler</c> itself never
+/// imports <c>PatronPolicy</c> or anything domain-specific; it only ever invokes whatever callback it
+/// was handed. Mutually exclusive with every other `ValueSpec` shape. Compiling an atom that carries
+/// this marker with no callback supplied (or an id the callback does not recognise) throws, naming
+/// the ref id — never silently prices at zero, matching every other marker's own rule.
+/// </param>
 public readonly record struct ValueSpec(
     int Min, int Max, RollPolicy Roll, string? CurveId = null,
-    string? EventField = null, int MultiplierMilli = 1000)
+    string? EventField = null, int MultiplierMilli = 1000,
+    bool PowerLadder = false, int PowerLadderKMilli = 0, long PowerLadderKMicro = 0,
+    bool ClampedLevelScale = false, int ClampedLevelScaleBaseMilli = 0, int ClampedLevelScaleCapMilli = 0,
+    string? ExternalRef = null)
 {
     /// <summary>The closed set of fields an event-linked spec may read. One member today.</summary>
     public static readonly IReadOnlyCollection<string> EventFields = new[] { "damage" };
@@ -78,10 +143,45 @@ public readonly record struct ValueSpec(
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
                     $"unknown eventField '{EventField}' — the closed set is: {string.Join(", ", EventFields)}");
 
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || PowerLadder || ClampedLevelScale || ExternalRef is not null)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "eventField is exclusive of min/max/roll/curve/powerLadder/clampedLevelScale/externalRef — author only " +
+                    "{\"eventField\": ..., \"multiplierMilli\": ...}");
+
+            return AtomRejection.Ok;
+        }
+
+        if (PowerLadder)
+        {
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || ClampedLevelScale || ExternalRef is not null)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "powerLadder is exclusive of min/max/roll/curve/eventField/clampedLevelScale/externalRef — author only " +
+                    "{\"powerLadder\": true, \"kMilli\": ...}");
+
+            return AtomRejection.Ok;
+        }
+
+        if (ClampedLevelScale)
+        {
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || ExternalRef is not null)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "clampedLevelScale is exclusive of min/max/roll/curve/eventField/powerLadder/externalRef — author only " +
+                    "{\"clampedLevelScale\": true, \"baseMilli\": ..., \"capMilli\": ...}");
+            if (ClampedLevelScaleCapMilli < 0)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    $"clampedLevelScale capMilli must be >= 0, got {ClampedLevelScaleCapMilli}");
+
+            return AtomRejection.Ok;
+        }
+
+        if (ExternalRef is not null)
+        {
+            if (ExternalRef.Length == 0)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "externalRef must not be empty");
             if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null)
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
-                    "eventField is exclusive of min/max/roll/curve — author only " +
-                    "{\"eventField\": ..., \"multiplierMilli\": ...}");
+                    "externalRef is exclusive of min/max/roll/curve/eventField/powerLadder/clampedLevelScale — author only " +
+                    "{\"externalRef\": \"...\"}");
 
             return AtomRejection.Ok;
         }

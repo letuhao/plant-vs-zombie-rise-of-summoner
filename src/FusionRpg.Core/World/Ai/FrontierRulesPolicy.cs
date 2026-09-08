@@ -38,6 +38,9 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     /// </summary>
     public static long SeveranceThresholdCost => WorldAiPolicy.Tuning.FrontierRules.SeveranceThresholdCost;
 
+    /// <summary>Momentum hysteresis margin, per-mille — see <see cref="FrontierRulesTuning"/>.</summary>
+    public static int MomentumMarginMilli => WorldAiPolicy.Tuning.FrontierRules.MomentumMarginMilli;
+
     public string PolicyId => Id;
 
     public IReadOnlyList<PolicyOrder> Decide(IWorldView view, ulong seed)
@@ -170,6 +173,9 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         if (!hasSourceAnywhere) return null;
 
         var handicap = view.Factions.First(f => string.Equals(f.FactionId, view.FactionId, StringComparison.Ordinal)).UpkeepHandicapMilli;
+        // world-map W48/W49: the season is calendar, never fogged — the belief side reads it off
+        // the turn exactly like truth does (`LoamUpkeep.BreakdownFor`), never a second copy.
+        var seasonMilli = World.WorldTuningHub.Tuning.Seasons.UpkeepMilli[TurnCalendar.SeasonOf(view.CurrentTurn)];
 
         long totalProduction = 0, totalUpkeep = 0, totalStock = 0;
         string? weakest = null;
@@ -183,7 +189,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
             var garrisonMembers = view.OwnForces
                 .Where(e => string.Equals(e.AtSectorId, id, StringComparison.Ordinal))
                 .Sum(e => e.Members.Count);
-            var upkeep = LoamUpkeep.For(garrisonMembers, b.DevelopmentLevel, b.DangerBand, b.FractureIntensityMilli, handicap);
+            var upkeep = LoamUpkeep.For(garrisonMembers, b.DevelopmentLevel, b.DangerBand, b.FractureIntensityMilli, handicap, seasonMilli);
 
             totalProduction += production;
             totalUpkeep += upkeep;
@@ -392,6 +398,53 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         }
 
         if (best is null) return null;
+
+        // ---- Momentum, as hysteresis (spec-ai-commander.md §Momentum, amended 2026-08-31) --------
+        //
+        // The observed defect: Zomboss alternated `defend black-gate` / `expand to verdant-shelf`
+        // from turn 8 onward, never arriving anywhere. It is a feedback loop between two rules --
+        // Defend pulls the legion home, the garrison rises, threat no longer exceeds it, Expand sends
+        // it out, the garrison drops -- so a bonus term has nothing to attach to. What breaks a loop
+        // like that is hysteresis: once committed, the alternative must be materially better, not
+        // merely better.
+        //
+        // Applied here rather than in Defend on purpose. Defend is the emergency at the top of the
+        // ladder and must stay free to interrupt a march; making an emergency sticky would trade
+        // dithering for a legion that ignores a real threat, which is the worse failure.
+        //
+        // `LastOrderedDestination` is self-knowledge derived from the command log, not new stored
+        // state, and it can never reach a replayed hash because replay never re-runs a policy.
+        var standing = view.LastOrderedDestination(entity.EntityId);
+        if (standing is not null
+            && !string.Equals(standing, best, StringComparison.Ordinal)
+            && !string.Equals(standing, entity.AtSectorId, StringComparison.Ordinal))
+        {
+            var standingScore = value.TryGetValue(standing, out var sv) ? sv.Total : 0;
+            if (standingScore > 0)
+            {
+                // Widen before multiplying and divide once, last -- a value total is a magnitude and
+                // the margin is per-mille (CLAUDE.md "Numeric overflow"). checked so an absurd score
+                // throws rather than wrapping into a silently negative threshold.
+                long required;
+                checked
+                {
+                    required = standingScore
+                             + standingScore * MomentumMarginMilli / 1000;
+                }
+
+                if (bestScore <= required)
+                {
+                    // Stay the course. Re-route to the standing target rather than returning null:
+                    // returning null would drop through to Hold and strand the legion mid-map, which
+                    // is a different bug wearing the same fix.
+                    var keep = Route(view, entity, standing);
+                    if (keep is not null && SurvivesTheRoute(view, entity, keep, supplied))
+                        return Order(view, entity, WorldCommandKinds.Move,
+                            $"expand to {standing}, holding course ({bestScore} does not beat {required})",
+                            lanePath: keep);
+                }
+            }
+        }
 
         var path = Route(view, entity, best);
         if (path is null || !SurvivesTheRoute(view, entity, path, supplied)) return null;

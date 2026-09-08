@@ -43,7 +43,7 @@ public class CostLedgerTests
         ActorDerivedSnapshot derived,
         long nowTick = 0,
         Func<double, int>? thetaScaleMilliOf = null) =>
-        new(costs, _ => pools, _ => derived, _ => Rung, () => nowTick, thetaScaleMilliOf);
+        new(costs, _ => pools, _ => derived, (_, _) => Rung, () => nowTick, thetaScaleMilliOf);
 
     static IReadOnlyDictionary<string, IReadOnlyList<ActionCostRow>> Costs(string actionId, params ActionCostRow[] rows) =>
         new Dictionary<string, IReadOnlyList<ActionCostRow>> { [actionId] = rows };
@@ -198,6 +198,69 @@ public class CostLedgerTests
         Assert.True(FusionRpg.Core.Actions.Rungs.RungPolicy.Table.TryResolve(Rung, out var atRungOne));
         Assert.True(FusionRpg.Core.Actions.Rungs.RungPolicy.Table.TryResolve(Rung, out var alsoAtRungOne));
         Assert.Equal(atRungOne.CdMulti, alsoAtRungOne.CdMulti); // same rung, called "at" two different (unpassable) Th -- identical, necessarily
+    }
+
+    [Fact]
+    public void TwoActorsHoldingTheSameActionAtDifferentRungsPayDifferentScaledCosts()
+    {
+        // A23 (spec-cost-scaling-holder-rung.md criterion 2): rungOf is now holder-keyed
+        // (Func<actorKey, actionId, int>) -- two actors resolving to DIFFERENT rungs for the
+        // SAME action must pay DIFFERENT scaled costs, proven through a real TryPay call against
+        // each, not the CostMulti formula read in isolation. Rungs 1 and 5 are the shipped
+        // RungPolicy.Table's own rows (costMulti 1000 / 3627 -- ContractTuningTestBootstrap's
+        // DefaultActionRungs, matching data/tuning/action-rungs.v2.json).
+        const string ActorLowRung = "actor:low-rung";
+        const string ActorHighRung = "actor:high-rung";
+        var derived = Snapshot(theta: 0, ("stamina", 1_000_000, 0));
+        var poolsLow = ActorResourcePools.CreateFull(derived, atTick: 0);
+        var poolsHigh = ActorResourcePools.CreateFull(derived, atTick: 0);
+        var costs = Costs("act.strike", new ActionCostRow("act.strike", "stamina", ValueSpec.Of(100), ActionCostTiming.OnCommit));
+
+        var ledger = new CostLedger(
+            costs,
+            poolsFor: actorKey => actorKey == ActorLowRung ? poolsLow : poolsHigh,
+            derivedFor: _ => derived,
+            rungOf: (actorKey, _) => actorKey == ActorLowRung ? 1 : 5,
+            nowTick: () => 0);
+
+        ledger.TryPay(ActorLowRung, "act.strike", ActionCostTiming.OnCommit, rng: null);
+        ledger.TryPay(ActorHighRung, "act.strike", ActionCostTiming.OnCommit, rng: null);
+
+        Assert.Equal(1_000_000 - 100, poolsLow.Resolve("stamina", 0, derived));  // rung 1: 100 * 1.000
+        Assert.Equal(1_000_000 - 363, poolsHigh.Resolve("stamina", 0, derived)); // rung 5: 100 * 3.627, rounded half-away
+    }
+
+    [Fact]
+    public void AnActorWithNoHeldEntryForTheActionResolvesTheAuthoredRungFallback()
+    {
+        // A23 criterion 3: an actor with no UnlockState entry for the action (every intrinsic/
+        // basic action, every existing fixture before this module) resolves to the AUTHORED
+        // rung, byte-identical to today -- the control every other A23 criterion is measured
+        // against. Modeled the same shape BattleRunState.EffectiveRungOf's own lookup takes:
+        // found in the held set -> holder's effective rung; not found -> the pre-A23 authored
+        // fallback.
+        const string Holder = "actor:holder";     // a real held-unlock entry -> resolves rung 5
+        const string NoEntry = "actor:no-entry";  // absent from the held set -> authored rung 1
+        var heldRungByActor = new Dictionary<string, int> { [Holder] = 5 };
+        const int AuthoredRungFallback = 1;
+
+        var derived = Snapshot(theta: 0, ("stamina", 1_000_000, 0));
+        var poolsHolder = ActorResourcePools.CreateFull(derived, atTick: 0);
+        var poolsNoEntry = ActorResourcePools.CreateFull(derived, atTick: 0);
+        var costs = Costs("act.strike", new ActionCostRow("act.strike", "stamina", ValueSpec.Of(100), ActionCostTiming.OnCommit));
+
+        var ledger = new CostLedger(
+            costs,
+            poolsFor: actorKey => actorKey == Holder ? poolsHolder : poolsNoEntry,
+            derivedFor: _ => derived,
+            rungOf: (actorKey, _) => heldRungByActor.TryGetValue(actorKey, out var rung) ? rung : AuthoredRungFallback,
+            nowTick: () => 0);
+
+        ledger.TryPay(Holder, "act.strike", ActionCostTiming.OnCommit, rng: null);
+        ledger.TryPay(NoEntry, "act.strike", ActionCostTiming.OnCommit, rng: null);
+
+        Assert.Equal(1_000_000 - 363, poolsHolder.Resolve("stamina", 0, derived));  // rung 5: 100 * 3.627
+        Assert.Equal(1_000_000 - 100, poolsNoEntry.Resolve("stamina", 0, derived)); // fallback rung 1, unchanged from today
     }
 
     [Fact]

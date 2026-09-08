@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="WIP: turn-based fights on a battle stage you play yourself — initiative, action bar, targets, wind-up and interrupt feel. Not finished yet; many web fights still auto-resolve." />
+    <title>Interactive battles — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/interactive-battles.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--wip">WIP</span>
+          Combat language · Delve · map fights
+        </p>
+        <h1 class="teach-title">Interactive battles</h1>
+        <p class="teach-hook"><strong>WIP:</strong> turn-based fights on a <strong>battle stage</strong> you play yourself — initiative, action bar, targets, wind-up and interrupt feel. Not finished yet; many web fights still auto-resolve.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>WIP</dt>
+              <dd>Not finished. You do not yet pilot every turn on a shipped battle stage.</dd>
+            </div>
+            <div>
+              <dt>Interactive</dt>
+              <dd>You pick targets and spend actions. Different from watching an auto-resolve report.</dd>
+            </div>
+            <div>
+              <dt>Auto-resolve</dt>
+              <dd>Expeditions and many web fights still resolve with the same combat math without you clicking each turn.</dd>
+            </div>
+            <div>
+              <dt>Battle stage</dt>
+              <dd>The place you fight hands-on — not the lawn board and not the rift map itself.</dd>
+            </div>
+            <div>
+              <dt>Same math</dt>
+              <dd>Auto-resolve and interactive use the same fight language. You feel the roster either way; only the pilot changes.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Skills and meters that feed the action bar are also WIP — see <a href="../../mechanisms/skills-loadouts.md">skills and loadouts</a> and <a href="actor-meters.html">actor meters</a>.</li>
+            <li>Named recipe catalog stays Vision — <a href="../../mechanisms/named-reactions.md">named reactions</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="not-finished-yet-title">
+          <h2 id="not-finished-yet-title">Not finished yet</h2>
+          <p>Today you feel the roster through auto-resolve more often than through a turn bar you own.</p>
+          <p>When the battle stage ships, you pilot turns: initiative track, action bar, targets, reactions and counters.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-it-will-feel-like-title">
+          <h2 id="what-it-will-feel-like-title">What it will feel like</h2>
+          <p>Design shape from the combat pillar:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  roster (same)  -&gt;  auto-resolve (today, many fights)
+                 -&gt;  battle stage (WIP)  -&gt;  you pilot turns
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Initiative</strong>
+              <p>Who acts when on the track.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Action bar</strong>
+              <p>What you can spend this turn.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Targets</strong>
+              <p>You pick who the action hits.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Reactions</strong>
+              <p>Windows to interrupt, counter, or answer — feel first; named catalog later.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-it-hangs-title">
+          <h2 id="where-it-hangs-title">Where it hangs</h2>
+          <p>Delves and map fights want this stage. Expeditions can stay auto-resolve on purpose.</p>
+          <p>Map handoff into battle is its own WIP — <a href="../../mechanisms/map-battle-handoff.md">map → battle handoff</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do while it is WIP</h2>
+          <ol class="steps-plain">
+            <li>Keep sending expeditions and reading returns — auto-resolve is intentional for idle.</li>
+            <li>Build roster power; the same math will matter when you pilot.</li>
+            <li>When a battle stage appears in a build, follow on-screen initiative and targeting — do not expect the lawn controls.</li>
+          </ol>
+          <p class="teach-note">Lawn remains the first core board match — <a href="../../mechanisms/lawn-match.md">lawn match</a>. This page is the hands-on stage elsewhere.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why don’t I get turns on expeditions?</dt>
+              <dd>Expeditions can stay auto-resolve. Interactive battles are a different place.</dd>
+            </div>
+            <div>
+              <dt>Is the lawn becoming turn-based?</dt>
+              <dd>No. The lawn stays a live board match. This is a separate battle stage.</dd>
+            </div>
+            <div>
+              <dt>Does auto-resolve use weaker math?</dt>
+              <dd>No. Same combat language — you just are not piloting each action.</dd>
+            </div>
+            <div>
+              <dt>Where is the battle stage button?</dt>
+              <dd>WIP — not finished. Absence is expected.</dd>
+            </div>
+            <div>
+              <dt>Are named combo recipes required first?</dt>
+              <dd>No. Reaction windows can ship with battles; the named catalog is Vision.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/skills-loadouts.md">Skills and loadouts</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/skills-loadouts.md">Skills and loadouts</a> ·
+            <a href="../../mechanisms/named-reactions.md">Named reactions and combo recipes</a> ·
+            <a href="../../mechanisms/map-battle-handoff.md">Map to battle handoff</a> ·
+            <a href="actor-meters.html">Actor meters</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/interactive-battles.md">Markdown (editable SSOT)</a> ·
+            <a href="../../combat.md">Combat</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/interactive-battles.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

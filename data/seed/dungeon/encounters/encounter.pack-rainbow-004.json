@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.pack-rainbow-004",
+  "formation": "pack",
+  "name": "Kaleidoscopic Swarm",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A chaotic influx of diverse elemental entities moving in a coordinated, shifting mass.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "short",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Finesse",
+      "reach": "short",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

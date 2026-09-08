@@ -1,0 +1,194 @@
+# Passive tree — capability map
+
+**Status:** in use, 2026-09-05. All fourteen module specs written against it (12 original plus
+`element-conversion` and `soul-curve-resolution`, both added 2026-09-06/07 — table below) — see
+`passive-tree/spec-*.md`. Source: [passive-tree-ideal.md](passive-tree-ideal.md) — 36 owner decisions,
+research documents in [../research/passive-tree/](../research/passive-tree/).
+
+This is the index of what exists for this program. **Never guess which spec is active from a
+filename** — read this table.
+
+---
+
+## Modules
+
+| Module id | Responsibility | Depends on |
+|---|---|---|
+| `squad-harness` | Six-vs-wave balance measurement. Answers D33's scope mismatch: every existing number is a 1v1 duel, the game fields six | — |
+| `mechanism-wiring` | The four inert lines that make mechanism nodes executable and *scorable*. §3.5 proved these are the only node class that rescues a focus build | — |
+| `tree-plan` | Stage 1, deterministic. Topology (10 tiers × 2 branches, 40 nodes, **rootless**), tier ladder, budgets, shape archetypes, potency ceiling (**182‰ of one branch**, derived — corrected 2026-09-05, R5; the retired 91‰-of-total form silently double-counted), the property vocabulary, and the plan schema handed downstream | — |
+| `gate-counters` | **Added 2026-09-05 (D37), shipped 2026-09-06 (G6).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the demon program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Both now `carrier` — R-G1's own block is cleared; `passive-tree-todo.md` J1 tracks the separate plan-emission-CLI gap that still blocks 30 of 42 trees (D51: was 27 of 39), 1,200 nodes (was 1,080)** | — |
+| `tree-catalog` | The baked artifact. Node record shape, id stability, catalog versioning, the freeze line, the load path | `tree-plan` |
+| `tree-language` | Stage 2. What the language stage may choose, from which closed vocabularies, under which quotas, behind which validation gates | `tree-plan` |
+| `tree-binder` | Stage 3, deterministic. Budget share → stored coefficient, atom composition, channel legality, conversion refusal | `tree-plan`, `tree-language`, `tree-catalog` |
+| `element-conversion` | **Added 2026-09-06 (D56).** The atom-vocabulary gap `tree-binder`'s own conversion refusal names: an `Element` attach point + `element.convert` kind so a passive node can actually write a weighted `ElementPayload`. Spec only — not built | `tree-binder` |
+| `soul-curve-resolution` | **Added 2026-09-06 (D58).** Closes `tree-catalog`'s own open question the other way its owner-chosen answer expected: `NodeAtom.SoulCurveId` is dead scaffolding with zero readers, not a wiring gap — soul-level scaling already ships and is tested as `tree-binder` §5.1's `Θ`-offset formula, which `passive-tree-ideal.md` §4 requires by name. Retires the dead field; adds no `CurveInput` member | `tree-catalog`, `tree-binder` |
+| `tree-review` | Making ~35,280 nodes (D51: was 35,160) across 882 trees (D51: was 879) reviewable: sampling design, the tree-card artifact, escalation, incremental re-review | `tree-catalog` |
+| `tree-state` | Per-actor allocation and soul levels. Sparse storage, rising unlock cost, respec, the migration boundary | `tree-catalog` |
+| `tree-resolve` | How tree power reaches combat. Tier gates, cross-unlock, the concentration index, the soul→Θ read | `tree-state`, `mechanism-wiring` |
+| `tree-surface` | The player surface. Browse, plan-before-spend, printed exclusions, per-actor management | `tree-state`, `tree-catalog` |
+| `species-tree` | D23/D30's unique per-species trees (**840 species × 40 nodes = 33,600**) and their own generation pipeline | `tree-language`, `tree-binder`, `tree-review` |
+
+**No cycles.** Every arrow points one way. `tree-resolve` reads `tree-state`; `tree-state` never
+reads `tree-resolve`.
+
+## Build order
+
+```
+wave 0   squad-harness · mechanism-wiring · tree-plan · gate-counters   (parallel, no shared files)
+wave 1   tree-catalog · tree-language
+wave 2   tree-binder · tree-state
+wave 3   tree-resolve · tree-review · tree-surface
+wave 4   species-tree
+```
+
+## Two SEQUENCING RULES the audit round added (2026-09-05)
+
+> **Reclassified 2026-09-05 during planning.** These were written as *gates* — hard stops blocking a phase from starting. Tested against the two questions a gate must survive, **neither is one.** Generating a corpus against a wrong premise is **expensive and detectable and redoable**; nothing is minted into a player's save, so it is recoverable. Both become **checkpoints with a reversible default**: generate the small primary corpus first, measure, then decide on the rest.
+
+**The one genuinely irreversible point in this program is the first catalog shipped to players** — after that, a node id change is a migration (D24). That is the only hard gate, and it is already a decision rather than a plan artifact.
+
+
+**A10 gates `tree-language --write`, not `tree-plan --emit`.** The plan is cheap and mints no ids, so
+being wrong there costs one regeneration. The irreversible step is the next one: ~5,040 model calls
+for the generic corpus (D51, 2026-09-06: 24 statuses, not 21 — was ~4,680), ~105,840 for species, and
+~34 human hours per review pass. Committing that against an unmeasured premise is how the program buys
+35,280 nodes (D51: was 35,160) and discovers in wave 3 that the deep tiers do nothing. **Corrected
+2026-09-05 after `spec-mechanism-wiring.md` split A10 against code — "after G1 and G3" was wrong in
+both directions:**
+
+- **A10a**, the static-snapshot difference, needs **no wiring at all**. `BattleActorSetup.ChannelMods` already carries `(ChannelId, long)`, the composer folds it and **throws** on an unknown id, and the resolver reads all eight defensive families off the defender's snapshot. It runs over `BattleEngine` in **wave 0**.
+- **A10b**, the shipped vehicle, needs G1 **and G2** — which this map never named — **plus a Battle status→`DerivedLedger` producer that does not exist and is in no module's modified-files table.** `BattleStatusSpec` carries no `StatMods` at all, and `BattleDerivedModifierLedger.Add` has one caller: the construction-time aura loop.
+
+So: **run A10a now, gate `tree-language --write` on it, and treat A10b as a separate item with an unowned prerequisite.**
+
+**A tree's gate quantity must exist before that tree's content is generated** (§13.4). Today only
+the 12 primary trees have one. `element_mastery` belongs to the demon program's `aspect-scope`
+module; `status_applied` belongs to nobody yet. Generating the elemental and status corpus first
+buys **1,080 nodes at tier 0**.
+
+So the corpus order is: **primary trees (480 nodes) → then one category per gate quantity as it
+lands**, never the whole 1,560 at once.
+
+**Amended 2026-09-05 (D37).** `gate-counters` is now in wave 0, so the two missing quantities have an owner and a schedule rather than a dependency on unscheduled work. The rule is unchanged — content still waits for its gate — but the wait is now bounded, and all 39 trees are reachable rather than 12.
+
+**Wave 0 is parallel by construction** — the harness is a `tools/` project, the wiring is four named
+lines in `Core`, and the planner is new code with no shipped caller. Nothing in wave 0 touches
+another wave-0 module's files.
+
+**Why `squad-harness` is first even though nothing depends on it.** It is not a gate any more (D33 as
+amended), but it is cheap and it is the only thing that can tell us whether `F`, `Fmax`, D28's
+largest-mate rule and *"magnitude cannot rescue focus"* survive at the scope the game is played at.
+Every number it touches is a **tunable** (§14) — so the specs downstream name the key and the unit,
+and the harness settles the value later without reopening a spec.
+
+**Why `mechanism-wiring` is in wave 0.** `tree-plan` must reserve budget for mechanism nodes at
+deep tiers. If the wiring never lands, that budget buys nodes that measurably do nothing, and we
+would not find out until `tree-resolve`. Its critical path is one file: a fourth
+`IActorStatSubsystem`, ~90 lines by the shipped `AtomDerivedSubsystem` precedent.
+
+## Boundaries between modules
+
+- `tree-plan` emits a **plan document**; it never emits node text or a magnitude.
+- `tree-language` chooses **from closed enums**; it never writes a number. The permitted subset *is*
+  the schema enum, so an out-of-quota value is unsampleable rather than rejected.
+- `tree-binder` writes **coefficients**, not magnitudes — which is what lets one static catalog be
+  correct for every player at every Θ.
+- `tree-catalog` is the only module that defines the on-disk record. Everything else reads it.
+- `tree-state` stores **effort** (which nodes, how many souls), never derived power — so a rebalance
+  needs no migration.
+- `tree-resolve` is the only module that multiplies anything by `P(Θ)`.
+
+## Paths
+
+| Artifact | Path |
+|---|---|
+| This map | `docs/architecture/passive-tree-map.md` |
+| Module specs | `docs/architecture/passive-tree/spec-<module-id>.md` |
+| Plan | `tasks/passive-tree-plan.md` |
+| Task list | `tasks/passive-tree-todo.md` |
+
+`SPEC.md`, `tasks/plan.md` and `tasks/todo.md` belong to other streams and are never used here.
+
+## Assumptions this map makes
+
+Correct any of these now — they shape module boundaries, and boundaries are expensive to move later.
+
+1. **The generator is a `tools/` program, not a runtime.** D24 makes the catalog build-time content,
+   so generation lives beside `tools/seedsmith/` and its output is committed data. Nothing in
+   `src/` generates a node.
+2. **`tree-resolve` extends the shipped resolver rather than forking it.** Tree power arrives as
+   ordinary channel contributions through `IActorStatSubsystem` / atoms, not as a parallel combat
+   path.
+3. **The web surface is the primary one; the injector may enrich it, never gate it** (standalone-first).
+4. **Species trees reuse the generic node record**, differing in content and provenance rather than
+   in schema — otherwise `tree-catalog` needs two record types.
+5. **`squad-harness` is measurement only.** It ships no balance change; it reports numbers that later
+   land as tunables.
+6. **Every balance number named in a spec is a tunable key with a unit**, per §14 — specs do not carry
+   values that a balance pass would move.
+
+## Filed by the item program (2026-09-06)
+
+A live, currently-broken production defect, found independently twice while the item program was
+verifying its own audit (once tracing a battle-side crash, once verifying its own generation corpus) —
+reported here, not fixed here (this program's generator, not item's).
+
+| | Defect | Evidence |
+|---|---|---|
+| **P1** | `tools/PassiveTreeRosterGen --atom-vocab-emit` writes its drift-check artefact, `data/seed/atoms/vocabulary.json`, directly into the folder effect-atom's `AtomImporter`/`SeedScanner` sweeps for real atom-kind seed rows | The file's own `_meta.note` says exactly this: *"Generated by tools/PassiveTreeRosterGen --atom-vocab-emit... Do not hand-edit"*. It carries no `kind` field (it is a vocabulary reference list, not an atom/container/affix/curve/rarity/element row), so `SeedScanner` refuses it with `UnknownKind — kind ''`. Landed in commit `50fcdf8` (2026-09-06 09:54) |
+| **Consequence, measured directly, 2026-09-06** | `dotnet run --project tools/AtomImporter -- --check --validate` returns **`1 error(s) — the files were refused; nothing was imported`** — one misplaced, kind-less file currently blocks the ENTIRE content import, not just its own folder | Reproduced fresh this session. Whoever boots against this seed tree with `--validate` on gets a total import failure, not a partial one |
+| **Fix, either side (both are real, independent improvements)** | (a) This program: move the artefact out of `data/seed/atoms/` into a path scoped to passive-tree's own content, e.g. `data/seed/passive-tree/` or a dedicated `_meta/` folder outside every importer's swept roots. (b) effect-atom: `AtomImporter`/`SeedScanner` refusing the WHOLE batch on ONE unrecognised file is a fail-fast-too-hard design independent of who causes the next one — worth hardening to skip-and-report a single bad file rather than refuse everything, filed as a note in `effect-atom-map.md` §20 in the same pass | Not filed as a decision between the two — either alone fixes today's break; both together close the general failure mode |
+
+## Filed — the live status registry has outgrown its own committed mirror (2026-09-06)
+
+**A genuine scope question, not a bug — flagged rather than silently resolved either way, because
+the fix changes how many nodes this whole program eventually generates.** `data/seed/statuses/
+roster.json` (A3's own committed mirror, `--check`-clean by design) still names **21** statuses;
+the live `StatusCategoryRegistry.cs`/`StatusCatalogBootstrap.cs` now register **24** (three
+`nerve.*` statuses: `afflicted`, `shaken`, `unsettled`) — a real, `git status`-clean, committed
+change from other work, not a race or a typo. `tasks/passive-tree-todo.md`'s own A3 entry already
+found and named this drift, and deliberately left it unfixed because the status system was, AT THE
+TIME, another session's in-progress, uncommitted edit — re-emitting the mirror would have collided
+with live work. **That blocking condition has since lifted**: `git status` on both files is clean
+now, confirmed by an adversarial spec audit re-checking the same claim today. The mechanical fix
+itself is exactly what A3 already specified (`PassiveTreeRosterGen --emit` for the status mirror,
+then `tree-plan --emit --tree might` to re-bake the new count) and costs nothing to run — but it
+is not a drive-by fix, because **every spec in this program that cites "39 generic trees" or
+"1,560 nodes" (`tree-plan`, `tree-language`, `gate-counters`, `species-tree`'s own cost table) is
+counting on 21 status trees, and 24 real statuses means 24 status trees — 42 total, 1,680 nodes**,
+a real ~8% corpus growth that ripples through every one of those numbers. **Left for the owner to
+decide** whether to accept the 3 new statuses into this program's own corpus now (and re-run the
+mirror + re-derive every "39"/"1,560" citation) or explicitly scope them out of the first catalog
+(and say so in `passive-tree-ideal.md`, the actual source of truth for which statuses exist) —
+either is a real, defensible call this map should not make unilaterally.
+
+**A second instance of the identical pattern, found the same day while verifying this fix's own test
+suite:** `channelFamily` has grown from 53 to 54 in the live vocabulary (confirmed via a real test
+failure: `might.v1.json`'s own committed `propertyVocabularyCounts.channelFamily` still says 53,
+`git status` on the vocabulary source is clean — another session's already-committed, legitimate
+growth, not drift or a flake). Not investigated further or fixed in this pass — noted here so the
+same "accept the growth and re-bake, or explicitly freeze the count" decision gets made once, for
+both axes together, rather than twice on two different days.
+
+**Both closed by the owner (D51/D52, 2026-09-06): accept the growth, re-bake, sweep every citation.**
+`PassiveTreeRosterGen --status-emit` re-ran (24 statuses); `python -m seedsmith trees plan --emit
+--tree <id>` re-ran for all 12 primary trees — confirmed via `--check` that ONLY the vocabulary count
+fields moved (`propertyVocabulary{,Counts}.{status,channelFamily}`, `roster.counts.statuses`,
+`roster.statuses`), no node id, budget share, or archetype assignment changed, matching R3's own
+"read back, never re-mint" contract. `tools/seedsmith/tests/test_tree_plan_emit.py`'s two hardcoded-21/
+53 assertions updated to 24/54; full seedsmith suite re-run clean (2,379+ passing; the only failures
+are the pre-existing, unrelated 100-vs-109 affix-family gap already flagged as the item program's own
+balance surface — confirmed via `git status` touching neither `data/seed/statuses/` nor
+`data/seed/passive-tree/plan/`).
+
+**A THIRD thing surfaced while doing that sweep — already filed, cross-referenced here rather than
+re-explained:** `spec-gate-counters.md` §19 already names the real remaining block precisely —
+`emit.py` has no `elemental_tree_spec()`/`status_tree_spec()` factory function (only
+`might_tree_spec()`/`primary_tree_spec()`, both `category="primary"`), so no `--tree <elementId>` or
+`--tree <statusId>` call can succeed today even though R-G1's gate itself is now `carrier` on all four
+kinds (G6/I8, live-probed 2026-09-06). Re-confirmed independently during this sweep (same grep, same
+zero hits). The one update that section's own count needed: D51 grew the affected set from 27 to 30
+trees (1,080 to 1,200 nodes) — folded into its text directly rather than re-stated here.
+`passive-tree-todo.md` task J1 is where the fix lands; every spec citation touched by this sweep that
+used to say "waits on gate-counters" now points to J1 instead.

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="The layer rail is the shared set of menus and hotkeys — Creatures, Fusion, Expeditions, and the rest — that open over whatever stage you are on." />
+    <title>Layer rail and hotkeys — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/layer-rail.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Session and shell · how you play
+        </p>
+        <h1 class="teach-title">Layer rail and hotkeys</h1>
+        <p class="teach-hook">The <strong>layer rail</strong> is the shared set of menus and hotkeys — Creatures, Fusion, Expeditions, and the rest — that open over whatever stage you are on.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Rail</dt>
+              <dd>Not a train. The fixed list of layers and keys available from any stage.</dd>
+            </div>
+            <div>
+              <dt>Layer</dt>
+              <dd>A panel drawn over the current stage. Closing it returns you exactly where you were.</dd>
+            </div>
+            <div>
+              <dt>Hotkey</dt>
+              <dd>One letter (or Esc) that opens that layer. Same letter on Sanctum, lawn, or map.</dd>
+            </div>
+            <div>
+              <dt>Stack</dt>
+              <dd>Layers can pile up. Esc closes the top one; on an empty stack, Esc opens System.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Locked layers stay visible and say what unlocks them — see <a href="unlock-beats.html">unlock beats</a>.</li>
+            <li>You are usually standing in the <a href="sanctum.html">Sanctum</a> when you first learn the rail.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="the-keys-title">
+          <h2 id="the-keys-title">The keys</h2>
+          <p>Memorize the verb, not a different shortcut per screen:</p>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Key</th>
+                <th scope="col">Layer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>C</td>
+                <td>Creatures</td>
+              </tr>
+              <tr>
+                <td>K</td>
+                <td>Commanders</td>
+              </tr>
+              <tr>
+                <td>R</td>
+                <td>Relics</td>
+              </tr>
+              <tr>
+                <td>F</td>
+                <td>Fusion</td>
+              </tr>
+              <tr>
+                <td>P</td>
+                <td>Pacts</td>
+              </tr>
+              <tr>
+                <td>E</td>
+                <td>Expeditions</td>
+              </tr>
+              <tr>
+                <td>A</td>
+                <td>Almanac</td>
+              </tr>
+              <tr>
+                <td>H</td>
+                <td>Chronicle</td>
+              </tr>
+              <tr>
+                <td>Esc</td>
+                <td>Close top layer; on empty stack → System</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="teach-note">Travel to the world map is <code>M</code> — that changes stage, it is not a layer on the rail.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-feels-title">
+          <h2 id="how-it-feels-title">How it feels</h2>
+          <p>Open Creatures mid-hall, check a demon, close — you are still in the Sanctum.</p>
+          <p>The same C works if you later open the rail from another stage. You do not learn a second UI language.</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  [ stage: Sanctum / Lawn / World ]
+           ^
+           |  open C / F / E / …
+           v
+  [ layer over the stage ]  --Esc--&gt;  back to stage
+</pre>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-the-rail-is-not-title">
+          <h2 id="what-the-rail-is-not-title">What the rail is not</h2>
+          <p>It is not a website sidebar of separate pages you navigate away to.</p>
+          <p>It is not the lawn game’s own pause menu — that is the host pack. This rail is Rise of Summoner’s control-room chrome.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>In the Sanctum, press <code>C</code> — Creatures should open over the hall.</li>
+            <li>Press Esc (or the close control) and confirm you are still in the Sanctum.</li>
+            <li>Press <code>?</code> or open System and confirm the keymap matches this table.</li>
+          </ol>
+          <p class="teach-note">Stop when one key feels global. Next: <a href="unlock-beats.html">unlock beats</a> so locked entries make sense.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why can’t I open Relics yet?</dt>
+              <dd>It unlocks when you hold your first item. The entry should say so — see <a href="unlock-beats.html">unlock beats</a>.</dd>
+            </div>
+            <div>
+              <dt>Is Fusion the host game’s name?</dt>
+              <dd>No. On the rail, Fusion (<code>F</code>) is specimen merge. The host pack is Plants vs. Zombies: Fusion.</dd>
+            </div>
+            <div>
+              <dt>Does Esc always quit the game?</dt>
+              <dd>No. Esc closes the top layer first. Only on an empty stack does it open System (quit lives there).</dd>
+            </div>
+            <div>
+              <dt>Is M on the rail?</dt>
+              <dd>M travels to the world map — a stage change, not a layer.</dd>
+            </div>
+            <div>
+              <dt>Do keys change on the lawn stage?</dt>
+              <dd>No. Same rail letters. That is the point of one rail.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="unlock-beats.html">Unlock ladder (play beats)</a>
+          </p>
+          <p>
+            Related:
+            <a href="sanctum.html">Sanctum</a> ·
+            <a href="unlock-beats.html">Unlock ladder (play beats)</a> ·
+            <a href="system-settings.html">Settings and keymap</a> ·
+            <a href="specimen-fusion.html">Specimen fusion</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/layer-rail.md">Markdown (editable SSOT)</a> ·
+            <a href="../../sanctum.md">Sanctum</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/layer-rail.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+{
+  "done": {
+    "trial-k1-mending-elderroot": {
+      "entry": {
+        "classId": "restore",
+        "family": "atom.mending",
+        "id": "consumable.k1-021",
+        "manifestCost": 2,
+        "name": "Elderroot Balm",
+        "nameKey": "consumable.restore-mending-elderroot",
+        "notes": "atom.mending Flat current-HP top-up on grant; high band -- the deepest, slowest-grown root stock, reserved for when a quick top-up is not enough.",
+        "powerBand": "high",
+        "tags": [
+          "defensive",
+          "organic"
+        ],
+        "useContext": [
+          "menu"
+        ]
+      }
+    },
+    "trial-k2-stoicism-steadfast": {
+      "entry": {
+        "classId": "draught",
+        "family": "atom.stoicism",
+        "id": "consumable.k2-021",
+        "manifestCost": 1,
+        "name": "Steadfast Distillate",
+        "nameKey": "consumable.draught-stoicism",
+        "notes": "Crit-resist stat.derived family (combat.crit.resist.*); run-scoped binding at dispatch, same discipline as k2's other stat.derived draughts.",
+        "powerBand": "medium",
+        "tags": [
+          "defensive",
+          "mineral"
+        ],
+        "useContext": [
+          "dispatch"
+        ]
+      }
+    },
+    "trial-k3-shield-toughness-anvilcore": {
+      "entry": {
+        "classId": "ward",
+        "family": "atom.shield-toughness",
+        "id": "consumable.k3-021",
+        "manifestCost": 1,
+        "name": "Anvilcore Ward",
+        "nameKey": "consumable.ward-shield-toughness-anvilcore",
+        "notes": "Shield-toughness stat.derived family (combat.shield.toughness.*); depleting absorption layer bound at battle setup, same discipline as k3's own elemental-defense/resilience wards.",
+        "powerBand": "low",
+        "tags": [
+          "defensive",
+          "metal"
+        ],
+        "useContext": [
+          "dispatch"
+        ]
+      }
+    }
+  },
+  "schemaVersion": 1
+}

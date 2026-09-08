@@ -30,10 +30,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-sepal",
       "flavorKey": "flavor.base.downy-sepal",
       "flavor": "Covered in soft hair, it feels its surroundings through a thousand tiny sensors.",
@@ -104,10 +104,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.pliant-lemma",
       "flavorKey": "flavor.base.pliant-lemma",
       "flavor": "Supple and bending, it reads movement and intention in every breeze.",
@@ -144,7 +144,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.slender-palea",
       "flavorKey": "flavor.base.slender-palea",
       "flavor": "Thin as a whisper, the chaff-leaf extends far to catch what others miss.",
@@ -178,7 +178,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -218,7 +218,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.layered-bracteole",
       "flavorKey": "flavor.base.layered-bracteole",
       "flavor": "Each scale-leaf nested inside the last, creating a mask of many faces for sensing.",
@@ -252,10 +252,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.tender-stipel",
       "flavorKey": "flavor.base.tender-stipel",
       "flavor": "Still young and yielding, the leaf-stipule grows only in the warmth of favorable conditions.",
@@ -329,7 +329,7 @@
         "family": "atom.ferocity",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.unhardened-sepal",
       "flavorKey": "flavor.base.unhardened-sepal",
       "flavor": "Not yet set in its final form, the petal-bract remains malleable, sensitive to every pressure.",
@@ -363,7 +363,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -403,7 +403,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.filamentous-lemma",
       "flavorKey": "flavor.base.filamentous-lemma",
       "flavor": "Hair-thin threads extend from every surface, each one a strand of pure sensation.",
@@ -437,7 +437,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,

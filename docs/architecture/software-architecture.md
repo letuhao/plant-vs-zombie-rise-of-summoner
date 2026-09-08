@@ -101,7 +101,7 @@ flowchart TD
   Sec["Secondary plugins / StatusRuntime pulses / OverlayCombatMath"] -->|only verb: Enqueue| Funnel["EffectFunnel — merge + Guard, flush at depth 0"]
   Bag --> Funnel
   Funnel --> FA["FA1 ModifyStat / FA2–FA9 / FA10 Add HP"]
-  FA --> Apply["EntityApply.Run* → ActorHub/StatSystem.Resolve"]
+  FA --> Apply["EntityApply.Run* → ActorHub.Resolve"]
   Apply --> Writer["EntityStatWriter → Unity fields"]
 ```
 
@@ -117,7 +117,7 @@ How the numeric subsystems relate: **ActorHub** is the shared substrate (only pl
 4. **Funnel guard** — rejects `mode=set` / absolute HP from overlay snapshots; dead ptr → skip, never throw; depth and `|amount|` caps; nested flush is a no-op (`guard-funnel-delta.ps1`).
 5. **Forward-only stats** — never `Xi = f(Y)`; persist Y0 + modifier state, never final `Y`. Y0 is immutable; progression flats ride `progression.bonus.*` only.
 6. **Modifier vs mutation never mix** — modifiers keep identity per `grantId` (exact withdraw); mutations sum.
-7. **Catalog discipline** — unknown derived channel / `statusId` / overlay key → reject, log, skip. Omni is additive-only (`omni × X` banned).
+7. **Catalog discipline** — unknown derived channel / `statusId` / overlay key → reject, log, skip. ~~Omni is additive-only (`omni × X` banned).~~ **Ban removed 2026-09-02 (owner)** — omni's combination rule is a **tunable**, not a prohibition; breadth is priced by magnitude in `numerics`. Default stays `omni + element`. See [element-hub-ssot.md](element-hub-ssot.md) §7.
 8. **Current HP is Unity-owned after spawn** — compose writes max/ATK; current HP is ratio-remapped only when max changes.
 9. **No Data in the hot plane** — `MatchRuntime`/`BoardProjection`/`CapPolicy` never reference `FusionRpg.Data`; injector is SQL-free; all SQL lives in Data (`guard-dal.ps1`).
 10. **No server round-trip on the hit path** — see §7.
@@ -161,7 +161,7 @@ How the numeric subsystems relate: **ActorHub** is the shared substrate (only pl
 
 ## 11. Build, release, contracts
 
-- **Dev loop:** `scripts/deploy-play.ps1` — guards → build injector into the game folder → publish server to `dist/FusionRpg.Server` → launch game. MelonLoader via `FUSIONRPG_ML_GAMEDIR` + `-LoaderHost MelonLoader`.
+- **Dev loop:** `scripts/deploy-play.ps1` — guards → build injector into the game folder → publish server to `dist/FusionRpg.Server` → launch game. Default `-LoaderHost` is `MelonLoader` (2026-08-30, `H:\Games\PVZ-Fusion-3.9_MelonLoader`); pass `-LoaderHost BepInEx` for the older FULL MOD TOOL install.
 - **Player release:** `scripts/publish-player.ps1` — Vite build into `wwwroot` → self-contained Server + Launcher publishes → injector drop fan-out into `DropIntoGame/{profile}/{loader}` → `dist/FusionRpg` zip. Players double-click `FusionRpg.Launcher.exe`; nobody installs Node or a .NET SDK.
 - **Contract versions (orthogonal):** `FoundationContractVersion = 2` (FA10 exists; surfaced at `GET /api/debug/effects/contract`) · `MatchRuntimeContractVersion = 1` (Snapshot/GateResult shape).
 - **Game profiles:** `pvzrh-3.8.1` (default, BepInEx + MelonLoader) and `pvzrh-3.9` (MelonLoader, auto-detected by `GameAssembly.dll` size). Build-level only — not a DB column. See [game-versioning.md](game-versioning.md).

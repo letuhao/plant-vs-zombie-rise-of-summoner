@@ -15,6 +15,16 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// </summary>
 public static class AtomPushCodec
 {
+    /// <summary>
+    /// E26: bumped by hand whenever THIS FILE's emit changes shape — the content hash covers seed
+    /// DATA, so a compiler-code change (like E26 itself, which starts emitting runner defs for the
+    /// first time) moves nothing the receiver's content hash or catalog revision can see. Without a
+    /// separate version, a host already at the current <see cref="AtomPushDto.CatalogRevision"/> would
+    /// never re-pull the new defs — the exact staleness trap `AtomImporter` already has for seed data,
+    /// one layer up, reproduced here for compiler code (spec-runner-def-emit.md §3.3).
+    /// </summary>
+    public const int EmitterVersion = 2; // 1 = pre-E26 (compiled defs only, no runner defs on the wire)
+
     // ---- encode -----------------------------------------------------------------------------------
 
     public static RunnerEntryDto Encode(RunnerEntry entry)
@@ -149,7 +159,8 @@ public static class AtomPushCodec
         ulong matchSeed,
         string? matchKey = null,
         string? contentHash = null,
-        long? receiverRevision = null)
+        long? receiverRevision = null,
+        int? receiverEmitterVersion = null)
     {
         if (catalog is null) throw new ArgumentNullException(nameof(catalog));
 
@@ -159,9 +170,15 @@ public static class AtomPushCodec
             ContentHash = contentHash,
             MatchSeed = matchSeed,
             MatchKey = matchKey,
+            // Always stamped, including the UpToDate branch below — a receiver that has never learned
+            // this field (null, not 0) still needs to see it once so its NEXT Hello can echo it back.
+            EmitterVersion = EmitterVersion,
         };
 
-        if (receiverRevision == catalog.CatalogRevision)
+        // Two-term short-circuit (E26): the catalog revision alone cannot see a compiler-code change,
+        // because ContentHash/CatalogRevision are both stamps over seed DATA. A receiver at the right
+        // revision but the wrong (or unknown) emitter version still gets the full rebuild.
+        if (receiverRevision == catalog.CatalogRevision && receiverEmitterVersion == EmitterVersion)
         {
             payload.UpToDate = true;
             return payload;
@@ -170,7 +187,22 @@ public static class AtomPushCodec
         payload.Defs.AddRange(catalog.Defs);
         payload.Grants.AddRange(catalog.Compiled);
 
-        foreach (var binding in bindings.OrderByDescending(b => b.Priority)
+        // E26: one def per translatable runner entry, so AtomRunner's dispatch resolves against a
+        // real def instead of throwing "unknown effect_id". Untranslatable entries are silently
+        // dropped from the wire on purpose — AtomCompiler.EmitRunnerDefs already named each one's
+        // reason in its own Rejected list, which is a server-side diagnostic, not a wire concern; the
+        // corresponding RunnerBinding is skipped below (bindings, not entries, drive what is encoded).
+        var (runnerDefs, _) = AtomCompiler.EmitRunnerDefs(bindings.Select(b => b.Entry));
+        payload.Defs.AddRange(runnerDefs);
+
+        // EmitRunnerDefs is exhaustive over its input (every distinct AtomId lands in exactly one of
+        // Defs / Rejected), so "has a def" and "was not rejected" are the same test — filtering on the
+        // def set alone is correct and needs no second lookup into the rejection list.
+        var translatable = runnerDefs.Select(d => d.EffectId).ToHashSet(StringComparer.Ordinal);
+
+        foreach (var binding in bindings
+                     .Where(b => translatable.Contains(b.Entry.AtomId))
+                     .OrderByDescending(b => b.Priority)
                      .ThenBy(b => b.BindingId, StringComparer.Ordinal))
             payload.RunnerBindings.Add(Encode(binding));
 
@@ -181,6 +213,21 @@ public static class AtomPushCodec
     /// A delivered def, as the catalog holds it. Both compiled grants and runner dispatches name an
     /// <c>effectId</c>, and <c>EffectBag.Grant</c> throws on one the catalog has never seen — so the
     /// defs have to be merged before any grant is applied.
+    ///
+    /// <para><b>Params are unwrapped, not copied.</b> The real receive path
+    /// (<c>CheatCommandRunner.InstallAtomPush</c>) deserializes with
+    /// <c>JsonSerializer.Deserialize&lt;AtomPushDto&gt;</c> and no custom converter, so every
+    /// <c>Dictionary&lt;string, object?&gt;</c> value in <c>EffectDefActionDto.Params</c> arrives as a
+    /// boxed <see cref="System.Text.Json.JsonElement"/> — and <see cref="System.Text.Json.JsonElement"/>
+    /// does not implement <see cref="IConvertible"/>, so every subsequent
+    /// <c>JsonOverlay.GetInt</c>/<c>GetString</c>/<c>GetDouble</c>/<c>GetBool</c> call in
+    /// <c>InjectorEffectActionSink</c> threw <see cref="InvalidCastException"/> for any def's static
+    /// (non-overlay) param — caught by that class's own outer try/catch and logged as an execution
+    /// failure, never surfaced as a crash. Found 2026-09-03 while working E28: reproduced with the
+    /// real DTOs and this method, not a synthetic repro (<c>WireRoundTripProbe</c>, since deleted).
+    /// <c>JsonOverlay.FromObject</c> already exists to unwrap exactly this shape (it is what
+    /// <c>RunEffectGrant</c>'s hand-rolled overlay parse achieves a different way, by walking the raw
+    /// <c>JsonElement</c> tree directly) — this is the codec's own half of the same fix.</para>
     /// </summary>
     public static EffectDef ToDef(EffectDefDto dto) => new()
     {
@@ -195,7 +242,7 @@ public static class AtomPushCodec
             {
                 Seq = a.Seq,
                 Action = a.Action,
-                Params = new Dictionary<string, object?>(a.Params, StringComparer.OrdinalIgnoreCase),
+                Params = FusionRpg.Core.Effects.JsonOverlay.FromObject(a.Params),
             })
             .ToList(),
     };

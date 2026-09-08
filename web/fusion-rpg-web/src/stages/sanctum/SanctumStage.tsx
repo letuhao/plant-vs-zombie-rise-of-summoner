@@ -4,7 +4,7 @@ import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpec
 import { useContracts } from "@/lib/bus/contracts";
 import { conditionOf } from "@/features/demons/contractView";
 import { displayName } from "@/features/demons/rosterSplit";
-import { adaptActor } from "@/contract/adapt";
+import { adaptActor, PLAYER_PENDING } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
 import { ChunkFallback } from "@/shell/ChunkFallback";
@@ -17,6 +17,7 @@ import type { ActorRungState } from "@/ui/actor";
 import { FocusCard } from "./FocusCard";
 import { SanctumHome } from "./SanctumHome";
 import { SanctumHud } from "./SanctumHud";
+import { OnboardingReveal } from "./OnboardingReveal";
 
 // GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
 // layer's real weight (a wrapped page, in most cases) loads once it's opened for the first time,
@@ -35,8 +36,16 @@ const AlmanacLayer = lazy(() => import("@/layers/almanac/AlmanacLayer").then((m)
 const ChronicleLayer = lazy(() =>
   import("@/layers/chronicle/ChronicleLayer").then((m) => ({ default: m.ChronicleLayer }))
 );
-const AptitudesLayer = lazy(() =>
-  import("@/layers/aptitudes/AptitudesLayer").then((m) => ({ default: m.AptitudesLayer }))
+const CommandersLayer = lazy(() =>
+  import("@/layers/commanders/CommandersLayer").then((m) => ({ default: m.CommandersLayer }))
+);
+// D5.8 — the descent door's own picker (spec-delve-stage.md §4: "the descent door is a Sanctum
+// affordance … opening the picker as a band-2 layer with no rail row and no key"). Deliberately NOT
+// one of the seven `RailLayerId` chunks above: it has no rail icon and no rebindable key, so it is
+// lazy-loaded and mounted the same way every other layer here is, but opened through its own
+// independent piece of state (`delvePickerOpen` below), never through `openLayer`/`openLayerById`.
+const DelvePickerLayer = lazy(() =>
+  import("@/layers/delve/DelvePickerLayer").then((m) => ({ default: m.DelvePickerLayer }))
 );
 
 /** T20 (GG-20): every rail entry is a rebindable action, so this reads the live table instead of
@@ -116,6 +125,38 @@ export function SanctumStage() {
       return next;
     });
   }
+  function selectCommander(commanderId: string | null) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (commanderId) next.set("sel", commanderId);
+      else next.delete("sel");
+      return next;
+    });
+  }
+
+  // D5.8 — the descent door's own open state. A separate query param from `panel` (not a
+  // `RailEntry["id"]`, never opened via `openLayerById`) so it never grows the rail or claims a
+  // rebindable key — but still rides the URL (GG-8), matching every other layer's own "deep link
+  // restores the stage first, then the layer" contract this component's own doc comment states above.
+  const delvePickerOpen = searchParams.get("delve-picker") === "1";
+  function openDelvePicker() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("delve-picker", "1");
+      return next;
+    });
+  }
+  function closeDelvePicker() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("delve-picker");
+      return next;
+    });
+  }
+  const [delvePickerMounted, setDelvePickerMounted] = useState(() => delvePickerOpen);
+  useEffect(() => {
+    if (delvePickerOpen && !delvePickerMounted) setDelvePickerMounted(true);
+  }, [delvePickerOpen, delvePickerMounted]);
 
   const keybindingsVersion = useKeybindingsVersion();
   const layerKeys = currentBindings();
@@ -175,9 +216,7 @@ export function SanctumStage() {
       <SanctumHud
         playerName={players.data?.items.find((p) => p.id === playerId)?.name ?? "Summoner"}
         soulsBalance={soulsQuery.data?.balance ?? 0}
-        summonerLevel={pendingWithReason(
-          "The summoner-led progression loop is the product direction, not what ships today (AGENTS.md)"
-        )}
+        summonerLevel={pendingWithReason(PLAYER_PENDING.summonerLevel)}
         unreadResultCount={railInputs.unreadResultCount}
         onOpenSystem={openSystem}
       />
@@ -185,6 +224,7 @@ export function SanctumStage() {
         <Rail entries={railEntries} onSelect={(id) => id !== "sanctum" && openLayerById(id)} />
 
         <div className="min-w-0 flex-1 p-5" data-testid="sanctum-body">
+          <OnboardingReveal playerId={playerId} onOpenCommanders={() => openLayerById("commanders")} />
           <FocusCard
             actorCount={actors.length}
             firstActor={firstActorState}
@@ -196,10 +236,13 @@ export function SanctumStage() {
           />
           {actors.length > 0 ? (
             <SanctumHome
+              playerId={playerId}
               actorStates={actors.map((a): ActorRungState => ({ kind: "ready", data: adaptActor(a) }))}
               onOpenCreatures={() => openLayerById("creatures")}
+              onOpenCommanders={() => openLayerById("commanders")}
               returnedExpeditionCount={returnedCount}
               onOpenExpeditions={() => openLayerById("expeditions")}
+              onOpenDelvePicker={openDelvePicker}
             />
           ) : null}
         </div>
@@ -211,8 +254,20 @@ export function SanctumStage() {
             open={openLayer === "creatures"}
             onOpenChange={(open) => !open && closeLayer()}
             playerId={playerId}
-            selectedId={selectedId}
+            selectedId={openLayer === "creatures" ? selectedId : null}
             onSelect={selectCreature}
+          />
+        </Suspense>
+      ) : null}
+
+      {mountedLayers.has("commanders") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-commanders" />}>
+          <CommandersLayer
+            open={openLayer === "commanders"}
+            onOpenChange={(open) => !open && closeLayer()}
+            playerId={playerId}
+            selectedId={openLayer === "commanders" ? selectedId : null}
+            onSelect={selectCommander}
           />
         </Suspense>
       ) : null}
@@ -253,9 +308,13 @@ export function SanctumStage() {
         </Suspense>
       ) : null}
 
-      {mountedLayers.has("aptitudes") ? (
-        <Suspense fallback={<ChunkFallback testId="chunk-fallback-aptitudes" />}>
-          <AptitudesLayer open={openLayer === "aptitudes"} onOpenChange={(open) => !open && closeLayer()} />
+      {delvePickerMounted ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-delve-picker" />}>
+          <DelvePickerLayer
+            open={delvePickerOpen}
+            onOpenChange={(open) => !open && closeDelvePicker()}
+            playerId={playerId}
+          />
         </Suspense>
       ) : null}
     </StageHost>

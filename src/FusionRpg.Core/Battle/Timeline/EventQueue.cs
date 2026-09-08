@@ -129,11 +129,30 @@ public sealed class EventQueue
     /// <c>(DueTick, Seq)</c> order. The buffer is appended to, never cleared — callers own their
     /// scratch (the same contract as <c>ShieldRuntime.DrainEvents</c>).
     /// </summary>
-    public int PopDue(long now, List<ScheduledEvent> into)
+    public int PopDue(long now, List<ScheduledEvent> into) => PopDue(now, into, int.MaxValue);
+
+    /// <summary>
+    /// Bounded form: drains at most <paramref name="max"/> due events, leaving the rest queued in
+    /// order. Everything the unbounded overload guarantees still holds for what it does drain.
+    ///
+    /// <para><b>Why a bound exists at all.</b> The unbounded loop is correct server-side, where a
+    /// battle resolves in one call and nobody is waiting on a frame. Driven per-frame in the injector
+    /// it is a spike waiting to happen: a backlog of any size runs to completion inside one Unity
+    /// frame on the main thread. Capping the pop keeps the scratch buffer bounded too, so a long
+    /// hitch cannot make the drive allocate — which is the property the whole allocation contract
+    /// rests on.</para>
+    ///
+    /// <para>Deferring is safe because simulated time is decoupled from wall-clock: the remaining
+    /// events keep their <c>(DueTick, Seq)</c> order and fire in exactly the sequence they would
+    /// have, just later. Nothing is dropped — a dropped shield expiry is a correctness bug, unlike a
+    /// dropped telemetry row.</para>
+    /// </summary>
+    public int PopDue(long now, List<ScheduledEvent> into, int max)
     {
         if (into == null) throw new ArgumentNullException(nameof(into));
+        if (max < 0) throw new ArgumentOutOfRangeException(nameof(max));
         var drained = 0;
-        while (_heap.Count > 0 && _heap[0].DueTick <= now)
+        while (drained < max && _heap.Count > 0 && _heap[0].DueTick <= now)
         {
             into.Add(_heap[0]);
             RemoveAt(0);
@@ -141,6 +160,39 @@ public sealed class EventQueue
         }
 
         return drained;
+    }
+
+    /// <summary>
+    /// T8 (spec-turn-order-forecast.md) — the next <paramref name="max"/> events in true pop order,
+    /// <b>without touching this queue</b>. Appends to <paramref name="into"/> and returns the count.
+    ///
+    /// <para><b>Why a sorted copy rather than k pops off a cloned heap.</b> A binary heap's array
+    /// order is not pop order — only the root is guaranteed — so reading the first k slots would be
+    /// wrong. Sorting a copy by the queue's own total order is O(n log n) against the pop loop's
+    /// O(k log n), and that is the right trade here: a forecast runs at UI cadence, not per frame,
+    /// and the sorted copy reuses the SAME `(DueTick, Seq)` comparison the heap itself is ordered by
+    /// rather than restating it. Duplicating the ordering rule is exactly how a projection starts
+    /// disagreeing with the thing it projects.</para>
+    ///
+    /// <para>Cancelled events cannot appear: <c>Cancel</c> removes them from the heap, so a copy of
+    /// the heap contains only live events by construction.</para>
+    /// </summary>
+    internal int ProjectNext(int max, List<ScheduledEvent> into)
+    {
+        if (into == null) throw new ArgumentNullException(nameof(into));
+        if (max < 0) throw new ArgumentOutOfRangeException(nameof(max));
+        if (max == 0 || _heap.Count == 0) return 0;
+
+        var copy = new List<ScheduledEvent>(_heap);
+        copy.Sort(static (a, b) =>
+        {
+            var byTick = a.DueTick.CompareTo(b.DueTick);
+            return byTick != 0 ? byTick : a.Seq.CompareTo(b.Seq);
+        });
+
+        var take = Math.Min(max, copy.Count);
+        for (var i = 0; i < take; i++) into.Add(copy[i]);
+        return take;
     }
 
     /// <summary>

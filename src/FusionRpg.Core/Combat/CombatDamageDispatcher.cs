@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 
 namespace FusionRpg.Core.Combat;
@@ -18,7 +19,9 @@ public static class CombatDamageDispatcher
         ICombatMath? math = null,
         List<string>? skipped = null,
         Shield.ShieldGate? shieldGate = null,
-        CombatActorResolve? actorResolve = null)
+        CombatActorResolve? actorResolve = null,
+        DamageOrigin origin = DamageOrigin.DirectHit,
+        Action<DamageApplyResult, DamageOrigin, IReadOnlyList<ElementPayloadComponent>, string?>? onDamageApplied = null)
     {
         using var _perf = FusionRpg.Core.Diagnostics.PerfProbe.Measure(FusionRpg.Core.Diagnostics.PerfSection.CombatDispatch);
         policy ??= CombatPolicy.Default;
@@ -42,7 +45,18 @@ public static class CombatDamageDispatcher
             // Apply tail is the shared DamageApplyPipeline (combat-unification): shield gate
             // → funnel, byte-identical to the pre-extraction inline tail.
             var applied = DamageApplyPipeline.ApplyPacketToFunnel(
-                packet, ptr, amount, ev?.HitCount ?? 1, shieldGate, funnel, ev);
+                packet, ptr, amount, ev?.HitCount ?? 1, shieldGate, funnel, ev, origin);
+
+            // spec-gate-counters.md §2.2/§7 P1 -- the ElementMasteryCounter seam. Never a new required
+            // dependency: `onDamageApplied` is null on every pre-existing caller (defaulted, like
+            // `origin` itself), so this line changes nothing for a caller that doesn't wire it. The
+            // components travel as `ElementPayloadComponent`, not the wire DTO, so the callback never
+            // has to know about `FusionRpg.Contracts` -- the same "read for presence, parsed once"
+            // shape `OverlayCombatCalculator.ParseComponents` already gives every other combat-math
+            // caller.
+            onDamageApplied?.Invoke(
+                applied, origin, OverlayCombatCalculator.ParseComponents(packet.ElementPayload), packet.ActorPtr);
+
             switch (applied.Outcome)
             {
                 case DamageApplyOutcome.Applied:

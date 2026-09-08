@@ -16,7 +16,6 @@ import {
   forceSyncLastApplied,
   shouldSyncLawnSprites
 } from "@/features/lawn/lawnSyncGate";
-import { subscribeIconEpoch } from "@/lib/bus/icon-epoch";
 import { PtrEntityRegistry } from "../entities/PtrEntityRegistry";
 import { FxPool } from "../fx/FxPool";
 import {
@@ -26,10 +25,27 @@ import {
   type LawnModelPayload,
   type LawnViewModePayload
 } from "../EventBus";
-import { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, lawnCameraZoom } from "../gridMath";
+import {
+  CELL_H,
+  CELL_W,
+  LAWN_CAMERA_MARGIN,
+  LAWN_MIN_CAMERA_ZOOM,
+  ORIGIN_X,
+  ORIGIN_Y
+} from "../gridMath";
+import { bindCamera, type CameraBridge } from "../camera/bindCamera";
+import { createLawnBoardLayers, paintLawnTerrainGraphics } from "../board/lawnTerrainPaint";
+import type { BoardLayers } from "../board/BoardLayers";
+import { makeGridSpec, type GridPos } from "../board/GridSpec";
+import {
+  initialFocus,
+  wireKeyboardNav,
+  type KeySource
+} from "../board/keyboardNav";
+import { isLawnKeyboardMuted } from "../focusGate";
 import { layoutGrid } from "../systems/LayoutGridSystem";
 import { wirePickSystem } from "../systems/PickSystem";
-import { tickStatusFx } from "../systems/StatusFxSystem";
+import { tickStatusFx, clearStatusFxRings } from "../systems/StatusFxSystem";
 import {
   applySelectionChrome,
   bustLawnIconTextures,
@@ -42,6 +58,27 @@ import {
 export type LawnWorldInit = {
   generation: number;
 };
+
+declare global {
+  interface Window {
+    /** Playwright e2e — probe named HUD children on the Phaser lawn canvas. */
+    __fusionRpgHasHudChild?: (ptr: string, name: string) => boolean;
+  }
+}
+
+function findNamedDescendant(
+  go: Phaser.GameObjects.GameObject,
+  name: string
+): Phaser.GameObjects.GameObject | null {
+  if (go.name === name) return go;
+  const container = go as Phaser.GameObjects.Container;
+  if (!container.list?.length) return null;
+  for (const child of container.list) {
+    const hit = findNamedDescendant(child as Phaser.GameObjects.GameObject, name);
+    if (hit) return hit;
+  }
+  return null;
+}
 
 /**
  * Persistent lawn world while #/lawn mounted.
@@ -60,6 +97,10 @@ export class LawnWorldScene extends Phaser.Scene {
   private lastCanvasKey = "";
   private unsubs: Array<() => void> = [];
   private pickUnsub?: () => void;
+  private keyboardUnsub?: () => void;
+  private keyboardFocus: GridPos = initialFocus();
+  private cameraBridge?: CameraBridge;
+  private boardLayers?: BoardLayers;
   private gridGfx?: Phaser.GameObjects.Graphics;
   private gridRows = 0;
   private gridCols = 0;
@@ -71,13 +112,22 @@ export class LawnWorldScene extends Phaser.Scene {
   }
 
   init(data: LawnWorldInit): void {
-    this.generation = data?.generation ?? 0;
+    this.generation =
+      data?.generation ??
+      (this.game?.registry?.get("generation") as number | undefined) ??
+      0;
+    // Restart hygiene: registry must not stick on constructor-only state.
+    this.ptrRegistry = new PtrEntityRegistry();
+    this.lastApplied = 0;
+    this.model = null;
+    this.selectedPtr = undefined;
   }
 
   create(): void {
     this.fx = new FxPool(this);
     this.cameras.main.setBackgroundColor(0x16120e);
-    this.ensureGrid(DEFAULT_ROWS, DEFAULT_COLS);
+    this.boardLayers = createLawnBoardLayers(this);
+    this.paintTerrain(DEFAULT_ROWS, DEFAULT_COLS);
     this.phaseText = this.add
       .text(12, 8, "Idle", {
         fontSize: "14px",
@@ -94,6 +144,35 @@ export class LawnWorldScene extends Phaser.Scene {
         cols: this.model?.cols ?? DEFAULT_COLS
       })
     );
+
+    // GG-18: gate then nav — mute when React panel owns input.
+    const kb = this.input.keyboard;
+    if (kb) {
+      const keys: KeySource = {
+        on: (event, handler) => {
+          kb.on(event, handler);
+        },
+        off: (event, handler) => {
+          kb.off(event, handler);
+        }
+      };
+      this.keyboardUnsub = wireKeyboardNav({
+        keys,
+        isEnabled: () => !isLawnKeyboardMuted(),
+        getSpec: () =>
+          makeGridSpec(
+            this.gridRows || DEFAULT_ROWS,
+            this.gridCols || DEFAULT_COLS
+          ),
+        getFocus: () => this.keyboardFocus,
+        onFocusChange: (pos) => {
+          this.keyboardFocus = pos;
+        },
+        onConfirm: (pos) => {
+          this.emitKeyboardSelect(pos);
+        }
+      });
+    }
 
     this.unsubs.push(
       lawnBusOn("lawn:model", (raw) => {
@@ -127,35 +206,37 @@ export class LawnWorldScene extends Phaser.Scene {
       })
     );
 
-    this.scale.on("resize", this.onScaleResize, this);
     this.unsubs.push(wireLawnIconLoadErrors(this));
-    this.unsubs.push(subscribeIconEpoch(() => {
-      bustLawnIconTextures(this);
-      this.lastApplied = 0;
-      this.applyModel();
-    }));
-
-    this.fitCamera();
-    lawnBusEmit("lawn:ready", { generation: this.generation });
-  }
-
-  private onScaleResize(gameSize: { width: number; height: number }): void {
-    this.fitCamera(gameSize.width, gameSize.height);
-  }
-
-  private fitCamera(viewW?: number, viewH?: number): void {
-    const w = viewW ?? this.scale.gameSize.width;
-    const h = viewH ?? this.scale.gameSize.height;
-    const z = lawnCameraZoom(
-      w,
-      h,
-      this.gridRows || DEFAULT_ROWS,
-      this.gridCols || DEFAULT_COLS
+    this.unsubs.push(
+      lawnBusOn("lawn:iconEpoch", (raw) => {
+        const p = raw as { generation?: number };
+        if (p.generation !== this.generation) return;
+        bustLawnIconTextures(this);
+        this.lastApplied = 0;
+        this.applyModel();
+      })
     );
-    this.cameras.main.setZoom(Math.max(0.2, z));
-    const cx = ORIGIN_X + (this.gridCols * CELL_W) / 2;
-    const cy = ORIGIN_Y + (this.gridRows * CELL_H) / 2;
-    this.cameras.main.centerOn(cx, cy);
+
+    this.cameraBridge = bindCamera({
+      scale: this.scale,
+      camera: this.cameras.main,
+      getModel: () => ({
+        rows: this.gridRows || DEFAULT_ROWS,
+        cols: this.gridCols || DEFAULT_COLS
+      }),
+      geometry: { cellWidth: CELL_W, cellHeight: CELL_H, originX: ORIGIN_X, originY: ORIGIN_Y },
+      margin: LAWN_CAMERA_MARGIN,
+      minZoom: LAWN_MIN_CAMERA_ZOOM
+    });
+    this.cameraBridge.refresh();
+    if (typeof window !== "undefined") {
+      window.__fusionRpgHasHudChild = (ptr, name) => {
+        const rec = this.ptrRegistry.get(ptr);
+        if (!rec) return false;
+        return findNamedDescendant(rec.go, name) != null;
+      };
+    }
+    lawnBusEmit("lawn:ready", { generation: this.generation });
   }
 
   private syncCtx(canvasPtrs?: Set<string>): SyncContext {
@@ -172,28 +253,42 @@ export class LawnWorldScene extends Phaser.Scene {
     };
   }
 
-  private ensureGrid(rows: number, cols: number): void {
+  private paintTerrain(rows: number, cols: number): void {
     if (this.gridGfx && this.gridRows === rows && this.gridCols === cols) return;
-    this.gridGfx?.destroy();
-    const g = this.add.graphics();
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const x = ORIGIN_X + c * CELL_W;
-        const y = ORIGIN_Y + r * CELL_H;
-        g.fillStyle((r + c) % 2 === 0 ? 0x221c16 : 0x2a231b, 0.9);
-        g.fillRect(x, y, CELL_W - 2, CELL_H - 2);
-        g.lineStyle(1, 0x3d6b45, 0.45);
-        g.strokeRect(x, y, CELL_W - 2, CELL_H - 2);
-      }
+    if (!this.boardLayers) {
+      this.boardLayers = createLawnBoardLayers(this);
     }
-    this.gridGfx = g;
+    this.gridGfx = paintLawnTerrainGraphics(
+      this,
+      this.boardLayers,
+      rows,
+      cols,
+      this.gridGfx
+    );
     this.gridRows = rows;
     this.gridCols = cols;
+    this.keyboardFocus = {
+      row: Math.min(this.keyboardFocus.row, rows - 1),
+      col: Math.min(this.keyboardFocus.col, cols - 1)
+    };
+  }
+
+  /**
+   * Confirm current keyboard focus — GG-21 tile dock: Enter opens the cell occupancy dock
+   * (`kind: "tile"`), never topmost-only inspect. Direct GO hits still select occupants.
+   */
+  private emitKeyboardSelect(pos: GridPos): void {
+    lawnBusEmit("lawn:select", {
+      generation: this.generation,
+      kind: "tile",
+      row: pos.row,
+      col: pos.col
+    });
   }
 
   private applyModel(): void {
     if (!this.model) return;
-    this.ensureGrid(
+    this.paintTerrain(
       Math.max(DEFAULT_ROWS, this.model.rows),
       Math.max(DEFAULT_COLS, this.model.cols)
     );
@@ -231,7 +326,7 @@ export class LawnWorldScene extends Phaser.Scene {
     }
     this.lastCanvasKey = canvasKey;
     this.lastViewMode = this.viewMode;
-    if (sync || modeChanged) this.fitCamera();
+    if (sync || modeChanged) this.cameraBridge?.refresh();
   }
 
   private showGhost(row: number, col: number): void {
@@ -254,9 +349,14 @@ export class LawnWorldScene extends Phaser.Scene {
   }
 
   shutdown(): void {
-    this.scale.off("resize", this.onScaleResize, this);
+    if (typeof window !== "undefined") {
+      delete window.__fusionRpgHasHudChild;
+    }
+    this.cameraBridge?.unbind();
     this.pickUnsub?.();
     this.pickUnsub = undefined;
+    this.keyboardUnsub?.();
+    this.keyboardUnsub = undefined;
     for (const u of this.unsubs) u();
     this.unsubs = [];
     try {
@@ -264,7 +364,10 @@ export class LawnWorldScene extends Phaser.Scene {
     } catch {
       /* */
     }
-    this.fx?.drain();
+    if (this.fx) {
+      clearStatusFxRings(this.fx);
+      this.fx.drain();
+    }
     this.ptrRegistry.clear();
     this.clearGhost();
   }

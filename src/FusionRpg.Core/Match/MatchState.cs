@@ -13,6 +13,13 @@ public sealed class MatchState
     public MatchDebugSessionFacet Debug { get; set; } = new();
     public MatchEffectSessionFacet Effect { get; set; } = new();
     public MatchUniqueBindingsFacet UniqueBindings { get; set; } = new();
+
+    /// <summary>
+    /// buff-debuff-scope T6: normalized ptrs currently mind-controlled, per the real `zombie.hypno`
+    /// event. Nothing tracked this on the Core side before — `MatchRuntime.cs`'s own dispatch had only
+    /// a placeholder comment for it (spec-membership-events.md's own audit correction).
+    /// </summary>
+    public HashSet<string> MindControl { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 /// <summary>Placeholder until W2/W3 debug sync.</summary>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Vision: a layer you can open to track quests and events — a story clock, not only loot. Not finished / not playable yet." />
+    <title>Quest log — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/quest-log.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--vision">Vision</span>
+          Quests, failure, memory · story clock layer
+        </p>
+        <h1 class="teach-title">Quest log</h1>
+        <p class="teach-hook"><strong>Vision:</strong> a layer you can open to track <strong>quests</strong> and <strong>events</strong> — a story clock, not only loot. Not finished / not playable yet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Vision</dt>
+              <dd>Named so it cannot stay invisible — but you cannot open a finished quest log layer today.</dd>
+            </div>
+            <div>
+              <dt>Quest log</dt>
+              <dd>A player-facing layer for tracked quests and events — not the chronicle XP ledger.</dd>
+            </div>
+            <div>
+              <dt>Story clock</dt>
+              <dd>Narrative beats from expeditions, delves, and world events — opposite of a pure loot clock.</dd>
+            </div>
+            <div>
+              <dt>Layer</dt>
+              <dd>Opens over where you already are (like Almanac), not a travel stage like Delve.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Expedition ticks that feed quests are Vision — see <a href="expedition-event-ticks.html">expedition event ticks</a>.</li>
+            <li>Failure that opens a new questline hangs here and on farm / hunt / defend.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="not-finished-not-playable-yet-title">
+          <h2 id="not-finished-not-playable-yet-title">Not finished / not playable yet</h2>
+          <p>There is no finished player quest log layer in the current loop.</p>
+          <p>The catalog names it anyway so the story clock cannot be “forgotten” into loot-only design.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-it-is-design-title">
+          <h2 id="what-it-is-design-title">What it is (design)</h2>
+          <p>Track quests and events in one place you can open.</p>
+          <p>Feeds from delve quests, expedition ticks, world events, and turn reports as those systems ship.</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  expedition ticks / delve / world events
+                    |
+                    v
+              quest log layer (Vision)
+</pre>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-is-not-the-quest-log-title">
+          <h2 id="what-is-not-the-quest-log-title">What is not the quest log</h2>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Chronicle</strong>
+              <p>History and XP ledgers — ships as memory, not quest tracking.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Almanac</strong>
+              <p>Dossiers and recipes from discovery — reference, not active quests.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do with this page</h2>
+          <ol class="steps-plain">
+            <li>Play without waiting on a quest checklist UI — it is Vision.</li>
+            <li>Use Almanac and Chronicle for shipped memory surfaces.</li>
+            <li>When the log appears, treat it as a layer, not a new travel stage.</li>
+          </ol>
+          <p class="teach-note">Stop when quest log ≠ chronicle. Related: <a href="../../mechanisms/world-events.md">world events</a>, <a href="failure-branches.html">failure branches</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Where is my quest log?</dt>
+              <dd>Vision — not finished / not playable yet.</dd>
+            </div>
+            <div>
+              <dt>Is Chronicle the quest log?</dt>
+              <dd>No. Chronicle is history and progression ledgers.</dd>
+            </div>
+            <div>
+              <dt>Do expeditions open quests today?</dt>
+              <dd>Full quest handoff from ticks is Vision.</dd>
+            </div>
+            <div>
+              <dt>Is this a stage I travel to?</dt>
+              <dd>No. Design is a layer you open over where you are.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/world-events.md">World events and raids</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/world-events.md">World events and raids</a> ·
+            <a href="expedition-event-ticks.html">Expedition quest and event ticks</a> ·
+            <a href="failure-branches.html">Failure branches</a> ·
+            <a href="chronicle.html">Chronicle</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/quest-log.md">Markdown (editable SSOT)</a> ·
+            <a href="../../how-you-play.md">How you play</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/quest-log.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

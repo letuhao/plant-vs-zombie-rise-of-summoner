@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
 using FusionRpg.Injector.Stats;
+using FusionRpg.Core.Commanders;
 using UnityEngine;
 
 namespace FusionRpg.Injector;
@@ -54,6 +55,8 @@ public static class DebugRuntime
         SessionActive = false;
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        Hud.ActorHudMeterOverride.Clear(); // E41: per-match state, same reset as the two lines above
+        try { Hud.ActorHudCache.Clear(); } catch { }
         Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
         ScenarioId = "";
     }
@@ -88,32 +91,7 @@ public static class DebugRuntime
     public static Dictionary<string, object> Snapshot()
     {
         var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
-        var dump = new Dictionary<string, object>
-        {
-            ["sessionActive"] = SessionActive,
-            ["scenarioId"] = ScenarioId,
-            ["hitCapture"] = HitCapture,
-            ["spawnCol"] = CheatState.SpawnCol,
-            ["spawnRow"] = CheatState.SpawnRow,
-            ["selectedPtr"] = CheatState.SelectedPtr == IntPtr.Zero ? "" : CheatState.SelectedPtr.ToString("X"),
-            ["selectedSide"] = CheatState.SelectedSide ?? "",
-            ["armOnKillExtra"] = ArmOnKillExtra,
-            ["armOnKillStatus"] = ArmOnKillStatus,
-            ["armOnKillGrave"] = ArmOnKillGrave,
-            ["armOnKillClearGrave"] = ArmOnKillClearGrave,
-            ["armOnHitExtra"] = ArmOnHitExtra,
-            ["onHitExtraRemaining"] = OnHitExtraRemaining,
-            ["armOnHitStatus"] = ArmOnHitStatus,
-            ["onHitStatusRemaining"] = OnHitStatusRemaining,
-            ["probePlant"] = CheatState.On("D-PROBE-PLANT"),
-            ["probeBullet"] = CheatState.On("D-PROBE-BULLET"),
-            ["dmgSet"] = CheatState.IVal("D-DMG-SET"),
-            // Flat fields kept for back-compat; nested match is W3-B MatchSnapshot observe.
-            ["livingPlants"] = matchSnap.PlantCount,
-            ["livingZombies"] = matchSnap.ZombieCount,
-            ["matchPhase"] = matchSnap.Phase.ToString(),
-            ["matchRevision"] = matchSnap.Revision,
-            ["match"] = new Dictionary<string, object>
+        var matchDict = new Dictionary<string, object>
             {
                 ["contractVersion"] = matchSnap.ContractVersion,
                 ["phase"] = matchSnap.Phase.ToString(),
@@ -140,7 +118,40 @@ public static class DebugRuntime
                     ["phase"] = b.Phase.ToString(),
                     ["correlationId"] = b.CorrelationId ?? ""
                 }).ToList()
-            }
+            };
+        var commanderFold = MatchCommanderSnapshotHolder.ObserveCommanderFold();
+        if (commanderFold != null)
+            matchDict["commander"] = commanderFold;
+        var lawnDeployRosterFold = FusionRpg.Core.Match.LawnDeployRosterSnapshotHolder.ObserveRosterFold();
+        if (lawnDeployRosterFold != null)
+            matchDict["lawnDeployRoster"] = lawnDeployRosterFold;
+
+        var dump = new Dictionary<string, object>
+        {
+            ["sessionActive"] = SessionActive,
+            ["scenarioId"] = ScenarioId,
+            ["hitCapture"] = HitCapture,
+            ["spawnCol"] = CheatState.SpawnCol,
+            ["spawnRow"] = CheatState.SpawnRow,
+            ["selectedPtr"] = CheatState.SelectedPtr == IntPtr.Zero ? "" : CheatState.SelectedPtr.ToString("X"),
+            ["selectedSide"] = CheatState.SelectedSide ?? "",
+            ["armOnKillExtra"] = ArmOnKillExtra,
+            ["armOnKillStatus"] = ArmOnKillStatus,
+            ["armOnKillGrave"] = ArmOnKillGrave,
+            ["armOnKillClearGrave"] = ArmOnKillClearGrave,
+            ["armOnHitExtra"] = ArmOnHitExtra,
+            ["onHitExtraRemaining"] = OnHitExtraRemaining,
+            ["armOnHitStatus"] = ArmOnHitStatus,
+            ["onHitStatusRemaining"] = OnHitStatusRemaining,
+            ["probePlant"] = CheatState.On("D-PROBE-PLANT"),
+            ["probeBullet"] = CheatState.On("D-PROBE-BULLET"),
+            ["dmgSet"] = CheatState.IVal("D-DMG-SET"),
+            // Flat fields kept for back-compat; nested match is W3-B MatchSnapshot observe.
+            ["livingPlants"] = matchSnap.PlantCount,
+            ["livingZombies"] = matchSnap.ZombieCount,
+            ["matchPhase"] = matchSnap.Phase.ToString(),
+            ["matchRevision"] = matchSnap.Revision,
+            ["match"] = matchDict
         };
         try
         {
@@ -157,6 +168,13 @@ public static class DebugRuntime
         catch { }
         return dump;
     }
+
+    /// <summary>
+    /// Living plant/zombie combat fields + effect session mods for LIVE FA1 scope asserts.
+    /// Emitted as <c>debug.board-stats</c>.
+    /// </summary>
+    static void AddBoardStatsActorHud(Dictionary<string, object> row, string ptrHex) =>
+        Hud.ActorHudObserve.AttachRow(row, ptrHex);
 
     /// <summary>
     /// Living plant/zombie combat fields + effect session mods for LIVE FA1 scope asserts.
@@ -190,6 +208,7 @@ public static class DebugRuntime
                         ["armor"] = armor,
                         ["thePlantAttackInterval"] = interval
                     });
+                    AddBoardStatsActorHud(plants[^1], GameDumps.Ptr(p));
                 }
                 catch { }
             }
@@ -228,6 +247,7 @@ public static class DebugRuntime
                         ["theSpeed"] = speed
                     };
                     GameDumps.AddZombiePos(item, z);
+                    AddBoardStatsActorHud(item, GameDumps.Ptr(z));
                     zombies.Add(item);
                 }
                 catch { }

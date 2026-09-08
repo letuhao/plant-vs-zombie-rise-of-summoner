@@ -124,10 +124,25 @@ content that was never attempted.
 ## 7. Known-answer test
 
 The eight empty partitions are deliberately left open (map §7.4) as this module's acceptance test:
-`metrics` must find exactly those eight, `planner` must place the four base-type partitions in the
-base-type layer, `gems/2` after its registry dependency, and the three display-template partitions
-after the affix families they render. If the plan matches what a human would write, the module
-works.
+`metrics` must find exactly those eight, `gems/2` must be placed after its registry dependency, and
+the three display-template partitions after the affix families they render. If the plan matches what
+a human would write, the module works.
+
+**⛔ Corrected 2026-08-31 — the four base-type partitions are EXCLUDED, not layered.** This section
+previously read *"`planner` must place the four base-type partitions in the base-type layer"*. That
+sentence predates **S2's own finding** and is wrong: those four cells' `_meta.partition` **string** is
+wrong while their entries' own `role`/`frame` fields are **intact**. They already hold real content.
+Scheduling them as generation jobs would author duplicates of rows that exist — they need a **corpus
+relabel**, which is not a generation job and must not be confused with one.
+
+The planner therefore reports them under `excluded[]` with the reason
+`mislabeled-partition-needs-relabel-not-generation`, rather than dropping them silently (a partition
+that vanishes with no explanation reads as a planner bug, and someone re-adds it).
+
+Built and tested this way in `seedsmith/planner/schedule.py`; the resolution is pinned in that
+module's docstring and in `tests/test_schedule.py` so it is not re-derived from the superseded
+sentence. Corrected here per the design gate's own propagation rule — a correction that lands in
+code but not in its sibling spec has not landed.
 
 ---
 

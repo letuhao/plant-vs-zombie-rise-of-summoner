@@ -1,0 +1,4556 @@
+{
+  "recipe.abyssswordstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "allpeater",
+    "inputSpeciesIdB": "bamboodragon",
+    "outputSpeciesId": "abyssswordstar"
+  },
+  "recipe.acientsunnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bedrocktallnut",
+    "inputSpeciesIdB": "ultimateswordzombie",
+    "outputSpeciesId": "acientsunnut"
+  },
+  "recipe.allpeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "bamboo",
+    "outputSpeciesId": "allpeater"
+  },
+  "recipe.apple": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "dolphinrider",
+    "outputSpeciesId": "apple"
+  },
+  "recipe.armedgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "acientsunnut",
+    "inputSpeciesIdB": "ultimatesunflower",
+    "outputSpeciesId": "armedgargantuar"
+  },
+  "recipe.bamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "bucketplant",
+    "outputSpeciesId": "bamboo"
+  },
+  "recipe.bamboodragon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bungizombie",
+    "outputSpeciesId": "bamboodragon"
+  },
+  "recipe.bamboofurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "bamboofurnace"
+  },
+  "recipe.bamboospruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "bamboospruce"
+  },
+  "recipe.bedrocksnowzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "flyingthreepeater",
+    "outputSpeciesId": "bedrocksnowzombie"
+  },
+  "recipe.bedrocktallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackelephantzombie",
+    "inputSpeciesIdB": "bedrocksnowzombie",
+    "outputSpeciesId": "bedrocktallnut"
+  },
+  "recipe.bigchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "bigchomper"
+  },
+  "recipe.biggatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "biggatling"
+  },
+  "recipe.biggloom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "biggloom"
+  },
+  "recipe.bigpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "bigpumpkin"
+  },
+  "recipe.bigseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "bigseashroom"
+  },
+  "recipe.bigsunnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "bigsunnut"
+  },
+  "recipe.bigsunshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "blackfootball_c",
+    "outputSpeciesId": "bigsunshroom"
+  },
+  "recipe.bigwallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "bigwallnut"
+  },
+  "recipe.blackelephantzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "abyssswordstar",
+    "outputSpeciesId": "blackelephantzombie"
+  },
+  "recipe.blackflagfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "iceclawzombie",
+    "outputSpeciesId": "blackflagfootball"
+  },
+  "recipe.blackfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "cherryultimatepumpkin",
+    "outputSpeciesId": "blackfootball"
+  },
+  "recipe.blackfootball_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "dolphinrider",
+    "outputSpeciesId": "blackfootball_a"
+  },
+  "recipe.blackfootball_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "goldhypnodoom",
+    "outputSpeciesId": "blackfootball_b"
+  },
+  "recipe.blackfootball_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "tower_sunmine",
+    "outputSpeciesId": "blackfootball_c"
+  },
+  "recipe.blackfootball_c2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "blackfootball_c2"
+  },
+  "recipe.blackhorse": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "bucketplant",
+    "outputSpeciesId": "blackhorse"
+  },
+  "recipe.blackjackboxzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "blackjackboxzombie"
+  },
+  "recipe.blacktrainzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "hamburger",
+    "outputSpeciesId": "blacktrainzombie"
+  },
+  "recipe.blovermine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "blovermine"
+  },
+  "recipe.bloverpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "bloverpot"
+  },
+  "recipe.bloverumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "bloverumbrella"
+  },
+  "recipe.blowerpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "electriconion",
+    "outputSpeciesId": "blowerpumpkin"
+  },
+  "recipe.bluegargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "protalzombie",
+    "outputSpeciesId": "bluegargantuar"
+  },
+  "recipe.bucketdoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "bucketdoom"
+  },
+  "recipe.bucketnutzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "bucketnutzombie"
+  },
+  "recipe.bucketpaper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "bucketpaper"
+  },
+  "recipe.bucketzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "bucketzombie"
+  },
+  "recipe.bungizombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "armoredimpzombie",
+    "outputSpeciesId": "bungizombie"
+  },
+  "recipe.cabbageblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "cabbageblover"
+  },
+  "recipe.cabbagecaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "cabbagecaltrop"
+  },
+  "recipe.cabbagecannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "driverzombie",
+    "outputSpeciesId": "cabbagecannon"
+  },
+  "recipe.cabbagefume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "cabbagefume"
+  },
+  "recipe.cabbagemelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "fumeshroom",
+    "outputSpeciesId": "cabbagemelon"
+  },
+  "recipe.cabbagenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "cabbagenut"
+  },
+  "recipe.cabbagepot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "gatlingfootballzombie",
+    "outputSpeciesId": "cabbagepot"
+  },
+  "recipe.cabbagepuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "cabbagepuff"
+  },
+  "recipe.cabbagesquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "cabbagesquash"
+  },
+  "recipe.cabbageumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "cabbageumbrella"
+  },
+  "recipe.cacstusstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drowngargantuar",
+    "outputSpeciesId": "cacstusstar"
+  },
+  "recipe.cactusblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "cactusblover"
+  },
+  "recipe.cactuscaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "cactuscaltrop"
+  },
+  "recipe.cactusfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "cactusfume"
+  },
+  "recipe.cactusnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "cactusnut"
+  },
+  "recipe.cactuspumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldumbrella",
+    "outputSpeciesId": "cactuspumpkin"
+  },
+  "recipe.cactusumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "cactusumbrella"
+  },
+  "recipe.caltropfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "frozenpear",
+    "outputSpeciesId": "caltropfume"
+  },
+  "recipe.caltropkelp_land": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "icebean",
+    "outputSpeciesId": "caltropkelp_land"
+  },
+  "recipe.caltropkelp_water": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "icelotus",
+    "outputSpeciesId": "caltropkelp_water"
+  },
+  "recipe.caltropnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "icepeach",
+    "outputSpeciesId": "caltropnut"
+  },
+  "recipe.caltroppot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "caltroppot"
+  },
+  "recipe.catapultzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "catapultzombie"
+  },
+  "recipe.cattailgirl": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "acientsunnut",
+    "inputSpeciesIdB": "solarsunflower",
+    "outputSpeciesId": "cattailgirl"
+  },
+  "recipe.cattaillour": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "blackhorse",
+    "outputSpeciesId": "cattaillour"
+  },
+  "recipe.cattailplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "cattailplant"
+  },
+  "recipe.cherryblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "electriconion",
+    "outputSpeciesId": "cherryblover"
+  },
+  "recipe.cherrycatapultzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "cherrycatapultzombie"
+  },
+  "recipe.cherrychomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "cherrychomper"
+  },
+  "recipe.cherryfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "driverzombie",
+    "outputSpeciesId": "cherryfume"
+  },
+  "recipe.cherrygatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drowngargantuar",
+    "outputSpeciesId": "cherrygatling"
+  },
+  "recipe.cherryhypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "blackjackboxzombie",
+    "outputSpeciesId": "cherryhypno"
+  },
+  "recipe.cherryjalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "frozenpear",
+    "outputSpeciesId": "cherryjalapeno"
+  },
+  "recipe.cherrymagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ironballoonzombie",
+    "outputSpeciesId": "cherrymagnet"
+  },
+  "recipe.cherrymine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "kirov_a",
+    "outputSpeciesId": "cherrymine"
+  },
+  "recipe.cherrynut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "fumeshroom",
+    "outputSpeciesId": "cherrynut"
+  },
+  "recipe.cherrypaperz95": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "superumbrella",
+    "outputSpeciesId": "cherrypaperz95"
+  },
+  "recipe.cherrypaperzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "ironballoonzombie2",
+    "outputSpeciesId": "cherrypaperzombie"
+  },
+  "recipe.cherrypot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "iceshroom",
+    "outputSpeciesId": "cherrypot"
+  },
+  "recipe.cherrypuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "gatlingfootballzombie",
+    "outputSpeciesId": "cherrypuff"
+  },
+  "recipe.cherrypumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "cherrypumpkin"
+  },
+  "recipe.cherryscaredy": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldumbrella",
+    "outputSpeciesId": "cherryscaredy"
+  },
+  "recipe.cherryshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "icebean",
+    "outputSpeciesId": "cherryshooter"
+  },
+  "recipe.cherrysplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "cherrysplit"
+  },
+  "recipe.cherrysquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "icelotus",
+    "outputSpeciesId": "cherrysquash"
+  },
+  "recipe.cherrysubmarine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "cherrysubmarine"
+  },
+  "recipe.cherrythreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "cherrythreepeater"
+  },
+  "recipe.cherrytorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "icepeach",
+    "outputSpeciesId": "cherrytorch"
+  },
+  "recipe.cherryultimatepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "cattaillour",
+    "outputSpeciesId": "cherryultimatepumpkin"
+  },
+  "recipe.cherryumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "gatlingpaper_c",
+    "outputSpeciesId": "cherryumbrella"
+  },
+  "recipe.chickenimp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "chickenimp"
+  },
+  "recipe.chomperpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "gatlingpeazombie",
+    "outputSpeciesId": "chomperpumpkin"
+  },
+  "recipe.chompersquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "levatationzombie",
+    "outputSpeciesId": "chompersquash"
+  },
+  "recipe.chrysantheautumn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "tower_sunmine",
+    "outputSpeciesId": "chrysantheautumn"
+  },
+  "recipe.coachpaper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "coachpaper"
+  },
+  "recipe.cobcannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldcabbage",
+    "outputSpeciesId": "cobcannon"
+  },
+  "recipe.cornblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldgarlic",
+    "outputSpeciesId": "cornblover"
+  },
+  "recipe.corncabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldmelon",
+    "outputSpeciesId": "corncabbage"
+  },
+  "recipe.corncaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldpot",
+    "outputSpeciesId": "corncaltrop"
+  },
+  "recipe.cornfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldscarypot",
+    "outputSpeciesId": "cornfume"
+  },
+  "recipe.cornmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldzombie",
+    "outputSpeciesId": "cornmelon"
+  },
+  "recipe.cornnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "greengargantuar",
+    "outputSpeciesId": "cornnut"
+  },
+  "recipe.cornpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "horsezombie",
+    "outputSpeciesId": "cornpot"
+  },
+  "recipe.cornpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ifvblover",
+    "outputSpeciesId": "cornpuff"
+  },
+  "recipe.cornumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ironpeadoorzombie",
+    "outputSpeciesId": "cornumbrella"
+  },
+  "recipe.dancepolzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "silvericeshroom",
+    "outputSpeciesId": "dancepolzombie"
+  },
+  "recipe.dancepolzombie2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "dancepolzombie2"
+  },
+  "recipe.darkthreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "iceshroom",
+    "outputSpeciesId": "darkthreepeater"
+  },
+  "recipe.deathchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "blackhorse",
+    "outputSpeciesId": "deathchomper"
+  },
+  "recipe.deathmine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "bigsunshroom",
+    "outputSpeciesId": "deathmine"
+  },
+  "recipe.diamondimitater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "acientsunnut",
+    "inputSpeciesIdB": "ultimatesunnut",
+    "outputSpeciesId": "diamondimitater"
+  },
+  "recipe.diamondrandomzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "armoredimpzombie",
+    "outputSpeciesId": "diamondrandomzombie"
+  },
+  "recipe.dolldiamond": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "bucketzombie",
+    "outputSpeciesId": "dolldiamond"
+  },
+  "recipe.dollgold": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ironredgargantuar",
+    "outputSpeciesId": "dollgold"
+  },
+  "recipe.dollsilver": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "smallumbrella",
+    "outputSpeciesId": "dollsilver"
+  },
+  "recipe.dolphingatlingzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "dolphingatlingzombie"
+  },
+  "recipe.dolphinpeazombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "kirov_c",
+    "outputSpeciesId": "dolphinpeazombie"
+  },
+  "recipe.doomblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "firecracker",
+    "outputSpeciesId": "doomblover"
+  },
+  "recipe.doomcabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "ironballoonzombie",
+    "outputSpeciesId": "doomcabbage"
+  },
+  "recipe.doomcactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "kirovzombie",
+    "outputSpeciesId": "doomcactus"
+  },
+  "recipe.doomcherry": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "kirov_a",
+    "outputSpeciesId": "doomcherry"
+  },
+  "recipe.doomchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "doomchomper"
+  },
+  "recipe.doomcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "kirov_c",
+    "outputSpeciesId": "doomcorn"
+  },
+  "recipe.doomfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "levatationzombie",
+    "outputSpeciesId": "doomfume"
+  },
+  "recipe.doomgarlic": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "penguinzombie",
+    "outputSpeciesId": "doomgarlic"
+  },
+  "recipe.doomgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "jackboxzombie",
+    "outputSpeciesId": "doomgatling"
+  },
+  "recipe.doomjalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "snowdolphinrider",
+    "outputSpeciesId": "doomjalapeno"
+  },
+  "recipe.doomkelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "diamondrandomzombie",
+    "outputSpeciesId": "doomkelp"
+  },
+  "recipe.doommelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "snowdrownzombie",
+    "outputSpeciesId": "doommelon"
+  },
+  "recipe.doomnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ladderzombie",
+    "outputSpeciesId": "doomnut"
+  },
+  "recipe.doompaper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "flyingthreepeater",
+    "inputSpeciesIdB": "abyssswordstar",
+    "outputSpeciesId": "doompaper"
+  },
+  "recipe.doompeashooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "kirovzombie",
+    "outputSpeciesId": "doompeashooter"
+  },
+  "recipe.doomplantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "apple",
+    "outputSpeciesId": "doomplantern"
+  },
+  "recipe.doompumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "blackjackboxzombie",
+    "outputSpeciesId": "doompumpkin"
+  },
+  "recipe.doomseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "jalapeno",
+    "outputSpeciesId": "doomseashroom"
+  },
+  "recipe.doomshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "doomshroom"
+  },
+  "recipe.doomsniper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "machinelevatation",
+    "outputSpeciesId": "doomsniper"
+  },
+  "recipe.doomsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "machinelevatation",
+    "outputSpeciesId": "doomsquash"
+  },
+  "recipe.doomstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "superbombthrower",
+    "outputSpeciesId": "doomstar"
+  },
+  "recipe.doomsunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "superkirov",
+    "outputSpeciesId": "doomsunflower"
+  },
+  "recipe.doomthreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "thorns",
+    "outputSpeciesId": "doomthreepeater"
+  },
+  "recipe.doomtorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "jalapenozombie",
+    "outputSpeciesId": "doomtorch"
+  },
+  "recipe.doublecherry": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "pinefurnace",
+    "outputSpeciesId": "doublecherry"
+  },
+  "recipe.doublepuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "machinenutzombie",
+    "outputSpeciesId": "doublepuff"
+  },
+  "recipe.doubleshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "minerzombie",
+    "outputSpeciesId": "doubleshooter"
+  },
+  "recipe.doublesnow": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "doublesnow"
+  },
+  "recipe.driver_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "spikerock",
+    "outputSpeciesId": "driver_c"
+  },
+  "recipe.driverzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "bucketplant",
+    "outputSpeciesId": "driverzombie"
+  },
+  "recipe.drown_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "superdriver",
+    "outputSpeciesId": "drown_a"
+  },
+  "recipe.drown_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "supermachinenutzombie",
+    "outputSpeciesId": "drown_b"
+  },
+  "recipe.drown_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "supermachineshardplant",
+    "outputSpeciesId": "drown_c"
+  },
+  "recipe.drowngargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "drowngargantuar"
+  },
+  "recipe.drownpult_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "umbrellapot",
+    "outputSpeciesId": "drownpult_b"
+  },
+  "recipe.drownpult_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "wallnut",
+    "outputSpeciesId": "drownpult_c"
+  },
+  "recipe.drownpultzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "drownpultzombie"
+  },
+  "recipe.electriconion": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "bucketplant",
+    "outputSpeciesId": "electriconion"
+  },
+  "recipe.elephantzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "elephantzombie"
+  },
+  "recipe.elephantzombie_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "elephantzombie_a"
+  },
+  "recipe.elephantzombie_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "imitatewheat",
+    "outputSpeciesId": "elephantzombie_b"
+  },
+  "recipe.elephantzombie_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "portalballoonzombie",
+    "outputSpeciesId": "elephantzombie_c"
+  },
+  "recipe.emeraldumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "emeraldumbrella"
+  },
+  "recipe.endoflame": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "bucketplant",
+    "outputSpeciesId": "endoflame"
+  },
+  "recipe.endoflamegirl": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ultimatesunflower",
+    "inputSpeciesIdB": "ultimatesunnut",
+    "outputSpeciesId": "endoflamegirl"
+  },
+  "recipe.endoflamezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "flyingthreepeater",
+    "outputSpeciesId": "endoflamezombie"
+  },
+  "recipe.endpumpiner": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "penguinzombie",
+    "outputSpeciesId": "endpumpiner"
+  },
+  "recipe.eternalzombie_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatebigsniper",
+    "outputSpeciesId": "eternalzombie_b"
+  },
+  "recipe.eternalzombie_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatecabbage",
+    "outputSpeciesId": "eternalzombie_c"
+  },
+  "recipe.firecabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "supercherryshooterzombie",
+    "outputSpeciesId": "firecabbage"
+  },
+  "recipe.firecannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "superpolevaulter",
+    "outputSpeciesId": "firecannon"
+  },
+  "recipe.firecattail": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "supersubmarine",
+    "outputSpeciesId": "firecattail"
+  },
+  "recipe.firecracker": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "firecracker"
+  },
+  "recipe.firefume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "torchwood",
+    "outputSpeciesId": "firefume"
+  },
+  "recipe.firegloom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_doomfume",
+    "outputSpeciesId": "firegloom"
+  },
+  "recipe.firemelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_iceblover",
+    "outputSpeciesId": "firemelon"
+  },
+  "recipe.firenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_icegloom",
+    "outputSpeciesId": "firenut"
+  },
+  "recipe.firesniper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_electriconion",
+    "outputSpeciesId": "firesniper"
+  },
+  "recipe.firespikerock": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_cherrychomper",
+    "outputSpeciesId": "firespikerock"
+  },
+  "recipe.firesunshroom_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "cherrysubmarine",
+    "outputSpeciesId": "firesunshroom_a"
+  },
+  "recipe.firesunshroom_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "flagzombie",
+    "outputSpeciesId": "firesunshroom_b"
+  },
+  "recipe.firesunshroom_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "footballzombie",
+    "outputSpeciesId": "firesunshroom_c"
+  },
+  "recipe.flagfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "flagfootball"
+  },
+  "recipe.flagzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "flagzombie"
+  },
+  "recipe.flyingthreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "biggloom",
+    "outputSpeciesId": "flyingthreepeater"
+  },
+  "recipe.flyingthreepeater_sp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "bloverumbrella",
+    "outputSpeciesId": "flyingthreepeater_sp"
+  },
+  "recipe.footballboss": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatecorn",
+    "outputSpeciesId": "footballboss"
+  },
+  "recipe.footballdolphin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "footballdolphin"
+  },
+  "recipe.footballdrown": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "footballdrown"
+  },
+  "recipe.footballzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "footballzombie"
+  },
+  "recipe.frozenpear": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "frozenpear"
+  },
+  "recipe.fumepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "fumepumpkin"
+  },
+  "recipe.fumeshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "fumeshroom"
+  },
+  "recipe.gargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "solarsunflower",
+    "inputSpeciesIdB": "ultimatesunflower",
+    "outputSpeciesId": "gargantuar"
+  },
+  "recipe.garlicblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "snowdolphinrider",
+    "outputSpeciesId": "garlicblover"
+  },
+  "recipe.garliccabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "newyearzombie",
+    "outputSpeciesId": "garliccabbage"
+  },
+  "recipe.garliccorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "passionfruit",
+    "outputSpeciesId": "garliccorn"
+  },
+  "recipe.garlicfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "garlicfume"
+  },
+  "recipe.garlicgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "bucketzombie",
+    "outputSpeciesId": "garlicgatling"
+  },
+  "recipe.garlicmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "peashooter",
+    "outputSpeciesId": "garlicmelon"
+  },
+  "recipe.garlicnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pickaxe_b",
+    "outputSpeciesId": "garlicnut"
+  },
+  "recipe.garlicpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "cherrysubmarine",
+    "outputSpeciesId": "garlicpea"
+  },
+  "recipe.garlicpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pickaxe_c",
+    "outputSpeciesId": "garlicpot"
+  },
+  "recipe.garlicpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pickaxezombie",
+    "outputSpeciesId": "garlicpumpkin"
+  },
+  "recipe.garlicrepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superbombthrower",
+    "outputSpeciesId": "garlicrepeater"
+  },
+  "recipe.garlicsniper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "endoflame",
+    "outputSpeciesId": "garlicsniper"
+  },
+  "recipe.garlicsplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "polevaulterzombie",
+    "outputSpeciesId": "garlicsplit"
+  },
+  "recipe.garlicthreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "goldcorn",
+    "outputSpeciesId": "garlicthreepeater"
+  },
+  "recipe.garlictorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superkirov",
+    "outputSpeciesId": "garlictorch"
+  },
+  "recipe.garlicultimatechomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "allpeater",
+    "outputSpeciesId": "garlicultimatechomper"
+  },
+  "recipe.garlicumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "present",
+    "outputSpeciesId": "garlicumbrella"
+  },
+  "recipe.gatlingblackfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "submarine_b",
+    "outputSpeciesId": "gatlingblackfootball"
+  },
+  "recipe.gatlingdoomscaredy": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "wateraloes",
+    "outputSpeciesId": "gatlingdoomscaredy"
+  },
+  "recipe.gatlingfootballzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "gatlingfootballzombie"
+  },
+  "recipe.gatlingpaper_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_cherryshooter",
+    "outputSpeciesId": "gatlingpaper_a"
+  },
+  "recipe.gatlingpaper_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "solarsunflower",
+    "inputSpeciesIdB": "ultimatesunnut",
+    "outputSpeciesId": "gatlingpaper_b"
+  },
+  "recipe.gatlingpaper_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "torchpumpkin",
+    "outputSpeciesId": "gatlingpaper_c"
+  },
+  "recipe.gatlingpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superpolevaulter",
+    "outputSpeciesId": "gatlingpea"
+  },
+  "recipe.gatlingpeazombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "torchspike",
+    "outputSpeciesId": "gatlingpeazombie"
+  },
+  "recipe.gatlingpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pudding",
+    "outputSpeciesId": "gatlingpuff"
+  },
+  "recipe.gloomshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "gloomshroom"
+  },
+  "recipe.goldbungizombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "goldbungizombie"
+  },
+  "recipe.goldcabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "armoredimpzombie",
+    "inputSpeciesIdB": "tower_sunmine",
+    "outputSpeciesId": "goldcabbage"
+  },
+  "recipe.goldcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "goldcorn"
+  },
+  "recipe.golddoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "snowgatlingpuff",
+    "outputSpeciesId": "golddoom"
+  },
+  "recipe.goldgarlic": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "driver_b",
+    "outputSpeciesId": "goldgarlic"
+  },
+  "recipe.goldhypnodoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "cattaillour",
+    "outputSpeciesId": "goldhypnodoom"
+  },
+  "recipe.goldiceshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "flyingthreepeater_sp",
+    "outputSpeciesId": "goldiceshroom"
+  },
+  "recipe.goldmagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "supersubmarine",
+    "outputSpeciesId": "goldmagnet"
+  },
+  "recipe.goldmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "goldmelon"
+  },
+  "recipe.goldpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "goldpot"
+  },
+  "recipe.goldscarypot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "goldscarypot"
+  },
+  "recipe.goldsunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "goldsunflower"
+  },
+  "recipe.goldthreeplantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "goldthreeplantern"
+  },
+  "recipe.goldthreetorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldbungizombie",
+    "outputSpeciesId": "goldthreetorch"
+  },
+  "recipe.goldumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "goldumbrella"
+  },
+  "recipe.goldzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "goldzombie"
+  },
+  "recipe.greengargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "greengargantuar"
+  },
+  "recipe.hamburger": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "cherryhypno",
+    "outputSpeciesId": "hamburger"
+  },
+  "recipe.helmetfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pumpiner",
+    "outputSpeciesId": "helmetfume"
+  },
+  "recipe.helmetgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "snowdrownzombie",
+    "outputSpeciesId": "helmetgatling"
+  },
+  "recipe.horseboss": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimategarlicsplit",
+    "outputSpeciesId": "horseboss"
+  },
+  "recipe.horsezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "horsezombie"
+  },
+  "recipe.hugewallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_doomfume",
+    "outputSpeciesId": "hugewallnut"
+  },
+  "recipe.hurricaneblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "hurricaneblover"
+  },
+  "recipe.hypnoblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "goldsunflower",
+    "outputSpeciesId": "hypnoblover"
+  },
+  "recipe.hypnocattailgirl": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "hypnocattailgirl"
+  },
+  "recipe.hypnocattailgirl_land": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "diamondrandomzombie",
+    "outputSpeciesId": "hypnocattailgirl_land"
+  },
+  "recipe.hypnochomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "goldthreeplantern",
+    "outputSpeciesId": "hypnochomper"
+  },
+  "recipe.hypnodoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "flagzombie",
+    "outputSpeciesId": "hypnodoom"
+  },
+  "recipe.hypnoemperor": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "marigold",
+    "outputSpeciesId": "hypnoemperor"
+  },
+  "recipe.hypnofume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "hypnofume"
+  },
+  "recipe.hypnogarlic": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_electriconion",
+    "outputSpeciesId": "hypnogarlic"
+  },
+  "recipe.hypnogatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "endoflame",
+    "outputSpeciesId": "hypnogatling"
+  },
+  "recipe.hypnojalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_doomstar",
+    "outputSpeciesId": "hypnojalapeno"
+  },
+  "recipe.hypnojalapenopickaxezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "bucketdoom",
+    "outputSpeciesId": "hypnojalapenopickaxezombie"
+  },
+  "recipe.hypnojalapenozombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cabbagefume",
+    "outputSpeciesId": "hypnojalapenozombie"
+  },
+  "recipe.hypnomagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "thorns",
+    "outputSpeciesId": "hypnomagnet"
+  },
+  "recipe.hypnomelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldcorn",
+    "outputSpeciesId": "hypnomelon"
+  },
+  "recipe.hypnomine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_iceblover",
+    "outputSpeciesId": "hypnomine"
+  },
+  "recipe.hypnonut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "randompluszombie",
+    "outputSpeciesId": "hypnonut"
+  },
+  "recipe.hypnopeashooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "footballzombie",
+    "outputSpeciesId": "hypnopeashooter"
+  },
+  "recipe.hypnopot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "randomgargantuar",
+    "outputSpeciesId": "hypnopot"
+  },
+  "recipe.hypnopuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_scaredyfume",
+    "outputSpeciesId": "hypnopuff"
+  },
+  "recipe.hypnopumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "redgargantuar",
+    "outputSpeciesId": "hypnopumpkin"
+  },
+  "recipe.hypnoqueen": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "goldbungizombie",
+    "outputSpeciesId": "hypnoqueen"
+  },
+  "recipe.hypnorepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "jackson_a",
+    "outputSpeciesId": "hypnorepeater"
+  },
+  "recipe.hypnosplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "redzombieloonnut",
+    "outputSpeciesId": "hypnosplit"
+  },
+  "recipe.hypnosquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldsunflower",
+    "outputSpeciesId": "hypnosquash"
+  },
+  "recipe.hypnotorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bamboo",
+    "outputSpeciesId": "hypnotorch"
+  },
+  "recipe.icebean": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "icebean"
+  },
+  "recipe.iceblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "iceblover"
+  },
+  "recipe.icecabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "icecabbage"
+  },
+  "recipe.icecactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "icecactus"
+  },
+  "recipe.icecaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "icecaltrop"
+  },
+  "recipe.icecannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "icecannon"
+  },
+  "recipe.icecattail": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "icecattail"
+  },
+  "recipe.icecherry": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "icecherry"
+  },
+  "recipe.iceclawzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bamboodragon",
+    "outputSpeciesId": "iceclawzombie"
+  },
+  "recipe.icecorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "icecorn"
+  },
+  "recipe.icedoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "icedoom"
+  },
+  "recipe.icefumeshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "icefumeshroom"
+  },
+  "recipe.icefurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "icefurnace"
+  },
+  "recipe.icegloom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "icegloom"
+  },
+  "recipe.icehypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "icehypno"
+  },
+  "recipe.icelaserumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "icelaserumbrella"
+  },
+  "recipe.icelotus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "icelotus"
+  },
+  "recipe.icemine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "icemine"
+  },
+  "recipe.icenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "icenut"
+  },
+  "recipe.icepeach": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "icepeach"
+  },
+  "recipe.iceplantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "apple",
+    "outputSpeciesId": "iceplantern"
+  },
+  "recipe.icepot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "icepot"
+  },
+  "recipe.icepuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "icepuff"
+  },
+  "recipe.icepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "icepumpkin"
+  },
+  "recipe.icescaredyshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "icescaredyshroom"
+  },
+  "recipe.iceseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "iceseashroom"
+  },
+  "recipe.iceshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "iceshroom"
+  },
+  "recipe.icespikerock": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "icespikerock"
+  },
+  "recipe.icesquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "icesquash"
+  },
+  "recipe.icetorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "drowngargantuar",
+    "outputSpeciesId": "icetorch"
+  },
+  "recipe.ifvblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "ifvblover"
+  },
+  "recipe.ifvironpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "sandjackson",
+    "outputSpeciesId": "ifvironpuff"
+  },
+  "recipe.ifvpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "seashroom",
+    "outputSpeciesId": "ifvpumpkin"
+  },
+  "recipe.ifvstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldthreeplantern",
+    "outputSpeciesId": "ifvstar"
+  },
+  "recipe.imitatewheat": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "bamboospruce",
+    "outputSpeciesId": "imitatewheat"
+  },
+  "recipe.impking": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatehypno",
+    "outputSpeciesId": "impking"
+  },
+  "recipe.ironballoonzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "ironballoonzombie"
+  },
+  "recipe.ironcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "silverpot",
+    "outputSpeciesId": "ironcorn"
+  },
+  "recipe.ironfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_icegloom",
+    "outputSpeciesId": "ironfume"
+  },
+  "recipe.irongargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "silverzombie",
+    "outputSpeciesId": "irongargantuar"
+  },
+  "recipe.ironmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "sniperpea",
+    "outputSpeciesId": "ironmelon"
+  },
+  "recipe.ironnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "apple",
+    "outputSpeciesId": "ironnut"
+  },
+  "recipe.ironpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "blackfootball_c",
+    "outputSpeciesId": "ironpea"
+  },
+  "recipe.ironpeadoorzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "ironpeadoorzombie"
+  },
+  "recipe.ironpeazombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "obsidianwheat",
+    "outputSpeciesId": "ironpeazombie"
+  },
+  "recipe.ironpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "blackhorse",
+    "outputSpeciesId": "ironpuff"
+  },
+  "recipe.ironpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "ironpumpkin"
+  },
+  "recipe.ironredgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "ironredgargantuar"
+  },
+  "recipe.ironsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "ironsquash"
+  },
+  "recipe.ironstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "ironstar"
+  },
+  "recipe.jackbox_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "tower_scaredyfume",
+    "outputSpeciesId": "jackbox_b"
+  },
+  "recipe.jackboxdoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "jackboxdoom"
+  },
+  "recipe.jackboxjumpzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cactusblover",
+    "outputSpeciesId": "jackboxjumpzombie"
+  },
+  "recipe.jackboxplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "diamondrandomzombie",
+    "outputSpeciesId": "jackboxplant"
+  },
+  "recipe.jackboxpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "jackboxpumpkin"
+  },
+  "recipe.jackboxstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "blackfootball_c",
+    "outputSpeciesId": "jackboxstar"
+  },
+  "recipe.jackboxzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "submarine_b",
+    "outputSpeciesId": "jackboxzombie"
+  },
+  "recipe.jackson_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "jackson_a"
+  },
+  "recipe.jackson_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "ironballoonzombie2",
+    "outputSpeciesId": "jackson_b"
+  },
+  "recipe.jacksondriver": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "firecracker",
+    "outputSpeciesId": "jacksondriver"
+  },
+  "recipe.jalacaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "jalacaltrop"
+  },
+  "recipe.jalacorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "blackhorse",
+    "outputSpeciesId": "jalacorn"
+  },
+  "recipe.jaladoubleshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "jaladoubleshooter"
+  },
+  "recipe.jalagatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "ultimateminigun",
+    "outputSpeciesId": "jalagatling"
+  },
+  "recipe.jalakelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "jalakelp"
+  },
+  "recipe.jalamine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "jalamine"
+  },
+  "recipe.jalapeashooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "jalapeashooter"
+  },
+  "recipe.jalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "superdriver",
+    "outputSpeciesId": "jalapeno"
+  },
+  "recipe.jalapenozombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "torchpumpkin",
+    "outputSpeciesId": "jalapenozombie"
+  },
+  "recipe.jalapumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "jalapumpkin"
+  },
+  "recipe.jalasplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "jalasplit"
+  },
+  "recipe.jalasquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "jalasquash"
+  },
+  "recipe.jalastar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "waterjackboxjumpzombie",
+    "outputSpeciesId": "jalastar"
+  },
+  "recipe.jalatorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "jalatorch"
+  },
+  "recipe.kelpfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "blackjackboxzombie",
+    "outputSpeciesId": "kelpfume"
+  },
+  "recipe.kelpmine_land": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "bucketzombie",
+    "outputSpeciesId": "kelpmine_land"
+  },
+  "recipe.kelpmine_water": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "diamondrandomzombie",
+    "outputSpeciesId": "kelpmine_water"
+  },
+  "recipe.kelpnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "cherrysubmarine",
+    "outputSpeciesId": "kelpnut"
+  },
+  "recipe.kelptorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "kelptorch"
+  },
+  "recipe.kirov_a": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "kirov_a"
+  },
+  "recipe.kirov_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "abyssswordstar",
+    "inputSpeciesIdB": "flyingthreepeater_sp",
+    "outputSpeciesId": "kirov_b"
+  },
+  "recipe.kirov_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "kirov_c"
+  },
+  "recipe.kirovzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "kirovzombie"
+  },
+  "recipe.ladderzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "ladderzombie"
+  },
+  "recipe.landsubmarine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "endoflame",
+    "outputSpeciesId": "landsubmarine"
+  },
+  "recipe.lanternblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "jackson_b",
+    "outputSpeciesId": "lanternblover"
+  },
+  "recipe.lanterncactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "marigold",
+    "outputSpeciesId": "lanterncactus"
+  },
+  "recipe.lanternchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "presentzombie",
+    "outputSpeciesId": "lanternchomper"
+  },
+  "recipe.lanternfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "randompluszombie",
+    "outputSpeciesId": "lanternfume"
+  },
+  "recipe.lanterngatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "sunflower",
+    "outputSpeciesId": "lanterngatling"
+  },
+  "recipe.lanternmagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "superladderzombie",
+    "outputSpeciesId": "lanternmagnet"
+  },
+  "recipe.lanternnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "tower_bigsunshroom",
+    "outputSpeciesId": "lanternnut"
+  },
+  "recipe.lanternpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "tower_gravebuster",
+    "outputSpeciesId": "lanternpea"
+  },
+  "recipe.lanternpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "lanternpot"
+  },
+  "recipe.lanternpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "lanternpumpkin"
+  },
+  "recipe.lanternrepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "bungizombie",
+    "outputSpeciesId": "lanternrepeater"
+  },
+  "recipe.lanternsplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "lanternsplit"
+  },
+  "recipe.lanternstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "lanternstar"
+  },
+  "recipe.lanternumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "lanternumbrella"
+  },
+  "recipe.laserumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "laserumbrella"
+  },
+  "recipe.legionsniperzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatelanternsplit",
+    "outputSpeciesId": "legionsniperzombie"
+  },
+  "recipe.legionzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatehypnopumpkin",
+    "outputSpeciesId": "legionzombie"
+  },
+  "recipe.levatationzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "levatationzombie"
+  },
+  "recipe.lilypad": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldcorn",
+    "outputSpeciesId": "lilypad"
+  },
+  "recipe.lotusaloes": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "lotusaloes"
+  },
+  "recipe.lotusbamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldsunflower",
+    "outputSpeciesId": "lotusbamboo"
+  },
+  "recipe.lotusspruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "frozenpear",
+    "outputSpeciesId": "lotusspruce"
+  },
+  "recipe.machinelevatation": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "machinelevatation"
+  },
+  "recipe.machinenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "firecracker",
+    "outputSpeciesId": "machinenut"
+  },
+  "recipe.machinenutzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "submarine_b",
+    "outputSpeciesId": "machinenutzombie"
+  },
+  "recipe.machineshardplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "jackboxzombie",
+    "outputSpeciesId": "machineshardplant"
+  },
+  "recipe.magicsnowpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "magicsnowpea"
+  },
+  "recipe.magicsnowpea2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "gatlingpaper_c",
+    "outputSpeciesId": "magicsnowpea2"
+  },
+  "recipe.magnetblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldthreeplantern",
+    "outputSpeciesId": "magnetblover"
+  },
+  "recipe.magnetcactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "jalapeno",
+    "outputSpeciesId": "magnetcactus"
+  },
+  "recipe.magnetcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "flagzombie",
+    "outputSpeciesId": "magnetcorn"
+  },
+  "recipe.magnetdoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "marigold",
+    "outputSpeciesId": "magnetdoom"
+  },
+  "recipe.magnetfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "randompluszombie",
+    "outputSpeciesId": "magnetfume"
+  },
+  "recipe.magnetmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "jalapenozombie",
+    "outputSpeciesId": "magnetmelon"
+  },
+  "recipe.magnetnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "footballzombie",
+    "outputSpeciesId": "magnetnut"
+  },
+  "recipe.magnetpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "pinefurnace",
+    "outputSpeciesId": "magnetpumpkin"
+  },
+  "recipe.magnetshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "sunflower",
+    "outputSpeciesId": "magnetshroom"
+  },
+  "recipe.magnetstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "supercherryshooterzombie",
+    "outputSpeciesId": "magnetstar"
+  },
+  "recipe.marigold": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "marigold"
+  },
+  "recipe.melonblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "torchwood",
+    "outputSpeciesId": "melonblover"
+  },
+  "recipe.meloncaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_cherrychomper",
+    "outputSpeciesId": "meloncaltrop"
+  },
+  "recipe.meloncannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "goldbungizombie",
+    "outputSpeciesId": "meloncannon"
+  },
+  "recipe.melonfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_bigsunshroom",
+    "outputSpeciesId": "melonfume"
+  },
+  "recipe.melonnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_starnut",
+    "outputSpeciesId": "melonnut"
+  },
+  "recipe.melonpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_sunshroom",
+    "outputSpeciesId": "melonpot"
+  },
+  "recipe.melonpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_cherryshooter",
+    "outputSpeciesId": "melonpuff"
+  },
+  "recipe.melonpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_doomstar",
+    "outputSpeciesId": "melonpumpkin"
+  },
+  "recipe.melonumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "jackson_a",
+    "outputSpeciesId": "melonumbrella"
+  },
+  "recipe.minerzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "torchpumpkin",
+    "outputSpeciesId": "minerzombie"
+  },
+  "recipe.mixanim": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "spruceshooter",
+    "outputSpeciesId": "mixanim"
+  },
+  "recipe.mixbomb": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "squalour",
+    "outputSpeciesId": "mixbomb"
+  },
+  "recipe.newyearzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "tower_sunmine",
+    "outputSpeciesId": "newyearzombie"
+  },
+  "recipe.nucleardoomcherry": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cactusfume",
+    "outputSpeciesId": "nucleardoomcherry"
+  },
+  "recipe.nuclearsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherryblover",
+    "outputSpeciesId": "nuclearsquash"
+  },
+  "recipe.nutblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "submarine_b2",
+    "outputSpeciesId": "nutblover"
+  },
+  "recipe.nutchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "submarine_c2",
+    "outputSpeciesId": "nutchomper"
+  },
+  "recipe.nutfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "submarinezombie",
+    "outputSpeciesId": "nutfume"
+  },
+  "recipe.nutpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superblackfootball",
+    "outputSpeciesId": "nutpot"
+  },
+  "recipe.nutpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superdancepolzombie",
+    "outputSpeciesId": "nutpumpkin"
+  },
+  "recipe.nutumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superpogozombie",
+    "outputSpeciesId": "nutumbrella"
+  },
+  "recipe.obsidianjalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "blackjackboxzombie",
+    "outputSpeciesId": "obsidianjalapeno"
+  },
+  "recipe.obsidianspike": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superpumpkin",
+    "outputSpeciesId": "obsidianspike"
+  },
+  "recipe.obsidiantallnutzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ultimateminigun",
+    "outputSpeciesId": "obsidiantallnutzombie"
+  },
+  "recipe.obsidianwallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tallnut",
+    "outputSpeciesId": "obsidianwallnut"
+  },
+  "recipe.obsidianwheat": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "bigchomper",
+    "outputSpeciesId": "obsidianwheat"
+  },
+  "recipe.passionfruit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "passionfruit"
+  },
+  "recipe.peablover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "peablover"
+  },
+  "recipe.peachomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "sunflower",
+    "outputSpeciesId": "peachomper"
+  },
+  "recipe.peafume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "peafume"
+  },
+  "recipe.peamine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_lilypad",
+    "outputSpeciesId": "peamine"
+  },
+  "recipe.peanut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_threemine",
+    "outputSpeciesId": "peanut"
+  },
+  "recipe.peapot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_watercan",
+    "outputSpeciesId": "peapot"
+  },
+  "recipe.peapuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ultimatemachinenutzombie",
+    "outputSpeciesId": "peapuff"
+  },
+  "recipe.peapumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "umbrellaleaf",
+    "outputSpeciesId": "peapumpkin"
+  },
+  "recipe.peascaredy": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "peascaredy"
+  },
+  "recipe.peashooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "peashooter"
+  },
+  "recipe.peasquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "vectorplant",
+    "outputSpeciesId": "peasquash"
+  },
+  "recipe.peasunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "peasunflower"
+  },
+  "recipe.penguinzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "penguinzombie"
+  },
+  "recipe.pickaxe_b": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "torchspike",
+    "outputSpeciesId": "pickaxe_b"
+  },
+  "recipe.pickaxe_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "smallumbrella",
+    "outputSpeciesId": "pickaxe_c"
+  },
+  "recipe.pickaxeplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "wateraloes",
+    "outputSpeciesId": "pickaxeplant"
+  },
+  "recipe.pickaxepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "whitefootball",
+    "outputSpeciesId": "pickaxepumpkin"
+  },
+  "recipe.pickaxestar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "xxspot",
+    "outputSpeciesId": "pickaxestar"
+  },
+  "recipe.pickaxezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "spikerock",
+    "outputSpeciesId": "pickaxezombie"
+  },
+  "recipe.pinefurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "torchspike",
+    "outputSpeciesId": "pinefurnace"
+  },
+  "recipe.pinkonion": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "pinkonion"
+  },
+  "recipe.polevaulterzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "superdriver",
+    "outputSpeciesId": "polevaulterzombie"
+  },
+  "recipe.portalballoonzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "allpeater",
+    "inputSpeciesIdB": "bamboospruce",
+    "outputSpeciesId": "portalballoonzombie"
+  },
+  "recipe.portalcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "jackson_a",
+    "outputSpeciesId": "portalcorn"
+  },
+  "recipe.portaldoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "tower_bigsunshroom",
+    "outputSpeciesId": "portaldoom"
+  },
+  "recipe.portalmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "portalmelon"
+  },
+  "recipe.portalnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "portalnut"
+  },
+  "recipe.portalpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "portalpea"
+  },
+  "recipe.portalplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "portalplant"
+  },
+  "recipe.portalpolevaulter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "portalpolevaulter"
+  },
+  "recipe.potatochomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "jackson_b",
+    "outputSpeciesId": "potatochomper"
+  },
+  "recipe.potatodoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "presentzombie",
+    "outputSpeciesId": "potatodoom"
+  },
+  "recipe.potatofume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "superladderzombie",
+    "outputSpeciesId": "potatofume"
+  },
+  "recipe.potatonut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "waterjackboxjumpzombie",
+    "outputSpeciesId": "potatonut"
+  },
+  "recipe.potatopuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "tower_gravebuster",
+    "outputSpeciesId": "potatopuff"
+  },
+  "recipe.potatopumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "ultimatefly",
+    "outputSpeciesId": "potatopumpkin"
+  },
+  "recipe.potatosquashbody": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboo",
+    "inputSpeciesIdB": "yellowgargantuar",
+    "outputSpeciesId": "potatosquashbody"
+  },
+  "recipe.present": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "supermachinenutzombie",
+    "outputSpeciesId": "present"
+  },
+  "recipe.presentzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "presentzombie"
+  },
+  "recipe.protalzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "cherryhypno",
+    "outputSpeciesId": "protalzombie"
+  },
+  "recipe.pudding": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "supermachineshardplant",
+    "outputSpeciesId": "pudding"
+  },
+  "recipe.puffdoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "puffdoom"
+  },
+  "recipe.puffjalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "bucketzombie",
+    "outputSpeciesId": "puffjalapeno"
+  },
+  "recipe.puffnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drowngargantuar",
+    "outputSpeciesId": "puffnut"
+  },
+  "recipe.puffpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "frozenpear",
+    "outputSpeciesId": "puffpumpkin"
+  },
+  "recipe.puffsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "blackfootball_a",
+    "outputSpeciesId": "puffsquash"
+  },
+  "recipe.pumpiner": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "umbrellapot",
+    "outputSpeciesId": "pumpiner"
+  },
+  "recipe.qingzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatelunarcabbage",
+    "outputSpeciesId": "qingzombie"
+  },
+  "recipe.randomgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bucketplant",
+    "inputSpeciesIdB": "wallnut",
+    "outputSpeciesId": "randomgargantuar"
+  },
+  "recipe.randompluszombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "randompluszombie"
+  },
+  "recipe.randomzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "tower_starnut",
+    "outputSpeciesId": "randomzombie"
+  },
+  "recipe.redemeraldumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "blackfootball_c2",
+    "outputSpeciesId": "redemeraldumbrella"
+  },
+  "recipe.redgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "redgargantuar"
+  },
+  "recipe.redzombieloonnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "superdriver",
+    "outputSpeciesId": "redzombieloonnut"
+  },
+  "recipe.sandjackson": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "sandjackson"
+  },
+  "recipe.scaredfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "scaredfume"
+  },
+  "recipe.scaredsun": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "scaredsun"
+  },
+  "recipe.scaredyblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "scaredyblover"
+  },
+  "recipe.scaredydoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "electriconion",
+    "outputSpeciesId": "scaredydoom"
+  },
+  "recipe.scaredyhypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "tower_sunshroom",
+    "outputSpeciesId": "scaredyhypno"
+  },
+  "recipe.scaredynut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "fumeshroom",
+    "outputSpeciesId": "scaredynut"
+  },
+  "recipe.scaredypot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "icebean",
+    "outputSpeciesId": "scaredypot"
+  },
+  "recipe.scaredypotato": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "bucketnutzombie",
+    "outputSpeciesId": "scaredypotato"
+  },
+  "recipe.scaredypumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "bucketpaper",
+    "outputSpeciesId": "scaredypumpkin"
+  },
+  "recipe.scaredystar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "catapultzombie",
+    "outputSpeciesId": "scaredystar"
+  },
+  "recipe.seablover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "gatlingpeazombie",
+    "outputSpeciesId": "seablover"
+  },
+  "recipe.seacactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "chickenimp",
+    "outputSpeciesId": "seacactus"
+  },
+  "recipe.seafume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "coachpaper",
+    "outputSpeciesId": "seafume"
+  },
+  "recipe.seahypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "jackson_b",
+    "outputSpeciesId": "seahypno"
+  },
+  "recipe.sealantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "sealantern"
+  },
+  "recipe.seamagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "icelotus",
+    "outputSpeciesId": "seamagnet"
+  },
+  "recipe.seamine_land": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "dancepolzombie",
+    "outputSpeciesId": "seamine_land"
+  },
+  "recipe.seamine_water": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "seamine_water"
+  },
+  "recipe.seanut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "seanut"
+  },
+  "recipe.seapumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "seapumpkin"
+  },
+  "recipe.seascaredyshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "seascaredyshroom"
+  },
+  "recipe.seashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "seashroom"
+  },
+  "recipe.seasquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "seasquash"
+  },
+  "recipe.seastarfruit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "seastarfruit"
+  },
+  "recipe.seasunshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "electriconion",
+    "outputSpeciesId": "seasunshroom"
+  },
+  "recipe.shulkbamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "shulkbamboo"
+  },
+  "recipe.shulkfurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "shulkfurnace"
+  },
+  "recipe.shulklotus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "jackboxzombie",
+    "outputSpeciesId": "shulklotus"
+  },
+  "recipe.silvercabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "silvercabbage"
+  },
+  "recipe.silvercorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "silvercorn"
+  },
+  "recipe.silverdoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "silverdoom"
+  },
+  "recipe.silvergarlic": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "silvergarlic"
+  },
+  "recipe.silvermelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "silvermelon"
+  },
+  "recipe.silverpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "silverpot"
+  },
+  "recipe.silversunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "silversunflower"
+  },
+  "recipe.silverumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "silverumbrella"
+  },
+  "recipe.silverzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "silverzombie"
+  },
+  "recipe.smalliceshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "jalapeno",
+    "outputSpeciesId": "smalliceshroom"
+  },
+  "recipe.sniperchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "sniperchomper"
+  },
+  "recipe.sniperpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "doomzombie",
+    "outputSpeciesId": "sniperpea"
+  },
+  "recipe.sniperpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "sniperpot"
+  },
+  "recipe.sniperpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "sniperpuff"
+  },
+  "recipe.snowdolphinrider": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "snowdolphinrider"
+  },
+  "recipe.snowdrownzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "snowdrownzombie"
+  },
+  "recipe.snowgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldcabbage",
+    "outputSpeciesId": "snowgatling"
+  },
+  "recipe.snowgatlingpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bucketdoom",
+    "outputSpeciesId": "snowgatlingpuff"
+  },
+  "recipe.snowmonsterrider": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "hypnojalapenopickaxezombie",
+    "outputSpeciesId": "snowmonsterrider"
+  },
+  "recipe.snowpeashooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldgarlic",
+    "outputSpeciesId": "snowpeashooter"
+  },
+  "recipe.snowsplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldmelon",
+    "outputSpeciesId": "snowsplit"
+  },
+  "recipe.solarlily": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "dancepolzombie2",
+    "outputSpeciesId": "solarlily"
+  },
+  "recipe.solarpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "dollsilver",
+    "outputSpeciesId": "solarpot"
+  },
+  "recipe.solarsunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ultimateendoflamezombie",
+    "inputSpeciesIdB": "ultimatefootballdrown",
+    "outputSpeciesId": "solarsunflower"
+  },
+  "recipe.splitpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "icepeach",
+    "outputSpeciesId": "splitpea"
+  },
+  "recipe.splitpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "iceshroom",
+    "outputSpeciesId": "splitpuff"
+  },
+  "recipe.spreadscaredyshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "gatlingfootballzombie",
+    "outputSpeciesId": "spreadscaredyshroom"
+  },
+  "recipe.spruceballista": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "spruceballista"
+  },
+  "recipe.sprucefurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "cherrysubmarine",
+    "outputSpeciesId": "sprucefurnace"
+  },
+  "recipe.spruceshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "firesquash",
+    "outputSpeciesId": "spruceshooter"
+  },
+  "recipe.spruceshulk": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "gatlingpaper_c",
+    "outputSpeciesId": "spruceshulk"
+  },
+  "recipe.squalour": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "squalour"
+  },
+  "recipe.squalourzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "gatlingpeazombie",
+    "outputSpeciesId": "squalourzombie"
+  },
+  "recipe.squashblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldcabbage",
+    "outputSpeciesId": "squashblover"
+  },
+  "recipe.squashcorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldgarlic",
+    "outputSpeciesId": "squashcorn"
+  },
+  "recipe.squashkelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldmelon",
+    "outputSpeciesId": "squashkelp"
+  },
+  "recipe.squashmelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldumbrella",
+    "outputSpeciesId": "squashmelon"
+  },
+  "recipe.squashnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldpot",
+    "outputSpeciesId": "squashnut"
+  },
+  "recipe.squashpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "ironballoonzombie",
+    "outputSpeciesId": "squashpumpkin"
+  },
+  "recipe.squashspike": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldscarypot",
+    "outputSpeciesId": "squashspike"
+  },
+  "recipe.squashtorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "squashtorch"
+  },
+  "recipe.starblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "fumeshroom",
+    "outputSpeciesId": "starblover"
+  },
+  "recipe.starfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "kirov_a",
+    "outputSpeciesId": "starfume"
+  },
+  "recipe.starhypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "driver_c",
+    "outputSpeciesId": "starhypno"
+  },
+  "recipe.starnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "gatlingfootballzombie",
+    "outputSpeciesId": "starnut"
+  },
+  "recipe.starpea": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "starpea"
+  },
+  "recipe.starpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldzombie",
+    "outputSpeciesId": "starpuff"
+  },
+  "recipe.starpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drown_a",
+    "outputSpeciesId": "starpumpkin"
+  },
+  "recipe.starsniper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drown_b",
+    "outputSpeciesId": "starsniper"
+  },
+  "recipe.starsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "kirov_c",
+    "outputSpeciesId": "starsquash"
+  },
+  "recipe.startorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "endoflame",
+    "outputSpeciesId": "startorch"
+  },
+  "recipe.submarine_b2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "submarine_b2"
+  },
+  "recipe.submarine_c": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "flyingthreepeater",
+    "inputSpeciesIdB": "portalballoonzombie",
+    "outputSpeciesId": "submarine_c"
+  },
+  "recipe.submarine_c2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "submarine_c2"
+  },
+  "recipe.submarinezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "submarine_b",
+    "outputSpeciesId": "submarinezombie"
+  },
+  "recipe.summonedhorse": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatepumpkin",
+    "outputSpeciesId": "summonedhorse"
+  },
+  "recipe.sunblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "sunblover"
+  },
+  "recipe.sunbomb": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "sunbomb"
+  },
+  "recipe.suncabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "tower_starnut",
+    "outputSpeciesId": "suncabbage"
+  },
+  "recipe.suncaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "suncaltrop"
+  },
+  "recipe.sunchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "sunchomper"
+  },
+  "recipe.sunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "sunflower"
+  },
+  "recipe.sungatlingpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldumbrella",
+    "outputSpeciesId": "sungatlingpuff"
+  },
+  "recipe.sunhypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "sunhypno"
+  },
+  "recipe.suniceshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "suniceshroom"
+  },
+  "recipe.sunjalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldcorn",
+    "outputSpeciesId": "sunjalapeno"
+  },
+  "recipe.sunmagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "drowngargantuar",
+    "outputSpeciesId": "sunmagnet"
+  },
+  "recipe.sunmine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "frozenpear",
+    "outputSpeciesId": "sunmine"
+  },
+  "recipe.sunnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "icebean",
+    "outputSpeciesId": "sunnut"
+  },
+  "recipe.sunpot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "icelotus",
+    "outputSpeciesId": "sunpot"
+  },
+  "recipe.sunpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "sunpumpkin"
+  },
+  "recipe.sunshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "sunshroom"
+  },
+  "recipe.sunsquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "firecracker",
+    "outputSpeciesId": "sunsquash"
+  },
+  "recipe.sunstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "jackboxzombie",
+    "outputSpeciesId": "sunstar"
+  },
+  "recipe.superblackfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "tower_sunmine",
+    "outputSpeciesId": "superblackfootball"
+  },
+  "recipe.superblackhorse": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatestar",
+    "outputSpeciesId": "superblackhorse"
+  },
+  "recipe.superbombthrower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "superbombthrower"
+  },
+  "recipe.supercaltrop": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "greengargantuar",
+    "outputSpeciesId": "supercaltrop"
+  },
+  "recipe.supercaltroppot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "levatationzombie",
+    "outputSpeciesId": "supercaltroppot"
+  },
+  "recipe.supercherrygatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drown_c",
+    "outputSpeciesId": "supercherrygatling"
+  },
+  "recipe.supercherryshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drownpult_b",
+    "outputSpeciesId": "supercherryshooter"
+  },
+  "recipe.supercherryshooterzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "goldnut",
+    "outputSpeciesId": "supercherryshooterzombie"
+  },
+  "recipe.superchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "kirovzombie",
+    "outputSpeciesId": "superchomper"
+  },
+  "recipe.superdancepolzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "superdancepolzombie"
+  },
+  "recipe.superfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldpot",
+    "outputSpeciesId": "superfume"
+  },
+  "recipe.superfurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drownpult_c",
+    "outputSpeciesId": "superfurnace"
+  },
+  "recipe.supergargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimatebamboo",
+    "outputSpeciesId": "supergargantuar"
+  },
+  "recipe.supergatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "supergatling"
+  },
+  "recipe.supergatlingpeamine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "machinelevatation",
+    "outputSpeciesId": "supergatlingpeamine"
+  },
+  "recipe.supergatlingpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "penguinzombie",
+    "outputSpeciesId": "supergatlingpumpkin"
+  },
+  "recipe.superhorse": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimatecactus",
+    "outputSpeciesId": "superhorse"
+  },
+  "recipe.superhurricaneblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "electriconion",
+    "outputSpeciesId": "superhurricaneblover"
+  },
+  "recipe.superhypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "superhypno"
+  },
+  "recipe.superhypnodoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball_c",
+    "inputSpeciesIdB": "bigsunnut",
+    "outputSpeciesId": "superhypnodoom"
+  },
+  "recipe.superhypnogatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "ironballoonzombie",
+    "outputSpeciesId": "superhypnogatling"
+  },
+  "recipe.superjackboxzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "flyingthreepeater",
+    "inputSpeciesIdB": "flyingthreepeater_sp",
+    "outputSpeciesId": "superjackboxzombie"
+  },
+  "recipe.superjalanut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrychomper",
+    "outputSpeciesId": "superjalanut"
+  },
+  "recipe.superkelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "snowdolphinrider",
+    "outputSpeciesId": "superkelp"
+  },
+  "recipe.superkirov": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "jackbox_c",
+    "outputSpeciesId": "superkirov"
+  },
+  "recipe.superladderzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "superladderzombie"
+  },
+  "recipe.supermachinenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "horsezombie",
+    "outputSpeciesId": "supermachinenut"
+  },
+  "recipe.supermelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "superbombthrower",
+    "outputSpeciesId": "supermelon"
+  },
+  "recipe.supernutshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "ifvblover",
+    "outputSpeciesId": "supernutshooter"
+  },
+  "recipe.superpenguinzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "hypnojalapenozombie",
+    "outputSpeciesId": "superpenguinzombie"
+  },
+  "recipe.superpogozombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "superpogozombie"
+  },
+  "recipe.superpolevaulter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "superpolevaulter"
+  },
+  "recipe.superpumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "smallumbrella",
+    "outputSpeciesId": "superpumpkin"
+  },
+  "recipe.supersnowgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldscarypot",
+    "outputSpeciesId": "supersnowgatling"
+  },
+  "recipe.supersnowmonsterzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "jackboxjumpzombie",
+    "outputSpeciesId": "supersnowmonsterzombie"
+  },
+  "recipe.superspruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "goldzombie",
+    "outputSpeciesId": "superspruce"
+  },
+  "recipe.superstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "kirov_a",
+    "outputSpeciesId": "superstar"
+  },
+  "recipe.supersubmarine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "supersubmarine"
+  },
+  "recipe.supersunnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "icepeach",
+    "outputSpeciesId": "supersunnut"
+  },
+  "recipe.supersunnutzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "tower_sunshroom",
+    "outputSpeciesId": "supersunnutzombie"
+  },
+  "recipe.superthreegatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "ironpeadoorzombie",
+    "outputSpeciesId": "superthreegatling"
+  },
+  "recipe.superthreepeater": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "drownpultzombie",
+    "outputSpeciesId": "superthreepeater"
+  },
+  "recipe.superthreepeater_sp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherryfume",
+    "outputSpeciesId": "superthreepeater_sp"
+  },
+  "recipe.supertorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldsunflower",
+    "outputSpeciesId": "supertorch"
+  },
+  "recipe.superumbrella": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "doomchomper",
+    "outputSpeciesId": "superumbrella"
+  },
+  "recipe.tallfirenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "elephantzombie",
+    "outputSpeciesId": "tallfirenut"
+  },
+  "recipe.tallicenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "greengargantuar",
+    "outputSpeciesId": "tallicenut"
+  },
+  "recipe.tallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "spikerock",
+    "outputSpeciesId": "tallnut"
+  },
+  "recipe.tallnutfootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "ironredgargantuar",
+    "outputSpeciesId": "tallnutfootball"
+  },
+  "recipe.tallnutfootballzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "ladderzombie",
+    "outputSpeciesId": "tallnutfootballzombie"
+  },
+  "recipe.thorns": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "thorns"
+  },
+  "recipe.thornsbamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "horsezombie",
+    "outputSpeciesId": "thornsbamboo"
+  },
+  "recipe.thornslotus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "ifvblover",
+    "outputSpeciesId": "thornslotus"
+  },
+  "recipe.thornsshulk": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "ironpeadoorzombie",
+    "outputSpeciesId": "thornsshulk"
+  },
+  "recipe.thornsspruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "jalapenozombie",
+    "outputSpeciesId": "thornsspruce"
+  },
+  "recipe.threecabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "machinenutzombie",
+    "outputSpeciesId": "threecabbage"
+  },
+  "recipe.threecorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "snowdrownzombie",
+    "outputSpeciesId": "threecorn"
+  },
+  "recipe.threekelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "minerzombie",
+    "outputSpeciesId": "threekelp"
+  },
+  "recipe.threemelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "newyearzombie",
+    "outputSpeciesId": "threemelon"
+  },
+  "recipe.threemine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "blackhorse",
+    "outputSpeciesId": "threemine"
+  },
+  "recipe.threenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "chrysantheautumn",
+    "outputSpeciesId": "threenut"
+  },
+  "recipe.threeplantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "threeplantern"
+  },
+  "recipe.threepot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "diamondrandomzombie",
+    "outputSpeciesId": "threepot"
+  },
+  "recipe.threepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "blackjackboxzombie",
+    "outputSpeciesId": "threepumpkin"
+  },
+  "recipe.threespike": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "bucketzombie",
+    "outputSpeciesId": "threespike"
+  },
+  "recipe.threesquash": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "cherrysubmarine",
+    "outputSpeciesId": "threesquash"
+  },
+  "recipe.threetorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "flagfootball",
+    "outputSpeciesId": "threetorch"
+  },
+  "recipe.thronsaloes": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "ironredgargantuar",
+    "outputSpeciesId": "thronsaloes"
+  },
+  "recipe.torchfirepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "footballdolphin",
+    "outputSpeciesId": "torchfirepumpkin"
+  },
+  "recipe.torchfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "footballdrown",
+    "outputSpeciesId": "torchfume"
+  },
+  "recipe.torchmine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldthreeplantern",
+    "outputSpeciesId": "torchmine"
+  },
+  "recipe.torchseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "torchseashroom"
+  },
+  "recipe.torchsunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "jalapeno",
+    "outputSpeciesId": "torchsunflower"
+  },
+  "recipe.torchwood": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "torchwood"
+  },
+  "recipe.tower_bigsunshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "tower_bigsunshroom"
+  },
+  "recipe.tower_cherrychomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "tower_cherrychomper"
+  },
+  "recipe.tower_cherryshooter": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "ironconezombie",
+    "outputSpeciesId": "tower_cherryshooter"
+  },
+  "recipe.tower_doomfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "smallumbrella",
+    "outputSpeciesId": "tower_doomfume"
+  },
+  "recipe.tower_doomstar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "tower_doomstar"
+  },
+  "recipe.tower_electriconion": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "spikerock",
+    "outputSpeciesId": "tower_electriconion"
+  },
+  "recipe.tower_gravebuster": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "tower_gravebuster"
+  },
+  "recipe.tower_iceblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "nuttorch",
+    "outputSpeciesId": "tower_iceblover"
+  },
+  "recipe.tower_icegloom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "tower_icegloom"
+  },
+  "recipe.tower_lilypad": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "supermachinenutzombie",
+    "outputSpeciesId": "tower_lilypad"
+  },
+  "recipe.tower_peasunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "tower_peasunflower"
+  },
+  "recipe.tower_scaredyfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "ironballoonzombie2",
+    "inputSpeciesIdB": "supermachinenutzombie",
+    "outputSpeciesId": "tower_scaredyfume"
+  },
+  "recipe.tower_starnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "ironballoonzombie2",
+    "outputSpeciesId": "tower_starnut"
+  },
+  "recipe.tower_sunshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "kelppuff",
+    "outputSpeciesId": "tower_sunshroom"
+  },
+  "recipe.tower_threemine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "supermachineshardplant",
+    "outputSpeciesId": "tower_threemine"
+  },
+  "recipe.tower_watercan": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "umbrellapot",
+    "outputSpeciesId": "tower_watercan"
+  },
+  "recipe.treasuremine": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "endoflame",
+    "outputSpeciesId": "treasuremine"
+  },
+  "recipe.twinflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "gatlingpaper_c",
+    "outputSpeciesId": "twinflower"
+  },
+  "recipe.twinmarigold": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldcorn",
+    "outputSpeciesId": "twinmarigold"
+  },
+  "recipe.twinshulk": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldsunflower",
+    "outputSpeciesId": "twinshulk"
+  },
+  "recipe.ultimatebamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "biggatling",
+    "outputSpeciesId": "ultimatebamboo"
+  },
+  "recipe.ultimatebigchomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "gatlingpeazombie",
+    "outputSpeciesId": "ultimatebigchomper"
+  },
+  "recipe.ultimatebiggatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "iceblover",
+    "outputSpeciesId": "ultimatebiggatling"
+  },
+  "recipe.ultimatebigsniper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "doomkelp",
+    "outputSpeciesId": "ultimatebigsniper"
+  },
+  "recipe.ultimateblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bungizombie",
+    "inputSpeciesIdB": "gatlingblackfootball",
+    "outputSpeciesId": "ultimateblover"
+  },
+  "recipe.ultimatecabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "bamboodragon",
+    "outputSpeciesId": "ultimatecabbage"
+  },
+  "recipe.ultimatecactus": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bamboofurnace",
+    "outputSpeciesId": "ultimatecactus"
+  },
+  "recipe.ultimatecannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bamboospruce",
+    "outputSpeciesId": "ultimatecannon"
+  },
+  "recipe.ultimatecattail": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrygatling",
+    "outputSpeciesId": "ultimatecattail"
+  },
+  "recipe.ultimatechomper": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherryjalapeno",
+    "outputSpeciesId": "ultimatechomper"
+  },
+  "recipe.ultimatecorn": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "bamboodragon",
+    "outputSpeciesId": "ultimatecorn"
+  },
+  "recipe.ultimatecornfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrynut",
+    "outputSpeciesId": "ultimatecornfume"
+  },
+  "recipe.ultimatedolphin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "flyingthreepeater",
+    "inputSpeciesIdB": "hypnojalapenopickaxezombie",
+    "outputSpeciesId": "ultimatedolphin"
+  },
+  "recipe.ultimatedoomgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "gatlingpaper_c",
+    "outputSpeciesId": "ultimatedoomgatling"
+  },
+  "recipe.ultimatedoomscaredy": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrypuff",
+    "outputSpeciesId": "ultimatedoomscaredy"
+  },
+  "recipe.ultimateendoflamezombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doompaper",
+    "inputSpeciesIdB": "bedrocksnowzombie",
+    "outputSpeciesId": "ultimateendoflamezombie"
+  },
+  "recipe.ultimateexplodecannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherryscaredy",
+    "outputSpeciesId": "ultimateexplodecannon"
+  },
+  "recipe.ultimatefireseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "gatlingpeazombie",
+    "outputSpeciesId": "ultimatefireseashroom"
+  },
+  "recipe.ultimatefly": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "sunnutzombie",
+    "inputSpeciesIdB": "jackbox_a",
+    "outputSpeciesId": "ultimatefly"
+  },
+  "recipe.ultimatefootballdrown": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bedrocksnowzombie",
+    "inputSpeciesIdB": "blackflagfootball",
+    "outputSpeciesId": "ultimatefootballdrown"
+  },
+  "recipe.ultimatefootballzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatejalapeno",
+    "outputSpeciesId": "ultimatefootballzombie"
+  },
+  "recipe.ultimatefume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bigchomper",
+    "outputSpeciesId": "ultimatefume"
+  },
+  "recipe.ultimategargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimatecannon",
+    "outputSpeciesId": "ultimategargantuar"
+  },
+  "recipe.ultimategarlicsplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "dolldiamond",
+    "outputSpeciesId": "ultimategarlicsplit"
+  },
+  "recipe.ultimategatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldcabbage",
+    "outputSpeciesId": "ultimategatling"
+  },
+  "recipe.ultimategatlingblover": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherryshooter",
+    "outputSpeciesId": "ultimategatlingblover"
+  },
+  "recipe.ultimategloom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "biggatling",
+    "outputSpeciesId": "ultimategloom"
+  },
+  "recipe.ultimategoldgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimatefume",
+    "outputSpeciesId": "ultimategoldgargantuar"
+  },
+  "recipe.ultimatehelmetgatling": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "biggloom",
+    "outputSpeciesId": "ultimatehelmetgatling"
+  },
+  "recipe.ultimatehorse": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimatepoisonfume",
+    "outputSpeciesId": "ultimatehorse"
+  },
+  "recipe.ultimatehorse2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimateredlunar",
+    "outputSpeciesId": "ultimatehorse2"
+  },
+  "recipe.ultimatehugenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "cherrypaperzombie",
+    "outputSpeciesId": "ultimatehugenut"
+  },
+  "recipe.ultimatehypno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "doomchomper",
+    "outputSpeciesId": "ultimatehypno"
+  },
+  "recipe.ultimatehypnopumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "doomkelp",
+    "outputSpeciesId": "ultimatehypnopumpkin"
+  },
+  "recipe.ultimateicedoom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bigpumpkin",
+    "outputSpeciesId": "ultimateicedoom"
+  },
+  "recipe.ultimateiceshroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bigseashroom",
+    "outputSpeciesId": "ultimateiceshroom"
+  },
+  "recipe.ultimateiceshroom2": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "ladderzombie",
+    "outputSpeciesId": "ultimateiceshroom2"
+  },
+  "recipe.ultimatejackboxzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "flyingthreepeater",
+    "inputSpeciesIdB": "hypnojalapenozombie",
+    "outputSpeciesId": "ultimatejackboxzombie"
+  },
+  "recipe.ultimatejacksondriver": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherryultimatepumpkin",
+    "inputSpeciesIdB": "goldhypnodoom",
+    "outputSpeciesId": "ultimatejacksondriver"
+  },
+  "recipe.ultimatejalanut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrysquash",
+    "outputSpeciesId": "ultimatejalanut"
+  },
+  "recipe.ultimatejalapeno": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "bucketdoom",
+    "outputSpeciesId": "ultimatejalapeno"
+  },
+  "recipe.ultimatejalapuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "icecabbage",
+    "outputSpeciesId": "ultimatejalapuff"
+  },
+  "recipe.ultimatekelp": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "goldcabbage",
+    "outputSpeciesId": "ultimatekelp"
+  },
+  "recipe.ultimatekirovzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "allpeater",
+    "inputSpeciesIdB": "bigchomper",
+    "outputSpeciesId": "ultimatekirovzombie"
+  },
+  "recipe.ultimatelanternsplit": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "doompumpkin",
+    "outputSpeciesId": "ultimatelanternsplit"
+  },
+  "recipe.ultimatelegionzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathmine",
+    "inputSpeciesIdB": "ultimateseashroom",
+    "outputSpeciesId": "ultimatelegionzombie"
+  },
+  "recipe.ultimatelunarcabbage": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "dolldiamond",
+    "outputSpeciesId": "ultimatelunarcabbage"
+  },
+  "recipe.ultimatemachinenut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimategloom",
+    "outputSpeciesId": "ultimatemachinenut"
+  },
+  "recipe.ultimatemachinenutzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "wallnut",
+    "outputSpeciesId": "ultimatemachinenutzombie"
+  },
+  "recipe.ultimatemagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "apple",
+    "inputSpeciesIdB": "iceshroom",
+    "outputSpeciesId": "ultimatemagnet"
+  },
+  "recipe.ultimatemelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboofurnace",
+    "inputSpeciesIdB": "bigpumpkin",
+    "outputSpeciesId": "ultimatemelon"
+  },
+  "recipe.ultimatemeloncannon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bigwallnut",
+    "outputSpeciesId": "ultimatemeloncannon"
+  },
+  "recipe.ultimatemelonpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "doomshroom",
+    "outputSpeciesId": "ultimatemelonpuff"
+  },
+  "recipe.ultimateminigun": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "ultimateminigun"
+  },
+  "recipe.ultimateplantern": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bigsunshroom",
+    "outputSpeciesId": "ultimateplantern"
+  },
+  "recipe.ultimatepoisonfume": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "firesunshroom_a",
+    "outputSpeciesId": "ultimatepoisonfume"
+  },
+  "recipe.ultimatepotatonut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "goldthreeplantern",
+    "outputSpeciesId": "ultimatepotatonut"
+  },
+  "recipe.ultimatepumpkin": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "firesunshroom_a",
+    "outputSpeciesId": "ultimatepumpkin"
+  },
+  "recipe.ultimateredlunar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "doompumpkin",
+    "outputSpeciesId": "ultimateredlunar"
+  },
+  "recipe.ultimateseashroom": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "deathchomper",
+    "inputSpeciesIdB": "firesunshroom_b",
+    "outputSpeciesId": "ultimateseashroom"
+  },
+  "recipe.ultimatesnowgatlingpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "blovermine",
+    "outputSpeciesId": "ultimatesnowgatlingpuff"
+  },
+  "recipe.ultimatesnowzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "iceclawzombie",
+    "inputSpeciesIdB": "imitatewheat",
+    "outputSpeciesId": "ultimatesnowzombie"
+  },
+  "recipe.ultimatespring": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "cherrytorch",
+    "outputSpeciesId": "ultimatespring"
+  },
+  "recipe.ultimatespruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "machinenutzombie",
+    "outputSpeciesId": "ultimatespruce"
+  },
+  "recipe.ultimatestar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "firesunshroom_b",
+    "outputSpeciesId": "ultimatestar"
+  },
+  "recipe.ultimatestartorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "darkthreepeater",
+    "outputSpeciesId": "ultimatestartorch"
+  },
+  "recipe.ultimatesunflower": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bedrocktallnut",
+    "inputSpeciesIdB": "ultimateendoflamezombie",
+    "outputSpeciesId": "ultimatesunflower"
+  },
+  "recipe.ultimatesungatlingpuff": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "garlicgatling",
+    "outputSpeciesId": "ultimatesungatlingpuff"
+  },
+  "recipe.ultimatesunmagnet": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunshroom",
+    "inputSpeciesIdB": "garlicpea",
+    "outputSpeciesId": "ultimatesunmagnet"
+  },
+  "recipe.ultimatesunnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bedrocktallnut",
+    "inputSpeciesIdB": "ultimatefootballdrown",
+    "outputSpeciesId": "ultimatesunnut"
+  },
+  "recipe.ultimateswordzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "blackfootball",
+    "inputSpeciesIdB": "blackfootball_b",
+    "outputSpeciesId": "ultimateswordzombie"
+  },
+  "recipe.ultimatetallnut": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "elephantzombie_a",
+    "outputSpeciesId": "ultimatetallnut"
+  },
+  "recipe.ultimatetorch": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "cherrycatapultzombie",
+    "inputSpeciesIdB": "goldgarlic",
+    "outputSpeciesId": "ultimatetorch"
+  },
+  "recipe.ultimatewintermelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doublesnow",
+    "inputSpeciesIdB": "bloverpot",
+    "outputSpeciesId": "ultimatewintermelon"
+  },
+  "recipe.ultiwatergargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "garlicultimatechomper",
+    "inputSpeciesIdB": "ultimatehelmetgatling",
+    "outputSpeciesId": "ultiwatergargantuar"
+  },
+  "recipe.umbrellaleaf": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "torchpumpkin",
+    "outputSpeciesId": "umbrellaleaf"
+  },
+  "recipe.vectorplant": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driver_b",
+    "inputSpeciesIdB": "torchspike",
+    "outputSpeciesId": "vectorplant"
+  },
+  "recipe.wateraloes": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "silvericeshroom",
+    "inputSpeciesIdB": "smallumbrella",
+    "outputSpeciesId": "wateraloes"
+  },
+  "recipe.waterballista": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "minerzombie",
+    "outputSpeciesId": "waterballista"
+  },
+  "recipe.waterbamboo": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "newyearzombie",
+    "outputSpeciesId": "waterbamboo"
+  },
+  "recipe.waterfurnace": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "flagzombie",
+    "outputSpeciesId": "waterfurnace"
+  },
+  "recipe.waterjackboxjumpzombie": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "doomzombie",
+    "inputSpeciesIdB": "silvernut",
+    "outputSpeciesId": "waterjackboxjumpzombie"
+  },
+  "recipe.watershulk": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "passionfruit",
+    "outputSpeciesId": "watershulk"
+  },
+  "recipe.waterspruce": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "peashooter",
+    "outputSpeciesId": "waterspruce"
+  },
+  "recipe.wheat": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bigsunnut",
+    "inputSpeciesIdB": "marigold",
+    "outputSpeciesId": "wheat"
+  },
+  "recipe.whitefootball": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "goldnut",
+    "inputSpeciesIdB": "helmetplant",
+    "outputSpeciesId": "whitefootball"
+  },
+  "recipe.wintermelon": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "driverzombie",
+    "inputSpeciesIdB": "pickaxe_b",
+    "outputSpeciesId": "wintermelon"
+  },
+  "recipe.xxspot": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "goldnut",
+    "inputSpeciesIdB": "imitater",
+    "outputSpeciesId": "xxspot"
+  },
+  "recipe.yellowgargantuar": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "dolphinrider",
+    "inputSpeciesIdB": "potatosquash",
+    "outputSpeciesId": "yellowgargantuar"
+  },
+  "recipe.zombieendoflame": {
+    "crossRungGapFill": false,
+    "inputSpeciesIdA": "bamboodragon",
+    "inputSpeciesIdB": "dolphingatlingzombie",
+    "outputSpeciesId": "zombieendoflame"
+  }
+}

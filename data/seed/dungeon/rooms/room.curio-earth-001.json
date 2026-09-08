@@ -1,0 +1,26 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A massive, translucent geode sits embedded in the center of the chamber, pulsing with a rhythmic, low-frequency hum that vibrates through the soles of your boots. Tiny crystalline shards drift through the air like slow-motion snow.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Lithic Heart",
+  "reason": "The room is designed around a singular, awe-inspiring geological anomaly that serves as the focal point for the dungeon's local ley lines.",
+  "roomId": "room.curio-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -1,0 +1,74 @@
+{
+  "slug": "actor-meters",
+  "title": "Actor meters",
+  "status": "WIP",
+  "kicker": "Combat language · every place",
+  "pillar": {"text": "Combat", "href": "combat.md"},
+  "loopLine": "Combat (every place)",
+  "hook": "**WIP:** actors share six pools — HP, stamina, sun/hunger, spirit, yang/yin, poise — the fuels skills and stances will spend. Not finished yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Designed and partly built. Poise and the full skill-cost loop are not finished — do not expect every pool as a live spend UI yet."},
+    {"term": "Meter", "meaning": "A shared actor pool. Faction difference is a **label** (plant vs zombie wording), not a different system."},
+    {"term": "Sun (two meanings)", "meaning": "The **lawn sun bank** in a match, and the plant **label** for the hunger meter. Different scopes — do not mix them."},
+    {"term": "Yang / Yin", "meaning": "Plant / zombie labels for stance and buff fuel — not a morality meter."},
+    {"term": "Poise", "meaning": "The guard pool. When it lands, guard is a real stance — not a free shrug."}
+  ],
+  "alsoTrue": [
+    "Health already matters everywhere; the unfinished part is spending the other pools on skills.",
+    "Skills that cost these meters are [skills and loadouts](skills-loadouts) — also WIP."
+  ],
+  "sections": [
+    {
+      "title": "Not finished yet",
+      "paras": [
+        "When meters land, skills cost something you can see, and guard is a real stance.",
+        "Until then, treat missing spend UI as unfinished work — not a broken save."
+      ]
+    },
+    {
+      "title": "The six pools",
+      "intro": "Same system; plant and zombie only rename some rows:",
+      "table": {
+        "cols": ["Pool", "Plant label", "Zombie label"],
+        "rows": [
+          ["Health", "HP", "HP"],
+          ["Body fuel", "Stamina", "Stamina"],
+          ["Hunger", "Sun", "Hunger"],
+          ["Nerve", "Spirit", "Spirit"],
+          ["Stance / buff fuel", "Yang", "Yin"],
+          ["Guard", "Poise", "Poise"]
+        ]
+      },
+      "note": "Do not confuse plant “Sun” on this table with the match’s lawn sun bank."
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Play with HP and the combat language that already ships — elements, shields, statuses.",
+        "Read this page as the map of fuels coming with skills and interactive battles."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Keep playing lawn and roster loops — meters are not a gate to start.",
+    "When meter UI appears, learn the six names and which label your side uses.",
+    "Separate lawn sun (match bank) from the plant hunger label named Sun."
+  ],
+  "doNote": "Paired WIP: [skills and loadouts](skills-loadouts) · [interactive battles](interactive-battles).",
+  "mixUps": [
+    {"q": "Where do I spend yang or poise?", "a": "Not finished yet. Poise and the skill-cost loop are WIP."},
+    {"q": "Is plant “Sun” the same as match sun?", "a": "No. Match sun is the lawn bank. Sun on the meter table is the plant hunger label."},
+    {"q": "Do plants and zombies use different meter systems?", "a": "No. Same six pools — labels differ."},
+    {"q": "Is this a stamina gate on the whole game?", "a": "No. Design forbids a player stamina gate. These are actor combat pools."},
+    {"q": "Do I need meters to finish a lawn match?", "a": "No. Lawn play and shipped combat language already work."}
+  ],
+  "next": ["skills-loadouts"],
+  "related": ["skills-loadouts", "interactive-battles"],
+  "sources": [
+    "docs/guide/combat.md §Meters",
+    "docs/guide/glossary.md §Currencies and meters",
+    "docs/guide/mechanisms/actor-meters.md (prior stub)",
+    "docs/guide/the-loops.md §Combat depth"
+  ]
+}

@@ -27,8 +27,12 @@ public class ExpeditionStoreTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
+    // DeployMode != HypnoAlly: this file's subject is expedition/PvZ-deploy soft-locking, unrelated to
+    // demon-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps `TryBeginUniqueDeploy` calls here
+    // from incidentally tripping T1.4's own deploy.hypno-ally-not-implemented refusal.
     static readonly FusionRpg.Core.Demons.DemonSpeciesDef CatalogSpecies =
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s => s.Side == "zombie");
+        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s =>
+            s.Side == "zombie" && s.DeployMode != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly);
 
     string Mint()
     {
@@ -37,7 +41,7 @@ public class ExpeditionStoreTests : IDisposable
             SpeciesId = CatalogSpecies.SpeciesId,
             Side = "zombie",
             GameTypeId = CatalogSpecies.GameTypeId,
-            Rarity = "common",
+            Rarity = "chaff",
             Variant = "normal",
             ElementPrimary = "fire",
             TraitIds = new List<string> { "swift" },

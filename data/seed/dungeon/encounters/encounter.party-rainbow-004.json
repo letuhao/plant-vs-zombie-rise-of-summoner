@@ -1,0 +1,39 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.party-rainbow-004",
+  "formation": "party",
+  "name": "The Chromatic Sovereignty",
+  "rankOrder": [
+    0,
+    1,
+    2
+  ],
+  "reason": "An elite, high-variance squad designed to challenge party coordination through diverse elemental resistances and specialized roles.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "melee",
+      "targetPreference": "backline"
+    },
+    {
+      "countBand": "lone",
+      "posture": "Finesse",
+      "reach": "long",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

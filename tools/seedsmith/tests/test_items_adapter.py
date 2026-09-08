@@ -50,7 +50,9 @@ class RegistryVersionTests(unittest.TestCase):
         versions = ItemsAdapter().registries().versions
         # Measured fresh 2026-08-23: NOT all equal — a single assumed constant would already be
         # wrong for naming/tags (v4) and classes (v3) against bands/core/themes (v1).
-        self.assertEqual(versions["naming"], 4)
+        # naming bumped 4->5 2026-09-07 (combination-write-unblock: additive `combination` kind),
+        # then 5->6 same day (set-charm-live-endpoint trial: additive 36 build-population set ids).
+        self.assertEqual(versions["naming"], 6)
         self.assertEqual(versions["tags"], 4)
         self.assertEqual(versions["classes"], 3)
         self.assertEqual(versions["bands"], 1)
@@ -64,8 +66,16 @@ class LegalCombinationsTests(unittest.TestCase):
     def test_ward_array_excluded_from_hybrid_frame(self) -> None:
         self.assertFalse(self.legal("role", "ward-array", "frame", "hybrid"))
 
-    def test_jewel_minor_b_excluded_from_hybrid_frame(self) -> None:
-        self.assertFalse(self.legal("frame", "hybrid", "role", "jewel-minor-b"))
+    def test_jewel_minor_b_is_legal_with_hybrid_frame(self) -> None:
+        # D30 (registryVersion 2, 2026-09-04): D3 wins over the prior 13-role/895‰ shape this test
+        # used to assert — jewel-minor-b is hybrid-eligible; head-guard and sense are not.
+        self.assertTrue(self.legal("frame", "hybrid", "role", "jewel-minor-b"))
+
+    def test_head_guard_excluded_from_hybrid_frame(self) -> None:
+        self.assertFalse(self.legal("frame", "hybrid", "role", "head-guard"))
+
+    def test_sense_excluded_from_hybrid_frame(self) -> None:
+        self.assertFalse(self.legal("frame", "hybrid", "role", "sense"))
 
     def test_commander_standard_excluded_from_hybrid_frame(self) -> None:
         self.assertFalse(self.legal("role", "standard", "frame", "hybrid"))
@@ -115,11 +125,35 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         cls.adapter = ItemsAdapter()
 
     def test_loads_the_expected_entry_and_file_counts(self) -> None:
-        self.assertEqual(len(self.corpus.entries), 1430)
+        # Explicit committed-corpus acceptance values. Re-measure these when a deliberate content
+        # batch or a recovery merge changes the corpus; do not preserve an obsolete snapshot.
+        self.assertEqual(len(self.corpus.entries), 1570)
         seen_files = {e.path for e in self.corpus.entries.values()}
-        self.assertEqual(len(seen_files), 121)
+        self.assertEqual(len(seen_files), 158)
 
-    def test_exactly_nine_empty_partitions_and_no_others(self) -> None:
+    def test_authored_item_names_are_unique_across_kinds(self) -> None:
+        """Identity names are global player-facing labels, not merely unique within one kind."""
+        by_name: "dict[str, list[str]]" = {}
+        for entry in self.corpus.entries.values():
+            if entry.kind == "display-template":
+                continue  # templates deliberately reuse placeholders; they are not item identities
+            name = entry.get("name")
+            if isinstance(name, str) and name:
+                by_name.setdefault(name, []).append(entry.id)
+        duplicates = {name: ids for name, ids in by_name.items() if len(ids) > 1}
+        self.assertEqual(duplicates, {})
+
+    def test_exactly_six_empty_partitions_and_no_others(self) -> None:
+        # ⛔ CORRECTED 2026-09-07: was 9, including two real, previously-undiscovered false positives.
+        # `gems/2` is real content now (sockets-gen's g2.json, this session). `base-types/footing/
+        # plant/{a,b}` were NEVER actually empty (24 real entries between them, confirmed directly) --
+        # their own `_meta.partition` field was stamped `"footing/plant/a"`/`"footing/plant/b"`,
+        # missing the `base-types/` prefix every sibling nested file uses (confirmed against
+        # `footing/humanoid/a.json`'s own correct `"base-types/footing/humanoid/a"`), so this metric's
+        # `corpus.partitions` lookup could never match the allocated id. Fixed at the source (the two
+        # files' own `_meta.partition` strings), not papered over here. The remaining 6 are genuinely
+        # empty -- confirmed directly, not assumed (`manipulator/` has no directory at all;
+        # `mantle/humanoid/` exists but has no `a.json`).
         ctx = Ctx(corpus=self.corpus, adapter=self.adapter)
         registry = MetricRegistry()
         registry.register(EmptyPartitionMetric())
@@ -127,13 +161,11 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         findings = run_all(registry, ctx)
         subjects = {f.subject for f in findings}
 
-        self.assertEqual(len(findings), 9)
+        self.assertEqual(len(findings), 6)
         self.assertEqual(subjects, {
             "attributes",
-            "base-types/footing/plant/a", "base-types/footing/plant/b",
             "base-types/manipulator/humanoid/b", "base-types/mantle/humanoid/a",
             "display-templates/4", "display-templates/5", "display-templates/6",
-            "gems/2",
         })
         self.assertTrue(all(f.severity is Severity.GAP for f in findings))
 

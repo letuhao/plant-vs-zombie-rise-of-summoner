@@ -1,6 +1,6 @@
 # Capability map: Demon gameplay system
 
-Source vision: the demon gameplay design note (external; its **ideals** are adopted, its architecture is not — everything below builds on the shipped overlay stack). Status: **approved 2026-08-21** (owner resolved the three shaping decisions below). Module specs live in [demons/](demons/), one per module id, written in dependency order.
+Source vision: the demon gameplay design note (external; its **ideals** are adopted, its architecture is not — everything below builds on the shipped overlay stack). Status: **approved 2026-08-21** (owner resolved the three shaping decisions below). Module specs live in [demons/](demons/), one per module id, written in dependency order. Implementation plan/task list: [tasks/demon-progression-plan.md](../../tasks/demon-progression-plan.md) / [tasks/demon-progression-todo.md](../../tasks/demon-progression-todo.md).
 
 ## Resolved decisions (2026-08-21)
 
@@ -35,26 +35,106 @@ Source vision: the demon gameplay design note (external; its **ideals** are adop
 
 **Hard constraints carried over:** in-run demon behavior is Unity-owned — personality influences *overlay* decisions (obedience checks, deploy gating, effect grants), never zombie pathing/AI. All combat mutation stays on the Funnel/Writer path. No server round-trip on the hit path: capture *resolution* is Cold, capture *conditions* are read Hot.
 
+## Vocabulary: general demon, unique demon, and the two aura roles (added 2026-09-06)
+
+**Written because the terms below get guessed wrong, the same reason the player guide keeps its own
+"blind spots" tables — read this once before designing anything that touches more than one of them.**
+Two axes are independent and get conflated if read as one: *what a demon IS* (general vs. unique) and
+*what ROLE it has been given* (none, Commander, Patron, or — in a Delve specifically — party member).
+
+### Axis 1 — what the demon is
+
+| | **General demon** | **Unique demon** |
+|---|---|---|
+| Spawned by | The PvZ engine itself (a normal lawn plant/zombie) | The RPG layer — summon, fusion, gacha, capture |
+| Identity | Species only — no `instanceId`, nothing persists between spawns | A real specimen: `UniqueActor`, its own `instanceId`, phase FSM |
+| Stats | Empire-wide, per-player, per-species progression fallback (primary stats, the general passive tree) | Own specimen progression and `UniqueDemon` allocation, plus equipment (T6.1), passive build, and (once built) aspect/action slots — **never** the empire species fallback |
+| Where it's used | Anywhere a large, disposable, or engine-spawned population is needed — a lawn run's own zombie wave, and (per the owner's own 2026-09-06 framing) **siege defenders and world-map legions** | Anywhere an individually-meaningful, player-invested demon belongs — your own roster, a designated Commander or Patron, a Delve party |
+| Scale model | **Troop-stack shaped**: one general-demon *type* × a count, the same "multiply one unit by N" shape `base-defense-ideal.md`'s own research already cites (Heroes 3's troop stacks, 7 slots, up to 9,999 each) — not N individually-tracked rows. This is *why* it exists as a distinct kind: a legion or a siege garrison at army scale cannot be N separate `UniqueActor` rows | Never army-scale by design — a roster is dozens, not thousands |
+
+**The "why" in one line:** you cannot build a legion or a siege garrison out of a million individually
+-tracked `UniqueActor` rows — general demons are the lightweight, count-based representation that
+scales, unique demons are the individually-customized representation that doesn't need to.
+
+### Progression source is selected by the spawn mechanism (2026-09-08)
+
+Each gameplay mechanism owns its spawn mechanism and declares the spawned demon's progression source.
+A player's empire general demon with no dedicated progression mechanism uses the empire-wide species
+fallback. A unique demon uses its own specimen progression; a Commander uses the Commander source.
+Neither may also consume the empire species fallback. A `(side, typeId) → species` catalog lookup
+identifies a species but is insufficient to select a progression source. This is the binding
+`decisions.md` **Demon progression source and spawn ownership** row; unique composition now reads
+dedicated allocation, while terminal provenance validation remains tracked in the lawn-deploy plan.
+
+### Axis 2 — the two passive-aura roles (both assignable only to a unique demon)
+
+**Commander and Patron are structurally the same shape — designate one demon, receive one continuous,
+passive, side-wide aura for the run — and are easy to conflate for exactly that reason. Neither one
+ever fights.** They differ in *what* the aura is and *which loop* it belongs to:
+
+| | **Commander** | **Patron** |
+|---|---|---|
+| Scope | The lawn run (`commanders.md`) | The match (`spec-patron-demon.md`) |
+| What it grants | One active leadership aura (`commander-auras.md` — "one active at a time") **plus** aptitude spend reaching the side | A specific elemental combat bonus (`combat.power.{element}`/`combat.defense.{element}`), scaled by the demon's own rarity/star/level/Θ |
+| Cost | Not soul-priced (aptitude spend is its own economy) | First pick free; each switch costs 100 souls |
+| Fusion interaction | Not documented as locked | The active patron is **unconsumable** — fusion refuses it as a sacrifice or input |
+| Status | WIP (pick + aptitude spend exist thin; full aura fantasy still catching up) | SIM shipped; LIVE gate open; magnitude-delivery migration to the atom system in flight (`patron-absorption`, T6.2) |
+
+**What Commander and Patron are *not*:** an active combat participant. That concept is real, but it
+belongs to a third, separate context — a **Delve party member** (`party-dungeon-ideal.md`) — a unique
+demon that actively fights, can go `Downed`, inside a dungeon run specifically. A Delve party member is
+not a lawn-run role at all, and neither Commander nor Patron ever join a fight the way a party member
+does. Do not use "commander" to mean "the demon fighting for me" — that is a party member, in a Delve,
+a different loop from the lawn Commander/Patron pick entirely.
+
+
+> ### ⛔ Two rows below are stale as of 2026-09-01 — read before building either
+>
+> **`aspect-scope` is REVERTED, not authorized.** Its row still reads *"APPROVED 2026-08-31, authorized
+> to build."* The owner reverted it during the demon-seed idea phase: *"revert aspect feature, original
+> demon need original aspect, no element/status … the aspect depend on some feature we have not design
+> and build yet."* The two it depends on — hybrid element typing and the passive skill graph — are
+> unbuilt. **Do not start this module.** The formal amendment is listed as owed in
+> [demon-seed-map.md](demon-seed-map.md) §5.
+>
+> **`demon-summoning`'s "trait rolls" now means something different.** Per
+> [effect-pipeline-ideal.md](effect-pipeline-ideal.md) Q10, `traits_json` stays the source of truth for
+> *which* traits a demon has, and a `trait.{traitId}` container becomes *what that trait does*. This
+> module keeps writing ids exactly as it does now — **no change is required here** — but the ids it
+> writes will start carrying effects once `effect-pipeline` ships. Recorded so the change is not
+> mistaken for a regression.
+
 ## Modules
 
 | Module id | Responsibility | Depends on | Wave |
 |---|---|---|---|
 | `element-extension` | Extend the ElementHub roster + matchup matrix (light/dark); decisions.md amendment; golden tests | — | **V1** |
 | `demon-core` | Specimen identity superset: species link, rarity, variants, trait slots, element typing, Codex discovery state | element-extension | **V1** |
+| `progression-source-contract` | Typed spawn/progression-source contract. A gameplay mechanism declares whether an actor resolves through the empire-general fallback, its own unique specimen, or Commander progression; source is never inferred from `typeId`. Spec: [demons/spec-progression-source-contract.md](demons/spec-progression-source-contract.md) | demon-core | partial 2026-09-08 |
+| `general-empire-fallback` | Lawn-facing, per-player/per-species general-demon progression. Applies only when the declared source is the empire-general fallback; owns the corresponding species-XP eligibility rules. Spec: [demons/spec-general-empire-fallback.md](demons/spec-general-empire-fallback.md) | progression-source-contract, species-build allocation transport | partial 2026-09-08 |
+| `dedicated-progression-isolation` | Route unique demons to specimen progression and Commander effects to Commander progression. Removes empire species fallback and species XP from dedicated-source paths. Spec: [demons/spec-dedicated-progression-isolation.md](demons/spec-dedicated-progression-isolation.md) | progression-source-contract, unique-actor-runtime | partial 2026-09-08 |
 | `soul-economy` | Souls ledger: earn rules from Activity facts, spend API, balances | demon-core | **V1** |
 | `demon-summoning` | Summoning/gacha: banners, Souls-funded pulls, rarity/variant/trait rolls, mint specimens | demon-core, soul-economy | **V1** |
 | `demon-contracts` | Binding slots (Soul-priced capacity) + loyalty with daily upkeep decay, personality rate modifiers, hard deploy refusal for unbound/insubordinate demons — **shipped 2026-08-21**, spec in [demons/spec-demon-contracts.md](demons/spec-demon-contracts.md); server + web only | demon-core, soul-economy, demon-fusion | shipped |
-| `aspect-scope` | **Move element typing off the species and make it a sub-tier.** `DemonSpeciesDef.ElementPrimary/Secondary` and `TraitPool` move down one level; `DemonSpeciesGenerator.TraitsFor` gains an `element` argument, so one species yields N aspects with derived trait bias — **generated, never authored**. Strengths/weaknesses need nothing: an aspect's are its element's. **Requested by the class-system program** ([class-system-map.md](class-system-map.md) §2b), which needs the tier as its third allocation scope; owned here because every file it edits is this program's. Spec: [demons/spec-aspect-scope.md](demons/spec-aspect-scope.md). **A byte-identical migration path exists** — seed the element salt so each species' own current element reproduces today's trait pool (spec §3.1) | demon-core | requested |
+| `aspect-scope` | **Move element typing off the species and make it a sub-tier.** `DemonSpeciesDef.ElementPrimary/Secondary` and `TraitPool` move down one level; `DemonSpeciesGenerator.TraitsFor` gains an `element` argument, so one species yields N aspects with derived trait bias — **generated, never authored**. Strengths/weaknesses need nothing: an aspect's are its element's. **Requested by the class-system program** ([class-system-map.md](class-system-map.md) §2b), which needs the tier as its third allocation scope; owned here because every file it edits is this program's. Spec: [demons/spec-aspect-scope.md](demons/spec-aspect-scope.md) — **APPROVED 2026-08-31, authorized to build** (resolving [seedsmith-demons-ideal.md](seedsmith-demons-ideal.md) §5 Q2; seedsmith's demons feature ships an `aspect` kind that needs this tier). **A byte-identical migration path exists** — seed the element salt so each species' own current element reproduces today's trait pool (spec §3.1) | demon-core | **approved 2026-08-31** |
 | `demon-capture` | In-run encounters, weaken→capture attempt flow (Hot reads, Cold resolution) | demon-core, demon-contracts, soul-economy | later |
 | `demon-fusion` | Star merges (identity-preserving) + discoverable recipes + trait inheritance + capped promotion — **shipped 2026-08-21**, spec in [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) | demon-core, soul-economy, expedition materials | shipped |
 | `patron-demon` | Element aura from one designated demon (stars+rarity+level scaled), soul-priced switching, +1 Soul/10 kills — anchors locked 2026-08-21, spec in [demons/spec-patron-demon.md](demons/spec-patron-demon.md); SIM half shipped 2026-08-21, LIVE owner gate open | demon-fusion, demon-summoning | SIM shipped |
 | `demon-domain-fe` | Web FE: Codex, summon altar, capture UX, fusion lab, contract board (grows out of `#/roster`) | reads all above | incremental |
 | `world-events` | Ecology conditions, roaming/boss encounters, raids, factions, release/legacy/lineage | demon-capture, demon-contracts | last |
 
-Build order (revised 2026-08-21; expeditions shipped): `element-extension` → `demon-core` → `soul-economy` → `demon-summoning` (V1 internal gate, shipped) → *(standalone program: match-source + expeditions = announced ship, shipped)* → **`demon-fusion`** (duplicate pressure makes it the next sink) → `patron-demon` → `demon-contracts` (shipped) → **`demon-capture`** → `world-events`.
+Build order (revised 2026-09-08; expeditions shipped): `element-extension` → `demon-core` → `progression-source-contract` → (`general-empire-fallback` after species-build allocation transport || `dedicated-progression-isolation` after unique-actor-runtime) → `soul-economy` → `demon-summoning` (V1 internal gate, shipped) → *(standalone program: match-source + expeditions = announced ship, shipped)* → **`demon-fusion`** (duplicate pressure makes it the next sink) → `patron-demon` → `demon-contracts` (shipped) → **`demon-capture`** → `world-events`.
 
 > **Standalone-first program (2026-08-21):** the [standalone RPG map](standalone-rpg-map.md) makes the web RPG the core game and PvZ an extension. Its combined roadmap interleaves with this program: `demon-capture` explicitly becomes the PvZ-mode module (exclusive capture species), and `expeditions` (web battles) becomes the primary consumer of demons. Where the two maps disagree, the combined roadmap in the standalone map wins.
 
 ## Deliberately deferred (not in any v1 module)
 
 Personality-driven in-run AI (Unity-owned), faction kingdoms/diplomacy, demon offspring/breeding mechanics beyond lineage records, prison/garden/market facilities, negotiation outcomes in raids, community discovery sharing.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Module here | Filed by | Shape | Until it lands |
+|---|---|---|---|---|
+| `DemonMintSpec.Level` | `demon-core` | `party-dungeon/spec-wild-room.md` §4 | additive `long? Level` on the spec; `RpgStore.Demons.cs:53` writes `$level = spec.Level ?? 1` — null is today's line for every caller | a recruit or capture mints at level 1 instead of `Θ_room + thetaOffset` |
+| `SummonRoller.Roll` optional `poolFilter` | `demon-summoning` | wild-room §6 | a trailing `Func<DemonSpeciesDef, bool>? poolFilter = null` on `Roll` (`SummonRoller.cs:61`); null = today's pool; `altar.poolFromDomain` stays `false` until it exists | the altar pulls from the whole summonable catalog |
+| A personality mint override | `demon-contracts` | wild-room §2 (**ask first**) | the talk's `PersonalityFor("dungeon:wild:{r}:{c}")` recorded on the mint instead of `PersonalityFor(instanceId)` over a fresh `Guid` (`RpgStore.Demons.cs:45`) | v1 accepts the mismatch |

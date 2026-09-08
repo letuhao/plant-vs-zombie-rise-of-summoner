@@ -42,6 +42,7 @@ if (listPartitions)
     {
         SequenceShape.ThreeDigit => "{seq:03}",
         SequenceShape.Fixed => "",
+        SequenceShape.Derived => "{gridCellTokens}",
         _ => "{seq}",
     };
 }

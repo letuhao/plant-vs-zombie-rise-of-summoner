@@ -8,20 +8,24 @@
 
 ## 1. Objective
 
-**Make the five actor resources, reach, and two progression rates into real derived channels.**
+**Make the six actor resources, reach, and two progression rates into real derived channels.**
 
-Eighteen channels, all **`Pool`** class except the two progression rates:
+**Twenty-one** channels, all **`Pool`** class except the two progression rates (was eighteen when this
+spec was written against five resources; `poise` made it six on 2026-08-26 and registration loops
+`ResourceIds`, so the code was right and only this table was stale):
 
 | Family | n | Class | Owner spec |
 |---|---|---|---|
-| `resource.max.{id}` | 5 | `Pool`, magnitude | [resource-hub-ssot.md](../resource-hub-ssot.md) |
-| `resource.regen.{id}` | 5 | `Pool`, magnitude | same |
-| `resource.efficiency.{id}` | 5 | `Pool`, bounded ratio | same |
+| `resource.max.{id}` | 6 | `Pool`, magnitude | [resource-hub-ssot.md](../resource-hub-ssot.md) |
+| `resource.regen.{id}` | 6 | `Pool`, magnitude | same |
+| `resource.efficiency.{id}` | 6 | `Pool`, bounded ratio | same |
 | `move.range` | 1 | `Pool`, magnitude | [action-map.md](../action-map.md) |
 | `progression.xpRate` | 1 | non-combat, magnitude | §4.1 |
 | `progression.breakthroughSuccess` | 1 | non-combat, bounded ratio | §4.2 |
 
-ids: `hp` · `stamina` · `hunger` · `spirit` · `qi` — one shared set, both factions, no branch.
+ids: `hp` · `stamina` · `hunger` · `spirit` · `qi` · **`poise`** — one shared set, both factions, no
+branch. (`poise` appended 2026-08-26; registration loops `DerivedStatChannels.ResourceIds`, so it was
+covered by construction — this line was simply never updated.)
 
 **Unpaired is correct here, not an exemption.** These are `Pool`: precedent is the shipped
 `combat.shield.capacity` and `combat.shield.regen`, which never had counterparts. The counters you
@@ -51,9 +55,10 @@ would want — drain, root — are **statuses**, which is what `status.expose.*`
 > *"What is new is that up to **four exhaustion debuffs can stack on one actor at once**, which the cap
 > logic has never been tested against."*
 
-Four pools exhaust (`stamina` · `hunger` · `spirit` · `qi`; `hp` depletion is death, owned by the turn
-FSM's `Downed` state). All four debuffing simultaneously is reachable in normal play and **has no test
-today**. §6 makes it one.
+**Five** pools exhaust (`stamina` · `hunger` · `spirit` · `qi` · **`poise`**; `hp` depletion is death,
+owned by the turn FSM's `Downed` state). All five debuffing simultaneously is reachable in normal play
+and **has no test today**. §6 makes it one. ⚠️ This said "four" until 2026-09-05 — `poise` exhaustion
+is breaking guard, which is a debuff like the other four, not death (`resource-hub-ssot.md` §1).
 
 ### 2.2 `resource.efficiency` is a bounded ratio and needs its §11.6 row
 
@@ -122,16 +127,16 @@ python scripts\audit-overflow.py
 | Test | Asserts |
 |---|---|
 | `ResourceChannelsNotInCombatRoster` | §2.1 — the failure that rule exists to prevent |
-| **`FourExhaustionDebuffsStack`** | §2.1's untested case: all four pools exhausted at once, caps still behave, no ordering surprise |
+| **`FiveExhaustionDebuffsStack`** | §2.1's untested case: all FIVE pools exhausted at once (incl. `poise`), caps still behave, no ordering surprise |
 | `LazyValueMatchesTicked` | `value + rate × elapsed` equals a hypothetically ticked pool at N sample points — proves §2.3's optimisation is not a behaviour change |
 | `EfficiencyCannotExceedOne` | A cost never goes negative (§2.2) |
 | `MaxAndRegenUncapped` | Magnitudes scale past any literal; **overflow throws, never clamps** |
 | `MoveRangePassesWithNoBoard` | Every range check passes with no grid — the byte-identical property |
 | `XpRateLayersOnAward` | `xpRate` multiplies `Award.PowerScale`'s output; does not replace it, reads no level |
 | `BreakthroughGrantsTheta` | A success adds `Θ`; `progression.realm` still exactly `1.0` |
-| `NoGoldensMove` | All 18 at defaults |
+| `NoGoldensMove` | All 21 at defaults |
 
-`FourExhaustionDebuffsStack` is the one with a real chance of failing — it is the only assertion here
+`FiveExhaustionDebuffsStack` is the one with a real chance of failing — it is the only assertion here
 covering something nobody has ever run.
 
 ---
@@ -141,8 +146,10 @@ covering something nobody has ever run.
 **Always** — keep resources out of `AllCombatChannelIds`. `rpg.*` layer. Compute values on read.
 Comment every bounded ratio with its PS-8 class.
 
-**Ask first** — a sixth resource. The five are locked by
-[decisions.md](../decisions.md)'s *Resource model* row and a sixth is a product decision.
+**Ask first** — a **seventh** resource. The six are locked by
+[decisions.md](../decisions.md)'s *Resource model* row and a seventh is a product decision. (The sixth,
+`poise`, was exactly that decision and it landed 2026-08-26 — this line asked for a gate that had
+already been answered.)
 
 **Never** — cap `resource.max` or `resource.regen` (progression ceilings). Branch on faction — labels
 are content, never ids. Let a resource channel reach a Unity field (only `hp` is Writer-backed, through
@@ -152,8 +159,8 @@ are content, never ids. Let a resource channel reach a Unity field (only `hp` is
 
 ## 8. Success criteria
 
-- [ ] 18 channels live, classified, none in `AllCombatChannelIds`.
-- [ ] **Four simultaneous exhaustion debuffs tested** — §3G's named gap closed.
+- [ ] 21 channels live, classified, none in `AllCombatChannelIds`.
+- [ ] **Five simultaneous exhaustion debuffs tested** — §3G's named gap closed.
 - [ ] Lazy compute-on-read proven equivalent to ticking.
 - [ ] `efficiency` and `breakthroughSuccess` bounded with §11.6 rows; `max`/`regen` uncapped and throwing on overflow.
 - [ ] `move.range` registered; every range check passes with no board.

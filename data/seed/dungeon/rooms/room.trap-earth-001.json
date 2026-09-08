@@ -1,0 +1,26 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
+  ],
+  "flavor": "The floor of this chamber is a seamless expanse of fine, grey dust that ripples like water under the torchlight. A single, unblemished stone pillar stands in the center, casting a long, lonely shadow across the featureless ground.",
+  "hazardBand": "heavy",
+  "kind": "trap",
+  "name": "The Sinking Silt-Pit",
+  "reason": "The floor is a deceptive layer of loose, aerated soil covering a deep, hollow cavity; once weight is applied, the ground liquefies, pulling the victim into a crushing descent.",
+  "roomId": "room.trap-earth-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

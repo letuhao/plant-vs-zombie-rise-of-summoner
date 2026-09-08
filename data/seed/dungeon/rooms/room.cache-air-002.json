@@ -1,0 +1,15 @@
+{
+  "climate": "air",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A vast, circular chamber where the walls are lined with thousands of thin, translucent crystal tubes. A constant, gentle updraft whistles through the pipes, creating a low, harmonic hum that vibrates in the marrow of your bones.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Hollow of Resonant Glass",
+  "reason": "The updrafts have kept the air pristine and the contents undisturbed for centuries.",
+  "roomId": "room.cache-air-002",
+  "secretEligible": "yes",
+  "sightBand": "dim",
+  "tags": []
+}

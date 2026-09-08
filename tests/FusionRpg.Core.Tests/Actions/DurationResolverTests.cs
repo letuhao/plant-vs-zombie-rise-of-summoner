@@ -199,7 +199,9 @@ public class DurationResolverTests
         var composer = new DerivedComposer(registry);
         return composer.Compose(new[]
         {
-            new DerivedModifier(DerivedTurnChannels.Speed, DerivedModifierOp.Flat, speed - DerivedTurnChannels.BaseSpeed, SourceId: "test"),
+            // turn.speed is FlatSum over its REGISTERED base, so the modifier is the delta from that
+            // base — which is the configured default, not the readiness formula's scale unit.
+            new DerivedModifier(DerivedTurnChannels.Speed, DerivedModifierOp.Flat, speed - DerivedStatPolicy.TurnDefaultSpeed, SourceId: "test"),
             new DerivedModifier(DerivedTurnChannels.Haste, DerivedModifierOp.Flat, haste - DerivedTurnChannels.NominalHasteMilli, SourceId: "test"),
         });
     }
@@ -242,7 +244,12 @@ public class DurationResolverTests
         // since TurnReadiness itself throws on <= 0 by design.
         var resolver = new BattleDurationResolver(_ => ActorDerivedSnapshot.StubNeutral());
         var ticks = resolver.ToTicks(victimTurns: 1, "wave:0"); // StubNeutral has no turn.* set -> Get returns 0 for both
-        Assert.Equal(DerivedTurnChannels.BaseSpeed, ticks); // exactly the default-rate ticks-per-turn, not a degenerate 1
+        // T14/B28: the expectation is derived from the CONFIGURED default speed, so this doubles as
+        // the binding test -- if data/tuning/derived-stats.v{n}.json's turnDefaultSpeed stopped
+        // reaching BattleDurationResolver, this fails. Not a tautology: the resolver could have
+        // clamped to 1, to 0, or to NominalHasteMilli, and every one of those breaks this line.
+        Assert.Equal(TurnReadiness.TicksPerFullTurn(DerivedStatPolicy.TurnDefaultSpeed), ticks);
+        Assert.True(ticks > 1, "a degenerate 1-tick turn means the clamp fell back to 1, not the registered default");
     }
 
     [Fact]

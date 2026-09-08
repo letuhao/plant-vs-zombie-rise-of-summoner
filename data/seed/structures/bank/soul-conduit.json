@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "partition": "Bank"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "StructureCatalog.cs Seed[4]. Matches \u00a75.21 R6 Bank exactly: 'the Tier-2 faucet designed (soul conduit)'.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "EssenceDeposit",
+        "role": "Bank",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "soul-conduit",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "soul-conduit",
+      "magnitudes": {
+        "blocksLineOfFire": false,
+        "blocksMovement": false,
+        "buildTurns": 3,
+        "capacityBonus": 0,
+        "constructIronworkCost": 0,
+        "constructRubbleCost": 0,
+        "containerId": null,
+        "cost": 250,
+        "coverPowerMilli": 0,
+        "coverRadius": 0,
+        "entryStaminaMultiplierMilli": 1000,
+        "flatYieldPerTurn": 20,
+        "materialTier": 0,
+        "obstacleKind": "None",
+        "structureKind": "Yield",
+        "visionRangeTiles": null,
+        "yieldMultiplierMilli": 1000
+      },
+      "name": "Soul Conduit"
+    }
+  ],
+  "kind": "structure-anchor"
+}

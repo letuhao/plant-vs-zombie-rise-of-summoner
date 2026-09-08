@@ -8,7 +8,7 @@ using Xunit;
 
 namespace FusionRpg.Core.Tests.Combat;
 
-/// <summary>spec-healing-pair.md — combat.heal.power (Pool, unpaired, uncapped) and the `+heal.power`
+/// <summary>spec-healing-pair.md — resource.restore.hp (Pool, unpaired, uncapped) and the `+heal.power`
 /// term OverlayCombatMath.FinalizeHeal adds to the shipped heal pass-through.</summary>
 public class HealingPairTests
 {
@@ -28,7 +28,7 @@ public class HealingPairTests
         var healerSnapshot = new CombatActorSnapshot(
             ActorDerivedSnapshot.FromValues(new[]
             {
-                new KeyValuePair<string, double>(DerivedStatChannels.CombatHealPower, 20)
+                new KeyValuePair<string, double>(DerivedStatChannels.ResourceRestore("hp"), 20)
             }),
             ActorElementTypes.Neutral);
         var math = OverlayCombatMath.Create((ptr, attackerLess) => healerSnapshot);
@@ -44,7 +44,7 @@ public class HealingPairTests
         var healerSnapshot = new CombatActorSnapshot(
             ActorDerivedSnapshot.FromValues(new[]
             {
-                new KeyValuePair<string, double>(DerivedStatChannels.CombatHealPower, -1000)
+                new KeyValuePair<string, double>(DerivedStatChannels.ResourceRestore("hp"), -1000)
             }),
             ActorElementTypes.Neutral);
         var math = OverlayCombatMath.Create((ptr, attackerLess) => healerSnapshot);
@@ -79,7 +79,7 @@ public class HealingPairTests
         // HealPowerReclassifiedAsContestFailsTheGuard in Guard.Tests/StatTaxonomyGuardTests.cs (it
         // needs to shell out to the real script; this project doesn't).
         var registry = DerivedStatRegistry.CreateDefault();
-        Assert.True(registry.TryGet(DerivedStatChannels.CombatHealPower, out var def));
+        Assert.True(registry.TryGet(DerivedStatChannels.ResourceRestore("hp"), out var def));
         Assert.Equal(StatClass.Pool, def.Class);
         Assert.Null(def.CounterpartOf);
         Assert.Null(def.Cap); // uncapped -- a magnitude, PS-8
@@ -208,7 +208,7 @@ public class HealingPairTests
     {
         // spec-healing-pair.md §3 -- lifesteal is deliberately untouched: a `resource.delta`
         // OnDamageDealt atom (atom-family-library.md; g-on-hit.json, ssot-affixes.md:1006), a
-        // completely separate mechanism from OverlayCombatMath.FinalizeHeal / combat.heal.power. This
+        // completely separate mechanism from OverlayCombatMath.FinalizeHeal / resource.restore.hp. This
         // module never touched item content, so the honest proof is the mechanism boundary itself:
         // the atom's kindId is still resource.delta (not rewired onto the overlay heal path), and no
         // runtime source this module touched even names "lifesteal".

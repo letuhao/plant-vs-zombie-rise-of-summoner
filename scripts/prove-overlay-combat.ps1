@@ -84,6 +84,54 @@ function Invoke-Probe([string]$url, [hashtable]$body) {
         -ContentType "application/json" -Body $json | Out-Null
 }
 
+# C11-C13 (aura-skill T7): the probe endpoint (Invoke-Probe above) special-cases ANY positive
+# `amount` as a raw pass-through (DebugCombatActions.Probe's own `amount > 0` branch), which never
+# calls OverlayCombatMath.Finalize/FinalizeHeal at all -- confirmed by direct code read, not assumed.
+# C5 above only proves that pass-through shape (no overlay breakdown), which is a real but DIFFERENT
+# claim from "a heal actually reads combat.heal.power". The one debug path that DOES route a positive
+# amount through the real CombatDamageDispatcher.DispatchInstant -> OverlayCombatMath.Finalize chain
+# is `debug/effect/enqueue-delta` when it carries a `target` object (CheatCommandRunner.RunEnqueueDelta's
+# own `useCombatDispatch` gate) -- but that command has no channel-pinning of its own. The fix used
+# here: `InjectorDerivedOverride`'s pin store is a persistent, ptr-keyed dictionary
+# (InjectorCombatBridge.ResolveActor consults it on every resolve, regardless of which debug command
+# set it) -- so a zero-amount probe call sets `combat.heal.power` on a ptr, and a LATER enqueue-delta
+# call against that SAME ptr reads it for real, through the real math.
+
+function Invoke-PinActorChannels([string]$url, [string]$ptr, [hashtable]$channels) {
+    Invoke-Probe $url @{
+        targetPtr = $ptr
+        actorPtr = $ptr
+        amount = 0   # no-op: DebugCombatActions.Probe's passApply==0 short-circuits the funnel write
+        pinActorChannels = $channels
+    }
+}
+
+function Invoke-EnqueueDelta([string]$url, [hashtable]$body) {
+    $json = $body | ConvertTo-Json -Depth 8 -Compress
+    Invoke-RestMethod -Method POST "$url/api/debug/effect/enqueue-delta" `
+        -ContentType "application/json" -Body $json | Out-Null
+}
+
+function Get-EntityHp([string]$url, [string]$ptr) {
+    Invoke-RestMethod -Method POST "$url/api/debug/board-stats" -ContentType "application/json" -Body '{}' -TimeoutSec 8 | Out-Null
+    $before = Get-MaxEventId $url
+    $deadline = (Get-Date).AddSeconds(6)
+    while ((Get-Date) -lt $deadline) {
+        $page = Invoke-RestMethod -Uri "$url/api/events?afterId=$before&limit=50" -Method GET
+        $items = @($page.items)
+        $ev = @($items | Where-Object { $_.kind -eq "debug.board-stats" }) | Select-Object -Last 1
+        if ($ev) {
+            $payload = Get-Payload $ev
+            $entry = @($payload.plants) + @($payload.zombies) | Where-Object { $_.ptr -eq $ptr } | Select-Object -First 1
+            if ($entry) { return [double]$entry.hp }
+            throw "ptr $ptr not found in debug.board-stats"
+        }
+        if ($items.Count -gt 0) { $before = [long]$items[-1].id }
+        Start-Sleep -Milliseconds 300
+    }
+    throw "no debug.board-stats event"
+}
+
 function Wait-LastOverlay([string]$url, [long]$afterId, [int]$timeoutMs = 4000) {
     $deadline = (Get-Date).AddMilliseconds($timeoutMs)
     while ((Get-Date) -lt $deadline) {
@@ -269,6 +317,71 @@ Run-Case "C10 overlay-force-crit" {
     $mult = [double]$p.critMultiplierFinal
     if ($mult -le 1.0) { throw "critMultiplierFinal=$mult expected > 1" }
     "crit=true critMultiplierFinal=$mult"
+}
+
+Run-Case "C11 overlay-heal-with-payload-scales-with-heal-power" {
+    if ([string]::IsNullOrWhiteSpace($TargetPtr)) { throw "need TargetPtr" }
+    Invoke-PinActorChannels $BaseUrl $TargetPtr @{ "combat.heal.power" = 40 }
+    $before = Get-EntityHp $BaseUrl $TargetPtr
+    Invoke-EnqueueDelta $BaseUrl @{
+        targetPtr = $TargetPtr
+        amount = 10
+        target = @{ mode = "single"; ptr = $TargetPtr }
+        elementPayload = @(@{ element = "fire"; weight = 1.0 })
+    }
+    Start-Sleep -Milliseconds 400
+    $after = Get-EntityHp $BaseUrl $TargetPtr
+    $healed = $after - $before
+    # effectiveHeal = max(0, signedAmount + healPower) = max(0, 10 + 40) = 50 -- FinalizeHeal's own
+    # formula (OverlayCombatMath.cs). Capped at maxHp, which setup-lab-run's fixtures leave headroom
+    # under -- if this ever fails on a full-HP target, heal a smaller amount first via debug tooling.
+    if ([math]::Abs($healed - 50) -gt 0.5) { throw "healed=$healed expected ~50 (10 base + 40 heal.power)" }
+    "healed=$healed (expected ~50)"
+}
+
+Run-Case "C12 overlay-heal-with-no-payload-still-reads-heal-power" {
+    # spec: `if (signedAmount > 0) return FinalizeHeal(...)` runs BEFORE the payload-null check
+    # (OverlayCombatMath.Finalize) -- so a heal WITHOUT any elementPayload must still scale by
+    # combat.heal.power, not silently fall through to "amount unchanged" the way a PAYLOAD-LESS
+    # DAMAGE packet would (Finalize's own `if (packet.ElementPayload == null) return signedAmount`,
+    # which only applies below the heal branch, never reached for signedAmount > 0).
+    if ([string]::IsNullOrWhiteSpace($TargetPtr)) { throw "need TargetPtr" }
+    Invoke-PinActorChannels $BaseUrl $TargetPtr @{ "combat.heal.power" = 40 }
+    $before = Get-EntityHp $BaseUrl $TargetPtr
+    Invoke-EnqueueDelta $BaseUrl @{
+        targetPtr = $TargetPtr
+        amount = 10
+        target = @{ mode = "single"; ptr = $TargetPtr }   # forces useCombatDispatch; deliberately NO elementPayload
+    }
+    Start-Sleep -Milliseconds 400
+    $after = Get-EntityHp $BaseUrl $TargetPtr
+    $healed = $after - $before
+    if ([math]::Abs($healed - 50) -gt 0.5) {
+        throw "healed=$healed expected ~50 -- a value of exactly 10 here would mean the no-payload heal fell through to raw signedAmount instead of FinalizeHeal"
+    }
+    "healed=$healed (expected ~50, proving FinalizeHeal ran despite no payload)"
+}
+
+Run-Case "C13 overlay-full-mitigation-resolves-to-zero-no-chip-floor" {
+    # owner decision 6: the overlay profile's MinChipShareKPm is 0 (CombatProfiles.Overlay = new(0)),
+    # unlike every other profile's 50‰ floor -- a fully-mitigated overlay hit must resolve to EXACTLY
+    # 0, not a guaranteed minimum chip. Sky-high combat.defense.omni on the defender drives
+    # DivisiveMitigation's powerAdjusted to 0 (Math.Max(0, powerAdjusted) floors it), and 0 times any
+    # crit/amp multiplier is still 0.
+    if ([string]::IsNullOrWhiteSpace($TargetPtr)) { throw "need TargetPtr" }
+    Invoke-PinActorChannels $BaseUrl $TargetPtr @{ "combat.defense.omni" = 999999999 }
+    $before = Get-MaxEventId $BaseUrl
+    Invoke-Probe $BaseUrl @{
+        amount = -100
+        targetPtr = $TargetPtr
+        seed = 1
+        forceHit = $true
+        elementPayload = @(@{ element = "fire"; weight = 1.0 })
+    }
+    $p = Wait-LastOverlay $BaseUrl $before
+    if (-not $p) { throw "no debug.combat.overlay" }
+    if ([int]$p.finalSignedDelta -ne 0) { throw "finalSignedDelta=$($p.finalSignedDelta) expected exactly 0 -- a nonzero value here would mean a chip floor leaked into the overlay profile" }
+    "finalSignedDelta=0, no exception -- the game handled full mitigation cleanly"
 }
 
 $payload = @{

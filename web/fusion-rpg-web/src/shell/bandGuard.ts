@@ -44,9 +44,10 @@ function scanLines(
 }
 
 /**
- * GG-5's guard: nothing outside the token definitions and the six `.band-*`
- * utility classes may set `z-index` or use a Tailwind `z-*` class. Any hit
- * means a surface picked its own stacking tier instead of one of the six.
+ * GG-5's guard: nothing outside the token definitions and the seven `.band-*`
+ * utility classes (`stage`/`scrim`/`hud`/`panel`/`dialog`/`toast`/`system` — `scrim` added
+ * 2026-09-04, world-stage W55's GG-5 amendment) may set `z-index` or use a Tailwind `z-*` class.
+ * Any hit means a surface picked its own stacking tier instead of one of the seven.
  */
 const STRAY_Z_INDEX_PATTERNS = [
   /z-index\s*:/,
@@ -82,16 +83,55 @@ export function scanForLayerStackImports(srcDir: string): GuardViolation[] {
  * GG-53 / D6: only run-ending results may open a blocking (band-3) surface unprompted — level-ups,
  * drops and contract offers report at band 4 and queue for the sanctum instead. No run-result
  * screen exists yet (it's part of T24, excluded this phase), so today's real invariant is
- * narrower and fully checkable: nothing outside `src/shell/` and `ui/ConfirmDialog.tsx` may render
- * `DialogShell` or claim the `band-dialog` class. `ConfirmDialog` is exempt by construction, not by
- * assumption — it is a fully controlled component (the caller's own `open` state decides visibility)
- * and every existing call site sets that state from a direct button click, never a background
- * event; GG-41 also exempts developer surfaces from GG-53 entirely, so the same
- * allow-list `vocabularyGuard.ts` uses for those applies here.
+ * narrower and fully checkable: nothing outside `src/shell/`, `ui/ConfirmDialog.tsx` and the
+ * `world-confirms` module's three dialogs may render `DialogShell` or claim the `band-dialog`
+ * class. Each is exempt by construction, not by assumption — a fully controlled component (the
+ * caller's own `open` state decides visibility), never self-opening from a background event
+ * (`stages/world/confirms/noSelfOpen.test.tsx`, world-stage W105, is that module's own standing
+ * proof); GG-41 also exempts developer surfaces from GG-53 entirely, so the same allow-list
+ * `vocabularyGuard.ts` uses for those applies here.
  */
 const DIALOG_BAND_PATTERNS = [/<DialogShell\b/, /\bband-dialog\b/, /band:\s*["']dialog["']/];
 
-const DIALOG_BAND_ALLOWED_PATHS = new Set(["ui/ConfirmDialog.tsx"]);
+const DIALOG_BAND_ALLOWED_PATHS = new Set([
+  "ui/ConfirmDialog.tsx",
+  "stages/world/confirms/CommitLegionDialog.tsx",
+  "stages/world/confirms/BindWardenDialog.tsx",
+  "stages/world/confirms/ReleaseGroundDialog.tsx",
+  // item module 20 (2026-09-06): the socket bench and the compendium are band-3 by their own spec's
+  // decision, not by a component's preference — they are the third and last push of the Relics
+  // depth budget (Relics → item → bench), and putting them back inside the panel is what the 640px
+  // measurement already ruled out. Both qualify the same way the three world dialogs above do:
+  // fully controlled (the layer's own `open` state decides visibility) and never self-opening from
+  // a background event — each opens only from an explicit button press on a selected row.
+  "layers/relics/SocketBench.tsx",
+  "layers/relics/Compendium.tsx",
+  // item modules 14/15/16 (2026-09-06): the craft bench is the workbench's write surface and sits at
+  // exactly the same depth as the socket bench above — the third push of the Relics budget, opened
+  // only by the Craft button on an already-selected armoury row, and fully controlled by the layer's
+  // own `craftOpen` state. It qualifies on the same two grounds, and for the same reason it is a
+  // dialog at all: a spend is a decision, which is what band 3 is for.
+  "layers/relics/Workbench.tsx",
+  // party-dungeon D5.9 (spec-delve-stage.md §7): "the extraction summary — the one result, with any
+  // wipe or permanent-loss notice folded in" — the one band-3 result the delve stage produces
+  // (`ExtractionSettlement.Decide`, `DelveLoot.AtExtraction`). Qualifies the same way the three world
+  // dialogs above do: fully controlled by its own `open` prop, never self-opening from a background
+  // event (`ExtractionSummary.test.tsx`'s own "open=false leaves the layer stack empty" case).
+  "stages/delve/summary/ExtractionSummary.tsx",
+  // party-dungeon D5.8 (spec-delve-stage.md §7): "Descent confirm (single-descent domains, and the
+  // Oath), extract confirm, retreat confirm — confirms, not results." Only `DescendConfirm.tsx` is
+  // listed here, not all three: `ExtractConfirm.tsx`/`RetreatConfirm.tsx` are thin `ui/ConfirmDialog`
+  // wrappers (already-exempt path above) that never themselves render `<DialogShell` or claim
+  // `band-dialog` — the scan patterns above simply never match their own source, so listing them would
+  // be an inert, meaningless entry rather than a real exemption. `DescendConfirm.tsx` is real: it needs
+  // `DialogShell` for the Oath checkbox `ConfirmDialog`'s flat `message: string` has no slot for.
+  // Qualifies on the same two grounds as every entry above: fully controlled by its own `open` prop
+  // (`DelvePickerLayer.tsx` decides when to show it), never self-opening from a background event
+  // (`DescendConfirm.test.tsx`'s own "renders nothing when closed" case). `stages/delve/bandDiscipline
+  // .test.ts`'s own `Only_the_summary_and_three_confirms_open_band_3` is the real-tree guard that keeps
+  // this list honest.
+  "stages/delve/confirms/DescendConfirm.tsx"
+]);
 
 const DEV_SURFACE_PREFIXES = [
   "dev/",

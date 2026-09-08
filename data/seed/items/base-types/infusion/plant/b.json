@@ -30,7 +30,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mesmerizing",
+        "family": "atom.blighting",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -70,7 +70,7 @@
         "family": "atom.blighting",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.swollen-bladder",
       "flavorKey": "flavor.base.swollen-bladder",
       "flavor": "Stretched taut with the pressure of what it holds, ready to rupture.",
@@ -144,7 +144,7 @@
         "family": "atom.marking",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.deep-cistern",
       "flavorKey": "flavor.base.deep-cistern",
       "flavor": "A sunken reservoir at the plant's core, holding all it will ever gather.",
@@ -178,10 +178,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.freezing",
+        "family": "atom.sporing",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.congealed-resin",
       "flavorKey": "flavor.base.congealed-resin",
       "flavor": "Set solid by age and depth, cracking only under the greatest pressure.",
@@ -215,7 +215,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.withering",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -255,7 +255,7 @@
         "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.weeping-sap",
       "flavorKey": "flavor.base.weeping-sap",
       "flavor": "Oozing steadily from wounds the plant cannot heal, a slow and relentless drain.",
@@ -289,10 +289,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.chilling",
+        "family": "atom.rotting",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.saturated-balsam",
       "flavorKey": "flavor.base.saturated-balsam",
       "flavor": "No longer fragrant but cloying, every molecule weighted with intention.",
@@ -329,7 +329,7 @@
         "family": "atom.sparking",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.distended-laticifer",
       "flavorKey": "flavor.base.distended-laticifer",
       "flavor": "The vessel itself has grown massive from generations of filling and emptying.",
@@ -400,10 +400,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bonding",
+        "family": "atom.sporing",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.curdled-latex",
       "flavorKey": "flavor.base.curdled-latex",
       "flavor": "Separated and coagulated, no longer fluid but not quite solid either.",
@@ -437,10 +437,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.venomous",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.stubborn-trichome",
       "flavorKey": "flavor.base.stubborn-trichome",
       "flavor": "Hardened and thickened, these hairs no longer bend but only break whatever touches them.",

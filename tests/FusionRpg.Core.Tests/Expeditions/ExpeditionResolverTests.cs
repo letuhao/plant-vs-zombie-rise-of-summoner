@@ -90,7 +90,7 @@ public class ExpeditionResolverTests
             {
                 var species = DemonSpeciesCatalog.Get(tick.WildSpeciesId!);
                 Assert.NotEqual(DemonAcquisition.CaptureOnly, species.Acquisition);
-                Assert.NotEqual(DemonRarity.Legendary, species.BaseRarity);
+                Assert.NotEqual(DemonRarity.Sunwoven, species.BaseRarity);
             }
 
             foreach (var join in r.Rewards.WildJoins)
@@ -140,6 +140,26 @@ public class ExpeditionResolverTests
             ExpeditionResolver.Resolve("scout-30m", new List<BattleActorSetup>(), 1, 1));
     }
 
+    /// <summary>spec-rarity-migration.md §4: `ShardCommon`/`ShardRare` are string LITERALS, invisible
+    /// to every grep for `DemonRarity` — they do not mention the enum and would survive a future
+    /// widening untouched, pointing at materials that no longer exist. This pins them against the
+    /// live catalog directly rather than trusting the rename was applied everywhere it needed to be.
+    /// Reflection over the private consts (not a text-file scan) so the check tracks the compiled
+    /// value even if the source formatting around the declaration changes.</summary>
+    [Fact]
+    public void Expedition_shard_constants_reference_live_ids()
+    {
+        var type = typeof(ExpeditionResolver);
+        foreach (var name in new[] { "ShardCommon", "ShardRare" })
+        {
+            var field = type.GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            Assert.True(field is not null, $"{type.FullName} no longer declares a const named {name}");
+            var value = (string)field!.GetValue(null)!;
+            Assert.Contains(value, DemonMaterialCatalog.All);
+            Assert.DoesNotContain(value, LegacyDemonRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
+        }
+    }
+
     // Re-blessed 2026-08-21 at battle RulesetVersion 2 (combat-unification): named
     // serialization-shape churn — BattleActorSetup gained InnateShield, so every embedded
     // plan changed bytes even though expedition MATH did not (per-tick streams unchanged;
@@ -150,10 +170,52 @@ public class ExpeditionResolverTests
     // bMilli 0->400 — expected magnitude movement, the same triage as BattleGoldenTests.cs.
     // Same_inputs_resolve_identically and the recall pro-rating tests stayed green unchanged,
     // confirming the resolver's OWN per-tick RNG logic did not move, only the embedded magnitudes.
-    const string ScoutHash = "4AD27E8E940CCE8C85CA94DD2D7B3748FADA236F7A863A35371B6CE8114E25C6";
-    const string ForageHash = "EAE8E34360557638A93DF7D400AE416BA5C9003914D5A4292E7F9DF1B2DC6DBE";
-    const string HuntHash = "272223CB0085C7B19D1D6E0FE2710A97204F806B10D49BF187FD94E777A5FB31";
-    const string WarpathHash = "A1C7283BB8022A3720145C263331B89665DD2849E552E3FC5110510692E19078";
+    //
+    // Re-blessed 2026-08-30 (aura-skill T12, Gate B): named serialization-shape churn again, the
+    // SAME class of change as the 2026-08-21 InnateShield re-bless — BattleSetup gained
+    // ActiveAuras (default empty, no behavior change for every existing caller including this one),
+    // so every embedded plan's serialized JSON gained an "activeAuras":[] key and every hash moved.
+    // Verified NOT a determinism break before re-blessing, not assumed: every other test in this
+    // file (Same_inputs_resolve_identically, recall pro-rating) stayed green unchanged, confirming
+    // the resolver's own math and RNG streams did not move — only the embedded BattleSetup's shape.
+    //
+    // Re-blessed 2026-08-31 in ONE step covering two roster changes made together: the species cap
+    // removal (24 -> 84 species) and RarityForRank's legendary tier becoming proportional
+    // (7 legendary instead of 2 at 84 species). Both feed WildBand, so they are one re-bless.
+    //
+    // Why the roster touches this golden at all — a DIFFERENT class from every re-bless
+    // above — those were serialization shape or magnitude churn with the roster fixed. This one is
+    // a genuine content change. WildBand (ExpeditionResolver.cs:231) picks wild enemies from
+    // DemonSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
+    // rng.NextInt(band.Count). Regenerating the catalog uncapped took it from 24 to 84 species, so
+    // both the band's contents and its size changed and a different enemy is legitimately rolled.
+    // Verified it is selection, not a determinism break: Same_inputs_resolve_identically and the
+    // recall pro-rating tests stayed green unchanged, and Squad() uses a fixed "test-species" that
+    // never touches the catalog — so the squad side of the resolution did not move at all.
+    //
+    // NOTE for the next capture: this golden is coupled to roster SIZE, so it moves every time
+    // species are added. That is now expected rather than alarming, but it makes the test a poor
+    // regression signal for the resolver itself — decoupling the wild-enemy pick from the live
+    // catalog (a fixture band) would be the fix if the churn becomes annoying.
+    // Re-blessed 2026-09-01 (seed-to-concrete T4.1) — the manifest now composes
+    // shard.chaff/shard.cultivated (ten-rung ladder ids) instead of shard.common/shard.rare, per
+    // this test's own comment above: coupled to roster/reward-id churn, expected to move, not a
+    // regression signal. Squad size/theta/species set are unchanged; verified by reading the
+    // resolver's own diff before re-blessing, not by inspection alone.
+    // Re-blessed 2026-09-07 (combat-unification Phase 7 F1, owner decision: hybrid.
+    // secondaryWeightMilli 0 -> 300) — checked before re-blessing, not assumed: `Squad()` above uses
+    // a fixed synthetic "test-species" with no catalog-backed ElementSecondary, so the player side of
+    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`)
+    // is not — 21/841 real species carry a genuine secondary element (measured live 2026-09-07), and
+    // any of the four rolls landing one now embeds a real two-component `elementPayload` on that
+    // enemy's own `BattleSetup` where it carried one component before, which is exactly what moves
+    // this hash. The resolver's own RNG stream and which enemy gets picked are unaffected — only the
+    // embedded setup's own shape changed, the same class of move this golden's own history already
+    // names as expected, not a regression signal.
+    const string ScoutHash = "DFC5BC6405D3985CDA41BDEAFC593D0B0F3B344379E7003AAEEE6A5569CA8182";
+    const string ForageHash = "01305D2A48438E873E83CD8575BEFB80351C651E109A556DBBBA7759DDA3DCD8";
+    const string HuntHash = "68F5FC90E0DBB0E6704623FBA5ACD2A86D573804F0D6ECE8672E4FE0C308FB91";
+    const string WarpathHash = "F1C4A2FA9CD6A296BE0A204A366BE37D97F8BFAE2CD36140409FBA658CFD2453";
 
     [Fact]
     public void Tier_goldens_are_locked()

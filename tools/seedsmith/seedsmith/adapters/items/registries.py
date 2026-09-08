@@ -14,7 +14,7 @@ REGISTRY_DIR = REPO_ROOT / "data" / "seed" / "items" / "_registry"
 SNAPSHOT_PATH = Path(__file__).resolve().parent / "_registry_snapshot" / "allocated_partitions.json"
 
 _REGISTRY_FILES = ("bands.v1.json", "core.v1.json", "naming.v1.json", "tags.v1.json",
-                   "classes.v1.json", "themes.v1.json")
+                   "classes.v1.json", "themes.v1.json", "words.v1.json")
 
 
 def _load(name: str) -> dict:
@@ -30,7 +30,35 @@ def load_versions() -> dict[str, int]:
            for name in _REGISTRY_FILES}
 
 
-def load_vocabularies() -> dict[str, frozenset[str]]:
+def load_theme_keys() -> frozenset[str]:
+    """`themeKey`'s legal vocabulary — a UNION of two append-only populations that cannot collide
+    by construction (spec-demon-themes.md §2.2a, resolving audit S5): legacy `theme.*` ids, human-
+    authored and frozen in `themes.v1.json` (13 registered, 5 currently referenced by 38 real
+    entries — measured 2026-08-31), and `demon.*` ids the demons feature publishes at runtime.
+
+    This is the ONE file outside `adapters/demons/` the demons feature is allowed to touch
+    (spec-adapter-demons.md's own single exception) — it adds a VOCABULARY, not a concept: this
+    module still knows nothing about what a demon is, only that `demon.`-prefixed strings are now
+    legal `themeKey` values. Demon themes are not loaded from a committed file here (none is
+    committed yet — see the demons feature's own build notes); a caller with a live demon theme
+    registry unions its keys in via `demon_theme_keys`.
+
+    ⭐ **A THIRD population landed 2026-09-04 (item module 13, `set-charm-gen`): `build.*`.** A
+    `set` REQUIRES a `themeKey` (`kinds.py`'s own spec, mirroring `KindCatalog.cs`), and the 36
+    build set families are keyed on `(aptitude, archetype)` and belong to no species — so without
+    it a build set is unauthorable. Ruled as a third append-only namespace rather than a loosened
+    `themeKey`, because `spec-demon-themes.md` §7 names making it *required* on `unique` as the
+    intended direction and loosening it here would reverse that. Collision-free against `theme.*`
+    and `demon.*` by construction, exactly the namespace split §2.2a already established.
+    """
+    legacy = frozenset(f"theme.{t['id']}" for t in _load("themes.v1.json")["themes"])
+    build = frozenset(row["themeKey"] for row in _load("build-themes.v1.json")["themes"])
+    return legacy | build
+
+
+def load_vocabularies(
+    *, demon_theme_keys: "frozenset[str] | None" = None,
+) -> dict[str, frozenset[str]]:
     core = _load("core.v1.json")
     tags = _load("tags.v1.json")
     classes = _load("classes.v1.json")
@@ -67,12 +95,54 @@ def load_vocabularies() -> dict[str, frozenset[str]]:
         "tags": tag_ids,
         "class": class_values,
         "partitions": partitions,
+        "themeKey": load_theme_keys() | (demon_theme_keys or frozenset()),
     }
 
 
 def partition_kind_map() -> dict[str, str]:
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     return dict(snapshot["partitionKind"])
+
+
+def load_tag_axes(*, applies_to: "str | None" = None) -> "dict[str, tuple[str, ...]]":
+    """`tags.v1.json`'s `axes`/`tags` arrays, grouped back to `axis id -> member tag ids` --
+    `load_vocabularies()["tags"]` flattens every axis into one set, which loses exactly the
+    grouping a caller needs to enforce an `exclusive: true` axis (e.g. `unique.tags` needing
+    "exactly one mass-class", spec-unique-pipeline.md §1). `applies_to` filters to axes whose
+    `appliesTo` list names that entry shape (e.g. `"unique"`); `None` returns every axis."""
+    tags = _load("tags.v1.json")
+    by_axis: "dict[str, list[str]]" = {}
+    axis_applies: "dict[str, list[str]]" = {a["id"]: a.get("appliesTo", []) for a in tags["axes"]}
+    for row in tags["tags"]:
+        by_axis.setdefault(row["axis"], []).append(row["id"])
+    return {
+        axis: tuple(sorted(ids))
+        for axis, ids in by_axis.items()
+        if applies_to is None or applies_to in axis_applies.get(axis, ())
+    }
+
+
+ATOMS_DIR = REPO_ROOT / "data" / "seed" / "atoms"
+
+
+def load_atom_families() -> frozenset[str]:
+    """`unique.fixedAtoms[].family` / `unique.varianceSlot.family`'s real VALIDATED vocabulary
+    (spec-unique-pipeline.md §1). The one function in this module that reads OUTSIDE
+    `data/seed/items/_registry/` -- deliberately, mirroring `load_theme_keys`'s own precedent of
+    a single named exception rather than pretending the boundary is absolute: no atom-specific
+    seedsmith adapter exists to own this loader instead, and `unique` is the only items kind that
+    references the atom catalog by family id at all (D4.24's own finding: 144 unique anchors name
+    68 families against a catalog of far fewer real ones -- reading this fresh, never
+    hand-transcribing it, is exactly the discipline that finding depends on to stay true as the
+    catalog grows, e.g. D4.26's `atom.extend-slot` landing the same session D4.24 counted 28)."""
+    families: "set[str]" = set()
+    for path in sorted(ATOMS_DIR.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for entry in doc.get("entries") or ():
+            family = entry.get("family")
+            if isinstance(family, str):
+                families.add(family)
+    return frozenset(families)
 
 
 # The one fact in this module transcribed rather than parsed: "hybrid drops these roles, and
@@ -83,10 +153,12 @@ def partition_kind_map() -> dict[str, str]:
 # live registry, so a future registry edit that changes this rule cannot silently drift away
 # from what this module assumes without a test noticing.
 HYBRID_FRAME_CITATION = (
-    "a chimera body combining both natures. Carries 13 of the 15 roles "
-    "(drops ward-array and jewel-minor-b); each remaining role accepts a base type from either "
+    "a chimera body combining both natures. Carries 12 of the 15 roles "
+    "(drops ward-array, head-guard and sense); each remaining role accepts a base type from either "
     "pure frame's ladder. The commander never wears this frame — it takes humanoid or plant only."
 )
 
-HYBRID_FRAME_EXCLUDED_ROLES = frozenset({"ward-array", "jewel-minor-b"})
+# D30 (2026-09-04, core.v1.json registryVersion 2): D3 wins over the prior 13-role/895‰ shape this
+# constant used to name. jewel-minor-b is now hybrid-eligible; head-guard and sense are not.
+HYBRID_FRAME_EXCLUDED_ROLES = frozenset({"ward-array", "head-guard", "sense"})
 COMMANDER_ROLE = "standard"

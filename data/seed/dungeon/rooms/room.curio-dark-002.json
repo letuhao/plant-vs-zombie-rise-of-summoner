@@ -1,0 +1,26 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A massive, jagged shard of obsidian hangs suspended in the center of the chamber, pulsing with a rhythmic, violet light that seems to pull the very shadows toward its core.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Vitreous Siphon",
+  "reason": "The shard acts as a vacuum for ambient light and memory, creating a localized gravitational pull on the senses.",
+  "roomId": "room.curio-dark-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

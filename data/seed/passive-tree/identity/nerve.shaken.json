@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Fortified Reflex",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn physical trauma into a hardened, self-repairing shell of reinforced skin and steady composure.",
+  "name": "Resilient Nerve Lattice",
+  "treeId": "nerve.shaken"
+}

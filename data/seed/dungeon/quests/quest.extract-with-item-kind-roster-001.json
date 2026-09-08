@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The high priest demands the return of the ancestral crown to restore the temple's sanctity. Failure to retrieve it will leave the priesthood without divine legitimacy.",
+  "name": "The Relic of the First King",
+  "objectiveTemplate": "extract-with-item-kind",
+  "prereqRefs": [],
+  "questId": "quest.extract-with-item-kind-roster-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "roster",
+  "targetRef": "retinue"
+}

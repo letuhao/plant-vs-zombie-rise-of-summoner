@@ -26,14 +26,21 @@ namespace FusionRpg.Core.Actions.Grants;
 /// </summary>
 public static class CapPolicy
 {
-    /// <summary>Levelling unlocks held — `UnlockTuning.Cap` (A11/T19).</summary>
+    /// <summary>Levelling unlocks held — `UnlockTuning.HeldCap` (A11/T19; split from a single `Cap`
+    /// field 2026-09-03, A-U1 §3.3 — `RungCap` is the ladder's own ceiling, a different scarcity).</summary>
     public static int HeldCap(UnlockTuning unlockTuning)
     {
         if (unlockTuning is null) throw new ArgumentNullException(nameof(unlockTuning));
-        return unlockTuning.Cap;
+        return unlockTuning.HeldCap;
     }
 
-    /// <summary>Equipped skills at once — `LoadoutSet.MaxSize` (A16/T21). The innate and three
-    /// basics are intrinsic and never counted against it.</summary>
-    public const int EquippedSkillCap = LoadoutSet.MaxSize;
+    /// <summary>Equipped skills at once — `LoadoutSet.EffectiveMaxSize` (A16/T21; extended D4.25 for
+    /// the extend-action-slot grant). The innate and three basics are intrinsic and never counted
+    /// against it. No longer a compile-time constant: <paramref name="loadoutSlotsChannel"/> is the
+    /// actor's composed <see cref="FusionRpg.Core.Stats.Derived.DerivedStatChannels.LoadoutSlots"/>
+    /// value (whole `long`, not `double` — see <see cref="LoadoutSet.EffectiveMaxSize"/>), 0 by
+    /// default (nothing worn grants it) — the plain base 5 for any caller that has not been updated
+    /// to pass a channel value.</summary>
+    public static int EquippedSkillCap(long loadoutSlotsChannel = 0) =>
+        LoadoutSet.EffectiveMaxSize(loadoutSlotsChannel);
 }

@@ -18,7 +18,36 @@
     "sourceRef": "docs/architecture/item/entry-shapes.md §6; docs/architecture/item/ssot-enhancement.md §5.5",
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z"
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "waves": [
+      {
+        "batch": "enh-milestones-wave1",
+        "model": "claude-haiku-4-5-20251001",
+        "authoredUtc": "2026-08-22T00:00:00Z",
+        "entryIds": [
+          "enh.001",
+          "enh.002",
+          "enh.003",
+          "enh.004",
+          "enh.005",
+          "enh.006",
+          "enh.007",
+          "enh.008",
+          "enh.009",
+          "enh.010"
+        ]
+      },
+      {
+        "batch": "enh-milestones-wave2-trial",
+        "model": "milestonegen/hand-authored-1",
+        "authoredUtc": "2026-09-07T00:00:00Z",
+        "entryIds": [
+          "enh.011",
+          "enh.012"
+        ],
+        "note": "small trial batch, hand-authored standing in for a live model call (no reachable LLM endpoint this session) -- run through the real milestonegen.run plan_run/run_draws/write_corpus + RunLedger."
+      }
+    ]
   },
   "entries": [
     {
@@ -180,6 +209,38 @@
         "defensive"
       ],
       "notes": "Milestone family for enhanced dodge chance. Resolver-point scale means low power band translates to meaningful percentage chance. Pairs with armor enhancements to offer a full defensive tree — one base type might stack hardy+evasion across enhancement levels for layered mitigation."
+    },
+    {
+      "id": "enh.011",
+      "nameKey": "enh.enhance-bastion",
+      "name": "Enhancement Bastion",
+      "runtimeFamily": "atom.enhance-bastion",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "defense",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced defense rating, granted along a base type's own enhancement track. Reinforces raw damage mitigation independent of the shield and armor systems, giving a defense-light base type a direct way to shore up its own survivability without borrowing from either."
+    },
+    {
+      "id": "enh.012",
+      "nameKey": "enh.enhance-swift",
+      "name": "Enhancement Swift",
+      "runtimeFamily": "atom.enhance-swift",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "plantMoveSpeed",
+        "op": "Increased"
+      },
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ],
+      "notes": "Milestone family for enhanced movement speed, granted along the enhancement track for base types built around repositioning and lane control. The Increased op keeps the gain proportional to the base type's own starting speed, so a naturally mobile base type stays comparably faster after enhancement rather than converging toward a flat baseline."
     }
   ]
 }

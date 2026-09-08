@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  boardArrowsLive,
   canEnterSpawnTargeting,
   idleInteraction,
   reduceInteraction
@@ -75,7 +76,7 @@ describe("interactionMode", () => {
     expect(s).toEqual({ mode: "SpawnTargeting", row: 0, col: 1, ptr: undefined });
   });
 
-  it("selectOccupant from SpawnTargeting exits to OccupantSelected", () => {
+  it("selectOccupant from SpawnTargeting stays SpawnTargeting (confirm path, no inspect clobber)", () => {
     let s = reduceInteraction(
       idleInteraction(),
       { type: "enterSpawnTargeting" },
@@ -87,8 +88,38 @@ describe("interactionMode", () => {
       { type: "selectOccupant", ptr: "Z9", row: 1, col: 1 },
       "InMatch"
     );
-    expect(s.mode).toBe("OccupantSelected");
+    expect(s.mode).toBe("SpawnTargeting");
+    expect(s.row).toBe(1);
+    expect(s.col).toBe(1);
+    expect(s.ptr).toBeUndefined();
+  });
+
+  it("ActionTargeting: selectOccupant does not become OccupantSelected", () => {
+    let s = reduceInteraction(
+      idleInteraction(),
+      { type: "enterActionTargeting", actionId: "sunfall" },
+      "InMatch"
+    );
+    expect(s.mode).toBe("ActionTargeting");
+    s = reduceInteraction(
+      s,
+      { type: "selectOccupant", ptr: "Z9", row: 2, col: 2 },
+      "InMatch"
+    );
+    expect(s.mode).toBe("ActionTargeting");
     expect(s.ptr).toBe("Z9");
+    expect(s.actionId).toBe("sunfall");
+  });
+
+  it("cancelArmed pops order before Idle", () => {
+    let s = reduceInteraction(
+      { mode: "TileSelected", row: 1, col: 1 },
+      { type: "enterActionTargeting", actionId: "bolt" },
+      "InMatch"
+    );
+    s = reduceInteraction(s, { type: "cancelArmed" }, "InMatch");
+    expect(s.mode).toBe("TileSelected");
+    expect(s.row).toBe(1);
   });
 
   it("phaseChanged keeps TileSelected / OccupantSelected", () => {
@@ -102,17 +133,11 @@ describe("interactionMode", () => {
     expect(s.ptr).toBe("X");
   });
 
-  it("clear from each mode", () => {
-    for (const start of [
-      reduceInteraction(idleInteraction(), { type: "selectTile", row: 0, col: 0 }, "InMatch"),
-      reduceInteraction(
-        idleInteraction(),
-        { type: "selectOccupant", ptr: "P" },
-        "InMatch"
-      ),
-      reduceInteraction(idleInteraction(), { type: "enterSpawnTargeting" }, "InMatch")
-    ]) {
-      expect(reduceInteraction(start, { type: "clear" }, "InMatch").mode).toBe("Idle");
-    }
+  it("boardArrowsLive keeps arrows in Spawn/Action targeting even when dock is open", () => {
+    expect(boardArrowsLive("SpawnTargeting", true)).toBe(true);
+    expect(boardArrowsLive("ActionTargeting", true)).toBe(true);
+    expect(boardArrowsLive("TileSelected", true)).toBe(false);
+    expect(boardArrowsLive("OccupantSelected", true)).toBe(false);
+    expect(boardArrowsLive("Idle", false)).toBe(true);
   });
 });

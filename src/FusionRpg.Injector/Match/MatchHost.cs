@@ -1,4 +1,7 @@
 using FusionRpg.Core.Match;
+using FusionRpg.Core.Commanders;
+using FusionRpg.Injector.Commanders;
+using FusionRpg.Injector.Host;
 
 namespace FusionRpg.Injector.Match;
 
@@ -9,6 +12,9 @@ public static class MatchHost
 {
     static readonly object Gate = new();
     static MatchRuntime _runtime = new();
+    /// <summary>zomboss-deploy-ai T3.2/T3.4 — the one board-level field <see cref="MatchSnapshot"/>
+    /// never carries; see the `isStart`/`board.economy` handling in <see cref="Apply"/> for why.</summary>
+    static int _currentWave;
 
     public static MatchRuntime Runtime
     {
@@ -116,7 +122,9 @@ public static class MatchHost
                 if (isStart && _runtime.Phase is not MatchPhase.Idle)
                 {
                     var priorKey = _runtime.MatchKey;
+                    ClearCommanderSnapshot();
                     _runtime.Apply("board.end");
+                    TryEffect("KernelEndBoard", Effects.KernelDriveHost.EndBoard);
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(priorKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
                     GameHooks.MatchKey = null;
@@ -139,6 +147,10 @@ public static class MatchHost
                 {
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(endingKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
+                    ClearCommanderSnapshot();
+                    // T13: one kernel per board — drop it here so a stale queue can never survive
+                    // into the next match.
+                    TryEffect("KernelEndBoard", Effects.KernelDriveHost.EndBoard);
                 }
 
                 if (isStart)
@@ -151,11 +163,57 @@ public static class MatchHost
                             GameHooks.MatchKey = key;
                     }
                     catch { }
+                    var snapshot = MatchCommanderSnapshotSource.BuildFromSessionCache();
+                    if (MatchCommanderSnapshotSource.LastBuildUsedFallback)
+                    {
+                        try { RpgHost.Log.Warning("commander snapshot: cache miss — implicit Dave"); } catch { }
+                    }
+                    MatchCommanderSnapshotHolder.BeginMatch(snapshot);
+                    CheatState.RefreshCommanderAllocationCache();
+                    // demon-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
+                    // Cold-plane roster/patron read frozen once, never re-queried mid-match.
+                    var lawnRoster = LawnDeployRosterSessionCache.BuildFromSessionCache();
+                    if (LawnDeployRosterSessionCache.LastBuildWasCacheMiss)
+                    {
+                        try { RpgHost.Log.Warning("lawn deploy roster: cache miss — empty roster frozen for this match"); } catch { }
+                    }
+                    LawnDeployRosterSnapshotHolder.BeginMatch(lawnRoster);
+                    // demon-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
+                    // evaluator, same board.start moment as everything else above.
+                    LawnDeployEventRunStateHolder.BeginMatch();
+                    // zomboss-deploy-ai T3.4: same board.start moment, Zomboss's own sibling tracker.
+                    FusionRpg.Core.Match.Ai.ZombossDeployRunStateHolder.BeginMatch();
+                    _currentWave = 0;
+                    // T13: a fresh timeline per board, alongside the commander snapshot that is
+                    // already frozen at exactly this moment.
+                    TryEffect("KernelBeginBoard", Effects.KernelDriveHost.BeginBoard);
                     TryEffect("NotifyMatchStart", () => Effects.EffectRuntime.NotifyMatchStart(_runtime.MatchKey ?? ""));
                 }
                 else if (isEnd)
                 {
                     GameHooks.MatchKey = null;
+                }
+
+                // zomboss-deploy-ai T3.2: the one board-level field MatchSnapshot itself never carries
+                // (confirmed by direct read — GameDumps.BoardStats's own separate "board.snapshot" dump
+                // owns wave, never MatchSnapshot). `board.economy`'s own payload already carries it on
+                // every wave change; cached here so CheckZombossDeployTrigger has a real number to pass
+                // ZombossDeployRoster.AvailableSpeciesFor without a second live query.
+                if (string.Equals(kind, "board.economy", StringComparison.OrdinalIgnoreCase) && payload != null
+                    && payload.TryGetValue("wave", out var waveObj))
+                {
+                    try { _currentWave = Convert.ToInt32(waveObj); } catch { }
+                }
+
+                // demon-lawn-deploy T2.4: checked after every event while a match is actually live —
+                // the evaluator's own gates (empty roster, per-run budget, per-case "already fired",
+                // the condition itself) make this cheap and safe to call this often; PlantCount/
+                // ZombieCount only ever change on a spawn/die event, so this is exactly "off
+                // MatchRuntime's own event stream" per the spec's own Assumption 2.
+                if (_runtime.Phase == MatchPhase.InMatch)
+                {
+                    CheckLawnDeployTrigger();
+                    CheckZombossDeployTrigger();
                 }
             }
         }
@@ -165,9 +223,134 @@ public static class MatchHost
         }
     }
 
+    /// <summary>Must be called from inside the Gate lock — reads `_runtime` directly, matching every
+    /// other Phase-1 helper in this method. Never throws to the caller.</summary>
+    static void CheckLawnDeployTrigger()
+    {
+        try
+        {
+            var roster = LawnDeployRosterSnapshotHolder.ResolveOrEmpty();
+            if (roster.Eligible.Count == 0) return;
+            if (!LawnDeployEventsTuningHub.IsConfigured) return;
+
+            var matchKey = _runtime.MatchKey;
+            if (string.IsNullOrEmpty(matchKey)) return;
+
+            // No new numeric match seed exists anywhere in this runtime (MatchRuntime/MatchState never
+            // tracked one) -- derived from the one per-match identifier that already does exist, reusing
+            // SeededRng's own hash rather than inventing a new one (WorldSeed.cs's own "ONE place this
+            // is computed" discipline, adapted: DeriveStream already turns an arbitrary label into a
+            // reproducible stream; a fixed base seed of 0 makes THIS derivation depend only on matchKey).
+            var seed = FusionRpg.Core.Battle.SeededRng.DeriveStream(0, matchKey).NextULong();
+
+            var result = LawnDeployEventEvaluator.Evaluate(
+                _runtime.ToSnapshot(), roster, LawnDeployEventsTuningHub.Tuning,
+                LawnDeployEventRunStateHolder.Current, seed);
+            if (!result.Fires) return;
+
+            LawnDeployEventRunStateHolder.RecordFired(result.CaseId!);
+            GameHooks.Emit("lawn-deploy-event.fired", new Dictionary<string, object>
+            {
+                ["caseId"] = result.CaseId!,
+                ["eligibleInstanceIds"] = roster.Eligible.Select(e => e.InstanceId).ToArray(),
+            });
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("MatchHost.CheckLawnDeployTrigger: " + ex.Message); } catch { }
+        }
+    }
+
+    /// <summary>Must be called from inside the Gate lock, same discipline as
+    /// <see cref="CheckLawnDeployTrigger"/>. Never throws to the caller, never awaits HTTP itself —
+    /// the actual mint+deploy is a fire-and-forget call kicked off outside any lock
+    /// (<see cref="RpgClient.EnqueueZombossDeploy"/>).</summary>
+    static void CheckZombossDeployTrigger()
+    {
+        try
+        {
+            if (!FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.IsConfigured) return;
+            if (FusionRpg.Core.Match.Ai.ZombossDeployRunStateHolder.AlreadyFired) return;
+
+            var matchKey = _runtime.MatchKey;
+            if (string.IsNullOrEmpty(matchKey)) return;
+
+            var playerId = CheatState.CurrentPlayerId;
+            if (playerId <= 0) return; // no real player id cached yet — decline, never guess
+
+            // Same "which player deployed it, not which mechanical side it's on" ownership axis T2.1
+            // already established, built from the ONE real player id this process knows about (the
+            // human player) — Zomboss never needs its own cached player id for this: any registered
+            // owner that is NOT this player is, by elimination, Zomboss's own (the only other deployer
+            // that exists), so the oracle's own Ally/Enemy answer is inverted below rather than
+            // constructing a second oracle. Unregistered (raw vanilla PvZ) units fall back to their own
+            // mechanical side -- a vanilla zombie IS Zomboss's own army, a vanilla plant is the player's.
+            var oracle = new FusionRpg.Core.Battle.SpecimenOwnershipOracle(playerId, CheatState.TryGetSpecimenOwner);
+            var snapshot = _runtime.ToSnapshot();
+            var units = new List<FusionRpg.Core.Match.Ai.ILawnUnitView>(snapshot.Entities.Length);
+            foreach (var e in snapshot.Entities)
+            {
+                // A bullet is a transient projectile, never a unit either side's own counts should
+                // include -- skipped entirely, not resolved to any relation.
+                if (e.Side == BoardSide.Bullet) continue;
+
+                var owned = oracle.RelationOf(e.Ptr);
+                if (owned is null && e.Side == BoardSide.Zombie)
+                    // An unregistered vanilla zombie is the ambient horde, not one of Zomboss's OWN
+                    // reinforcements -- ZombossScorerTuning.MaxConcurrentOwnUnits caps how many
+                    // Zomboss-DEPLOYED uniques are out at once, never the whole lane's zombie count
+                    // (a real gap self-caught before this task's own live check: with the horde
+                    // included, any normal wave would already sit at or past a starting cap like 2,
+                    // and Zomboss would structurally never fire). Excluded, not counted as Ally.
+                    continue;
+
+                var relation = owned switch
+                {
+                    FusionRpg.Contracts.RelationKind.Ally => FusionRpg.Contracts.RelationKind.Enemy,
+                    FusionRpg.Contracts.RelationKind.Enemy => FusionRpg.Contracts.RelationKind.Ally,
+                    // Only reachable for an unregistered PLANT now (the zombie case is skipped above) --
+                    // a vanilla plant is real, meaningful defense from Zomboss's own reading of the board.
+                    _ => FusionRpg.Contracts.RelationKind.Enemy,
+                };
+                // T3.1's own deferred gap, unchanged here: no live per-unit HP feed exists yet
+                // (MatchSnapshot/BoardEntity never carried it) -- ZombossDeployPolicy's own scorer
+                // never reads Hp today, so 0/0 is honest ("not populated"), never a fabricated number.
+                units.Add(new FusionRpg.Core.Match.Ai.LawnUnitSnapshot(e.Ptr, relation, 0, 0));
+            }
+            var board = new FusionRpg.Core.Match.Ai.LawnBoardSnapshot(_currentWave, MaxWave: 0, units);
+
+            var tuning = FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Tuning;
+            var candidates = FusionRpg.Core.Match.Ai.ZombossDeployRoster.AvailableSpeciesFor(
+                _currentWave, FusionRpg.Core.Demons.DemonSpeciesCatalog.All, tuning.WaveRarityCeilings);
+
+            var seed = FusionRpg.Core.Battle.SeededRng.DeriveStream(0, matchKey).NextULong();
+            var decision = FusionRpg.Core.Match.Ai.ZombossDeployPolicy.Decide(
+                board, candidates,
+                speciesId => FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(speciesId).BaseRarity,
+                tuning.Scorer, seed, caseId: "zomboss-reinforce");
+            if (!decision.Deploys) return;
+
+            FusionRpg.Core.Match.Ai.ZombossDeployRunStateHolder.RecordFired();
+            RpgHost.Client?.EnqueueZombossDeploy(decision.SpeciesId!, seed, matchKey);
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("MatchHost.CheckZombossDeployTrigger: " + ex.Message); } catch { }
+        }
+    }
+
     static bool IsMatchEnd(string kind) =>
         string.Equals(kind, "board.end", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(kind, "match.result", StringComparison.OrdinalIgnoreCase);
+
+    static void ClearCommanderSnapshot()
+    {
+        MatchCommanderSnapshotHolder.EndMatch();
+        CheatState.RefreshCommanderAllocationCache();
+        LawnDeployRosterSnapshotHolder.EndMatch();
+        LawnDeployEventRunStateHolder.EndMatch();
+        FusionRpg.Core.Match.Ai.ZombossDeployRunStateHolder.EndMatch();
+    }
 
     static void TryEffect(string label, Action action)
     {

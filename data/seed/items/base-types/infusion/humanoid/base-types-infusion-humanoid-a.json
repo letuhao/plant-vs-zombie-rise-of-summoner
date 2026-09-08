@@ -68,7 +68,7 @@
         "family": "atom.venomous",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-canteen",
       "flavorKey": "flavor.base.spun-canteen",
       "flavor": "Holds what grows in dark places.",
@@ -103,7 +103,7 @@
         "family": "atom.withering",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.threadbare-bottle",
       "flavorKey": "flavor.base.threadbare-bottle",
       "flavor": "What was fresh in the bottle spoiled years ago.",
@@ -139,7 +139,7 @@
         "family": "atom.mesmerizing",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-sprayer",
       "flavorKey": "flavor.base.secondhand-sprayer",
       "flavor": "Used for lawns before the change. Now it carries different things.",
@@ -175,7 +175,7 @@
         "family": "atom.chilling",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.insulated-tumbler",
       "flavorKey": "flavor.base.insulated-tumbler",
       "flavor": "Keeps the venom's bite from spreading.",
@@ -210,7 +210,7 @@
         "family": "atom.buttering",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.treated-tin",
       "flavorKey": "flavor.base.treated-tin",
       "flavor": "Metal coating protects what slips from inside.",
@@ -242,10 +242,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.blighting",
+        "family": "atom.buttering",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.reinforced-packet",
       "flavorKey": "flavor.base.reinforced-packet",
       "flavor": "Each pouch stitched to hold what kills plants.",
@@ -278,10 +278,10 @@
       "class": "scale",
       "band": "a",
       "implicit": {
-        "family": "atom.rotting",
+        "family": "atom.freezing",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.curved-cartridge",
       "flavorKey": "flavor.base.curved-cartridge",
       "flavor": "Pressure-locked tubes keep rot contained until impact.",
@@ -314,10 +314,10 @@
       "class": "scale",
       "band": "a",
       "implicit": {
-        "family": "atom.sparking",
+        "family": "atom.chilling",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.plated-canister",
       "flavorKey": "flavor.base.plated-canister",
       "flavor": "Metal plates keep the spark from leaking before it jumps.",
@@ -349,10 +349,10 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.venomous",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.riveted-jug",
       "flavorKey": "flavor.base.riveted-jug",
       "flavor": "Heavy container for a heavier dose. Barely wearable.",
@@ -386,7 +386,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.marking",
+        "family": "atom.mesmerizing",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -422,7 +422,7 @@
       "class": "scale",
       "band": "a",
       "implicit": {
-        "family": "atom.sporing",
+        "family": "atom.withering",
         "powerBand": "low"
       },
       "socketMax": 1,

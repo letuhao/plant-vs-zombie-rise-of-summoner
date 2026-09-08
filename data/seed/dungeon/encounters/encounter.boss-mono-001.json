@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "finesse-defence-force-breaks-aggro",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "escalating",
+    "retinue": 0,
+    "signatureAction": "elemental-surge"
+  },
+  "elementSpread": "mono",
+  "encounterId": "encounter.boss-mono-001",
+  "formation": "boss",
+  "name": "The Monolithic Sentinel",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A singular elemental juggernaut supported by a dedicated protector to enforce a high-pressure combat loop.",
+  "slots": [
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "swarm"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "slow",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

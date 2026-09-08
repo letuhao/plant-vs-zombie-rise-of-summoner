@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.boss-mono-001",
+  "eventPool": [],
+  "flavor": "A vast, circular chamber where the floor is composed of millions of polished, white teeth. A single, monolithic throne of obsidian sits at the far end, casting a shadow that seems to move independently of the light.",
+  "hazardBand": "heavy",
+  "kind": "boss",
+  "name": "The Ossuary of Finality",
+  "reason": "The boss room serves as the ultimate confrontation point, requiring a grand, intimidating setting that emphasizes the weight of the encounter.",
+  "roomId": "room.boss-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

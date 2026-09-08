@@ -1,6 +1,7 @@
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
@@ -44,11 +45,11 @@ public sealed class RpgProgressionSubsystem : IActorStatSubsystem
             DerivedStatChannels.ProgressionPower,
             DerivedModifierOp.Replace,
             _powerIndex.ActorIndex(ctx),
-            SourceId: SubsystemId));
+            SourceId: ContributionSourceIds.Progression));
         mods.Add(new DerivedModifier(
             DerivedStatChannels.ProgressionRealm,
             DerivedModifierOp.Replace,
             StatusPolicy.ProgressionPowerStubDefault,
-            SourceId: SubsystemId));
+            SourceId: ContributionSourceIds.Progression));
     }
 }

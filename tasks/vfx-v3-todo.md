@@ -16,7 +16,7 @@ Plan: [vfx-v3-plan.md](vfx-v3-plan.md) · Spec: [../SPEC.md](../SPEC.md)
 - [x] Lifecycle core offline-green (1,064 core / 40 CheatCore / 40 Guard; Melon + Server builds clean). Note: paused mid-run for the parallel shield session's RED tests to turn green (their T1 landed; not our files).
 
 - [x] **V3: Aura primitive + wither pilot** (spec M3) — offline complete (envelope tests green; LIVE eyeball folded into the final gate)
-  - Pure `VfxAuraMath` (Drip/Orbit/RiseSparkle/CrackleJitter/PulseRing/StreamOut samplers, envelope-tested); `AuraPool` (24 systems, emission off, soft-disc, explicit colors, ≤6 particles/aura, ~0.3s pulses, per-tick position follow, host-gone reap); recipe kind `Aura`; seed wither (ash-brown Drip).
+  - Pure `VfxAuraMath` (Drip/Orbit/RiseSparkle/CrackleJitter/PulseRing/StreamOut samplers, envelope-tested; identity batches added WispOut/BubbleRise/ChunkFall and SparkStrobe/ShardGlitter); `AuraPool` (24 systems, emission off, soft-disc, explicit colors, ≤6 particles/aura, ~0.3s pulses, per-tick position follow, host-gone reap); recipe kind `Aura`; seed wither (WispOut, was Drip at pilot).
   - Accept: math tests green; LIVE pilot — `debug.status.apply wither` shows aura until expire, `state.started/ended` asserted; owner eyeball.
   - Scope: M.
 
@@ -38,13 +38,11 @@ Plan: [vfx-v3-plan.md](vfx-v3-plan.md) · Spec: [../SPEC.md](../SPEC.md)
 
 - [x] **V4: Tint primitive** / **V5: Marker primitive** — offline-complete, LIVE-proven via the gate.
 - [x] **V6: 13 identities + full gate** — all 13 seeded; SSOT §17 addendum written; **LIVE gate PASSED 46/46 (2026-08-21 ~09:00)**: v2 regression + sustained lifecycle (`started` → `ended(expired)`, refresh-no-flicker started=1/ended=0, host-gone reap). Two harness fixes during the gate: apply-until-started retries (LIVE apply-roll can resist ~50% — v2's single-shot pass was luck) and `Get-FxEvents` whitelist extended with `debug.fx.state.*` (the four "failures" were events the feed filtered out — they had all fired).
-  **Offline caveat:** `FusionRpg.Core.Tests` is still uncompilable from the parallel Battle round's stale RED (`BattleReportEmitter` missing since 05:59) — the V6 catalog assertions (13-sustained / 8-vanilla-none / marker set) have not run offline; LIVE played every recipe as partial substitution. Run the suite once Battle lands.
+  ~~**Offline caveat:** `FusionRpg.Core.Tests` uncompilable from the parallel Battle round's stale RED~~ — **resolved.** Battle landed; the V6 catalog assertions (13-sustained / 8-vanilla-none / marker set) have since run green alongside the identity-batch suites (`staticTestPass: true` in the audit JSON).
 
 ### Final gate
-- [x] Event-asserted LIVE gate PASSED (46/46, `_prove-vfx.json`). **Owner eyeball pending** — the 13-identity visual checklist printed by the prove run.
-  - Seed all 13 per SPEC §4 (grammar: Drip=DoT, Crackle=armor/electric, Orbit=passive, Rise=buff, PulseRing=mark; markers only pact_mark/expose/bond/command); catalog test pins 13 sustained sets + zero for engine-wrapped 8; prove-vfx lifecycle cases (started / expired / host-gone / refresh-no-end / master-off); SSOT + SPEC + docs sync.
-  - Accept: full prove PASS; 13-row eyeball checklist; owner verdict.
-  - Scope: M.
-
-### Final gate
-- [ ] Full LIVE run + owner visual confirmation; verdict JSON appended; vfx.tick budget re-checked at next perf stress run.
+- [x] Event-asserted LIVE gate PASSED (46/46, `_prove-vfx.json`).
+- [x] **Static identity audit** (2026-08-30, re-run after batches 1–5): [`docs/research/vfx/status-identity-audit-2026-08-30.md`](../docs/research/vfx/status-identity-audit-2026-08-30.md) + [`_status-identity-audit.json`](../docs/research/vfx/_status-identity-audit.json) + `scripts/audit-status-vfx-identity.ps1` + `StatusVfxIdentity*` tests. **Final: 13 Pass / 0 Conditional / 0 Fail sustain-glance, 0 color-only pairs** (the first pass scored 6/2/5 — identity batches 1–5 closed every gap by giving each cluster its own motion, not just its own color). Apply-moment: 13 Conditional by design (whitelisted — apply bursts intentionally share a grammar, the sustained aura carries identity).
+- [x] **LIVE identity run** (2026-08-30): `audit-status-vfx-identity.ps1 -Live -Stress` → **13/13 sustainedStarted**, static tests green, stress pass offline.
+- [x] **Owner LIVE eyeball / forced-choice trials — WAIVED (2026-09-04).** Owner closed the round on the static + LIVE evidence; `humanCorrect` columns in `_status-identity-audit.json` stay null by decision, not by omission. If a future play session finds two statuses that read alike, reopen with a batch-7 row rather than re-running the whole audit.
+- [x] **Round closed (2026-09-04)** — vfx v1+v2+v3 + identity batches 1–6 shipped. Remaining watch item (not a gate): `vfx.tick` budget re-check at the next perf stress run.

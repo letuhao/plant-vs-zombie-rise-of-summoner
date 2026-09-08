@@ -4,6 +4,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
 import { CreaturesLayer } from "./CreaturesLayer";
+import { ACTOR_COLLECTION_SEARCH_FIRST_ABOVE } from "@/ui/lawn/lawnPresentationTokens";
 
 function ControlledCreaturesLayer() {
   const [open, setOpen] = useState(true);
@@ -58,8 +59,8 @@ describe("CreaturesLayer (T10)", () => {
   it("renders a row per bound creature with side, level and no typeId anywhere", () => {
     mockUseUniqueActors.mockReturnValue({ data: { playerId: 1, items: actors } });
     renderWithProviders(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
-    expect(screen.getByTestId("creatures-row-a1")).toBeInTheDocument();
-    expect(screen.getByTestId("creatures-row-a2")).toBeInTheDocument();
+    expect(screen.getByTestId("creatures-item-a1")).toBeInTheDocument();
+    expect(screen.getByTestId("creatures-item-a2")).toBeInTheDocument();
     expect(screen.getAllByTestId("actor-level")).toHaveLength(2);
     expect(document.body.textContent).not.toMatch(/typeId/i);
   });
@@ -75,13 +76,13 @@ describe("CreaturesLayer (T10)", () => {
       <CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={selected} onSelect={onSelect} />
     );
 
-    await user.click(screen.getByTestId("creatures-row-a1"));
+    await user.click(screen.getByTestId("creatures-item-a1"));
     expect(onSelect).toHaveBeenCalledWith("a1");
 
     rerender(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId="a1" onSelect={onSelect} />);
     expect(screen.getByTestId("creatures-detail")).toBeInTheDocument();
 
-    await user.click(screen.getByTestId("creatures-row-a1"));
+    await user.click(screen.getByTestId("creatures-item-a1"));
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 
@@ -116,12 +117,12 @@ describe("CreaturesLayer (T10)", () => {
       mockUseUniqueActors.mockReturnValue({ data: { playerId: 1, items: actors } });
       const user = userEvent.setup();
       renderWithProviders(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
-      expect(screen.getByTestId("creatures-row-a1")).toBeInTheDocument();
-      expect(screen.getByTestId("creatures-row-a2")).toBeInTheDocument();
+      expect(screen.getByTestId("creatures-item-a1")).toBeInTheDocument();
+      expect(screen.getByTestId("creatures-item-a2")).toBeInTheDocument();
 
-      await user.click(screen.getByTestId("creatures-filter-zombie"));
-      expect(screen.queryByTestId("creatures-row-a1")).not.toBeInTheDocument();
-      expect(screen.getByTestId("creatures-row-a2")).toBeInTheDocument();
+      await user.selectOptions(screen.getByTestId("creatures-side"), "zombie");
+      expect(screen.queryByTestId("creatures-item-a1")).not.toBeInTheDocument();
+      expect(screen.getByTestId("creatures-item-a2")).toBeInTheDocument();
     });
 
     it("search matches the real fields a row renders (side/level/phase), not a name that doesn't exist yet", async () => {
@@ -130,8 +131,8 @@ describe("CreaturesLayer (T10)", () => {
       renderWithProviders(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
 
       await user.type(screen.getByTestId("creatures-search"), "lvl 12");
-      expect(screen.queryByTestId("creatures-row-a1")).not.toBeInTheDocument();
-      expect(screen.getByTestId("creatures-row-a2")).toBeInTheDocument();
+      expect(screen.queryByTestId("creatures-item-a1")).not.toBeInTheDocument();
+      expect(screen.getByTestId("creatures-item-a2")).toBeInTheDocument();
     });
 
     it("a search/filter with no matches shows a distinct no-match state, not the unfiltered list or the empty-roster state", async () => {
@@ -150,16 +151,16 @@ describe("CreaturesLayer (T10)", () => {
       renderWithProviders(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
 
       // default: level-desc — a2 (12) before a1 (5).
-      let rows = screen.getAllByTestId(/^creatures-row-/);
-      expect(rows.map((r) => r.dataset.testid)).toEqual(["creatures-row-a2", "creatures-row-a1"]);
+      let rows = screen.getAllByTestId(/^creatures-item-/);
+      expect(rows.map((r) => r.dataset.testid)).toEqual(["creatures-item-a2", "creatures-item-a1"]);
 
       await user.selectOptions(screen.getByTestId("creatures-sort"), "level-asc");
-      rows = screen.getAllByTestId(/^creatures-row-/);
-      expect(rows.map((r) => r.dataset.testid)).toEqual(["creatures-row-a1", "creatures-row-a2"]);
+      rows = screen.getAllByTestId(/^creatures-item-/);
+      expect(rows.map((r) => r.dataset.testid)).toEqual(["creatures-item-a1", "creatures-item-a2"]);
     });
 
     it("above 240, the grid starts empty (search-first) until a search or filter narrows it — GG-50's third tier", async () => {
-      const many = Array.from({ length: 241 }, (_, i) => ({
+      const many = Array.from({ length: ACTOR_COLLECTION_SEARCH_FIRST_ABOVE + 1 }, (_, i) => ({
         instanceId: `m${i}`,
         playerId: 1,
         side: i % 2 === 0 ? "plant" : "zombie",
@@ -173,11 +174,11 @@ describe("CreaturesLayer (T10)", () => {
       const user = userEvent.setup();
       renderWithProviders(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
 
-      expect(screen.getByTestId("creatures-search-first-prompt")).toBeInTheDocument();
+      expect(screen.getByTestId("creatures-search-first")).toBeInTheDocument();
       expect(screen.queryByTestId("creatures-list")).not.toBeInTheDocument();
 
-      await user.click(screen.getByTestId("creatures-filter-zombie"));
-      expect(screen.queryByTestId("creatures-search-first-prompt")).not.toBeInTheDocument();
+      await user.selectOptions(screen.getByTestId("creatures-side"), "zombie");
+      expect(screen.queryByTestId("creatures-search-first")).not.toBeInTheDocument();
     });
 
     it("search/filter/sort state survives the layer closing and reopening within the session (GG-51)", async () => {
@@ -190,16 +191,16 @@ describe("CreaturesLayer (T10)", () => {
         <CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />
       );
 
-      await user.click(screen.getByTestId("creatures-filter-zombie"));
+      await user.selectOptions(screen.getByTestId("creatures-side"), "zombie");
       await user.selectOptions(screen.getByTestId("creatures-sort"), "level-asc");
-      expect(screen.queryByTestId("creatures-row-a1")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("creatures-item-a1")).not.toBeInTheDocument();
 
       rerender(<CreaturesLayer open={false} onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
       rerender(<CreaturesLayer open onOpenChange={() => {}} playerId={1} selectedId={null} onSelect={() => {}} />);
 
-      expect(screen.getByTestId("creatures-filter-zombie")).toHaveAttribute("aria-current", "true");
+      expect(screen.getByTestId("creatures-side")).toHaveValue("zombie");
       expect(screen.getByTestId("creatures-sort")).toHaveValue("level-asc");
-      expect(screen.queryByTestId("creatures-row-a1")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("creatures-item-a1")).not.toBeInTheDocument();
     });
   });
 });

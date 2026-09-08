@@ -47,9 +47,11 @@ public class ChannelExtensionTests
     // ---- the channels compose --------------------------------------------------------------------
 
     [Fact]
-    public void There_are_eleven_primary_channels()
+    public void There_are_twentythree_primary_channels()
     {
-        Assert.Equal(11, StatChannels.All.Length);
+        // 11 since E16; E38 (spec-entity-fields-12plus.md) took it to 23 — see
+        // EntityFieldsTwelvePlusTests for that module's own channel-list assertions.
+        Assert.Equal(23, StatChannels.All.Length);
         Assert.Contains(StatChannels.AttackInterval, StatChannels.All);
         Assert.Contains(StatChannels.ProduceInterval, StatChannels.All);
         Assert.Contains(StatChannels.ZombieSpeed, StatChannels.All);

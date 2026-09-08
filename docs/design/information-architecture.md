@@ -1,7 +1,7 @@
 # Information architecture — the whole game GUI
 
 **Status:** design complete, for review. Governed by
-[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-61);
+[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-64);
 decisions D1–D8 recorded in its §20.1.
 
 This is the map: every stage, every layer, every key, and what happens to all twenty routes the
@@ -11,8 +11,20 @@ current build has. Plates draw these surfaces; this document says what they are 
 
 ## 1. The shape
 
-**Four stages, one at a time. Eight player layers, openable over any of them. One developer tree,
+**Four stages, one at a time. Nine player layers, openable over any of them. One developer tree,
 off by default.**
+
+> **Amended 2026-09-05 — six stages, not four.** `siege` (`#/siege/{id}`) was approved as the fifth on
+> 2026-09-04 (decisions.md, Game GUI row amendment; [base-defense-ideal.md](../architecture/base-defense-ideal.md)
+> decisions 8/9) and `delve` (`#/delve/{id}`) as the sixth on 2026-09-05 (decisions.md row *"Game GUI — sixth
+> stage `delve`"*; [party-dungeon-map.md](../architecture/party-dungeon-map.md)). Both pass GG-4's test — a place
+> the player acts in, not looks at — which is why each is a stage and not a layer. The four-stage wording
+> above and the §2 catalog are kept as written; §2.4a is the `delve` stub.
+> **§2.4b is the `siege` stub — landed 2026-09-06** (`spec-siege-stage.md` task 21.1): `#/siege/:siegeId`
+> is a real, routed, lazy-loaded stage. **§2.4a landed 2026-09-07** (`spec-delve-stage.md` task D5.1):
+> `#/delve/:delveId` is a real, routed, lazy-loaded stage too (`railState.ts`'s `STAGE_IDS` — the one
+> runtime list of every stage id — now names all six). The rail still renders from state (GG-44), so
+> neither stage adds a rail entry.
 
 ```text
                     ┌─────────── SHELL (band −1) ───────────┐
@@ -34,7 +46,7 @@ off by default.**
    └─────────────────────────────────────────────────────────────────────┘
                                     ▲
         LAYERS (band 2) open over whichever stage is current and close back to it:
-        Creatures · Relics · Fusion · Pacts · Expeditions · Almanac · Chronicle
+        Creatures · Commanders · Relics · Fusion · Pacts · Expeditions · Almanac · Chronicle
                           System (band 5) · Developer (band 2, gated)
 ```
 
@@ -83,7 +95,7 @@ The PvZ board projection. Observe-and-intent only; the RPG never owns this simul
 | | |
 |---|---|
 | **Contains** | The Phaser canvas — the Dual-Plane Lawn Projector |
-| **HUD** | Sun · wave clock · match phase · deployed specimens · status tray · transport cluster |
+| **HUD** | Sun **bank** (not actor Sun) · wave clock · match phase · commander + active aura · fielded uniques · status tray · transport · **combat book** (off-board, 1–9, HoMM3 hero-off-hex) · reserved-left occupancy dock + **ActorSheet** over the live canvas — [spec-lawn-interactive.md](spec-lawn-interactive.md) · [12-lawn-stage.html](12-lawn-stage.html) |
 | **Time** | Owned by the game. Under a band-2 panel it follows `overlay-spec.md` §Pause while away |
 | **Canvas lifetime** | Created on **entering this stage**, destroyed on **leaving it**. Never on opening a panel (GG-11) |
 | **Enter** | Start a run from the sanctum, or the injector reporting a live board |
@@ -102,6 +114,39 @@ The turn-based stage, on the discrete-event kernel.
 | **Leave** | Resolution → result → sanctum |
 | **Forbidden while here** | Stage travel with a committed turn (§6) |
 
+### 2.4a Delve — `#/delve/{id}` (stub, 2026-09-05)
+
+The sixth stage, approved 2026-09-05. **Not designed here** — the room graph, its fights, the pack and
+wild-talk layers, the extraction result and the band-4 reports are specified in
+[party-dungeon-map.md](../architecture/party-dungeon-map.md) and its module specs; the decisions.md row
+*"Game GUI — sixth stage `delve`"* fixes the band assignments. This entry exists so the catalog's count
+matches the approved stages; the surface itself is specified in
+[party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) (drafted 2026-09-05) — §4 for the
+route and the six shell rows, §7 for the band of every surface, §8 for the player vocabulary. Unlike this
+entry's own "stub" heading, the route is real as of 2026-09-07 (D5.1) — `DelveStage.tsx` mounts, claims
+`?panel=` per §4's own URL grammar, and dismisses via the existing layer stack. The room graph, the fight
+drawn on it, the HUD, all six band-2 panels, the descent picker, the three band-3 confirms and the
+extraction summary are real too, closed the same day (D5.4–D5.10, D5.12) — drawn at layout fidelity,
+against the shipped components, in [14-delve-stage.html](14-delve-stage.html). The one still-open piece is
+the live session client (D5.11), the thing that would make any of the above reachable by a real player.
+
+### 2.4b Siege — `#/siege/{siegeId}` (stub, 2026-09-06)
+
+The fifth stage, approved 2026-09-04. **Not designed here** — the board, HUD, structure/unit
+inspector, targeting and playback are specified in
+[base-defense/spec-siege-stage.md](../architecture/base-defense/spec-siege-stage.md); the decisions.md
+Game GUI row amendment fixes the five-stage count and the two costs (§7 there) beyond this catalog
+entry. Unlike 2.4a, the route is real today — `SiegeStage.tsx` mounts, claims `?layer=` per GG-1's URL
+grammar, and dismisses via the existing layer stack — but the board itself is a later task in that
+spec's own list.
+
+| | |
+|---|---|
+| **Contains** | *(later pass)* the siege board (`board-render`'s generic layer), turn/round HUD, structure and unit inspector, targeting, playback |
+| **Time** | **One world turn**, however many battle rounds it takes internally — the map-step/battle-step boundary decision 24 already drew for World/Battle applies here unconditionally (§9) |
+| **Enter** | From the world stage, on a sector with an assault available. World stays mounted underneath (GG-1) |
+| **Leave** | The siege resolves → `BattleOutcome` → the world turn advances → back to `#/world`. Leaving mid-siege **pauses** (decisions 41/46) — it is not a withdrawal, and closing the tab must not surrender |
+
 ### 2.5 Shell — band −1
 
 Boot, title, save select, fatal error. The only surfaces that replace a stage without being travel.
@@ -118,6 +163,7 @@ none of them invents a rendering.
 | Layer | Key | Contains | Ladder rungs | Replaces route |
 |---|---|---|---|---|
 | **Creatures** | `C` | The bound roster; bind, rename, equip, deploy, release; specimen detail | Actor row / card / **panel** · Atom chip | `/roster` |
+| **Commanders** | `K` | Player-empire commanders; set default lawn leader; open commander Actor sheet; map/legion stubs | Actor row / **panel** | *(new — no legacy route)* |
 | **Relics** | `R` | Items and containers held; equip and compare; storage tabs | Container card · Atom row · **comparison** | `/storage` |
 | **Fusion** | `F` | Two parents → result; recipe browse; preview of what is gained and lost | Actor card · **comparison** · recipe row | `/fusion`, part of `/recipes` |
 | **Pacts** | `P` | Demon contracts, loyalty, tribute, terms, renegotiation | Contract card / panel · Actor chip | `/demons` |
@@ -128,10 +174,10 @@ none of them invents a rendering.
 | **System** | `Esc` on empty stack | Settings, keybinds, audio, display, developer toggle, quit | — | — |
 | **Developer** | `` ` `` | Status, live log, metrics, activity, cheats, icon and almanac dumps, sim | Own rules (GG-41) | `/status`, `/log`, `/runs` raw, `/pvz-activity`, `/cheats`, `/icon-dump`, `/almanac-dump`, `/sim`, `/stats` |
 
-**Twenty flat routes become four stages, eight player layers and one gated tree.**
+**Twenty flat routes become four stages, nine player layers and one gated tree.**
 
-**The rail is identical on every stage.** It lists Sanctum, then the five doing-layers, then the two
-reading-layers — the same nine entries in the same order whether the player is in the sanctum, on the
+**The rail is identical on every stage.** It lists Sanctum, then the six doing-layers, then the two
+reading-layers — the same ten entries in the same order whether the player is in the sanctum, on the
 map, on the lawn or in a battle. That uniformity *is* GG-7: a rail that changes per stage is a rail
 that says some things are unreachable from here.
 
@@ -146,9 +192,9 @@ rather than opening a layer, and it is therefore the only one that can confirm b
 | Band | Surfaces |
 |---|---|
 | −1 Shell | Boot · title · save select · fatal error |
-| 0 Stage | Sanctum · World map · Lawn · Battle |
+| 0 Stage | Sanctum · World map · Lawn · Battle · **Siege** · **Delve** — six declared (§1's 2026-09-05 amendment); `siege` and `delve` are declared and unbuilt, and the count assertion names the two sets separately |
 | 1 HUD | Per-stage HUD clusters · the layer rail · connection status |
-| 2 Panel | The nine layers in §3 |
+| 2 Panel | The ten layers in §3 (nine player + sector inspector), plus the Delve's own stage-local panels — pack · wild talk · event · object prompt · supply bag · fight input · descent picker ([party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) §7) |
 | 3 Dialog | Confirm (release, fuse, release-tribute) · **run result** · level-up · contract offer |
 | 4 Toast | Mutation results · drops · tribute due · connection warnings · expedition returns |
 | 5 System | Settings · quit · unrecoverable connection failure |
@@ -163,9 +209,9 @@ Declared once. No surface reassigns a global verb (GG-20).
 |---|---|---|
 | `Esc` | Pop one layer; **on an empty stack, open System** | The universal game convention, and it matches the overlay window's own Esc |
 | `F10` | Toggle the overlay window | **Reserved** — owned by launcher/injector, never handled by the app |
-| `C` `R` `F` `P` `E` `A` `H` | Open Creatures / Relics / Fusion / Pacts / Expeditions / Almanac / Chronicle | Pressing an open layer's key closes it |
+| `C` `K` `R` `F` `P` `E` `A` `H` | Open Creatures / Commanders / Relics / Fusion / Pacts / Expeditions / Almanac / Chronicle | Pressing an open layer's key closes it |
 | `M` | Travel to the world map | A stage change, so it confirms if something would be abandoned |
-| `Space` | Stage transport pause/resume | Lawn and battle only; inert elsewhere |
+| `Space` | Stage transport pause/resume | Lawn, battle and siege only; inert elsewhere — and **deliberately inert on `delve`**, which has no clock to pause (`party-dungeon-map.md`: no stamina, no daily limit, no real-time recovery). Siege's own pause (decision 41) is a persisted decision log, not a held session (decision 46) — see `spec-siege-stage.md`'s own "Open questions" section |
 | `Tab` | Cycle focus within the top layer | Never escapes it (GG-19) |
 | `` ` `` | Developer tree | Only when developer mode is on |
 | `1`–`9` | Stage-specific hotbar | Owned by the current stage |
@@ -198,13 +244,14 @@ they are not present-but-dead.
 
 | Unlocks | On |
 |---|---|
-| Sanctum · Creatures · first run | Session start |
+| Sanctum · Creatures · Commanders · first run | Session start |
 | Chronicle · Almanac | First run completed |
 | Relics | First container acquired |
 | World map (travel) | First sector contact |
 | Fusion | Second creature of one species held |
 | Pacts | First contract offered |
 | Expeditions | First sector held |
+| Delve | First domain found (expedition) — *added 2026-09-05 with the sixth stage* |
 
 The rail therefore renders from **state**, never from a constant list — the architectural
 consequence GG-44 exists to force.
@@ -217,6 +264,8 @@ The address encodes **stage + open layers**, never a replacement screen.
 
 ```text
 #/sanctum                                  stage only
+#/sanctum?panel=commanders                 layer over the stage
+#/sanctum?panel=commanders&sel=commander:dave   layer with selection
 #/sanctum?panel=creatures                  layer over the stage
 #/sanctum?panel=creatures&sel=spec-42      layer with selection
 #/sanctum?panel=relics&tab=equipped&cmp=r-9   layer, tab, comparison target
@@ -237,7 +286,7 @@ to the bare stage URL. Back and Esc do the same thing, always.
 |---|---|---|
 | Sanctum → World | `M`, or the map table | None |
 | World → Sanctum | Travel back | None |
-| Sanctum → Lawn | Start a run | Confirms the loadout |
+| Sanctum → Lawn | Start a run | **No commander gate** — uses persisted default + snapshot at board.start; creature berths (T21 / plate 07) are a separate async concern |
 | World → Battle | Commit a legion | **Commits the legion** — confirm dialog names what is staked |
 | Lawn / Battle → Sanctum | Resolution | Run result at band 3 (the one interruption class, D6) |
 | Any → Shell | Quit | Confirms |
@@ -318,8 +367,14 @@ stages, and one (`/recipes`) splits between a reference and a workshop.
 | [00-foundation.html](00-foundation.html) | Tokens · primitives · domain tokens · entity ladders · comparison · band shells · control clusters |
 | [01-shell-home.html](01-shell-home.html) | Boot / title / save select · the Sanctum stage · HUD · rail · first-run script · unlock states |
 | [02-collection.html](02-collection.html) | Creatures · Relics · Fusion — the itemisation surfaces, with comparison in situ |
-| [03-world.html](03-world.html) | World map stage · sector inspector · legions · Expeditions · Pacts |
+| [03-world.html](03-world.html) | World map stage · sector inspector · legions · Expeditions · Pacts — **world sections superseded by plate 11**; Expeditions and Pacts stand |
 | [04-run-stages.html](04-run-stages.html) | Lawn stage · Battle stage · their HUDs, transport and target surfaces |
 | [05-chronicle-almanac.html](05-chronicle-almanac.html) | Chronicle · Almanac · the reference and history surfaces |
 | [06-system-dev.html](06-system-dev.html) | Run result · level-up · confirms · toasts · Settings · rebinding · Display and Sound · the keymap · the developer tree |
 | [07-flows.html](07-flows.html) | Loadout · deploy targeting · the pact offer · the four first-session beats · focus order and directional input · the last ladder rungs |
+| [08-actor-sheet.html](08-actor-sheet.html) | Actor sheet · specimen and commander role extensions |
+| [09-commander-list.html](09-commander-list.html) | Commanders layer · persisted default · list → Actor sheet |
+| [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render |
+| [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — every map component in all its states, with the field that drives it. Supersedes plate 03 §A–B |
+| [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — ActorCollection, ActorSheet character landing, cell stack, spawn tray, commander order bar. Contract: spec-lawn-interactive.md. Supersedes plate 04 lawn chrome and plate 08 landing |
+| [14-delve-stage.html](14-delve-stage.html) | **Delve stage, as-built** — the room graph, the fight drawn on it, the HUD, all six band-2 panels, the descent picker, the three band-3 confirms, the extraction summary and the four band-4 report kinds, every surface bucketed built/wiring/real against the real 2026-09-07 components. Contract: [party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) §7 |

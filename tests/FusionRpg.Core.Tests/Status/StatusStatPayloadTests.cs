@@ -141,6 +141,59 @@ public class StatusStatPayloadTests
         Assert.Null(error);
     }
 
+    // ---- derived-channel parse refusal (mechanism-wiring E2) --------------------------------------
+
+    /// <summary>
+    /// The earlier, stricter half of the rule <c>StatusDerivedSubsystem.TryParseOp</c> already enforces
+    /// at resolve time (skip, never coerce). Here the same content error is caught at PARSE, before a
+    /// `more` mod against a derived channel is ever created, stored, or withdrawn on expiry — never a
+    /// silently-dropped mod that "just doesn't show up".
+    /// </summary>
+    [Fact]
+    public void More_on_a_derived_channel_is_refused_at_parse()
+    {
+        Assert.False(StatusStatPayload.TryParse(
+            Json("""{"combat.defense.omni":{"more":-0.1}}"""), out var mods, out var error));
+        Assert.Empty(mods);
+        Assert.Contains(StatusStatPayload.MoreOnDerivedChannelError, error!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void More_on_a_primary_channel_still_parses()
+    {
+        // The refusal targets DERIVED channels only -- `atk` is one of the 23 primary channels, and
+        // `more` against it is exactly StatusStatPayload's own shipped worked example.
+        Assert.True(StatusStatPayload.TryParse(
+            Json("""{"atk":{"more":-0.1}}"""), out var mods, out var error), error);
+        Assert.Single(mods);
+    }
+
+    [Fact]
+    public void Flat_and_increased_on_derived_channels_still_parse()
+    {
+        // There is no `More` on the derived side, but Flat/Increased are exactly what a derived channel
+        // composes with (DerivedModifierOp.Flat | Increased | Replace | Flag).
+        Assert.True(StatusStatPayload.TryParse(
+            Json("""{"combat.defense.omni":{"flat":25},"status.resist.dot":{"increased":0.1}}"""),
+            out var mods, out var error), error);
+        Assert.Equal(2, mods.Count);
+    }
+
+    /// <summary>
+    /// The one predicate both the parser and <c>StatusDerivedModReader</c> read (mechanism-wiring E2) --
+    /// pinned directly so a mutant flipping it to always-true is caught here even before it reaches the
+    /// `more`-refusal or the reader's own primary-channel exclusion test.
+    /// </summary>
+    [Theory]
+    [InlineData("combat.defense.omni", true)]
+    [InlineData("status.power.omni", true)]
+    [InlineData("status.resist.dot", true)]
+    [InlineData("atk", false)]
+    [InlineData("maxHp", false)]
+    [InlineData("status.power.fire", false)] // not one of the eight named status.power/resist channels
+    public void IsDerivedChannel_matches_exactly_the_combat_and_status_derived_set(string channel, bool derived) =>
+        Assert.Equal(derived, StatusStatPayload.IsDerivedChannel(channel));
+
     // ---- the modifiers it becomes -------------------------------------------------------------------
 
     [Fact]

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
 import type { DemonSpecimenDto, SoulBalanceDto } from "./demons";
-import type { FusionCostDto } from "@/features/fusion/fusionView";
+import type { FusionCostDto, PickableAtom, SelectedPick } from "@/features/fusion/fusionView";
 
 // ---- DTOs (spec-demon-fusion.md wire shapes; undiscovered recipes carry no identity) ----
 
 export type FusionMode = "star-merge" | "promotion" | "recipe";
+export type { PickableAtom, SelectedPick };
 
 export type RecipeBrowserItem = {
   slot: number;
@@ -29,6 +30,8 @@ export type FusionPreviewDto = {
   resultSpeciesId?: string | null;
   resultRarity?: string;
   pickableTraits?: string[];
+  pickableAtoms?: PickableAtom[];
+  pickSlotCap?: number;
 };
 
 export type FusionOutcomeDto = {
@@ -48,6 +51,7 @@ export type FusionRequestBody = {
   baseInstanceId?: string | null;
   sacrifices: string[];
   pickedTraitId?: string | null;
+  picks?: SelectedPick[];
   correlationId?: string;
 };
 

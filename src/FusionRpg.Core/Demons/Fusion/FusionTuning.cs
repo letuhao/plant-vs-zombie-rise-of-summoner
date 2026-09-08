@@ -13,7 +13,10 @@ public sealed record FusionTuning(
     int PerStarPowerMilli, int PerStarDefenseMilli,
     IReadOnlyDictionary<DemonRarity, int> StarCap,
     FusionCostTuning StarMergeCost, FusionCostTuning PromotionCost,
-    IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost);
+    IReadOnlyDictionary<DemonRarity, FusionCostTuning> PromotionCostByRarity,
+    IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost,
+    IReadOnlyDictionary<DemonRarity, int> SlotsByRarity,
+    IReadOnlyDictionary<DemonRarity, long> InheritCostByRarity);
 
 public sealed class FusionTuningRejection : Exception
 {
@@ -48,10 +51,29 @@ public static class FusionTuningLoader
             var starMergeCost = Cost(root, "starMergeCost");
             var promotionCost = Cost(root, "promotionCost");
 
+            // Per-rung promotion price (effort-power M5, 2026-09-05). Every rung must be present;
+            // `promotionCost` above stays as the shape the flat price used to have, and is the
+            // fallback a rung falls back to only if this table ever loses one.
+            var promoEl = Obj(root, "promotionCostByRarity", "$");
+            var promotionCostByRarity = new Dictionary<DemonRarity, FusionCostTuning>();
+            foreach (var rarity in DemonRarityLadder.All)
+            {
+                var key = rarity.ToString().ToLowerInvariant();
+                var el = Obj(promoEl, key, "promotionCostByRarity");
+                promotionCostByRarity[rarity] = new FusionCostTuning(
+                    Souls: Long(el, "souls", $"promotionCostByRarity.{key}"),
+                    ShardCount: Int(el, "shardCount", $"promotionCostByRarity.{key}"),
+                    EssenceCount: Int(el, "essenceCount", $"promotionCostByRarity.{key}"));
+            }
+
+            // Eligible-for-recipes is DemonRecipeCatalog's own eligibility floor (Cultivated and
+            // up, spec-rarity-migration.md §3's translation of the old ">= Rare") — one source of
+            // truth, never a second hardcoded list here.
             var recipeEl = Obj(root, "recipeCost", "$");
             var recipeCost = new Dictionary<DemonRarity, RecipeCostTuning>();
-            foreach (var rarity in new[] { DemonRarity.Rare, DemonRarity.Epic, DemonRarity.Legendary })
+            foreach (var rarity in DemonRarityLadder.All)
             {
+                if (!DemonRarityLadder.AtLeast(rarity, DemonRecipeCatalog.OutputEligibilityFloor)) continue;
                 var key = rarity.ToString().ToLowerInvariant();
                 var el = Obj(recipeEl, key, "recipeCost");
                 recipeCost[rarity] = new RecipeCostTuning(
@@ -61,8 +83,27 @@ public static class FusionTuningLoader
                     EssenceCount: Int(el, "essenceCount", $"recipeCost.{key}"));
             }
 
+            var slotsEl = Obj(root, "slotsByRarity", "$");
+            var slotsByRarity = new Dictionary<DemonRarity, int>();
+            foreach (var rarity in DemonRarityLadder.All)
+                slotsByRarity[rarity] = Int(slotsEl, rarity.ToString().ToLowerInvariant(), "slotsByRarity");
+
+            // WAVE F2.3 (demon-standalone, 2026-09-07): a fusion pick's cost is read from the PICK'S
+            // OWN source rarity, never the fusion output's — the same rung set recipeCost covers
+            // (Cultivated and up), a different lookup key, hence its own table rather than a second
+            // read of recipeCost.
+            var inheritEl = Obj(root, "inheritCostByRarity", "$");
+            var inheritCostByRarity = new Dictionary<DemonRarity, long>();
+            foreach (var rarity in DemonRarityLadder.All)
+            {
+                if (!DemonRarityLadder.AtLeast(rarity, DemonRecipeCatalog.OutputEligibilityFloor)) continue;
+                var key = rarity.ToString().ToLowerInvariant();
+                inheritCostByRarity[rarity] = Long(inheritEl, key, "inheritCostByRarity");
+            }
+
             return new FusionTuning(schemaVersion, version, perStarPowerMilli, perStarDefenseMilli,
-                starCap, starMergeCost, promotionCost, recipeCost);
+                starCap, starMergeCost, promotionCost, promotionCostByRarity, recipeCost, slotsByRarity,
+                inheritCostByRarity);
         }
     }
 

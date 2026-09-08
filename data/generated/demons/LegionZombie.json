@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 226,
+  "magnitudes": {
+    "combat.defense.omni": 949,
+    "progression.bonus.defense": 3164,
+    "progression.bonus.maxHp": 2531,
+    "resource.max.hp": 4791,
+    "resource.max.hunger": 6690,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 115,
+    "resource.regen.hunger": 298,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Heirloom",
+  "side": "zombie",
+  "speciesId": "LegionZombie",
+  "theta": 13,
+  "traitPool": [
+    "battle_hymn_resonance",
+    "death_defying_resurgence",
+    "immunity_to_charm",
+    "tactical_duo"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "normal"
+  ]
+}

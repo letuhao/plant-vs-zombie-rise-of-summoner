@@ -40,6 +40,21 @@ public class BattleEngineTests
     }
 
     [Fact]
+    public void ZombossPatternId_travelsFromSetupToTheReport_andIsAbsentWhenNull()
+    {
+        // species-build-todo.md T4.5: "pattern id on BattleSetup and on the report" -- proven by the
+        // real BattleEngine, not just record-shape inspection. Absent-by-default (null) also asserted:
+        // a non-Zomboss battle must not gain a field in its serialized report.
+        var withPattern = Setup() with { ZombossPatternId = "force-pure" };
+        var report = BattleEngine.Resolve(withPattern, 5);
+        Assert.Equal("force-pure", report.ZombossPatternId);
+
+        var withoutPattern = BattleEngine.Resolve(Setup(), 5);
+        Assert.Null(withoutPattern.ZombossPatternId);
+        Assert.DoesNotContain("ZombossPatternId", JsonSerializer.Serialize(withoutPattern));
+    }
+
+    [Fact]
     public void Different_seeds_diverge()
     {
         var a = JsonSerializer.Serialize(BattleEngine.Resolve(Setup(), 1));
@@ -71,6 +86,17 @@ public class BattleEngineTests
         var deaths = report.Events.Where(e => e.Kind == BattleEventKinds.Die).Select(e => e.ActorKey).ToList();
         Assert.Equal(deaths.Distinct().Count(), deaths.Count);
         Assert.Equal(report.Actors.Count(a => !a.Survived), deaths.Count);
+    }
+
+    [Fact]
+    public void Direct_lethal_hits_record_the_attacker_key_on_each_death()
+    {
+        var report = BattleEngine.Resolve(Setup(squadLevel: 10, waveLevel: 1, squadN: 1, waveN: 1), 5);
+        var death = Assert.Single(report.Events.Where(e => e.Kind == BattleEventKinds.Die));
+
+        Assert.Equal("wave:0", death.ActorKey);
+        Assert.Equal("squad:0", death.KillerActorKey);
+        Assert.Equal(1, report.Actors.Single(a => a.Key == "squad:0").Kills);
     }
 
     [Fact]

@@ -1,7 +1,9 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.Effects;
@@ -13,6 +15,7 @@ public sealed class FoundationHarness
     readonly SeededEffectRandom _rng;
     readonly RecordingEffectSink _sink;
     readonly RecordingDamageFxSink _fx;
+    readonly RecordingUiPresentSink _uiPresent;
     readonly EffectBag _bag;
     readonly ActorDerivedLookup _derived = new();
     readonly ActorElementLookup _elements = new();
@@ -24,12 +27,14 @@ public sealed class FoundationHarness
         _rng = new SeededEffectRandom(seed);
         _sink = new RecordingEffectSink();
         _fx = new RecordingDamageFxSink();
+        _uiPresent = new RecordingUiPresentSink();
         var catalog = new InMemoryEffectCatalog();
         catalog.ReplaceAll(EffectAtomCatalog.CreateAll());
         var grants = new InMemoryEffectGrantStore();
         var proc = new EffectProcPolicy(_clock, _rng);
         _bag = new EffectBag(catalog, grants, proc, _sink);
         _bag.UtcNow = () => _clock.UtcNow;
+        _bag.UiPresent = _uiPresent;
         _bag.Status = new StatusRuntime(
             StatusCatalogBootstrap.CreateDefault(),
             (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
@@ -46,6 +51,7 @@ public sealed class FoundationHarness
     public EffectFunnel Funnel { get; }
     public RecordingEffectSink Sink => _sink;
     public RecordingDamageFxSink Fx => _fx;
+    public RecordingUiPresentSink UiPresent => _uiPresent;
     public FakeEffectClock Clock => _clock;
 
     public EffectGrant Grant(EffectGrantDto dto)
@@ -53,6 +59,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         return _bag.Grant(dto);
     }
 
@@ -74,6 +81,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         _bag.ClearAll();
     }
 
@@ -91,6 +99,33 @@ public sealed class FoundationHarness
     public void PinDerived(string ptr, ActorDerivedSnapshot snapshot) =>
         _derived.Pin(ptr, snapshot);
 
+    /// <summary>Resolves <paramref name="ptr"/>'s current derived snapshot — the pinned base folded
+    /// with any <see cref="ContributeDerived"/> contributions. The read-side complement to
+    /// <see cref="PinDerived"/>/<see cref="ContributeDerived"/>, so a caller can observe the fold
+    /// directly rather than only through a combat/status side effect.</summary>
+    public ActorDerivedSnapshot ResolveDerived(string ptr) => _derived.Resolve(ptr, attackerLess: false);
+
+    /// <summary>
+    /// Folds one bound `stat.derived` contribution onto <paramref name="ptr"/>'s pinned snapshot —
+    /// mechanism-wiring.md §4.3 step 1/2, the SIM-side analog of
+    /// <see cref="Stats.Derived.Subsystems.AtomDerivedSubsystem"/> on the lawn. Delegates entirely to
+    /// <see cref="ActorDerivedLookup.AddContribution"/> so this host and <see cref="SimEffectHost"/>
+    /// fold through the exact same logic — one function, two hosts. <c>tools/CombatSim</c> drives
+    /// THIS host, not <see cref="SimEffectHost"/> (Simulator.cs:66), which is why the fold had to
+    /// reach both rather than just one.
+    /// </summary>
+    public void ContributeDerived(string ptr, BoundDerivedAtom atom) =>
+        _derived.AddContribution(ptr, atom);
+
+    /// <summary>
+    /// Attempts a real `stat.derived` bind with <c>BindContext(RuntimeId.Sim)</c> — §4.3 step 3. See
+    /// <see cref="ActorDerivedLookup.TryBind"/> for why this refuses every row until E5 flips the Sim
+    /// cell off <see cref="RuntimeState.None"/>.
+    /// </summary>
+    public AtomRejection TryBindDerivedAtoms(
+        IReadOnlyList<AtomRow> atoms, OwnerScope owner, IReadOnlyCollection<string>? overlayKeys = null) =>
+        _derived.TryBind(atoms, owner, overlayKeys);
+
     public void PinElementTypes(string ptr, ActorElementTypes types) =>
         _elements.Pin(ptr, types);
 
@@ -105,6 +140,11 @@ public sealed class FoundationHarness
             ElementHub.Default,
             _bag.CombatRng,
             (breakdown, _, _) => _breakdowns.Add(breakdown));
+        // aura-skill T20: same resolve as combat/shields, wired into the bag itself (not just
+        // exposed via Resolve for a manual DispatchInstant call) -- so a test that drives reflect
+        // through EffectBag's own internal grant processing, not a hand-built DispatchInstant call,
+        // exercises the exact same production wiring EffectRuntime.WireCombatMath sets up.
+        _bag.ActorResolve = ResolveCombatActor;
         return this;
     }
 
@@ -162,6 +202,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         _breakdowns.Clear();
         return _bag.OnEvent(ev);
     }

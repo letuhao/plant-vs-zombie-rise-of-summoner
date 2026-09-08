@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "finesse-defence-force-breaks-aggro",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "escalating",
+    "retinue": 0,
+    "signatureAction": "elemental-convergence"
+  },
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.boss-rainbow-001",
+  "formation": "boss",
+  "name": "The Prismatic Hegemon",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-tier elemental master utilizing a diverse retinue to cover all elemental weaknesses.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "calamity",
+    "floorRung": "cataclysm"
+  }
+}

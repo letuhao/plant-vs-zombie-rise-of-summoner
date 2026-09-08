@@ -133,7 +133,7 @@ public class StatTaxonomyGuardTests
     public void HealPowerReclassifiedAsContestFailsTheGuard()
     {
         // spec-healing-pair.md §6 (HealIsPoolNotContest, T4.5): the classification is load-bearing,
-        // not incidental. Mutates the REAL shipped catalog's combat.heal.power entry to Contest (no
+        // not incidental. Mutates the REAL shipped catalog's resource.restore entry to Contest (no
         // counterpart) and proves the guard actually catches it -- not just that the generic P1
         // mechanism works on an arbitrary synthetic family name, which the tests above already show.
         var fixture = NewFixture();
@@ -146,16 +146,16 @@ public class StatTaxonomyGuardTests
             System.Text.Json.Nodes.JsonNode? healPower = null;
             foreach (var e in entries)
             {
-                if ((string?)e!["family"] == "combat.heal.power") { healPower = e; break; }
+                if ((string?)e!["family"] == "resource.restore") { healPower = e; break; }
             }
-            Assert.True(healPower is not null, "combat.heal.power entry not found in the real catalog");
+            Assert.True(healPower is not null, "resource.restore entry not found in the real catalog");
             healPower!["statClass"] = "Contest";
 
             WriteCatalog(fixture, root.ToJsonString());
 
             var (exit, stdout, _) = Run(fixture, FindRepoRoot());
             Assert.True(exit != 0, "expected the guard to fail on a Contest-reclassified heal.power");
-            Assert.Contains("P1 combat.heal.power", stdout, StringComparison.Ordinal);
+            Assert.Contains("P1 resource.restore", stdout, StringComparison.Ordinal);
         }
         finally { Cleanup(fixture); }
     }

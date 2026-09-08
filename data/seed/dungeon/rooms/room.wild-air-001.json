@@ -1,0 +1,20 @@
+{
+  "climate": "air",
+  "dispositionBase": "eager",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
+  ],
+  "flavor": "A swirling vortex of translucent silk and silver chains hangs suspended in the center of a hollowed mountain peak. Within the eye of the cyclone, a creature of condensed storm-clouds drifts, its eyes glowing like lightning trapped in amber.",
+  "hazardBand": "light",
+  "kind": "wild",
+  "name": "The Gale-Bound Reliquary",
+  "reason": "The party encounters a celestial-aligned demon bound by wind-magic, offering cryptic prophecies in exchange for breath or song.",
+  "roomId": "room.wild-air-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

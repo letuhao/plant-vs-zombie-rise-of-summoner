@@ -1,0 +1,20 @@
+{
+  "done": {
+    "g.elem-power:stat.derived:surfeit": {
+      "groupId": "g.elem-power",
+      "kindId": "stat.derived",
+      "mintedId": "atom.elpw-surfeit"
+    },
+    "g.shield-stat:stat.derived:absolute": {
+      "groupId": "g.shield-stat",
+      "kindId": "stat.derived",
+      "mintedId": "atom.shld-absolute"
+    },
+    "g.tempo:stat.modify:wildgrowth": {
+      "groupId": "g.tempo",
+      "kindId": "stat.modify",
+      "mintedId": "atom.tempo-wildgrowth"
+    }
+  },
+  "schemaVersion": 1
+}

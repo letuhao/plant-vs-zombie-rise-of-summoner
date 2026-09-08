@@ -58,7 +58,7 @@ public class CompiledPushTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, "", 1),
                 KindId = kind, FamilyId = family, Variant = "", Tier = 1,
-                ParamsJson = paramsJson, WhenJson = whenJson,
+                Name = family, ParamsJson = paramsJson, WhenJson = whenJson,
             });
             // The reason, not just the id: a seed rejected for an unrelated schema change should
             // say so rather than fail every test in the class with a bare family name.
@@ -85,7 +85,7 @@ public class CompiledPushTests : IDisposable
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         Assert.True(Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, 1, 20, Tuning, out var inst).IsOk);
+            id => atoms.TryGetValue(id, out var a) ? a : null, _store.GetAffix, 1, 20, Tuning, out var inst).IsOk);
 
         var instanceId = _store.SaveInstance(inst! with { CatalogRevision = _store.GetCatalogRevision() });
         var bindingId = Guid.NewGuid().ToString("N");
@@ -125,7 +125,11 @@ public class CompiledPushTests : IDisposable
         Bind("item.blade", "1");
         var revision = _store.GetCatalogRevision();
 
-        var payload = _push.Build(Owner(), Lawn(), matchSeed: 7, receiverRevision: revision);
+        // E26: the short-circuit is two-term now (spec-runner-def-emit.md §3.3) — the receiver must
+        // also echo the current EmitterVersion, or a compiler-code change with no revision bump would
+        // never re-push.
+        var payload = _push.Build(Owner(), Lawn(), matchSeed: 7,
+            receiverRevision: revision, receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.True(payload.UpToDate);
         Assert.Empty(payload.RunnerBindings);
@@ -142,7 +146,7 @@ public class CompiledPushTests : IDisposable
 
         var payload = _push.Build(
             Owner(), Lawn(), matchSeed: 99, matchKey: "m1",
-            receiverRevision: _store.GetCatalogRevision());
+            receiverRevision: _store.GetCatalogRevision(), receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.True(payload.UpToDate);
         Assert.False(string.IsNullOrEmpty(payload.ContentHash));
@@ -290,5 +294,121 @@ public class CompiledPushTests : IDisposable
     {
         Assert.Equal(0UL, MatchSeed.For(null));
         Assert.Equal(0UL, MatchSeed.For(""));
+    }
+
+    // ---- T6.2: the assembled WIRE payload, not just the DTO -----------------------------------------
+    //
+    // ⛔ The defect this block exists for, found 2026-09-06 and PRE-EXISTING (true of the original
+    // Player-only push, long before any equip-runtime work): `AtomPushDto.Grants` is filled by
+    // AtomPushCodec.BuildPayload:188 from `catalog.Compiled` and was then DROPPED by both server call
+    // sites, each of which hand-rolled its own payload dictionary carrying `defs` + `runnerBindings`
+    // and nothing else. Every test above asserts the DTO; none asserted what actually goes on the
+    // wire, which is why a whole half of the push could be inert without a single red test.
+    //
+    // A def with no grant naming it does nothing: EffectBag holds the content and never applies it.
+
+    [Fact]
+    public void The_wire_payload_carries_the_compiled_grants_not_just_the_defs()
+    {
+        Bind("trait.stalwart", "1"); // stat.modify, no trigger -> compiles to a grant, not a runner entry
+
+        var atoms = _push.Build(Owner(), Lawn(), matchSeed: 7, matchKey: "m1");
+        Assert.NotEmpty(atoms.Grants); // precondition: the DTO half already worked
+
+        var payload = AtomPushService.BuildApplyPayload(atoms, sessionGrants: null);
+
+        var grants = Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(payload["grants"]);
+        var grant = Assert.Single(grants);
+        Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), grant.EffectId);
+        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.Match, grant.OwnerKey);
+    }
+
+    [Fact]
+    public void The_session_snapshot_and_the_compiled_grants_share_one_array_session_first()
+    {
+        // One key, not two: the injector's RunEffectsGrantsApply loops `grants[]` -> RunEffectGrant,
+        // and AtomPushReceiver.Install deliberately does NOT apply AtomPushDto.Grants ("the command
+        // runner's existing grant loop owns that" -- its own doc comment). A separately-named key
+        // would have been read by nothing at all.
+        Bind("trait.stalwart", "1");
+
+        var session = new[]
+        {
+            new FusionRpg.Contracts.EffectGrantDto
+            {
+                GrantId = "session-1", EffectId = "fx.session", OwnerKind = "match",
+                OwnerKey = FusionRpg.Contracts.EffectOwnerKeys.Match, PluginId = "test",
+            },
+        };
+
+        var atoms = _push.Build(Owner(), Lawn(), matchSeed: 7);
+        var grants = Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(
+            AtomPushService.BuildApplyPayload(atoms, session)["grants"]);
+
+        Assert.Equal(2, grants.Count);
+        Assert.Equal("session-1", grants[0].GrantId);          // pre-existing half, order untouched
+        Assert.StartsWith("atom:", grants[1].GrantId);          // compiled half, appended
+    }
+
+    [Fact]
+    public void The_compiled_grants_survive_the_injectors_own_two_reads_of_the_same_payload()
+    {
+        // The real receive path reads this payload TWICE, two different ways, and both must see it:
+        //   1. RunEffectsGrantsApply: p.TryGetProperty("grants") -> EnumerateArray -> RunEffectGrant
+        //   2. InstallAtomPush: JsonSerializer.Deserialize<AtomPushDto>(p.GetRawText())
+        // AtomPushDto.Grants is declared [JsonPropertyName("grants")], so read 2 lands on the same key
+        // read 1 walks -- which is exactly why the compiled grants belong there and nowhere else.
+        Bind("trait.stalwart", "1");
+
+        var atoms = _push.Build(Owner(), Lawn(), matchSeed: 7, matchKey: "m1");
+        var json = JsonSerializer.Serialize(AtomPushService.BuildApplyPayload(atoms, sessionGrants: null), Wire);
+        using var doc = JsonDocument.Parse(json);
+
+        // Read 1 -- the grant loop.
+        Assert.True(doc.RootElement.TryGetProperty("grants", out var arr));
+        Assert.Equal(JsonValueKind.Array, arr.ValueKind);
+        var raw = Assert.Single(arr.EnumerateArray().ToList());
+        Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), raw.GetProperty("effectId").GetString());
+
+        // Read 2 -- the atom installer, through the very same bytes.
+        var round = JsonSerializer.Deserialize<FusionRpg.Contracts.AtomPushDto>(json);
+        Assert.NotNull(round);
+        Assert.Equal(atoms.Grants.Count, round!.Grants.Count);
+        Assert.Equal(atoms.Defs.Count, round.Defs.Count);
+        Assert.Equal(atoms.CatalogRevision, round.CatalogRevision);
+        Assert.Equal(atoms.EmitterVersion, round.EmitterVersion);
+    }
+
+    [Fact]
+    public void Grants_is_always_an_array_even_with_nothing_to_put_in_it()
+    {
+        // The injector refuses the WHOLE command -- InstallAtomPush never reached -- when `grants` is
+        // absent or not an array ("effects.grants.apply: missing grants[]"). So the key survives a
+        // failed atom build and an empty session alike.
+        var empty = AtomPushService.BuildApplyPayload(atoms: null, sessionGrants: null);
+        Assert.Empty(Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(empty["grants"]));
+        Assert.False(empty.ContainsKey("defs")); // a failed atom build must not fake an empty catalog
+
+        var withAtoms = AtomPushService.BuildApplyPayload(
+            _push.Build(Owner(), Lawn(), matchSeed: 7), sessionGrants: null);
+        Assert.True(withAtoms.ContainsKey("defs"));
+        Assert.True(withAtoms.ContainsKey("runnerBindings"));
+        Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(withAtoms["grants"]);
+    }
+
+    [Fact]
+    public void A_runner_only_push_puts_no_compiled_grant_on_the_wire()
+    {
+        // The negative half: item.blade is two TRIGGERED atoms, so nothing compiles. If this ever
+        // starts carrying a grant, the compile/run split has moved and the runner would double-apply.
+        Bind("item.blade", "1");
+
+        var atoms = _push.Build(Owner(), Lawn(), matchSeed: 7);
+        Assert.Empty(atoms.Grants);
+        Assert.NotEmpty(atoms.RunnerBindings);
+
+        var grants = Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(
+            AtomPushService.BuildApplyPayload(atoms, sessionGrants: null)["grants"]);
+        Assert.Empty(grants);
     }
 }

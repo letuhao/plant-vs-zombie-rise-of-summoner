@@ -1,0 +1,20 @@
+{
+  "climate": "earth",
+  "dispositionBase": "wary",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [
+    "event.story-demon.allpeater-001",
+    "event.story-demon.ashthreepeater-001",
+    "event.story-demon.cactus-001",
+    "event.story-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, subterranean hollow where the walls are lined with thousands of unglazed clay vessels. In the center, a massive, pulsating mound of silt and jagged quartz rises from the floor, emitting a low, rhythmic hum that vibrates through the soles of your boots.",
+  "hazardBand": "light",
+  "kind": "wild",
+  "name": "The Terracotta Reliquary",
+  "reason": "The party encounters a primordial earth-bound demon bound within the central silt-mound, offering ancient geological secrets in exchange for offerings of precious gems or blood.",
+  "roomId": "room.wild-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

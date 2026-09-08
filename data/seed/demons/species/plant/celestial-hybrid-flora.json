@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:52:25Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "celestial-hybrid-flora"
+    ],
+    "gameTypeId": 909,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature possesses massive area-of-effect capabilities, infinite scaling through combo mechanics, and meteor strikes capable of dealing extreme damage, far exceeding a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateStar",
+    "targetPreference": "frontline",
+    "traits": [
+      "photomagnetic-manipulation",
+      "meteor-summoning",
+      "star-projectile-generation",
+      "magnetic-interference",
+      "synergistic-cosmic-resonance"
+    ],
+    "variants": [
+      "ancient",
+      "blessed",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

@@ -1,0 +1,70 @@
+using FusionRpg.Core.Delve.Encounter;
+using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Power;
+using FusionRpg.Core.Stats.Aptitudes;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.Delve.Encounter;
+
+/// <summary>
+/// The real anchor corpus, joined into <see cref="ConcreteAnchor"/> rows through the exact production
+/// pipeline (anchor -&gt; `SpeciesExpander` -&gt; `ConcreteAnchor.From`), built ONCE for every
+/// `Delve.Encounter` test that needs it. Deliberately does NOT reuse
+/// `Demons.Fusion.RealCorpusFixture` — that one round-trips through a temp `RpgStore` and returns
+/// `DemonSpeciesDef`, which carries neither `ThreatBand`, `AptitudePrimary`, `Reach` nor
+/// `TargetPreference` (verified 2026-09-06) — exactly the fields this module's own join exists to
+/// recover, so building from the plain `AnchorRow`/`ConcreteSpecies` pair directly is both simpler and
+/// the only shape that actually has what `SlotFilter.Candidates` needs.
+/// </summary>
+internal static class RealAnchorCorpusFixture
+{
+    static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "src", "FusionRpg.Injector"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("repo root");
+    }
+
+    static string ReadTuning(params string[] relative) =>
+        File.ReadAllText(Path.Combine(new[] { RepoRoot() }.Concat(relative).ToArray()));
+
+    static readonly AptitudeTuning RealAptitudes = AptitudeTuningLoader.Parse(ReadTuning("data", "tuning", "aptitudes.v2.json"));
+    static readonly DemonShapeTuning RealShape = DemonShapeTuningLoader.Parse(ReadTuning("data", "tuning", "demon-shape.v1.json"));
+    static readonly DemonThreatTuning RealThreat = DemonThreatTuningLoader.Parse(ReadTuning("data", "tuning", "demon-threat.v1.json"));
+    static readonly PowerTuning RealPower = PowerTuningLoader.Parse(ReadTuning("data", "tuning", "power-scale.v2.json"));
+
+    public static DemonThreatTuning ThreatTuning => RealThreat;
+
+    /// <summary>Ordinal `SpeciesId` order (spec-encounter-generator.md §9 — "no dictionary enumeration
+    /// reaches an output"), matching `WaveCatalog.cs`'s own `OrderBy(..., Ordinal)` convention.
+    /// Anchors that fail `SpeciesExpander`'s own unresolved-field check are skipped, the same skip
+    /// `RealCorpusFixture`/species-import both apply — a species that cannot be generated correctly
+    /// never reaches the corpus at all, banded or not.</summary>
+    public static readonly IReadOnlyList<ConcreteAnchor> All = Build();
+
+    static IReadOnlyList<ConcreteAnchor> Build()
+    {
+        var seedRoot = Path.Combine(RepoRoot(), "data", "seed", "demons", "species");
+        var anchors = new List<AnchorRow>();
+        foreach (var file in Directory.GetFiles(seedRoot, "*.json", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
+        {
+            if (Path.GetFileName(file).StartsWith('_')) continue;
+            anchors.AddRange(AnchorRowReader.ReadAll(File.ReadAllText(file)));
+        }
+
+        var rows = new List<ConcreteAnchor>();
+        foreach (var anchor in anchors.OrderBy(a => a.SpeciesId, StringComparer.Ordinal))
+        {
+            if (SpeciesExpander.UnresolvedFields(anchor).Count > 0) continue;
+            var species = SpeciesExpander.Expand(anchor, RealAptitudes, RealPower, RealShape, RealThreat);
+            rows.Add(ConcreteAnchor.From(anchor, species, RealThreat));
+        }
+
+        Assert.True(rows.Count > 700, $"expected the real corpus to join well over 700 anchors, got {rows.Count} — seed data may have moved");
+        return rows;
+    }
+}

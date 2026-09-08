@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.trap-demon.ashthreepeater-001",
+  "flavor": "A sudden mechanism clicks within the masonry, and a volley of heated bolts whistles through the air. The scent of 烧焦 wood and sulfur fills the corridor as the projectiles strike the floor near your feet.",
+  "kind": "trap",
+  "name": "The Searing Volley",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggered a pressure plate while navigating a narrow corridor.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "A single, blinding pillar of pure radiance descends from the ceiling, striking a massive, multifaceted crystal at the center of the chamber. The light shatters into a thousand dancing rainbows that slice through the heavy, incense-filled air.",
+  "hazardBand": "light",
+  "kind": "elite",
+  "name": "The Prism of Refracted Souls",
+  "reason": "The concentrated light creates a high-visibility environment that empowers celestial guardians while making it difficult for creatures to find cover.",
+  "roomId": "room.elite-light-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

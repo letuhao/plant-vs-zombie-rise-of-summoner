@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.bargain-demon.ashthreepeater-002",
+  "flavor": "A figure composed of shifting, grey smoke sits atop a pile of calcified remains. It offers a vessel of liquid starlight, promising a clarity that is 彻底—absolute and unyielding. However, the entity demands a memory in exchange: a piece of your past that can never be reclaimed, leaving a void that is 无法 to fill.",
+  "kind": "bargain",
+  "name": "The Toll of the Unending Echo",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a powerful entity that offers a significant mechanical boon at the cost of a permanent character attribute or narrative hook.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

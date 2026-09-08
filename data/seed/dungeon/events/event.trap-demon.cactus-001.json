@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-demon.cactus-001",
+  "flavor": "As the party steps onto the shifting silt, a row of dried 仙人掌 stalks begins to vibrate violently. With a sudden, sharp hiss, the desiccated spines begin to 发射 through the air like a volley of tiny, jagged arrows.",
+  "kind": "trap",
+  "name": "The Needle's Arc",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggered a pressure plate hidden beneath the loose sand.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cactus"
+}

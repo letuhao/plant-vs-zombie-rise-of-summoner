@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The patron demands proof of absolute martial discipline and resilience. To succeed, the party must emerge from the depths without a single soul falling to the brink of death.",
+  "name": "The Unbroken Line",
+  "objectiveTemplate": "survive-no-downed",
+  "prereqRefs": [],
+  "questId": "quest.survive-no-downed-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "delve",
+  "targetRef": "none"
+}

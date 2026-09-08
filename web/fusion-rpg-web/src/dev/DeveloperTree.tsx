@@ -19,6 +19,16 @@ const CheatsPage = lazy(() => import("@/features/cheats/CheatsPage").then((m) =>
 const SimPage = lazy(() => import("@/features/sim/SimPage").then((m) => ({ default: m.SimPage })));
 const LogPage = lazy(() => import("@/features/log/LogPage").then((m) => ({ default: m.LogPage })));
 const MetricsPage = lazy(() => import("@/features/metrics/MetricsPage").then((m) => ({ default: m.MetricsPage })));
+const PhaserSceneSwitchPocPage = lazy(() =>
+  import("./PhaserSceneSwitchPocPage").then((m) => ({ default: m.PhaserSceneSwitchPocPage }))
+);
+// item-content module `atom-preview` (T9). A dev surface rather than a fold into AlmanacDumpPage:
+// that page is scoped to scraped in-game pedia text (`/api/almanac/dump`, plant/zombie sides), a
+// different content type with no extension point, and its "review then promote" shell is a
+// list/detail over almanac rows rather than a generic authoring frame.
+const AtomPreviewPage = lazy(() =>
+  import("./AtomPreviewPage").then((m) => ({ default: m.AtomPreviewPage }))
+);
 
 export const DEV_SURFACES = [
   { id: "status", label: "Status", Component: StatusPage },
@@ -26,10 +36,12 @@ export const DEV_SURFACES = [
   { id: "pvz-activity", label: "PvzActivity", Component: PvzActivityPage },
   { id: "icon-dump", label: "IconDump", Component: IconDumpPage },
   { id: "almanac-dump", label: "AlmanacText", Component: AlmanacDumpPage },
+  { id: "atom-preview", label: "ItemPreview", Component: AtomPreviewPage },
   { id: "cheats", label: "Cheats", Component: CheatsPage },
   { id: "sim", label: "Sim", Component: SimPage },
   { id: "log", label: "Log", Component: LogPage },
-  { id: "runs", label: "Runs", Component: MetricsPage }
+  { id: "runs", label: "Runs", Component: MetricsPage },
+  { id: "phaser-scene-poc", label: "ScenePOC", Component: PhaserSceneSwitchPocPage }
 ] as const;
 
 export type DevSurfaceId = (typeof DEV_SURFACES)[number]["id"];

@@ -32,5 +32,66 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- party-dungeon D1.x: Program.cs (8a82cf0) already loads this tree unconditionally at startup
+         via DungeonRegistryLoader.LoadAll/dungeon-tuning's own readers, but no content rule ever
+         copied it next to the exe, which silently breaks EVERY test that boots the real host
+         (WebApplicationFactory-backed E2E tests), not just a dungeon-specific one. Same copy pattern
+         as data\tuning\ above, one directory over. -->
+    <Content Include="..\..\data\seed\dungeon\**\*.json">
+      <Link>data\seed\dungeon\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- species-build T2.1: `demon-type-allocation`'s runtime plan reader (SpeciesBuildPlanCatalog)
+         needs the committed, generated plan next to the exe — the same copy pattern as data/tuning/
+         above, but for one specific generated file rather than a whole authored tree. -->
+    <Content Include="..\..\data\generated\demons\_species-build-plan.json">
+      <Link>data\generated\demons\_species-build-plan.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- ds 18 fusion-recipe-runtime (T8.5): the committed recipe seed fusion-recipe-reconcile owns
+         writing — same copy pattern as _species-build-plan.json just above. -->
+    <Content Include="..\..\data\generated\demons\_fusion-recipes.json">
+      <Link>data\generated\demons\_fusion-recipes.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- item-todo.md P4.1/module-20 web pass (2026-09-06): the item program's whole seed tree
+         (base types, affix families, rarity/tuning, sets, uniques, consumables, recipes) is loaded
+         unconditionally at startup the same way dungeon's is above, and had the identical missing-rule
+         defect — silently absent next to the exe, so `MapWorkbench`'s recipe corpus never loads and
+         every workbench route 404s/405s on a real published build despite passing every in-process
+         test. Same copy pattern as data\seed\dungeon\ above, one directory over. -->
+    <Content Include="..\..\data\seed\items\**\*.json">
+      <Link>data\seed\items\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- item-content T6 (item-lore): ssot-presentation.md §5.3 N2's string catalog. Program.cs reads
+         it at boot for card block 10's authored flavour sentence; without this rule the file is simply
+         absent next to the exe and every unique/set renders its key with no prose — the same silent
+         missing-copy-rule defect data\seed\items\ above already had. -->
+    <Content Include="..\..\content\display\*.json">
+      <Link>content\display\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- base-defense-todo.md 25.4: structure-catalog-import reads this committed corpus at startup
+         (Program.cs) the same way dungeon's registry and item's seed tree do above — the identical
+         missing-copy-rule defect those two comments already name, caught here before it ever shipped
+         rather than after, since StructureCatalog.Configure is being wired in the same change that
+         deletes the C# literal fallback. -->
+    <Content Include="..\..\data\seed\structures\**\*.json">
+      <Link>data\seed\structures\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
+  <ItemGroup>
+    <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board
+         rule that cost two sessions; it needs a regression test and is not part of the public API. -->
+    <InternalsVisibleTo Include="FusionRpg.Server.Tests" />
+  </ItemGroup>
+
 </Project>

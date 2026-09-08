@@ -171,8 +171,9 @@ public static class EffectAtomCatalog
                     Action = "ClearGridItem",
                     Params = new()
                     {
+                        ["col"] = 3.0,
                         ["gridItemType"] = 7.0,
-                        ["selector"] = "last",
+                        ["row"] = 2.0,
                     },
                 },
             },
@@ -280,7 +281,7 @@ public static class EffectAtomCatalog
                     Action = "SetBoxType",
                     Params = new()
                     {
-                        ["boxType"] = 1.0,
+                        ["boxType"] = 2.0,
                         ["col"] = 3.0,
                         ["row"] = 2.0,
                     },

@@ -14,6 +14,8 @@ export type PanelShellProps = {
   /** GG-5's band this shell occupies in the stack — "panel" (band-2) for every ordinary layer;
    * "system" (band-5, T20) for the one settings shell reachable from an empty stack. */
   band?: Extract<Band, "panel" | "system">;
+  /** ActorSheet alone uses the near-fullscreen GG-61 bound; ordinary panels keep the compact default. */
+  size?: "default" | "actorSheet";
 };
 
 /**
@@ -31,7 +33,8 @@ export function PanelShell({
   footer,
   children,
   testId = "panel-shell",
-  band = "panel"
+  band = "panel",
+  size = "default"
 }: PanelShellProps) {
   const id = useId();
   const push = useLayerStack((state) => state.push);
@@ -57,8 +60,13 @@ export function PanelShell({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
+        {/* GG-5 amendment (world-stage W55, owner-authorised 2026-09-04): the dimming scrim is not
+            the panel's own content stacking. A band-2 (Panel) scrim sits at its own tier strictly
+            between Stage and HUD (`--band-scrim`) so it covers only the Stage — the HUD (band 1)
+            stays fully legible and interactive above it. `band === "system"` is unaffected: the
+            amendment only ever named the Panel band's scrim. */}
         <Dialog.Overlay
-          className={cn(band === "system" ? "band-system" : "band-panel", "fixed inset-0 bg-black/50")}
+          className={cn(band === "system" ? "band-system" : "band-scrim", "fixed inset-0 bg-black/50")}
           data-testid={`${testId}-overlay`}
         />
         <Dialog.Content
@@ -76,9 +84,11 @@ export function PanelShell({
           }}
           className={cn(
             band === "system" ? "band-system" : "band-panel",
-            "fixed left-1/2 top-1/2 flex w-[min(640px,92vw)] -translate-x-1/2 -translate-y-1/2",
+            "fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2",
             "flex-col overflow-hidden rounded-md border border-border bg-panel shadow-panel",
-            "max-h-[min(720px,82vh)]"
+            size === "actorSheet"
+              ? "h-[min(960px,92vh)] w-[min(1800px,96vw)]"
+              : "max-h-[min(720px,82vh)] w-[min(640px,92vw)]"
           )}
         >
           <header className="flex flex-none items-start gap-3 border-b border-border bg-soil-raised px-4 py-3">

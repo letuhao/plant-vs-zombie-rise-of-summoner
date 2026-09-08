@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The ancient gatekeeper demands a tribute of pure essence to allow passage into the inner sanctum. Only those who can offer their own vitality can hope to breach the seal.",
+  "name": "The Hollow Toll",
+  "objectiveTemplate": "spend-no-provision",
+  "prereqRefs": [],
+  "questId": "quest.spend-no-provision-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "delve",
+  "targetRef": "none"
+}

@@ -1,0 +1,70 @@
+{
+  "slug": "skills-loadouts",
+  "title": "Skills and loadouts",
+  "status": "WIP",
+  "kicker": "Combat language · every place",
+  "pillar": {"text": "Combat", "href": "combat.md"},
+  "loopLine": "Combat (every place)",
+  "hook": "**WIP:** equip a small set of **actions** — innate skills, family skills, signatures — with costs, cooldowns, and targeting. Not finished yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. You should not expect a full creature-sheet loadout editor as a daily loop yet."},
+    {"term": "Loadout", "meaning": "The small set of actions on a creature — not a second character class."},
+    {"term": "Unlock", "meaning": "Getting a skill is progression. It is not a second power curve beside levels and aptitudes."},
+    {"term": "Cost", "meaning": "Skills will spend [actor meters](actor-meters) you can see — when that loop lands."},
+    {"term": "Guard / reaction", "meaning": "Guard, movement skills, and reaction windows belong with meters and interactive battles — still WIP."}
+  ],
+  "alsoTrue": [
+    "Live power today is levels, traits, elements, and [aptitudes](aptitudes) — play those.",
+    "Hands-on turns that use skills: [interactive battles](interactive-battles) (also WIP)."
+  ],
+  "sections": [
+    {
+      "title": "Not finished yet",
+      "paras": [
+        "Loadouts will live on the creature sheet.",
+        "Until the editor and spend loop ship, treat missing skill slots as unfinished work."
+      ]
+    },
+    {
+      "title": "Design shape",
+      "intro": "What the page is aiming at:",
+      "cards": [
+        {"name": "Innate", "body": "Actions the creature brings by nature."},
+        {"name": "Family", "body": "Actions shared by a kinship of species."},
+        {"name": "Signatures", "body": "Standout actions that define the specimen’s face."}
+      ],
+      "diagram": [
+        "  unlock skill (progression)  ->  equip on sheet  ->  spend meters / cooldown in fight"
+      ],
+      "note": "Unlocking is progression — not a parallel grind that replaces levels."
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Raise specimens, field elements, and fight with the combat language that already ships.",
+        "Read this page so the future sheet vocabulary is not a surprise."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Grow roster power with levels, fusion, and aptitudes now.",
+    "When loadout UI appears, equip a small set — do not hunt for a class pick.",
+    "Treat skill unlocks as progression steps, not a second curve to max first."
+  ],
+  "doNote": "Meters that pay costs: [actor meters](actor-meters). Specimen home: [specimens](specimens).",
+  "mixUps": [
+    {"q": "Where is the skill loadout screen?", "a": "WIP — not finished. Absence is expected."},
+    {"q": "Is unlocking a skill a second power ladder?", "a": "No. Design says unlocks are progression, not a second curve."},
+    {"q": "Do I pick a class for skills?", "a": "No. You have no class. Loadouts sit on the creature."},
+    {"q": "Will skills invent new elements?", "a": "No. They spend meters and use the existing combat language."},
+    {"q": "Are expeditions waiting on this?", "a": "No. Expeditions can stay auto-resolve; skills matter most when you pilot turns."}
+  ],
+  "next": ["interactive-battles"],
+  "related": ["actor-meters", "interactive-battles", "specimens"],
+  "sources": [
+    "docs/guide/combat.md §Skills and loadouts",
+    "docs/guide/mechanisms/skills-loadouts.md (prior stub)",
+    "docs/guide/the-loops.md §Combat depth"
+  ]
+}

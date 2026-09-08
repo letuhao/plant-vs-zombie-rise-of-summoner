@@ -37,6 +37,33 @@ public static class StatusStatPayload
     public static readonly string[] Ops = { "flat", "increased", "more" };
 
     /// <summary>
+    /// Named, so a test can assert against it rather than a substring of a formatted sentence —
+    /// mechanism-wiring E2 (spec-mechanism-wiring.md §4.1 sub-decision 3): <c>DerivedModifierOp</c> has
+    /// <c>Flat | Increased | Replace | Flag</c> and deliberately no <c>More</c>
+    /// (<c>DerivedModifier.cs</c>), so a status authoring <c>more</c> against a derived channel is a
+    /// content error, not a runtime detail. Refusing it here — at parse — is the earlier, stricter half
+    /// of the same rule <see cref="Stats.Derived.Subsystems.StatusDerivedSubsystem.TryParseOp"/> already
+    /// enforces at resolve time by skipping rather than coercing: this stops the bad content from ever
+    /// being stored as a withdrawable modifier in the first place.
+    /// </summary>
+    public const string MoreOnDerivedChannelError =
+        "'more' is not valid on a derived channel — there is no `More` op on the derived side";
+
+    /// <summary>
+    /// Is <paramref name="channel"/> one of the DERIVED channels (<c>combat.*</c> or the eight
+    /// <c>status.power.*</c>/<c>status.resist.*</c> ones) rather than one of the 23 PRIMARY channels?
+    ///
+    /// <para><b>The one place "derived vs primary" is decided.</b> Both the parser
+    /// (<see cref="TryParse"/>, via <see cref="IsKnownChannel"/> and the <c>more</c> refusal below) and
+    /// the runtime-side filter (<see cref="StatusDerivedModReader.Read(IReadOnlyList{StatusInstance}?)"/>)
+    /// read this SAME predicate, so the two can never independently drift on what "derived" means —
+    /// exactly the drift <c>StatusDerivedSubsystem.ContributeDerived</c>'s own doc comment already
+    /// warned would be invisible rather than a build error.</para>
+    /// </summary>
+    public static bool IsDerivedChannel(string channel) =>
+        DerivedStatChannels.IsCombatChannel(channel) || DerivedStatusChannels.Contains(channel);
+
+    /// <summary>
     /// Parse the overlay's <c>stat</c> block.
     ///
     /// <para><c>Override</c> is not accepted. A status is a temporary contribution, and an override
@@ -103,6 +130,17 @@ public static class StatusStatPayload
                     return false;
                 }
 
+                // mechanism-wiring E2: refused at PARSE, never coerced to Flat. `more` is meaningful on
+                // a PRIMARY channel (StatSystem's bag composes it); there is no `More` on the derived
+                // side, so a status authoring `more` against `combat.*`/`status.*` here is a content
+                // error caught before the mod is ever created, stored or withdrawn — not silently
+                // dropped later at resolve time.
+                if (opName == "more" && IsDerivedChannel(channel.Name))
+                {
+                    error = $"stat.{channel.Name}.{op.Name}: {MoreOnDerivedChannelError}";
+                    return false;
+                }
+
                 list.Add(new StatusStatMod(channel.Name, opName, value));
             }
         }
@@ -124,8 +162,7 @@ public static class StatusStatPayload
         Array.Exists(StatChannels.All, c => string.Equals(c, channel, StringComparison.Ordinal))
         // E25: O(1) against the cached generation rather than a linear scan of a freshly
         // allocated 84-element list on every channel parsed.
-        || DerivedStatChannels.IsCombatChannel(channel)
-        || DerivedStatusChannels.Contains(channel);
+        || IsDerivedChannel(channel);
 
     static readonly HashSet<string> DerivedStatusChannels = new(StringComparer.Ordinal)
     {
@@ -149,7 +186,7 @@ public static class StatusStatPayload
     {
         if (instance.StatMods.Count == 0) return Array.Empty<StatModifier>();
 
-        var sourceId = "status:" + instance.InstanceId;
+        var sourceId = ContributionSourceIds.Status(instance.InstanceId);
         var result = new List<StatModifier>(instance.StatMods.Count);
 
         foreach (var mod in instance.StatMods)
@@ -177,5 +214,6 @@ public static class StatusStatPayload
     }
 
     /// <summary>What a host withdraws when the instance ends. One id, matching <see cref="ToModifiers"/>.</summary>
-    public static string SourceIdOf(StatusInstance instance) => "status:" + instance.InstanceId;
+    public static string SourceIdOf(StatusInstance instance) =>
+        ContributionSourceIds.Status(instance.InstanceId);
 }

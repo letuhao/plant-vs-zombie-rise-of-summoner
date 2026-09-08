@@ -174,8 +174,8 @@ Boot order on Blooms pack: translator + Blooms_QOL + AudioImportLib + FusionRpg.
 Scripts:
 
 ```powershell
-.\scripts\deploy-play.ps1                       # BepInEx FULL MOD TOOL (default)
-.\scripts\deploy-play.ps1 -LoaderHost MelonLoader
+.\scripts\deploy-play.ps1                       # MelonLoader 3.9 (default, 2026-08-30 — faster startup)
+.\scripts\deploy-play.ps1 -LoaderHost BepInEx   # older FULL MOD TOOL install
 .\scripts\publish-player.ps1                    # both DropIntoGame trees when ML refs set
 ```
 

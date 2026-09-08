@@ -59,6 +59,109 @@ STRUCTURAL_WORD = re.compile(
     r"namespace|floor_?id|offset|bytes?|width|precision|encoding|schema|"
     r"maxsegments|pool|dispose|timeout_?ms|port|epsilon)", re.I)
 
+# Named explicitly, not folded into a broader regex — same discipline CONTENT_FILE already uses:
+# a deliberate, reviewable exception rather than a silent broadening of BALANCE_WORD/STRUCTURAL_WORD
+# that could swallow a real future finding sharing the same substring.
+#
+# `KernelDriveHost.KindShieldUpkeep` (Injector/Effects) is an opaque scheduler-kind discriminator —
+# its own doc comment: "Opaque ints to the queue by design — the scheduler never interprets them."
+# It matches BALANCE_WORD only because "Shield" + "Upkeep" happen to be substrings of an id, the same
+# accidental-substring class audit-overflow.py's own "WithPatron"/"hP" note already warns about.
+#
+# `KernelDriveHost.UpkeepPeriodTicks` is a scheduling GRANULARITY, not a balance rate — its own doc
+# comment: "structural, not tunable... It stays 100 ms deliberately" (integer milli-HP regen would
+# truncate to zero at finer granularity). T2 already requires this exact justification in a comment;
+# this constant already carries it and was still flagged because "upkeep" is deliberately in
+# BALANCE_WORD (a real resource-upkeep RATE elsewhere is a genuine balance dial).
+#
+# `VariantShift.MaxTier`/`MinTier` (Core/Effects/Atoms) — "which tier ROWS exist" (a schema fact: t5
+# is the highest tier row authored, there is no t6), not a magnitude a balance pass scales. Its own
+# doc comment names this exact audit by function: "named here so a later overflow/magic-number sweep
+# does not flag ShiftTierWindow's clamp as an illegal cap." Matched via BALANCE_WORD's "tier", which
+# elsewhere (a tier-scaled bonus, say) is correctly a real balance dial — the exemption is these two
+# specific identifiers, not the word.
+#
+# `FamilyExpansion.TierCount`/`ReferenceLevel`/`BandFloorPermille`/`BandCeilingPermille` (E43,
+# Core/Effects/Atoms/Generation) mirror `bands.v1.json`'s FROZEN `powerBand.tierScaling` values
+# verbatim — the same "5, one per tier the atom layer already has" fact `MaxTier`/`MinTier` above are
+# exempt for, and the same reasoning: a balance pass that wants to move these mints a v2 of that
+# frozen, versioned registry file (its own `frozenNote`: "No in-place edit... registryVersion 2 plus
+# an explicit decision"), it never edits this constant directly. Matched via BALANCE_WORD's
+# "tier"/"level"/"band" — real per-family balance data (`sharePermille`) lives in
+# `tier-bands.v1.json`, read at runtime by the same module, not as a `const` here.
+# `TurnReadiness.SpeedScale` (battle-timeline T14/B28, 2026-09-04) is the readiness formula's UNIT OF
+# MEASURE, and it matches BALANCE_WORD purely on the substring "scale" — the same accidental-substring
+# class the two entries above are here for. "Scale" in BALANCE_WORD means a multiplier a balance pass
+# turns up; here it means the scale numbers are *expressed in*. TicksFor computes
+# `work × SpeedScale / rate` where the work supplied and the rate compared are in these same units, so
+# changing it scales numerator and denominator together and cancels: nobody gets faster, the timeline is
+# merely described at a different granularity. The half of that constant that IS a balance dial was
+# split out in the same change and moved to config as derived-stats' `turnDefaultSpeed` — so exempting
+# this name hides nothing, because the tunable half is no longer in code at all.
+EXEMPT_NAMES = {
+    "KindShieldUpkeep", "UpkeepPeriodTicks", "MaxTier", "MinTier",
+    "TierCount", "ReferenceLevel", "BandFloorPermille", "BandCeilingPermille",
+    "SpeedScale",
+    # 2026-09-04: an ARRAY LENGTH — `new MeshRenderer?[MaxStatusTokens]` in ActorHudPool. §1 exempts
+    # buffers by name; STRUCTURAL_WORD just does not happen to carry "token". Changing it does not
+    # change how the game feels, it changes how many renderers the pool allocates.
+    "MaxStatusTokens",
+    # 2026-09-05: the star system's own RANGE and the anchor its reward curve is normalised around.
+    # Both match BALANCE_WORD only through "star". fusion.v1.json's own _meta already records the
+    # bound as structural ("SacrificesForStar's 1..5 bound and StarCap's rarity->cap shape stay
+    # structural (the star system's own range), only the numbers a balance pass would tune moved"),
+    # and the per-rarity cap that IS tunable lives in that file. ReferenceStar is the same kind of
+    # thing as the already-exempt ReferenceLevel: move it and you redefine the curve rather than
+    # retune it -- the knob a balance pass actually turns is perStarPowerMilli, which is config.
+    "MaxStar", "ReferenceStar",
+    # 2026-09-05, item module 17 (uniques). Two structural constants that match BALANCE_WORD only
+    # through a substring, both already carrying the justification T2 requires:
+    #
+    # `UniqueBudget.AeScale = 100` matches "scale". It is not a scale a balance pass turns -- it is
+    # the INTEGER ENCODING of the affix-equivalent unit. `item_unique.budget_ae` stores AE x 100
+    # because SC4 forbids floats in content, so changing this changes what the column MEANS, not how
+    # strong a unique is. The number a balance pass actually turns is budgetPremiumAeHundredths, which
+    # is in data/tuning/uniques.v1.json. Same kind of thing as the already-exempt ReferenceLevel.
+    #
+    # `UniqueLimits.FixedCoreChannelWeightMilli = 0` matches "weight". It is the one value in this
+    # program that is zero BY CONSTRUCTION rather than by tuning: effect-pipeline L0 turns a power
+    # class into a POOL RATE, and a unique's identity atoms are fixed-core rows that are never drawn,
+    # so there is no draw for a weight to modify. Making it configurable would invite someone to set
+    # it non-zero, which would weight a draw that does not exist. Its own doc comment says exactly
+    # this, and ssot-uniques.md requires the comment to exist.
+    "AeScale", "FixedCoreChannelWeightMilli",
+    # 2026-09-05, item module 18 (consumables). Two structural constants that match BALANCE_WORD only
+    # through a substring, both already carrying the AGENTS.md justification T2 requires:
+    #
+    # `ConsumableLimits.MinManifestCost = 1` matches "cost". It is not a price -- it is the FLOOR that
+    # makes the belt limit a limit at all: a consumable occupying zero manifest places is free, so any
+    # number of them fit in any belt and the carry rule refuses nothing. There is deliberately no
+    # matching maximum, because a strong draught costing several places is what the column is for.
+    #
+    # `ConsumableLimits.UnbeltedSlots = 0` matches "slot". D37 is explicit that with no girdle equipped
+    # the count is 0 and "not a default" -- an unequipped slot grants nothing, exactly as every other
+    # role behaves. Making it configurable would reintroduce the global carry limit D37 withdrew, which
+    # is the one thing data/tuning/consumables.v1.json refuses BY NAME. The number a balance pass
+    # actually moves is the girdle base type's own `consumableSlots`, which is content, not config.
+    "MinManifestCost", "UnbeltedSlots",
+    # 2026-09-05, party-dungeon difficulty-ladder wave. `DoorTypeCatalog.InertCostMultiplierMilli`
+    # (Core/Delve) matches "cost" and "multiplier". It is not a march-cost balance dial -- nothing
+    # marches in a delve (spec-dungeon-registries.md), so LaneTypeDef.CostMultiplierMilli is
+    # completely inert there and this constant exists ONLY to satisfy LaneTypeCatalog's own unrelated
+    # "a lane type must cost something to march" validator with a positive placeholder. Any positive
+    # value produces an identical game outcome (none), which is exactly what T1's own test ("would a
+    # balance pass ever want to change this number?") answers no to.
+    "InertCostMultiplierMilli",
+    # 2026-09-07, item-card gem inserts. `GemInsertCorpus.UnauthoredInsertTier` matches "tier" but is
+    # not a balance dial -- it is the IDENTITY of "the corpus authors no tier for this gem", not a
+    # number a pass would retune. Its own doc comment already says so: gems/*.json carries `powerBand`
+    # (a different axis), so every insert reports the ladder's own minimum, which is provably SAFE
+    # because `CombinationDistance` only ever UNDER-reports a resonance at the floor, never promises
+    # one the evaluator would refuse. The day the corpus authors a real tier, this constant is deleted,
+    # not retuned -- exactly T2's own "why this isn't tunable" test.
+    "UnauthoredInsertTier",
+}
+
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)
 
@@ -134,8 +237,8 @@ def scan(paths):
                     m = CONST_RE.search(line)
                     if m:
                         name, val = m.group(1), m.group(2)
-                        structural = bool(STRUCTURAL_WORD.search(name))
-                        balance = bool(BALANCE_WORD.search(name))
+                        structural = bool(STRUCTURAL_WORD.search(name)) or name in EXEMPT_NAMES
+                        balance = bool(BALANCE_WORD.search(name)) and name not in EXEMPT_NAMES
                         prev = lines[i - 2].strip() if i >= 2 else ""
                         documented = prev.startswith(("//", "///", "*", "/>"))
                         if balance and not structural:

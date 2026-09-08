@@ -66,10 +66,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-mitt",
       "flavorKey": "flavor.base.spun-mitt",
       "flavor": "Twisted thread wound tight. The fine weave hides the strength underneath.",
@@ -102,10 +102,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.cured-finger",
       "flavorKey": "flavor.base.cured-finger",
       "flavor": "Single leather digit, treated to grip. One finger can do the work of five.",
@@ -142,7 +142,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.studded-claw",
       "flavorKey": "flavor.base.studded-claw",
       "flavor": "Reinforced leather with raised studs across the knuckles. Strikes and tears in one motion.",
@@ -175,10 +175,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.supple-grip",
       "flavorKey": "flavor.base.supple-grip",
       "flavor": "Soft leather that moves with your hand. Flexibility is its own kind of armor.",
@@ -214,7 +214,7 @@
         "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.threadbare-hand",
       "flavorKey": "flavor.base.threadbare-hand",
       "flavor": "Worn cloth barely holding itself together. What remains works because it has to.",
@@ -248,7 +248,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -287,7 +287,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-wrap",
       "flavorKey": "flavor.base.woven-wrap",
       "flavor": "Cloth wound and bound around palm and fingers. The tighter the wrap, the sharper the hit.",
@@ -320,7 +320,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -393,10 +393,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.faded-tape",
       "flavorKey": "flavor.base.faded-tape",
       "flavor": "Old tape, color long washed out, but still holding. Some things get better with age.",
@@ -429,7 +429,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 1,

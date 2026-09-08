@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1136,
+  "magnitudes": {
+    "combat.defense.omni": 240,
+    "progression.bonus.defense": 800,
+    "progression.bonus.maxHp": 640,
+    "resource.max.hp": 800,
+    "resource.max.hunger": 800,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 640,
+    "resource.regen.hp": 2,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "SilverPot",
+  "theta": 0,
+  "traitPool": [
+    "currency-generating",
+    "exponential-scaling",
+    "low-profile",
+    "upgradable"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "normal"
+  ]
+}

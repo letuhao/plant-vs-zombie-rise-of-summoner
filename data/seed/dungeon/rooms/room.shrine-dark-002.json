@@ -1,0 +1,26 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
+  ],
+  "flavor": "A single, jagged monolith of obsidian stands in the center of a salt-crusted chamber, weeping a thick, viscous shadow that pools around its base like spilled ink.",
+  "hazardBand": "heavy",
+  "kind": "shrine",
+  "name": "The Altar of Hollowed Echoes",
+  "reason": "The shrine serves as a focal point for a ritual of soul-binding, where the shadows of the deceased are tethered to the stone to act as eternal sentinels.",
+  "roomId": "room.shrine-dark-002",
+  "secretEligible": "yes",
+  "sightBand": "dim",
+  "tags": []
+}

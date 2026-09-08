@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "fire",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (fire)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.fire", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.fire" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "fire",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (fire)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.fire", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.fire" } }
+    },
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "ice",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (ice)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.ice", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.ice" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "ice",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (ice)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.ice", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.ice" } }
+    },
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "air",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (air)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.air", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.air" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "air",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (air)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.air", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.air" } }
+    },
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "earth",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (earth)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.earth", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.earth" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "earth",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (earth)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.earth", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.earth" } }
+    },
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "light",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (light)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.light", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.light" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "light",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (light)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.light", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.light" } }
+    },
+    {
+      "family": "atom.patron-aura-power",
+      "variant": "dark",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura power (dark)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.power.dark", "op": "flat", "amount": { "externalRef": "patron.auraPowerMilli.dark" } }
+    },
+    {
+      "family": "atom.patron-aura-defense",
+      "variant": "dark",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Patron aura defense (dark)",
+      "icdKey": "fx.patron_aura",
+      "params": { "channel": "combat.defense.dark", "op": "flat", "amount": { "externalRef": "patron.auraDefenseMilli.dark" } }
+    }
+  ]
+}

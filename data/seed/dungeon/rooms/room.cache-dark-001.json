@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A shallow pool of stagnant, ink-black water fills the floor, reflecting nothing. Amidst the skeletal remains of long-dead pilgrims, a pile of tarnished silver and jagged gemstones glimmers beneath a layer of fine, grey ash.",
+  "hazardBand": "heavy",
+  "kind": "cache",
+  "name": "The Ossuary of Gilded Teeth",
+  "reason": "The room contains high-value loot but is located in a high-difficulty zone, requiring careful navigation to avoid the sludge.",
+  "roomId": "room.cache-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

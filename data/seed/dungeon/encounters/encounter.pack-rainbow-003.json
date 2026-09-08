@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "elementSpread": "rainbow",
+  "encounterId": "encounter.pack-rainbow-003",
+  "formation": "pack",
+  "name": "Swarming Kaleidoscope",
+  "rankOrder": [
+    0,
+    1
+  ],
+  "reason": "A chaotic surge of varied elemental entities overwhelming the party through sheer numbers and unpredictable elemental coverage.",
+  "slots": [
+    {
+      "countBand": "many",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    },
+    {
+      "countBand": "many",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "backline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "flurry",
+  "threatWindow": {
+    "ceilRung": "harbinger",
+    "floorRung": "nuisance"
+  }
+}

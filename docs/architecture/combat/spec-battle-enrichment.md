@@ -1,6 +1,27 @@
 # Spec: battle-enrichment
 
-Module id `battle-enrichment` in the [combat unification map](../combat-unification-map.md). Depends on `battle-adoption` (everything here rides the unified pipeline). Three waves, owner-ordered; **build held**, and each wave gets its own task breakdown at plan time.
+Module id `battle-enrichment` in the [combat unification map](../combat-unification-map.md). Depends on `battle-adoption` (everything here rides the unified pipeline). ~~Three waves, owner-ordered; **build held**~~ — **two waves; nothing held.** Each wave gets its own task breakdown at plan time.
+
+> ### ⛔ Rebased 2026-09-04 — read before building any wave
+>
+> [battle-timeline-map.md](../battle-timeline-map.md) said this spec *"is **partly superseded and
+> should be rebased after T5**"*. T5 closed 2026-08-28; **the rebase never happened**, and the text
+> below still describes a round loop that no longer exists. Corrected here rather than silently:
+>
+> - **Wave S is removed from this spec.** It is now its own module,
+>   [spec-species-skills.md](spec-species-skills.md). Its `SkillDef` (id, cooldown in **rounds**,
+>   action kind, targeting policy) and code-first `SkillCatalog` each re-invent something that has
+>   since shipped — `ActionRow`, `ActionEnvelope` (absolute **ticks**, `CooldownLedger.cs:15`),
+>   `ActionKind`, `ActionTargetSpec`, and `ActionCatalog` (wired into battle by T19, 2026-08-30).
+>   Building it as written would create a fifth content system.
+> - **Wave R stands, with one clause spent.** Its concern about sub-round `periodMs` under-delivery
+>   was fixed by **T9** (`subsystems-on-timeline`, closed 2026-08-28) — status pulses now fire at
+>   true ms. The rider design itself, the dedicated `riders` RNG stream, and the typed-DoT
+>   `StatusInstance` element are all unaffected and still correct.
+> - **Wave H stands unchanged.** The timeline map's own read: *"genuinely independent
+>   (resolver-side, not timeline-side). **Can ship any time**."*
+> - **The build hold is lifted** — see the combat-unification map's status box. `RulesetVersion` is
+>   **4**, not 2; neither remaining wave bumps it unless it moves a golden.
 
 ## Objective
 

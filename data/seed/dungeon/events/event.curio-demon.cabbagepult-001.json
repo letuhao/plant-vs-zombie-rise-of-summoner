@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-demon.cabbagepult-001",
+  "flavor": "Resting atop a pedestal of calcified bone is a miniature, ornate catapult. Instead of stones, its basket is filled with tightly wrapped, glowing heads of 卷心菜. A faint, rhythmic thumping sound emanates from the mechanism, like a slow, undead heartbeat.",
+  "kind": "curio",
+  "name": "The Verdant Siege Engine",
+  "outcomes": [
+    {
+      "consequence": "loot",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a strange, organic siege engine that seems to possess a rudimentary, zombie-like vitality.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.cabbagepult"
+}

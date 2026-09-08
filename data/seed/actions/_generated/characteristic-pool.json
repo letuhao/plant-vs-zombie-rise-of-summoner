@@ -1,0 +1,283 @@
+{
+  "_meta": {
+    "corpusHash": "d72d4cf76c516be27df182a9d13b0d5d595bbb947cdacac81a333db3b4e11736",
+    "partition": "characteristic-pool",
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "closedValues": {
+        "scope": [
+          "family",
+          "general",
+          "species"
+        ]
+      },
+      "fields": [
+        "scope",
+        "scopeKey"
+      ],
+      "group": "A",
+      "id": "pool.a-scope-anchor",
+      "name": "Scope + anchor",
+      "sourceVocabulary": "spec-eligibility-axis.md §3.1",
+      "whoPicks": "planner"
+    },
+    {
+      "closedValues": {
+        "element": [
+          "fire",
+          "ice",
+          "air",
+          "earth",
+          "light",
+          "dark"
+        ],
+        "rarity": [
+          "chaff",
+          "sprout",
+          "grafted",
+          "cultivated",
+          "fused",
+          "chimeric",
+          "heirloom",
+          "firstseed",
+          "sunwoven",
+          "almanac"
+        ]
+      },
+      "fields": [
+        "family",
+        "motifs",
+        "antiMotifs",
+        "element",
+        "themeKey",
+        "rarity"
+      ],
+      "group": "B",
+      "id": "pool.b-identity-context",
+      "name": "Identity context",
+      "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity rungs DemonRarity.cs:16-27",
+      "whoPicks": "read from the seed"
+    },
+    {
+      "closedValues": {
+        "areaShape": [
+          "column",
+          "rectangle",
+          "row",
+          "square"
+        ],
+        "category": [
+          "attack",
+          "defense",
+          "movement",
+          "status",
+          "support"
+        ],
+        "kind": [
+          "basic",
+          "innate",
+          "skill"
+        ],
+        "relation": [
+          "ally",
+          "any",
+          "enemy",
+          "self"
+        ],
+        "rungBand": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "targetMode": [
+          "all",
+          "area",
+          "multi",
+          "rolledTarget",
+          "self",
+          "single"
+        ]
+      },
+      "fields": [
+        "category",
+        "targetMode",
+        "areaShape",
+        "relation",
+        "kind",
+        "rungBand"
+      ],
+      "group": "C",
+      "id": "pool.c-mechanical-slot",
+      "name": "Mechanical slot",
+      "sourceVocabulary": "ActionEnums.cs, ActionTargetSpec.cs, data/tuning/action-rungs.v1.json",
+      "whoPicks": "planner"
+    },
+    {
+      "closedValues": {
+        "allowedAtomFamilies": [
+          "atom.arm-hardening",
+          "atom.arm-riveting",
+          "atom.arm-welding",
+          "atom.bloodletting",
+          "atom.bulwark",
+          "atom.carapace",
+          "atom.cherry-bloom",
+          "atom.cleansing",
+          "atom.cruelty",
+          "atom.death-glean",
+          "atom.death-harvest",
+          "atom.death-salvo",
+          "atom.deathblast",
+          "atom.dooming",
+          "atom.econ-bounty",
+          "atom.econ-endure",
+          "atom.econ-graze",
+          "atom.econ-muster",
+          "atom.econ-toll",
+          "atom.elemental-defense",
+          "atom.elpw-attune",
+          "atom.elpw-focus",
+          "atom.elpw-overflow",
+          "atom.elpw-override",
+          "atom.elpw-pierce",
+          "atom.entangling",
+          "atom.evasion",
+          "atom.evd-brace",
+          "atom.evd-flinch",
+          "atom.evd-harden",
+          "atom.evd-husk",
+          "atom.evd-scar",
+          "atom.evd-seal",
+          "atom.ferocity",
+          "atom.firelining",
+          "atom.flash-freeze",
+          "atom.flourishing",
+          "atom.fortitude",
+          "atom.freezing",
+          "atom.gardener",
+          "atom.gravedigging",
+          "atom.gravemaking",
+          "atom.hit-followthrough",
+          "atom.hit-mend",
+          "atom.hit-retort",
+          "atom.immunity",
+          "atom.keen-edge",
+          "atom.life-graft",
+          "atom.life-surge",
+          "atom.lifesteal",
+          "atom.martyrdom",
+          "atom.mending",
+          "atom.mesmerizing",
+          "atom.midas",
+          "atom.might",
+          "atom.padding",
+          "atom.plating",
+          "atom.prec-fixation",
+          "atom.prec-reckoning",
+          "atom.prec-truesight",
+          "atom.prec-verdict",
+          "atom.precision",
+          "atom.quickening",
+          "atom.regeneration",
+          "atom.resilience",
+          "atom.retribution",
+          "atom.savagery",
+          "atom.searing-strike",
+          "atom.shield-capacity",
+          "atom.shield-pen",
+          "atom.shield-regen",
+          "atom.shield-toughness",
+          "atom.shld-breach",
+          "atom.shld-cycle",
+          "atom.shld-surge",
+          "atom.sporing",
+          "atom.stalwart",
+          "atom.stoicism",
+          "atom.summoner",
+          "atom.sunbloom",
+          "atom.sust-callus",
+          "atom.sust-freshgraft",
+          "atom.sust-grit",
+          "atom.sust-husk",
+          "atom.swiftness",
+          "atom.tempo-haste",
+          "atom.tempo-stampede",
+          "atom.tempo-surge",
+          "atom.tempo-yield",
+          "atom.terraforming",
+          "atom.venomous",
+          "atom.vitality",
+          "atom.volley",
+          "atom.ward-brace",
+          "atom.ward-harden",
+          "atom.warded",
+          "atom.warding",
+          "atom.withering"
+        ],
+        "structureAxes": [
+          "scopeSplit",
+          "riderStatus",
+          "condition",
+          "sequence",
+          "consumption",
+          "reaction",
+          "restriction"
+        ]
+      },
+      "fields": [
+        "allowedAtomFamilies",
+        "forbiddenAtomFamilies",
+        "structureAxes"
+      ],
+      "group": "D",
+      "id": "pool.d-pool-constraints",
+      "name": "Pool constraints",
+      "sourceVocabulary": "the 98 authored affix families (data/seed/items/affix-families/*.json); RungRow.StructureBudget",
+      "whoPicks": "planner"
+    },
+    {
+      "closedValues": {
+        "pairedPayoffFamily": [
+          "atom.chill-punisher",
+          "atom.rot-punisher"
+        ],
+        "pairingRole": [
+          "enabler",
+          "none",
+          "payoff"
+        ]
+      },
+      "fields": [
+        "pairingRole",
+        "pairedPayoffFamily"
+      ],
+      "group": "E",
+      "id": "pool.e-pairing-role",
+      "name": "Pairing role",
+      "sourceVocabulary": "data/seed/actions/pairings.json via EnablerPayoffPairings",
+      "whoPicks": "planner"
+    },
+    {
+      "fields": [
+        "antiMotifs",
+        "avoidNeighbours"
+      ],
+      "group": "F",
+      "id": "pool.f-negative-constraints",
+      "name": "Negative constraints",
+      "sourceVocabulary": "derived (spec-dedup-select.md §2's fingerprint; spec-distribution-planner.md §3 step 8)",
+      "whoPicks": "planner"
+    }
+  ],
+  "kind": "action-characteristic-pool",
+  "schemaVersion": 1
+}

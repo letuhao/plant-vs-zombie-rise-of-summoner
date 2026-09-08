@@ -99,6 +99,7 @@
   --lh-tight: 1.15;
   --lh-body: 1.45;
   --band-stage: 0;
+  --band-scrim: 50;
   --band-hud: 100;
   --band-panel: 200;
   --band-dialog: 300;
@@ -119,11 +120,20 @@
 }
 
 .band-stage { z-index: var(--band-stage); }
+.band-scrim { z-index: var(--band-scrim); }
 .band-hud { z-index: var(--band-hud); }
 .band-panel { z-index: var(--band-panel); }
 .band-dialog { z-index: var(--band-dialog); }
 .band-toast { z-index: var(--band-toast); }
 .band-system { z-index: var(--band-system); }
+
+/* Notch / home-indicator insets (lawn HUD / commander bar T13). */
+.safe-area-top {
+  padding-top: max(0px, env(safe-area-inset-top, 0px));
+}
+.safe-area-bottom {
+  padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+}
 
 :root {
   color: var(--color-text);

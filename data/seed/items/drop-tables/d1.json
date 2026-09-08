@@ -417,13 +417,13 @@
             },
             {
               "entryKind": "equipment",
-              "role": "standard",
+              "role": "core-guard",
               "frame": "humanoid",
               "dropBand": "occasional"
             },
             {
               "entryKind": "equipment",
-              "role": "standard",
+              "role": "girdle",
               "frame": "plant",
               "dropBand": "occasional"
             }
@@ -1313,6 +1313,205 @@
               "entryKind": "currency",
               "ref": "souls",
               "dropBand": "seldom"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-011",
+      "nameKey": "droptable.verdant-reliquary",
+      "name": "Verdant Reliquary",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "verdant-reliquary-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "retinue",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-reliquary-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "shard.rare",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.sprout",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-reliquary-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-012",
+      "nameKey": "droptable.banner-offering",
+      "name": "Banner Offering",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "banner-offering-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "humanoid",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "banner-offering-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "shard.sunwoven",
+              "dropBand": "exceptional",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.crude",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "banner-offering-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-013",
+      "nameKey": "droptable.ward-stockpile",
+      "name": "Ward Stockpile",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "ward-stockpile-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "cultivated"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "ward-array",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "ward-stockpile-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.fine",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.prime",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "ward-stockpile-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-013",
+              "dropBand": "frequent"
+            }
+          ]
+        },
+        {
+          "groupKey": "ward-stockpile-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-013",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "ward-stockpile-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
             }
           ]
         }

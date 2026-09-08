@@ -9,15 +9,15 @@ namespace FusionRpg.Core.Tests.Demons;
 public class FusionRollerTests
 {
     static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.BaseRarity == DemonRarity.Epic && s.Acquisition != DemonAcquisition.CaptureOnly);
+        .First(s => s.BaseRarity == DemonRarity.Heirloom && s.Acquisition != DemonAcquisition.CaptureOnly);
 
     static readonly string[] CombinedPool = { "swift", "guardian", "berserker", "loyal" };
 
     [Fact]
     public void Picked_trait_leads_and_rolls_are_deterministic()
     {
-        var a = FusionRoller.Roll(Species, DemonRarity.Epic, "guardian", CombinedPool, 42);
-        var b = FusionRoller.Roll(Species, DemonRarity.Epic, "guardian", CombinedPool, 42);
+        var a = FusionRoller.Roll(Species, DemonRarity.Heirloom, "guardian", CombinedPool, 42);
+        var b = FusionRoller.Roll(Species, DemonRarity.Heirloom, "guardian", CombinedPool, 42);
 
         Assert.Equal(a.TraitIds, b.TraitIds);
         Assert.Equal(a.Variant, b.Variant);
@@ -32,7 +32,7 @@ public class FusionRollerTests
     {
         var variants = new HashSet<string>(StringComparer.Ordinal);
         for (ulong seed = 0; seed < 200; seed++)
-            variants.Add(FusionRoller.Roll(Species, DemonRarity.Epic, "swift", CombinedPool, seed).Variant);
+            variants.Add(FusionRoller.Roll(Species, DemonRarity.Heirloom, "swift", CombinedPool, seed).Variant);
         Assert.Contains("normal", variants);
         Assert.Contains("shiny", variants); // 1/64 — 200 seeds make a miss astronomically unlikely
     }
@@ -41,15 +41,15 @@ public class FusionRollerTests
     public void Pick_outside_the_combined_pool_rejects()
     {
         Assert.Throws<ArgumentException>(() =>
-            FusionRoller.Roll(Species, DemonRarity.Epic, "immortal", CombinedPool, 1));
+            FusionRoller.Roll(Species, DemonRarity.Heirloom, "immortal", CombinedPool, 1));
         Assert.Throws<ArgumentException>(() =>
-            FusionRoller.Roll(Species, DemonRarity.Epic, "no-such-trait", CombinedPool, 1));
+            FusionRoller.Roll(Species, DemonRarity.Heirloom, "no-such-trait", CombinedPool, 1));
     }
 
     [Fact]
     public void Exhausted_pools_yield_fewer_traits_never_padding()
     {
-        var result = FusionRoller.Roll(Species, DemonRarity.Legendary, "swift", new[] { "swift" }, 7);
+        var result = FusionRoller.Roll(Species, DemonRarity.Sunwoven, "swift", new[] { "swift" }, 7);
         Assert.Equal(new[] { "swift" }, result.TraitIds); // 3 slots wanted, pool had 1
     }
 

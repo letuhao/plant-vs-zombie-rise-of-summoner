@@ -1,0 +1,1231 @@
+{
+  "schemaVersion": 1,
+  "kind": "dungeon-drop-table-generated",
+  "tables": [
+    {
+      "tableId": "drop.dungeon.fire.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.fire.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.fire.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.fire.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.ice.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.ice.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.ice.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.ice.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.air.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.air.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.air.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.air.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.earth.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.earth.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.earth.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.earth.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.light.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.light.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.light.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.light.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.dark.fight",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "fight-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.dark.elite",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "elite-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.dark.boss",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "boss-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tableId": "drop.dungeon.dark.cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "enabled": true,
+      "revision": 0,
+      "groups": [
+        {
+          "groupKey": "cache-drop",
+          "seq": 0,
+          "rolls": 1,
+          "entries": [
+            {
+              "seq": 0,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "plant",
+              "role": "core-guard"
+            },
+            {
+              "seq": 1,
+              "entryKind": "equipment",
+              "ref": "",
+              "weight": 300,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop",
+              "frame": "humanoid",
+              "role": "core-guard"
+            },
+            {
+              "seq": 2,
+              "entryKind": "nothing",
+              "ref": "",
+              "weight": 700,
+              "minCount": 1,
+              "maxCount": 1,
+              "enabled": true,
+              "affixChannel": "drop"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": []
+}

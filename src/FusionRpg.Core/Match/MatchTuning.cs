@@ -2,8 +2,14 @@ using System.Text.Json;
 
 namespace FusionRpg.Core.Match;
 
-/// <summary>Match RAM-cap balance surface (tunables-ssot.md T1). See <see cref="CapPolicyConfig.Defaults"/>.</summary>
-public sealed record MatchTuning(int SchemaVersion, int Version, int MaxLivingPlants, int MaxLivingZombies);
+/// <summary>Match RAM-cap balance surface (tunables-ssot.md T1). See <see cref="CapPolicyConfig.Defaults"/>.
+/// <see cref="WaveHoldFloorSeconds"/> is a second, unrelated balance surface riding the same file —
+/// E36 (spec-wave-control.md §2.2): the wave-timer floor `wave.control`'s `hold` op applies every
+/// tick, moved out of `CheatActions.cs`'s own bare <c>30f</c> literal (tunables-ssot.md T1 — a
+/// balance pass would tune this floor).</summary>
+public sealed record MatchTuning(
+    int SchemaVersion, int Version, int MaxLivingPlants, int MaxLivingZombies,
+    double WaveHoldFloorSeconds);
 
 public sealed class MatchTuningRejection : Exception
 {
@@ -29,7 +35,11 @@ public static class MatchTuningLoader
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
                 MaxLivingPlants: Int(root, "maxLivingPlants"),
-                MaxLivingZombies: Int(root, "maxLivingZombies"));
+                MaxLivingZombies: Int(root, "maxLivingZombies"),
+                // E36 (spec-wave-control.md §2.2): seconds, not per-mille/ms — this is the same unit
+                // Board.timeUntilNextWave already carries (a Unity float), never a magnitude in the
+                // CLAUDE.md overflow-table sense, so no long/per-mille discipline applies here.
+                WaveHoldFloorSeconds: Double(root, "waveHoldFloorSeconds"));
         }
     }
 
@@ -37,6 +47,13 @@ public static class MatchTuningLoader
     {
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt32(out var v))
             throw new MatchTuningRejection($"match tuning: missing or non-integer '{key}'");
+        return v;
+    }
+
+    static double Double(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetDouble(out var v))
+            throw new MatchTuningRejection($"match tuning: missing or non-numeric '{key}'");
         return v;
     }
 }

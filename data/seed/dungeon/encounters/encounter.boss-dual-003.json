@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "force-pure",
+    "phaseTrigger": "none",
+    "phasing": "none",
+    "retinue": 0,
+    "signatureAction": "Kinetic Reversal"
+  },
+  "elementSpread": "dual",
+  "encounterId": "encounter.boss-dual-003",
+  "formation": "boss",
+  "name": "The Kinetic Singularity",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-mobility force that manipulates momentum, supported by a reactive elemental anchor.",
+  "slots": [
+    {
+      "countBand": "lone",
+      "posture": "Force",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "cataclysm",
+    "floorRung": "cataclysm"
+  }
+}

@@ -39,9 +39,21 @@ public class BindGateTests
     [InlineData("player:1")]
     [InlineData("sector:north-ridge")]
     [InlineData("slot:forge-1")]
+    [InlineData("unique-actor:abc123")]
     public void Every_legal_owner_key_parses(string text)
     {
         Assert.True(OwnerScope.TryParse(text, out _).IsOk, text);
+    }
+
+    [Fact]
+    public void UniqueActor_round_trips_through_ToString_and_TryParse()
+    {
+        // decision 1 (tasks/seed-to-concrete-open-decisions.md): a persistent rpg_unique_actor's own
+        // instance_id, durable like Player — never session-scoped like Entity.
+        var scope = Parse("unique-actor:c0ffee00");
+        Assert.Equal(OwnerKind.UniqueActor, scope.Kind);
+        Assert.False(scope.IsSessionScoped);
+        Assert.Equal("unique-actor:c0ffee00", scope.ToString());
     }
 
     [Theory]
@@ -139,16 +151,19 @@ public class BindGateTests
     [Fact]
     public void A_kind_binds_only_where_a_consumer_exists()
     {
-        // stat.derived was None/None/None under D6's quarantine. E12 shipped the battle consumer
-        // (`BattleStatComposer` reading bound atoms at squad build), so battle now accepts it —
-        // and lawn and sim still do not, because nothing there reads it.
+        // stat.derived was None/None/None under D6's quarantine. Each runtime has opened only on the
+        // strength of its OWN consumer, never a sibling's — which is the rule this test exists to pin:
+        //   battle  — E12 (2026-08-23), `BattleStatComposer` reads bound atoms at squad build
+        //   lawn    — decisions.md "Derived-write lawn executor" (2026-08-30), `AtomDerivedSubsystem`
+        //   sim     — mechanism-wiring E5 (2026-09-06), `ActorDerivedLookup`'s contribution fold —
+        //             Partial, not Full (the fold is a plain sum: Flat/Increased compose correctly,
+        //             Replace/Flag do not — EffectOfflineKitTests.
+        //             The_four_derived_ops_decide_Full_versus_Partial). BindGate accepts Partial like
+        //             Full — it only rejects None outright and PlanOnly on a non-planner host.
         var atom = Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
-        Assert.True(Bind(atom, OwnerScope.Match, new BindContext(RuntimeId.Battle, IsPlanner: true)).IsOk);
-
-        foreach (var runtime in new[] { RuntimeId.Lawn, RuntimeId.Sim })
-            Assert.Equal(AtomRejectionReason.RuntimeUnsupported,
-                Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).Reason);
+        foreach (var runtime in new[] { RuntimeId.Battle, RuntimeId.Lawn, RuntimeId.Sim })
+            Assert.True(Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).IsOk);
     }
 
     // ---- world scopes, level, staleness ---------------------------------------------------------------

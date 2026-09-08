@@ -1,0 +1,15 @@
+{
+  "climate": "none",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "Dust motes dance in the shafts of light piercing through high, narrow slits in the masonry. The air is still, smelling of old stone and the metallic tang of dried blood.",
+  "hazardBand": "none",
+  "kind": "fight",
+  "name": "The Hollowed Vestibule",
+  "reason": "A group of territorial scavengers has claimed this bottleneck, blocking the only path forward.",
+  "roomId": "room.fight-none-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

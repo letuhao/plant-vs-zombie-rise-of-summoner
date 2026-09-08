@@ -1,0 +1,26 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A cluster of crystalline trees rises from the silt, their translucent branches humming with a low, rhythmic vibration that resonates in the marrow of your bones.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Vitrified Grove",
+  "reason": "The room features a singular, massive geode formation that pulses with light, acting as a focal point for the dungeon's ley lines.",
+  "roomId": "room.curio-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

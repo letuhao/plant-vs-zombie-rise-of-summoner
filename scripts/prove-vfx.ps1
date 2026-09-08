@@ -3,10 +3,12 @@
 # including per-element combat.hit variants, one hybrid (rainbow) payload, and the
 # SYS-ELEMENT-FX-off neutral path (asserted by rgb payload = white).
 #
-# Requires: game + injector running, lawn open (cell anchors need LawnCoords):
+# All-in-one board setup: dot-source LiveLawnSetup.ps1 and call Ensure-LiveLabBoard, or:
+#   .\scripts\audit-status-vfx-identity.ps1 -Live   (status sustained VFX path)
+# Legacy mid-match only (operator already in Adventure day):
 #   .\scripts\setup-lab-run.ps1
-#   .\scripts\prove-vfx.ps1
-# Pass -TargetPtr from setup-lab-run to also prove the unit-anchored (floater) path.
+#   .\scripts\prove-vfx.ps1 -TargetPtr <ZombiePtr> -SkipSetup
+# See .claude/skills/live-lawn-quick-start/SKILL.md
 param(
     [string]$BaseUrl = "http://127.0.0.1:5088",
     [string]$TargetPtr = "",

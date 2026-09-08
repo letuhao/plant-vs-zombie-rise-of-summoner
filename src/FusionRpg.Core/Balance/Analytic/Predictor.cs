@@ -149,8 +149,9 @@ public static class Predictor
         var hpRegenB = b.Snapshot.Derived.Get(DerivedStatChannels.ResourceRegen("hp"));
         var shieldRegenA = CombatDerivedReader.ShieldRegen(a.Snapshot.Derived, null);
         var shieldRegenB = CombatDerivedReader.ShieldRegen(b.Snapshot.Derived, null);
-        // class-system-todo.md P7.4: poise, live -- reads the same channel PoiseRuntime is built
-        // against (resource.regen.poise, registered since P1.12). Resolves to 0 for every actor today
+        // class-system-todo.md P7.4: poise, live -- reads the same channel PoiseLedger/ActorResourcePools
+        // pays against (resource.regen.poise, registered since P1.12; unified onto this one pool by
+        // battle-tempo poise-unification, 2026-09-05). Resolves to 0 for every actor today
         // (no aptitude edge feeds it yet, P7.2's own named gap), so this is currently a no-op that
         // makes the termination check CORRECT once one does, not a behavior change today.
         var poiseRegenA = a.Snapshot.Derived.Get(DerivedStatChannels.ResourceRegen("poise"));

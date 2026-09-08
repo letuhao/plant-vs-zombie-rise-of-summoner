@@ -1,0 +1,32 @@
+{
+  "affixRoll": "none",
+  "boss": {
+    "build": "bastion-pure",
+    "phaseTrigger": "hp-threshold",
+    "phasing": "escalating",
+    "retinue": 0,
+    "signatureAction": "elemental-surge"
+  },
+  "elementSpread": "dual",
+  "encounterId": "encounter.boss-dual-001",
+  "formation": "boss",
+  "name": "The Dual-Core Sentinel",
+  "rankOrder": [
+    0
+  ],
+  "reason": "A high-threat boss encounter utilizing a single heavy protector to anchor a dual-elemental onslaught.",
+  "slots": [
+    {
+      "countBand": "several",
+      "posture": "Bastion",
+      "reach": "melee",
+      "targetPreference": "frontline"
+    }
+  ],
+  "synergyHint": "none",
+  "tempo": "steady",
+  "threatWindow": {
+    "ceilRung": "cataclysm",
+    "floorRung": "cataclysm"
+  }
+}

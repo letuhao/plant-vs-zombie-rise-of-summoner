@@ -62,6 +62,10 @@ public sealed class RpgClient
     {
         await RefreshStatsAsync().ConfigureAwait(false);
         await RefreshPvzStatsAsync().ConfigureAwait(false);
+        await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+        await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
+        await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
+        await RefreshPowerIndexAsync().ConfigureAwait(false);
         try
         {
             _hub = new HubConnectionBuilder()
@@ -88,6 +92,21 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "pvz.stats.reload" });
             });
+            _hub.On<object>("AptitudesUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "aptitudes.allocation.reload" });
+            });
+            _hub.On<object>("CommandersUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "commander.snapshot.reload" });
+            });
+            // demon-lawn-deploy T2.1: DemonsUpdated previously reached only WebGroup — a new specimen
+            // (summon/fusion) changes the plant-side deploy roster, so the injector's own session cache
+            // needs to hear it too (DemonEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
+            _hub.On<object>("DemonsUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
+            });
             _hub.On<CommandDto>("Command", cmd =>
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
@@ -96,6 +115,9 @@ public sealed class RpgClient
                 if (string.Equals(cmd?.Name, "patron.aura", StringComparison.OrdinalIgnoreCase))
                 {
                     try { Effects.PatronCommand.Apply(cmd!); } catch (Exception ex) { RpgHost.Log.Warning("patron.aura: " + ex.Message); }
+                    // demon-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
+                    // deploy roster — reuse this already-pushed signal instead of adding a second one.
+                    CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
                     return;
                 }
 
@@ -107,6 +129,15 @@ public sealed class RpgClient
                 {
                     await _hub.InvokeAsync("Join", RpgConstants.InjectorGroup).ConfigureAwait(false);
                     await _hub.InvokeAsync("Hello", new HelloDto { Game = RpgHost.GameProfileId, Version = "1.0.0" }).ConfigureAwait(false);
+                    // Found 2026-08-30 alongside the AptitudesUpdated group-mismatch fix
+                    // (AptitudeEndpoints.cs): a reconnect (e.g. a server restart) re-joins the group
+                    // but never re-syncs the two caches StartAsync populates at first connect, so any
+                    // allocation/Θ change made during the disconnected window was silently lost until
+                    // the next full injector process restart, not just the next reconnect.
+                    await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+                    await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
+                    await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
+                    await RefreshPowerIndexAsync().ConfigureAwait(false);
                     RpgHost.Log.Info("SignalR reconnected + re-joined + Hello (grant rehydrate)");
                 }
                 catch (Exception ex)
@@ -152,6 +183,36 @@ public sealed class RpgClient
     }
 
     public void BumpBullet() => Interlocked.Increment(ref _bullets);
+
+    /// <summary>zomboss-deploy-ai T3.4 — fire-and-forget, matching `EnqueueAlmanacTextDump`'s own exact
+    /// shape: `MatchHost.CheckZombossDeployTrigger()` runs inside its own `lock(Gate)` and must never
+    /// await HTTP there (the established rule `LawnDeployRosterSessionCache`'s own doc comment already
+    /// states for this same class of call), so the decision is made synchronously and the actual
+    /// privileged mint+deploy is kicked off here, outside any lock, never awaited by the caller.</summary>
+    public void EnqueueZombossDeploy(string speciesId, ulong matchSeed, string? matchKey)
+    {
+        if (string.IsNullOrWhiteSpace(speciesId)) return;
+        _ = PostZombossDeployAsync(speciesId, matchSeed, matchKey);
+    }
+
+    async Task PostZombossDeployAsync(string speciesId, ulong matchSeed, string? matchKey)
+    {
+        try
+        {
+            var payload = new { speciesId, matchSeed, matchKey };
+            var body = JsonSerializer.Serialize(payload, Json);
+            using var content = new StringContent(body, Encoding.UTF8, "application/json");
+            var resp = await Http().PostAsync($"{_base}/api/zomboss/deploy", content).ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[zomboss-deploy] {speciesId} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[zomboss-deploy] deployed {speciesId}");
+        }
+        catch (Exception ex)
+        {
+            RpgHost.Log.Warning("[zomboss-deploy] " + ex.Message);
+        }
+    }
 
     /// <summary>Fire-and-forget almanac layer dump (not the event queue).</summary>
     public void EnqueueAlmanacTextDump(
@@ -323,6 +384,202 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>aura-skill T5 (W1): the transport half of the commander allocation delegate
+    /// <c>CheatState.ActorHub</c> needs. Mirrors <see cref="RefreshPvzStatsAsync"/>'s own shape exactly
+    /// (same current-player lookup, same try/catch-to-LastError) — this reads
+    /// <c>GET /api/aptitudes/{playerId}</c> (already shipped, <c>AptitudeEndpoints.ProjectState</c>'s
+    /// <c>shares</c> map) rather than adding a new server endpoint. Called at session start
+    /// (<see cref="StartAsync"/>) and on the same <c>"AptitudesUpdated"</c> SignalR broadcast
+    /// <c>AptitudeEndpoints.BroadcastBestEffort</c> already sends on every save — never on a per-hit
+    /// poll.
+    ///
+    /// <para><b>species-build `allocation-transport` (module 6).</b> The same response now also
+    /// carries a `species` map (`{ speciesId: { aptitudeId: points } }`) alongside the unchanged
+    /// `shares` — parsed here too, in the SAME fetch, at the SAME cadence, rather than a second HTTP
+    /// round trip: `species` is additive on the wire, so it is additive here as well.</para>
+    /// </summary>
+    public async Task RefreshCommanderAllocationAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/aptitudes/" + playerId).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("shares", out var sharesEl) || sharesEl.ValueKind != JsonValueKind.Object)
+                return;
+
+            var allocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+            foreach (var share in sharesEl.EnumerateObject())
+            {
+                if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                allocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, share.Name, points);
+            }
+            CheatState.ApplyCommanderAllocation(allocation);
+
+            var speciesAllocations = new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+            if (doc.RootElement.TryGetProperty("species", out var speciesEl) && speciesEl.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var speciesEntry in speciesEl.EnumerateObject())
+                {
+                    if (speciesEntry.Value.ValueKind != JsonValueKind.Object) continue;
+                    var speciesAllocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+                    foreach (var share in speciesEntry.Value.EnumerateObject())
+                    {
+                        if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                        speciesAllocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, share.Name, points);
+                    }
+                    speciesAllocations[speciesEntry.Name] = speciesAllocation;
+                }
+            }
+            CheatState.ApplySpeciesAllocations(speciesAllocations);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>commander-surface P2: session cache for match snapshot at board.start — same cadence
+    /// as <see cref="RefreshCommanderAllocationAsync"/> (StartAsync, reconnect, aptitudes reload).
+    /// Never called from MatchHost.Apply.</summary>
+    public async Task RefreshCommanderSnapshotCacheAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+
+            var json = await Http().GetStringAsync(_base + "/api/commanders/" + playerId).ConfigureAwait(false);
+            var list = JsonSerializer.Deserialize<CommanderListResponse>(json, Json);
+            if (list == null || string.IsNullOrWhiteSpace(list.DefaultLawnCommanderId)) return;
+
+            var row = list.Commanders.Find(c =>
+                string.Equals(c.Id, list.DefaultLawnCommanderId, StringComparison.Ordinal))
+                ?? list.Commanders.FirstOrDefault();
+
+            FusionRpg.Core.Commanders.MatchCommanderSessionCache.Apply(
+                list.DefaultLawnCommanderId,
+                row?.DisplayName ?? FusionRpg.Core.Commanders.PlayerEmpireCommanders.DisplayName(FusionRpg.Core.Commanders.CommanderId.Dave),
+                row?.ActiveAuraId,
+                row?.ActiveAuraName,
+                CheatState.FetchedCommanderAllocation);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>demon-lawn-deploy T2.1: session cache for the plant-side deploy roster at
+    /// board.start — same cadence and same "caller resolves, cache stores" split as
+    /// <see cref="RefreshCommanderSnapshotCacheAsync"/>. Never called from MatchHost.Apply. A roster
+    /// or patron read failure leaves the PREVIOUS cache standing (matching this method's own sibling)
+    /// rather than clearing it to empty, so a transient hiccup doesn't wipe an otherwise-good cache the
+    /// moment before board.start reads it.</summary>
+    public async Task RefreshLawnDeployRosterCacheAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+
+            var rosterJson = await Http().GetStringAsync(_base + "/api/demons/" + playerId).ConfigureAwait(false);
+            var roster = JsonSerializer.Deserialize<DemonRosterDto>(rosterJson, Json);
+            if (roster == null) return;
+
+            string? patronInstanceId = null;
+            try
+            {
+                var patronJson = await Http().GetStringAsync(_base + "/api/patron/" + playerId).ConfigureAwait(false);
+                using var patronDoc = JsonDocument.Parse(patronJson);
+                if (patronDoc.RootElement.TryGetProperty("patron", out var p) && p.ValueKind == JsonValueKind.Object &&
+                    p.TryGetProperty("instanceId", out var pInst))
+                    patronInstanceId = pInst.GetString();
+            }
+            catch (Exception ex)
+            {
+                // A patron-read failure must not accidentally OFFER the active Patron as deployable —
+                // fail toward the safer (fewer options), not the more permissive, direction: if we
+                // cannot confirm who is NOT the Patron, keep the previous cache instead of guessing.
+                LastError = ex.Message;
+                return;
+            }
+
+            // demon-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
+            // yet (T1.4's own refusal, `DeployAsync` returns `deploy.hypno-ally-not-implemented`) —
+            // caught live by actually clicking a real fired prompt's own accept button, not guessed.
+            // `DemonSpeciesCatalog` is already `Configure`d on this process at mod load
+            // (`RpgHost.Initialize`), so this is an in-process lookup against the same 829-species
+            // roster the frontend's own species index resolves display info from — no new REST call.
+            // Unknown-species and not-yet-configured both fail CLOSED (excluded), matching this
+            // method's own patron-read-failure branch above: fewer options, never a guess.
+            var eligible = roster.Items
+                .Where(it => !string.Equals(it.Actor.InstanceId, patronInstanceId, StringComparison.Ordinal))
+                .Where(it => FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured
+                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
+                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
+                        != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly)
+                .Select(it => new FusionRpg.Core.Match.LawnDeployRosterEntry(it.Actor.InstanceId, it.Profile.SpeciesId))
+                .ToList();
+            FusionRpg.Core.Match.LawnDeployRosterSessionCache.Apply(eligible);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>aura-skill T6 (W2): the hydration source `InjectorPowerIndexProvider.Hydrate` never
+    /// had — Θ read as flat `P(0) = C` for every actor in production regardless of level
+    /// (`PowerIndexHydrationTests.Magnitude_isFlatWhenThetaIsZero` pins this as the pre-T6 symptom).
+    /// Reads the already-shipped `GET /api/rpg/progression/{playerId}/summary` (no new server
+    /// endpoint) for `player.level` — the one field `ServerPowerIndexProvider.ReadSnapshot` itself
+    /// hydrates from server-side (its own doc comment: `realmsAdvanced`/`pvzRuns` have no column
+    /// anywhere yet, so both stay 0, matching the server's own honest partial hydration exactly, not
+    /// a shortcut unique to this path). Called at session start and on demand — never per hit.</summary>
+    public async Task RefreshPowerIndexAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/rpg/progression/" + playerId + "/summary").ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            var daveLevel = 0;
+            if (doc.RootElement.TryGetProperty("player", out var playerEl)
+                && playerEl.ValueKind == JsonValueKind.Object
+                && playerEl.TryGetProperty("level", out var levelEl)
+                && levelEl.TryGetInt64(out var lvl))
+                daveLevel = checked((int)lvl);
+
+            CheatState.ApplyPowerSnapshot(playerId,
+                new FusionRpg.Core.Power.ActorLadderSnapshot(daveLevel, RealmsAdvanced: 0, PvzRuns: 0));
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
     public async Task PushCheatSnapshotAsync()
     {
         try
@@ -399,6 +656,28 @@ public sealed class RpgClient
         catch
         {
             /* perf telemetry is never allowed to fail loudly */
+        }
+    }
+
+    /// <summary>
+    /// passive-tree-todo.md G6 (spec-gate-counters.md §4.3) — ship one batched gate-counter flush.
+    /// Best-effort, matching <see cref="PostPerfAsync"/> exactly: a lost window costs a little
+    /// progress, never correctness (§4.3), so a failed POST here is swallowed rather than retried or
+    /// requeued — the accumulator has already cleared its own copy by the time this call is made
+    /// (<c>GateCounterAccumulator.DrainAndClear</c>'s contract), and the next window's credits are
+    /// unaffected either way.
+    /// </summary>
+    public async Task PostGateCounterCreditAsync(object body)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(body, Json);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            await Http().PostAsync(_base + "/api/gate-counters/credit", content).ConfigureAwait(false);
+        }
+        catch
+        {
+            /* gate-counter credit is background progress, never allowed to fail loudly (§4.3) */
         }
     }
 

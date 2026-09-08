@@ -250,6 +250,16 @@
       "groupId": "g.tempo",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p1-024",
+      "nameKey": "disptpl.affix.tempo-wildgrowth",
+      "name": "{value}% more attack interval",
+      "runtimeFamily": "atom.tempo-wildgrowth",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
     }
   ]
 }

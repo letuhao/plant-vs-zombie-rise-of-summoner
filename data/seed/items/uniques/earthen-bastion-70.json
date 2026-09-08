@@ -57,8 +57,9 @@
       "iconKey": "icon.unique.holding-thresher",
       "flavorKey": "flavor.unique.holding-thresher",
       "flavor": "It does not spray to kill. It sprays to keep them exactly where they already made the mistake of standing.",
-      "notes": "armament-primary/control, row 1 of 8. baseType item.plant-muzzle-b-002 (role armament-primary, class nozzle, band b) resolved against data/seed/items/base-types/plant-armament-primary-b.json. atom.buttering is a shipped status.apply family (butter), used here as a control rider on a weapon role rather than the raw-damage rider a generator pool would normally weight toward that slot \u2014 a generator-level role/family preference, not a machine rule, and fixed atoms are not drawn from the pool.",
-      "acquisition": "source-locked"
+      "notes": "armament-primary/control, row 1 of 8. baseType item.plant-muzzle-b-002 (role armament-primary, class nozzle, band b) resolved against data/seed/items/base-types/plant-armament-primary-b.json. atom.buttering is a shipped status.apply family (butter), used here as a control rider on a weapon role rather than the raw-damage rider a generator pool would normally weight toward that slot — a generator-level role/family preference, not a machine rule, and fixed atoms are not drawn from the pool.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-002",
@@ -98,7 +99,8 @@
       "flavorKey": "flavor.unique.broad-bole",
       "flavor": "Wide enough that two zombies could not get their hands around it together, if either still had the reach to try.",
       "notes": "core-guard/utility, row 2 of 8. baseType item.plant-stem-b-008 (role core-guard, class heartwood, band b) resolved against data/seed/items/base-types/plant-stem-b.json.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-003",
@@ -137,8 +139,9 @@
       "iconKey": "icon.unique.armature-of-the-redoubt",
       "flavorKey": "flavor.unique.armature-of-the-redoubt",
       "flavor": "Every stalk it shelters keeps producing. A wall that also pays rent.",
-      "notes": "ward-array/economy, row 3 of 8. baseType item.plant-sheath-b-004 (role ward-array, class heartwood, band b) resolved against data/seed/items/base-types/plant-ward-array-b.json. atom.sunbloom is the shipped resource.economy family (on-kill sun, capPerMatch implemented in the runner per atom-family-library.md \u00a73.5) placed on a shoulder-armour role instead of the pool's usual economy carrier \u2014 a generator preference, not a machine rule.",
-      "acquisition": "source-locked"
+      "notes": "ward-array/economy, row 3 of 8. baseType item.plant-sheath-b-004 (role ward-array, class heartwood, band b) resolved against data/seed/items/base-types/plant-ward-array-b.json. atom.sunbloom is the shipped resource.economy family (on-kill sun, capPerMatch implemented in the runner per atom-family-library.md §3.5) placed on a shoulder-armour role instead of the pool's usual economy carrier — a generator preference, not a machine rule.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-004",
@@ -167,7 +170,7 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line at medium band, everything else riding on the on-hit rider \u2014 against a firstseed-rung rare's tier-4/5 attack lines this is a deliberately thin stat sheet."
+        "note": "One raw-stat line at medium band, everything else riding on the on-hit rider — against a firstseed-rung rare's tier-4/5 attack lines this is a deliberately thin stat sheet."
       },
       "tags": [
         "heavy",
@@ -179,7 +182,7 @@
       "iconKey": "icon.unique.sporangium-of-siege",
       "flavorKey": "flavor.unique.sporangium-of-siege",
       "flavor": "It does not scatter on the wind. It waits for a face to be close enough, then answers with the whole garden bed underneath it.",
-      "notes": "jewel-major/offense, row 4 of 8. baseType item.plant-pollen-b-009 (role jewel-major, class graft, band b) resolved against data/seed/items/base-types/plant-pollen-b.json. atom.searing-strike carries element:earth to match the theme's affinity. RUNTIME HONESTY: atom.searing-strike is a resource.delta family, lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note \u2014 this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
+      "notes": "jewel-major/offense, row 4 of 8. baseType item.plant-pollen-b-009 (role jewel-major, class graft, band b) resolved against data/seed/items/base-types/plant-pollen-b.json. atom.searing-strike carries element:earth to match the theme's affinity. RUNTIME HONESTY: atom.searing-strike is a resource.delta family, lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note — this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
       "acquisition": "source-locked"
     },
     {
@@ -218,8 +221,9 @@
       "iconKey": "icon.unique.involucre-of-the-berm",
       "flavorKey": "flavor.unique.involucre-of-the-berm",
       "flavor": "Bracts folded tight as a berm's slope, closing back over whatever they lose the moment they lose it.",
-      "notes": "sense/survivability, row 5 of 8. baseType item.plant-bract-b-005 (role sense, class heartwood, band b) resolved against data/seed/items/base-types/plant-bract-b.json. RUNTIME HONESTY: atom.regeneration is a resource.delta family (OnTimer), lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note \u2014 this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
-      "acquisition": "source-locked"
+      "notes": "sense/survivability, row 5 of 8. baseType item.plant-bract-b-005 (role sense, class heartwood, band b) resolved against data/seed/items/base-types/plant-bract-b.json. RUNTIME HONESTY: atom.regeneration is a resource.delta family (OnTimer), lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note — this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-006",
@@ -257,7 +261,7 @@
       "iconKey": "icon.unique.tamped-holdfast",
       "flavorKey": "flavor.unique.tamped-holdfast",
       "flavor": "Packed so hard into the bed beneath it that the ground itself slows to match its pace, which is to say: none at all.",
-      "notes": "footing/control, row 6 of 8. baseType item.plant-roots-b-001 (role footing, class heartwood, band b) resolved against data/seed/items/base-types/footing/plant/b.json \u2014 chosen deliberately over item.plant-roots-b-002 (the base type's own 'Ancient Holdfast' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
+      "notes": "footing/control, row 6 of 8. baseType item.plant-roots-b-001 (role footing, class heartwood, band b) resolved against data/seed/items/base-types/footing/plant/b.json — chosen deliberately over item.plant-roots-b-002 (the base type's own 'Ancient Holdfast' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
       "acquisition": "source-locked"
     },
     {
@@ -298,7 +302,8 @@
       "flavorKey": "flavor.unique.cistern-of-loam",
       "flavor": "Holds more than it needs, on the theory that a siege eventually asks for everything you saved.",
       "notes": "infusion/utility, row 7 of 8. baseType item.plant-glands-b-003 (role infusion, class heartwood, band b) resolved against data/seed/items/base-types/infusion/plant/b.json.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-008",
@@ -336,8 +341,99 @@
       "iconKey": "icon.unique.colony-of-the-foundation",
       "flavorKey": "flavor.unique.colony-of-the-foundation",
       "flavor": "Every runner it sends out comes home carrying something. That is the whole of the arrangement, and it has held for longer than anyone digging here expected.",
-      "notes": "retinue/economy, row 8 of 8. baseType item.plant-runner-b-006 (role retinue, class graft, band b) resolved against data/seed/items/base-types/plant-runner-b.json \u2014 chosen deliberately over item.plant-runner-b-012 (the base type's own 'Inseparable Colony' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
+      "notes": "retinue/economy, row 8 of 8. baseType item.plant-runner-b-006 (role retinue, class graft, band b) resolved against data/seed/items/base-types/plant-runner-b.json — chosen deliberately over item.plant-runner-b-012 (the base type's own 'Inseparable Colony' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
       "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.earthen-bastion-70-009",
+      "nameKey": "unique.earthen-bastion-70-009",
+      "iconKey": "icon.unique.earthen-bastion-70-009",
+      "flavorKey": "flavor.unique.earthen-bastion-70-009",
+      "frame": "humanoid",
+      "powerAxis": "survivability",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Earthen Bastion",
+      "flavor": "A dense, unyielding stone carved from the roots of the world. It pulses with a rhythmic, tectonic heartbeat that stabilizes the wearer's very essence.",
+      "baseType": "item.humanoid-neck-a-012",
+      "fixedAtoms": [
+        {
+          "family": "atom.fortitude",
+          "powerBand": "high"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The immense weight of the stone slows the wearer's movements significantly."
+      },
+      "tags": [
+        "heavy",
+        "mineral",
+        "defensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.earthen-bastion-70-010",
+      "nameKey": "unique.earthen-bastion-70-010",
+      "iconKey": "icon.unique.earthen-bastion-70-010",
+      "flavorKey": "flavor.unique.earthen-bastion-70-010",
+      "frame": "plant",
+      "powerAxis": "utility",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Verdant Sentry",
+      "flavor": "A living staff of woven briars that pulses with the rhythm of the forest. It seeks to entangle those who disturb the sacred grove.",
+      "baseType": "item.plant-muzzle-b-010",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "medium"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The living wood withers rapidly when exposed to intense heat."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.earthen-bastion-70-011",
+      "nameKey": "unique.earthen-bastion-70-011",
+      "iconKey": "icon.unique.earthen-bastion-70-011",
+      "flavorKey": "flavor.unique.earthen-bastion-70-011",
+      "frame": "humanoid",
+      "powerAxis": "utility",
+      "rarity": "firstseed",
+      "acquisition": "drop",
+      "name": "Echoing Lens",
+      "flavor": "The glass vibrates with the rhythmic pulse of the world. It reveals the hidden paths of the ancient spirits.",
+      "baseType": "item.humanoid-face-a-011",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The vision becomes clouded when the user moves too quickly."
+      },
+      "tags": [
+        "light",
+        "mineral",
+        "defensive",
+        "signature"
+      ]
     }
   ]
 }

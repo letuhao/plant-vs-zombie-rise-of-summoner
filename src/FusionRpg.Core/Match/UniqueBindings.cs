@@ -43,6 +43,13 @@ public sealed class MatchUniqueBindingsFacet
     readonly Dictionary<string, string> _ptrToInstance =
         new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// buff-debuff-scope T5: raised alongside the existing Bound/Cleared transitions below — never
+    /// changes when or whether they fire, only adds a signal for a scope's own-side WHO-value to
+    /// react to (spec-membership-events.md).
+    /// </summary>
+    public event Action<ScopeMembershipEvent>? MembershipChanged;
+
     /// <summary>Count of PendingSpawn + Bound (excludes Cleared).</summary>
     public int Count
     {
@@ -136,6 +143,7 @@ public sealed class MatchUniqueBindingsFacet
         row.Phase = UniqueBindingPhase.Bound;
         _ptrToInstance[p] = row.InstanceId;
         bound = row.Clone();
+        MembershipChanged?.Invoke(new ScopeMembershipEvent(p, ScopeMembershipTransition.Bound));
         return true;
     }
 
@@ -204,13 +212,16 @@ public sealed class MatchUniqueBindingsFacet
         if (!_byInstance.TryGetValue(id, out var row)) return false;
         if (row.Phase == UniqueBindingPhase.Cleared) return false;
 
-        if (!string.IsNullOrWhiteSpace(row.Ptr))
-            _ptrToInstance.Remove(NormalizePtr(row.Ptr));
+        var clearedPtr = string.IsNullOrWhiteSpace(row.Ptr) ? null : NormalizePtr(row.Ptr);
+        if (clearedPtr is not null)
+            _ptrToInstance.Remove(clearedPtr);
         if (!string.IsNullOrWhiteSpace(row.CorrelationId))
             _corrToInstance.Remove(row.CorrelationId);
 
         row.Phase = UniqueBindingPhase.Cleared;
         row.Ptr = null;
+        if (clearedPtr is not null)
+            MembershipChanged?.Invoke(new ScopeMembershipEvent(clearedPtr, ScopeMembershipTransition.Cleared));
         return true;
     }
 

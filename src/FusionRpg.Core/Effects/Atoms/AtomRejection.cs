@@ -114,6 +114,53 @@ public enum AtomRejectionReason
 
     /// <summary>Owner does not meet the binding's `level_req` (E6).</summary>
     LevelTooLow,
+
+    /// <summary>
+    /// One content-authoring rule outside the 33 above, carried as a namespaced rule id in
+    /// <see cref="AtomRejection.Detail"/> — e.g. <c>"atom.empty-name: 'atom.foo.t1' has no display
+    /// name"</c>. Chosen over minting a new enum member per rule (item-ideal.md §2b.1): 101 discrete
+    /// codes is a vocabulary no operator can hold, and every lane that would have needed its own code
+    /// instead registers a namespace via <see cref="ContentRuleNamespaces.Register"/> and raises this
+    /// one value. <b>This is the 34th and last member by design</b> — a caller that wants a new rule
+    /// registers a namespace, it never mints a 35th code. First wired by <c>durable-ownership</c>
+    /// (item module 1), the program's first schema-validation consumer of it.
+    /// </summary>
+    ContentRuleViolated,
+}
+
+/// <summary>
+/// The namespace prefixes <see cref="AtomRejectionReason.ContentRuleViolated"/> may carry, one
+/// registration per lane that raises it. A rule id under an unregistered prefix is a bug in the
+/// caller, not a data problem — <see cref="AtomRejection.ContentRule"/> throws rather than silently
+/// accepting an unregistered vocabulary, exactly as an unlisted
+/// <see cref="FusionRpg.Core.Scope.ScopeCompatibility"/> combination throws rather than guessing.
+/// </summary>
+public static class ContentRuleNamespaces
+{
+    static readonly HashSet<string> Registered = new(StringComparer.Ordinal)
+    {
+        // durable-ownership (item module 1) registers its own namespace rather than leaving
+        // registration to whichever lane happens to load first — C3's empty-name check is the first
+        // real consumer (AtomRowValidator).
+        "atom",
+    };
+
+    /// <summary>Called once per lane, at the point it starts raising rule ids under its prefix.</summary>
+    public static void Register(string prefix)
+    {
+        if (string.IsNullOrWhiteSpace(prefix))
+            throw new ArgumentException("a content-rule namespace prefix must be non-empty", nameof(prefix));
+        Registered.Add(prefix);
+    }
+
+    /// <summary>True when <paramref name="ruleId"/>'s dot-prefix (e.g. <c>"atom"</c> of <c>"atom.empty-name"</c>) is registered.</summary>
+    public static bool IsRegistered(string ruleId)
+    {
+        var dot = ruleId?.IndexOf('.', StringComparison.Ordinal) ?? -1;
+        return dot > 0 && Registered.Contains(ruleId!.Substring(0, dot));
+    }
+
+    public static IReadOnlyCollection<string> All => Registered;
 }
 
 /// <summary>One refusal: the rule that fired plus enough detail to fix the row.</summary>
@@ -124,6 +171,21 @@ public readonly record struct AtomRejection(AtomRejectionReason Reason, string D
     public bool IsOk => Reason == AtomRejectionReason.None;
 
     public static AtomRejection Fail(AtomRejectionReason reason, string detail) => new(reason, detail);
+
+    /// <summary>
+    /// One namespaced content rule, raised as the single <see cref="AtomRejectionReason.ContentRuleViolated"/>
+    /// code (item-ideal.md §2b.1 — "one code with a namespaced payload", never a second code family).
+    /// <paramref name="ruleId"/> must be under a namespace some lane has registered via
+    /// <see cref="ContentRuleNamespaces.Register"/>.
+    /// </summary>
+    public static AtomRejection ContentRule(string ruleId, string detail)
+    {
+        if (!ContentRuleNamespaces.IsRegistered(ruleId))
+            throw new InvalidOperationException(
+                $"content rule id '{ruleId}' is not under a namespace registered via " +
+                $"{nameof(ContentRuleNamespaces)}.{nameof(ContentRuleNamespaces.Register)}");
+        return new AtomRejection(AtomRejectionReason.ContentRuleViolated, $"{ruleId}: {detail}");
+    }
 
     public override string ToString() => IsOk ? "ok" : $"{Reason}: {Detail}";
 }

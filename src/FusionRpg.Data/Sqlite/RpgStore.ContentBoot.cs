@@ -30,4 +30,28 @@ public sealed partial class RpgStore
             .ToDictionary(r => r.ChannelId, r => r.Direction, StringComparer.Ordinal);
         ChannelPolicyTable.Use(new ChannelPolicyTable(directions));
     }
+
+    /// <summary>"imported" once the catalog tables genuinely hold content; "codeFallback" while a
+    /// player has never had a successful import (E46, player-content-boot). Read by
+    /// <see cref="ToHealth"/> — see <see cref="RecordContentBootOutcome"/> for who sets it.</summary>
+    public string ContentSource { get; private set; } = "codeFallback";
+
+    /// <summary>Why the self-healing startup import did not run or did not succeed. Null once content
+    /// is imported.</summary>
+    public string? ContentImportError { get; private set; }
+
+    /// <summary>
+    /// Records what the server's self-healing startup import (E46) did, so <c>/health</c> can report
+    /// it. Called exactly once, right after <c>FusionRpg.Data.Seed.SeedImportRunner.RunSelfHealing</c>
+    /// and before <see cref="LoadContentIntoRuntime"/> — nothing else should call this.
+    ///
+    /// <para>The whole point of E46 is that an absent import must stop looking identical to a
+    /// successful one (spec-player-content-boot.md §3.2). Before this existed, a fresh player install
+    /// booted on the code fallback with no table anywhere saying so.</para>
+    /// </summary>
+    public void RecordContentBootOutcome(string source, string? error)
+    {
+        ContentSource = source;
+        ContentImportError = error;
+    }
 }

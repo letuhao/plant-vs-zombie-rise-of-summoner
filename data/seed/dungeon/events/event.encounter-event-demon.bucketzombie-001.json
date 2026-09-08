@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-demon.bucketzombie-001",
+  "flavor": "In the center of the chamber, a pale, stiff-limbed 僵尸 sits atop a pile of rotting scrolls. It clutches a brush with a grip like iron, its eyes milky and vacant. As the party approaches, the creature begins to trace frantic, nonsensical characters in the air, its movements jerky and uncoordinated, as if suffering from a sudden case of 江郎才尽.",
+  "kind": "encounter-event",
+  "name": "The Scholar's Final Verse",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to interrupt the creature's ritualistic writing or allow it to complete its final, nonsensical stanza.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.bucketzombie"
+}

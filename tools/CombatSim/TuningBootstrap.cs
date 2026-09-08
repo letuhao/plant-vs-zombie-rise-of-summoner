@@ -32,7 +32,7 @@ public static class TuningBootstrap
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(Read(dir, "stats", patches)));
         FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
-            FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(Read(dir, "derived-stats", patches)));
+            FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(Read(dir, "derived-stats", patches, version: 2)));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(Read(dir, "status", patches)));
 
@@ -45,9 +45,14 @@ public static class TuningBootstrap
 
     static readonly HashSet<string> Touched = new(StringComparer.Ordinal);
 
-    static string Read(string dir, string domain, Dictionary<string, Dictionary<string, string>> patches)
+    /// <summary><paramref name="version"/> is per-domain and explicit rather than "resolve the latest
+    /// on disk", because this tool pins its inputs on purpose: `aptitudes` is at v5 and CombatSim
+    /// deliberately does not read it here, and silently following the newest file would move every
+    /// class-system baseline the next time any domain is published. Only `derived-stats` is at v2, and
+    /// only because T14/B28 added `turnDefaultSpeed` to it as a schema change.</summary>
+    static string Read(string dir, string domain, Dictionary<string, Dictionary<string, string>> patches, int version = 1)
     {
-        var path = Path.Combine(dir, domain + ".v1.json");
+        var path = Path.Combine(dir, domain + ".v" + version.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".json");
         var text = File.ReadAllText(path);
         if (!patches.TryGetValue(domain, out var keys)) return text;
         Touched.Add(domain);

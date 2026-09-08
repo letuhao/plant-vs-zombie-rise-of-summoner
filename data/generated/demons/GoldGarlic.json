@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1146,
+  "magnitudes": {
+    "combat.defense.omni": 1356,
+    "progression.bonus.defense": 4520,
+    "progression.bonus.maxHp": 3616,
+    "resource.max.hp": 4520,
+    "resource.max.hunger": 4520,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "GoldGarlic",
+  "theta": 13,
+  "traitPool": [
+    "Economic Synergy",
+    "High Durability",
+    "Tactical Displacement"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "normal",
+    "shiny"
+  ]
+}

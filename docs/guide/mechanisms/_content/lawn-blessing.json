@@ -1,0 +1,71 @@
+{
+  "slug": "lawn-blessing",
+  "title": "Lawn blessing",
+  "status": "WIP",
+  "kicker": "Lawn · first core · idle expeditions",
+  "pillar": {"text": "The lawn", "href": "the-lawn.md"},
+  "loopLine": "Lawn — first core · Idle expeditions",
+  "hook": "**WIP:** a real lawn run charges stronger **soul** earn on the next stretch of web expeditions — lawn makes idle better. Not finished yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. You should not expect a reliable blessing charge meter as a daily loop yet."},
+    {"term": "Blessing", "meaning": "A temporary boost to soul earn on following web expeditions after a real lawn run — not a permanent stat and not a second stock."},
+    {"term": "Idle better", "meaning": "Design intent: lawn improves the next idle waves. It must never be the only way to keep up."},
+    {"term": "Required faucet", "meaning": "What blessing must not become. Souls already pay from play without it."},
+    {"term": "Web expeditions", "meaning": "The idle dispatch loop that collects later — see [expeditions](expeditions)."}
+  ],
+  "alsoTrue": [
+    "Capture and trophies are sibling WIP lawn outcomes — [capture](capture) · [lawn trophies](lawn-trophies).",
+    "Play lawn for souls and deploy today; treat missing blessing UI as unfinished work."
+  ],
+  "sections": [
+    {
+      "title": "Not finished yet",
+      "paras": [
+        "Fantasy: finish a strong match, then collect better from the next idle waves.",
+        "Until it ships, ordinary lawn soul earn and expedition returns still work."
+      ]
+    },
+    {
+      "title": "Design intent",
+      "intro": "How it is meant to hang on the loops:",
+      "cards": [
+        {"name": "Charge", "body": "A real lawn run builds blessing for what comes next."},
+        {"name": "Spend on idle", "body": "The next stretch of web expeditions earns souls more strongly."},
+        {"name": "Not a gate", "body": "Unlocked web play must remain viable without endless lawn."}
+      ],
+      "diagram": [
+        "  strong lawn run  ->  blessing charge (WIP)",
+        "                         |",
+        "                         +->  next web expeditions  ->  stronger soul earn"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Play lawn matches and collect expeditions normally.",
+        "Do not plan your whole economy around a blessing button that is not live yet."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Earn souls from lawn and expeditions as they already ship.",
+    "When blessing UI appears, finish a real match first, then collect the boosted idle stretch.",
+    "If idle ever feels mandatory-only-via-lawn, that is a design bug — report the feel, do not invent a private workaround economy."
+  ],
+  "doNote": "Parent: [lawn match](lawn-match). Idle sibling: [expeditions](expeditions). Stock: [souls](souls).",
+  "mixUps": [
+    {"q": "Where is the blessing button?", "a": "WIP — not finished. Absence is expected."},
+    {"q": "Does blessing change combat stats?", "a": "No. Design is stronger soul earn on following expeditions — not a combat buff."},
+    {"q": "Must I lawn forever to keep up?", "a": "No. Design says a strong run can bless idle — never be the only way to keep up."},
+    {"q": "Is this the same as trophies?", "a": "No. Trophies are cosmetic prestige. Blessing is temporary idle soul pressure."},
+    {"q": "Do I still get souls without blessing?", "a": "Yes. Lawn and other faucets already pay."}
+  ],
+  "next": ["expeditions"],
+  "related": ["lawn-match", "expeditions", "souls", "lawn-trophies"],
+  "sources": [
+    "docs/guide/the-lawn.md §Blessing, capture, trophies",
+    "docs/guide/the-loops.md §Lawn — first core",
+    "docs/guide/mechanisms/lawn-blessing.md (prior stub)"
+  ]
+}

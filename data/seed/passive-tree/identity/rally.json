@@ -1,0 +1,10 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "high",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who stand firm, turning the force of incoming blows into a rhythmic, layered defense that grows harder to breach with every impact.",
+  "name": "Unyielding Bastion",
+  "treeId": "rally"
+}

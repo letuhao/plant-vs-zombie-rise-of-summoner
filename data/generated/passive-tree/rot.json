@@ -1,0 +1,498 @@
+{
+  "treeId": "rot",
+  "category": "status",
+  "gateQuantity": "status_applied.rot",
+  "shapeArchetype": "gated-deep",
+  "tiers": 10,
+  "branches": 2,
+  "nodesPerTier": [
+    6,
+    6,
+    6,
+    4,
+    4,
+    4,
+    4,
+    2,
+    2,
+    2
+  ],
+  "catalogVersion": 1,
+  "enabled": true,
+  "nodes": [
+    {
+      "id": "skill.rot-def-t1-n0",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 6,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 96,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t1-n1",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 6,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 96,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "atomAttachPoint"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t1-n2",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 1,
+      "nodeKey": "n2",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 6,
+      "atoms": [],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t2-n0",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n0",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "budgetShareMilli": 12,
+      "atoms": [],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t2-n1",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "budgetShareMilli": 12,
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 192,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ],
+      "excludeProps": [
+        "tier"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t2-n2",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 2,
+      "nodeKey": "n2",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "budgetShareMilli": 12,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t3-n1",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 3,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "budgetShareMilli": 18,
+      "atoms": [],
+      "excludeProps": [
+        "branch"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    },
+    {
+      "id": "skill.rot-def-t7-n1",
+      "treeId": "rot",
+      "branch": "Def",
+      "tier": 7,
+      "nodeKey": "n1",
+      "prereqNodeIds": [],
+      "nodeClass": "Magnitude",
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "budgetShareMilli": 64,
+      "atoms": [],
+      "excludeProps": [
+        "atomKind"
+      ],
+      "exclusionForm": "Reroute",
+      "tagsJson": null,
+      "enabled": true,
+      "retiredAtRevision": null
+    }
+  ],
+  "verdict": "Fail",
+  "totalUnspentBudgetShareMilli": 1864,
+  "bound": [
+    {
+      "nodeId": "skill.rot-def-t1-n0",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 96,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.rot-def-t1-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 96,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.rot-def-t1-n2",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.rot-def-t2-n0",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.rot-def-t2-n1",
+      "atoms": [
+        {
+          "kindId": "stat.modify",
+          "attachPoint": "Stat",
+          "channelId": "defense",
+          "op": "Increased",
+          "trigger": null,
+          "whenJson": null,
+          "kMicro": 192,
+          "unitClass": "GameUnits",
+          "scaleAxis": "PTheta"
+        }
+      ]
+    },
+    {
+      "nodeId": "skill.rot-def-t2-n2",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.rot-def-t3-n1",
+      "atoms": []
+    },
+    {
+      "nodeId": "skill.rot-def-t7-n1",
+      "atoms": []
+    }
+  ],
+  "refused": [
+    {
+      "nodeId": "skill.rot-off-t1-n0",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t1-n1",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.cruelty\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t1-n2",
+      "unspentBudgetShareMilli": 6,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t2-n0",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t2-n1",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t2-n2",
+      "unspentBudgetShareMilli": 12,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.venomous\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t3-n1",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-salvo\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.econ-bounty\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.econ-bounty\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.blighting\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.econ-bounty\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t7-n1",
+      "unspentBudgetShareMilli": 64,
+      "deliberateHole": false,
+      "reason": "node \u0027skill.rot-off-t7-n1\u0027: channel \u0027atk\u0027 op \u0027more\u0027 is not one of Flat|Increased|Replace|Flag (\u00A76 M3 -- there is no More on the derived side)"
+    },
+    {
+      "nodeId": "skill.rot-off-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-glean\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-glean\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-off-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.death-glean\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t3-n0",
+      "unspentBudgetShareMilli": 18,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-husk\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t3-n2",
+      "unspentBudgetShareMilli": 19,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.plating\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t4-n0",
+      "unspentBudgetShareMilli": 36,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.gravedigging\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t4-n1",
+      "unspentBudgetShareMilli": 37,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-grit\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t5-n0",
+      "unspentBudgetShareMilli": 45,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.ward-brace\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t5-n1",
+      "unspentBudgetShareMilli": 46,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.evd-harden\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t6-n0",
+      "unspentBudgetShareMilli": 54,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.shld-cycle\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t6-n1",
+      "unspentBudgetShareMilli": 55,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-grit\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t7-n0",
+      "unspentBudgetShareMilli": 63,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.sust-callus\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t8-n0",
+      "unspentBudgetShareMilli": 145,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.arm-welding\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t9-n0",
+      "unspentBudgetShareMilli": 164,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.econ-toll\u0027 does not exist in the shipped seed content"
+    },
+    {
+      "nodeId": "skill.rot-def-t10-n0",
+      "unspentBudgetShareMilli": 182,
+      "deliberateHole": false,
+      "reason": "affix \u0027atom.gravedigging\u0027 does not exist in the shipped seed content"
+    }
+  ]
+}

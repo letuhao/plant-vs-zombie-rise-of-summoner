@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "kind": "charm",
   "_meta": {
+    "batch": "charm-gen-surv-util",
     "partition": "charms/surv-util",
     "contractVersion": 1,
-    "exemplarVersion": 1,
-    "promptVersion": 1,
-    "batch": "charms-1c",
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "docs/architecture/item/entry-shapes.md#7",
     "registryVersions": {
-      "core": 1,
       "bands": 1,
-      "themes": 1,
+      "core": 2,
+      "naming": 6,
       "tags": 4,
-      "classes": 2,
-      "naming": 4,
+      "classes": 3,
+      "themes": 1,
       "words": 5
-    }
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
   },
   "entries": [
     {
@@ -30,10 +30,17 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.vitality", "powerBand": "low" }
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["defensive", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: rot-bloom"
     },
     {
@@ -45,10 +52,17 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.rallying", "powerBand": "low" }
+        {
+          "family": "atom.rallying",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "notes": "themeId: windswept-spore"
     },
     {
@@ -60,10 +74,17 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.warding", "powerBand": "low" }
+        {
+          "family": "atom.warding",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["defensive", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: earthen-bastion"
     },
     {
@@ -75,10 +96,17 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.cleansing", "powerBand": "low" }
+        {
+          "family": "atom.cleansing",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "notes": "themeId: hollow-orchard"
     },
     {
@@ -90,10 +118,16 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.mending", "powerBand": "low" }
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["defensive"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive"
+      ],
       "notes": "themeId: rusted-legion"
     },
     {
@@ -105,10 +139,16 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.exposing", "powerBand": "low" }
+        {
+          "family": "atom.exposing",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "notes": "themeId: umbral-swarm"
     },
     {
@@ -120,10 +160,17 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.lifesteal", "powerBand": "low" }
+        {
+          "family": "atom.lifesteal",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["defensive", "undead"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "undead"
+      ],
       "notes": "themeId: charnel-bloom"
     },
     {
@@ -135,10 +182,17 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.gardener", "powerBand": "low" }
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility", "rooted"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "notes": "themeId: verdant-graft"
     },
     {
@@ -150,11 +204,19 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.warding", "powerBand": "medium" }
+        {
+          "family": "atom.warding",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.mending"],
-      "poolRolls": 1,
-      "tags": ["defensive"],
+      "roleGroups": [
+        "atom.mending"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive"
+      ],
       "notes": "themeId: gilded-porcelain"
     },
     {
@@ -166,11 +228,20 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.commanding", "powerBand": "medium" }
+        {
+          "family": "atom.commanding",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.rallying", "atom.regeneration"],
-      "poolRolls": 1,
-      "tags": ["utility"],
+      "roleGroups": [
+        "atom.rallying",
+        "atom.regeneration"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "notes": "themeId: rusted-legion"
     },
     {
@@ -182,11 +253,20 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.vitality", "powerBand": "medium" }
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.mending"],
-      "poolRolls": 1,
-      "tags": ["defensive", "rooted"],
+      "roleGroups": [
+        "atom.mending"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: frostbitten-vanguard"
     },
     {
@@ -198,11 +278,21 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.terraforming", "powerBand": "medium" }
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.gravemaking", "atom.gravedigging"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.gravemaking",
+        "atom.gravedigging"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "notes": "themeId: sunwoven-almanac"
     },
     {
@@ -214,11 +304,20 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.regeneration", "powerBand": "high" }
+        {
+          "family": "atom.regeneration",
+          "powerBand": "high"
+        }
       ],
-      "roleGroups": ["atom.mending"],
-      "poolRolls": 2,
-      "tags": ["defensive", "rooted"],
+      "roleGroups": [
+        "atom.mending"
+      ],
+      "prefixRolls": 2,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: rot-bloom"
     },
     {
@@ -230,11 +329,20 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.gravemaking", "powerBand": "high" }
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "high"
+        }
       ],
-      "roleGroups": ["atom.gravedigging", "atom.gravemaking"],
-      "poolRolls": 1,
-      "tags": ["utility"],
+      "roleGroups": [
+        "atom.gravedigging",
+        "atom.gravemaking"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "notes": "themeId: umbral-swarm"
     },
     {
@@ -246,11 +354,21 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.martyrdom", "powerBand": "high" }
+        {
+          "family": "atom.martyrdom",
+          "powerBand": "high"
+        }
       ],
-      "roleGroups": ["atom.regeneration", "atom.rallying"],
-      "poolRolls": 1,
-      "tags": ["defensive", "rooted"],
+      "roleGroups": [
+        "atom.regeneration",
+        "atom.rallying"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: rusted-legion"
     },
     {
@@ -262,11 +380,21 @@
       "axis": "utility",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.gravedigging", "powerBand": "medium" }
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.terraforming", "atom.warding"],
-      "poolRolls": 1,
-      "tags": ["utility", "rooted"],
+      "roleGroups": [
+        "atom.terraforming",
+        "atom.warding"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "utility",
+        "rooted"
+      ],
       "notes": "themeId: earthen-bastion"
     },
     {
@@ -278,11 +406,21 @@
       "axis": "survivability",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.warded", "powerBand": "medium" }
+        {
+          "family": "atom.warded",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.warding", "atom.terraforming"],
-      "poolRolls": 1,
-      "tags": ["defensive", "rooted"],
+      "roleGroups": [
+        "atom.warding",
+        "atom.terraforming"
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive",
+        "rooted"
+      ],
       "notes": "themeId: verdant-graft"
     },
     {
@@ -295,11 +433,23 @@
       "frameHint": "any",
       "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.vitality", "powerBand": "high" },
-        { "family": "atom.warding", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.warding",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["defensive"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "defensive"
+      ],
       "notes": "themeId: earthen-bastion"
     },
     {
@@ -312,11 +462,23 @@
       "frameHint": "any",
       "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.terraforming", "powerBand": "high" },
-        { "family": "atom.gravemaking", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.terraforming",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "notes": "themeId: windswept-spore"
     },
     {
@@ -329,12 +491,218 @@
       "frameHint": "any",
       "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.gardener", "powerBand": "high" },
-        { "family": "atom.terraforming", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.gardener",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
-      "poolRolls": 0,
-      "tags": ["utility"],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [
+        "utility"
+      ],
       "notes": "themeId: sunwoven-almanac"
+    },
+    {
+      "id": "charm.surv-util-021",
+      "nameKey": "charm.carapace-of-patience",
+      "name": "Carapace of Patience",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "It never strikes back. It simply outlasts whatever struck first.",
+      "notes": "themeKey: demon.wallnut"
+    },
+    {
+      "id": "charm.surv-util-022",
+      "nameKey": "charm.pop-rhythm-baton",
+      "name": "Pop Rhythm Baton",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-haste",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A polished, neon-coated conductor's baton that pulses with the rhythm of a stadium anthem, guiding the dance of the dead.",
+      "notes": "themeKey: demon.dancepolzombie"
+    },
+    {
+      "id": "charm.surv-util-023",
+      "nameKey": "charm.matryoshka-shell",
+      "name": "Matryoshka Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A series of nested, hand-carved wooden layers that pulse with a hollow, rhythmic thud.",
+      "notes": "themeKey: demon.dollgold"
+    },
+    {
+      "id": "charm.surv-util-024",
+      "nameKey": "charm.matryoshka-exclamation",
+      "name": "Matryoshka Exclamation",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A series of nested, silver-plated shells that expand outward with a sharp, metallic crack.",
+      "notes": "themeKey: demon.dollsilver"
+    },
+    {
+      "id": "charm.surv-util-025",
+      "nameKey": "charm.corporate-ice-maker",
+      "name": "Corporate Ice-Maker",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, industrial-grade metal canister shaped like a sled, perpetually emitting a freezing mist.",
+      "notes": "themeKey: demon.driverzombie"
+    },
+    {
+      "id": "charm.surv-util-026",
+      "nameKey": "charm.spring-loaded-pole",
+      "name": "Spring-Loaded Pole",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-surge",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.swiftness",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A long, flexible shaft of petrified wood bound with sinew, designed to launch the wielder forward with sudden, violent momentum.",
+      "notes": "themeKey: demon.polevaulterzombie"
+    },
+    {
+      "id": "charm.surv-util-027",
+      "nameKey": "charm.terracotta-canopy",
+      "name": "Terracotta Canopy",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.plating",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy ceramic tile, shaped like a miniature roof, sheltering a cluster of thick vines.",
+      "notes": "themeKey: demon.pot"
+    },
+    {
+      "id": "charm.surv-util-028",
+      "nameKey": "charm.bulwarked-shell",
+      "name": "Bulwarked Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A thick, woody shell that absorbs the impact of the world.",
+      "notes": "themeKey: demon.wallnut"
     }
   ]
 }

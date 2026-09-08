@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.encounter-event-demon.ashthreepeater-001",
+  "flavor": "A high, jagged parapet overlooks the battlefield, where a skeletal 射手 stands amidst a cloud of soot. As the combatants clash, the archer releases a rhythmic sequence of arrows that leave trails of 烧焦 embers in the air, turning the battlefield into a chaotic zone of heat and whistling projectiles.",
+  "kind": "encounter-event",
+  "name": "The Cinder-Archer's Volley",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to focus their fire on the archer to stop the area-of-effect damage or ignore the threat to finish the primary combatants before the arrows rain down.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "demon.ashthreepeater"
+}

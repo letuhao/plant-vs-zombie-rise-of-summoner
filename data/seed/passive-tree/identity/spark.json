@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "Kinetic Aegis",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards those who turn the force of incoming blows into a thickening layer of protective energy and hardened barriers.",
+  "name": "Conductive Aegis",
+  "treeId": "spark"
+}

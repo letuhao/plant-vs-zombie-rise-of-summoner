@@ -52,6 +52,15 @@
       <Link>data\tuning\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06): the real 829-species
+         committed tree, read by ConcreteSpeciesSeedReader (Core-only, no SQL) via RpgHost.Initialize
+         the same way data/tuning/ already reaches this same folder. Excludes the two underscore-
+         prefixed aggregate files (_species-build-plan.json, _fusion-recipes.json) — neither is a
+         per-species ConcreteSpecies row the reader can parse. -->
+    <Content Include="..\..\data\generated\demons\*.json" Exclude="..\..\data\generated\demons\_*.json">
+      <Link>data\generated\demons\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">

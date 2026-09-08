@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The High Priest demands the return of the Solar Scepter to restore light to the temple. Failure to retrieve it means eternal darkness for the faithful.",
+  "name": "The Relic of the Sunken Vault",
+  "objectiveTemplate": "extract-with-item-kind",
+  "prereqRefs": [],
+  "questId": "quest.extract-with-item-kind-domain-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "fair",
+  "scope": "domain",
+  "targetRef": "retinue"
+}

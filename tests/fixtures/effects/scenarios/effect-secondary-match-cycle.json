@@ -1,6 +1,7 @@
 {
   "id": "effect-secondary-match-cycle",
   "seed": 42,
+  "plugins": ["sec.match.butter"],
   "steps": [
     { "op": "clear" },
     { "op": "matchStart" },

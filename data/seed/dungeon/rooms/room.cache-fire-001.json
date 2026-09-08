@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "A massive, soot-stained stone basin sits in the center of the chamber, its rim glowing with a dull, rhythmic heat. Within the basin, piles of scorched gold and blackened gemstones shimmer beneath a layer of drifting ash.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Hearth of Embers",
+  "reason": "The room contains valuable loot but is devoid of combat encounters, serving as a resting point or reward node.",
+  "roomId": "room.cache-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

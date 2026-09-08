@@ -1,0 +1,15 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-004",
+  "eventPool": [],
+  "flavor": "Jagged shards of translucent blue ice erupt from the floor like frozen lightning, trapping ancient, frost-rimed weapons mid-swing within their crystalline depths.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Permafrost Crucible",
+  "reason": "The narrow walkways and slippery footing force the party into a bottleneck, allowing the elite defenders to control the flow of combat.",
+  "roomId": "room.elite-ice-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

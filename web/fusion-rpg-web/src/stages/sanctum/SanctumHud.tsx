@@ -22,9 +22,9 @@ export function SanctumHud({
 }) {
   return (
     <div className="band-hud flex items-center gap-5 border-b border-border bg-soil-raised px-5 py-3" data-testid="sanctum-hud">
-      <span className="font-display text-lg text-text" data-testid="sanctum-hud-identity">
+      <h1 className="font-display text-lg text-text" data-testid="sanctum-hud-identity">
         {playerName}
-      </span>
+      </h1>
 
       <span className="flex items-center gap-1 text-sm text-sun" data-testid="sanctum-hud-souls">
         <span aria-hidden="true">✦</span>

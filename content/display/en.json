@@ -1,0 +1,869 @@
+{
+  "action.family.cactus.001": {
+    "template": "Spined Volley"
+  },
+  "action.family.cactus.001.desc": {
+    "template": "Looses a spine that can split into a second shot, and leaves spores growing in whatever it hits."
+  },
+  "action.family.cherry.001": {
+    "template": "The Crimson Reanimation"
+  },
+  "action.family.cherry.001.desc": {
+    "template": "Blesses an ally so their strikes can set off a cherry blast, and a kill they land closes their own wounds."
+  },
+  "action.family.chomper.001": {
+    "template": "Grave-Gorge"
+  },
+  "action.family.chomper.001.desc": {
+    "template": "Bites down and feeds on the wound: every hit returns some health, and a killing blow returns far more."
+  },
+  "action.family.corn.001": {
+    "template": "Internal Ballistic Forging"
+  },
+  "action.family.corn.001.desc": {
+    "template": "Packs the caster with live ordnance. Shots cut deeper through resistance, and one last round leaves the barrel when the caster falls."
+  },
+  "action.family.double.001": {
+    "template": "Kinetic Discharge"
+  },
+  "action.family.double.001.desc": {
+    "template": "Doubles up the shot: hits can throw an extra round, and a final round still fires if the caster is destroyed."
+  },
+  "action.family.fruit.001": {
+    "template": "Directional Kinetic Discharge"
+  },
+  "action.family.fruit.001.desc": {
+    "template": "Braces the caster behind a heavier shield and blunts the critical hits that would punch through it."
+  },
+  "action.family.garlic.001": {
+    "template": "Internal Saturation"
+  },
+  "action.family.garlic.001.desc": {
+    "template": "Saturates the target with rot, so hits can leave it poisoned, withered, or both at once."
+  },
+  "action.family.garlic.002": {
+    "template": "Internal Saturation"
+  },
+  "action.family.garlic.002.desc": {
+    "template": "Laces an ally's attacks, so what they strike can be left poisoned."
+  },
+  "action.family.hypno.001": {
+    "template": "The Fickle Rot"
+  },
+  "action.family.hypno.001.desc": {
+    "template": "Hits can leave the target mesmerized, and a killing blow feeds the caster's own health back."
+  },
+  "action.family.hypno.002": {
+    "template": "Fickle Rigor Mortis"
+  },
+  "action.family.hypno.002.desc": {
+    "template": "Hardens the caster against critical hits and keeps a thin shell re-forming over them as the fight runs on."
+  },
+  "action.family.nut.001": {
+    "template": "Hardened Penetration"
+  },
+  "action.family.nut.001.desc": {
+    "template": "Thickens the caster's shell while sharpening its strikes to punch through what the enemy is hiding behind."
+  },
+  "action.family.pea.001": {
+    "template": "Undead Volley"
+  },
+  "action.family.pea.001.desc": {
+    "template": "Shots can leave spores growing in the target, and one last shot fires when the caster goes down."
+  },
+  "action.family.pea.002": {
+    "template": "Relentless Surge of the Unliving"
+  },
+  "action.family.pea.002.desc": {
+    "template": "Drives the caster forward faster, and leaves a parting shot behind if it falls on the way."
+  },
+  "action.family.sunflower.001": {
+    "template": "Radiant Completion"
+  },
+  "action.family.sunflower.001.desc": {
+    "template": "Turns kills into fuel: each one closes the caster's wounds and pays out sun."
+  },
+  "action.general.0001": {
+    "template": "Brace"
+  },
+  "action.general.0001.desc": {
+    "template": "Sets a floor under the caster's dodge, and lets them shake off something harmful whenever they land a hit."
+  },
+  "action.general.0003": {
+    "template": "Shared Pulse"
+  },
+  "action.general.0003.desc": {
+    "template": "Pushes the whole group forward faster and gives every one of them more health to spend."
+  },
+  "action.general.0004": {
+    "template": "Shift"
+  },
+  "action.general.0004.desc": {
+    "template": "Breaks the caster into a faster advance and keeps them at that pace for the rest of the fight."
+  },
+  "action.general.0005": {
+    "template": "Shift"
+  },
+  "action.general.0005.desc": {
+    "template": "Moves the caster up quickly and makes them harder to hit while they close the gap."
+  },
+  "action.general.0006": {
+    "template": "Lingering Tremor"
+  },
+  "action.general.0006.desc": {
+    "template": "Withers everything caught in the area, and anything that dies under it can bring the ground down with it."
+  },
+  "action.species.allpeater.001": {
+    "template": "Ignition Singularity"
+  },
+  "action.species.allpeater.001.desc": {
+    "template": "Overcharges the caster's element so every hit lands with extra burning force behind it."
+  },
+  "action.species.bucketnutzombie.001": {
+    "template": "Iron-Skull Resonance"
+  },
+  "action.species.bucketnutzombie.001.desc": {
+    "template": "Rivets the caster's plating tighter, and rigs it to burst outward when the plating finally fails."
+  },
+  "action.species.cabbagepult.001": {
+    "template": "Rooted Retribution"
+  },
+  "action.species.cabbagepult.001.desc": {
+    "template": "Digs the caster in with deeper reserves, and scorches the ground where its shots land."
+  },
+  "action.species.cabbagepult.002": {
+    "template": "Rooted Bastion"
+  },
+  "action.species.cabbagepult.002.desc": {
+    "template": "Roots the caster down for a long fight and burns the lane it is holding into open lava."
+  },
+  "action.species.cactusblover.001": {
+    "template": "Thorned Retribution"
+  },
+  "action.species.cactusblover.001.desc": {
+    "template": "Stiffens the whole army's guard, and turns the damage the caster takes back on whoever dealt it."
+  },
+  "disptpl.affix.affliction": {
+    "template": "+{value} potency to the statuses you inflict"
+  },
+  "disptpl.affix.arm-hardening": {
+    "template": "{value}% more defense for the whole army"
+  },
+  "disptpl.affix.arm-riveting": {
+    "template": "{value}% increased armor plating"
+  },
+  "disptpl.affix.arm-welding": {
+    "template": "{value}% increased carapace"
+  },
+  "disptpl.affix.blighting": {
+    "template": "{value}% chance to blight target on hit"
+  },
+  "disptpl.affix.bloodletting": {
+    "template": "{value}% chance to inflict bloodletting on hit"
+  },
+  "disptpl.affix.bonding": {
+    "template": "{value}% chance to bond target on hit"
+  },
+  "disptpl.affix.bulwark": {
+    "template": "{value} more max health"
+  },
+  "disptpl.affix.buttering": {
+    "template": "{value}% chance to butter target on hit"
+  },
+  "disptpl.affix.carapace": {
+    "template": "+{value} carapace"
+  },
+  "disptpl.affix.cherry-bloom": {
+    "template": "{value}% chance to burst cherry bloom on hit"
+  },
+  "disptpl.affix.chill-punisher": {
+    "template": "{value} bonus damage on hit"
+  },
+  "disptpl.affix.chilling": {
+    "template": "{value}% chance to chill target on hit"
+  },
+  "disptpl.affix.cleansing": {
+    "template": "{value}% chance to cleanse harmful status when struck"
+  },
+  "disptpl.affix.cruelty": {
+    "template": "+{value} {element} critical damage"
+  },
+  "disptpl.affix.death-glean": {
+    "template": "{value}% chance to fire bullet when you land killing blow"
+  },
+  "disptpl.affix.death-harvest": {
+    "template": "heal {value}% of max health when you land killing blow"
+  },
+  "disptpl.affix.death-salvo": {
+    "template": "{value}% chance to fire bullet when this dies"
+  },
+  "disptpl.affix.deathblast": {
+    "template": "{value} {element} damage burst on death"
+  },
+  "disptpl.affix.dooming": {
+    "template": "{value}% chance to detonate board on death"
+  },
+  "disptpl.affix.econ-bounty": {
+    "template": "+{value} bounty points per kill"
+  },
+  "disptpl.affix.econ-endure": {
+    "template": "+{value} sun per hit taken"
+  },
+  "disptpl.affix.econ-graze": {
+    "template": "+{value} sun per hit landed"
+  },
+  "disptpl.affix.econ-muster": {
+    "template": "+{value} points on deployment"
+  },
+  "disptpl.affix.econ-toll": {
+    "template": "+{value} money per hit taken"
+  },
+  "disptpl.affix.elemental-defense": {
+    "template": "+{value} {element} resistance"
+  },
+  "disptpl.affix.elemental-power": {
+    "template": "+{value} {element} power"
+  },
+  "disptpl.affix.elpw-attune": {
+    "template": "attunes {element} power, enabling it to take effect"
+  },
+  "disptpl.affix.elpw-focus": {
+    "template": "{value} increased {element} penetration"
+  },
+  "disptpl.affix.elpw-overflow": {
+    "template": "+{value} bonus {element} power"
+  },
+  "disptpl.affix.elpw-override": {
+    "template": "{element} power becomes {value}, overriding weaker sources"
+  },
+  "disptpl.affix.elpw-pierce": {
+    "template": "+{value} {element} penetration"
+  },
+  "disptpl.affix.elpw-surfeit": {
+    "template": "{value} increased {element} power overflow"
+  },
+  "disptpl.affix.entangling": {
+    "template": "{value}% chance to entangle target on hit"
+  },
+  "disptpl.affix.evasion": {
+    "template": "{value} dodge against {element} attacks"
+  },
+  "disptpl.affix.evd-brace": {
+    "template": "dodge against {element} attacks never falls below {value}"
+  },
+  "disptpl.affix.evd-flinch": {
+    "template": "{value} increased dodge against {element} attacks"
+  },
+  "disptpl.affix.evd-harden": {
+    "template": "{value} increased resistance to {element} critical hits"
+  },
+  "disptpl.affix.evd-husk": {
+    "template": "resistance to bonus damage from {element} critical hits never falls below {value}"
+  },
+  "disptpl.affix.evd-scar": {
+    "template": "resistance to {element} critical hits never falls below {value}"
+  },
+  "disptpl.affix.evd-seal": {
+    "template": "{value} increased reduction of bonus damage from {element} critical hits"
+  },
+  "disptpl.affix.ferocity": {
+    "template": "{value} increased attack"
+  },
+  "disptpl.affix.firelining": {
+    "template": "{value}% chance to lay line of fire on hit"
+  },
+  "disptpl.affix.flash-freeze": {
+    "template": "{value}% chance to flash-freeze attacker when struck"
+  },
+  "disptpl.affix.flourishing": {
+    "template": "{value}ms faster sun production"
+  },
+  "disptpl.affix.fortitude": {
+    "template": "{value} increased max health"
+  },
+  "disptpl.affix.freezing": {
+    "template": "{value}% chance to freeze target on hit"
+  },
+  "disptpl.affix.gardener": {
+    "template": "{value}% chance to spawn plant where this fell"
+  },
+  "disptpl.affix.gravedigging": {
+    "template": "{value}% chance to clear nearby grave when struck"
+  },
+  "disptpl.affix.gravemaking": {
+    "template": "{value}% chance to raise grave where target falls"
+  },
+  "disptpl.affix.hit-followthrough": {
+    "template": "{value} bonus damage on hit"
+  },
+  "disptpl.affix.hit-mend": {
+    "template": "heal {value}% of damage taken on hit"
+  },
+  "disptpl.affix.hit-retort": {
+    "template": "{value}% chance to fire bullet back at attacker when hit"
+  },
+  "disptpl.affix.immunity": {
+    "template": "{value} chance to shrug off a status affliction outright"
+  },
+  "disptpl.affix.keen-edge": {
+    "template": "+{value} {element} critical rate"
+  },
+  "disptpl.affix.life-graft": {
+    "template": "{value} increased health restored on grant"
+  },
+  "disptpl.affix.life-surge": {
+    "template": "{value} more health restored on grant"
+  },
+  "disptpl.affix.lifesteal": {
+    "template": "heal {value}% of damage dealt on hit"
+  },
+  "disptpl.affix.marking": {
+    "template": "{value}% chance to mark target on hit"
+  },
+  "disptpl.affix.martyrdom": {
+    "template": "heal allies {value}% of max health when this dies"
+  },
+  "disptpl.affix.mending": {
+    "template": "+{value} health restored on grant"
+  },
+  "disptpl.affix.mesmerizing": {
+    "template": "{value}% chance to mesmerize target on hit"
+  },
+  "disptpl.affix.midas": {
+    "template": "+{value} money per kill"
+  },
+  "disptpl.affix.might": {
+    "template": "+{value} attack"
+  },
+  "disptpl.affix.padding": {
+    "template": "{value} reduced {element} critical damage taken"
+  },
+  "disptpl.affix.plating": {
+    "template": "+{value} armor plating"
+  },
+  "disptpl.affix.prec-fixation": {
+    "template": "sets {element} accuracy to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.prec-reckoning": {
+    "template": "sets {element} critical damage to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.prec-truesight": {
+    "template": "never misses with {element} strikes"
+  },
+  "disptpl.affix.prec-verdict": {
+    "template": "sets {element} critical rate to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.precision": {
+    "template": "+{value} {element} accuracy"
+  },
+  "disptpl.affix.quickening": {
+    "template": "{value}ms faster between shots"
+  },
+  "disptpl.affix.regeneration": {
+    "template": "heal {value} hp per tick"
+  },
+  "disptpl.affix.resilience": {
+    "template": "{value}% increased defense for the whole army"
+  },
+  "disptpl.affix.retribution": {
+    "template": "reflect {value}% of damage taken back at attacker"
+  },
+  "disptpl.affix.rot-punisher": {
+    "template": "{value} bonus damage on hit"
+  },
+  "disptpl.affix.rotting": {
+    "template": "{value}% chance to rot target on hit"
+  },
+  "disptpl.affix.savagery": {
+    "template": "×{value} attack"
+  },
+  "disptpl.affix.searing-strike": {
+    "template": "{value} {element} damage on hit"
+  },
+  "disptpl.affix.shield-capacity": {
+    "template": "+{value} {element} shield capacity"
+  },
+  "disptpl.affix.shield-pen": {
+    "template": "hits deal +{value} damage to {element} shields"
+  },
+  "disptpl.affix.shield-regen": {
+    "template": "+{value} {element} shield regeneration per second"
+  },
+  "disptpl.affix.shield-toughness": {
+    "template": "{element} shields take {value} less damage per hit"
+  },
+  "disptpl.affix.shld-absolute": {
+    "template": "sets {element} shield penetration to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.shld-breach": {
+    "template": "{value} increased damage dealt to {element} shields"
+  },
+  "disptpl.affix.shld-cycle": {
+    "template": "{value} increased {element} shield regeneration"
+  },
+  "disptpl.affix.shld-surge": {
+    "template": "{value} increased {element} shield capacity"
+  },
+  "disptpl.affix.sparking": {
+    "template": "{value}% chance to spark target on hit"
+  },
+  "disptpl.affix.sporing": {
+    "template": "{value}% chance to infest target with spores on hit"
+  },
+  "disptpl.affix.stalwart": {
+    "template": "+{value} status potency"
+  },
+  "disptpl.affix.stoicism": {
+    "template": "+{value} {element} critical hit resistance"
+  },
+  "disptpl.affix.summoner": {
+    "template": "{value}% chance to spawn zombie where this fell"
+  },
+  "disptpl.affix.sunbloom": {
+    "template": "+{value} sun per kill"
+  },
+  "disptpl.affix.sust-callus": {
+    "template": "gain {value} shield when struck"
+  },
+  "disptpl.affix.sust-freshgraft": {
+    "template": "cleanse all harmful statuses on spawn"
+  },
+  "disptpl.affix.sust-grit": {
+    "template": "{value}% chance to cleanse harmful status when you land hit"
+  },
+  "disptpl.affix.sust-husk": {
+    "template": "gain {value} shield every tick"
+  },
+  "disptpl.affix.swiftness": {
+    "template": "{value} faster zombie advance"
+  },
+  "disptpl.affix.tempo-haste": {
+    "template": "{value}% faster attack rate"
+  },
+  "disptpl.affix.tempo-stampede": {
+    "template": "{value}% more zombie advance"
+  },
+  "disptpl.affix.tempo-surge": {
+    "template": "{value}% increased zombie advance"
+  },
+  "disptpl.affix.tempo-wildgrowth": {
+    "template": "{value}% more attack interval"
+  },
+  "disptpl.affix.tempo-yield": {
+    "template": "{value}% faster sun production"
+  },
+  "disptpl.affix.terraforming": {
+    "template": "{value}% chance to scorch ground to lava on hit"
+  },
+  "disptpl.affix.venomous": {
+    "template": "{value}% chance to poison target on hit"
+  },
+  "disptpl.affix.vitality": {
+    "template": "+{value} max health"
+  },
+  "disptpl.affix.volley": {
+    "template": "{value}% chance to fire extra bullet on hit"
+  },
+  "disptpl.affix.ward-brace": {
+    "template": "cannot be critically struck by {element} damage"
+  },
+  "disptpl.affix.ward-harden": {
+    "template": "{value} increased {element} resistance"
+  },
+  "disptpl.affix.warded": {
+    "template": "{value} {element} shield on spawn"
+  },
+  "disptpl.affix.warding": {
+    "template": "+{value} defense for the whole army"
+  },
+  "disptpl.affix.withering": {
+    "template": "{value}% chance to wither target on hit"
+  },
+  "flavor.set.ancestral-bine": {
+    "template": "Trained around the same stake for a hundred seasons, the bine no longer needs the stake — it remembers the shape on its own and curls back into it every spring."
+  },
+  "flavor.set.copyhand": {
+    "template": "It has never once composed a line of its own, only reproduced the last hand's exactly — and a garden grown from a faithful copy still grows."
+  },
+  "flavor.set.firstedition": {
+    "template": "Every printing since has fixed a typo the first one never had, and every printing since has also lost the one thing the first one got right by accident."
+  },
+  "flavor.set.indexed-lamina": {
+    "template": "Every vein on this leaf was traced and numbered before it ever unfurled, so a strike lands exactly where the diagram already said a strike would land."
+  },
+  "flavor.set.lattice-of-the-page": {
+    "template": "Grown to hold up pages too heavy to stand on their own, the lattice does not care what is written on them — only that the binding never sags."
+  },
+  "flavor.set.root-of-the-solstice": {
+    "template": "It only pushes deeper on the one day the almanac names, and every other day it is content to hold exactly the ground it already has."
+  },
+  "flavor.unique.armature-of-the-redoubt": {
+    "template": "Every stalk it shelters keeps producing. A wall that also pays rent."
+  },
+  "flavor.unique.arrested-yoke": {
+    "template": "Meant to carry the load forward. It carries it in place."
+  },
+  "flavor.unique.blighted-taproot": {
+    "template": "It doesn't grip the soil so much as remember what's buried in it."
+  },
+  "flavor.unique.bloodgarland": {
+    "template": "A wreath meant for a grave, repurposed for a body that isn't ready for one yet."
+  },
+  "flavor.unique.bole-of-the-threshold": {
+    "template": "Planted at the fence line since before anyone kept count, its roots close over whatever tries to cross first. Nothing behind the line has ever needed to ask it for help."
+  },
+  "flavor.unique.bolted-bramble": {
+    "template": "The bolts hold the plating on. The thorns underneath were never anybody's idea but the plant's."
+  },
+  "flavor.unique.bract-of-quietude": {
+    "template": "It senses affliction the way it senses weather, early and without alarm, and settles what it finds back into the same hush the rest of the orchard keeps."
+  },
+  "flavor.unique.brittle-tread": {
+    "template": "One more step and it would have shattered. It never took the step."
+  },
+  "flavor.unique.broad-bole": {
+    "template": "Wide enough that two zombies could not get their hands around it together, if either still had the reach to try."
+  },
+  "flavor.unique.burgeoning-gumboot": {
+    "template": "Something took root in the sole. It has not slowed the kicking any."
+  },
+  "flavor.unique.cage-of-the-multitude": {
+    "template": "Room enough inside for the whole tide to press against the bars at once. It never asks which of them is holding the line."
+  },
+  "flavor.unique.cairnblossom": {
+    "template": "Every step leaves a small mound behind it, and every mound has something worth digging for."
+  },
+  "flavor.unique.carrion-husker": {
+    "template": "It doesn't fire seeds anymore. It fires whatever's left of the zombie that fed it, and it keeps the change."
+  },
+  "flavor.unique.carrion-spitter": {
+    "template": "It doesn't wait for the battlefield to finish. It roots in mid-fight and blooms before the body is cold."
+  },
+  "flavor.unique.catalogued-culm": {
+    "template": "The almanac keeps one page on wounds: what was dealt, returned, entry for entry."
+  },
+  "flavor.unique.caudex-of-symbiosis": {
+    "template": "Two circulations run through it now, and each one scrubs what the other would have let fester. Neither trunk was built to do this alone."
+  },
+  "flavor.unique.cistern-of-loam": {
+    "template": "Holds more than it needs, on the theory that a siege eventually asks for everything you saved."
+  },
+  "flavor.unique.clarion-of-poise": {
+    "template": "It has never once sounded off-key, which is the part that unsettles the collection most."
+  },
+  "flavor.unique.clockwork-sentinel": {
+    "template": "It has stood guard over the cabinet since before the family that built the cabinet stopped visiting."
+  },
+  "flavor.unique.cloistered-sap": {
+    "template": "Sealed away from the air behind bark that has not opened in an age, it keeps its cold the way the orchard keeps everything else — quietly, completely, without needing to be watched."
+  },
+  "flavor.unique.cogcreeper": {
+    "template": "It leaves two kinds of tracks: bootprints, and whatever took root three steps behind them."
+  },
+  "flavor.unique.colony-of-annexation": {
+    "template": "Every runner it sends out comes back having claimed something for the both of them. The colony does not distinguish between growing and annexing."
+  },
+  "flavor.unique.colony-of-the-foundation": {
+    "template": "Every runner it sends out comes home carrying something. That is the whole of the arrangement, and it has held for longer than anyone digging here expected."
+  },
+  "flavor.unique.cooler-of-the-hunger": {
+    "template": "Cold enough to keep the hunger asleep until the wearer needs it awake. It has never once run empty."
+  },
+  "flavor.unique.cordial-of-the-kilnborn": {
+    "template": "Bottled from whatever the last harvest left too strange to plant."
+  },
+  "flavor.unique.corpsewreath": {
+    "template": "It doesn't mourn the wearer. It's already planting the next one."
+  },
+  "flavor.unique.cortex-of-the-canon": {
+    "template": "The canon does not explain itself twice. Grown to the letter of a rule copied out a hundred seasons running, this bark holds exactly the line it was told to and asks nothing else of the plant underneath it."
+  },
+  "flavor.unique.creepmass": {
+    "template": "Stamped out in bulk for someone's army, it was never meant to carry a name. Every plate it presses into the dirt opens the ground a little further, until the soil remembers how many have walked here and gives the rest of them room."
+  },
+  "flavor.unique.crossbred-sporangium": {
+    "template": "Two lineages of pollen fused into one cluster, and neither one waited for the other before it caught fire."
+  },
+  "flavor.unique.deathpetal": {
+    "template": "The bladder never stops swelling. It only ever looks finished right before it isn't."
+  },
+  "flavor.unique.dogtag-of-the-throng": {
+    "template": "A name written in someone else's hand, on a tag stamped from the same mould as ten thousand others. Wear it and the throng does not treat you as one of the ten thousand — it treats you as all of them, briefly, whenever it costs you blood to be."
+  },
+  "flavor.unique.dollhand": {
+    "template": "Six little fingers, each one sharpened after the last collector who wound it too far."
+  },
+  "flavor.unique.encroaching-leash": {
+    "template": "It was tied to hold one throat. It has since learned to hold a great many, one length at a time, and it has not run out of length yet."
+  },
+  "flavor.unique.exact-involucre": {
+    "template": "Every grain the field yields is weighed and logged the instant it is sensed, down to the exact measure the almanac has always insisted on — nothing here rounds up, and nothing rounds down either."
+  },
+  "flavor.unique.facelessmark": {
+    "template": "The cloth hides nothing of what looks back through it, because there was never a face under there worth hiding. Whatever meets that gap in the strips forgets, for a moment, which side of the line it was standing on."
+  },
+  "flavor.unique.flowering-pollen": {
+    "template": "Breathe it in and the battlefield smells like a garden for exactly one second."
+  },
+  "flavor.unique.frostbitten-sledge": {
+    "template": "It swings on the half-beat, same as everyone else in the column."
+  },
+  "flavor.unique.frozen-torc": {
+    "template": "Command passed through it once. It has not passed since."
+  },
+  "flavor.unique.furnace-of-the-shadow": {
+    "template": "It burns nothing you can see. Whatever passes through its bars leaves something behind — a coin, a scrap, a share of what the swarm stripped on the way past — and the furnace never once asks whose it was."
+  },
+  "flavor.unique.gearthorn": {
+    "template": "Somewhere under the gear teeth, a vine still grows toward the light. The bellows just decided the vine's sap made a better coolant than water ever did."
+  },
+  "flavor.unique.glazeface": {
+    "template": "Its expression was painted on once, a century before it learned to change it."
+  },
+  "flavor.unique.gloomcount": {
+    "template": "One note and the tally begins again, dark shapes answering from ground that looked empty a moment ago."
+  },
+  "flavor.unique.gloomshell": {
+    "template": "The dark does not stop at its edge. It slows there, thickens there, and asks the next attacker to wait its turn."
+  },
+  "flavor.unique.goldenmargin": {
+    "template": "Every seed it flings is logged in the margin first — what the field spends, what the field is owed back in sun."
+  },
+  "flavor.unique.goldjoint": {
+    "template": "Every step still creaks in the key it was wound to, long after the winding stopped mattering."
+  },
+  "flavor.unique.graftwake": {
+    "template": "Every splice that takes leaves something behind for the one who tends the graft. This sheath has learned to collect it."
+  },
+  "flavor.unique.haloed-maw": {
+    "template": "It does not aim to kill. It opens, and the orchard's own held light pours out through it — the same glow that has kept this ground standing pours now into whoever stands beside it."
+  },
+  "flavor.unique.holding-thresher": {
+    "template": "It does not spray to kill. It sprays to keep them exactly where they already made the mistake of standing."
+  },
+  "flavor.unique.horn-of-muster": {
+    "template": "It calls the roll. Fewer answer every winter."
+  },
+  "flavor.unique.hushblossom": {
+    "template": "It opens once, and only the nearest ranks ever smell it. Everything past the first row never even notices the orchard has spoken."
+  },
+  "flavor.unique.hushpod": {
+    "template": "Thin enough to see a candle through, it holds nothing back and asks for nothing either — only that whatever was laid on the wearer be quietly lifted off again."
+  },
+  "flavor.unique.hypanthium-of-suture": {
+    "template": "Two floral rings sutured into one closed cup, holding what neither half could hold apart."
+  },
+  "flavor.unique.hypocotyl-of-the-precept": {
+    "template": "The garden's oldest precept says a dying root strikes back before it lets go. Pale and still underground, this hypocotyl has never once needed to be told the rule a second time."
+  },
+  "flavor.unique.illuminated-balsam": {
+    "template": "Sealed light pools in this gland the way sap pools in a cut that never quite closes — bright enough to read by, and generous only while there is still enough of the plant left to spare it."
+  },
+  "flavor.unique.indexed-stamen": {
+    "template": "Every affliction the garden has ever recorded is filed here, in order, waiting to be read back to whatever earns the page."
+  },
+  "flavor.unique.interred-cage": {
+    "template": "Whatever they buried in it stopped struggling years ago. It hasn't stopped digging."
+  },
+  "flavor.unique.involucre-of-the-berm": {
+    "template": "Bracts folded tight as a berm's slope, closing back over whatever they lose the moment they lose it."
+  },
+  "flavor.unique.jerrycan-of-the-nightfall": {
+    "template": "The metal does not give, but whatever is sealed inside keeps working anyway, souring by the hour until sundown, when it is worth the most to whoever is still carrying it. Nobody has asked what it was before it was this."
+  },
+  "flavor.unique.klaxon-of-the-hive": {
+    "template": "Amplified past anything it was built to carry, its one note opens paths beneath the ground before it even finishes ringing. Whoever falls holding it does not stop the call — the hive was never listening for a single voice."
+  },
+  "flavor.unique.leash-of-the-barrow": {
+    "template": "It was buried with its owner. It came back with an owner of its own."
+  },
+  "flavor.unique.ledger-of-salvage": {
+    "template": "Every dent it takes gets a line entry. The apron stopped being armor around the fourth ledger page."
+  },
+  "flavor.unique.longlineage": {
+    "template": "Cut the line at any point and the total does not change. Only which page carries it forward."
+  },
+  "flavor.unique.luminous-scion": {
+    "template": "Every runner the orchard sends out carries a little of its light forward with it. This one took, and kept growing, long after the branch that grew it had every reason to stop."
+  },
+  "flavor.unique.mask-of-the-wake": {
+    "template": "Worn to the vigil, kept after everyone else went home."
+  },
+  "flavor.unique.massed-tread": {
+    "template": "No single footstep here is worth listening for. It is the ones behind it, and the ones behind those, that flatten what they reach."
+  },
+  "flavor.unique.meldbone": {
+    "template": "Bone dissolved into sap until neither one remembers which it used to be. What it exudes now takes hold on any tissue willing to receive it."
+  },
+  "flavor.unique.mouldreign": {
+    "template": "The wound closes the way a fallen log closes over — slowly, and with something living in the seam."
+  },
+  "flavor.unique.mournvine": {
+    "template": "It grows toward whatever screamed last."
+  },
+  "flavor.unique.mouthguard-of-the-tide": {
+    "template": "Bite down and the harvest keeps coming in behind your teeth, counted by a mouth that was never meant to count."
+  },
+  "flavor.unique.muffler-of-the-linkage": {
+    "template": "Chain-linked and choked tight, it does one thing without complaint: it keeps the wearer walking after the fight most collars would have ended at."
+  },
+  "flavor.unique.numbed-visor": {
+    "template": "Nothing gets in past the ice. Nothing gets out either."
+  },
+  "flavor.unique.pagelight": {
+    "template": "It reads by its own glow, one page at a time, and has never once needed to ask what the light outside is doing."
+  },
+  "flavor.unique.pod-of-the-ossuary": {
+    "template": "Every bone it has swallowed became one more layer between the lawn and whatever is still standing on it."
+  },
+  "flavor.unique.pollen-of-the-appendix": {
+    "template": "Every almanac needs a page nobody reads until the season it suddenly matters. This pollen is that page, drifting loose at the back of the garden's record, useful the instant anyone remembers to open it."
+  },
+  "flavor.unique.pricelesstoy": {
+    "template": "Appraised twice, buried once, and dug back up the week the garden went quiet."
+  },
+  "flavor.unique.putrid-choker": {
+    "template": "Worn tight enough to smell everything it has already started to become."
+  },
+  "flavor.unique.radiant-thresher": {
+    "template": "Every stalk it threshes earns a page before the husk even hits the ground — the same sunlight that ripens the field now rides the blade back out through it."
+  },
+  "flavor.unique.rattle-of-the-windrow": {
+    "template": "Shake it once at the turned earth. Whatever answers was already listening."
+  },
+  "flavor.unique.resin-of-benediction": {
+    "template": "What it secretes was never meant as a weapon; it is exactly what the orchard uses to consecrate its own ground. Turned outward, that same blessing burns."
+  },
+  "flavor.unique.resin-of-the-engine": {
+    "template": "The gland still makes poison, out of habit. What actually pays the bills is what it makes instead."
+  },
+  "flavor.unique.root-of-the-equinox": {
+    "template": "The almanac names the day. The root only ever needed telling once."
+  },
+  "flavor.unique.runner-of-the-barrow": {
+    "template": "Send it ahead. It already knows where the ground gives way."
+  },
+  "flavor.unique.runner-of-the-palegift": {
+    "template": "Every runner this clone sends out carries a little of the orchard's own pale light with it, rooting somewhere new before the light even fades. It was never grown to stand alone."
+  },
+  "flavor.unique.seething-chainsaw": {
+    "template": "It has cut through more of them than any single blade could count, and it stopped counting a long time ago. One motor, one chain, an unbroken line of names it never learned."
+  },
+  "flavor.unique.sepal-of-silage": {
+    "template": "It does not flower for bees. It flowers for what the compost pays back."
+  },
+  "flavor.unique.sepulchral-tropism": {
+    "template": "It doesn't grow toward the sun. It grows toward whatever just stopped moving."
+  },
+  "flavor.unique.shelfwarden": {
+    "template": "It kept its post through the fall of three gardens, and counts that as a promotion."
+  },
+  "flavor.unique.shroud-of-decay": {
+    "template": "Wrap the wound before the rot decides what grows there instead."
+  },
+  "flavor.unique.shroud-of-the-litany": {
+    "template": "Recited correctly, the same shield rises twice in the same season. It has never once explained where the second one comes from."
+  },
+  "flavor.unique.sodden-raincoat": {
+    "template": "It never dries. Nothing under it does either, and that is exactly the point."
+  },
+  "flavor.unique.solemn-shroud": {
+    "template": "The orchard's own fence line wore thinner shrouds than this. It does not flare until the wearer is truly failing, solemn and unhurried, exactly as reluctant to act as everything else that keeps this ground quiet."
+  },
+  "flavor.unique.spiked-megaphone": {
+    "template": "One blast and something answers. Nobody who built it ever confirmed whether it was calling for help or ordering an attack, but by the third blast it stopped mattering."
+  },
+  "flavor.unique.sporangium-of-siege": {
+    "template": "It does not scatter on the wind. It waits for a face to be close enough, then answers with the whole garden bed underneath it."
+  },
+  "flavor.unique.stalk-of-dawn": {
+    "template": "It stands through the whole night no differently than any other stem, quiet and unremarkable, until the moment it falls and gives back every hour of light it was ever owed."
+  },
+  "flavor.unique.stiffened-harness": {
+    "template": "The straps never loosened. Neither did anything else."
+  },
+  "flavor.unique.stigma-of-keeping": {
+    "template": "Once touched, it takes and keeps, the way the orchard has always kept what the world outside gave up on. Every harvest goes in. Nothing that isn't sunlight ever comes back out swinging."
+  },
+  "flavor.unique.stitched-maw": {
+    "template": "Root fiber and dead muscle were never meant to close on the same hinge. This one closes anyway, and whatever it closes on stops being sure which side it fights for."
+  },
+  "flavor.unique.sunverse": {
+    "template": "Every runner it sends out carries one verse of the same recorded sun, rooting fresh the instant the gardener that grew it draws its first blood. The almanac calls this multiplication; the garden just calls it Tuesday."
+  },
+  "flavor.unique.tamped-holdfast": {
+    "template": "Packed so hard into the bed beneath it that the ground itself slows to match its pace, which is to say: none at all."
+  },
+  "flavor.unique.teeming-spitter": {
+    "template": "What it spits was rot an hour ago. Give it a season and it will be soil, then bloom, then rot again."
+  },
+  "flavor.unique.tended-taproot": {
+    "template": "Someone has been coming back to this root for longer than anyone alive can say, clearing the soil around it, checking that it still holds. It has never once given them reason to stop."
+  },
+  "flavor.unique.tidefall": {
+    "template": "It was built for opening doors that were never meant to open. Now it opens the ground itself, and the ground it leaves behind never grows anything again — just more room for the tide behind it to fill."
+  },
+  "flavor.unique.torpid-canteen": {
+    "template": "Whatever is inside stopped moving before the marching did."
+  },
+  "flavor.unique.transcribed-resin": {
+    "template": "An exact copy of a procedure meant to record a wound, applied instead to cause one. The almanac was never wrong — only ever misread on purpose."
+  },
+  "flavor.unique.umbral-shell": {
+    "template": "Netting meant to catch scrap now catches blows instead, and returns every one of them with the weight of however many are pressed in behind it. Nobody who strikes it learns how many that was."
+  },
+  "flavor.unique.vest-of-the-ossuary": {
+    "template": "Stitched from grave-linen and stiffened with what the linen used to hold."
+  },
+  "flavor.unique.vigilant-bract": {
+    "template": "It has watched the fence line for longer than any single season, and it has learned exactly one lesson from all that watching: what does not belong to the light does not get to stand in it."
+  },
+  "flavor.unique.vigilroot": {
+    "template": "It keeps watch the way a root keeps watch, by staying exactly where it is, and every kill made anywhere near it comes back down through the soil as banked sun."
+  },
+  "flavor.unique.votive-gourd": {
+    "template": "Every gourd the orchard drops is already a kind of tithe. This one never forgets the exchange: what leaves the vine comes back as coin, not blood."
+  },
+  "flavor.unique.welted-holdfast": {
+    "template": "It welted where root met rot and never smoothed over. Anything that plants a foot too close finds the ground itself has turned cold and unwilling to let go."
+  },
+  "flavor.unique.wired-glume": {
+    "template": "Somebody ran a copper lead into the husk to see what it would do. It answered by learning to aim."
+  },
+  "flavor.unique.wovenpage": {
+    "template": "Thin as a leaf pressed flat and bound between two others, it reads whatever affliction already marks the field and unmakes the entry, page by page, the moment the ink is fresh enough to lift."
+  },
+  "tpl.affix.evasion.plant": {
+    "template": "{value} chance to sway aside from {element} attacks"
+  },
+  "flavor.unique.charnel-bloom-70-009": {
+    "template": "A pulsating, violet petal that rhythmically constricts the air around it. Those caught in its scent find their limbs turning to heavy, unyielding wood."
+  },
+  "flavor.unique.charnel-bloom-70-010": {
+    "template": "A pulsing, fleshy orb that beats in rhythm with the heartbeat of those it ensnares. It whispers of eternal stillness to the frantic mind."
+  },
+  "flavor.unique.charnel-bloom-70-011": {
+    "template": "Every petal is a crystallized coin, blooming only when fed upon the wealth of the fallen. Its thorns drip with a liquid gold that intoxicates the greedy."
+  },
+  "flavor.unique.charnel-bloom-70-012": {
+    "template": "A heavy, ornate buckler etched with veins of pure gold that pulse in rhythm with the market's ebb and flow. It seems to drink the very essence of prosperity from the air around it."
+  },
+  "flavor.unique.earthen-bastion-70-009": {
+    "template": "A dense, unyielding stone carved from the roots of the world. It pulses with a rhythmic, tectonic heartbeat that stabilizes the wearer's very essence."
+  },
+  "flavor.unique.earthen-bastion-70-010": {
+    "template": "A living staff of woven briars that pulses with the rhythm of the forest. It seeks to entangle those who disturb the sacred grove."
+  },
+  "flavor.unique.earthen-bastion-70-011": {
+    "template": "The glass vibrates with the rhythmic pulse of the world. It reveals the hidden paths of the ancient spirits."
+  },
+  "flavor.unique.gilded-porcelain-70-010": {
+    "template": "A delicate lattice of enchanted porcelain that vibrates with the heat of a dying star. It seeks to crack the very air to release its stored fury."
+  },
+  "flavor.unique.gilded-porcelain-70-011": {
+    "template": "Woven from living vines and reinforced with ancient sap, this ward pulses with a rhythmic, life-giving heartbeat. It seeks to mend the wearer even as the world attempts to tear them asunder."
+  },
+  "flavor.unique.gilded-porcelain-70-012": {
+    "template": "Jagged vines wrap around the core to strike at anything that dares approach. The sap pulses with a violent hunger for life."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "climate": "fire",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.party-mono-001",
+  "eventPool": [],
+  "flavor": "The air here is thick enough to chew, shimmering with a relentless, dry heat that makes the very stones glow a dull, angry red. Ash falls like silent snow from a ceiling lost in smoke.",
+  "hazardBand": "heavy",
+  "kind": "elite",
+  "name": "The Cinder Crucible",
+  "reason": "A concentrated pocket of elemental energy has coalesced here, manifesting a guardian that thrives on the heat.",
+  "roomId": "room.elite-fire-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

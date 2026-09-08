@@ -1,0 +1,62 @@
+{
+  "slug": "tribute",
+  "title": "Tribute on pacts",
+  "status": "Shipped",
+  "kicker": "Roster and summoning · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "**Tribute** is the payment side of a pact — keep contracts paid. Overdue tribute is leverage against you.",
+  "blindSpots": [
+    {"term": "Tribute", "meaning": "What the pact asks you to pay to keep the books clear. Usually paid in souls — read the pact UI for the ask."},
+    {"term": "Overdue", "meaning": "You have not paid what is due. That state is leverage — you do not renegotiate your way out while it is owed."},
+    {"term": "Leverage", "meaning": "The contract holds power over you until the books are clear — not a separate currency."},
+    {"term": "Pact", "meaning": "The bond slot. Tribute is one duty of that bond — see [pacts and loyalty](pacts-loyalty)."}
+  ],
+  "alsoTrue": [
+    "Loyalty can still decay under upkeep even when you understand tribute — both matter.",
+    "Altar pulls also spend souls; plan the bank so tribute and summons do not starve each other."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "A pact is not free forever. Tribute is the recurring cost of keeping that demon under contract.",
+        "When tribute is overdue, renegotiation waits until you pay what you owe."
+      ]
+    },
+    {
+      "title": "How you use it",
+      "steps": [
+        "Open Pacts and read each contract’s tribute ask.",
+        "Pay when due if you still need that demon in the field.",
+        "If you are overdue, clear the debt before you expect friendly renegotiation."
+      ]
+    },
+    {
+      "title": "What it is not",
+      "paras": [
+        "It is not lawn-game sun.",
+        "It is not essence — fusion materials are a different stock."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "With a demon on a pact, open Pacts (`P`).",
+    "Find the tribute line and the due state.",
+    "Pay once when asked and confirm the overdue warning clears."
+  ],
+  "doNote": "Stop when overdue = leverage is clear. Fuse next: [specimen fusion](specimen-fusion).",
+  "mixUps": [
+    {"q": "Can I ignore tribute if loyalty looks fine?", "a": "Do not. Overdue tribute is its own problem — leverage stays until paid."},
+    {"q": "Does tribute spend essence?", "a": "No. Plan around souls (and whatever the pact UI shows)."},
+    {"q": "If I release the demon, do I still owe?", "a": "Leaving a contract is a pact decision — clear dues the UI still shows before you assume you are free."},
+    {"q": "Is this a real-money shop?", "a": "No. Local game stocks only."}
+  ],
+  "next": ["specimen-fusion"],
+  "related": ["pacts-loyalty", "souls", "specimens"],
+  "sources": [
+    "docs/guide/creatures.md §Bind (pacts) and tribute",
+    "docs/guide/mechanisms/tribute.md (prior stub)"
+  ]
+}

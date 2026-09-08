@@ -89,7 +89,17 @@ class LadderInversionTests(unittest.TestCase):
 
 
 class OutOfEnvelopeTests(unittest.TestCase):
-    def test_the_shipped_v1_tuning_resolves_clean_for_every_authored_channel(self) -> None:
+    def test_the_shipped_tuning_resolves_clean_for_every_channel_it_can_resolve(self) -> None:
+        """No GAP over the shipped tuning — and the channels the metric could NOT resolve are
+        reported as NOT_MEASURED, one per channel, rather than crashing or silently passing.
+
+        Since tier-bands v2 (item-content T10) the file authors a weight for all 109 affix-family
+        stems, so `FamilyExpansion` stops refusing them; `adapters.items.channels` still carries a
+        `BattleRuleset` reference base for only the 14 primary ones. That difference is a real,
+        named gap in the progression model, and NOT_MEASURED is how this suite says so.
+        """
+        from seedsmith.metrics import Severity
+
         tuning = TierBands.load("latest")
         progression = BattleRulesetProgression.from_adapter(ItemsAdapter())
         numerics = NumericsContext(tuning=tuning, progression=progression)
@@ -98,7 +108,24 @@ class OutOfEnvelopeTests(unittest.TestCase):
         registry = MetricRegistry()
         registry.register(OutOfEnvelope())
         findings = run_all(registry, ctx)
-        self.assertEqual(findings, [])
+
+        self.assertEqual([f for f in findings if f.severity is Severity.GAP], [])
+
+        from seedsmith.adapters.items.channels import PRIMARY_CHANNEL_IDS
+        unmeasured = {f.subject for f in findings if f.severity is Severity.NOT_MEASURED}
+        self.assertEqual(unmeasured, set(tuning.channel_weight_permille) - PRIMARY_CHANNEL_IDS)
+
+    def test_the_fourteen_primary_channels_alone_still_resolve_with_no_findings(self) -> None:
+        # The historical shape of the check above, pinned against v1 so "clean" keeps a meaning
+        # that does not depend on how many stems the latest tuning has grown to.
+        tuning = TierBands.load(1)
+        progression = BattleRulesetProgression.from_adapter(ItemsAdapter())
+        numerics = NumericsContext(tuning=tuning, progression=progression)
+        ctx = Ctx(corpus=None, adapter=None, numerics=numerics)
+
+        registry = MetricRegistry()
+        registry.register(OutOfEnvelope())
+        self.assertEqual(run_all(registry, ctx), [])
 
     def test_a_pathological_tuning_that_zeros_out_m1_is_caught(self) -> None:
         # channelWeight so small the m1 formula rounds to 0, which makes every tier equal —

@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 336,
+  "magnitudes": {
+    "combat.power.omni": 994,
+    "progression.bonus.atk": 4520,
+    "resource.max.hp": 6328,
+    "resource.max.hunger": 4068,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 8136,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 407
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "ElephantZombie_a",
+  "theta": 13,
+  "traitPool": [
+    "immense_bulk",
+    "status_immunity",
+    "sulfur_hardened_skin",
+    "tusks_of_destruction"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

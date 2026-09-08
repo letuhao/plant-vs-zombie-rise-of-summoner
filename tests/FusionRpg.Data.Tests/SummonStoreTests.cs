@@ -34,7 +34,7 @@ public class SummonStoreTests : IDisposable
         Assert.True(_store.ListDemonCodex(1).Entries.Count >= 1);
         // Spent 900; discovery rewards may add back — assert via totals.
         Assert.Equal(900, _store.GetSoulBalance(1).SpentTotal);
-        Assert.True(outcome.Pity.PullsSinceLegendary <= 10);
+        Assert.True(outcome.Pity.PullsSinceSunwoven <= 10);
         Assert.Equal(outcome.Pity, _store.GetSummonPity(1));
     }
 
@@ -119,8 +119,8 @@ public class SummonStoreTests : IDisposable
         _store.ExecuteSummon(1, SummonBannerCatalog.ElementFocus, 1, "c-p2", 2, "fire");
         var afterEleven = _store.GetSummonPity(1);
         // Counter either advanced by one or reset on a hit — never unchanged-and-nonzero drifting.
-        Assert.True(afterEleven.PullsSinceLegendary == afterTen.PullsSinceLegendary + 1
-                    || afterEleven.PullsSinceLegendary == 0);
+        Assert.True(afterEleven.PullsSinceSunwoven == afterTen.PullsSinceSunwoven + 1
+                    || afterEleven.PullsSinceSunwoven == 0);
     }
 
     [Fact]

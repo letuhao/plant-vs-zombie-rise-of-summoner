@@ -33,13 +33,23 @@ public enum ParamKind
 /// nowhere bind and then do nothing. So it is checked at <b>bind</b>, against params and overlay
 /// together (D10).
 /// </param>
+/// <param name="Vocabulary">
+/// E29 (spec-kind-value-guard.md): non-null means this param's value must be a member of an
+/// enumerable SSOT — a status id, a currency, a board verb. Resolved <b>fresh on every call</b>, never
+/// cached, so a vocabulary that grows (a new status registered, a new derived channel) widens what
+/// validates with no guard edit — the exact mistake G6's own comment names: "the registry declared
+/// PrimaryChannels and never read it, which made the list documentation rather than a rule." Checked
+/// by <see cref="AtomKindRegistry.Validate"/>, not here, because the refusal message names the kind
+/// and this schema does not know its own kind id.
+/// </param>
 public sealed record ParamDef(
     string Name,
     ParamKind Kind,
     bool Required = false,
     string? HonouredOnlyWhen = null,
     string? NotImplementedNote = null,
-    bool OverlayOrParam = false);
+    bool OverlayOrParam = false,
+    Func<IReadOnlyCollection<string>>? Vocabulary = null);
 
 /// <summary>The closed key set for one atom kind. Unknown keys reject; unhonoured keys reject.</summary>
 public sealed class ParamSchema

@@ -39,7 +39,7 @@ public class AtomInstanceStoreTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, "", tier),
                 KindId = "stat.modify", FamilyId = family, Variant = "", Tier = tier,
-                ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
+                Name = family, ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
             }).IsOk);
 
         foreach (var id in new[] { "trait.stalwart", "item.ember-band" })
@@ -63,7 +63,7 @@ public class AtomInstanceStoreTests : IDisposable
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         var r = Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, seed, 20, Tuning, out var inst);
+            id => atoms.TryGetValue(id, out var a) ? a : null, _store.GetAffix, seed, 20, Tuning, out var inst);
         Assert.True(r.IsOk, r.ToString());
 
         return _store.SaveInstance(inst!);

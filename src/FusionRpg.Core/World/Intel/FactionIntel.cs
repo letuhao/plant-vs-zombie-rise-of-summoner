@@ -98,6 +98,19 @@ public sealed record IntelSnapshot
     /// <summary>Ordered by slot index. Empty for a glimpse.</summary>
     public IReadOnlyList<RememberedSlot> Slots { get; init; } = Array.Empty<RememberedSlot>();
 
+    /// <summary>
+    /// world-map W45 (spec-sector-development.md §1): what you counted last time you stood here.
+    /// Owner-only economy state, same gate as <see cref="Slots"/> — a glimpse tells you who holds
+    /// the ground, not what it has banked. Zero for a glimpse, never a stale number.
+    /// </summary>
+    public long RecruitStock { get; init; }
+
+    /// <summary>A sector-wide project as it stood on your last full survey — same full-detail-only gate as <see cref="RecruitStock"/>.</summary>
+    public string? ProjectId { get; init; }
+
+    /// <summary>Null for a glimpse, or for a finished project; must not be set without <see cref="ProjectId"/>.</summary>
+    public int? ProjectTurnsRemaining { get; init; }
+
     /// <summary>Ordered by entity id.</summary>
     public IReadOnlyList<RememberedForce> Forces { get; init; } = Array.Empty<RememberedForce>();
 }

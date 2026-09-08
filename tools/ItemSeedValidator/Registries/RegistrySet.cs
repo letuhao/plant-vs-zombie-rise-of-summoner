@@ -19,11 +19,32 @@ public sealed class RegistrySet
     public JsonObject Classes { get; private init; } = new();
     public JsonObject Naming { get; private init; } = new();
 
+    /// <summary>
+    /// The `build.*` themeKey population (item module 13, set-charm-gen): 12 aptitudes x 3
+    /// archetypes, derived from data/seed/aptitudes/roster.json rather than authored. Optional
+    /// on purpose — every check that reads it degrades to the legacy population when it is
+    /// absent, so an older tree still validates.
+    /// </summary>
+    public JsonObject? BuildThemes { get; private init; }
+
     /// <summary>F1's reserved word pools. Not authored yet; absent is legal and reported.</summary>
     public JsonObject? Words { get; private init; }
 
     /// <summary>Optional ledger of ids retired by earlier runs (see seed-contract.md §7.2).</summary>
     public JsonObject? RetiredIds { get; private init; }
+
+    /// <summary>
+    /// D3's role-override table (item module 8, `affix-legality`): a role-wide tier cap or family
+    /// removal. Optional on the same "absence degrades, never blocks" rule every other registry
+    /// here follows — a scoped validation run over a handful of hand-built entries has no reason to
+    /// carry this file, and `RoleFamilyCheck` reports rather than errors when it is absent.
+    /// </summary>
+    public JsonObject? FamilyOverrides { get; private init; }
+
+    /// <summary>D3's relocation table (item module 8): a family dropped from `ward-array`/
+    /// `head-guard`/`sense` re-legalised on a surviving hybrid-core host, at a reduced tier. Same
+    /// optionality rule as <see cref="FamilyOverrides"/>.</summary>
+    public JsonObject? RoleRelocation { get; private init; }
 
     // --- core.v1.json -------------------------------------------------------------------
     public IReadOnlyList<string> RoleIds { get; private set; } = Array.Empty<string>();
@@ -54,6 +75,14 @@ public sealed class RegistrySet
     public IReadOnlyDictionary<string, TagAxisInfo> Axes { get; private set; } = new Dictionary<string, TagAxisInfo>();
 
     // --- themes.v1.json -----------------------------------------------------------------
+    /// <summary>
+    /// The legal <c>themeKey</c> bodies — the union of the legacy <c>theme.*</c> population
+    /// (themes.v1.json, frozen) and the <c>build.*</c> population build-themes.v1.json adds
+    /// (item module 13, set-charm-gen). A <c>set</c> REQUIRES a themeKey and the 36 build set
+    /// families belong to no species, so without the second population a build set is
+    /// unauthorable. The two cannot collide: one is prefixed <c>theme.</c>, the other
+    /// <c>build.</c>, and <see cref="Checks.ReferenceCheck"/> strips whichever it sees.
+    /// </summary>
     public IReadOnlyList<string> ThemeIds { get; private set; } = Array.Empty<string>();
 
     /// <summary>Element vocabulary. No registry owns it outright — see README, "element".</summary>
@@ -155,10 +184,17 @@ public sealed class RegistrySet
             Bands = Read("bands.v1.json"),
             Tags = Read("tags.v1.json"),
             Themes = Read("themes.v1.json"),
-            Classes = Read("classes.v1.json"),
+            // item-ideal.md, base-types (module 6, D35): v2 re-derives the 32-family global
+            // exclusion list against AtomKindRegistry.cs, lifting 15 stale D6-quarantine entries.
+            // v1 stays on disk (frozen, never edited); v2 is purely additive (minCompatibleVersion
+            // 1), so nothing legal under v1 becomes illegal here.
+            Classes = Read("classes.v2.json"),
             Naming = Read("naming.v1.json"),
+            BuildThemes = ReadOptional("build-themes.v1.json"),
             Words = ReadOptional("words.v1.json"),
             RetiredIds = ReadOptional("retired-ids.json"),
+            FamilyOverrides = ReadOptional("family-overrides.v1.json"),
+            RoleRelocation = ReadOptional("role-relocation.v1.json"),
         };
         set.Index();
         return set;
@@ -167,13 +203,15 @@ public sealed class RegistrySet
     /// <summary>Test seam: build a set straight from in-memory registry nodes.</summary>
     public static RegistrySet FromNodes(
         JsonObject core, JsonObject bands, JsonObject tags, JsonObject themes,
-        JsonObject classes, JsonObject naming, JsonObject? words = null, JsonObject? retired = null)
+        JsonObject classes, JsonObject naming, JsonObject? words = null, JsonObject? retired = null,
+        JsonObject? buildThemes = null, JsonObject? familyOverrides = null, JsonObject? roleRelocation = null)
     {
         var set = new RegistrySet
         {
             RegistryDir = "(in-memory)",
             Core = core, Bands = bands, Tags = tags, Themes = themes,
             Classes = classes, Naming = naming, Words = words, RetiredIds = retired,
+            BuildThemes = buildThemes, FamilyOverrides = familyOverrides, RoleRelocation = roleRelocation,
         };
         set.Index();
         return set;
@@ -215,7 +253,7 @@ public sealed class RegistrySet
         Version("bands", Bands, "bands.v1.json");
         Version("tags", Tags, "tags.v1.json");
         Version("themes", Themes, "themes.v1.json");
-        Version("classes", Classes, "classes.v1.json");
+        Version("classes", Classes, "classes.v2.json");
         Version("naming", Naming, "naming.v1.json");
         // words.v1.json is optional to load but nameable in _meta: an author who drew from the
         // pools has every reason to record which version they drew from.
@@ -301,7 +339,19 @@ public sealed class RegistrySet
     void IndexThemes()
     {
         var themes = (Themes["themes"] as JsonArray ?? new JsonArray()).OfType<JsonObject>().ToList();
-        ThemeIds = themes.Select(t => t["id"]?.GetValue<string>()).OfType<string>().ToList();
+        // The union of the two themeKey populations. build-themes.v1.json's own `id` is already
+        // the bare body (`might-offense`); its `themeKey` carries the `build.` prefix, which
+        // ReferenceCheck strips before it looks here — the same shape the legacy `theme.` prefix
+        // has always had. Absent file = legacy population only, which is what every tree before
+        // item module 13 has.
+        var buildThemes = (BuildThemes?["themes"] as JsonArray ?? new JsonArray())
+            .OfType<JsonObject>()
+            .Select(t => t["id"]?.GetValue<string>())
+            .OfType<string>();
+        ThemeIds = themes.Select(t => t["id"]?.GetValue<string>()).OfType<string>()
+            .Concat(buildThemes)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
 
         // No wave-0 registry declares the element list on its own. themes.v1.json is the only one
         // that names elements at all, and definitions.md §1 fixes the shape at "6 elements + omni",

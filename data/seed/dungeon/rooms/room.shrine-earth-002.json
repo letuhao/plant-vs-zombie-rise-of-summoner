@@ -1,0 +1,26 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
+  ],
+  "flavor": "A massive, unhewn slab of obsidian rises from the center of the chamber, its surface etched with veins of glowing amber. Dust motes dance in shafts of light that seem to emanate from the very stones of the walls.",
+  "hazardBand": "light",
+  "kind": "shrine",
+  "name": "The Lithic Altar",
+  "reason": "The party discovers a site of ancient geological worship where the earth itself is offered tribute.",
+  "roomId": "room.shrine-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

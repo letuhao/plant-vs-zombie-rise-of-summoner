@@ -57,7 +57,7 @@ public class UnlockLadderTests
     [Fact]
     public void FloorZeroIsRejectedAtLoadNamingPS8()
     {
-        var json = """{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 0, "cap": 10, "discardTaxCoeffMilli": 100 }""";
+        var json = """{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 0, "heldCap": 10, "rungCap": 10, "discardTaxCoeffMilli": 100 }""";
         var ex = Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
         Assert.Contains("PS-8", ex.Message, StringComparison.Ordinal);
     }
@@ -65,20 +65,22 @@ public class UnlockLadderTests
     [Fact]
     public void RungIsDerivedFromEarnCountAloneNeverOccupancy()
     {
-        // "A planted occupancy-keyed implementation fails": UnlockLadder.Rung takes ONLY earnCount --
-        // there is no slot/position parameter it could even read, so an occupancy-keyed variant is
-        // not a bug this signature can express, let alone hide.
-        Assert.Equal(1, UnlockLadder.Rung(1, Shipped));
-        Assert.Equal(5, UnlockLadder.Rung(5, Shipped));
-        Assert.Equal(10, UnlockLadder.Rung(10, Shipped));   // at cap
-        Assert.Equal(10, UnlockLadder.Rung(11, Shipped));   // past cap -- clamped, "arrives at the top rung"
-        Assert.Equal(10, UnlockLadder.Rung(1000, Shipped)); // arbitrarily far past cap -- still clamped
+        // "A planted occupancy-keyed implementation fails": UnlockLadder.EffectiveRung takes ONLY
+        // earnCount -- there is no slot/position parameter it could even read, so an occupancy-keyed
+        // variant is not a bug this signature can express, let alone hide. Renamed from `Rung` (A-U1,
+        // spec-rung-semantics.md §3.1) -- this is the HOLDER-derived reading, distinct from
+        // `ActionRow.Rung`'s authored column.
+        Assert.Equal(1, UnlockLadder.EffectiveRung(1, Shipped).Value);
+        Assert.Equal(5, UnlockLadder.EffectiveRung(5, Shipped).Value);
+        Assert.Equal(10, UnlockLadder.EffectiveRung(10, Shipped).Value);   // at rungCap
+        Assert.Equal(10, UnlockLadder.EffectiveRung(11, Shipped).Value);   // past rungCap -- clamped, "arrives at the top rung"
+        Assert.Equal(10, UnlockLadder.EffectiveRung(1000, Shipped).Value); // arbitrarily far past rungCap -- still clamped
     }
 
     [Fact]
     public void RungOfZeroEarnsIsZero()
     {
-        Assert.Equal(0, UnlockLadder.Rung(0, Shipped));
+        Assert.Equal(0, UnlockLadder.EffectiveRung(0, Shipped).Value);
     }
 
     [Theory]
@@ -87,7 +89,7 @@ public class UnlockLadderTests
     [InlineData(-1)]
     public void P1OutOfRangeIsRejectedAtLoad(int badP1)
     {
-        var json = $$"""{ "p1Milli": {{badP1}}, "deltaMilli": 880, "floorMilli": 1, "cap": 10, "discardTaxCoeffMilli": 100 }""";
+        var json = $$"""{ "p1Milli": {{badP1}}, "deltaMilli": 880, "floorMilli": 1, "heldCap": 10, "rungCap": 10, "discardTaxCoeffMilli": 100 }""";
         Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
     }
 
@@ -96,14 +98,23 @@ public class UnlockLadderTests
     [InlineData(0)]
     public void DeltaOutOfRangeIsRejectedAtLoad(int badDelta)
     {
-        var json = $$"""{ "p1Milli": 500, "deltaMilli": {{badDelta}}, "floorMilli": 1, "cap": 10, "discardTaxCoeffMilli": 100 }""";
+        var json = $$"""{ "p1Milli": 500, "deltaMilli": {{badDelta}}, "floorMilli": 1, "heldCap": 10, "rungCap": 10, "discardTaxCoeffMilli": 100 }""";
+        Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
+    }
+
+    /// <summary>A-U1 (spec-rung-semantics.md §3.3): the two dials are validated independently now
+    /// that they are separate fields — each must individually reject below 1.</summary>
+    [Fact]
+    public void HeldCapBelowOneIsRejectedAtLoad()
+    {
+        var json = """{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 1, "heldCap": 0, "rungCap": 10, "discardTaxCoeffMilli": 100 }""";
         Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
     }
 
     [Fact]
-    public void CapBelowOneIsRejectedAtLoad()
+    public void RungCapBelowOneIsRejectedAtLoad()
     {
-        var json = """{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 1, "cap": 0, "discardTaxCoeffMilli": 100 }""";
+        var json = """{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 1, "heldCap": 10, "rungCap": 0, "discardTaxCoeffMilli": 100 }""";
         Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
     }
 
@@ -112,7 +123,7 @@ public class UnlockLadderTests
     [InlineData(-1)]
     public void DiscardTaxCoeffZeroOrBelowIsRejectedAtLoad(int badCoeff)
     {
-        var json = $$"""{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 1, "cap": 10, "discardTaxCoeffMilli": {{badCoeff}} }""";
+        var json = $$"""{ "p1Milli": 500, "deltaMilli": 880, "floorMilli": 1, "heldCap": 10, "rungCap": 10, "discardTaxCoeffMilli": {{badCoeff}} }""";
         Assert.Throws<UnlockTuningRejection>(() => UnlockTuningLoader.Parse(json));
     }
 }

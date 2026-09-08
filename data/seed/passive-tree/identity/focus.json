@@ -1,0 +1,11 @@
+{
+  "_provenance": {
+    "nameVoteConfidence": "split",
+    "nameVoteMinority": "The Unyielding Bark",
+    "pipeline": "seedsmith.adapters.trees.identity",
+    "promptVersion": "tree-identity/1"
+  },
+  "description": "This path rewards players who stand their ground, turning heavy impacts into a source of enduring strength and thick, protective armor.",
+  "name": "Unyielding Timber",
+  "treeId": "focus"
+}

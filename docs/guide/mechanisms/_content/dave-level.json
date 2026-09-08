@@ -1,0 +1,63 @@
+{
+  "slug": "dave-level",
+  "title": "Dave's level",
+  "status": "Shipped",
+  "kicker": "Power and builds · level up and power",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power",
+  "hook": "**Dave’s level** is the main power line for your summoner — endless, with no cap. Play raises it; Vision chapters may drip complexity by it later.",
+  "blindSpots": [
+    {"term": "Dave’s level", "meaning": "Your summoner’s level — Crazy Dave’s power line — not a lawn plant’s XP bar alone."},
+    {"term": "Endless / no cap", "meaning": "There is no soft ceiling where grinding stops mattering by design. New worlds raise prestige; they do not wipe who you are."},
+    {"term": "Aptitude points", "meaning": "Spendable power you earn as Dave grows — see [free-build aptitudes](aptitudes)."},
+    {"term": "Chapters", "meaning": "Vision drip by Dave level — not the live rail today. See [unlock chapters](unlock-chapters)."}
+  ],
+  "alsoTrue": [
+    "Specimens and type lines also grow from work they did — see [type and specimen XP](type-specimen-xp).",
+    "HUD and Chronicle show progression; exact curves live in balance data."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "The spine of the power loop: play → Dave levels → spend into builds.",
+        "No designed hard stop where more play stops counting."
+      ]
+    },
+    {
+      "title": "How you use it",
+      "steps": [
+        "Play lawn, expeditions, and map work that feed progression.",
+        "Watch Dave’s level on the HUD / Chronicle.",
+        "Spend aptitude points as you earn them — there is no soft ceiling telling you to stop."
+      ]
+    },
+    {
+      "title": "What it is not",
+      "paras": [
+        "It is not the live unlock table for the rail (that is play beats).",
+        "It is not specimen XP — individuals grow on their own track too."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Finish a lawn match or other play that pays experience.",
+    "Find Dave’s level on the HUD or Chronicle.",
+    "If you have aptitude points, open builds and spend at least one."
+  ],
+  "doNote": "Stop when “no cap” is clear. Next: [type and specimen XP](type-specimen-xp).",
+  "mixUps": [
+    {"q": "Is there a max Dave level?", "a": "No designed cap. Endless grind is the rule."},
+    {"q": "Does a new world reset Dave?", "a": "You keep who you are across worlds — see [New world](new-world-prestige)."},
+    {"q": "Why didn’t Dave 10 open Relics?", "a": "Dave chapters are Vision. Relics open on the live item beat."},
+    {"q": "Is Dave’s level the same as a demon’s level?", "a": "No. Demons have specimen XP; Dave is the summoner line."}
+  ],
+  "next": ["type-specimen-xp"],
+  "related": ["aptitudes", "type-specimen-xp", "unlock-chapters"],
+  "sources": [
+    "docs/guide/relics-and-builds.md",
+    "docs/guide/how-you-play.md §Unlock chapters",
+    "docs/guide/mechanisms/dave-level.md (prior stub)"
+  ]
+}

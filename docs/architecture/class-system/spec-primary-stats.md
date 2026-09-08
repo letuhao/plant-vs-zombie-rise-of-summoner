@@ -217,12 +217,16 @@ tests/FusionRpg.Core.Tests/Stats/Aptitudes/AptitudeCatalogTests.cs
 tests/FusionRpg.Core.Tests/Stats/Aptitudes/AptitudeAllocationTests.cs
 ```
 
-**No file I/O, no DB, no Unity.** The catalog is code-first, matching `StatusCatalog`'s shipped shape
-(`decisions.md` *Status SSOT*: *"in-memory Core registry, code-first; no runtime YAML loader v1"*).
-Persistence of an allocation is `point-economy`'s, in `FusionRpg.Data`.
+**No file I/O, no DB, no Unity inside Core.** Roster identity + `displayName` / `role` / `reading`
+live in `data/tuning/aptitude-catalog.v{n}.json` (runtime catalog — tunables-ssot §1 / T8). Hosts
+parse and inject; Core’s `AptitudeCatalog` is the in-memory registry built from that object
+(matching the amended StatusCatalog shape). **Amended 2026-09-07** from “code-first; no
+`data/tuning/` file.” The C# `AptitudeCatalog.All` array is the **migration source** until inject
+lands. Persistence of an allocation is still `point-economy`’s, in `FusionRpg.Data`.
 
-**No `data/tuning/` file.** This module contains **no balance number** — that is the whole of
-`aptitude-tuning`. If a number appears here during the build, it is in the wrong module.
+**Balance numbers stay out of this module.** Edges and pointEconomy remain
+`data/tuning/aptitudes.v{n}.json` — do not dump English into that file (T7). If a *number* appears
+in the catalog module during the build, it is in the wrong place.
 
 ---
 

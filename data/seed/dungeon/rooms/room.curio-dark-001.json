@@ -1,0 +1,26 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
+  ],
+  "flavor": "A vast, circular chamber where the walls are not stone, but a mosaic of bleached ribcages and hollowed skulls. In the center, a single, pristine silver bell hangs from a strand of braided hair, perfectly still despite the stagnant air.",
+  "hazardBand": "light",
+  "kind": "curio",
+  "name": "The Ossuary of Echoes",
+  "reason": "The bell's chime is said to allow the listener to speak with the last thought of a dying god, but the silence of the room is heavy enough to crush the spirit.",
+  "roomId": "room.curio-dark-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

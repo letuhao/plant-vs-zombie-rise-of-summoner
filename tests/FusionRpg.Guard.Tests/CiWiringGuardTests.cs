@@ -21,6 +21,22 @@ public class CiWiringGuardTests
         Assert.Contains("tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj", ci, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// E35 (spec-match-modify.md §4): the one deliberate exemption to this guard. This project's whole
+    /// reason to exist is testing <c>CheatState.SetLong</c>/<c>LVal</c> and the scoped match-end
+    /// restore, both of which live in <c>FusionRpg.Injector</c> — a project ci.yml has never compiled
+    /// (CLAUDE.md, "Injector not built by CI": no game directory on the runner, so the BepInEx interop
+    /// DLLs its build needs do not exist there). Adding this csproj's path string to ci.yml without
+    /// actually wiring a working step would be exactly the lie this guard exists to catch — a suite
+    /// that "appears wired" but never truly runs. The honest fix is this named exemption, not a fake
+    /// wire-up; if `FusionRpg.Injector` itself is ever made CI-buildable, this exemption is the first
+    /// place to remove.
+    /// </summary>
+    static readonly string[] ExemptFromCiWiring =
+    {
+        "tests/FusionRpg.Injector.Tests/FusionRpg.Injector.Tests.csproj",
+    };
+
     [Fact]
     public void Every_test_project_under_tests_appears_somewhere_in_ci_yml()
     {
@@ -41,12 +57,33 @@ public class CiWiringGuardTests
                 continue;
 
             var relative = Path.GetRelativePath(repoRoot, csproj).Replace('\\', '/');
+            if (ExemptFromCiWiring.Contains(relative, StringComparer.Ordinal)) continue;
             if (!ci.Contains(relative, StringComparison.Ordinal))
                 missing.Add(relative);
         }
 
         Assert.True(missing.Count == 0,
             "test project(s) not referenced anywhere in .github/workflows/ci.yml: " + string.Join(", ", missing));
+    }
+
+    /// <summary>
+    /// E47 (spec-validate-gate-ci.md, test 6): "the point" of the whole module — E24 built this very
+    /// guard for "the next unwired suite" and was itself the next unwired suite (its own `--validate`
+    /// flag shipped with no CI caller). This is that guard pointed at the fix: if the step naming
+    /// `tools/AtomImporter` and `--validate` together ever disappears from <c>ci.yml</c>, the content
+    /// validation gate goes silent again exactly the way it did the first time — an unrelated ci.yml
+    /// edit that deletes or rewords the step is now caught here rather than surfacing months later as
+    /// "why did nobody notice this content was broken."
+    /// </summary>
+    [Fact]
+    public void AtomImporter_validate_gate_is_wired_into_ci()
+    {
+        var ci = ReadCi();
+
+        Assert.Contains("tools/AtomImporter", ci, StringComparison.Ordinal);
+        Assert.Contains("--validate", ci, StringComparison.Ordinal);
+        Assert.Contains("--check", ci, StringComparison.Ordinal);
+        Assert.Contains("--db", ci, StringComparison.Ordinal);
     }
 
     static string ReadCi()

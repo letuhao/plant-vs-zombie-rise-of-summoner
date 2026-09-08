@@ -7,13 +7,13 @@ import type { RailEntry } from "./railState";
 const RAIL_ICON: Record<RailEntry["id"], string> = {
   sanctum: "⌂",
   creatures: "✦",
+  commanders: "♔",
   relics: "◈",
   fusion: "⚗",
   pacts: "👹",
   expeditions: "⛵",
   almanac: "📖",
-  chronicle: "🕮",
-  aptitudes: "◎"
+  chronicle: "🕮"
 };
 
 /**

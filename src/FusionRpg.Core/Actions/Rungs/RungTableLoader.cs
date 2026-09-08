@@ -87,7 +87,22 @@ public static class RungTableLoader
             }
         }
 
-        return new RungRow(rung, minTier, maxTier, poolRolls, qPower, cost, cd, budget);
+        // A-G1 (spec-tier-access-gate.md §3.1): optional, not required like qPower/cost/cd above --
+        // action-rungs.v1.json and every inline test fixture written before this column existed must
+        // keep loading unchanged. Absent means "no ceiling data source loaded" (RungRow.PowerBudgetMilli
+        // is null, never 0). Present but malformed still throws -- a half-authored column is a defect,
+        // an absent one is a pre-v2 table.
+        long? powerBudgetMilli = null;
+        if (el.TryGetProperty("powerBudgetMilli", out var powerBudgetEl))
+        {
+            if (powerBudgetEl.ValueKind != JsonValueKind.Number || !powerBudgetEl.TryGetInt64(out var pb))
+                throw new RungTableRejection($"action rung table: rung {rung} 'powerBudgetMilli' must be an integer");
+            if (pb < 0)
+                throw new RungTableRejection($"action rung table: rung {rung} has a negative powerBudgetMilli");
+            powerBudgetMilli = pb;
+        }
+
+        return new RungRow(rung, minTier, maxTier, poolRolls, qPower, cost, cd, budget, powerBudgetMilli);
     }
 
     static int Int(JsonElement parent, string key, string path)

@@ -19,7 +19,25 @@ public enum VfxAuraStyle
     RiseSparkle = 2,
     CrackleJitter = 3,
     PulseRing = 4,
-    StreamOut = 5
+    StreamOut = 5,
+    /// <summary>wither — ash wisps drift up and outward (batch-1 identity).</summary>
+    WispOut = 6,
+    /// <summary>blight — viscous bubbles rise from feet with horizontal sway.</summary>
+    BubbleRise = 7,
+    /// <summary>rot — heavy chunks fall in a narrow vertical column.</summary>
+    ChunkFall = 8,
+    /// <summary>spark — yellow-white sparks teleport in a tight body box (batch-2 identity).</summary>
+    SparkStrobe = 9,
+    /// <summary>shatter — cyan shard glints with horizontal bias (batch-2 identity).</summary>
+    ShardGlitter = 10,
+    /// <summary>spore — lime spores drift upward on a wide orbit (batch-3 identity).</summary>
+    SporeDrift = 11,
+    /// <summary>charm_pulse — magenta orbit with phase-pulsing radius heartbeat (batch-3 identity).</summary>
+    CharmHeartbeat = 12,
+    /// <summary>pact_mark — violet ring pulse at feet (batch-5 identity).</summary>
+    PactFootPulse = 13,
+    /// <summary>command — blue-violet crown halo pulse above head (batch-5 identity).</summary>
+    CommandCrownPulse = 14
 }
 
 public enum VfxMarkerShape

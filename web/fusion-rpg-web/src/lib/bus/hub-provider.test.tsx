@@ -90,6 +90,22 @@ describe("hub-provider PvzStats", () => {
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["rpgProgressionActor"] });
   });
 
+  it("CommandersUpdated_invalidates_commanders_keys", async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    render(
+      <HubProvider>
+        <div />
+      </HubProvider>,
+      { wrapper: wrap(client) }
+    );
+    await Promise.resolve();
+    expect(handlers.CommandersUpdated).toBeTypeOf("function");
+    handlers.CommandersUpdated!({ playerId: 3 });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.commanders(3) });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["commanders"] });
+  });
+
   it("AlmanacTextUpdated_invalidates_almanac_progression_and_types", async () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const invalidate = vi.spyOn(client, "invalidateQueries");

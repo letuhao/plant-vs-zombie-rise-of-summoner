@@ -1,7 +1,7 @@
 # Capability map: power program
 
 **Status:** **Map drafted 2026-08-23, every open question closed the same day. Owner approved the map and all ten module specs 2026-08-24 — build authorized.**
-**Inventory:** the SSOT's §10 sweep found **14** power-shaped scales; 6 collapse into `Θ`, 8 are bounded or relative and stay. That table is now closed — a scale not in it has no permission to exist.
+**Inventory:** the SSOT's §10 table carries **27** power-shaped scales; **8** are level curves that collapse into `Θ` (or are deleted, or are *cost* ladders exempt by name), **19** are bounded, relative, or the shared ladder itself and stay. That table is now closed — a scale not in it has no permission to exist. *(Was "14 … 6 … 8" — the first sweep's 2026-08-23 numbers, never moved as rows were added. Recounted 2026-09-05 against §10 itself, row by row; row 17 is retired and its number is not reassigned.)*
 **Parent SSOT:** [power/ssot-power-scale.md](power/ssot-power-scale.md) (reconciled 2026-08-23).
 **Adversarial audit:** [power/audit-2026-08-23.md](power/audit-2026-08-23.md) — 8 findings, 5 critical, all adjudicated and applied.
 **Grounding:** [decisions.md](decisions.md) P1 · [actor-hub-ssot.md](actor-hub-ssot.md) §3.B–D, §4 ·

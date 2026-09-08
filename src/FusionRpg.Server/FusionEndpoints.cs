@@ -51,6 +51,9 @@ public static class FusionEndpoints
                 {
                     await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("DemonsUpdated", new { playerId = pid });
                     await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("SoulsUpdated", new { playerId = pid });
+                    // demon-lawn-deploy T2.1: fusion changes roster membership (sacrifices consumed, a
+                    // new specimen created) — see DemonEndpoints.cs's own matching comment.
+                    await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("DemonsUpdated", new { playerId = pid });
                 }
                 catch
                 {
@@ -144,7 +147,7 @@ public static class FusionEndpoints
 
                 if (!StarPolicy.CanPromote(rarity, baseSpec.Profile.Star, baseSpec.Profile.Promoted))
                     return new { ok = false, reason = "promotion.not-ready" };
-                var newRarity = (DemonRarity)((int)rarity + 1);
+                var newRarity = DemonRarityLadder.OneRungAbove(rarity);
                 return new
                 {
                     ok = true,
@@ -170,6 +173,35 @@ public static class FusionEndpoints
                     .Contains(recipe.RecipeId, StringComparer.Ordinal);
                 var pickable = a.Profile.TraitIds.Concat(b.Profile.TraitIds)
                     .Distinct(StringComparer.Ordinal).ToList();
+
+                // WAVE F2.5: each sacrifice's own real rolled atoms, offered for inheritance only
+                // when the server would actually accept a pick on them — mirrors RecipeUnlocked's
+                // own two gates so the FE never offers a choice that bounces at execute time:
+                // `picks.already-materialised` (player_species is materialise-ONCE) and
+                // `picks.source-below-inherit-floor` (InheritCostByRarity only covers
+                // OutputEligibilityFloor-and-above).
+                var alreadyOwnsOutput = store.ListPlayerSpecies(playerId)
+                    .Any(r => string.Equals(r.SpeciesId, output.SpeciesId, StringComparison.Ordinal));
+                var pickableAtoms = new List<object>();
+                if (!alreadyOwnsOutput)
+                    foreach (var (specimen, specimenId) in new[] { (a, body.Sacrifices[0]), (b, body.Sacrifices[1]) })
+                    {
+                        if (!DemonRarityIds.TryParse(specimen.Profile.Rarity, out var sourceRarity)
+                            || !DemonRarityLadder.AtLeast(sourceRarity, DemonRecipeCatalog.OutputEligibilityFloor))
+                            continue;
+                        var roll = store.GetSpecimenMaterialisedRoll(specimenId);
+                        if (roll is null) continue;
+                        var pickCostSouls = FusionCostTable.InheritPick(sourceRarity);
+                        foreach (var atom in roll.Instance.Atoms)
+                            pickableAtoms.Add(new
+                            {
+                                sourceInstanceId = specimenId,
+                                sourceSpeciesId = specimen.Profile.SpeciesId,
+                                atomId = atom.AtomId,
+                                costSouls = pickCostSouls
+                            });
+                    }
+
                 return new
                 {
                     ok = true,
@@ -178,6 +210,8 @@ public static class FusionEndpoints
                     resultSpeciesId = isDiscovered ? recipe.OutputSpeciesId : null,
                     resultRarity = output.BaseRarity.ToId(),
                     pickableTraits = pickable,
+                    pickableAtoms,
+                    pickSlotCap = FusionRoller.SlotsFor(output.BaseRarity),
                     cost = ProjectCost(FusionCostTable.Recipe(output.BaseRarity), output)
                 };
             }
@@ -209,7 +243,8 @@ public static class FusionEndpoints
         body.Mode ?? "",
         body.BaseInstanceId,
         body.Sacrifices ?? new List<string>(),
-        body.PickedTraitId);
+        body.PickedTraitId,
+        body.Picks?.Select(p => new FusionPick(p.SourceInstanceId ?? "", p.AtomId ?? "")).ToList());
 
     public sealed class FusionHttpRequest
     {
@@ -219,6 +254,15 @@ public static class FusionEndpoints
         public List<string>? Sacrifices { get; set; }
         public string? PickedTraitId { get; set; }
         public string? CorrelationId { get; set; }
+        /// <summary>WAVE F2.4/F2.5: player-selected inheritance picks (fusion lab). Omitted or empty
+        /// reproduces today's exact behavior — nothing forced, remainder rolls normally.</summary>
+        public List<FusionPickHttp>? Picks { get; set; }
+    }
+
+    public sealed class FusionPickHttp
+    {
+        public string? SourceInstanceId { get; set; }
+        public string? AtomId { get; set; }
     }
 
     /// <summary>SIM-only fixtures — deterministic species mints and material grants for tests.</summary>

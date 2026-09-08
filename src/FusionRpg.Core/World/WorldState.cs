@@ -2,14 +2,24 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.World;
 
-/// <summary>How far along a sector's life it is (spec-world-model.md §The sector's life).</summary>
+/// <summary>
+/// How far along a sector's life it is (spec-world-model.md §The sector's life). Persisted and
+/// hashed **by name, never by ordinal** (`RpgStore.World.cs` writes `s.Phase.ToString()` and reads
+/// back via `Enum.Parse&lt;SectorPhase&gt;`; `WorldCanonical.Row` hashes the same string form) — the
+/// identical property `SlotTypeCatalog.cs`'s own `SlotKind` relies on, which is what makes removing
+/// an unused member here safe.
+///
+/// `Developed` was removed world-map W54 (spec-sector-development.md §3): declared but referenced
+/// nowhere in `src/` — development level is the number (`WorldSector.DevelopmentLevel`, world-map
+/// W53's own producer), and a phase mirroring it would be derived state that rots, which
+/// spec-world-movement.md already forbids ("no storage of anything recomputable").
+/// </summary>
 public enum SectorPhase
 {
     Unknown,
     Explored,
     Contested,
     Held,
-    Developed,
     Besieged,
     Lost
 }
@@ -71,6 +81,16 @@ public sealed record WorldFaction
     /// lever, not a cheat — hashed, replayed, and named in the turn report whenever it is not 1000.
     /// </summary>
     public int UpkeepHandicapMilli { get; init; } = 1000;
+
+    /// <summary>
+    /// buff-debuff-scope T12: a standing world-map buff/debuff on this faction, per-mille,
+    /// 1000 = no modifier. Follows <see cref="UpkeepHandicapMilli"/>'s exact precedent — hashed via
+    /// <c>WorldCanonical.Write</c>, replay-safe, applied by whichever future consumer's own compute
+    /// path reads it (resolved during audit: `UpkeepHandicapMilli` itself has no single compute path
+    /// — three independent consumers read it, each for its own reason — so this module declares and
+    /// hashes the modifier without wiring itself into any consumer ahead of need).
+    /// </summary>
+    public int ScopeModifierMilli { get; init; } = 1000;
 }
 
 public sealed record WorldSlot
@@ -104,6 +124,25 @@ public sealed record WorldSlot
     /// lands now so it hashes and persists before that module needs it.
     /// </summary>
     public int? ConstructionTurnsRemaining { get; init; }
+
+    /// <summary>
+    /// base-defense `structure-state`: current structure HP. **Null means undamaged** — not zero, and
+    /// not "no structure." Null is the default on every slot in every existing world, which is what
+    /// keeps <see cref="WorldCanonical"/>'s conditional `slot-hp` row silent and every golden unmoved.
+    /// </summary>
+    public long? StructureHp { get; init; }
+
+    /// <summary>
+    /// base-defense `structure-state`, audit F10: slot-level resource depletion, per-mille, 0 =
+    /// untouched. Deliberately NOT <see cref="WorldSector.DepletionMilli"/> — that field is
+    /// sector-scoped and already claimed by the loam program, and the owner's decision ("stop mining
+    /// and product, because the resource can exhausted") is per-mine. Two consumers of one field would
+    /// make each one's changes look like the other's bug.
+    ///
+    /// <para>Bounded ratio, 0..1000 — exempt from AGENTS.md's no-hard-ceilings rule, which names
+    /// "bounded ratios (per-mille, 0..1)" explicitly.</para>
+    /// </summary>
+    public int SlotDepletionMilli { get; init; }
 }
 
 public sealed record WorldSector
@@ -132,6 +171,20 @@ public sealed record WorldSector
     /// none to forget; the `int` version silently overflowed into negative upkeep at legal inputs.
     /// </summary>
     public long LoamStock { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-construction` decision 27/28: raw material drawn from a working
+    /// <see cref="StructureKind.Extractor"/>-adjacent slot, refined into <see cref="IronworkStock"/>
+    /// by a <see cref="StructureKind.Refinery"/>. `long`, matching `LoamStock`'s own precedent above
+    /// — the same int-overflow incident applies to any stockpile field.
+    /// </summary>
+    public long RubbleStock { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-construction` decision 28: the refined output of <see cref="RubbleStock"/>
+    /// via <see cref="SiegeConstruction.Refine"/> — a lossy, gated conversion, not a 1:1 exchange.
+    /// </summary>
+    public long IronworkStock { get; init; }
 
     /// <summary>
     /// The local strength of the Fracture, per-mille, 1000 = baseline (spec-loam-model.md). The
@@ -168,6 +221,26 @@ public sealed record WorldSector
     /// that state; a later module resets it the moment the sector is reclaimed or grows a source.
     /// </summary>
     public int NeglectedTurns { get; init; }
+
+    /// <summary>
+    /// world-map W44 (spec-sector-development.md §1): what this sector has accrued toward founding a
+    /// legion — a **stock, not a rate**, for the same reason <see cref="LoamStock"/>'s own comment
+    /// gives: per-mille means rate or fraction, and a stockpile is neither. `long`, not `int`, for the
+    /// same overflow reason `LoamStock` already documents. No hard cap — a throttle, if one is ever
+    /// needed, is a configurable soft cap in tuning (ssot-power-scale.md §11), never a silent clamp.
+    /// </summary>
+    public long RecruitStock { get; init; }
+
+    /// <summary>
+    /// A sector-wide project in progress (spec-sector-development.md §3) — raises the whole sector
+    /// (development, defense, capacity), never one slot's output, which is what a `WorldSlot.StructureId`
+    /// is for. Null means no project. Mirrors `WorldSlot.StructureId`/`ConstructionTurnsRemaining`'s
+    /// own shape exactly, one level up.
+    /// </summary>
+    public string? ProjectId { get; init; }
+
+    /// <summary>Null means either no project or a finished one; must not be set without <see cref="ProjectId"/>.</summary>
+    public int? ProjectTurnsRemaining { get; init; }
 }
 
 public sealed record WorldLane

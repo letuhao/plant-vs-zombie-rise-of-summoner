@@ -5,6 +5,10 @@ import { renderWithProviders } from "@/test/render";
 import { getStageMountCount, resetStageMountCounts } from "@/shell/stageHost";
 import { resetKeymapForTests } from "@/shell/keymap";
 import { setDevModeEnabled } from "@/dev/devMode";
+import {
+  isLawnKeyboardMuted,
+  resetLawnKeyboardMuteForTests
+} from "@/game/focusGate";
 import { LawnStage } from "./LawnStage";
 
 const mutateAsync = vi.fn();
@@ -35,6 +39,7 @@ describe("LawnStage — GG-11 keystone proof", () => {
     destroyLawnGame.mockClear();
     resetStageMountCounts();
     resetKeymapForTests();
+    resetLawnKeyboardMuteForTests();
     // This environment's default window.localStorage is incomplete (same pattern
     // SystemLayer.test.tsx already uses) — stub a real in-memory Storage before each test.
     const mem: Record<string, string> = {};
@@ -71,6 +76,7 @@ describe("LawnStage — GG-11 keystone proof", () => {
 
     await user.click(screen.getByTestId("lawn-stage-open-panel"));
     await waitFor(() => expect(screen.getByTestId("lawn-stage-panel")).toBeInTheDocument());
+    expect(isLawnKeyboardMuted()).toBe(true);
 
     // The board host never left the tree, the Phaser Game was never
     // recreated or destroyed, and the stage component was never remounted.
@@ -82,6 +88,7 @@ describe("LawnStage — GG-11 keystone proof", () => {
 
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByTestId("lawn-stage-panel")).not.toBeInTheDocument());
+    expect(isLawnKeyboardMuted()).toBe(false);
 
     expect(screen.getByTestId("lawn-game-host")).toBeInTheDocument();
     expect(createLawnGame).toHaveBeenCalledTimes(1);

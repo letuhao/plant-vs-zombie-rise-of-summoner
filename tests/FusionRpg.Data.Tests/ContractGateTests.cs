@@ -36,8 +36,12 @@ public class ContractGateTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
+    // DeployMode != HypnoAlly: this file's subject is contract binding/loyalty gating, unrelated to
+    // demon-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps the deploy-accepting tests here
+    // from incidentally tripping T1.4's own deploy.hypno-ally-not-implemented refusal.
     static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0
+            && s.DeployMode != DemonDeployMode.HypnoAlly);
 
     string Mint()
     {

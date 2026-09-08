@@ -1,0 +1,78 @@
+{
+  "slug": "virtual-turns",
+  "title": "World virtual turns",
+  "status": "Shipped",
+  "kicker": "World and empire · End Turn clock",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure · World-stage empire",
+  "hook": "**Virtual turns** are the world clock — everyone commits orders, then **End Turn** resolves them for every commander at once.",
+  "blindSpots": [
+    {"term": "Virtual turn", "meaning": "A shared resolve step on the map. Not a live match timer and not a real-life diary day."},
+    {"term": "End Turn", "meaning": "The button (or control) that commits the turn. The barrier waits until you and the other commanders are ready."},
+    {"term": "Orders", "meaning": "What you set for legions before the turn resolves — march, claim, and later richer tools."},
+    {"term": "Diary clock", "meaning": "A minute→day→week meta calendar. This game does not use one for the world — only lawn time, expedition wall-clock, and virtual turns."}
+  ],
+  "alsoTrue": [
+    "Expeditions use wall-clock because they are idle. The map does not — it waits on End Turn.",
+    "Same clock applies when the finished [world stage](world-stage) arrives."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Time on the map is turn-based. There is no clock bullying you while you think.",
+        "When orders are set, press End Turn. You, Zomboss, and neutrals resolve together."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "One commit, one resolve:",
+      "cards": [
+        {"name": "Set", "body": "Issue orders for your legions while the turn is open."},
+        {"name": "Commit", "body": "Press End Turn when you are ready."},
+        {"name": "Resolve", "body": "Everyone’s orders fire — including Zomboss evaluating from his fog."}
+      ],
+      "diagram": [
+        "  set orders  ->  End Turn  ->  resolve for all commanders",
+        "                                  |",
+        "                                  +->  you / Zomboss / neutrals"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the World map",
+          "intro": "Open World travel and look for End Turn once you can issue orders.",
+          "steps": [
+            "Set at least one legion order.",
+            "Press End Turn.",
+            "Read what moved — yours and theirs."
+          ],
+          "note": "If nothing resolves, you have not committed the turn yet."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Open the world map.",
+    "Give one clear order (march or claim).",
+    "Press End Turn and watch the resolve — including enemy motion."
+  ],
+  "doNote": "Stop when End Turn ≠ “wait five real minutes.” Related: [world map](world-map), [Zomboss](zomboss-commander).",
+  "mixUps": [
+    {"q": "Does the map tick while I am AFK?", "a": "No. It waits for End Turn. Expeditions are the wall-clock loop."},
+    {"q": "Is this the same as lawn time?", "a": "No. Lawn is a live match. The map is virtual turns."},
+    {"q": "Do I need to End Turn for expeditions?", "a": "No. Expeditions use their own dispatch timers."},
+    {"q": "Does Zomboss move on my End Turn?", "a": "Yes. Everyone resolves together when you commit."}
+  ],
+  "next": ["fog-of-war"],
+  "related": ["world-map", "zomboss-commander", "world-stage"],
+  "sources": [
+    "docs/guide/the-rift.md §What it is",
+    "docs/guide/the-loops.md §Three clocks",
+    "docs/guide/mechanisms/virtual-turns.md (prior stub)",
+    "docs/guide/glossary.md §World virtual turns"
+  ]
+}

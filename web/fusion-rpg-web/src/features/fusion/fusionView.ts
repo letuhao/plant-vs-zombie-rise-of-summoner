@@ -8,6 +8,45 @@ export type FusionCostDto = {
   essenceCount: number;
 };
 
+// WAVE F2.5: one atom a sacrifice actually rolled, offered for inheritance — the server has
+// already filtered out anything it would refuse (already-owned output species, below-floor rarity).
+export type PickableAtom = {
+  sourceInstanceId: string;
+  sourceSpeciesId: string;
+  atomId: string;
+  costSouls: number;
+};
+
+export type SelectedPick = { sourceInstanceId: string; atomId: string };
+
+/** Toggle one pick in/out of a selection, capped at `slotCap` — mirrors the server's own
+ * `slotsByRarity` ceiling (`RecipeUnlocked`'s `picks.exceeds-slots` refusal) so the UI can never
+ * assemble a request the server would refuse for being over-cap. */
+export function togglePick(selected: SelectedPick[], pick: SelectedPick, slotCap: number): SelectedPick[] {
+  const same = (p: SelectedPick) => p.sourceInstanceId === pick.sourceInstanceId && p.atomId === pick.atomId;
+  if (selected.some(same)) return selected.filter((p) => !same(p));
+  return selected.length < slotCap ? [...selected, pick] : selected;
+}
+
+/** Sum of each selected pick's own souls cost, looked up by (sourceInstanceId, atomId) against the
+ * server-priced list — never re-derived client-side (F2.3's own per-source-rarity table). */
+export function picksSoulsCost(selected: SelectedPick[], pickable: PickableAtom[]): number {
+  return selected.reduce((sum, p) => {
+    const found = pickable.find((a) => a.sourceInstanceId === p.sourceInstanceId && a.atomId === p.atomId);
+    return sum + (found?.costSouls ?? 0);
+  }, 0);
+}
+
+/** The recipe's base cost with the selected picks' own souls added on top — souls only (an
+ * inherited pick never prices shards/essence). */
+export function costWithPicks(
+  cost: FusionCostDto,
+  selected: SelectedPick[],
+  pickable: PickableAtom[]
+): FusionCostDto {
+  return { ...cost, souls: cost.souls + picksSoulsCost(selected, pickable) };
+}
+
 export type MaterialShelf = { materialId: string; qty: number }[];
 
 export type HaveNeedLine = { label: string; have: number; need: number; enough: boolean };

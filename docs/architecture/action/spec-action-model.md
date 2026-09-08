@@ -43,7 +43,7 @@ debuffs are not — the actor does not *do* them.
 | Kind | Count | Loadout capacity? | Source |
 |---|---|---|---|
 | **Basic** — attack · guard · move | 3 | **no** | intrinsic on the species row |
-| **Innate** | 1 | **no** — a free sixth | the actor's demon type |
+| **Innate** | 1 | **no** — a free sixth | **the species row** — `SpeciesBasics.InnateActionId`, nullable |
 | **Earned skill** | **5 equipped** | yes — the scarcity | the unlock ladder (`A11`) or any paid grant |
 
 **Loadout capacity caps the granted set only.** Intrinsic actions are never bound, so **there is nothing

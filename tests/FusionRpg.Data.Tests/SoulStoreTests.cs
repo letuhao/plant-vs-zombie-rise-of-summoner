@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Demons;
 using FusionRpg.Data;
@@ -83,6 +84,59 @@ public class SoulStoreTests : IDisposable
         var before = _store.GetSoulBalance(1).Balance;
         _store.InsertEvents(new[] { kill }); // same ptr → same fact dedupe → no new fact → no new earn
         Assert.Equal(before, _store.GetSoulBalance(1).Balance);
+    }
+
+    /// <summary>[[match-key-orphan-drops-soul-earn]]: `Board.Awake` can rotate `GameHooks.MatchKey`
+    /// and fire a new `board.start` whose HTTP request never lands server-side (dropped, or
+    /// superseded by the next rotation before it completes). Before this fix, every subsequent event
+    /// under that matchKey (`FindRunId` returns null for a non-empty, never-seen matchKey) routed to
+    /// `ProjectGlobal`, which silently drops anything but `catalog.*` — real kills, zero soul earn, no
+    /// error anywhere. The fix: lazily create the missing `runs` row the first time this happens,
+    /// trading lost `board.start` metadata (levelName/levelType/boardLevel/modifiers, all null on the
+    /// recovered row) for the economy actually landing.</summary>
+    [Fact]
+    public void A_kill_under_a_never_seen_matchKey_still_earns_souls_self_healing_the_missing_run()
+    {
+        var matchKey = Guid.NewGuid().ToString("N");
+        // Deliberately NO board.start -- this is the orphan scenario itself, not a setup omission.
+        _store.InsertEvents(new[] { Ev("zombie.die", matchKey, new { ptr = $"0x{matchKey[..8]}", type = 0 }) });
+
+        var b = _store.GetSoulBalance(1);
+        Assert.Equal(SoulEarnPolicy.KillDelta, b.Balance);
+    }
+
+    [Fact]
+    public void Self_healed_events_under_the_same_matchKey_share_one_recovered_run()
+    {
+        var matchKey = Guid.NewGuid().ToString("N");
+        _store.InsertEvents(new[]
+        {
+            Ev("zombie.die", matchKey, new { ptr = $"0x{matchKey[..8]}a", type = 0 }),
+            Ev("zombie.die", matchKey, new { ptr = $"0x{matchKey[..8]}b", type = 0 }),
+        });
+
+        var matching = _store.ListRuns().Where(r => string.Equals(r.MatchKey, matchKey, StringComparison.Ordinal));
+        Assert.Single(matching); // one recovered run, not one per orphaned event
+
+        var b = _store.GetSoulBalance(1);
+        Assert.Equal(2 * SoulEarnPolicy.KillDelta, b.Balance); // both kills counted -- neither dropped
+    }
+
+    /// <summary>The additive-discipline control every fix in this codebase runs: an event with NO
+    /// matchKey at all (the real shape of e.g. a global `catalog.*` ingest) must be completely
+    /// unaffected — self-heal only ever triggers for a non-empty, unrecognized matchKey.</summary>
+    [Fact]
+    public void An_event_with_no_matchKey_never_self_heals_a_run_byte_identical_to_today()
+    {
+        var before = _store.ListRuns().Count;
+        _store.InsertEvents(new[] { new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+            Kind = "zombie.die", MatchKey = null, Payload = new { ptr = "0xnomatch", type = 0 },
+        }});
+
+        Assert.Equal(before, _store.ListRuns().Count);
+        Assert.Equal(0, _store.GetSoulBalance(1).Balance); // ProjectGlobal ignores zombie.die -- no earn either
     }
 
     [Fact]

@@ -7,7 +7,7 @@ public sealed class DemonProfileDto
 {
     [JsonPropertyName("instanceId")] public string InstanceId { get; set; } = "";
     [JsonPropertyName("speciesId")] public string SpeciesId { get; set; } = "";
-    [JsonPropertyName("rarity")] public string Rarity { get; set; } = "common";
+    [JsonPropertyName("rarity")] public string Rarity { get; set; } = "chaff";
     [JsonPropertyName("variant")] public string Variant { get; set; } = "normal";
     [JsonPropertyName("elementPrimary")] public string ElementPrimary { get; set; } = "";
     [JsonPropertyName("elementSecondary")] public string? ElementSecondary { get; set; }
@@ -60,7 +60,7 @@ public sealed class DemonMintSpec
     public string SpeciesId { get; set; } = "";
     public string Side { get; set; } = "";
     public int GameTypeId { get; set; }
-    public string Rarity { get; set; } = "common";
+    public string Rarity { get; set; } = "chaff";
     public string Variant { get; set; } = "normal";
     public string ElementPrimary { get; set; } = "";
     public string? ElementSecondary { get; set; }

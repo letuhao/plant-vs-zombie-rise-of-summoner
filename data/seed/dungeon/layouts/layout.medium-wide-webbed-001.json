@@ -1,0 +1,13 @@
+{
+  "branchiness": "webbed",
+  "gateDensity": "sparse",
+  "layoutId": "layout.medium-wide-webbed-001",
+  "oneWayDensity": "sparse",
+  "raidModes": [
+    "pair",
+    "quad"
+  ],
+  "secretDensity": "dense",
+  "sizeBand": "medium",
+  "widthBand": "wide"
+}

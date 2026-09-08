@@ -31,11 +31,12 @@ COMMON_REQUIRED = frozenset({"id", "nameKey", "name"})
 
 
 def _defined(kind: str, directory: str, namespace: str, *, required: "set[str]",
-            extra: "set[str]") -> KindSpec:
+            extra: "set[str]", refs: "set[str] | None" = None) -> KindSpec:
     return KindSpec(
         kind=kind, directory=directory, namespace=namespace,
         required=COMMON_REQUIRED | required,
         optional=COMMON_FIELDS | extra,
+        reference_fields=frozenset(refs or ()),
     )
 
 
@@ -55,11 +56,20 @@ KINDS: "tuple[KindSpec, ...]" = (
     _defined("unique", "uniques", "uniques",
             required={"frame", "baseType", "rarity", "fixedAtoms", "counterPressure", "tags",
                      "powerAxis"},
+            # D4.29 (spec-unique-pipeline.md §1): `reason` and `actionGrantRef` amend this
+            # KindSpec -- both are in the spec's own field-ownership table (AUTHORED and
+            # VALIDATED respectively) but were absent from every prior port of this KindSpec.
+            # Optional, not required: zero of the real 144-corpus's sampled entries use either
+            # field, and `actionGrantRef`'s own "none legal" reading (spec §1) means absence is
+            # itself a legal value, never a missing-field defect.
             extra={"frame", "baseType", "rarity", "fixedAtoms", "varianceSlot",
-                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis"}),
+                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis",
+                   "reason", "actionGrantRef"},
+            refs={"baseType"}),
     _defined("set", "sets", "sets",
             required={"themeKey", "members", "thresholds"},
-            extra={"themeKey", "theme", "members", "thresholds"}),
+            extra={"themeKey", "theme", "members", "thresholds"},
+            refs={"members"}),
     _defined("gem", "gems", "gems",
             required={"family", "powerBand"},
             extra={"family", "element", "powerBand", "affinityElement"}),
@@ -80,7 +90,8 @@ KINDS: "tuple[KindSpec, ...]" = (
     _defined("recipe", "recipes", "recipes",
             required={"operation", "outputKind", "frame", "costLines"},
             extra={"operation", "outputKind", "outputRef", "outputQty", "frame", "costLines",
-                   "soulsCostBand"}),
+                   "soulsCostBand"},
+            refs={"outputRef"}),
     _defined("enhancement-milestone", "enhancement-milestones", "enhancementMilestones",
             required={"runtimeFamily", "kindId", "params", "powerBand"},
             extra={"runtimeFamily", "kindId", "params", "powerBand"}),
@@ -89,7 +100,8 @@ KINDS: "tuple[KindSpec, ...]" = (
             extra={"classId", "useContext", "family", "element", "powerBand", "manifestCost",
                    "grantsActionId", "cooldownKey"}),
     _defined("drop-table", "drop-tables", "dropTables",
-            required={"sourceAllow", "groups"}, extra={"sourceAllow", "groups"}),
+            required={"sourceAllow", "groups"}, extra={"sourceAllow", "groups"},
+            refs={"sourceAllow", "groups"}),
     _defined("display-template", "display-templates", "displayTemplates",
             required={"runtimeFamily", "groupId", "status"},
             extra={"runtimeFamily", "plantOverrideKey", "plantOverrideName", "groupId",
@@ -98,3 +110,48 @@ KINDS: "tuple[KindSpec, ...]" = (
 
 assert len(KINDS) == 15, "KindCatalog.cs carries 15 kinds (14 Defined + 1 Undefined: attribute)"
 assert len({k.kind for k in KINDS}) == 15, "duplicate kind id in this port"
+
+
+# ---------------------------------------------------------------------------------------------
+# D4.29 (spec-unique-pipeline.md §1) — one ownership level per `unique` field. Five levels: the
+# item seed-contract's four (AUTHORED, VALIDATED, DERIVED, GENERATED) plus dungeon-seed-contract's
+# PLANNED ("the planner fixes it from the budget before the call; the model is shown it and may
+# not change it") — first use of PLANNED under `adapters/items/`. A field with no declared level
+# is a contract defect (`every_field_has_exactly_one_level`, dungeon/audit.py's own precedent).
+#
+# Transcribed directly from the spec's §1 table, not re-derived: `id`/`nameKey`/`iconKey`/
+# `flavorKey` are PLANNED because the corpus mints them from a cell before any call
+# (`unique.<theme>-<band>-<nnn>`, three keys off the same slug), never from model output.
+# `frame`/`powerAxis`/`rarity`/`acquisition` are PLANNED because they ARE the grid cell (frame x
+# axis x band) plus the acquisition gate (ssot-uniques.md §4.5) -- a wrong one here is invisible
+# in the same way a wrong ordinal is (dungeon-seed-contract.md §1). `fixedAtoms[].family`,
+# `varianceSlot.family`, `baseType`, `counterPressure.kind`, `actionGrantRef`, `dungeonBinding`
+# and `tags` are VALIDATED against real, closed registries -- never invented, never free text.
+# `name`, `flavor`, `counterPressure.note` and `reason` are the only AUTHORED (free-text) fields.
+# `powerBand` on a fixed atom is AUTHORED but VOTED (seed-contract §4), not a plain free write.
+UNIQUE_OWNERSHIP: "dict[str, str]" = {
+    "id": "PLANNED", "nameKey": "PLANNED", "iconKey": "PLANNED", "flavorKey": "PLANNED",
+    "name": "AUTHORED", "flavor": "AUTHORED", "reason": "AUTHORED",
+    "frame": "PLANNED", "powerAxis": "PLANNED", "rarity": "PLANNED", "acquisition": "PLANNED",
+    "baseType": "VALIDATED",
+    "fixedAtoms": "VALIDATED",           # family VALIDATED, powerBand AUTHORED+voted -- one level
+    "varianceSlot": "VALIDATED",         # family VALIDATED, variance AUTHORED -- one level, per entry
+    "counterPressure": "VALIDATED",      # kind VALIDATED; its own arguments VALIDATED -- never the note
+    "actionGrantRef": "VALIDATED",
+    "theme": "VALIDATED", "themeKey": "VALIDATED",
+    "tags": "VALIDATED",
+    # COMMON_FIELDS this kind does not use for identity (name/nameKey/id/tags/flavor/flavorKey/
+    # iconKey are already assigned above): enabled, notes, overrides, unlockGate are structural
+    # bookkeeping, not part of the anchor's own identity -- VALIDATED (closed true/false or a
+    # frozen gate id, never authored free-form).
+    "enabled": "VALIDATED", "notes": "AUTHORED", "overrides": "VALIDATED", "unlockGate": "VALIDATED",
+}
+
+VALID_OWNERSHIP_LEVELS = frozenset({"AUTHORED", "VALIDATED", "DERIVED", "GENERATED", "PLANNED"})
+
+# DERIVED, never in the file (spec §1's own table, last row): climateAffinity (the theme's
+# elementAffinity[]), budget_ae, the container id, extend-slot carriage, footprint. Listed for
+# documentation -- there is no field in the seed file to assign a level to for any of these.
+UNIQUE_DERIVED_FACTS = frozenset({
+    "climateAffinity", "budget_ae", "containerId", "extendSlotCarriage", "footprint",
+})

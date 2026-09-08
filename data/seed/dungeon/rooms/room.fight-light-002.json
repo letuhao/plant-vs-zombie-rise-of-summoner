@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "Beams of concentrated sunlight pierce through high, crystalline apertures, casting dancing rainbows across the polished marble floor. The air hums with a low, vibrating warmth that makes the very dust motes glow like tiny embers.",
+  "hazardBand": "none",
+  "kind": "fight",
+  "name": "The Prismatic Refraction",
+  "reason": "The party is intercepted by guardians of pure radiance before they can reach the inner sanctum.",
+  "roomId": "room.fight-light-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

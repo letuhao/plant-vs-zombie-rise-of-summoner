@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "charm-species-demon.ashthreepeater": {
+      "entryId": "charm.off-ctrl-021",
+      "attempts": 2
+    },
+    "charm-species-demon.bucketnutzombie": {
+      "entryId": "charm.off-ctrl-022",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrythreepeater": {
+      "entryId": "charm.off-ctrl-023",
+      "attempts": 2
+    },
+    "charm-species-demon.conezombie": {
+      "entryId": "charm.off-ctrl-024",
+      "attempts": 1
+    },
+    "charm-species-demon.dancepolzombie": {
+      "entryId": "charm.surv-util-022",
+      "attempts": 2
+    },
+    "charm-species-demon.darkthreepeater": {
+      "entryId": "charm.off-ctrl-025",
+      "attempts": 1
+    },
+    "charm-species-demon.dollgold": {
+      "entryId": "charm.surv-util-023",
+      "attempts": 1
+    },
+    "charm-species-demon.dollsilver": {
+      "entryId": "charm.surv-util-024",
+      "attempts": 2
+    },
+    "charm-species-demon.doomcactus": {
+      "entryId": "charm.off-ctrl-026",
+      "attempts": 2
+    },
+    "charm-species-demon.doorzombie": {
+      "entryId": "charm.off-ctrl-027",
+      "attempts": 2
+    },
+    "charm-species-demon.driverzombie": {
+      "entryId": "charm.surv-util-025",
+      "attempts": 2
+    },
+    "charm-species-demon.footballzombie": {
+      "entryId": "charm.off-ctrl-028",
+      "attempts": 2
+    },
+    "charm-species-demon.garlicthreepeater": {
+      "entryId": "charm.off-ctrl-029",
+      "attempts": 2
+    },
+    "charm-species-demon.ironpeazombie": {
+      "entryId": "charm.off-ctrl-030",
+      "attempts": 2
+    },
+    "charm-species-demon.jalapeashooter": {
+      "entryId": "charm.off-ctrl-031",
+      "attempts": 1
+    },
+    "charm-species-demon.melonpult": {
+      "entryId": "charm.off-ctrl-032",
+      "attempts": 1
+    },
+    "charm-species-demon.paperzombie": {
+      "entryId": "charm.off-ctrl-033",
+      "attempts": 2
+    },
+    "charm-species-demon.peasunflower": {
+      "entryId": "charm.off-ctrl-034",
+      "attempts": 1
+    },
+    "charm-species-demon.polevaulterzombie": {
+      "entryId": "charm.surv-util-026",
+      "attempts": 2
+    },
+    "charm-species-demon.pot": {
+      "entryId": "charm.surv-util-027",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredyshroom": {
+      "entryId": "charm.off-ctrl-035",
+      "attempts": 2
+    },
+    "charm-species-demon.snowgatling": {
+      "entryId": "charm.off-ctrl-036",
+      "attempts": 1
+    },
+    "charm-species-demon.threepeater": {
+      "entryId": "charm.off-ctrl-037",
+      "attempts": 1
+    },
+    "charm-species-demon.twinflower": {
+      "entryId": "charm.econ-021",
+      "attempts": 2
+    },
+    "charm-species-demon.wallnut": {
+      "entryId": "charm.surv-util-028",
+      "attempts": 1
+    }
+  }
+}

@@ -33,7 +33,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.bent-spacer",
       "flavorKey": "flavor.base.bent-spacer",
       "flavor": "Worked from scrap, still holds.",
@@ -62,10 +62,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.twisted-washer",
       "flavorKey": "flavor.base.twisted-washer",
       "flavor": "Spun tight around the wrist.",
@@ -97,7 +97,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.open-shank",
       "flavorKey": "flavor.base.open-shank",
       "flavor": "Worn loose, waiting to clamp.",
@@ -129,7 +129,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.burnished-grommet",
       "flavorKey": "flavor.base.burnished-grommet",
       "flavor": "Polished and edged with care.",
@@ -158,10 +158,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.flanged-ferrule",
       "flavorKey": "flavor.base.flanged-ferrule",
       "flavor": "Edges hold firm at wrist and bone.",
@@ -190,10 +190,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.substantial-nut",
       "flavorKey": "flavor.base.substantial-nut",
       "flavor": "Threaded so nothing spins loose.",
@@ -225,7 +225,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.notarised-shim",
       "flavorKey": "flavor.base.notarised-shim",
       "flavor": "Authority bound in metal.",
@@ -254,10 +254,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.certified-clip",
       "flavorKey": "flavor.base.certified-clip",
       "flavor": "Stamped and bound with intent.",
@@ -289,7 +289,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.final-bead",
       "flavorKey": "flavor.base.final-bead",
       "flavor": "The last word on a binding thread.",
@@ -321,7 +321,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.absolute-ring",
       "flavorKey": "flavor.base.absolute-ring",
       "flavor": "No compromise, no exception.",
@@ -350,10 +350,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.endorsed-token",
       "flavorKey": "flavor.base.endorsed-token",
       "flavor": "Approved by those who came before.",
@@ -382,10 +382,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.unbreakable-trinket",
       "flavorKey": "flavor.base.unbreakable-trinket",
       "flavor": "Built to outlast the wearer.",

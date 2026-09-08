@@ -18,6 +18,11 @@ Enriches [item-ideal.md](../item-ideal.md); bound by [enrichment-contract.md](en
 
 ---
 
+> ⚠ **§10 Q5 is STALE (2026-09-03).** It holds `affliction` / `stalwart` at `status = 'pending'` because
+> of defect **C2**. **C2 is fixed** — `ResistanceEvaluator.cs:348` now reads
+> `clamp(1 + delta/NetFactorScale, …)` and `StatusPolicy.cs:24` cites *"T3.2 (audit F4)"*. Those families
+> ship **live**. See [../item-ideal.md](../item-ideal.md) §2e.
+
 ## 1. Scope
 
 ### This lane owns

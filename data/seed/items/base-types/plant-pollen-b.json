@@ -30,7 +30,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -70,7 +70,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.engorged-pollen",
       "flavorKey": "flavor.base.engorged-pollen",
       "flavor": "Swollen with life force, dense and crackling with potential.",
@@ -104,10 +104,10 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.latent-ovule",
       "flavorKey": "flavor.base.latent-ovule",
       "flavor": "The waiting seed sleeps in perfect form. All that will bloom lies dormant within.",
@@ -154,7 +154,7 @@
         "rooted",
         "defensive"
       ],
-      "notes": "Weaker implicit paired with standard socket ceiling for resilience in band-b variety \u2014 dormancy itself provides the protection.",
+      "notes": "Weaker implicit paired with standard socket ceiling for resilience in band-b variety — dormancy itself provides the protection.",
       "enhanceTrack": [
         {
           "atLevel": 4,
@@ -179,10 +179,10 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.nourished-nectar",
       "flavorKey": "flavor.base.nourished-nectar",
       "flavor": "Tended and thick with sweetness, a bounty held in reserve.",
@@ -219,7 +219,7 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.potent-stamen",
       "flavorKey": "flavor.base.potent-stamen",
       "flavor": "Packed with the vigor to draw life from the soil itself.",
@@ -253,13 +253,13 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.cohered-pistil",
       "flavorKey": "flavor.base.cohered-pistil",
-      "flavor": "Once three parts \u2014 now one binding truth.",
+      "flavor": "Once three parts — now one binding truth.",
       "tags": [
         "heavy",
         "organic",
@@ -290,7 +290,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -330,7 +330,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.knit-perianth",
       "flavorKey": "flavor.base.knit-perianth",
       "flavor": "A mesh of petals and sepals woven so tightly nothing passes without consent.",
@@ -401,7 +401,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
       "socketMax": 1,

@@ -1,0 +1,15 @@
+{
+  "climate": "ice",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-rainbow-001",
+  "eventPool": [],
+  "flavor": "Jagged shards of translucent blue ice erupt from the floor like frozen teeth, catching the dim light in a thousand fractured directions. A biting wind whistles through the narrow pillars, carrying the scent of ancient snow.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Rime-Crusted Courtyard",
+  "reason": "The party is cornered in an open area by frost-touched guardians.",
+  "roomId": "room.fight-ice-001",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="The Sanctum is your home hall — the place you are when no lawn, battle, or map run is in progress, and where every run returns." />
+    <title>Sanctum — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/sanctum.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped (thin)</span>
+          Session and shell · home stage
+        </p>
+        <h1 class="teach-title">Sanctum</h1>
+        <p class="teach-hook">The <strong>Sanctum</strong> is your home hall — the place you are when no lawn, battle, or map run is in progress, and where every run returns.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Stage</dt>
+              <dd>Where you are playing right now. The Sanctum is a stage — a place to *be*, not a list of websites to click through.</dd>
+            </div>
+            <div>
+              <dt>Layer</dt>
+              <dd>A menu that opens <strong>over</strong> the stage (Creatures, Fusion, Expeditions…). Closing it returns you to the same hall.</dd>
+            </div>
+            <div>
+              <dt>Rail</dt>
+              <dd>The shared set of layer hotkeys and entries. Same keys on every stage. Detail: <a href="layer-rail.html">layer rail</a>.</dd>
+            </div>
+            <div>
+              <dt>Home</dt>
+              <dd>Not “main menu.” When nothing else is active, you stand in the hall with creatures, travel, and a sense of what is next.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>The hall and rail are open in this build; some layers behind the rail are still thin. The guided first-run naming ritual is WIP — see <a href="naming-ritual.html">naming ritual</a>.</li>
+            <li>You arrive here after <a href="save-select.html">title / save select</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>A summoner’s hall: creatures on display, a way to travel, and a focus on what to do next.</p>
+          <p>When a lawn, battle, delve, or siege ends, you come back here.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-you-do-here-title">
+          <h2 id="what-you-do-here-title">What you do here</h2>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Read the hall</strong>
+              <p>Soul balance and summoner level sit on the HUD. Time in the Sanctum does not push you.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Open layers</strong>
+              <p>Creatures, Fusion, Pacts, Expeditions, and the rest open over the hall without leaving it.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Travel</strong>
+              <p>Go to the world map (<code>M</code> or the map table) or start a lawn run when a match is ready.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Collect</strong>
+              <p>Take expedition returns that finished while you were away.</p>
+            </li>
+          </ol>
+          <p class="teach-note">Expedition timers are wall-clock remaining — not a ticking panic meter in the hall.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="layers-vs-travel-title">
+          <h2 id="layers-vs-travel-title">Layers vs travel</h2>
+          <p>Layers stack over the Sanctum and close back to the same place.</p>
+          <p>Travel replaces the stage when you leave for Lawn or World — that is a real departure, then you return home afterward.</p>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Action</th>
+                <th scope="col">What happens</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Press C / F / E / …</td>
+                <td>A layer opens over the hall</td>
+              </tr>
+              <tr>
+                <td>Esc (empty stack)</td>
+                <td>System settings open</td>
+              </tr>
+              <tr>
+                <td>Travel (M / map table)</td>
+                <td>You leave for the world map stage</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="first-session-note-title">
+          <h2 id="first-session-note-title">First session note</h2>
+          <p>Vision for a brand-new save: the hall starts almost empty; you bind and name your first creature in place.</p>
+          <p>Until that ritual ships, you still land in the Sanctum and open the rail yourself.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Finish <a href="save-select.html">save select</a> and land in the hall.</li>
+            <li>Look around without opening everything — note HUD stocks and any “what next” cue.</li>
+            <li>Open one layer (Creatures is a safe first), then close it and confirm you are still in the Sanctum.</li>
+          </ol>
+          <p class="teach-note">Stop when the hall feels like home, not a settings dump. Next: <a href="layer-rail.html">layer rail</a> and <a href="unlock-beats.html">unlock beats</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is the Sanctum just the main menu?</dt>
+              <dd>No. It is a home stage. Layers open over it; you stay in the hall.</dd>
+            </div>
+            <div>
+              <dt>Do I lose my place when I open Creatures?</dt>
+              <dd>No. Closing the layer returns you to the same Sanctum.</dd>
+            </div>
+            <div>
+              <dt>Why are some rail entries locked?</dt>
+              <dd>They unlock as you play. Locked entries say what opens them — see <a href="unlock-beats.html">unlock beats</a>.</dd>
+            </div>
+            <div>
+              <dt>Does standing here advance expeditions?</dt>
+              <dd>Expeditions run on wall-clock whether you watch or not. The hall does not add pressure.</dd>
+            </div>
+            <div>
+              <dt>Where is the naming ritual?</dt>
+              <dd>Not finished yet. You can still play from the Sanctum; see <a href="naming-ritual.html">naming ritual</a>.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="layer-rail.html">Layer rail and hotkeys</a>
+          </p>
+          <p>
+            Related:
+            <a href="save-select.html">Title / save select</a> ·
+            <a href="layer-rail.html">Layer rail and hotkeys</a> ·
+            <a href="unlock-beats.html">Unlock ladder (play beats)</a> ·
+            <a href="naming-ritual.html">First-run naming ritual</a> ·
+            <a href="system-settings.html">Settings and keymap</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/sanctum.md">Markdown (editable SSOT)</a> ·
+            <a href="../../sanctum.md">Sanctum</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/sanctum.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

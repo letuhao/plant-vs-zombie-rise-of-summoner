@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "entries": [
+    {
+      "id": "item.fx-passive-atk-flat",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-passive-atk-flat.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.passive_atk_flat"
+      }
+    },
+    {
+      "id": "item.fx-butter-on-hit",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-butter-on-hit.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.butter_on_hit"
+      }
+    },
+    {
+      "id": "item.fx-shield-grant",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-shield-grant.a.t1" },
+        { "atom": "atom.fx-shield-grant.b.t1" },
+        { "atom": "atom.fx-shield-grant.c.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.shield_grant"
+      }
+    },
+    {
+      "id": "item.fx-cold-on-hit",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-cold-on-hit.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.cold_on_hit"
+      }
+    },
+    {
+      "id": "item.fx-entity-atk",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.entity_atk",
+        "note": "fx.entity_atk is a placeholder id with no defined effect anywhere in the seed tree (UniqueEquipmentCatalog's own doc comment on Items). Zero atoms preserves that exact no-op behavior while moving stub.hp_charm/relic.cracked_seal off the legacy mods_json grant path — the same fixed-core-marker shape patron.aura shipped with before patron-absorption filled it in."
+      }
+    }
+  ]
+}

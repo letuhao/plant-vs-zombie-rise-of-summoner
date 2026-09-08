@@ -1,0 +1,15 @@
+{
+  "climate": "dark",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Black, oily residue coats the floor, reflecting nothing. Amidst the gloom, a pile of silvered bones and tarnished heirlooms rests atop a pedestal of obsidian, pulsing with a faint, rhythmic violet light.",
+  "hazardBand": "light",
+  "kind": "cache",
+  "name": "The Reliquary of Hollowed Veins",
+  "reason": "The party has navigated the necrotic currents of the dungeon to find a cache of sanctified remains and stolen finery.",
+  "roomId": "room.cache-dark-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

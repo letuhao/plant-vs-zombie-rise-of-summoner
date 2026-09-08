@@ -1,4 +1,4 @@
-# The derived-stat sheet — 261 channels, five open families, and six states
+# The derived-stat sheet — 269 channels, five open families, and six states
 
 **Status:** Detail design, 2026-08-23. **Document 9 of 9** owed by
 [gap-audit-2026-08-22.md](gap-audit-2026-08-22.md) §7 (gap **A26**), built second because it is the
@@ -35,7 +35,8 @@ against the generator, not hand-recomputed and left to go stale again.**
 | `resource.max/regen/efficiency.*` (H.5, T2 + `poise` 2026-08-26) | 18 | same — six resource ids × 3 channels |
 | `move.range` (H.6, T2) | 1 | same |
 | `skill.cooldown/effectiveness.*` (H.3, T2) | 10 | same |
-| **Pre-registered total** | **261** | 99 → 256 (T2) → 259 (class-system `poise-resource`, 2026-08-26) → 261 (P0.5 / battle-timeline B9, `turn.speed`+`turn.haste`, 2026-08-28) |
+| `loadout.slots` (H.8, D4.25 — party-dungeon, spec-unique-pipeline.md §4) | 1 | same |
+| **Pre-registered total** | **269** | 99 → 256 (T2) → 259 (class-system `poise-resource`, 2026-08-26) → 261 (P0.5 / battle-timeline B9, `turn.speed`+`turn.haste`, 2026-08-28) → 267 (action-corpus Phase 0.8, 2026-09-02: `combat.heal.power` generalised into `resource.restore.{resource}` — +6 members, and the old id stays registered as a retirement shim so archived `aptitudes.v1/v2/v3.json` remain loadable) → 268 (party-dungeon D4.25, 2026-09-06: `loadout.slots`, the extend-action-slot grant's derived channel) → **269** (base-defense siege-ai, 2026-09-07: `ai.aggression`, §5.20 rule 4's signed targeting-priority scalar) |
 | Nine **open-ended prefix families** — `status.power.{id}` · `status.resist.{id}` · `status.duration.{id}` · `status.durationReduction.{id}` · `status.intensity.{id}` · `status.intensityReduction.{id}` · `status.immune.{tag}` · `status.immuneReduction.{tag}` · `status.expose.{category}` | **unbounded** | resolved dynamically in `TryResolveChannel` (5 original + 4 from H.2, T2) |
 | …of which the locked 21-status catalog could expand the first **six** by | **+126** | [status-ssot.md §9](../architecture/status-ssot.md) — 21 statuses × 6 sparse-eligible dimensions. **Corrected from a "+42, ~298" estimate** that counted only power/resist — H.2's four new sparse families are exercisable by the same 21-status catalog and were omitted from that arithmetic |
 
@@ -182,9 +183,42 @@ visible**, so suppression never reads as absence.
 and it is what stops `+150 crit rate` and `+12 fire power` being read as comparable. Guard 3 of that
 document tests exactly this.
 
+### 5.2a Player names — runtime catalog, not `idWords` (added 2026-09-07; home amended same day)
+
+The sheet in §5.2 already used English family names (*Power*, *Crit rate*). The FE did not:
+`channelLabel` in `web/fusion-rpg-web/src/contract/adapt.ts` title-cases the dotted id because
+`catalog.json` authors no `displayName`. That is a named gap, not a style miss.
+
+**Home (amended 2026-09-07):** [`data/tuning/derived-stat-catalog.v{n}.json`](../../data/tuning/) —
+families carry `displayName`, `reading`, `icon`, `gauge`, sheet group, and a cap **ref**. Cap
+*values* stay in `data/tuning/derived-stats.v{n}.json` (`categoryResistCap`, `turnDefaultSpeed`).
+Seed [`lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json) and
+[`catalog.json`](../../data/seed/derived-stats/catalog.json) become check mirrors once hosts inject
+the tuning catalog. The sheet still renders **what the snapshot holds**, laid out by the catalog
+rule — not by a hardcoded component list (§1).
+
+A player row binds `(displayName, reading, unitClass, gauge, cap)` from the catalog plus the six
+render states from §3. `idWords` is developer-only (GG-62).
+
+### 5.2b StatRow + InspectSplit (added 2026-09-07)
+
+The combat block is still a **matrix** (28 × 7). The player does not meet it as 196 `<tr>` of ids.
+
+| Piece | Job |
+|---|---|
+| **StatRow** | icon · catalog name · number · spark · `?`. One family per row; element occupancy as seven pips, not seven columns of text |
+| **Category collapse** | offense / defense / shield / guard / reflect / status / progression (from catalog sheet groups). **One group open** |
+| **InspectSplit** | clicking a row or `?` fills the **right inspector** (value, unit sentence, compose sentence from §4, cap or “no cap — more still counts”, contribution list). Not a nested dialog (GG-63) |
+
+**Spark policy** is the catalog `gauge` field. Uncapped `GameUnits` sparks are *relative to this
+actor’s siblings* and never paint `CAP`. Registry caps (`status.resist.dot` at 0.95) fill against
+the cap and show the §3 marker. That is GG-64 / PS-8, not a third classification.
+
+The ActorSheet **Derived** tab *is* this sheet. Plate 13 is the visual catalog.
+
 ### 5.3 Channel detail — the "why"
 
-Opened from a cell. Shows: the value, its unit class, the compose sentence from §4, the cap and distance
+Opened from a StatRow into the inspector (same panel). Shows: the value, its unit class, the compose sentence from §4, the cap and distance
 to it, and **the contribution list — each source named in the fiction's words**, never `sourceId`.
 
 This is where the player answers *"where did this come from"*, and it is the only place the sheet can
@@ -192,8 +226,8 @@ honestly claim to explain a number.
 
 > **What it cannot show yet, and must say so.** Four producers write derived channels today with **no
 > registered subsystem row** — patron, stars, injuries, and contracts
-> ([actor-hub-ssot.md §6.1](../architecture/actor-hub-ssot.md)). Until `stat.derived` lands and they
-> adopt it, their contributions arrive **unattributed**. The detail view renders those as
+> ([actor-hub-ssot.md §6.1](../architecture/actor-hub-ssot.md)). The `stat.derived` kind **has landed**;
+> until those four producers adopt it, their contributions arrive **unattributed**. The detail view renders those as
 > *"from your pact"* / *"from an injury"* where the producer is knowable and **an explicit
 > `unattributed` row where it is not** — never silently folded into the total, which would make the
 > list not add up with no explanation.

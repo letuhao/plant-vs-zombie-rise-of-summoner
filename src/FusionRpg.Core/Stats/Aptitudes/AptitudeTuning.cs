@@ -40,16 +40,30 @@ public sealed record AptitudeGrant(long AptitudePointsPerThetaMilli, long SkillP
 /// <see cref="RespecPolicy"/> owns that as a documented placeholder. This field is only the "how
 /// much," which IS the tunable (§6: "RespecPolicy... carries no bare literal — every number is a
 /// named tunable").</para></summary>
+/// <summary><see cref="SkillPointsPerThetaMilliByScope"/> — passive-tree C6, spec-tree-state.md §3
+/// (D34): the SKILL-point sibling of <see cref="AptitudePointsPerThetaMilliByScope"/> above, added
+/// 2026-09-06. <b>Deliberately OPTIONAL at the tuning-file level</b>, unlike its sibling: mirroring
+/// the sibling's hard per-parse requirement would reject `aptitudes.v1-v5.json` and the dozen-plus
+/// inline `AptitudeTuningLoader.Parse("""...""")` fixtures across the test suite that predate this
+/// table, none of which grant scoped skill points. A tuning file that never carries this key parses
+/// to an EMPTY dictionary here — not a guessed rate — and <see cref="PointBudget.SkillPointsFor"/> is
+/// the one place that turns "no rate for this scope" into a loud rejection, at first use, naming the
+/// scope (tunables-ssot.md T5's "never a default", applied at the point a caller actually needs the
+/// number rather than at every historical file's parse). When the key IS present it is parsed exactly
+/// like the sibling — all four scopes required, each a load rejection if absent.</summary>
 public sealed record AptitudePointEconomy(
     IReadOnlyDictionary<AllocationScope, long> AptitudePointsPerThetaMilliByScope,
-    long RespecPrice);
+    long RespecPrice,
+    IReadOnlyDictionary<AllocationScope, long> SkillPointsPerThetaMilliByScope);
 
 /// <summary>class-system-todo.md P7.1-P7.3, spec-guard-economy.md §3/§5/§8 — the three coefficients
-/// `PoiseRuntime` reads. <see cref="FlatCommitCost"/>: Reading C's flat half, paid on every guard
-/// commit regardless of outcome (§3: "committing is what costs, not landing"). <see cref="AbsorbDrainSharePermille"/>:
+/// `PoiseLedger`/`Riposte` read (unified onto this one pair by battle-tempo `poise-unification`,
+/// 2026-09-05 — the deleted `Combat/Guard/PoiseRuntime.cs` read the same three before then).
+/// <see cref="FlatCommitCost"/>: Reading C's flat half, paid on every guard commit regardless of
+/// outcome (§3: "committing is what costs, not landing"). <see cref="AbsorbDrainSharePermille"/>:
 /// Reading C's proportional half, drained against what a guard actually stopped. <see cref="RiposteShareCapPermille"/>:
 /// §5's conversion, a BOUNDED RATIO over an uncapped pool (PS-8 — the comment §8's code-style example
-/// requires lives on <c>PoiseRuntime.Riposte</c> itself, not here). All three are UNMEASURED
+/// requires lives on <c>Riposte.DamageFromSpentPoise</c> itself, not here). All three are UNMEASURED
 /// placeholders — §10 "Ask first: the riposte share, it is BASTION's whole offence" — shipped per the
 /// same "shipping a guess is fine, calling it balance is not" posture this session already applied to
 /// `AptitudePointEconomy`'s own tier weights and respec price.</summary>
@@ -201,7 +215,9 @@ public static class AptitudeTuningLoader
                     [AllocationScope.Aspect] = PositiveMilli(byScopeEl, "aspect", byScopePath),
                     [AllocationScope.UniqueDemon] = PositiveMilli(byScopeEl, "uniqueDemon", byScopePath),
                 },
-                RespecPrice: PositiveMilli(pointEconomyEl, "respecPrice", "pointEconomy"));
+                RespecPrice: PositiveMilli(pointEconomyEl, "respecPrice", "pointEconomy"),
+                SkillPointsPerThetaMilliByScope: OptionalScopedRates(
+                    pointEconomyEl, "skillPointsPerThetaMilliByScope", "pointEconomy"));
 
             var guardEconomyEl = Obj(root, "guardEconomy", "$");
             var guardEconomy = new AptitudeGuardEconomy(
@@ -256,6 +272,30 @@ public static class AptitudeTuningLoader
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Object)
             throw new AptitudeTuningRejection($"aptitude tuning: missing required key '{(parentPath == "$" ? key : parentPath + "." + key)}'");
         return el;
+    }
+
+    /// <summary>The four-scope rate table backing <see cref="AptitudePointEconomy.SkillPointsPerThetaMilliByScope"/>
+    /// — C6, spec-tree-state.md §3 (D34). Unlike <see cref="Obj"/>, an ABSENT key is not a rejection:
+    /// a tuning file that never carries `key` parses to an empty table (never a guessed rate), and
+    /// <see cref="PointBudget.SkillPointsFor"/> is what turns "no rate for this scope" into a load
+    /// rejection, at first use. But once the key IS present it is exactly as strict as the sibling
+    /// table `Obj`+<see cref="PositiveMilli"/> already enforce: all four scopes required, each a named
+    /// rejection if absent, so a half-authored table can never ship silently.</summary>
+    static IReadOnlyDictionary<AllocationScope, long> OptionalScopedRates(JsonElement parent, string key, string parentPath)
+    {
+        if (!parent.TryGetProperty(key, out var el))
+            return new Dictionary<AllocationScope, long>();
+        if (el.ValueKind != JsonValueKind.Object)
+            throw new AptitudeTuningRejection($"aptitude tuning: '{parentPath}.{key}' must be an object");
+
+        var path = parentPath + "." + key;
+        return new Dictionary<AllocationScope, long>
+        {
+            [AllocationScope.Commander] = PositiveMilli(el, "commander", path),
+            [AllocationScope.DemonType] = PositiveMilli(el, "demonType", path),
+            [AllocationScope.Aspect] = PositiveMilli(el, "aspect", path),
+            [AllocationScope.UniqueDemon] = PositiveMilli(el, "uniqueDemon", path),
+        };
     }
 
     static List<string> StringArray(JsonElement parent, string key, string parentPath)

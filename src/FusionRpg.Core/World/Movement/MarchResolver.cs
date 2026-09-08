@@ -55,9 +55,7 @@ public static class MarchResolver
             if (next is null) return new MarchRefusal("path.not-contiguous");
 
             var type = LaneTypeCatalog.Get(lane.TypeId);
-            if (type.OneWay && !string.Equals(lane.FromSectorId, at, StringComparison.Ordinal))
-                return new MarchRefusal("lane.one-way");
-            if (type.Gated && lane.GateKeyId != null) return new MarchRefusal("lane.gated");
+            if (LaneGate.Refusal(type, lane, at) is { } refusal) return refusal;
 
             at = next;
         }
@@ -80,6 +78,7 @@ public static class MarchResolver
         var startedProgress = entity.LaneProgressMilli;
         var heading = entity.OnLaneTowardSectorId;
         var arrivedAt = (string?)null;
+        var arrivedViaLaneId = (string?)null;
 
         string? onLane = null;
         var progress = 0;
@@ -116,6 +115,7 @@ public static class MarchResolver
                 spent += remainingCost;
                 atSector = towards;
                 arrivedAt = towards;
+                arrivedViaLaneId = laneId;
                 onLane = null;
                 progress = 0;
                 if (towards != null) visited.Add(towards);
@@ -146,7 +146,7 @@ public static class MarchResolver
         var timeMilli = budget <= 0 ? 0 : (int)Math.Clamp((long)spent * 1000 / budget, 0, 1000);
         return new MarchOutcome(
             atSector, onLane, onLane is null ? null : heading, progress, budget - spent, timeMilli,
-            arrivedAt, halted, visited);
+            arrivedAt, halted, visited, arrivedViaLaneId);
     }
 
     /// <summary>
@@ -205,10 +205,16 @@ public static class MarchResolver
 }
 
 /// <summary>Where a march ended, which way it was pointing, and when — in turn per-mille.</summary>
+/// <param name="ArrivedViaLaneId">
+/// The last lane walked to reach <see cref="ArrivedAtSectorId"/>, or null when the march never
+/// completed a hop this turn. Movement-phase-local only — never stored on <see cref="WorldEntity"/>
+/// — it exists solely so a same-turn Sector-kind contact fight that routs this force has somewhere to
+/// fall back to (<see cref="Turn.BattleApplication"/>'s own fall-back logic, world-map, 2026-09-05).
+/// </param>
 public readonly record struct MarchOutcome(
     string? AtSectorId, string? OnLaneId, string? OnLaneTowardSectorId, int LaneProgressMilli,
     int MovementRemaining, int TimeMilli, string? ArrivedAtSectorId, bool HaltedByZoneOfControl,
-    IReadOnlyList<string> VisitedSectorIds);
+    IReadOnlyList<string> VisitedSectorIds, string? ArrivedViaLaneId = null);
 
 /// <summary>
 /// One force's occupancy of one lane this turn: where along it, which end it faces, and how much of

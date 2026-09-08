@@ -22,6 +22,25 @@ $patterns = @(
 $failures = @()
 $scanned = @{}
 
+# Whole-line comments are not code, and matching them is a false positive that hard-fails a deploy.
+# Found 2026-09-04: a comment in ModifierOp.cs that DOCUMENTS the boundary ("EntityStatWriter.cs
+# writes the entity that has it") failed this guard, which then failed deploy-play.ps1 outright.
+# Documenting the rule must never look like breaking it.
+#
+# Same approach, and same stated caveat, as KernelPurityScan and ModeProfileArchitectureTests already
+# use for themselves: skip whole-line comments, keep everything else. This is deliberately NOT full
+# comment/string awareness — a trailing comment on a line of real code is still scanned, so the rule
+# is narrowed for documentation and not weakened for code.
+function Get-CodeLines([string]$text) {
+    $out = New-Object System.Collections.Generic.List[string]
+    foreach ($line in ($text -split "`r?`n")) {
+        $t = $line.TrimStart()
+        if ($t.StartsWith('//') -or $t.StartsWith('*') -or $t.StartsWith('/*')) { continue }
+        $out.Add($line)
+    }
+    return ($out -join "`n")
+}
+
 function Test-SecondaryFile([string]$full) {
     if ($script:scanned.ContainsKey($full)) { return }
     $script:scanned[$full] = $true
@@ -31,8 +50,9 @@ function Test-SecondaryFile([string]$full) {
     $text = Get-Content -LiteralPath $full -Raw
     if ([string]::IsNullOrEmpty($text)) { return }
     $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+    $code = Get-CodeLines $text
     foreach ($pat in $patterns) {
-        if ([regex]::IsMatch($text, $pat)) {
+        if ([regex]::IsMatch($code, $pat)) {
             $script:failures += "${rel}: matches /$pat/"
         }
     }
@@ -72,8 +92,9 @@ if (Test-Path $coreDir) {
         $text = Get-Content -LiteralPath $full -Raw
         if ([string]::IsNullOrEmpty($text)) { return }
         $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        $code = Get-CodeLines $text
         foreach ($pat in $coreWriterPatterns) {
-            if ([regex]::IsMatch($text, $pat)) {
+            if ([regex]::IsMatch($code, $pat)) {
                 $script:failures += "${rel}: matches /$pat/ (Core must fan-out via CombatDamageDispatcher + Funnel)"
             }
         }

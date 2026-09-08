@@ -1,0 +1,43 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1012,
+  "magnitudes": {
+    "combat.shield.capacity.omni": 24860,
+    "combat.shield.regen.omni": 407,
+    "combat.shield.toughness.omni": 904,
+    "progression.bonus.arm2": 3616,
+    "progression.bonus.maxHp": 5424,
+    "resource.max.hp": 5424,
+    "resource.max.hunger": 5424,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 11752,
+    "resource.regen.hp": 38,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 480
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "NutChomper",
+  "theta": 13,
+  "traitPool": [
+    "digestive-regeneration",
+    "high-durability",
+    "predatory"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

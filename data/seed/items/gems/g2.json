@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "kind": "gem",
+  "_meta": {
+    "batch": "gems-g2",
+    "partition": "gems/2",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 4,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "gem-gen/1",
+    "model": "gemgen/hand-authored-1",
+    "authoredUtc": "2026-09-07T00:00:00Z",
+    "sourceRef": "entry-shapes.md#1"
+  },
+  "entries": [
+    {
+      "id": "gem.g2-001",
+      "nameKey": "gem.afflicted-barb",
+      "name": "Afflicted Barb",
+      "family": "atom.affliction",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.afflicted-barb",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-002",
+      "nameKey": "gem.hardened-rivet",
+      "name": "Hardened Rivet",
+      "family": "atom.arm-hardening",
+      "powerBand": "high",
+      "iconKey": "icon.gem.hardened-rivet",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "gem.g2-003",
+      "nameKey": "gem.riveted-plate",
+      "name": "Riveted Plate",
+      "family": "atom.arm-riveting",
+      "powerBand": "low",
+      "iconKey": "icon.gem.riveted-plate",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "gem.g2-004",
+      "nameKey": "gem.welded-brace",
+      "name": "Welded Brace",
+      "family": "atom.arm-welding",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.welded-brace",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "gem.g2-005",
+      "nameKey": "gem.blight-vial",
+      "name": "Blight Vial",
+      "family": "atom.blighting",
+      "powerBand": "high",
+      "iconKey": "icon.gem.blight-vial",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-006",
+      "nameKey": "gem.bloodletting-fang",
+      "name": "Bloodletting Fang",
+      "family": "atom.bloodletting",
+      "powerBand": "low",
+      "iconKey": "icon.gem.bloodletting-fang",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-007",
+      "nameKey": "gem.meldbond-coil",
+      "name": "Meldbond Coil",
+      "family": "atom.bonding",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.meldbond-coil",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-008",
+      "nameKey": "gem.butterseal-chip",
+      "name": "Butterseal Chip",
+      "family": "atom.buttering",
+      "powerBand": "high",
+      "iconKey": "icon.gem.butterseal-chip",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-009",
+      "nameKey": "gem.cherry-cinder",
+      "name": "Cherry Cinder",
+      "family": "atom.cherry-bloom",
+      "powerBand": "low",
+      "iconKey": "icon.gem.cherry-cinder",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-010",
+      "nameKey": "gem.rime-brand",
+      "name": "Rime Brand",
+      "family": "atom.chill-punisher",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.rime-brand",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-011",
+      "nameKey": "gem.numbing-coil",
+      "name": "Numbing Coil",
+      "family": "atom.chilling",
+      "powerBand": "high",
+      "iconKey": "icon.gem.numbing-coil",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-012",
+      "nameKey": "gem.gleaming-hook",
+      "name": "Gleaming Hook",
+      "family": "atom.death-glean",
+      "powerBand": "low",
+      "iconKey": "icon.gem.gleaming-hook",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-013",
+      "nameKey": "gem.harvest-ledger",
+      "name": "Harvest Ledger",
+      "family": "atom.death-harvest",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.harvest-ledger",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "gem.g2-014",
+      "nameKey": "gem.parting-fang",
+      "name": "Parting Fang",
+      "family": "atom.death-salvo",
+      "powerBand": "high",
+      "iconKey": "icon.gem.parting-fang",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-015",
+      "nameKey": "gem.doom-sigil",
+      "name": "Doom Sigil",
+      "family": "atom.dooming",
+      "powerBand": "low",
+      "iconKey": "icon.gem.doom-sigil",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "gem.g2-016",
+      "nameKey": "gem.bounty-scrip",
+      "name": "Bounty Scrip",
+      "family": "atom.econ-bounty",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.bounty-scrip",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "id": "gem.g2-017",
+      "nameKey": "gem.endurance-chit",
+      "name": "Endurance Chit",
+      "family": "atom.econ-endure",
+      "powerBand": "high",
+      "iconKey": "icon.gem.endurance-chit",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "id": "gem.g2-018",
+      "nameKey": "gem.grazing-coin",
+      "name": "Grazing Coin",
+      "family": "atom.econ-graze",
+      "powerBand": "low",
+      "iconKey": "icon.gem.grazing-coin",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "id": "gem.g2-019",
+      "nameKey": "gem.muster-ledger",
+      "name": "Muster Ledger",
+      "family": "atom.econ-muster",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.muster-ledger",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "id": "gem.g2-020",
+      "nameKey": "gem.toll-marker",
+      "name": "Toll Marker",
+      "family": "atom.econ-toll",
+      "powerBand": "high",
+      "iconKey": "icon.gem.toll-marker",
+      "tags": [
+        "utility"
+      ]
+    }
+  ]
+}

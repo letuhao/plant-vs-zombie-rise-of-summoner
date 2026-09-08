@@ -227,16 +227,16 @@ was added alongside `max`/`regen` (H.5 supersedes the original §3G's count of 1
 
 | Family | Ids |
 |---|---|
-| `resource.max.{id}` | `hp` · `stamina` · `hunger` · `spirit` · `qi` |
-| `resource.regen.{id}` | same five |
-| `resource.efficiency.{id}` | same five — bounded `0..1`, `SumIncreased` + `Cap: DerivedStatPolicy.ResourceEfficiencyCap` (T4.4: `FlatSum` never applies a Cap) |
+| `resource.max.{id}` | `hp` · `stamina` · `hunger` · `spirit` · `qi` · **`poise`** |
+| `resource.regen.{id}` | same six |
+| `resource.efficiency.{id}` | same six — bounded `0..1`, `SumIncreased` + `Cap: DerivedStatPolicy.ResourceEfficiencyCap` (T4.4: `FlatSum` never applies a Cap) |
 | `move.range` | one channel, `Pool`, `hp`/faction-independent |
 
 Four properties, now proven rather than merely required:
 
 1. **They form their own family list and never joined `AllCombatChannelIds`** (now asserted at 196, not 84). `ResourceChannelsNotInCombatRoster` (`tests/Stats/ActorChannelsTests.cs`) proves it directly.
 2. **They are `rpg.*` layer, not `pvz.*`.** They are not `StatChannels` entries and never reach a Unity field; the only Writer-backed resource is `hp`. This is the layer split in [pvz-middle-layer.md](pvz-middle-layer.md), not a limitation.
-3. **Resource *values* are still not derived channels — no runtime tracking class exists yet.** Only `max`/`regen`/`efficiency` are composed here. The current value is meant to be per-actor runtime state resolved lazily as `value + rate × (now − lastTick)`; `LazyValueMatchesTicked` proves that FORMULA is equivalent to ticking, at several sample points, but building the actual per-actor pool that reads it is a later module's job (200 actors × 4 regenerating pools would otherwise be 800 recurring scheduled events against a 0.15 ms kernel slice — the reason to do this lazily at all).
+3. **Resource *values* are not derived channels — the per-actor pool that holds them is a separate module, and it is now BUILT.** Only `max`/`regen`/`efficiency` compose here. **Corrected 2026-08-30:** this line previously claimed *"no runtime tracking class exists yet … building the actual per-actor pool that reads it is a later module's job"*, which has been false since the action-cost work landed and **actively misled a session into reporting 25% of the aptitude surface as inert.** The pool exists and is wired: `Actions/Cost/ActorResourcePools.cs` (with `ResourcePoolState`, `CommanderResourcePools`) holds the values and reads exactly these channels via `Stats/Derived/ResourceChannelReader.cs` (`Max` / `RegenPerTick`); real consumers are `CostLedger`, `PoiseLedger`, `AuraUpkeepDriver`, `UnlockDiscardService`, with persistence in `Data/Sqlite/RpgStore.RunPools.cs`. The lazy `value + rate × (now − lastTick)` resolve described here is what `ActorResourcePools` actually implements, and `LazyValueMatchesTicked` pins the formula (200 actors × 4 regenerating pools would otherwise be 800 recurring scheduled events against a 0.15 ms kernel slice — the reason to do it lazily at all). **Scope note, so this correction is not over-read:** those consumers are action/battle-mode, and PvZ-lawn mode has no action queue by design ([decisions.md](decisions.md), Action model row) — so `resource.*` doing nothing *on the lawn* is the architecture working as specified, not a gap.
 4. **Exhaustion debuffs compose through this catalog like any other derived mod** — same four compose kinds, same per-channel caps, no new ordering rule. `FourExhaustionDebuffsStack` now actually runs four simultaneous debuffs (stamina/hunger/spirit/qi) on one actor, including two independent efficiency debuffs stacking past the cap on one pool while the other three are debuffed — the case this section used to flag as untested.
 
 Faction naming (plant `hunger` displays as **Sun**, `qi` as **Yang**; zombie `qi` as **Yin**) is a **display label owned by content**, never a channel id and never a branch in this catalog.
@@ -424,7 +424,7 @@ own design.
 
 #### H.5 Resource — **15** (supersedes §3G's 10)
 
-`resource.max.{id}` · `resource.regen.{id}` · `resource.efficiency.{id}` over the five ids.
+`resource.max.{id}` · `resource.regen.{id}` · `resource.efficiency.{id}` over the six ids (incl. `poise`).
 `max`/`regen` are magnitudes (`long`); `efficiency` is a bounded ratio.
 
 §3G's four properties all still hold unchanged. `resource.efficiency` is the new third family —
@@ -508,7 +508,7 @@ instead of the catalog. Total is **157 new / 256 named** (Q5 dropped `heal.reduc
 | **Q6** | `block.strength ↔ block.shred` duplicates `shield.toughness ↔ shield.pen` | **One shared contest helper, two channel sets.** Modelling block *as* a 1-hit shield is attractive and reuses priorities/stacking/matrix/goldens — but [shield-system-spec.md](shield-system-spec.md) caps **3 shields per actor**, so a per-turn block shield permanently eats a third of every actor's budget and the admission rule would evict real shields. Revisit only if that cap moves. |
 | **Q6b** | What bounds a parry/block exchange | **Decided 2026-08-24: the _status_ precedent, not the shield's.** Shield's chip floor exists because a shield is a **pool** that must always spend; a proc has no pool, so **no floor** — a fully shredded block removing zero is a legitimate contest outcome. The ceiling follows `StatusPolicy.CategoryResistCap`: **`950‰`, a block removes at most 95% of a hit, never all of it.** Immunity stays impossible, expressed on the side that has something to protect. Own keys `blockCapPermille` / `parryCapPermille` in `data/tuning/combat.v1.json`, both `950` — they *agree with* the status constant, they do not share it. Neither stat is capped; only the fraction one exchange removes. |
 
-**Ban:** `totalPower = omni × category` or `totalResist = omni × category` — **forbidden** (Chaos Omni additive-only).
+**Ban:** `totalPower = omni × category` or `totalResist = omni × category` — **forbidden** **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]** (Chaos Omni additive-only).
 
 Category mapping: normative **StatusId → category** table in [status-ssot.md §9.5](status-ssot.md).
 
@@ -716,6 +716,7 @@ Chaos level/realm curves are **reference for future `UpdatePower`** — not the 
 | `rpg.progression` | 100 | no-op | Sets **`progression.power = Θ`** via `IPowerIndexProvider` (0 if un-hydrated) and **`progression.realm = 1.0`** permanently (§3B) |
 | `pvz.stats` | 250 | existing plugin | rows on catalog channels when present |
 | `foundation.effect` | 350 | session bag | future timed derived |
+| `status.timed` | 400 | session bag | timed derived from live statuses |
 | `cheat.*` | 900+ | existing | debug derived optional |
 
 Multi-progression: **`IProgressionSubsystem`** hook reserved; v1 registers **RpgProgression only**.
@@ -726,15 +727,19 @@ The table above lists who is *supposed* to write derived channels. A repo sweep 
 
 That is the same failure mode §3 exists to prevent, arrived at from the producer side rather than the channel side: the catalog validates *which channel ids* are legal, but nothing validates *who may write them*. Four features grew their own path because there was no opcode to use.
 
-The effect-atom program's `stat.derived` kind exists specifically to give them one — it is the one kind with full runtime support (lawn ✅ battle ✅ sim ✅). When it lands, these four collapse into containers of atoms and become a single registered producer.
+The effect-atom program's `stat.derived` kind **landed** and is the one kind with full runtime support
+(lawn ✅ battle ✅ sim ✅ via Hub / battle equip / atom path). §6.1's four producers (patron, stars,
+injuries, contracts) still write outside a registered subsystem row — they must adopt `stat.derived`
+containers so contributions are attributed. Until they do, those magnitudes remain **unattributed**
+on the atom path (honest residual, not “kind missing”).
 
 | Producer | Writes | State |
 |---|---|---|
-| patron | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| stars | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| injuries | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| contracts (`ContractPolicy`) | rank bonuses, loyalty rates, personality modifiers | **Unregistered** — adopts `stat.derived` |
-| atom compiler | `stat.derived` atoms → derived mods | Designed — [effect-atom-map.md](effect-atom-map.md) E7 |
+| patron | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| stars | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| injuries | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| contracts (`ContractPolicy`) | rank bonuses, loyalty rates, personality modifiers | **Unregistered** — adopt `stat.derived` |
+| atom compiler | `stat.derived` atoms → derived mods | **Shipped** — AtomDerivedSubsystem / EquipAtomSource / grants |
 
 **Rule to adopt when that lands:** a derived write needs both a registered *channel* and a registered *producer*. Only half of that is enforced today.
 
@@ -777,11 +782,29 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 - Do not wire level→damage silently; `progression.power` is catalog derived only
 - Do not persist AppliedCombat or derived snapshot as SSOT
 - No derived channel outside **DerivedStatCatalog**
-- **Never multiply omni × category** for status power/resist totals
+- **Never multiply omni × category** for status power/resist totals **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 - Do not use fixed-only ApplyScale as Fusion product lock (Chaos fixed scale is reference only)
 - No runtime YAML derived loader v1
 - **StatusRuntime code must not ship** before Actor Hub derived resolve + `progression.power` stub channel exist
 - Do not conflate the kill-XP power scale (`RpgXpAwardMap.Award.PowerScale`; formerly `RpgXpPowerScale`, deleted T3.3) with combat `progression.power`
+
+### 8.1 Contribution SourceId grammar (GG-49 FULL) — locked 2026-09-07
+
+Every Hot derived modifier carries a non-empty SourceId minted via `ContributionSourceIds`. Empty or bare `generic` ids are defects. Sheet fiction uses `ContributionSourceIds.FictionLabel`.
+
+| Producer | SourceId | Fiction label example |
+|---|---|---|
+| Progression | `rpg.progression` | Progression |
+| Aptitude | `aptitude.{Share}` | Aptitude · Might |
+| Equip | `equip:{role}:{itemRef}` | Equip · armament-primary (item…) |
+| Tree | `tree.{treeId}.{nodeId}` | Tree · might/…/n0 |
+| Status | `status:{instanceId}` | Status · … |
+| Effect grant | `grant:{effectOrGrantId}` | Grant · … |
+| Primary bag (sheet join) | `primary:{sourceKind}\|{sourceId}` | Primary · … |
+
+Empty / whitespace SourceId is a **defect**: **every** Hot derived subsystem must refuse it — `AtomDerivedSubsystem` and `StatusDerivedSubsystem` skip rather than mint an unattributed contribution. Producers must mint via the helpers above.
+
+Compose honesty: `FlatReplace` channels ship `composeKind` on the sheet **and** `/derived` so a contribution list that does not sum to the total is explained. Contributions are **ephemeral per resolve** — never a SQLite ledger.
 
 ---
 
@@ -802,7 +825,7 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 
 1. **Catalog SSOT** — unknown derived channel rejected like unknown `statusId`.
 2. **Stub unblock** — `tierPower = 1.0` hardcoded lets StatusRuntime code plan proceed before power ADR.
-3. **Chaos-aligned two-phase** — sigmoid apply vs linear potency; omni additive-only.
+3. **Chaos-aligned two-phase** — sigmoid apply vs linear potency; omni additive-only. **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 4. **Dynamic ApplyScale** — self-normalizes high-tier fights without copying fixed `trigger_scale`.
 
 ### Risks and mitigations
@@ -862,7 +885,7 @@ Separate ADR:         P2 progression.bonus.* combat flats
 - [stat-system.md](stat-system.md) — primary Y0 + compose (unchanged ownership)
 - [rpg-progression.md](rpg-progression.md) — type actor grain, power stub vs XP scale
 - [pvz-stats.md](pvz-stats.md) — may contribute catalog channels; not progression power SSOT
-- [resource-hub-ideal.md](resource-hub-ideal.md) — the five resources and their exhaustion mechanic; source for the **proposed** `resource.*` families in §3.G
+- [resource-hub-ssot.md](resource-hub-ssot.md) — the **six** resources (`hp` `stamina` `hunger` `spirit` `qi` `poise`) and their exhaustion mechanic. The `resource.*` families in §3.G are **registered and shipped** (2026-08-25), no longer proposed. ⚠️ `resource-hub-ideal.md` is superseded — reasoning trail only, and it predates `poise`
 - [shield-system-spec.md](shield-system-spec.md) — the four `combat.shield.*` families counted in §3.E
 - [battle-timeline-map.md](battle-timeline-map.md) — owner of `turn.speed` / `turn.haste` and the readiness model in §11.4–5
 - [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) — level/realm borrow

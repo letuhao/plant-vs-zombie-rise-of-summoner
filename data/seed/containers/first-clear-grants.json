@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "_meta": {
+    "partition": "containers/first-clear",
+    "contractVersion": 1,
+    "sourceRef": "docs/architecture/item/spec-drop-volume.md (item module 11) — the deterministic source for rung 100; ssot-generation.md §3.5; ssot-rarity.md §3.8. Lives in data/seed/containers/ (an owned folder of SeedScanner) rather than beside the drop tables, so it imports through the STANDARD AtomSeedFile → RpgStore.ImportContent path like every other container — a second, hand-written writer beside it is exactly the drift module 7 refused when seeding the rarity ladder",
+    "note": "ssot-rarity.md §3.8: 'Rung 100 must have at least one deterministic source. An unreachable top rung is a frustration, not a fantasy.' Module 7 registered the requirement and assigned it to module 11; this file is module 11's answer, and it is the cheaper of the two available ones. A first clear is deterministic BY CONSTRUCTION — it is recorded in item_first_clear, it fires once per (player_id, source_kind, source_id), and it never rolls — so the requirement is met by CONTENT rather than by code.",
+    "noRolls": "prefixRolls / suffixRolls are 0 and there is no pool. §3.5: 'a fixed, authored item... no rolls at all, so it never disappoints.' This is the tutorial for the whole item system, and it is the one drop that should be hand-chosen.",
+    "firstConsumer": "data/seed/rarity/README.md records that no shipped container names a rarity value. This is the first one that does, which makes it also the first live exercise of the effect_container.rarity FK module 7 wired into RpgStore.UpsertContainer and the ImportContent batch path.",
+    "ownersCall": "WHICH content id carries the grant is the owner's, because it decides how deep the top rung sits — data/seed/loot/tables.v1.json currently hangs it off web-wave:rift-tyrant, the deepest shipped wave. Promotion to ordinal 100 (module 15, D7 lifted rule 7) is the OTHER real source, so if the owner would rather the top rung be purely earned, this grant can be dropped without leaving §3.8 unsatisfied."
+  },
+  "entries": [
+    {
+      "id": "item.first-clear-almanac-seed",
+      "kind": "item",
+      "rarity": "almanac",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-passive-atk-flat.t1" }
+      ],
+      "tags": {
+        "grant": "first-clear",
+        "deterministicSourceFor": "rarity.almanac"
+      }
+    }
+  ]
+}

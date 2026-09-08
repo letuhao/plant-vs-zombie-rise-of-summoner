@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "seed-contract.md \u00a72-6, \u00a79; words.v1.json v4 offhand pools; classes.v1.json offhand and weapon ladders; implicit slate for armament-secondary"
+    "sourceRef": "seed-contract.md §2-6, §9; words.v1.json v4 offhand pools; classes.v1.json offhand and weapon ladders; implicit slate for armament-secondary"
   },
   "entries": [
     {
@@ -30,10 +30,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.shielding-manhole",
       "flavorKey": "flavor.base.shielding-manhole",
       "flavor": "A round opening to traffic below. Now it opens to something else.",
@@ -66,10 +66,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.barring-sandbag",
       "flavorKey": "flavor.base.barring-sandbag",
       "flavor": "Packed earth and canvas. The weight is not all in the bag.",
@@ -103,10 +103,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.reinforced-pallet",
       "flavorKey": "flavor.base.reinforced-pallet",
       "flavor": "A shipping platform reinforced with straps and rivets. It takes, as well as bears.",
@@ -143,7 +143,7 @@
         "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.unflinching-tailgate",
       "flavorKey": "flavor.base.unflinching-tailgate",
       "flavor": "A truck bed gate, unhooked and held high. It answers what it blocks.",
@@ -179,7 +179,7 @@
         "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.blocking-grate",
       "flavorKey": "flavor.base.blocking-grate",
       "flavor": "A drainage cover, iron and heavy. Blocks passage and drives it home.",
@@ -213,10 +213,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.sheltering-umbrella",
       "flavorKey": "flavor.base.sheltering-umbrella",
       "flavor": "An oversized parasol, reinforced at every seam. The rain it sheds is not all water.",
@@ -249,10 +249,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.interposing-shutter",
       "flavorKey": "flavor.base.interposing-shutter",
       "flavor": "A storm shutter pulled free. It stops more than wind.",
@@ -286,10 +286,10 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.retribution",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.standing-plank",
       "flavorKey": "flavor.base.standing-plank",
       "flavor": "A length of pressure-treated wood, held at the ready. It drinks what it spills.",
@@ -326,7 +326,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.crushing-hubcap",
       "flavorKey": "flavor.base.crushing-hubcap",
       "flavor": "A car wheel cap, held with deadly purpose. A second weapon for closing distance.",
@@ -359,10 +359,10 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.lumbering-lid",
       "flavorKey": "flavor.base.lumbering-lid",
       "flavor": "A garbage can cover, awkward and slow. It does more damage than its clumsiness suggests.",
@@ -396,10 +396,10 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.stunning-tray",
       "flavorKey": "flavor.base.stunning-tray",
       "flavor": "A serving tray from a diner, its face dented from a hundred impacts. It specializes in one more.",
@@ -432,10 +432,10 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.jarring-clipboard",
       "flavorKey": "flavor.base.jarring-clipboard",
       "flavor": "A metal clipboard with hardened corners and a reinforced spine. Strikes like a hammer.",

@@ -1,0 +1,15 @@
+{
+  "climate": "earth",
+  "dispositionBase": "none",
+  "encounterRef": "encounter.pack-mono-001",
+  "eventPool": [],
+  "flavor": "The ceiling hangs low, heavy with the weight of a thousand tons of shale. Dust dances in the stagnant air, settling upon the jagged, uneven floor of granite slabs.",
+  "hazardBand": "light",
+  "kind": "fight",
+  "name": "The Lithic Maw",
+  "reason": "A group of territorial earth elementals blocks the only narrow passage through the cavern wall.",
+  "roomId": "room.fight-earth-002",
+  "secretEligible": "no",
+  "sightBand": "dim",
+  "tags": []
+}

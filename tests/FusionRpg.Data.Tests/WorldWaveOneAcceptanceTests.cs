@@ -8,8 +8,10 @@ namespace FusionRpg.Data.Tests;
 /// <summary>
 /// **Checkpoint 3 — wave-1 acceptance** (world-map-plan.md). Twenty turns that actually play: a
 /// legion marches, clears two guards, claims the sector, meets a warband head-on in the middle of a
-/// lane, pushes on to the frontier, and finally has its supply line cut by a third faction walking
-/// into the sector behind it.
+/// lane, pushes on to the frontier, and finally has its frontier sector besieged by a third faction
+/// walking directly onto it (base-defense siege-supply F1/F1b, 2026-09-05: a besieged sector still
+/// supplies ITSELF now — "a base with stores is not a legion in the field" — so this is no longer a
+/// `supply.cut`, see re-bless entry #14 below).
 ///
 /// The scenario is scripted rather than improvised, so its value is in the invariants: one turn-log
 /// row per turn, a stable hash sequence, and — the sharp one — the pure engine reproducing the
@@ -117,10 +119,151 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       own) — no pre-existing scenario places a structure at all, so nothing about the *play*
     //       changed, only the row shape the hash is taken over.
     //
-    // The plan expected one re-bless. Four were needed for world-intel, each for a behaviour change
-    // rather than a drift, and each recorded here. Protecting the hash in any of them would have
-    // meant shipping something known to be wrong.
-    const string GoldenFinalHash = "a7abb774047dc1aa53215892b1152fe36c803330692a4cfddfcc16f33031a553";
+    //   13. **world-map W44, 2026-09-04** — `WorldCanonical` gains three sector fields:
+    //       `RecruitStock`/`ProjectId`/`ProjectTurnsRemaining` (spec-sector-development.md §1/§3).
+    //       This module's own budgeted field batch, `RulesetVersion` unchanged — matching
+    //       `loam-model`'s and L25's own precedent for a field-only addition. Every field sits at
+    //       its default (0/null/null) for this scenario — no growth or project behaviour is wired
+    //       yet (that lands at W50/W52), so nothing about the *play* changed, only the row shape the
+    //       hash is taken over.
+    //
+    //   14. **base-defense `siege-supply` F1/F1b, 2026-09-05** — `SupplyGraph.ConnectedSectors`
+    //       stopped silently dropping a besieged sector from its own supply. The audit's own finding:
+    //       a hostile force standing IN a sector you hold made that sector, and everything reachable
+    //       only through it, vanish from `ConnectedSectors` — indistinguishable from a sector that
+    //       was never yours. Fixed by splitting "traversable" (owned, not held against — gates BFS
+    //       and Seat-seeding) from "besieged" (owned, held against — unioned back in post-BFS as a
+    //       self-source: it can still supply itself, it just cannot be routed THROUGH). A real
+    //       behaviour change, not a field addition (`RulesetVersion` unchanged — nothing about how a
+    //       turn is hashed moved, only what a besieged sector's own supply state resolves to).
+    //
+    //       This scenario's own frontier claim is exactly the case the bug hid: Zomboss's band
+    //       marches directly onto `ash-waste` (turns 11-12), which Dave claimed on turn 10. Under the
+    //       old (buggy) behaviour that made `ash-waste` read as fully cut off, firing `supply.cut:`.
+    //       Under the fix it correctly reads as besieged-but-self-supplying, firing
+    //       `supply.besieged:` instead — `ash-waste` is first-light's only Seat-less sector
+    //       (`SupplyTests.cs`'s own documented reason), so it is the only holding on this map that
+    //       can ever be cut off at all, and this script's one hostile incursion stands directly in it
+    //       rather than behind it. There is therefore no longer any scripted event in this 20-turn
+    //       run that produces a genuine `supply.cut` — `Every_wave_one_verb_fires_somewhere_in_the_
+    //       twenty_turns` was updated to require `supply.besieged:` in its place, matching what this
+    //       script actually — and now correctly — produces.
+    //
+    //   15. **world-map W58 (`RulesetVersion` 6 → 7), 2026-09-05 — recorded retroactively, found
+    //       missing while closing Phase 12's own checkpoint audit.** `growth.seatPulsePerWeek`
+    //       moved off 0 (`data/tuning/world.v5.json`, 0 → 20). This scenario holds two Seats across
+    //       its own week boundaries (turns 7, 14): `homeworld` from turn 0, and the claimed,
+    //       lair-cleared `ember-hollow` from turn 3 — both now accrue `WorldSector.RecruitStock`
+    //       (a field `WorldCanonical` has hashed since entry #13), which moves this golden on its
+    //       own, independent of entry #14's supply fix. `decisions.md`'s own W58 row named this
+    //       exact test as the one golden the bump would move and predicted the reason correctly —
+    //       the diff was genuinely checked in advance, only the matching numbered entry here was
+    //       never written, leaving the file's own "every re-bless recorded" convention silently
+    //       broken by one entry despite the substance being right.
+    //
+    //   16. **base-defense `siege-engagement`, module 20 (`RulesetVersion` 7 → 8), 2026-09-06** — a
+    //       CONTINUING siege (no fresh `assault` order) used to fall through
+    //       `ContactResolver.SectorContacts` into a generic `BattleKinds.Sector` request, which
+    //       `DistrictAssaultResolver`'s own delegation guard sent straight to
+    //       `PlaceholderBattleResolver` — a siege silently stopped being a real board fight the moment
+    //       its attacker held still for one turn. `MovementPhase.BuildContactRequest` now checks
+    //       `SiegeEngagement.IsUnderSiege` per contact and routes a genuinely besieged sector to
+    //       `BattleKinds.District` instead, reusing `DistrictAssaultPhase.BuildBoard`. This scenario's
+    //       own frontier claim (entry #14's own words) is exactly where it fires: Zomboss's band walks
+    //       directly onto `ash-waste` at turns 11-12, which Dave claimed at turn 10 — before this fix
+    //       that contact resolved as an abstract `Sector` fight; now it resolves on the real board
+    //       (structures, elements, `BattleEngine.Resolve`), a genuinely different combat outcome from
+    //       that point on. A real behaviour change, not a field addition.
+    //
+    //       Caught alongside a second, unrelated defect this same investigation surfaced:
+    //       `The_pure_engine_reproduces_the_stored_hashes_from_the_command_log_alone`'s own replay loop
+    //       called `TurnEngine.Step` with no resolver (defaulting to `PlaceholderBattleResolver`), while
+    //       the store commits with `DistrictAssaultResolver.Instance`
+    //       (`RpgStore.WorldTurns.cs`) — silently correct only because this script never fielded an
+    //       `assault` order and, until this fix, never routed a contact into `BattleKinds.District`
+    //       either. Fixed by passing `DistrictAssaultResolver.Instance` into that replay loop, which is
+    //       what actually makes "pure engine reproduces stored hashes" a true statement instead of one
+    //       that happened to hold by coincidence. `WorldTwentyTurnCheckpointTests.cs`'s own CP2 replay
+    //       carried the identical gap (fixed there too) and re-ran green, unchanged — CP2's script never
+    //       reaches a District battle at all, so that fix was a no-op for it, confirming this was a
+    //       test-methodology defect and not a second production behaviour change.
+    //
+    //   17. **base-defense `siege-construction` 15.4 (`RulesetVersion` 8 → 9), 2026-09-06** — the two
+    //       raw faucets (§2: `ironwork` from a CLEARED `shard-vein` slot, `rubble` from a CLEARED
+    //       `material-seam` slot) landed in the SAME `Production` turn phase `LoamPhases` already
+    //       runs. This scenario's own turn-9 order — `Clear, ash-waste, slot 2` (entry #14's own
+    //       words: "ash-waste is first-light's only Seat-less sector") — clears exactly `ash-waste`'s
+    //       `material-seam` slot, so from turn 10 onward `WorldSector.RubbleStock` accrues there for
+    //       real for the first time. A genuine behaviour change, not a field addition — the same
+    //       command log, for any world with a cleared `shard-vein`/`material-seam` slot, now produces
+    //       a different state than version 8 did.
+    //
+    //       **A second, far more consequential defect this same wiring pass surfaced and fixed**:
+    //       `WorldSector.RubbleStock`/`IronworkStock` (added 15.1, hashed by `WorldCanonical` and
+    //       checked by `RpgStore.WorldGraphDiff.cs`'s own `SectorRowEquals` equivalence guard since
+    //       the day they landed) had **no database columns at all** — `rpg_world_sectors`' own schema,
+    //       every `INSERT`, and the read-back `SELECT` all omitted them entirely. Both fields were
+    //       silently write-only: correct in memory for the lifetime of one `TurnEngine.Step` chain,
+    //       but reset to 0 the moment any world was actually saved and reloaded, and undetectable by
+    //       anything that had not yet made either field non-zero and then committed-and-reread it in
+    //       the same operation — which is exactly what this task's own faucet phase was the first
+    //       thing ever to do. Found the same way `development_level` on `rpg_world_faction_intel`
+    //       (entry above `RpgStore.World.cs`'s own migration list) was: "found by the diffing writer's
+    //       own equivalence guard, not designed in." Fixed with the SAME `EnsureColumn` migration
+    //       pattern (`rubble_stock`/`ironwork_stock`, both `INTEGER NOT NULL DEFAULT 0` — an existing
+    //       saved world reads both back at 0, exactly the world before either stock existed) plus the
+    //       three sites that needed them: `CreateWorld`'s own initial INSERT, `DiffSectors`' own
+    //       INSERT-OR-REPLACE (both in the affected files above), and the sector read-back SELECT.
+    //
+    //   18. **base-defense `siege-construction` 15.4b (`RulesetVersion` 9 → 10), audit F10, decision 48,
+    //       2026-09-06** — `SiegeConstruction.AdvanceDepletion` (new) wires the already-shipped, already-
+    //       tested pure function `BoardEconomy.AdvanceDepletionMilli` into the SAME `Production` phase
+    //       15.4's own faucets already extended — the missing per-turn increment to `WorldSlot.
+    //       SlotDepletionMilli` audit F10 named. A genuine behaviour change: EVERY owned sector's
+    //       `Rootbed` slot now accrues depletion every turn it is owned (`LoamProduction.For`'s own base
+    //       `SeepPerTurn` applies unconditionally to any owned Rootbed, so "yielded this turn" is simply
+    //       "sector is owned" — re-derived independently here, `LoamProduction.For` itself untouched),
+    //       and this scenario has owned sectors with Rootbed slots from turn 1 — so this is NOT a narrow,
+    //       single-slot change like entry #17's, it moves the hash from the very first turn onward.
+    //
+    //       **A second, previously-undiscovered defect this same pass surfaced and fixed — the THIRD
+    //       instance of the exact same bug class entries #17 and (before it) the
+    //       `rpg_world_faction_intel.development_level` migration each already found**:
+    //       `WorldSlot.SlotDepletionMilli` was hashed by `WorldCanonical` (`structure-state`'s own
+    //       "slot-depletion" conditional row) and correctly diffed by `DiffSlots`' own plain record
+    //       equality (`WorldSlot == WorldSlot` already compares every field, so the diff logic itself was
+    //       never wrong) — but had NO database column anywhere: not on `rpg_world_slots`' own `CREATE
+    //       TABLE`, not on `CreateWorld`'s INSERT, not on `DiffSlots`' own INSERT-OR-REPLACE, not on the
+    //       read-back SELECT. Silently write-only since `structure-state` shipped, reset to 0 on every
+    //       save/reload, invisible until THIS task's own `AdvanceDepletion` phase made it non-zero for
+    //       the first time and tripped `DiffWorldGraphUnlocked`'s own equivalence guard with a hard
+    //       `DebugAssertException` — caught on the very first run against this exact test, not guessed
+    //       at. Fixed with the same `EnsureColumn` pattern across all four sites named above.
+    //
+    //   19. **base-defense `siege-ai` 17.11 (decision 47), 2026-09-07** — `DistrictLayout.ZoneOf`'s
+    //       6-argument overload (17.11's own build: a warded lane's `WorldLane.WardLevel` widens the
+    //       Rampart/Approach boundary, but only on the wedge facing the attacker's entry edge) was
+    //       built and unit-tested WITHOUT moving this golden — its own closure note said so directly,
+    //       because `DistrictAssaultResolver` did not call the 6-arg overload yet at that point, only
+    //       the byte-identical 4-arg one every other caller still uses. It has SINCE been wired in
+    //       (`DistrictAssaultResolver.cs`'s own `ZoneOf` call now passes `attackerEdge`/`wardExtraDepth`)
+    //       — a genuine, deliberate, already-authorized behaviour change (decision 47), not a drift:
+    //       this scenario's own district assault now computes Approach-zone membership asymmetrically
+    //       for any lane carrying a non-zero `WardLevel`, which can shift which cells are legal for
+    //       troop placement and, from there, real combat outcomes and final `WorldSector`/`WorldSlot`
+    //       state. Confirmed NOT caused by anything else landing the same day — re-run in isolation
+    //       with `DistrictAssaultResolver`'s own new, UNRELATED `aiTuning: SiegeTuningPolicy.Ai`
+    //       argument (17.4/live-wiring, same day) temporarily disabled, and the mismatch persisted
+    //       identically, isolating this specific change as the sole cause. Verified stable across
+    //       multiple repeated runs (both truncated and full-length hash) before re-blessing — the
+    //       first observation briefly showed a second, different value while an unrelated concurrent
+    //       session was mid-edit in `Battle/BattleModels.cs`; re-checked only after that file's own
+    //       diff stopped changing between runs.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #19 above —
+    // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
+    // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
+    const string GoldenFinalHash = "5a596ea4ffbbc0d3827f77d41840ba40e0530f8787649357400889beb77dd7ed";
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -266,7 +409,12 @@ public class WorldWaveOneAcceptanceTests : IDisposable
             ("crossing", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("lane:")),
             ("claim", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("claim.held:")),
             ("zone-of-control", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("halt:zoc:")),
-            ("supply cut", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.cut:")),
+            // base-defense siege-supply F1/F1b (re-bless entry #14): this script's one hostile
+            // incursion stands directly IN ash-waste (first-light's only Seat-less sector), which
+            // now besieges it rather than cutting it off — there is no scripted event left in this
+            // run that produces a genuine `supply.cut:`, so the wave-1 "hostile-blocked supply" verb
+            // is proven by `supply.besieged:` instead.
+            ("supply besieged", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.besieged:")),
             // spec-loam-legions.md (L27): wound-based attrition is retired; a legion beyond supply
             // now burns carried loam (surviving on its reserve) or, if that reserve runs out, is
             // destroyed outright rather than bled slowly.
@@ -300,11 +448,17 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     {
         var stored = Play("cp3-replay");
 
+        // The resolver must match what the store actually commits with (RpgStore.WorldTurns.cs) or
+        // "pure engine" would silently mean "pure engine, minus whichever battle kind the store's
+        // resolver wasn't the default" — a gap base-defense `siege-engagement` (2026-09-06) found the
+        // hard way: this scenario fields no `assault` order anywhere in its script, so before that
+        // module's own dispatch fix no `BattleKinds.District` battle had ever fired here, and the two
+        // resolvers had always agreed by coincidence, not by construction.
         var world = Scenario("cp3-replay");
         var replayed = new List<string>();
         for (var turn = 0; turn < Turns; turn++)
         {
-            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp3-replay", turn), Seed);
+            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp3-replay", turn), Seed, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed.Add(result.StateHash);
         }

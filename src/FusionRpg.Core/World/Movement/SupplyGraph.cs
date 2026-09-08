@@ -20,20 +20,70 @@ public static class SupplyGraph
     {
         var byId = world.Sectors.ToDictionary(s => s.SectorId, StringComparer.Ordinal);
 
-        bool Usable(string sectorId) =>
+        bool Owned(string sectorId) =>
             byId.TryGetValue(sectorId, out var sector)
-            && string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal)
-            && !ZoneOfControl.IsHeldAgainst(world, sector.SectorId, factionId);
+            && string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal);
 
-        // Sources: every Seat this faction still holds. The traversal itself belongs to
-        // `SupplyReach`, because a faction policy asks the same question of what it *believes* —
-        // same rule, different and deliberately less reliable inputs.
+        // base-defense siege-supply (audit F1): can supply TRAVEL through this sector? No — a
+        // contested sector is a roadblock. This was always the right answer for the TRAVERSAL, and
+        // is unchanged from the original `Usable`.
+        bool Traversable(string sectorId) =>
+            Owned(sectorId) && !ZoneOfControl.IsHeldAgainst(world, sectorId, factionId);
+
+        // Owned AND contested — the sector a besieged garrison stands in. Deliberately narrower than
+        // "not reached by the BFS": a lane-severed-but-uncontested sector is NOT besieged and must
+        // keep reporting `supply.cut:` exactly as before this fix — only contested ground gets the
+        // self-supply exemption below.
+        bool Besieged(string sectorId) => IsBesieged(world, sectorId, factionId);
+
+        // The traversal itself belongs to `SupplyReach`, because a faction policy asks the same
+        // question of what it *believes* — same rule, different and deliberately less reliable
+        // inputs. A besieged Seat cannot seed the network — that is the traversal being correctly
+        // cut — but see below for what it still gets on its own.
         var seats = world.Sectors
-            .Where(s => Usable(s.SectorId)
+            .Where(s => Traversable(s.SectorId)
                         && s.Slots.Any(sl => sl.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId))
             .Select(s => s.SectorId);
 
-        return SupplyReach.From(seats, SupplyReach.LinksOf(world.Lanes), Usable);
+        var reached = new HashSet<string>(
+            SupplyReach.From(seats, SupplyReach.LinksOf(world.Lanes), Traversable),
+            StringComparer.Ordinal);
+
+        // base-defense siege-supply (audit F1b): a besieged sector still supplies ITSELF, even
+        // though it cannot route supply to or from the rest of the network — "a base with stores is
+        // not a legion in the field". `SupplyReach.From`'s seed inclusion is gated by the SAME
+        // `usable` predicate as its traversal expansion (verified by reading `SupplyReach.From`,
+        // not assumed — an earlier draft of this fix assumed seeds bypass `usable` and they do not),
+        // so a besieged Seat would otherwise be silently dropped as a seed too. Union every besieged
+        // owned sector back in explicitly, additive only — this never removes a sector the BFS
+        // already reached, and never adds one that is merely lane-severed rather than contested.
+        //
+        // Consequence, and it is the correct one, not a residual bug: if a faction's ONLY Seat is
+        // besieged, `seats` is empty, so no OTHER sector is reached via traversal either — every
+        // other sector the faction owns correctly reports `supply.cut:` and its legions correctly
+        // burn, exactly as losing your only capital should mean. What F1b actually fixes is narrower
+        // and specific: `connected.Count == 0` no longer holds (the besieged Seat itself is in
+        // `reached`), so `SupplyGraph.Run`/`LegionSupply.Resolve`'s per-faction
+        // `if (connected.Count == 0) continue` skip no longer exempts the WHOLE FACTION from the
+        // burn/cut pass — every sector and entity is now correctly evaluated per its own
+        // reachability, instead of the besieged Seat's exclusion silently granting the entire
+        // faction blanket immunity.
+        foreach (var sector in world.Sectors)
+            if (Besieged(sector.SectorId))
+                reached.Add(sector.SectorId);
+
+        return reached;
+    }
+
+    /// <summary>Owned by <paramref name="factionId"/> and held against it right now — factored out of
+    /// <see cref="ConnectedSectors"/> so <see cref="Run"/>'s report can name the same fact without
+    /// duplicating the predicate.</summary>
+    public static bool IsBesieged(WorldState world, string sectorId, string factionId)
+    {
+        var sector = world.Sectors.FirstOrDefault(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal));
+        return sector is not null
+               && string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal)
+               && ZoneOfControl.IsHeldAgainst(world, sectorId, factionId);
     }
 
     /// <summary>
@@ -54,6 +104,17 @@ public static class SupplyGraph
         {
             if (sector.OwnerFactionId is not { } owner) continue;
             if (!connectedByFaction.TryGetValue(owner, out var connected) || connected.Count == 0) continue;
+
+            // base-defense siege-supply: a besieged sector is now ALWAYS in `connected` (F1/F1b), so
+            // it can never also hit the `supply.cut:` branch below — report the fact that actually
+            // changed for the player (under siege, not simply severed) instead of staying silent.
+            if (IsBesieged(world, sector.SectorId, owner))
+            {
+                report.Add(phase, TurnReportKinds.Event, owner, "supply.besieged:" + sector.SectorId,
+                    sector.SectorId, audience: owner);
+                continue;
+            }
+
             if (!connected.Contains(sector.SectorId))
                 report.Add(phase, TurnReportKinds.Event, owner, "supply.cut:" + sector.SectorId, sector.SectorId);
         }

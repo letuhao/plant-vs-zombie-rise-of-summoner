@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "partition": "See"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "A cheaper, shorter-range See-role structure than Watchtower \u2014 a distinct acquisition niche per \u00a75.24's own Laboured path ('digging a moat, throwing up a berm ... any actor, no materials at all'), not a tier of the same building.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built",
+          "laboured"
+        ],
+        "controlPoint": true,
+        "costProfile": "cheap",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "short",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "See",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "lookout-post",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "lookout-post",
+      "name": "Lookout Post"
+    }
+  ],
+  "kind": "structure-anchor"
+}

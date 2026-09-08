@@ -1,0 +1,1279 @@
+{
+  "_meta": {
+    "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+    "candidateSetHash": "71f0fd92b8047255d388991466222c6cfc5c4f9f1056f170cfec925954f242d2",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "partition": "family",
+    "promptVersion": "family-propose/1",
+    "round": 1
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "8af0675d059b787d3798bdd06d7f3a01b145f23510e2dd1d00f520a3655e2544",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.base.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "805f2528d06aa8532a9d5e5e13281179dc2c60a31874851eeca1260ba37e36b8",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.base.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "31ec0ecda58770a602d4281154c6f00fc3018f759e9154774012bce4c47bc16c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.bucket.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "f978604e0b6592244a41db94ab623fd074c9b1b8132f859723800f889707b1e7",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.bucket.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "4de89e5ac8152b9a43ac5b18f26537fd7c9a7d4bab15cd5f36bd9ad62eb5a55d",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.cactus.001",
+      "candidateId": "candidate.family.004",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "4de89e5ac8152b9a43ac5b18f26537fd7c9a7d4bab15cd5f36bd9ad62eb5a55d",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.sporing",
+          "atom.volley"
+        ],
+        "briefId": "brief.family.cactus.001",
+        "candidateId": "candidate.family.004",
+        "flavor": "The body erupts in a sudden, violent discharge of needle-like projectiles, turning its own structural defenses into a storm of piercing fury.",
+        "motifsExpressed": [
+          "仙人掌",
+          "发射"
+        ],
+        "name": "Spined Volley",
+        "rationale": "The action utilizes the family's inherent morphology to launch a barrage of sharp, detached elements. It fulfills the 'attack' category by using the self as a source of projectiles (发射) and satisfies the 'cactus' family identity through the deployment of needle-like structures (仙人掌) without referencing specific species or prohibited concepts like planting or pots.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.elpw-pierce|atom.volley"
+    },
+    {
+      "_provenance": {
+        "briefHash": "1d77a72d199104dbf4c854f09a15fe52ddce9961aa5d445745795488711c8df0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.cactus.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "bcb51381c73f5aab4a3f30fa847dee4a6e6e7d13da7f1758fc3ee8414f3c50c3",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.cherry.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "237756cd199df291eef88dd2e7cc8bc4e4a2791f18178b9856e6193993839817",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.cherry.002",
+      "candidateId": "candidate.family.007",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "237756cd199df291eef88dd2e7cc8bc4e4a2791f18178b9856e6193993839817",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.cherry-bloom",
+          "atom.death-harvest"
+        ],
+        "briefId": "brief.family.cherry.002",
+        "candidateId": "candidate.family.007",
+        "flavor": "A sudden, syrupy burst of dark essence erupts from the ground, coating an ally in a thick, sweet-smelling layer of revitalizing decay that pulses with a rhythmic, undead heartbeat.",
+        "motifsExpressed": [
+          "僵尸",
+          "樱桃"
+        ],
+        "name": "The Crimson Reanimation",
+        "rationale": "The action utilizes the 'death-harvest' and 'cherry-bloom' atoms to bridge the gap between the sweetness of the cherry motif and the necrotic nature of the zombie motif. It provides support by coating an ally in a restorative, albeit macabre, substance that represents the essence of the family's shared nature.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.gravedigging|atom.lifesteal"
+    },
+    {
+      "_provenance": {
+        "briefHash": "602c2db488709b4bc86f2f3be9abafe90a6fc7cdeb846fbfd23a0805efe4ed27",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.chomper.001",
+      "candidateId": "candidate.family.008",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "602c2db488709b4bc86f2f3be9abafe90a6fc7cdeb846fbfd23a0805efe4ed27",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-harvest",
+          "atom.lifesteal"
+        ],
+        "briefId": "brief.family.chomper.001",
+        "candidateId": "candidate.family.008",
+        "flavor": "The consumer unhinges its form to swallow the essence of the fallen, converting the remains of the departed into a surge of necrotic vitality.",
+        "motifsExpressed": [
+          "吞食",
+          "僵尸"
+        ],
+        "name": "Grave-Gorge",
+        "rationale": "The action captures the essence of 'chomping' (吞食) by consuming an enemy to fuel the self, while the 'zombie' (僵尸) motif is expressed through the utilization of death-gleaning and lifesteal to sustain the user's existence through the consumption of the dead.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-glean|atom.lifesteal"
+    },
+    {
+      "_provenance": {
+        "briefHash": "32e6831c1d2e8bbf28ff93ecf49c37d0463f49d1636abaf522857268aaa37c9f",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.chomper.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "2c0454c756b91840e9bee35f225d03fae7e4437b73884de10d23ca49466833f0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.corn.001",
+      "candidateId": "candidate.family.010",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2c0454c756b91840e9bee35f225d03fae7e4437b73884de10d23ca49466833f0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.elpw-pierce"
+        ],
+        "briefId": "brief.family.corn.001",
+        "candidateId": "candidate.family.010",
+        "flavor": "The creature converts its own essence into high-velocity projectiles, discharging the kinetic force through its own structural integrity to strike the foe.",
+        "motifsExpressed": [
+          "子弹",
+          "制成"
+        ],
+        "name": "Internal Ballistic Forging",
+        "rationale": "The action describes the process of manufacturing (制成) projectiles (子弹) from within the self to attack an enemy. By using 'death-salvo' and 'elpw-pierce', it captures the repetitive, piercing nature of the discharge without specifying a single species or a specific magnitude.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "d8dd20b88e03ef275d163c0c19be14f49b3d873ca55ee5f424a0e13832e6136a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.corn.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "96cb734de0a21a3b8dd0fbc83e61fdfaa5348e4deef431dbf110efbe6ac9b637",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.dolls.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "0f24a55af4b40790ed132dc07c76c160a3c368e00b73b22f16a1b360f1398f12",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.dolls.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "cb6372822620829642c2c8203cf69794c3151ac3516e09b811dde60698cd717b",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.double.001",
+      "candidateId": "candidate.family.014",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "cb6372822620829642c2c8203cf69794c3151ac3516e09b811dde60698cd717b",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.volley"
+        ],
+        "briefId": "brief.family.double.001",
+        "candidateId": "candidate.family.014",
+        "flavor": "The entity undergoes a violent internal convulsion, ejecting a rapid succession of projectiles from its own form to strike those in its path.",
+        "motifsExpressed": [
+          "发射",
+          "子弹"
+        ],
+        "name": "Kinetic Discharge",
+        "rationale": "The action focuses on the 'double' aspect by having the entity act as the source of a rapid-fire barrage. By utilizing 'death-salvo' and 'volley', the action captures the essence of multiple projectiles being launched (发射) in a sequence (子弹) without specifying a single species or a specific number of shots.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-salvo|atom.elpw-overflow"
+    },
+    {
+      "_provenance": {
+        "briefHash": "47d39b8bfad09550fce60cf55f430678a4d0acb8aee92849a94577913749c476",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.double.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "c3cf47840f912f7783ab17b536433ec8be77e06a5e990568a72fc7b1858596a0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.fire.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "b23ff357e2f73eabad1876e676c5cbb1239ad01cbc3706ac79ec7efb356a33b3",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.fire.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "369853f18da045746f6f429afc0e7d8ff844de9ba9aa35955b4d333544632fca",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.fruit.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "faab5147dfac181c493e524803b45923eb41b56af3591a36539309bfc5b67048",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.fruit.002",
+      "candidateId": "candidate.family.019",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "faab5147dfac181c493e524803b45923eb41b56af3591a36539309bfc5b67048",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.evd-harden",
+          "atom.shld-surge"
+        ],
+        "briefId": "brief.family.fruit.002",
+        "candidateId": "candidate.family.019",
+        "flavor": "The entity projects its internal structural tension outward, converting its own physical integrity into a forceful, directed wave of impact.",
+        "motifsExpressed": [
+          "发射",
+          "方向"
+        ],
+        "name": "Directional Kinetic Discharge",
+        "rationale": "The action represents the family's ability to convert defensive posture into an offensive impulse. By hardening their form (evd-harden) and surging their defensive energy (shld-surge), they release a directed blast (发射/方向) that uses their own defensive state as the propellant.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.evd-brace"
+    },
+    {
+      "_provenance": {
+        "briefHash": "cae84ab5eca3f022eaa823aefb2557328e4eb87ffe3630dec5ab0ecccda5ba72",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.garlic.001",
+      "candidateId": "candidate.family.020",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "cae84ab5eca3f022eaa823aefb2557328e4eb87ffe3630dec5ab0ecccda5ba72",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.venomous",
+          "atom.withering"
+        ],
+        "briefId": "brief.family.garlic.001",
+        "candidateId": "candidate.family.020",
+        "flavor": "The user ruptures their own essence, allowing a concentrated essence to flood their internal systems, turning their very being into a vessel of toxic potency that seeps into those who strike them.",
+        "motifsExpressed": [
+          "中毒",
+          "体内"
+        ],
+        "name": "Internal Saturation",
+        "rationale": "The action focuses on the user's internal state (体内) to facilitate a toxic effect (中毒). By rupturing their own internal systems, they ensure that any contact with an enemy results in the spread of their inherent toxicity. This is a self-targeted attack that uses the user's own body as the delivery mechanism for a debilitating effect.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-harvest|atom.venomous"
+    },
+    {
+      "_provenance": {
+        "briefHash": "b77bd50d0b35aa76b778d2702b8c9ada7acdc7da321d011d4ef4cdab37f939bc",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.garlic.002",
+      "candidateId": "candidate.family.021",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "b77bd50d0b35aa76b778d2702b8c9ada7acdc7da321d011d4ef4cdab37f939bc",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.venomous"
+        ],
+        "briefId": "brief.family.garlic.002",
+        "candidateId": "candidate.family.021",
+        "flavor": "The essence of the family permeates the blood and marrow of those nearby, turning their very biology into a vessel for a spreading, transformative sickness.",
+        "motifsExpressed": [
+          "体内",
+          "中毒"
+        ],
+        "name": "Internal Saturation",
+        "rationale": "The action focuses on the internal saturation (体内) of an ally with a transformative toxin (中毒). By using atom.venomous, the family's shared trait is expressed as a biological infiltration that affects the target's internal state rather than an external coating or a protective barrier.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.immunity|atom.venomous"
+    },
+    {
+      "_provenance": {
+        "briefHash": "7913751b9874e5dc6239f65d61a65c9013cbd1b688fb4259d6ce111cb0415fe0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.hypno.001",
+      "candidateId": "candidate.family.022",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "7913751b9874e5dc6239f65d61a65c9013cbd1b688fb4259d6ce111cb0415fe0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-harvest",
+          "atom.mesmerizing"
+        ],
+        "briefId": "brief.family.hypno.001",
+        "candidateId": "candidate.family.022",
+        "flavor": "The target's own essence begins to betray them, turning inward as their internal rhythm shifts from vitality to a hollow, mindless decay.",
+        "motifsExpressed": [
+          "僵尸",
+          "变心"
+        ],
+        "name": "The Fickle Rot",
+        "rationale": "The action targets the self to inflict an attack upon the enemy via the target's own corruption. It utilizes 'mesmerizing' to capture the '变心' (change of heart/betrayal) motif and 'death-harvest' to capture the '僵尸' (zombie/undead) motif, representing the transition from a living state to a mindless, harvested state.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-glean|atom.mesmerizing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "a58b8e329c53330aa686b05ead9a2e72e50fefdfea177b9790c5f4e20508c7f2",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.hypno.002",
+      "candidateId": "candidate.family.023",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "a58b8e329c53330aa686b05ead9a2e72e50fefdfea177b9790c5f4e20508c7f2",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.evd-harden",
+          "atom.sust-husk"
+        ],
+        "briefId": "brief.family.hypno.002",
+        "candidateId": "candidate.family.023",
+        "flavor": "The body undergoes a sudden, jarring shift in structural integrity, hardening into a rigid, unyielding state that rejects the current influence before softening into a different, equally unnatural density.",
+        "motifsExpressed": [
+          "僵尸",
+          "变心"
+        ],
+        "name": "Fickle Rigor Mortis",
+        "rationale": "The action captures the essence of the 'zombie' (僵尸) through the sudden hardening and husk-like rigidity of the body, and the 'change of heart/fickleness' (变心) through the rapid, unpredictable shifting of the physical state's properties.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.evd-husk|atom.mesmerizing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "7d9c782e36339d0625959a4f32a00a0c6de059b42fd0906cc7ce93bbcde213fd",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.ice.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "38871b32df1792b17f52a338dea2b6bfd74e7dae8d137bed722bd445611b9842",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.ice.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "e08952e0b6b028b78d97ac0df40ffccefaa7a11c579dce07f2c6ede937f04031",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.light.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "3430e9610729b737bcb1f3c8ba9b3783adc5249329f1a3638ec7d1714afa1d76",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.light.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "ee6c235c33ab2b6c2f4ab92450fb79c6caa1ec4139d1d7ce60b821090afb06f5",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.line.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "d7b9030994fc3e10065f1559b9c86cf9170511d5e3d1faf5d2065324a41fbe24",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.line.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "25bc7b06dbcceabd13f969be2cecbde75e2ea98ae355f47a35d6b43ae192200e",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.nut.001",
+      "candidateId": "candidate.family.030",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "25bc7b06dbcceabd13f969be2cecbde75e2ea98ae355f47a35d6b43ae192200e",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.carapace",
+          "atom.elpw-pierce"
+        ],
+        "briefId": "brief.family.nut.001",
+        "candidateId": "candidate.family.030",
+        "flavor": "The core of the being hardens into a dense, unyielding kernel, driving itself forward with explosive force to pierce through the opposition.",
+        "motifsExpressed": [
+          "穿透",
+          "坚果"
+        ],
+        "name": "Hardened Penetration",
+        "rationale": "The action focuses on the internal hardening (nut/kernel) to facilitate a piercing strike (penetration) against an enemy, fulfilling the attack/self/enemy requirement without violating anti-motifs or species-specific constraints.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.elpw-pierce|atom.might"
+    },
+    {
+      "_provenance": {
+        "briefHash": "da6455cdc73cc69af2c340e560ad9266bd6362522912e3c49cd447e4351713c1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.nut.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "8c3cb07b3795cc624a8ad2f254a0faf1d7ee2efb497f1b33168370d765e1406c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.pea.001",
+      "candidateId": "candidate.family.032",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "8c3cb07b3795cc624a8ad2f254a0faf1d7ee2efb497f1b33168370d765e1406c",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.sporing"
+        ],
+        "briefId": "brief.family.pea.001",
+        "candidateId": "candidate.family.032",
+        "flavor": "The creature ruptures its own essence, launching a barrage of necrotic fragments that seek out the living.",
+        "motifsExpressed": [
+          "僵尸",
+          "发射"
+        ],
+        "name": "Undead Volley",
+        "rationale": "The action utilizes 'gravemaking' to represent the 'zombie' (僵尸) motif through the release of death-related matter, and 'death-salvo' to fulfill the 'launch' (发射) motif. It targets the enemy by expending the self to create a projectile-based attack.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-salvo|atom.gravemaking"
+    },
+    {
+      "_provenance": {
+        "briefHash": "45e5946923f4c7296ba9b1bdb23959c4fd67d832c52042e42dda83f2975f5955",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.pea.002",
+      "candidateId": "candidate.family.033",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "45e5946923f4c7296ba9b1bdb23959c4fd67d832c52042e42dda83f2975f5955",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.tempo-surge"
+        ],
+        "briefId": "brief.family.pea.002",
+        "candidateId": "candidate.family.033",
+        "flavor": "A sudden, violent propulsion that propels the body forward with the singular, mindless momentum of a corpse being launched from a catapult.",
+        "motifsExpressed": [
+          "僵尸",
+          "发射"
+        ],
+        "name": "Relentless Surge of the Unliving",
+        "rationale": "The action captures the 'launching' (发射) of a 'zombie' (僵尸) through a sudden burst of movement. By utilizing deathblast and tempo-surge, the movement is characterized by a sudden, explosive release of kinetic energy that ignores self-preservation, embodying the unstoppable, mindless momentum shared by all members of this family.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.deathblast|atom.tempo-surge"
+    },
+    {
+      "_provenance": {
+        "briefHash": "5bda6a0b93ed54fc209b5dbd5028eeb700f09b7aad0f2df790ba8e5ff4eff3ce",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.sun.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "6df930041f985485a0363be5c13b099893c6516e205fe5e32e38e471694250fe",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.sun.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "55f01854619170e1ed04855e55129f3e764fa23c5414ca3567d19072692995a1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.sunflower.001",
+      "candidateId": "candidate.family.036",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "55f01854619170e1ed04855e55129f3e764fa23c5414ca3567d19072692995a1",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:28:12+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1"
+        },
+        "atomFamilies": [
+          "atom.death-harvest",
+          "atom.sunbloom"
+        ],
+        "briefId": "brief.family.sunflower.001",
+        "candidateId": "candidate.family.036",
+        "flavor": "The entity turns its full attention toward the zenith, blooming with a sudden, overwhelming intensity that consumes its own internal reserves to ensure the cycle reaches its inevitable end.",
+        "motifsExpressed": [
+          "嘴花",
+          "完成"
+        ],
+        "name": "Radiant Completion",
+        "rationale": "The action focuses on the family's inherent drive to reach a state of full maturity or 'completion' (完成) by expending their essence in a sudden burst of brilliance (嘴花/blooming/flowering). This is an attack on the self that triggers a reaction against the enemy, utilizing the sun-driven energy and the harvest-driven cycle common to the entire lineage.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.flourishing|atom.sunbloom"
+    },
+    {
+      "_provenance": {
+        "briefHash": "83efbf5ab512f0283af5d43b957d6f2f8033357ca979b2a934821bdaad7e323c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:28:12+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.sunflower.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    }
+  ],
+  "kind": "action-candidate",
+  "schemaVersion": 1
+}

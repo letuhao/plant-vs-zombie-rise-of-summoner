@@ -26,15 +26,50 @@
       "nameKey": "affix.deathblast",
       "name": "Deathblast",
       "kindId": "resource.delta",
-      "params": { "element": "{variant}", "when": "OnDeath" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "element": "{variant}",
+        "when": "OnDeath"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Detonation", "of the Blast", "of Ruin"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Detonation"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Blast"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Ruin"
+          }
+        ]
+      },
       "displayTemplate": "{value} {element} damage burst on death",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED — id, kind and element-variant expansion kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.on-death existingFamilies), and per ssot-affixes.md's own worked example citing `atom.deathblast.omni.t5` as a real (crafted-only-weighted) row, which is what confirms this family carries the element variant rather than being a single-row one. `roles` is the on-death column of ssot-affixes.md §4.3's role x group matrix (weight > 0 for head-protective, core-protective, jewel-major, jewel-minor, armament-primary), translated to core.v1.json's 15 ids: head-protective->head-guard, core-protective->core-guard, jewel-minor->jewel-minor-a and jewel-minor-b, jewel-major and armament-primary stay. Every entry in this file shares this identical roles list, same as the on-hit group's file does for its own column. `displayTemplate` mirrors `searing_strike`'s shape (bonus element damage) but on the corpse's cell instead of the hit target, which is the trigger swap the whole family is built on."
     },
     {
@@ -42,14 +77,46 @@
       "nameKey": "affix.martyrdom",
       "name": "Martyrdom",
       "kindId": "resource.delta",
-      "params": { "when": "OnDeath" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDeath"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Sacrifice", "of the Fallen", "of Last Rites"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Sacrifice"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Fallen"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Last Rites"
+          }
+        ]
+      },
       "displayTemplate": "heal allies {value}% of max health when this dies",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. No `element` param and no `variants` — a single-row family, the death-side mirror of how `lifesteal` carries no variant on the on-hit side. The trigger is the same `OnDeath` as `deathblast`; the two shipped families split the wearer's-own-death perspective into an offensive burst (`deathblast`) and a defensive ally-heal (`martyrdom`), exactly the O/S split atom-family-library.md §3.3 records for this pair."
     },
     {
@@ -57,14 +124,47 @@
       "nameKey": "affix.summoner",
       "name": "Summoner",
       "kindId": "spawn.entity",
-      "params": { "kind": "zombie", "when": "OnDeath" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "zombie",
+        "when": "OnDeath"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Reinforcement", "of the Rally", "of the Uprising"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Reinforcement"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Rally"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Uprising"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to spawn a zombie where this fell",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. `kindId: spawn.entity` with `params.kind: \"zombie\"` matches AtomKindRegistry's spawn.entity schema, which honours `x`/`hp`/`maxHp`/`mindControlled` only for `kind=zombie` — this family supplies none of those, the same restraint `volley` shows for its own `kind: \"bullet\"` row on the on-hit side. `powerBand: low` for the same reason `volley` sits at `low`: a spawn rider is a bigger swing than an additive number and is kept modest relative to the additive riders (`deathblast`, `martyrdom`) beside it. atom-family-library.md §4.2 calls this family's home domain the zombie/creep side, which the flavour and `nameWords` lean into without the schema needing a faction field to say so."
     },
     {
@@ -72,14 +172,47 @@
       "nameKey": "affix.gardener",
       "name": "Gardener",
       "kindId": "spawn.entity",
-      "params": { "kind": "plant", "when": "OnDeath" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "plant",
+        "when": "OnDeath"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of the Seedling", "of Renewal", "of the Sowing"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Seedling"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Renewal"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Sowing"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to spawn a plant where this fell",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "SHIPPED, id kept verbatim, and the one family in this file with a real worked citation: ssot-affixes.md's draw example resolves row 4 as `atom.gardener.t2` -> \"spawn 1 plant OnDeath, 250 permille\", confirming both the trigger and that the count/chance split is a generated magnitude, never authored here. `params.kind: \"plant\"` is the plant-side twin of `summoner`'s `kind: \"zombie\"`, the same pairing atom-family-library.md §3.5 and §4.2 draw between them. `tags: [\"utility\"]` rather than `[\"offensive\"]` follows that same table's O/U split for the pair — a new plant on the board is board presence and tempo, not a direct damage swing."
     },
     {
@@ -87,14 +220,47 @@
       "nameKey": "affix.death-harvest",
       "name": "Harvest",
       "kindId": "resource.delta",
-      "params": { "when": "OnDeath", "actorIsKiller": true },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDeath",
+        "actorIsKiller": true
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of the Reaper", "of Gleaning", "of the Harvest"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Reaper"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Gleaning"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Harvest"
+          }
+        ]
+      },
       "displayTemplate": "heal {value}% of max health when you land the killing blow",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family minted on this group's reserved `death` stem (naming.v1.json idNamespaces.affixFamilies), word `harvest` — a mechanical description of gaining something from a death, not a theme adjective. There is no `OnKill` trigger (atom-catalog-ssot.md §3: 'No OnKill — killer arrives as actorIsKiller'), so 'when you land the killing blow' is authored as the same `OnDeath` trigger every other family in this file uses, plus `actorIsKiller: true` — the existing OnDeath filter core.v1.json's own counterPressure.conditions registers as leaf `actorIsKiller` (id `actor-is-killer`), placed in `params` the same authoring-level way `when` already sits there (neither key is in AtomKindRegistry's `resource.delta` ParamSchema; both are trigger/condition shorthand the generator resolves into the row's `when_json`, per spec-atom-schema.md's `trigger`+`predicate` shape). This is the wearer-kills mirror of `martyrdom` (wearer-dies, heals allies): same kind, same heal shape, opposite half of the OnDeath perspective split — and distinct from `lifesteal`, which triggers on every hit rather than only a killing one."
     },
     {
@@ -102,14 +268,48 @@
       "nameKey": "affix.death-glean",
       "name": "Glean",
       "kindId": "spawn.entity",
-      "params": { "kind": "bullet", "when": "OnDeath", "actorIsKiller": true },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "bullet",
+        "when": "OnDeath",
+        "actorIsKiller": true
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Gleaning", "of the Windfall", "of the Spoils"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Gleaning"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Windfall"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Spoils"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to fire an additional bullet when you land the killing blow",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `death`, word `glean` (to gather what a harvest leaves behind — mechanical, not a flavour adjective). Same `actorIsKiller: true` + `OnDeath` construction as `death-harvest`, applied to `spawn.entity`/`kind: bullet` instead of `resource.delta` — the wearer-kills mirror of `volley` (which fires on every hit) the way `death-harvest` mirrors `lifesteal`, and a genuinely different combination from `summoner` (spawns a zombie on the WEARER's own death, not on a kill the wearer causes)."
     },
     {
@@ -117,14 +317,47 @@
       "nameKey": "affix.death-salvo",
       "name": "Parting Salvo",
       "kindId": "spawn.entity",
-      "params": { "kind": "bullet", "when": "OnDeath" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "bullet",
+        "when": "OnDeath"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "core-guard", "head-guard", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "core-guard",
+        "head-guard",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of the Farewell", "of the Last Stand", "of the Final Volley"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Farewell"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Last Stand"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Final Volley"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to fire a bullet when this dies",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `death`, word `salvo`. Closes the last open cell in this group's own combination table: the wearer-dies perspective (like `deathblast`/`martyrdom`/`summoner`/`gardener`) crossed with a `spawn.entity`/`kind: bullet` payload (like `volley` on the on-hit side, and like `death-glean` on this side's kill-perspective half) — a slot none of the four shipped families or the two kill-triggered new ones above fill. `powerBand: low` for the same reason every other spawn rider in this file sits there."
     }
   ]

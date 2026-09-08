@@ -1,0 +1,44 @@
+{
+  "_meta": {
+    "partition": "Deny"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.18 kind 3, Wire: SLOW verb, bulk material, 'the cheapest' \u2014 multiplies the stamina cost of entering the cell. NOT a block, NOT cover (source's own distinction from Rampart).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built",
+          "laboured"
+        ],
+        "controlPoint": false,
+        "costProfile": "cheap",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [
+          "SLOW"
+        ],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Deny",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "wire",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "wire",
+      "name": "Wire"
+    }
+  ],
+  "kind": "structure-anchor"
+}

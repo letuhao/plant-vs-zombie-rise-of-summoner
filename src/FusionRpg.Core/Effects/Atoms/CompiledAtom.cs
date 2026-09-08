@@ -88,6 +88,12 @@ public sealed class FlatPredicate : ICompiledPredicate
         // scalar this leaf needs beyond Op's single Value slot, reusing the Set array Leaf.Values
         // already provides rather than adding a new field.
         LeafId.HoldsStock => f.StockQty(op.Subject, op.Value) >= (op.Set is { Length: > 0 } s ? s[0] : 1),
+        // D3.7 (event-deck): plain raw ordinals/counts, Intern's own default (l.Value, null) already
+        // carries op.Value through unchanged -- no new Op field, no new Intern case needed.
+        LeafId.BandIs => f.Band(op.Subject) == op.Value,
+        LeafId.HaulAtLeast => f.HaulCount(op.Subject) >= op.Value,
+        LeafId.RoomKindIs => f.RoomKind(op.Subject) == op.Value,
+        LeafId.PartyDownedCount => f.DownedCount(op.Subject) >= op.Value,
         _ => true,
     };
 

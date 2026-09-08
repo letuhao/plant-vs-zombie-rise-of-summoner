@@ -1,0 +1,15 @@
+{
+  "climate": "light",
+  "dispositionBase": "none",
+  "encounterRef": "none",
+  "eventPool": [],
+  "flavor": "Sunlight pours through a ceiling of polished quartz, fracturing into a thousand dancing rainbows that coat the floor in shifting, iridescent colors. At the center, a pedestal of white marble holds a collection of silvered instruments and vials of liquid starlight.",
+  "hazardBand": "none",
+  "kind": "cache",
+  "name": "The Prism of Refracted Grace",
+  "reason": "The room serves as a non-combat reward chamber containing high-value consumable items and lore-significant artifacts.",
+  "roomId": "room.cache-light-001",
+  "secretEligible": "no",
+  "sightBand": "lit",
+  "tags": []
+}

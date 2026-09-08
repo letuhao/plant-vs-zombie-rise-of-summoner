@@ -1,0 +1,51 @@
+{
+  "slug": "commander-auras",
+  "title": "Commander auras",
+  "status": "WIP",
+  "kicker": "Power and builds · lawn",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power · Lawn",
+  "hook": "**WIP:** a continuous side-wide presence (or Focus on your own actions) from the commander you chose — one aura active at a time.",
+  "blindSpots": [
+    {"term": "Aura", "meaning": "Ongoing presence from the leader — not a one-shot skill click."},
+    {"term": "One at a time", "meaning": "Design is a single active aura, not a stack of every commander buff."},
+    {"term": "WIP", "meaning": "Not finished on the live lawn path."},
+    {"term": "Focus", "meaning": "Some auras may emphasize your own actions rather than only side-wide buffs — read the aura when it ships."}
+  ],
+  "alsoTrue": [
+    "Set the leader first — [commanders](commanders).",
+    "Hero recruitment into the commander slot is later fantasy on the same pillar."
+  ],
+  "sections": [
+    {
+      "title": "What it will be",
+      "paras": [
+        "The commander you set carries one aura into the match.",
+        "It stays continuous for that snapshot."
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Pick a commander.",
+        "Play without expecting a finished aura chrome."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Use Commanders (`K`) for who leads.",
+    "Ignore missing aura readouts.",
+    "Return when aura UI ships."
+  ],
+  "doNote": "Gear loop: [relics armoury](relics-armoury).",
+  "mixUps": [
+    {"q": "Can I stack three auras?", "a": "No — one active at a time."},
+    {"q": "Is aura the same as patron colour?", "a": "No. Patron is element identity; aura is commander presence."},
+    {"q": "Broken lawn without aura?", "a": "No — WIP."},
+    {"q": "Does aura persist after the match?", "a": "It is match presence from the leader snapshot — not a permanent world buff."}
+  ],
+  "next": ["relics-armoury"],
+  "related": ["commanders", "lawn-match"],
+  "sources": ["docs/guide/relics-and-builds.md §Commanders and auras"]
+}

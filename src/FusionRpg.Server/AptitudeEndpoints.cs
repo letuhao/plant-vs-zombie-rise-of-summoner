@@ -1,5 +1,7 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -54,12 +56,36 @@ public static class AptitudeEndpoints
             _ = BroadcastBestEffort(hub, pid);
             return Results.Ok(ProjectState(store, powerIndex, pid));
         });
+
+        // `demon-type-allocation` (module 5, spec-demon-type-allocation.md §"Commands") — the
+        // player-facing surface over EffectiveSpeciesAllocation. GET only: the POST twin
+        // (`/species/allocate`) was RETIRED by species-build-todo.md T4.3/Checkpoint 5's own named
+        // follow-up — it wrote a DemonType override with zero pricing awareness, a live bypass of the
+        // whole `species-respec` economy (owner decision, 2026-09-05: "retire it now"). Every real
+        // write now goes through `SpeciesBuildEndpoints.cs`'s `POST /api/species-build/respec`, which
+        // decides free-vs-priced for itself; this GET keeps serving reads unchanged.
+        g.MapGet("/species/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            if (!DemonSpeciesCatalog.IsKnown(speciesId))
+                return Results.BadRequest(new { reason = "species.unknown" });
+            return Results.Ok(ProjectSpeciesState(store, playerId, speciesId));
+        });
     }
 
     static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
     {
+        // Both groups, matching Program.cs/SimEndpoints.cs's own PvzStatsUpdated pattern: the web
+        // client refetches on this event, and the injector's RpgClient.cs:93 handler (enqueues
+        // "aptitudes.allocation.reload" -> RefreshCommanderAllocationAsync) needs it too -- an
+        // injector connection only ever joins InjectorGroup (RpgHub.cs:27-28), so a WebGroup-only
+        // send here left CheatState.CommanderAllocation stale until the next injector reconnect.
+        // Found 2026-08-30 verifying aura-skill T5/T6's own "wired end-to-end" claim against a real
+        // live game -- confirmed dead via a live probe, not assumed from reading code alone.
         try { await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("AptitudesUpdated", new { playerId }); }
         catch { /* best-effort; the allocation is durable and the next GET reflects it */ }
+        try { await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("AptitudesUpdated", new { playerId }); }
+        catch { /* best-effort; the injector re-syncs at its own next session start regardless */ }
     }
 
     /// <summary>The store is agnostic to key shape (`RpgStore.Aptitudes.cs`'s own contract) — matches
@@ -71,13 +97,54 @@ public static class AptitudeEndpoints
         var allocation = store.LoadAllocation(AllocationScope.Commander, ScopeKey(playerId));
         var theta = (long)powerIndex.ActorIndex(new StatContext { PlayerId = playerId });
         var check = PointBudget.CheckScope(AllocationScope.Commander, allocation, theta, AptitudeTuningHub.Tuning);
+
+        // species-build T3.1 (module 6, allocation-transport): additive only — `shares` below is
+        // byte-unchanged for a player with no species allocations (spec's own ⛔ callout: RpgClient.cs
+        // hard-requires the literal key "shares", a rename would silently stop every allocation
+        // applying). Only species this player has actually levelled are sent, never the full corpus.
+        var species = new Dictionary<string, Dictionary<string, long>>(StringComparer.Ordinal);
+        foreach (var speciesId in store.ListLevelledSpeciesIds(playerId))
+        {
+            var effective = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
+            species[speciesId] = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => effective.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal);
+        }
+
         return new
         {
             theta,
             budget = check.Budget,
             spent = check.Spent,
             withinBudget = check.WithinBudget,
-            shares = AptitudeCatalog.All.ToDictionary(a => a.Id, a => allocation.PointsAt(AllocationScope.Commander, a.Id), StringComparer.Ordinal)
+            shares = AptitudeCatalog.All.ToDictionary(a => a.Id, a => allocation.PointsAt(AllocationScope.Commander, a.Id), StringComparer.Ordinal),
+            species
+        };
+    }
+
+    static object ProjectSpeciesState(RpgStore store, long playerId, string speciesId)
+    {
+        var demonTypeId = DemonSpeciesCatalog.Get(speciesId).DemonTypeId;
+        var level = store.GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+        var allocation = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
+        var source = PointBudget.DemonTypeSourceFromLevel(level);
+        var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
+
+        // species-build-todo.md T5.1 — additive: `spec-allocation-surface.md`'s panel needs the
+        // shipped baseline SEPARATELY from the effective (baseline-or-override) value in `shares`, to
+        // render an override "as a deviation from it" rather than as a standalone build.
+        var baseline = store.SpeciesBaselineAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
+        return new
+        {
+            speciesId,
+            level,
+            budget = check.Budget,
+            spent = check.Spent,
+            withinBudget = check.WithinBudget,
+            hasOverride = store.HasSpeciesOverride(playerId, speciesId),
+            shares = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => allocation.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal),
+            baseline = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => baseline.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
         };
     }
 

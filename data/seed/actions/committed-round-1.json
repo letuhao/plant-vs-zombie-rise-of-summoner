@@ -1,0 +1,669 @@
+{
+  "_meta": {
+    "corpusHash": "11e86961a582d4a547a035f43fbc3b146e4e18947577477cded9bd82401d60c6",
+    "partition": "round-1",
+    "round": 1
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:00.038835+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "912dfec8c25df013be2abb349b20a3693bddd0e6502ade43db68ea9d39008881"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.sporing",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "description": "A rapid-fire barrage of needles erupts from the cactus, whistling through the air toward the approaching horde.",
+      "descriptionKey": "action.family.cactus.001.desc",
+      "id": "action.family.cactus.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "仙人掌",
+        "发射"
+      ],
+      "name": "Spined Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "cactus",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:19.078377+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "48cb1b2b7922022e3f5ad289365048f420d6b00ef84675e9f55aeed70a4f2ea0"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.death-harvest"
+      ],
+      "category": "support",
+      "description": "A burst of dark, petal-strewn energy surges through a fallen comrade, knitting their essence back into a vibrant, vengeful bloom.",
+      "descriptionKey": "action.family.cherry.001.desc",
+      "id": "action.family.cherry.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "樱桃"
+      ],
+      "name": "The Crimson Reanimation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "cherry",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:21.905370+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b10b8a2594108ddb89e1658dc15661b5ced81a1a69e275155a281c4704dffa50"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.lifesteal"
+      ],
+      "category": "attack",
+      "description": "A dark, hungry void opens within the maw, pulling the essence of the fallen directly into the soil.",
+      "descriptionKey": "action.family.chomper.001.desc",
+      "id": "action.family.chomper.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "吞食",
+        "僵尸"
+      ],
+      "name": "Grave-Gorge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "chomper",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:26.054589+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9418b742af44c644d818ceee98bcd17bd5bd02e43c0a83547c99407463b9eadb"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.elpw-pierce"
+      ],
+      "category": "attack",
+      "description": "A rapid-fire succession of kernels erupts from within, shredding through the air with a deafening, rhythmic crack.",
+      "descriptionKey": "action.family.corn.001.desc",
+      "id": "action.family.corn.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "子弹",
+        "制成"
+      ],
+      "name": "Internal Ballistic Forging",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "corn",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:29.567415+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "93e200d7ab505a0603e209e2d7addbf55430af83f19f58a0a30c451bfbfd65a7"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "description": "A rapid-fire succession of heavy impacts ripples outward, shaking the very ground beneath.",
+      "descriptionKey": "action.family.double.001.desc",
+      "id": "action.family.double.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "发射",
+        "子弹"
+      ],
+      "name": "Kinetic Discharge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "double",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:33.359972+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "658e3f785247614a5c583c380cba2a2c0c6d87c1c934f196c06aaab48c2ffba0"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-harden",
+        "atom.shld-surge"
+      ],
+      "category": "defense",
+      "description": "A sudden, pressurized burst of juice erupts from the rind, knocking back anything caught in its path.",
+      "descriptionKey": "action.family.fruit.001.desc",
+      "id": "action.family.fruit.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "发射",
+        "方向"
+      ],
+      "name": "Directional Kinetic Discharge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "fruit",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:36.206854+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "47770df69d4d31f4ffbaeb7c654af659412331f8ce7356e0cf575bbe5de2a41b"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.venomous",
+        "atom.withering"
+      ],
+      "category": "attack",
+      "description": "A pungent, sickly green haze seeps from the cloves, causing the target to wilt and sag from the inside out.",
+      "descriptionKey": "action.family.garlic.001.desc",
+      "id": "action.family.garlic.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "中毒",
+        "体内"
+      ],
+      "name": "Internal Saturation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "garlic",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:39.006364+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "8c6329cb3e82916fa90ae73f42ab28f8628a886241b97d1dfaeda11e7161a663"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.venomous"
+      ],
+      "category": "support",
+      "description": "A pungent, swirling mist of concentrated essence seeps into the target's pores.",
+      "descriptionKey": "action.family.garlic.002.desc",
+      "id": "action.family.garlic.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "体内",
+        "中毒"
+      ],
+      "name": "Internal Saturation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "garlic",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:42.978846+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "439c8e052a49c87478857c32224c01ba591357614a217f2c0037ccbc357b2dba"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.mesmerizing"
+      ],
+      "category": "attack",
+      "description": "A swirling haze of hypnotic spores causes the target to unravel into a decaying, mindless shadow of its former self.",
+      "descriptionKey": "action.family.hypno.001.desc",
+      "id": "action.family.hypno.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "变心"
+      ],
+      "name": "The Fickle Rot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "hypno",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:45.816884+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "68604e06058e9f052bf648c77816695510727a4bb8f2da9ed2fc45d60b797a21"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-harden",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "description": "The zombie's limbs stiffen into a rigid, trance-like shell that resists all movement.",
+      "descriptionKey": "action.family.hypno.002.desc",
+      "id": "action.family.hypno.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "变心"
+      ],
+      "name": "Fickle Rigor Mortis",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "hypno",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:49.026291+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6ff74e8601a495c81899781b60c8c4a1ed7d8429fded9bc0cfbeec3367d1505d"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.carapace",
+        "atom.elpw-pierce"
+      ],
+      "category": "attack",
+      "description": "The shell thickens into a jagged, spear-like point that shatters through any obstacle in its path.",
+      "descriptionKey": "action.family.nut.001.desc",
+      "id": "action.family.nut.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "穿透",
+        "坚果"
+      ],
+      "name": "Hardened Penetration",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "nut",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:52.902984+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4d04ffd037b3f688a83fc29a2f3957a2c00eaca780d6c355a085b3a52445b5ba"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.sporing"
+      ],
+      "category": "attack",
+      "description": "A rapid-fire barrage of necrotic seeds tears through the air with a hollow, whistling sound.",
+      "descriptionKey": "action.family.pea.001.desc",
+      "id": "action.family.pea.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "发射"
+      ],
+      "name": "Undead Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "pea",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:05:55.918835+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2871b8079183dcc7240dd848cc93965b0bcea2ba41278998670760664e25550f"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "description": "A rapid-fire cadence of green projectiles accelerates into a blurring, unstoppable wave of vegetation.",
+      "descriptionKey": "action.family.pea.002.desc",
+      "id": "action.family.pea.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "发射"
+      ],
+      "name": "Relentless Surge of the Unliving",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "pea",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:00.158928+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2937a2381d9cb40402057433a88a206bd666bdf6a3ee45e89a67d566086209b6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.sunbloom"
+      ],
+      "category": "attack",
+      "description": "A brilliant, golden burst erupts from the petals, scattering shimmering essence across the battlefield.",
+      "descriptionKey": "action.family.sunflower.001.desc",
+      "id": "action.family.sunflower.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "嘴花",
+        "完成"
+      ],
+      "name": "Radiant Completion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "sunflower",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:03.206449+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2a471b0c940e903e2e9d5ec5eef5252acc0856a3ae5f6c776616d39181b75c2f"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-brace",
+        "atom.sust-grit"
+      ],
+      "category": "defense",
+      "description": "The plant digs its roots deep into the soil, tensing its stem to withstand the coming impact.",
+      "descriptionKey": "action.general.0001.desc",
+      "id": "action.general.0001",
+      "name": "Brace",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:07.339987+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5d3f24c71eb3711a8ffc2af479bdc7a775486a9aed72b987aeaeb169218681c3"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.tempo-surge",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "description": "A rhythmic, emerald wave ripples through the garden, synchronizing the heartbeats of every nearby sprout.",
+      "descriptionKey": "action.general.0003.desc",
+      "id": "action.general.0003",
+      "name": "Shared Pulse",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:10.590260+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a562a7e1f5bd917c6bce4e2266d8a2f1bd5fc4922524781f954cdd94267dd30a"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.swiftness",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "description": "A sudden blur of green as the plant snaps into a new position in a heartbeat.",
+      "descriptionKey": "action.general.0004.desc",
+      "id": "action.general.0004",
+      "name": "Shift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:15.187365+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "f2d1e3b0f7e036b8ec38f6668d1245f33c859041c3c05fddb35643a33d7ed1c6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evasion",
+        "atom.swiftness"
+      ],
+      "category": "movement",
+      "description": "A sudden, blurring blur of green as the plant skitters momentarily out of harm's way.",
+      "descriptionKey": "action.general.0005.desc",
+      "id": "action.general.0005",
+      "name": "Shift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-07T19:06:18.001097+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c7b783277f25e1fa897702f3e614820e406828401c77558a6fba755d364cb75f"
+      },
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.dooming",
+        "atom.withering"
+      ],
+      "category": "status",
+      "description": "The ground ripples violently, leaving the earth cracked and unstable beneath their feet.",
+      "descriptionKey": "action.general.0006.desc",
+      "id": "action.general.0006",
+      "name": "Lingering Tremor",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

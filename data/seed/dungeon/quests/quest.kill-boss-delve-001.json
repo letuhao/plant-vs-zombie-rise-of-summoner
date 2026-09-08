@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The ancient architect's shadow looms over the deepest chamber, guarding the secrets of the maze. Only by striking down the master of this place can the path to the exit be revealed.",
+  "name": "The Heart of the Labyrinth",
+  "objectiveTemplate": "kill-boss",
+  "prereqRefs": [],
+  "questId": "quest.kill-boss-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "delve",
+  "targetRef": "none"
+}

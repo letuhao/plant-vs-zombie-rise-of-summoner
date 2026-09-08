@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Atoms;
@@ -288,9 +289,12 @@ public class AtomSeedFileTests
     [Fact]
     public void An_unknown_container_kind_is_refused()
     {
+        // "consumable" was this test's example until 2026-09-07 (container-kind-expansion, X7) made
+        // it a real ContainerKind member -- swapped for a name that stays genuinely outside the enum,
+        // since the point of this test is "unknown is refused," not this specific string.
         var r = Collect(("c.json", """
             { "schemaVersion": 1, "kind": "container", "entries": [
-                { "id": "x.one", "kind": "consumable" } ] }
+                { "id": "x.one", "kind": "bogus-kind" } ] }
             """));
 
         Assert.False(r.IsOk);
@@ -308,5 +312,303 @@ public class AtomSeedFileTests
         Assert.False(r.IsOk);
         Assert.Equal(AtomRejectionReason.BadCurve, r.Errors[0].Reason);
         Assert.Empty(r.Content.Curves);
+    }
+
+    // ---- affix (module 9, `affix-authoring`'s own consumer — no reader existed before this) ------
+
+    [Fact]
+    public void A_concrete_ref_affix_parses()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.master-of-fire-and-ice", "class": "prefix", "refs": [
+                    { "atom": "atom.fire-power.t1" }, { "atom": "atom.ice-power.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var affix = Assert.Single(r.Content.Affixes);
+        Assert.Equal("affix.master-of-fire-and-ice", affix.AffixId);
+        Assert.Equal(AffixClass.Prefix, affix.Class);
+        Assert.Equal(2, affix.Refs.Count);
+        Assert.Equal("atom.fire-power.t1", affix.Refs[0].AtomId);
+        Assert.False(affix.Refs[0].IsSlot);
+        Assert.Equal("x.json", r.Content.SourceOf["affix.master-of-fire-and-ice"]);
+    }
+
+    [Fact]
+    public void A_slot_ref_affix_parses()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.elemental-adept", "class": "prefix", "refs": [
+                    { "slotName": "E1", "slotDomain": "element", "slotPick": 1,
+                      "slotAtomPattern": "atom.elemental-power.$E1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var refRow = Assert.Single(r.Content.Affixes[0].Refs);
+        Assert.True(refRow.IsSlot);
+        Assert.Null(refRow.AtomId);
+        Assert.Equal("E1", refRow.SlotName);
+        Assert.Equal("element", refRow.SlotDomain);
+        Assert.Equal(1, refRow.SlotPick);
+        Assert.Equal("atom.elemental-power.$E1", refRow.SlotAtomPattern);
+    }
+
+    [Fact]
+    public void A_mixed_concrete_and_slot_bundle_parses_both_ref_shapes_in_authored_order()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.mixed", "class": "mixed", "refs": [
+                    { "atom": "atom.fire-power.t1" },
+                    { "slotName": "E1", "slotDomain": "element", "slotPick": 1,
+                      "slotAtomPattern": "atom.elemental-power.$E1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var refs = r.Content.Affixes[0].Refs;
+        Assert.Equal(new[] { 0, 1 }, refs.Select(x => x.Seq));
+        Assert.False(refs[0].IsSlot);
+        Assert.True(refs[1].IsSlot);
+    }
+
+    [Fact]
+    public void An_explicit_seq_wins_over_the_authored_position_for_affix_refs()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "prefix", "refs": [
+                    { "seq": 7, "atom": "a.t1" }, { "atom": "b.t1" } ] } ] }
+            """));
+
+        Assert.Equal(new[] { 7, 1 }, r.Content.Affixes[0].Refs.Select(x => x.Seq));
+    }
+
+    [Theory]
+    [InlineData("prefix", AffixClass.Prefix)]
+    [InlineData("suffix", AffixClass.Suffix)]
+    [InlineData("mixed", AffixClass.Mixed)]
+    [InlineData("PREFIX", AffixClass.Prefix)]
+    public void Every_affix_class_parses_case_insensitively(string authored, AffixClass expected)
+    {
+        var r = Collect(("x.json", $$"""
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "{{authored}}", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Equal(expected, r.Content.Affixes[0].Class);
+    }
+
+    [Fact]
+    public void An_unknown_affix_class_is_refused_rather_than_defaulted()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "legendary", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Errors[0].Reason);
+        Assert.Empty(r.Content.Affixes);
+    }
+
+    [Fact]
+    public void A_missing_affix_class_parses_as_null_not_defaulted_to_prefix()
+    {
+        // E32 (spec-affix-import-path.md §3.2, decided 2026-09-03): an absent class is now LEGAL at
+        // parse time — "derive it" — the shape a real generator emits. It parses to `null`, never a
+        // silent default of Prefix; AffixValidator.Validate/ResolveClass is what fills it in, and
+        // only once an atom lookup exists to derive FROM.
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var affix = Assert.Single(r.Content.Affixes);
+        Assert.Null(affix.Class);
+    }
+
+    [Fact]
+    public void An_unparseable_affix_class_is_still_refused()
+    {
+        // Present-but-garbage is still a refusal — only ABSENCE became legal, not "any string goes."
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "nonsense", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Errors[0].Reason);
+    }
+
+    [Fact]
+    public void An_affix_with_no_refs_array_parses_as_an_empty_bundle_not_an_error()
+    {
+        // Matches ReadContainer's own treatment of an absent "atoms"/"pool" array — the shape
+        // question ("does an empty bundle make sense") is AffixValidator.Validate's job, not the
+        // reader's; this method only parses what is there.
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "prefix" } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Empty(r.Content.Affixes[0].Refs);
+    }
+
+    [Fact]
+    public void An_affix_id_collides_with_an_atom_id_as_a_duplicate_across_kinds()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "atom.vitality.t1", "class": "prefix", "refs": [ { "atom": "a.t1" } ] } ] }
+            """), ("a.json", AtomsFile(Vitality)));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.DuplicateKey, r.Errors[0].Reason);
+    }
+
+    [Fact]
+    public void All_five_kinds_parse_affix_included()
+    {
+        var r = Collect(
+            ("a.json", AtomsFile(Vitality)),
+            ("aff.json", """
+                { "schemaVersion": 1, "kind": "affix", "entries": [
+                    { "id": "affix.x", "class": "prefix", "refs": [ { "atom": "atom.vitality.t1" } ] } ] }
+                """),
+            ("c.json", """
+                { "schemaVersion": 1, "kind": "curve", "entries": [
+                    { "id": "curve.atk.level", "input": "level",
+                      "points": [ { "x": 1, "mult": 1000 } ] } ] }
+                """),
+            ("r.json", """
+                { "schemaVersion": 1, "kind": "rarity", "entries": [
+                    { "id": "rare", "ordinal": 2, "poolRolls": 2, "minTier": 1, "maxTier": 3 } ] }
+                """),
+            ("k.json", """
+                { "schemaVersion": 1, "kind": "container", "entries": [
+                    { "id": "item.ring", "kind": "item", "slot": "ring",
+                      "atoms": [ { "atom": "atom.vitality.t1" } ] } ] }
+                """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Single(r.Content.Affixes);
+        Assert.Equal(5, r.Content.Count);
+    }
+
+    // ---- power-coefficient (E44 criterion 0, spec-power-sweep.md §4.1) ----------------------------
+
+    [Fact]
+    public void A_coefficient_row_parses()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                  "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var row = Assert.Single(r.Content.Coefficients);
+        Assert.Equal("stat.derived", row.KindId);
+        Assert.Equal("combat.dodge.fire", row.Channel);
+        Assert.Equal(1000, row.CoeffMilli);
+        Assert.Equal(1, row.ReferenceScale);
+        Assert.Equal("p.json", r.Content.SourceOf["stat.derived/combat.dodge.fire"]);
+    }
+
+    [Fact]
+    public void An_absent_channel_defaults_to_empty_meaning_priced_the_same_regardless()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "shield.grant", "coeffMilli": 1000, "referenceScale": 10 } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Equal("", r.Content.Coefficients[0].Channel);
+        Assert.Equal("shield.grant/*", r.Content.SourceOf.Keys.Single());
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_kindId_is_refused()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "channel": "combat.dodge.fire", "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Empty(r.Content.Coefficients);
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_coeffMilli_is_refused_rather_than_defaulted()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire", "referenceScale": 1 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Contains("coeffMilli", r.Errors[0].Detail);
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_referenceScale_is_refused_rather_than_defaulted()
+    {
+        // A silently-defaulted reference scale would be the same units trap RpgStore.UpsertPowerTables
+        // already refuses at the semantic layer — this is the structural half of that same guard.
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire", "coeffMilli": 1000 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Contains("referenceScale", r.Errors[0].Detail);
+    }
+
+    [Fact]
+    public void The_same_kind_and_channel_pair_in_two_files_is_refused_as_a_duplicate()
+    {
+        const string row = """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                  "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """;
+        var r = Collect(("first.json", row), ("second.json", row));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.DuplicateKey, r.Errors[0].Reason);
+        Assert.Single(r.Content.Coefficients);
+    }
+
+    [Fact]
+    public void A_coefficient_key_does_not_collide_with_a_channel_policy_row_naming_the_same_channel()
+    {
+        // The reason the claim key is "kindId/channel", not the bare channel ReadChannelPolicy claims
+        // with: a coefficient's real identity is the (kind, channel) pair the table's own primary key
+        // names, and two authors are free to write a channel-policy row and a coefficient row for the
+        // same channel string without one refusing the other as a false duplicate.
+        var r = Collect(
+            ("cp.json", """
+                { "schemaVersion": 1, "kind": "channel-policy", "entries": [
+                    { "channel": "combat.dodge.fire", "direction": 0 } ] }
+                """),
+            ("pc.json", """
+                { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                    { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                      "coeffMilli": 1000, "referenceScale": 1 } ] }
+                """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Single(r.Content.ChannelPolicies);
+        Assert.Single(r.Content.Coefficients);
     }
 }
