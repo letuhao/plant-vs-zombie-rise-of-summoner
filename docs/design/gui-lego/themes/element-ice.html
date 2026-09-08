@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>element-ice — gui-lego theme</title>
+<title>element.ice — gui-lego theme</title>
 <link rel="stylesheet" href="../../_kit/tokens.css">
 <link rel="stylesheet" href="../../_kit/kit.css">
 <link rel="stylesheet" href="../pieces/_piece-kit.css">
@@ -11,11 +11,11 @@
 <body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
 <main class="lego-page">
   <h1>Theme <code>element.ice</code></h1>
-  <p class="lede">Element ice pack — same piece markup as fire demo.</p>
+  <p class="lede">Element ice. Full set in <code>packs/</code>; swap lab cycles all elements.</p>
   <div class="lego-grid two">
     <section class="lego-card">
-      <h2>Bound pieces (same markup pattern)</h2>
-      <div class="piece-stage" style="--piece-accent:var(--el-ice); --piece-rail-edge:var(--el-ice); --piece-select-glow:rgb(111 196 217 / 0.35)">
+      <h2>Bound pieces</h2>
+      <div class="piece-stage" style="--piece-accent:var(--el-ice); --piece-rail-edge:var(--el-ice); --piece-select-glow:color-mix(in srgb, #6fc4d9 35%, transparent)">
         <button type="button" class="chip is-on">ice</button>
         <button type="button" class="row is-selected" style="margin-top:10px;width:100%">
           <span class="glyph">I</span>
@@ -29,15 +29,7 @@
             <circle cx="21" cy="21" r="15.5" fill="none" stroke="#6fc4d9" stroke-width="6" stroke-dasharray="70 30" stroke-dashoffset="25"/>
             <circle cx="21" cy="21" r="15.5" fill="none" stroke="#3a7a8a" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="-45"/>
           </svg>
-          <ul class="share-legend">
-            <li><i style="background:#6fc4d9"></i> paint.accent</li>
-            <li><i style="background:#3a7a8a"></i> paint.accentMuted</li>
-          </ul>
         </div>
-      </div>
-      <div class="theme-swatches">
-        <span><i style="background:#6fc4d9"></i> accent #6fc4d9</span>
-        <span><i style="background:#3a7a8a"></i> muted #3a7a8a</span>
       </div>
     </section>
     <section class="lego-card">
@@ -49,17 +41,18 @@
   "css": {
     "--piece-accent": "var(--el-ice)",
     "--piece-rail-edge": "var(--el-ice)",
-    "--piece-select-glow": "rgb(111 196 217 / 0.35)"
+    "--piece-select-glow": "color-mix(in srgb, #6fc4d9 35%, transparent)"
   },
   "paint": {
     "accent": "#6fc4d9",
     "accentMuted": "#3a7a8a",
-    "onAccent": "#0e181c"
+    "onAccent": "#1a1410"
   },
   "vfx": {
     "select": "vfx.frost-pulse",
     "idle": null
-  }
+  },
+  "glyphDefault": null
 }</pre>
     </section>
   </div>

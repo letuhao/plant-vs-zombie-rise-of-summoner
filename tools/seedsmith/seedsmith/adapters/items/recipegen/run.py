@@ -457,10 +457,6 @@ def main(argv=None) -> int:
         raise SystemExit(
             "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
-        raise SystemExit(
-            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
 
     # ⛔ Real gap, closed 2026-09-08 — see basetypegen.run.main's own identical fix for the full
     # account: this branch used to be an unconditional refusal even though `plan_run`/`run_draws`/
@@ -470,11 +466,13 @@ def main(argv=None) -> int:
     # `basetypegen.run` this module's own docstring already names.
     import dataclasses
 
-    from ....pipeline.llm_caller import live_answer_caller, load_config
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
 
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     caller = live_answer_caller(config, validator=schema_mod.validate_answer)
     plan = plan_run(count=args.count, ledger=ledger, theme_hint=theme_hint)
     fresh, blocked = run_draws(plan, ledger=ledger, call=caller)

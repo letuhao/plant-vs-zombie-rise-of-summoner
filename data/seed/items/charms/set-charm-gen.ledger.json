@@ -100,6 +100,10 @@
     "charm-species-demon.wallnut": {
       "entryId": "charm.surv-util-028",
       "attempts": 1
+    },
+    "charm-species-demon.allpeater": {
+      "entryId": "charm.off-ctrl-038",
+      "attempts": 2
     }
   }
 }

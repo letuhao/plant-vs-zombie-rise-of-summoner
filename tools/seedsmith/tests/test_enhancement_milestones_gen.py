@@ -430,10 +430,16 @@ def test_cli_refuses_a_real_run_with_no_model_call_wired(tmp_path, monkeypatch):
 
 
 def test_cli_write_without_endpoint_refuses(tmp_path, monkeypatch):
+    """Refuse only when the *resolved* transport has no endpoint (CLI empty + config empty)."""
+    from seedsmith.pipeline.llm_caller import LlmCallerConfig
     monkeypatch.setattr(run_mod, "OUTPUT_PATH", tmp_path / "milestones.json")
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(
+        "seedsmith.pipeline.llm_caller.resolve_live_transport",
+        lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
     with pytest.raises(SystemExit):
         run_mod.main(["--write"])
+
 
 
 def test_cli_a_real_live_run_writes_a_real_corpus_file(tmp_path, monkeypatch, capsys):

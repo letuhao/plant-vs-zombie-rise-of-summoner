@@ -1,46 +1,64 @@
-# Piece: phase-empty
+# Piece: `phase-empty`
 
-**Program:** gui-lego · **Kind:** lifecycle · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** lifecycle · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/phase-empty.html](../../design/gui-lego/pieces/phase-empty.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-No rows in filter
+
+Lifecycle frame — No rows match the filter.
 
 ## Structure
-- Landmark / root class: .phase-empty (see draft HTML)
-- Slots: _none_
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
+| | |
+|---|---|
+| Landmark / root | `.phase / .phase-empty` |
+| Slots | _none_ |
+| CSS `>` parents | overlay on surface or pane |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"phase-empty"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `message` | `string` | yes | Player copy |
+
+
+
+## Theme slots
+
+- Pack kind(s): `neutral`
+- Reads: none
+- Vfx keys: none
+
+## Data flow
+
+- **Bind:** `vm.phase or field.phase`
+- **Bus out:** _none_
+
+## Focus (GG-19)
+
+retry control when phase-error
+
+## Motion (GG-31/32)
+
+none
+
+## Empty / error
+
+n/a — this piece IS the empty/error frame
+
+## Sample payloads
+
+```json
 {
   "piece": "phase-empty",
   "instanceId": "demo:phase-empty",
   "phase": "empty",
-  "message": "No channels match this filter."
+  "message": "No rows match the filter."
 }
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
-
-## Theme slots
-- Pack kind(s): neutral
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
-- Vfx keys: none
-
-## Data flow
-- Bind: vm.phase
-- Bus out: _none (parent or host)_
-
-## Focus (GG-19)
-no
-
-## Motion (GG-31/32)
-none
-
-## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
-
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+```

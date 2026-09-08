@@ -7,6 +7,10 @@
     "milestone-draw-001": {
       "entryId": "enh.012",
       "runtimeFamily": "atom.enhance-swift"
+    },
+    "milestone-draw-002": {
+      "entryId": "enh.013",
+      "runtimeFamily": "atom.enhance-resilience"
     }
   },
   "schemaVersion": 1

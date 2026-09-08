@@ -1517,6 +1517,86 @@
         }
       ],
       "tags": []
+    },
+    {
+      "id": "droptable.d1-014",
+      "nameKey": "droptable.verdant-echo-cache",
+      "name": "Verdant Echo Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "verdant-echo-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "ward-array",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.crude",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-014",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-014",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
     }
   ]
 }

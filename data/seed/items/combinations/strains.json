@@ -8,7 +8,7 @@
     "registryVersions": {
       "bands": 1,
       "core": 2,
-      "naming": 5,
+      "naming": 6,
       "tags": 4,
       "classes": 3,
       "themes": 1,
@@ -16,8 +16,8 @@
     },
     "exemplarVersion": 1,
     "promptVersion": "strain-splice-gen/1",
-    "model": "combogen/hand-authored-1",
-    "authoredUtc": "2026-09-07T00:00:00Z",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
     "sourceRef": "docs/architecture/item-seedgen/spec-combination-write-unblock.md"
   },
   "entries": [

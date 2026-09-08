@@ -187,19 +187,30 @@ class RefusalNarrowingTests(unittest.TestCase):
     is proven directly in test_item_gen_wiring.py, rather than through the full `cmd_items` plan
     machinery, so the assertion is about the transport gate and nothing else."""
 
-    def test_neither_answers_nor_endpoint_still_refuses(self):
+    def test_neither_answers_nor_resolved_endpoint_still_refuses(self):
+        """Empty CLI `--endpoint` is no longer enough to refuse — `.env` / defaults can supply
+        one. Refuse only when the *resolved* transport endpoint is blank."""
+        empty = LlmCallerConfig(endpoint="", model="x")
         with tempfile.TemporaryDirectory() as tmp:
             plan = _set_plan()
-            args = _write_args(out_dir=str(Path(tmp) / "out"))
-            exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+            args = _write_args(out_dir=str(Path(tmp) / "out"), allow_production_tree=True)
+            with patch("seedsmith.pipeline.llm_caller.resolve_live_transport",
+                       return_value=empty):
+                exit_code = cli_mod._cmd_items_write(
+                    args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
         self.assertEqual(exit_code, cli_mod.EXIT_REFUSED)
 
     def test_no_out_dir_still_refuses_even_with_an_endpoint(self):
         """A live endpoint is not a substitute for somewhere to write — the write half of the
-        contract is unchanged."""
+        contract is unchanged when production defaults are off."""
         plan = _set_plan()
-        args = _write_args(endpoint="http://127.0.0.1:1/v1/chat/completions", out_dir="")
-        exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+        args = _write_args(endpoint="http://127.0.0.1:1/v1/chat/completions", out_dir="",
+                           allow_production_tree=False)
+        with patch("seedsmith.adapters.items.defaults.allow_production_tree",
+                   return_value=False), \
+             patch("seedsmith.adapters.items.defaults.resolve_out_dir_arg",
+                   return_value=""):
+            exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
         self.assertEqual(exit_code, cli_mod.EXIT_REFUSED)
 
     # `--endpoint` alone no longer hitting the refusal gate is proven by

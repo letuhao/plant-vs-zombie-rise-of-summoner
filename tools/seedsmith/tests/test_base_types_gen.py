@@ -21,6 +21,7 @@ import pytest
 from seedsmith.adapters.items.basetypegen import brief as brief_mod
 from seedsmith.adapters.items.basetypegen import emit as emit_mod
 from seedsmith.adapters.items.basetypegen import run as run_mod
+from seedsmith.pipeline.llm_caller import LlmCallerConfig
 from seedsmith.adapters.items.basetypegen import schema as schema_mod
 from seedsmith.adapters.items.basetypegen import tuning as tuning_mod
 from seedsmith.pipeline.model import audit_schema
@@ -547,10 +548,15 @@ def test_cli_refuses_a_real_run_with_no_model_call_wired():
 
 
 def test_cli_write_without_endpoint_refuses(tmp_path, monkeypatch):
+    """Refuse only when the *resolved* transport has no endpoint (CLI empty + config empty)."""
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(
+        "seedsmith.pipeline.llm_caller.resolve_live_transport",
+        lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
     with pytest.raises(SystemExit):
         run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
                      "--write"])
+
 
 
 def test_cli_a_real_live_run_writes_a_real_partition_file(tmp_path, monkeypatch, capsys):

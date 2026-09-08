@@ -2,24 +2,34 @@
 
 **Plan:** [gui-lego-plan.md](gui-lego-plan.md)
 
-## Design wave (this delivery)
+## Wave A — initial design pack
 
-- [x] `docs/architecture/gui-lego-ideal.md`
-- [x] `docs/architecture/gui-lego-map.md`
-- [x] `docs/architecture/gui-lego/spec-composition.md`
-- [x] `docs/architecture/gui-lego/spec-derived-surface-vm.md`
-- [x] `docs/architecture/gui-lego/spec-theme-packs.md`
-- [x] `docs/design/gui-lego/recipes/derived-console.json`
-- [x] `docs/design/gui-lego/README.md` (index, graph, reuse matrix)
-- [x] Per-piece `spec-<id>.md` (24 pieces)
-- [x] Per-piece HTML drafts + `_piece-kit.css`
-- [x] Theme demos + swap-lab + pack JSON
-- [x] `tasks/gui-lego-plan.md` / `tasks/gui-lego-todo.md`
-- [ ] **Owner review** of breakdown / payloads / themes
+- [x] Ideal + map
+- [x] Composition + VM + theme-packs specs
+- [x] Recipe + piece HTML drafts
+- [x] Initial theme demos + tasks
 
-## Blocked until owner accept
+## Wave B — harden into binding standard (2026-09-09)
 
-- [ ] React piece registry + `foldDerivedSurfaceVm` implementation
-- [ ] Mount `derived-console` recipe inside ActorPanel Derived tab
-- [ ] Retire stop-gap `ui/actor/derived/*` god path by composition
-- [ ] Contract + side-by-side visual gate against Lego drafts
+- [x] DESIGN-GATE / decisions / authoring / specs / surfaces / themes / queue
+
+## Wave 0 — shared FE runtime (P0)
+
+- [x] types + themeRegistry + pieceRegistry + recipeRegistry
+- [x] bindSurface (`$bindArray`, instanceIdTemplate, lifecycleOverlays)
+- [x] RecipeMount + createSurfaceBus
+- [x] Fixture tests (array, overlay, `>` DOM)
+
+## Wave C — Derived consumer
+
+- [x] C1 foldDerivedSurfaceVm + cook under features/gui-lego
+- [x] C2 Derived pieces + CatalogIcon + paint gauges
+- [x] C3 switch DerivedTab; delete ui/actor/derived/*
+- [x] C4 contract + e2e SSOT retarget + queue P0 done
+
+## Queue (after P0 React)
+
+- [ ] P1 Condition
+- [ ] P2 Creatures filter chrome
+- [ ] P3 Relics / Commanders
+- [ ] P4 other rail layers + remaining Actor tabs

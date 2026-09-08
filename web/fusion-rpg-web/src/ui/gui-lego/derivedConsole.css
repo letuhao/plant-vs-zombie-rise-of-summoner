@@ -493,6 +493,7 @@
     .derived-combat-console .row.is-on,
     .derived-combat-console .val,
     .derived-combat-console .inspect .big,
-    .derived-combat-console .stack-row .fill { animation: none; }
+    .derived-combat-console .stack-row .fill,
+    .derived-combat-console [class*="vfx-"] { animation: none !important; transition: none !important; }
     .derived-combat-console .stack-row .fill { transform: none; }
   }

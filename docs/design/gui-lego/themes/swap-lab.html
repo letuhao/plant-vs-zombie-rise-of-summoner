@@ -8,13 +8,10 @@
 <link rel="stylesheet" href="../../_kit/kit.css">
 <link rel="stylesheet" href="../pieces/_piece-kit.css">
 <script>
-const PACKS = {
-  fire: {"themeId": "element.fire", "kind": "element", "id": "fire", "css": {"--piece-accent": "var(--el-fire)", "--piece-rail-edge": "var(--el-fire)", "--piece-select-glow": "rgb(224 112 60 / 0.35)"}, "paint": {"accent": "#e0703c", "accentMuted": "#a04a28", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.ember-pulse", "idle": null}},
-  ice: {"themeId": "element.ice", "kind": "element", "id": "ice", "css": {"--piece-accent": "var(--el-ice)", "--piece-rail-edge": "var(--el-ice)", "--piece-select-glow": "rgb(111 196 217 / 0.35)"}, "paint": {"accent": "#6fc4d9", "accentMuted": "#3a7a8a", "onAccent": "#0e181c"}, "vfx": {"select": "vfx.frost-pulse", "idle": null}},
-  dot: {"themeId": "status-category.dot", "kind": "status-category", "id": "dot", "css": {"--piece-accent": "var(--sun)", "--piece-rail-edge": "var(--sun)", "--piece-select-glow": "rgb(224 180 75 / 0.3)"}, "paint": {"accent": "#e0b44b", "accentMuted": "#8a6c28", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}}
-};
+const PACKS = {"fire": {"themeId": "element.fire", "kind": "element", "id": "fire", "css": {"--piece-accent": "var(--el-fire)", "--piece-rail-edge": "var(--el-fire)", "--piece-select-glow": "color-mix(in srgb, #e0703c 35%, transparent)"}, "paint": {"accent": "#e0703c", "accentMuted": "#a04a28", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.ember-pulse", "idle": null}, "glyphDefault": null}, "ice": {"themeId": "element.ice", "kind": "element", "id": "ice", "css": {"--piece-accent": "var(--el-ice)", "--piece-rail-edge": "var(--el-ice)", "--piece-select-glow": "color-mix(in srgb, #6fc4d9 35%, transparent)"}, "paint": {"accent": "#6fc4d9", "accentMuted": "#3a7a8a", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.frost-pulse", "idle": null}, "glyphDefault": null}, "air": {"themeId": "element.air", "kind": "element", "id": "air", "css": {"--piece-accent": "var(--el-air)", "--piece-rail-edge": "var(--el-air)", "--piece-select-glow": "color-mix(in srgb, #b7c9d6 35%, transparent)"}, "paint": {"accent": "#b7c9d6", "accentMuted": "#6a7884", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.air-pulse", "idle": null}, "glyphDefault": null}, "earth": {"themeId": "element.earth", "kind": "element", "id": "earth", "css": {"--piece-accent": "var(--el-earth)", "--piece-rail-edge": "var(--el-earth)", "--piece-select-glow": "color-mix(in srgb, #b08a4f 35%, transparent)"}, "paint": {"accent": "#b08a4f", "accentMuted": "#6e5530", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.earth-pulse", "idle": null}, "glyphDefault": null}, "light": {"themeId": "element.light", "kind": "element", "id": "light", "css": {"--piece-accent": "var(--el-light)", "--piece-rail-edge": "var(--el-light)", "--piece-select-glow": "color-mix(in srgb, #efdca0 35%, transparent)"}, "paint": {"accent": "#efdca0", "accentMuted": "#9a8a55", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.light-pulse", "idle": null}, "glyphDefault": null}, "dark": {"themeId": "element.dark", "kind": "element", "id": "dark", "css": {"--piece-accent": "var(--el-dark)", "--piece-rail-edge": "var(--el-dark)", "--piece-select-glow": "color-mix(in srgb, #8b7bab 35%, transparent)"}, "paint": {"accent": "#8b7bab", "accentMuted": "#564a6a", "onAccent": "#1a1410"}, "vfx": {"select": "vfx.dark-pulse", "idle": null}, "glyphDefault": null}, "omni": {"themeId": "element.omni", "kind": "element", "id": "omni", "css": {"--piece-accent": "var(--el-omni)", "--piece-rail-edge": "var(--el-omni)", "--piece-select-glow": "color-mix(in srgb, #a89880 35%, transparent)"}, "paint": {"accent": "#a89880", "accentMuted": "#6a6050", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}, "status-omni": {"themeId": "status-category.omni", "kind": "status-category", "id": "omni", "css": {"--piece-accent": "#a89880", "--piece-rail-edge": "#a89880", "--piece-select-glow": "color-mix(in srgb, #a89880 30%, transparent)"}, "paint": {"accent": "#a89880", "accentMuted": "#6a6050", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}, "status-dot": {"themeId": "status-category.dot", "kind": "status-category", "id": "dot", "css": {"--piece-accent": "#e0b44b", "--piece-rail-edge": "#e0b44b", "--piece-select-glow": "color-mix(in srgb, #e0b44b 30%, transparent)"}, "paint": {"accent": "#e0b44b", "accentMuted": "#8a6c28", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}, "status-cc": {"themeId": "status-category.cc", "kind": "status-category", "id": "cc", "css": {"--piece-accent": "#6fa8d9", "--piece-rail-edge": "#6fa8d9", "--piece-select-glow": "color-mix(in srgb, #6fa8d9 30%, transparent)"}, "paint": {"accent": "#6fa8d9", "accentMuted": "#3d6688", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}, "status-contagion": {"themeId": "status-category.contagion", "kind": "status-category", "id": "contagion", "css": {"--piece-accent": "#6fbf73", "--piece-rail-edge": "#6fbf73", "--piece-select-glow": "color-mix(in srgb, #6fbf73 30%, transparent)"}, "paint": {"accent": "#6fbf73", "accentMuted": "#3d7a42", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}, "neutral": {"themeId": "neutral", "kind": "neutral", "id": "default", "css": {"--piece-accent": "var(--sun)", "--piece-rail-edge": "var(--border-control)", "--piece-select-glow": "transparent"}, "paint": {"accent": "#e0b44b", "accentMuted": "#6b6358", "onAccent": "#1a1410"}, "vfx": {"select": null, "idle": null}, "glyphDefault": null}};
 function applyPack(name) {
   const pack = PACKS[name];
+  if (!pack) return;
   const root = document.getElementById('stage');
   Object.entries(pack.css).forEach(([k,v]) => root.style.setProperty(k, v));
   const rings = root.querySelectorAll('[data-ring]');
@@ -24,22 +21,36 @@ function applyPack(name) {
     el.style.background = i === 0 ? pack.paint.accent : pack.paint.accentMuted;
   });
   document.getElementById('packJson').textContent = JSON.stringify(pack, null, 2);
+  document.getElementById('activeName').textContent = pack.themeId;
 }
 </script>
 </head>
 <body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
 <main class="lego-page">
   <h1>Theme swap lab</h1>
-  <p class="lede">Identical markup. Buttons only rebind theme packs (css + paint). Proves pieces never hard-code element colors.</p>
+  <p class="lede">Identical markup. Rebind packs only (css + paint). Active: <code id="activeName">element.fire</code></p>
+  <p class="lede" style="margin-bottom:8px">Elements</p>
   <p>
-    <button type="button" class="chip is-on" onclick="applyPack('fire')">Fire</button>
-    <button type="button" class="chip" onclick="applyPack('ice')">Ice</button>
-    <button type="button" class="chip" onclick="applyPack('dot')">Status · Dot</button>
+    <button type="button" class="chip" onclick="applyPack('fire')">fire</button>
+    <button type="button" class="chip" onclick="applyPack('ice')">ice</button>
+    <button type="button" class="chip" onclick="applyPack('air')">air</button>
+    <button type="button" class="chip" onclick="applyPack('earth')">earth</button>
+    <button type="button" class="chip" onclick="applyPack('light')">light</button>
+    <button type="button" class="chip" onclick="applyPack('dark')">dark</button>
+    <button type="button" class="chip" onclick="applyPack('omni')">omni</button>
+  </p>
+  <p class="lede" style="margin-bottom:8px">Status-category</p>
+  <p>
+    <button type="button" class="chip" onclick="applyPack('status-omni')">omni</button>
+    <button type="button" class="chip" onclick="applyPack('status-dot')">dot</button>
+    <button type="button" class="chip" onclick="applyPack('status-cc')">cc</button>
+    <button type="button" class="chip" onclick="applyPack('status-contagion')">contagion</button>
+    <button type="button" class="chip" onclick="applyPack('neutral')">neutral</button>
   </p>
   <div class="lego-grid two">
     <section class="lego-card">
       <h2>Piece stage</h2>
-      <div id="stage" class="piece-stage" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)">
+      <div id="stage" class="piece-stage" style="--piece-accent:var(--el-fire);--piece-rail-edge:var(--el-fire)">
         <button type="button" class="chip is-on">Variant</button>
         <button type="button" class="row is-selected" style="margin-top:10px;width:100%">
           <span class="glyph">*</span>
@@ -69,7 +80,7 @@ function applyPack(name) {
   "css": {
     "--piece-accent": "var(--el-fire)",
     "--piece-rail-edge": "var(--el-fire)",
-    "--piece-select-glow": "rgb(224 112 60 / 0.35)"
+    "--piece-select-glow": "color-mix(in srgb, #e0703c 35%, transparent)"
   },
   "paint": {
     "accent": "#e0703c",
@@ -79,7 +90,8 @@ function applyPack(name) {
   "vfx": {
     "select": "vfx.ember-pulse",
     "idle": null
-  }
+  },
+  "glyphDefault": null
 }</pre>
     </section>
   </div>

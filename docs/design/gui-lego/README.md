@@ -1,15 +1,21 @@
 # GUI Lego — design index
 
 **Program:** `gui-lego`  
-**Status:** Design drafts for owner review — **no React yet**.  
-**Ideal / map:** [../../architecture/gui-lego-ideal.md](../../architecture/gui-lego-ideal.md) ·
-[../../architecture/gui-lego-map.md](../../architecture/gui-lego-map.md)  
+**Status:** **Binding design standard** for player menus — P0 React **shipped** (fold → bind → RecipeMount).  
+**Ideal / map / authoring:** [../../architecture/gui-lego-ideal.md](../../architecture/gui-lego-ideal.md) ·
+[../../architecture/gui-lego-map.md](../../architecture/gui-lego-map.md) ·
+[../../architecture/gui-lego-authoring.md](../../architecture/gui-lego-authoring.md)  
+**Queue:** [../../architecture/gui-lego/menu-refactor-queue.md](../../architecture/gui-lego/menu-refactor-queue.md)  
 **Tasks:** [../../tasks/gui-lego-plan.md](../../tasks/gui-lego-plan.md)
 
+**Start here (whole menu):** [surfaces/derived-console.html](surfaces/derived-console.html)  
 Open any `pieces/*.html` or `themes/*.html` in a browser (links `_kit` relatively).
 
-Visual reference for the assembled Derived surface (pre-Lego SSOT):
-[../derived-combat-console.html](../derived-combat-console.html).
+**FE sync:** Theme packs and `recipes/derived-console.json` are **copied** into
+`web/fusion-rpg-web/src/features/gui-lego/themes/` and `web/fusion-rpg-web/src/ui/gui-lego/recipes/`.
+Design remains SSOT — re-copy when packs change (manual until a sync script exists).
+
+Pre-Lego visual peer (history): [../derived-combat-console.html](../derived-combat-console.html).
 
 ---
 
@@ -17,9 +23,11 @@ Visual reference for the assembled Derived surface (pre-Lego SSOT):
 
 | Path | Role |
 |---|---|
+| [surfaces/derived-console.html](surfaces/derived-console.html) | **Assembled P0 surface** (recipe composed) |
 | [recipes/derived-console.json](recipes/derived-console.json) | Surface assembly (slots + binds) |
 | [pieces/](pieces/) | Per-piece HTML drafts (structure + sample payload) |
-| [themes/](themes/) | Theme pack demos (same markup, different pack) |
+| [themes/](themes/) | Theme demos + [swap-lab](themes/swap-lab.html) |
+| [themes/packs/](themes/packs/) | JSON packs: all elements, status-categories, sides, neutral |
 | [pieces/_piece-kit.css](pieces/_piece-kit.css) | Shared draft chrome for piece pages |
 
 Architecture contracts: [../../architecture/gui-lego/](../../architecture/gui-lego/).
@@ -71,11 +79,11 @@ Architecture contracts: [../../architecture/gui-lego/](../../architecture/gui-le
 
 | Demo | Path |
 |---|---|
-| Element fire | [themes/element-fire.html](themes/element-fire.html) |
-| Element ice | [themes/element-ice.html](themes/element-ice.html) |
+| **Swap lab (all elements + status)** | [themes/swap-lab.html](themes/swap-lab.html) |
+| Element fire / ice | [themes/element-fire.html](themes/element-fire.html) · [themes/element-ice.html](themes/element-ice.html) |
 | Status-category dot | [themes/status-dot.html](themes/status-dot.html) |
 | Neutral | [themes/neutral.html](themes/neutral.html) |
-| Swap lab (fire↔ice) | [themes/swap-lab.html](themes/swap-lab.html) |
+| Pack JSON (14) | [themes/packs/](themes/packs/) — omni+6 elements, 4 status-categories, plant/zombie sides, neutral |
 
 ---
 
@@ -123,6 +131,7 @@ theme packs → chip, channel-row, inspect gauges (css + paint)
 
 ## 5. Review checklist
 
+- [ ] Assembled surfaces/derived-console.html reviewed
 - [ ] Recipe slots match intended landmark tree (`>` parents intact)
 - [ ] Every piece has structure + payload + flow + theme slots
 - [ ] Theme swap lab proves paint hex on donut

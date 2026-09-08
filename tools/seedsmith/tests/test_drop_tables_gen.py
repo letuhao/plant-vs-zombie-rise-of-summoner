@@ -400,7 +400,12 @@ class TestHarness:
             run_mod.main(["--slot", "1", "--count", "1"])
 
     def test_cli_write_without_endpoint_refuses(self, monkeypatch, tmp_path):
+        """Refuse only when the *resolved* transport has no endpoint."""
+        from seedsmith.pipeline.llm_caller import LlmCallerConfig
         monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+        monkeypatch.setattr(
+            "seedsmith.pipeline.llm_caller.resolve_live_transport",
+            lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
         with pytest.raises(SystemExit):
             run_mod.main(["--slot", "1", "--count", "1", "--write"])
 

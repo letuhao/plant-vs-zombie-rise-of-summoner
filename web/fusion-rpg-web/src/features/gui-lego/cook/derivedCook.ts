@@ -1,6 +1,6 @@
 /**
  * Pure cook/join for ActorSheet → Derived. No React.
- * Visual SSOT remains docs/design/derived-combat-console.html.
+ * Visual SSOT: docs/design/gui-lego/surfaces/derived-console.html
  */
 import type {
   DerivedExpandKind,
@@ -13,6 +13,7 @@ import {
   type ActorContributionDto,
   type DerivedChannelDto
 } from "@/lib/bus/aura";
+import { formatDerivedMagnitude } from "./formatDerivedMagnitude";
 
 /** Primary Derived rail — cook surface tabs only. Never sheetGroups (offense/pools/…). */
 export const COOK_PRIMARY_TAB_IDS = ["elements", "status", "resources", "other"] as const;
@@ -224,11 +225,9 @@ export function bucketContributions(contributions: ActorContributionDto[]): {
     .map(([key, value]) => ({ key, label: BUCKET_LABELS[key] ?? key, value }));
 }
 
+/** @deprecated Prefer formatDerivedMagnitude — kept for stop-gap row/inspector. */
 export function formatChannelValue(value: number, unitClass: string): string {
-  if (unitClass === "UnitInterval" || unitClass === "PerMilleRatio") {
-    if (Math.abs(value) < 10) return value.toFixed(2);
-  }
-  return value.toLocaleString();
+  return formatDerivedMagnitude(value, unitClass).valueText;
 }
 
 export function toLiveMap(

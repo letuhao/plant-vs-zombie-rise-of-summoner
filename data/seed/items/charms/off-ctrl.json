@@ -1038,6 +1038,33 @@
       "tags": [],
       "flavor": "A series of three parallel metal rods, aligned and tensioned to release a single, devastating kinetic burst.",
       "notes": "themeKey: demon.threepeater"
+    },
+    {
+      "id": "charm.off-ctrl-038",
+      "nameKey": "charm.pattern-shift-array",
+      "name": "Pattern-Shift Array",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elpw-overflow",
+          "powerBand": "low",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A rotating prism of shifting alloys that reconfigures its internal geometry to redistribute kinetic energy into concentrated bursts of fire.",
+      "notes": "themeKey: demon.allpeater"
     }
   ]
 }

@@ -13,6 +13,7 @@ it is buildable and testable before any of those exist, and must stay that way.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 import time
@@ -27,6 +28,11 @@ VerifyFn = Callable[[dict, dict], tuple[dict, dict]]
 BuildUserFn = Callable[[dict], str]
 BuildHealUserFn = Callable[[dict, dict, dict], str]
 DefaultForFn = Callable[[str, object], object]
+
+#: `tools/seedsmith/` — parent of the `seedsmith` package. Used when CWD has no `.env` so a
+#: repo-root `python -m seedsmith` still finds the machine-local file operators keep next to
+#: `.env.example`.
+_PACKAGE_TOOL_ROOT = Path(__file__).resolve().parents[2]
 
 
 @dataclass(frozen=True)
@@ -87,6 +93,34 @@ def _parse_dotenv(path: Path) -> "dict[str, str]":
     return out
 
 
+def resolve_dotenv_path(dotenv_path: Path | None = None) -> Path:
+    """Pick the `.env` file to read.
+
+    - Explicit `dotenv_path` always wins (tests pass a guaranteed-absent path for hermeticity).
+    - Else CWD `.env` if it exists (operator ran from `tools/seedsmith`).
+    - Else `tools/seedsmith/.env` next to the package (repo-root / other CWD still finds it).
+    - Else CWD `.env` as a non-existent placeholder — `load_config` treats a missing file as
+      "no override," same as before.
+    """
+    if dotenv_path is not None:
+        return dotenv_path
+    cwd = Path(".env")
+    if cwd.exists():
+        return cwd
+    packaged = _PACKAGE_TOOL_ROOT / ".env"
+    if packaged.exists():
+        return packaged
+    return cwd
+
+
+def read_dotenv_values(dotenv_path: Path | None = None) -> "dict[str, str]":
+    """Raw `KEY=value` map from the resolved `.env`, or `{}` when the file is absent."""
+    path = resolve_dotenv_path(dotenv_path)
+    if not path.exists():
+        return {}
+    return _parse_dotenv(path)
+
+
 def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = None) -> LlmCallerConfig:
     """Read `[pipeline.llm_caller]` from `seedsmith.toml`, then layer `.env` on top (`.env` is
     per-machine and wins — a real endpoint/model override belongs there, never hand-edited into
@@ -120,14 +154,36 @@ def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = Non
         "max_tokens": section.get("max_tokens", base.max_tokens),
     }
 
-    dotenv_path = dotenv_path or Path(".env")
-    if dotenv_path.exists():
-        env_values = _parse_dotenv(dotenv_path)
+    env_file = resolve_dotenv_path(dotenv_path)
+    if env_file.exists():
+        env_values = _parse_dotenv(env_file)
         for env_key, (field, caster) in _ENV_KEYS.items():
             if env_key in env_values and env_values[env_key] != "":
                 resolved[field] = caster(env_values[env_key])
 
     return LlmCallerConfig(**resolved)
+
+
+def resolve_live_transport(
+    cli_endpoint: str = "",
+    cli_model: str = "",
+    *,
+    toml_path: Path | None = None,
+    dotenv_path: Path | None = None,
+) -> LlmCallerConfig:
+    """Merge CLI `--endpoint`/`--model` onto `load_config()` — empty CLI falls through to
+    `.env` / toml / built-in defaults. Spec-foundation §7.3: every flag has a config equivalent;
+    the flag wins when the operator actually passed a non-empty value.
+
+    Callers that previously refused `--write` when `args.endpoint` was empty should refuse only
+    when *this* helper's `.endpoint` is empty (CLI and config both blank).
+    """
+    base = load_config(toml_path, dotenv_path=dotenv_path)
+    endpoint = (cli_endpoint or "").strip() or base.endpoint
+    model = (cli_model or "").strip()
+    if not model or model == "unrecorded":
+        model = base.model
+    return dataclasses.replace(base, endpoint=endpoint, model=model)
 
 
 class DegenerateGenerationError(RuntimeError):

@@ -1,47 +1,72 @@
-# Piece: rail-primary
+# Piece: `rail-primary`
 
-**Program:** gui-lego · **Kind:** chrome · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** chrome · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/rail-primary.html](../../design/gui-lego/pieces/rail-primary.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Cook tablist
+
+Cook primary tablist: Elements · Status · Resources · Other.
 
 ## Structure
-- Landmark / root class: .cat-bar (see draft HTML)
-- Slots: chips
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
-{
-  "piece": "rail-primary",
-  "instanceId": "demo:rail-primary",
-  "phase": "ready",
-  "selectedId": "elements",
-  "chips": []
-}
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
+| | |
+|---|---|
+| Landmark / root | `nav.cat-bar` |
+| Slots | `chips` (chip[]) |
+| CSS `>` parents | surface-shell railPrimary |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"rail-primary"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `selectedId` | `string` | yes | Active cook tab id |
+| `chips` | `ChipPayload[]` | yes | Built by fold; rendered as chip pieces |
+
+
 
 ## Theme slots
-- Pack kind(s): cook-tab
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
+
+- Pack kind(s): `cook-tab` / `neutral`
+- Reads: selected chip accent
 - Vfx keys: none
 
 ## Data flow
-- Bind: vm.primaryRail
-- Bus out: derived.tab.set
+
+- **Bind:** `vm.primaryRail`
+- **Bus out:** `derived.tab.set` (via chip)
 
 ## Focus (GG-19)
-roving tabindex
+
+roving tabindex within tablist
 
 ## Motion (GG-31/32)
+
 none
 
 ## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
 
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+phase-error if cook missing
+
+## Sample payloads
+
+```json
+{
+  "piece": "rail-primary",
+  "instanceId": "rail:primary",
+  "phase": "ready",
+  "selectedId": "elements",
+  "chips": [
+    {
+      "id": "elements",
+      "label": "Elements",
+      "selected": true
+    }
+  ]
+}
+```

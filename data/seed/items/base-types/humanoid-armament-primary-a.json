@@ -455,6 +455,78 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-013",
+      "nameKey": "base.heavy-cleaver",
+      "name": "Heavy Cleaver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.heavy-cleaver",
+      "flavorKey": "flavor.base.heavy-cleaver",
+      "flavor": "A thick, oversized slab of tempered steel designed to split through bone and plate alike. Its weight is balanced for devastating downward strokes.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-014",
+      "nameKey": "base.piston-driven-maul",
+      "name": "Piston-Driven Maul",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.piston-driven-maul",
+      "flavorKey": "flavor.base.piston-driven-maul",
+      "flavor": "A heavy, pneumatic-assisted hammer designed to deliver devastating kinetic impact through rapid internal compression.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

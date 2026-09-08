@@ -1,5 +1,10 @@
 {
   "done": {
+    "basetype-draw-armament-primary-humanoid-a-000": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-014",
+      "implicitFamily": "atom.might"
+    },
     "basetype-draw-core-guard-humanoid-b-000": {
       "class": "plate",
       "entryId": "item.humanoid-torso-b-013",

@@ -473,8 +473,12 @@ class CliTests(unittest.TestCase):
         self.assertIn("atom.affliction", buf.getvalue())
 
     def test_cli_write_without_endpoint_refuses(self) -> None:
+        """Refuse only when the *resolved* transport has no endpoint."""
+        from seedsmith.pipeline.llm_caller import LlmCallerConfig
         with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
-             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"):
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"), \
+             mock.patch("seedsmith.pipeline.llm_caller.resolve_live_transport",
+                        return_value=LlmCallerConfig(endpoint="", model="x")):
             with self.assertRaises(SystemExit):
                 run_mod.main(["--slot", "2", "--write"])
 

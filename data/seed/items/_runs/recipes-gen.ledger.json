@@ -7,6 +7,10 @@
     "recipe-draw-001": {
       "entryId": "recipe.032",
       "operation": "elevate"
+    },
+    "recipe-draw-002": {
+      "entryId": "recipe.033",
+      "operation": "temper"
     }
   },
   "schemaVersion": 1

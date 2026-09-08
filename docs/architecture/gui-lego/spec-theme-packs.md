@@ -51,16 +51,17 @@ resolved packs in a side panel for review, but the piece root must bind via pack
 
 ---
 
-## 3. Taxonomy (v1 demos)
+## 3. Taxonomy (design packs on disk)
 
-| kind | Demo ids |
+| kind | Pack ids in `themes/packs/` |
 |---|---|
-| `element` | fire, ice (full set listed in ideal; demos prove swap) |
-| `status-category` | dot |
-| `neutral` | default chrome |
+| `element` | omni, fire, ice, air, earth, light, dark |
+| `status-category` | omni, dot, cc, contagion |
+| `side` | plant, zombie |
+| `neutral` | default |
 
-Resource / action-category / rarity / side / cook-tab packs follow the same schema when drafted;
-v1 demos prove the mechanism with element + status-category + neutral.
+Resource / action-category / rarity / cook-tab packs follow the same schema when a queue row needs
+them; v1 demos + swap-lab prove the mechanism with element + status-category + neutral + side.
 
 ---
 

@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>derived-console — gui-lego assembled surface</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="../pieces/_piece-kit.css">
+<style>
+  .console {
+    display: flex; flex-direction: column;
+    height: min(820px, 88vh);
+    border: 1px solid var(--border-control);
+    border-radius: var(--r-md);
+    background: linear-gradient(180deg, rgb(51 43 33 / 0.55), rgb(18 15 12 / 0.35)), var(--panel);
+    overflow: hidden;
+  }
+  .console > .console-hd {
+    flex: none; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end;
+    padding: 12px 14px 10px; border-bottom: 1px solid var(--border);
+  }
+  .console > .cat-bar {
+    flex: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); background: rgb(18 15 12 / 0.35);
+  }
+  .console > .inspect-split {
+    flex: 1; min-height: 0; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 0;
+  }
+  .console > .inspect-split > .dock,
+  .console > .inspect-split > .inspect {
+    min-height: 0; overflow: auto; padding: 12px; border: 0; border-radius: 0;
+    background: transparent;
+  }
+  .console > .inspect-split > .dock { border-right: 1px solid var(--border); }
+  .console > .foot {
+    flex: none; padding: 8px 14px; border-top: 1px solid var(--border);
+  }
+  .hd-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+  .family-block + .family-block { margin-top: 14px; }
+  .row + .row { margin-top: 6px; }
+</style>
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page" style="max-width:min(1600px,96vw)">
+  <h1>Surface <code>derived-console</code></h1>
+  <p class="lede">Assembled from gui-lego pieces + recipe slots. Direct children of <code>.console</code> preserve CSS <code>&gt;</code> contracts.
+  Recipe: <code>recipes/derived-console.json</code>. Visual peer of <code>derived-combat-console.html</code>, Lego grammar.</p>
+
+  <div class="console" data-surface="derived-console" style="--piece-accent:var(--el-fire);--piece-rail-edge:var(--el-fire);--piece-select-glow:rgb(224 112 60 / 0.35)">
+    <header class="console-hd">
+      <div class="identity">
+        <div class="who">Emberling</div>
+        <div class="meta">Lv <b>12</b> · Plant · Elements / Fire</div>
+      </div>
+      <div class="hd-tools">
+        <input class="search" type="search" placeholder="Search channels" aria-label="Search channels">
+        <label class="toggle"><span class="track"><span class="knob"></span></span> Show unchanged</label>
+      </div>
+    </header>
+
+    <nav class="cat-bar" aria-label="Cook tabs">
+      <button type="button" class="chip is-on">Elements</button>
+      <button type="button" class="chip">Status</button>
+      <button type="button" class="chip">Resources</button>
+      <button type="button" class="chip">Other</button>
+    </nav>
+
+    <nav class="cat-bar variant-bar" aria-label="Variants">
+      <button type="button" class="chip is-on">Fire</button>
+      <button type="button" class="chip" style="--piece-accent:var(--el-ice);--piece-rail-edge:var(--el-ice)">Ice</button>
+      <button type="button" class="chip" style="--piece-accent:var(--el-air);--piece-rail-edge:var(--el-air)">Air</button>
+      <button type="button" class="chip" style="--piece-accent:var(--el-earth);--piece-rail-edge:var(--el-earth)">Earth</button>
+    </nav>
+
+    <div class="inspect-split">
+      <div class="dock">
+        <div class="list-pane">
+          <div class="family-block">
+            <div class="family-hd">Power</div>
+            <button type="button" class="row is-selected">
+              <span class="glyph">F</span>
+              <span><span class="nm">Power</span><div class="rd">Fire power</div></span>
+              <span class="val">2,847</span>
+              <span class="rd">active</span>
+            </button>
+            <button type="button" class="row">
+              <span class="glyph">F</span>
+              <span><span class="nm">Crit</span><div class="rd">Fire crit</div></span>
+              <span class="val">12%</span>
+              <span class="rd">default</span>
+            </button>
+          </div>
+          <div class="family-block">
+            <div class="family-hd">Resist</div>
+            <button type="button" class="row">
+              <span class="glyph">F</span>
+              <span><span class="nm">Resist</span><div class="rd">Fire resist</div></span>
+              <span class="val">420</span>
+              <span class="rd">active</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <aside class="inspect">
+        <div class="big">2,847</div>
+        <div class="reading">Fire power</div>
+        <div class="sentence">Compose: Hub derived</div>
+        <div class="sentence">Unit: whole · Join: channelId</div>
+        <div class="cap-note">No cap on this channel.</div>
+        <div class="share-donut" style="margin-top:14px">
+          <svg width="88" height="88" viewBox="0 0 42 42" aria-hidden="true">
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#2a241c" stroke-width="6"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#e0703c" stroke-width="6" stroke-dasharray="60 40" stroke-dashoffset="25"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#a04a28" stroke-width="6" stroke-dasharray="40 60" stroke-dashoffset="-35"/>
+          </svg>
+          <ul class="share-legend">
+            <li><i style="background:#e0703c"></i> Base 62%</li>
+            <li><i style="background:#a04a28"></i> Gear 38%</li>
+          </ul>
+        </div>
+        <div class="stack" style="margin-top:12px">
+          <div class="stack-row"><span>Base</span><span>+1,764</span><div class="bar"><span style="width:62%"></span></div></div>
+          <div class="stack-row"><span>Gear</span><span>+1,083</span><div class="bar"><span style="width:38%"></span></div></div>
+        </div>
+        <ul class="sources">
+          <li><span>Weapon</span><span>+1,083</span></li>
+          <li><span>Base</span><span>+1,764</span></li>
+        </ul>
+      </aside>
+    </div>
+
+    <footer class="foot">4 default channels hidden</footer>
+  </div>
+
+  <section class="lego-card" style="margin-top:20px">
+    <h2>Lifecycle samples (same kit)</h2>
+    <div class="lego-grid two">
+      <div class="phase"><strong>phase-empty</strong>No channels match this filter.</div>
+      <div class="phase"><strong>phase-error</strong>Sheet unavailable<button type="button">Retry</button></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

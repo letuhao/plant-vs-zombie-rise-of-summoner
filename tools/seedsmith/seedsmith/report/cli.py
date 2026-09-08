@@ -493,34 +493,38 @@ def cmd_effects(args: argparse.Namespace) -> int:
     return EXIT_CANNOT_RUN
 
 
+def _apply_items_write_defaults(args: argparse.Namespace) -> None:
+    """Fill empty `--out-dir` / `--allow-production-tree` from `.env` before plan or write.
+
+    Mutates `args` in place so planning and writing share the same out-dir (ledger resume).
+    """
+    from ..adapters.items import defaults as items_defaults
+
+    allow = items_defaults.allow_production_tree(cli_allow=bool(args.allow_production_tree))
+    args.allow_production_tree = allow
+    args.out_dir = items_defaults.resolve_out_dir_arg(
+        args.kind, getattr(args, "out_dir", "") or "", allow_production=allow)
+
+
 def cmd_items(args: argparse.Namespace) -> int:
-    """`seedsmith items generate --kind set|charm --population build|species` (item module 13).
+    """`seedsmith items generate|validate|combogen-migrate|fill` (item modules 13 + 21 + fill UX).
 
-    ⚠ **No `items` subcommand existed** — `build_parser` registered `check`, `report`, `metrics`,
-    `demons` and `effects` and nothing else, so every command the module-13 spec listed was a
-    documented interface that did not exist. The same defect class `cmd_demons`'s own docstring
-    records twice. Made true here rather than softened in the spec.
-
-    ⛔ **`--dry-run` is the default, and that is deliberate.** A real run is ~1,800 model calls; a
-    flag you must remember to pass to avoid spending them is a flag someone eventually forgets.
-    `--write` is the explicit opt-in.
-
-    ⭐ **`--write` now writes along either of two transports (module 13, `set-charm-live-endpoint`).**
-    The generation graph is `workflow/graphs/item_set.py`; its `call` is injected. `--answers <file>`
-    keeps the deterministic path from before — `setgen.answers.replay_caller` reads answers a model
-    has already authored against briefs this command emitted (`--briefs-out`); CI and dry runs stay
-    on this path. `--endpoint <url> [--model <name>]` is the new live path — `setgen.run.live_caller`
-    bound to `pipeline.llm_caller.call_model`, the same real HTTP transport `effects generate` and
-    `demons generate` already use. `--write` with neither flag still refuses with the reason, because
-    a command that silently writes nothing is worse than one that says so.
+    ⛔ **`--dry-run` is the default on `generate`.** A real run is ~1,800 model calls; `--write`
+    is the explicit opt-in. `items fill` is the intentional “just finish it” verb (write/resume
+    across kinds). Empty `--endpoint` / `--out-dir` fall through to `tools/seedsmith/.env`.
     """
     if args.items_command == "validate":
         return _cmd_items_validate(args)
     if args.items_command == "combogen-migrate":
         return _cmd_items_combogen_migrate(args)
+    if args.items_command == "fill":
+        return _cmd_items_fill(args)
     if args.items_command != "generate":
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
+
+    if args.kind in ("set", "charm", "combination") and (args.write or args.out_dir):
+        _apply_items_write_defaults(args)
 
     if args.kind == "combination":
         return _cmd_items_combination(args)
@@ -611,34 +615,29 @@ def _prompt_version() -> str:
 def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> int:
     """The `--write` half. Refuses loudly and specifically rather than writing an empty run.
 
-    ⚠ **`--out-dir` has no default, and a path inside `data/seed/items/` is refused unless
-    `--allow-production-tree` is passed.** Every items metric globs that tree recursively, so a
-    sample written there moves finding counts other streams baseline against — the failure is
-    silent and shows up as someone else's regression.
-
-    ⭐ **Two transports, one refusal (module 13, `set-charm-live-endpoint`).** `--answers <file>` is
-    the deterministic replay path, unchanged. `--endpoint <url>` is the live path — a real call
-    through `pipeline.llm_caller.call_model`, the same transport `effects generate`/`demons generate`
-    already use — and it makes `--answers` optional, not `--out-dir`: a write still needs somewhere
-    to land. Only when NEITHER transport is named does this refuse, the same safety net as before.
+    Empty `--out-dir` / `--endpoint` fall through to `.env` defaults (`SEEDSMITH_ALLOW_PRODUCTION_TREE`,
+    production kind dirs, `SEEDSMITH_LLM_*`) via `_apply_items_write_defaults` /
+    `resolve_live_transport`. A path inside `data/seed/items/` still needs allow-production.
     """
-    import dataclasses
-
     from ..adapters.items.setgen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
     from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
-    from ..pipeline.llm_caller import load_config
+    from ..pipeline.llm_caller import resolve_live_transport
+
+    _apply_items_write_defaults(args)
 
     if not args.out_dir:
-        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
-              "land.", file=sys.stderr)
+        print("seedsmith: --write is refused — no --out-dir given and production defaults are "
+              "off. Pass --out-dir, or set SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in "
+              "tools/seedsmith/.env (with optional SEEDSMITH_ITEMS_OUT_DIR).",
+              file=sys.stderr)
         return EXIT_REFUSED
-    if not args.answers and not args.endpoint:
-        print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_set.py) is wired to two: an authored-answer file (emit briefs "
-              "with --briefs-out, have a model answer them, then pass --answers <file>), or a live "
-              "model endpoint (--endpoint <url> [--model <name>]).",
+
+    transport = resolve_live_transport(args.endpoint, args.model)
+    if not args.answers and not transport.endpoint:
+        print("seedsmith: --write is refused — no transport. Pass --answers <file>, "
+              "--endpoint <url>, or set SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env.",
               file=sys.stderr)
         return EXIT_REFUSED
 
@@ -663,24 +662,10 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
             return EXIT_REFUSED
         effective_model = args.model
     else:
-        # No answer file at all this time — `run_batch`'s own `answers` parameter is consulted
-        # only to build the DEFAULT (replay) caller, which never happens here because `call` is
-        # given explicitly. This empty stand-in satisfies the parameter's type without pretending
-        # an answer file exists.
         answers = answers_mod.AnswerFile(kind=args.kind, population=args.population,
                                          prompt_version=_prompt_version(), by_subject={})
-        # ⛔ Real bug, found 2026-09-08: this used to build `LlmCallerConfig(endpoint=..., model=...)`
-        # directly, which NEVER called `load_config()` — every `.env`/`seedsmith.toml` override
-        # (model, timeout, attempts, retry_delay, max_heal, max_tokens) was silently ignored on this,
-        # the actual live-generation path, no matter what was set. `--model unrecorded` (the CLI's own
-        # not-passed sentinel) fell back to `LlmCallerConfig`'s hardcoded dataclass default, not to
-        # `.env`. Fixed: `load_config()` is now the base, and only `--endpoint`/`--model` (when the
-        # operator actually passed them) override it — every other `.env`/toml-set field survives.
-        base_config = load_config()
-        effective_model = (args.model if args.model and args.model != "unrecorded"
-                           else base_config.model)
-        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
-        call = run_mod.live_caller(config)
+        effective_model = transport.model
+        call = run_mod.live_caller(transport)
 
     ledger_path = Path(args.ledger) if args.ledger else out_dir / "set-charm-gen.ledger.json"
     result = authored_mod.run_batch(
@@ -898,23 +883,24 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
     owns (`items validate --deps`, schema/`audit_schema` conformance, `dependency_validator`), not
     against `tools/ItemSeedValidator`.
     """
-    import dataclasses
-
     from ..adapters.items.combogen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
     from ..adapters.items.setgen import run as set_run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
-    from ..pipeline.llm_caller import load_config
+    from ..pipeline.llm_caller import resolve_live_transport
+
+    _apply_items_write_defaults(args)
 
     if not args.out_dir:
-        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
-              "land.", file=sys.stderr)
+        print("seedsmith: --write is refused — no --out-dir given and production defaults are "
+              "off. Pass --out-dir, or set SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in "
+              "tools/seedsmith/.env.", file=sys.stderr)
         return EXIT_REFUSED
-    if not args.answers and not args.endpoint:
-        print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_combination.py) accepts an authored-answer file (emit briefs "
-              "with --briefs-out, then pass --answers <file>) or a live model endpoint "
-              "(--endpoint <url> [--model <name>]).", file=sys.stderr)
+    transport = resolve_live_transport(args.endpoint, args.model)
+    if not args.answers and not transport.endpoint:
+        print("seedsmith: --write is refused — no transport. Pass --answers <file>, "
+              "--endpoint <url>, or set SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env.",
+              file=sys.stderr)
         return EXIT_REFUSED
     try:
         out_dir = seedfile_mod.resolve_out_dir(
@@ -938,11 +924,8 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
     else:
         answers = answers_mod.AnswerFile(
             kind="combination", population="n/a", prompt_version="live", by_subject={})
-        base_config = load_config()
-        effective_model = (args.model if args.model and args.model != "unrecorded"
-                           else base_config.model)
-        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
-        call = set_run_mod.live_caller(config)
+        effective_model = transport.model
+        call = set_run_mod.live_caller(transport)
 
     ledger_path = Path(args.ledger) if args.ledger else None
     result = authored_mod.run_batch(
@@ -977,6 +960,70 @@ def _cmd_items_validate(args: argparse.Namespace) -> int:
     report = deps_mod.preflight(tuning)
     print(json.dumps({"kind": "combination", **report.to_dict()}, ensure_ascii=False, indent=2))
     return EXIT_REFUSED if report.refused else EXIT_CLEAN
+
+
+def _cmd_items_fill(args: argparse.Namespace) -> int:
+    """`seedsmith items fill` — resume/fill missing subjects across item kinds.
+
+    Implies write (unless `--dry-run`). Uses `.env` for endpoint / production out-dirs. Walks
+    kinds in item-seedgen-map dependency order; partition kinds use discovered corpus files only.
+
+    Unbounded set/charm/combination require `--limit N` or `--full`. Allow-production is required
+    only when the plan includes those kinds.
+    """
+    from ..adapters.items import defaults as items_defaults
+    from ..adapters.items import fill as fill_mod
+
+    kinds = None
+    if getattr(args, "kinds", ""):
+        kinds = tuple(k.strip() for k in args.kinds.split(",") if k.strip())
+        unknown = [k for k in kinds if k not in items_defaults.FILL_KIND_ORDER]
+        if unknown:
+            print(f"seedsmith: unknown --kinds {unknown!r}; legal: "
+                  f"{', '.join(items_defaults.FILL_KIND_ORDER)}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+
+    selected = set(kinds) if kinds is not None else set(items_defaults.FILL_KIND_ORDER)
+    needs_production = bool(selected & fill_mod.PRODUCTION_KINDS)
+    allow = items_defaults.allow_production_tree(
+        cli_allow=bool(getattr(args, "allow_production_tree", False)))
+    if not args.dry_run and needs_production and not allow:
+        print("seedsmith: items fill refused — set/charm/combination need "
+              "SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in tools/seedsmith/.env or "
+              "--allow-production-tree.",
+              file=sys.stderr)
+        return EXIT_REFUSED
+
+    limits = fill_mod.FillLimits(
+        limit=int(getattr(args, "limit", 0) or 0),
+        count=int(getattr(args, "count", 1) or 1),
+        batch_size=int(getattr(args, "batch_size", 1) or 1),
+        max_partitions=int(getattr(args, "max_partitions", 1) or 0),
+        full=bool(getattr(args, "full", False)),
+    )
+    # When not --full, default max_partitions stays 1 (smoke). --full means all partitions
+    # (max_partitions 0 = uncapped in plan_fill_steps).
+    if limits.full:
+        limits.max_partitions = 0
+
+    if not args.dry_run and getattr(args, "validate_deps", True) and "combination" in selected:
+        vargs = argparse.Namespace(deps=True)
+        deps_code = _cmd_items_validate(vargs)
+        if deps_code == EXIT_REFUSED:
+            print("seedsmith: items fill refused — combination deps preflight failed "
+                  "(fix with items validate --deps, or pass --no-validate-deps).",
+                  file=sys.stderr)
+            return EXIT_REFUSED
+
+    report = fill_mod.run_fill(
+        kinds=kinds, dry_run=bool(args.dry_run), allow_production=allow or not needs_production,
+        limits=limits,
+        stop_on_error=not bool(getattr(args, "continue_on_error", False)))
+    print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+    if report.refused_reason:
+        print(f"seedsmith: {report.refused_reason}", file=sys.stderr)
+        return EXIT_REFUSED
+    return report.worst_exit_code
 
 
 def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
@@ -2290,18 +2337,18 @@ def build_parser() -> argparse.ArgumentParser:
                            "of attempts per subject is legal — the graph's repair edge consumes "
                            "them in order). The deterministic path; mutually exclusive with "
                            "--endpoint in practice (--answers wins if both are given)")
-    igen.add_argument("--endpoint", default="",
-                      help="set/charm/combination --write: call a real model endpoint via "
-                           "pipeline.llm_caller.call_model instead of replaying an answer file — "
-                           "the same live transport --endpoint already selects for effects/demons "
-                           "generate. Ignored when --answers is also given")
     igen.add_argument("--out-dir", dest="out_dir", default="",
-                      help="set/charm/combination --write: where the seed files land. No default, and a path "
-                           "inside data/seed/items/ is refused unless --allow-production-tree")
+                      help="set/charm/combination --write: where the seed files land. Defaults to "
+                           "the kind's production folder when SEEDSMITH_ALLOW_PRODUCTION_TREE=1 "
+                           "(or --allow-production-tree). A path inside data/seed/items/ is refused "
+                           "unless allow-production is on")
     igen.add_argument("--allow-production-tree", dest="allow_production_tree",
                       action="store_true",
-                      help="set/charm/combination --write: permit an --out-dir inside data/seed/items/. This "
-                           "is the production run; every items metric globs that tree")
+                      help="set/charm/combination --write: permit an --out-dir inside "
+                           "data/seed/items/. Also settable via SEEDSMITH_ALLOW_PRODUCTION_TREE=1")
+    igen.add_argument("--endpoint", default="",
+                      help="set/charm/combination --write: live model endpoint. Empty falls "
+                           "through to SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env")
     igen.add_argument("--ledger", default="",
                       help="set/charm/combination --write: resume-ledger path (default: generator-specific "
                            "ledger inside --out-dir, so a sample never touches the real one)")
@@ -2356,6 +2403,37 @@ def build_parser() -> argparse.ArgumentParser:
                            help="combination: confirm every hostRole/ingredients family a run "
                                 "could request resolves against real content, before any subject "
                                 "is planned (acceptance 3a, spec-combination-write-unblock.md)")
+    ifill = items_sub.add_parser(
+        "fill",
+        help="resume/fill missing item corpus subjects across kinds (uses .env for endpoint/"
+             "production out-dirs; --dry-run plans only; requires --limit or --full for "
+             "set/charm/combination)")
+    ifill.add_argument("--dry-run", dest="dry_run", action="store_true",
+                       help="print the dependency-ordered work plan; make no model calls")
+    ifill.add_argument("--kinds", default="",
+                       help="comma-separated kind filter (default: all fill kinds in map order)")
+    ifill.add_argument("--limit", type=int, default=0,
+                       help="set/charm/combination: plan only the first N subjects (required "
+                            "unless --full)")
+    ifill.add_argument("--count", type=int, default=1,
+                       help="base-type/enhancement-milestone/recipe/drop-table draws per step "
+                            "(default 1)")
+    ifill.add_argument("--batch-size", dest="batch_size", type=int, default=1,
+                       help="gem: subjects per partition step (default 1)")
+    ifill.add_argument("--max-partitions", dest="max_partitions", type=int, default=1,
+                       help="cap discovered affix/base-type/gem/drop-table jobs (default 1; "
+                            "ignored under --full)")
+    ifill.add_argument("--full", action="store_true",
+                       help="unbounded closed grids + all discovered partitions (explicit opt-in)")
+    ifill.add_argument("--allow-production-tree", dest="allow_production_tree",
+                       action="store_true",
+                       help="permit data/seed/items/ writes for set/charm/combination (also "
+                            "SEEDSMITH_ALLOW_PRODUCTION_TREE=1)")
+    ifill.add_argument("--continue-on-error", dest="continue_on_error", action="store_true",
+                       help="keep walking after a refused/gap/error step (default: stop)")
+    ifill.add_argument("--no-validate-deps", dest="validate_deps", action="store_false",
+                       help="skip the combination deps preflight before fill")
+    ifill.set_defaults(validate_deps=True)
     imigrate = items_sub.add_parser(
         "combogen-migrate",
         help="report combogen.migrate's own socket-word retirement plan (module 21)")

@@ -158,10 +158,6 @@ def main(argv=None) -> int:
         raise SystemExit(
             "seedsmith: refused — no --write. Use --dry-run to inspect the brief first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
-        raise SystemExit(
-            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
 
     free_pairs = brief_mod.free_channel_ops(brief.partition, args.affix_kind)
     if not free_pairs:
@@ -171,11 +167,13 @@ def main(argv=None) -> int:
         }, ensure_ascii=False, indent=2))
         return 0
 
-    from ....pipeline.llm_caller import live_answer_caller, load_config
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
 
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     validator = lambda answer, schema: schema_mod.validate_answer(
         answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind)
     answer = live_answer_caller(config, validator=validator)(brief.render(), brief.schema)

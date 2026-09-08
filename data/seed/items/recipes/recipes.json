@@ -741,6 +741,28 @@
       "soulsCostBand": "modest",
       "tags": [],
       "flavor": "The graft finally takes — a shard from something just beginning to grow."
+    },
+    {
+      "id": "recipe.033",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "Infuse the fabric with solar energy to harden the weave."
     }
   ]
 }

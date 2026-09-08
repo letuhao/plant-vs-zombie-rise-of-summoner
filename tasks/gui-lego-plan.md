@@ -1,59 +1,47 @@
-# gui-lego — plan (design-only)
+# gui-lego — plan
 
-**Status:** Design pack delivered — **awaiting owner review**. No React implementation in this
-wave.  
-**Ideal / map:** [docs/architecture/gui-lego-ideal.md](../docs/architecture/gui-lego-ideal.md) ·
-[docs/architecture/gui-lego-map.md](../docs/architecture/gui-lego-map.md)  
+**Status:** P0 React **done** (Wave 0 + Wave C). Design Waves A–B shipped.  
+**Ideal / map / authoring:** [docs/architecture/gui-lego-ideal.md](../docs/architecture/gui-lego-ideal.md) ·
+[docs/architecture/gui-lego-map.md](../docs/architecture/gui-lego-map.md) ·
+[docs/architecture/gui-lego-authoring.md](../docs/architecture/gui-lego-authoring.md)  
+**Queue:** [docs/architecture/gui-lego/menu-refactor-queue.md](../docs/architecture/gui-lego/menu-refactor-queue.md)  
 **Design index:** [docs/design/gui-lego/README.md](../docs/design/gui-lego/README.md)  
+**Assembled P0:** [docs/design/gui-lego/surfaces/derived-console.html](../docs/design/gui-lego/surfaces/derived-console.html)  
 **Todo:** [gui-lego-todo.md](gui-lego-todo.md)
 
 ---
 
 ## Goal
 
-Replace “port the combat console as one page” with a **composable menu Lego kit** (Phaser-analogue
-Scene/System/Registry/GameObject + MVVM over DPLP, aligned with ERM). First surface =
-`derived-console`.
+Make **gui-lego** the durable standard for refactoring player menus. P0 = shared FE runtime +
+Derived consumer replacing stop-gap `ui/actor/derived/*` — **shipped**.
 
 ---
 
-## Delivered this wave
+## Delivered
 
-1. Ideal + capability map (pattern lock, bans, bus catalog, theme taxonomy).  
-2. Composition grammar + [recipes/derived-console.json](../docs/design/gui-lego/recipes/derived-console.json).  
-3. Design README — piece index, dependency graph, reuse matrix.  
-4. `foldDerivedSurfaceVm` contract + theme-packs module spec.  
-5. Per-piece specs under `docs/architecture/gui-lego/spec-*.md`.  
-6. Per-piece HTML drafts + shared `_piece-kit.css`.  
-7. Theme demos (fire, ice, status-dot, neutral) + **swap-lab**.  
+### Wave A–B (design)
 
-Stop-gap production code `web/.../ui/actor/derived/*` is **unchanged** on purpose.
+Ideal, map, authoring, recipes, pieces, themes, queue, DESIGN-GATE / decisions.
 
----
+### Wave 0 + Wave C (React P0)
 
-## Owner review gates
+| Wave | Work | Status |
+|---|---|---|
+| **0** | registries, `bindSurface` (`$bindArray`, overlays), `RecipeMount`, bus, fixtures | done |
+| **C1** | `foldDerivedSurfaceVm` + cook under `features/gui-lego` + `formatMagnitude` | done |
+| **C2** | Derived pieces + CatalogIcon + paint gauges | done |
+| **C3** | Thin `DerivedTab`; stop-gap deleted | done |
+| **C4** | Contract/unit/ActorPanel; e2e SSOT → Lego surface; queue P0 done | done |
 
-1. Accept / reject piece boundaries and recipe slots.  
-2. Accept / reject payload shapes (esp. `channel-row`, gauges, lifecycle).  
-3. Confirm theme `css` + `paint` split (open `themes/swap-lab.html`).  
-4. Confirm host = ActorPanel tab (no second shell).  
-5. Only then: authorize a **separate** React implementation stream.
+FE homes: `web/fusion-rpg-web/src/features/gui-lego/` · `web/fusion-rpg-web/src/ui/gui-lego/`.  
+Theme/recipe JSON under FE are **copies** — re-copy from `docs/design/gui-lego/` when design packs change.
 
 ---
 
-## After acceptance (not this plan)
-
-- Implement piece registry + fold + recipe mount in FE.  
-- Replace stop-gap Derived modules by composition.  
-- Contract tests for landmark/`>` DOM; side-by-side vs Lego drafts.  
-- Do **not** resume CV-only CSS patches as strategy.
-
----
-
-## How to preview drafts
+## Preview
 
 ```powershell
-start docs\design\gui-lego\README.md
+start docs\design\gui-lego\surfaces\derived-console.html
 start docs\design\gui-lego\themes\swap-lab.html
-start docs\design\gui-lego\pieces\channel-row.html
 ```

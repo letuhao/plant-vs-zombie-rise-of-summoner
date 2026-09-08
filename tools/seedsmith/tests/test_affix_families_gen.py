@@ -449,9 +449,15 @@ def test_cli_dry_run_prints_the_brief_and_makes_no_model_call(isolated_families_
     assert "g.armour" in out
 
 
-def test_cli_write_without_endpoint_refuses(isolated_families_dir):
+def test_cli_write_without_endpoint_refuses(isolated_families_dir, monkeypatch):
+    """Refuse only when the *resolved* transport has no endpoint (CLI empty + config empty)."""
+    from seedsmith.pipeline.llm_caller import LlmCallerConfig
+    monkeypatch.setattr(
+        "seedsmith.pipeline.llm_caller.resolve_live_transport",
+        lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
     with pytest.raises(SystemExit):
         run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write"])
+
 
 
 def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir, capsys, monkeypatch):
