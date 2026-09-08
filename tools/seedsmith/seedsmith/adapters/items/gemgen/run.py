@@ -259,3 +259,95 @@ def write_partition_file(partition: str, entries: "list[dict]", *, path: "Path |
         Path(tmp_name).unlink(missing_ok=True)
         raise
     return target
+
+
+def main(argv=None) -> int:
+    """`seedsmith items generate --kind gem --slot <n>` (item-seedgen module `sockets-gen`).
+
+    ⛔ **Real gap, closed 2026-09-08.** This module had `plan_partition`/`generate_partition`/
+    `write_partition_file` — a complete, tested pipeline — and a spec
+    (`docs/architecture/item-seedgen/spec-sockets-gen.md`) documenting `items generate --kind gem
+    --brief <theme-file> --write` as the real invocation, but no CLI entrypoint of any kind, not
+    even a private one. This closes it, matching every sibling module's own shape (`--dry-run`
+    plans and calls no model; `--write --endpoint <url>` is the live path; `--overwrite` bypasses
+    reconcile for named ids or the literal `all`).
+
+    One real divergence from the sibling modules, kept rather than papered over: `apply_answer`
+    raises `Blocked`/`ValueError` per subject instead of returning a `{"blocked": ...}` dict —
+    this loop catches `Blocked` itself (mirroring the "not all-or-nothing" convention every
+    sibling module's own `run_draws` already enforces) rather than letting one declined family
+    abort the whole batch.
+    """
+    import argparse
+    import dataclasses
+
+    ap = argparse.ArgumentParser(description="Author gem (socket-item) identities for one gems/N "
+                                             "partition.")
+    ap.add_argument("--slot", type=int, required=True, help="the gems/N partition number")
+    ap.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
+    ap.add_argument("--dry-run", action="store_true", help="assemble the plan, make no model calls")
+    ap.add_argument("--write", action="store_true", help="write the partition file back to disk")
+    ap.add_argument("--overwrite", "--force", default="",
+                    help="comma-separated subject ids to regenerate, or the literal 'all'")
+    ap.add_argument("--endpoint", default="", help="live model endpoint; enables a real run")
+    ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
+    args = ap.parse_args(argv)
+
+    partition = f"gems/{args.slot}"
+    ledger = RunLedger(DEFAULT_LEDGER_PATH)
+
+    if args.dry_run:
+        plan = plan_partition(partition, batch_size=args.batch_size, ledger=ledger)
+        print(json.dumps({"partition": partition, "toGenerate": len(plan.subjects),
+                          "alreadyDone": len(plan.already_done)}, ensure_ascii=False, indent=2))
+        if plan.subjects:
+            print("--- sample brief ---")
+            print(plan.subjects[0].brief)
+        return 0
+
+    if not args.write:
+        raise SystemExit(
+            "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
+            "then re-run with --write --endpoint <url> to actually call a model and persist.")
+    if not args.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
+            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
+
+    from ....pipeline.llm_caller import live_answer_caller, load_config
+
+    base_config = load_config()
+    config = dataclasses.replace(base_config, endpoint=args.endpoint,
+                                 model=args.model or base_config.model)
+    caller = live_answer_caller(config)
+
+    if args.overwrite:
+        target = "all" if args.overwrite == "all" else \
+            [s.strip() for s in args.overwrite.split(",") if s.strip()]
+        subjects = plan_overwrite(partition, target, batch_size=args.batch_size, ledger=ledger)
+    else:
+        subjects = plan_partition(partition, batch_size=args.batch_size, ledger=ledger).subjects
+
+    fresh: "dict[str, dict]" = {}
+    blocked: "dict[str, dict]" = {}
+    for subject in subjects:
+        schema = schema_mod.gem_answer_schema(elemental=subject.elemental)
+        answer = caller(subject.brief, schema)
+        try:
+            entry = apply_answer(subject, answer)
+        except Blocked as exc:
+            blocked[subject.subject_id] = {"reason": exc.reason}
+            continue
+        fresh[subject.subject_id] = entry
+        ledger.mark_done(subject.subject_id, {"entryId": subject.entry_id, "entry": entry})
+
+    if fresh:
+        all_entries = entries_from_ledger(partition, ledger_path=DEFAULT_LEDGER_PATH)
+        write_partition_file(partition, all_entries, model=config.model)
+    print(json.dumps({"planned": len(subjects), "fresh": len(fresh), "blocked": len(blocked),
+                      "blockedReasons": blocked}, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - dev entrypoint
+    raise SystemExit(main())

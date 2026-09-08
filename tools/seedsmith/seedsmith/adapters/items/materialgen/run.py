@@ -223,3 +223,70 @@ def run_batch(plan: RunPlan, answers: "dict[str, dict]", *,
         _write_entries(entries, materials_path, base_doc=doc)
 
     return BatchResult(outcomes=tuple(outcomes), entries=tuple(persisted), materials_path=materials_path)
+
+
+def main(argv=None) -> int:
+    """`seedsmith items generate --kind material` (item-seedgen module `materials-gen`).
+
+    ⛔ **Real gap, closed 2026-09-08.** This module had `plan_run`/`plan_overwrite`/`run_batch` — a
+    complete, tested pipeline — and a spec (`docs/architecture/item-seedgen/spec-materials-gen.md`)
+    documenting `items generate --kind material --brief <theme-file> --write` as the real
+    invocation, but no CLI entrypoint of any kind. `run_batch` takes a pre-built `{subject_id:
+    answer}` mapping rather than a `call` callable (a third shape, distinct from both
+    `basetypegen`'s `call(brief, schema) -> dict` and `gemgen`'s `answer_fn(subject) -> dict`) — this
+    builds that mapping from `live_answer_caller` before calling it, once per plan.
+    """
+    import argparse
+    import dataclasses
+
+    ap = argparse.ArgumentParser(description="Author the closed, issuable materials corpus.")
+    ap.add_argument("--dry-run", action="store_true", help="assemble the plan, make no model calls")
+    ap.add_argument("--write", action="store_true", help="write the merged corpus back to disk")
+    ap.add_argument("--overwrite", "--force", default="",
+                    help="comma-separated issuable ids to regenerate (no bare 'all' — every "
+                         "issuable id must be named explicitly, matching plan_overwrite's own "
+                         "refusal of an unscoped request)")
+    ap.add_argument("--endpoint", default="", help="live model endpoint; enables a real run")
+    ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
+    args = ap.parse_args(argv)
+
+    ledger = RunLedger(DEFAULT_LEDGER_PATH)
+
+    if args.overwrite:
+        plan = plan_overwrite([s.strip() for s in args.overwrite.split(",") if s.strip()],
+                              ledger=ledger)
+    else:
+        plan = plan_run(ledger=ledger)
+
+    if args.dry_run:
+        print(json.dumps({"toGenerate": len(plan.subjects),
+                          "alreadyPresent": len(plan.already_present)},
+                         ensure_ascii=False, indent=2))
+        if plan.subjects:
+            print("--- sample brief ---")
+            print(plan.subjects[0].brief)
+        return 0
+
+    if not args.write:
+        raise SystemExit(
+            "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
+            "then re-run with --write --endpoint <url> to actually call a model and persist.")
+    if not args.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
+            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
+
+    from ....pipeline.llm_caller import live_answer_caller, load_config
+
+    base_config = load_config()
+    config = dataclasses.replace(base_config, endpoint=args.endpoint,
+                                 model=args.model or base_config.model)
+    caller = live_answer_caller(config)
+    answers = {s.subject_id: caller(s.brief, material_schema()) for s in plan.subjects}
+    result = run_batch(plan, answers, ledger=ledger)
+    print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - dev entrypoint
+    raise SystemExit(main())

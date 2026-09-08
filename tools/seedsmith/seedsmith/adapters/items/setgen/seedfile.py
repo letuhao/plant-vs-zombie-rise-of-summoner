@@ -57,6 +57,48 @@ class OutDirRefused(ValueError):
     """The requested write target is the shipped corpus and the caller did not say so."""
 
 
+_NAME_KEY_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _slugify(name: str) -> str:
+    """`name` -> a `[a-z0-9-]+` slug: lowercase, every run of non-alphanumeric characters becomes
+    one hyphen, no leading/trailing hyphen. Mirrors `trees.nodegen.run._slugify` exactly (same
+    real 2026-09-06 finding that motivated it there: never trust the model to derive its own
+    `nameKey` from its own `name` — see `derive_name_key`'s own docstring for this module's own,
+    worse incident on the same field). Never returns an empty string — `"item"` if `name` collapses
+    to nothing (pure punctuation), since every `nameKey` pattern in this program requires at least
+    one character after the kind prefix."""
+    slug = _NAME_KEY_SLUG_RE.sub("-", name.strip().lower()).strip("-")
+    return slug or "item"
+
+
+def derive_name_key(kind: str, name: str) -> str:
+    """`set.<slug>` / `charm.<slug>` — computed deterministically from the model's own `name`
+    choice, never asked of the model itself.
+
+    ⛔ **Real incident, 2026-09-08.** `nameKey` used to be a field the model filled in directly
+    (constrained by a `pattern` regex `set_schema`/`charm_schema` sent it). Two independent
+    findings converge on removing it from the schema entirely rather than continuing to ask:
+    `trees.nodegen`'s own 2026-09-06 finding (`_derive_unique_name_key`'s docstring) — a real local
+    model repeatedly fell back to a generic templated key decoupled from its own `name` choice,
+    twice, even after a wording fix — and this program's own incident the same day: a quantized
+    model (reproduced on two different local models) degenerated into a repeated-token loop inside
+    this exact field, burning the full `max_tokens` budget on garbage, with `maxLength`/`pattern`
+    both confirmed unenforced by LM Studio's grammar sampler. There is no information `nameKey`
+    could carry beyond a mechanical transform of `name`, so it is derived here instead — the
+    failure mode does not exist if the field is never generated at all.
+
+    **Scope, named rather than silently assumed:** this does not check the derived key against the
+    already-shipped corpus for a collision — `set_entry`/`charm_entry` never did that when the
+    model supplied `nameKey` directly either, so this is unchanged collision safety, not a
+    regression. A corpus-wide dedup pass is a real, separate feature (`trees.nodegen`'s own
+    `_derive_unique_name_key` shows the shape one would take) — out of scope for this fix, which
+    exists to close the degenerate-generation incident, not to add a capability this module never
+    had.
+    """
+    return f"{kind}.{_slugify(name)}"
+
+
 def resolve_out_dir(out_dir: "str | Path", *, allow_production_tree: bool = False) -> Path:
     """Where rows land. Refuses the production kind directories unless explicitly authorised.
 
@@ -103,17 +145,34 @@ def resolve_pick(picks: "tuple[FamilyPick, ...]", token: str) -> "FamilyPick | N
 
 
 def resolve_capability(vocabulary: Vocabulary, node: "dict[str, Any]") -> "FamilyPick | None":
-    """`{"family": …, "variant": …}` -> the capability pick, or `None` if it names nothing."""
+    """`{"family": …, "variant": …}` -> the capability pick, or `None` if it names nothing.
+
+    ⛔ Real incident, 2026-09-08: AFTER the brief-truncation fix (`brief._pick_lines` — the run
+    could finally see every pick), a live 53-subject run still escalated on this exact field,
+    for a different reason. Every stat/charm family in this whole program is named by copying
+    ONE plain string (`resolve_pick`'s own two-spelling tolerance), but `capability` alone asks
+    for a split `{family, variant}` object — a shape found nowhere else in the brief the model
+    reads. Two live shapes came back wrong because of it: an elemental pick's full printed id
+    echoed into BOTH fields (`{"family": "atom.deathblast.fire", "variant":
+    "atom.deathblast.fire"}` instead of the split `{"family": "atom.deathblast", "variant":
+    "fire"}`), and a flat (variant-less) pick given a placeholder instead of an omitted variant
+    (`{"family": "atom.freezing", "variant": "none"}`). Both are legal, unambiguous picks a
+    human reading the printed list would recognize instantly, so `family` is tried as a plain
+    pick_id FIRST — the same tolerant lookup every stat/charm family already goes through —
+    before falling back to the family+variant combination the schema actually documents.
+    """
     family = node.get("family")
     if not isinstance(family, str):
         return None
+    direct = resolve_pick(vocabulary.capability, family)
+    if direct is not None:
+        return direct
     variant = node.get("variant")
     if isinstance(variant, str) and variant:
         for pick in vocabulary.capability:
             if pick.family == family and pick.variant == variant:
                 return pick
-        return None
-    return resolve_pick(vocabulary.capability, family)
+    return None
 
 
 # --------------------------------------------------------------------------------------------
@@ -188,7 +247,7 @@ def set_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: S
 
     return {
         "id": entry_id,
-        "nameKey": draft["nameKey"],
+        "nameKey": derive_name_key("set", draft["name"]),
         "name": draft["name"],
         "themeKey": theme_key,
         "members": [{"role": m["role"], "frame": m["frame"]} for m in draft.get("members") or ()],
@@ -208,7 +267,7 @@ def charm_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan:
     fixed = [_atom_row(pick, pick.power_band or "low") for pick in plan.families]
     row: "dict[str, Any]" = {
         "id": entry_id,
-        "nameKey": draft["nameKey"],
+        "nameKey": derive_name_key("charm", draft["name"]),
         "name": draft["name"],
         "charmClass": plan.charm_class,
         "apCost": plan.ap_cost,

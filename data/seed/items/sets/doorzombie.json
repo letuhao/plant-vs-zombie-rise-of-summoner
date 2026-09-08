@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-doorzombie",
+    "partition": "sets/doorzombie",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.doorzombie-001",
+      "nameKey": "set.iron-gate-hostage",
+      "name": "Iron Gate Hostage",
+      "themeKey": "demon.doorzombie",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant"
+        },
+        {
+          "role": "footing",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.rotting",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.arm-riveting",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.arm-welding",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.plating",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A heavy, rusted iron gate bound by the desperate grip of a thousand restless souls.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

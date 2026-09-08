@@ -22,6 +22,7 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -419,6 +420,72 @@ class RealGemsCorpusTests(unittest.TestCase):
         for entry in entries:
             seq = int(entry["id"].rsplit("-", 1)[1])
             self.assertTrue(emit.SEQ_MIN <= seq <= emit.SEQ_MAX, entry["id"])
+
+
+# ------------------------------------------------------------------------------------------------
+# CLI — real gap, closed 2026-09-08: this module had no entrypoint of any kind before this.
+# ------------------------------------------------------------------------------------------------
+class CliTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmp_path = Path(self._tmp.name)
+        self.gems_dir = self.tmp_path / "gems"
+        self.gems_dir.mkdir()
+
+    def test_cli_dry_run_prints_a_sample_brief_and_makes_no_model_call(self, ) -> None:
+        import io
+        from contextlib import redirect_stdout
+
+        with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                exit_code = run_mod.main(["--slot", "2", "--dry-run", "--batch-size", "1"])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("atom.affliction", buf.getvalue())
+
+    def test_cli_write_without_endpoint_refuses(self) -> None:
+        with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"):
+            with self.assertRaises(SystemExit):
+                run_mod.main(["--slot", "2", "--write"])
+
+    def test_cli_a_real_live_run_writes_a_real_partition_file(self) -> None:
+        """⛔ Real gap, closed 2026-09-08: this module (`sockets-gen`) had no CLI entrypoint of any
+        kind before this — not even a private, dry-run-only one like its four siblings. Proves the
+        full wire: CLI args -> `load_config()`-based config -> `live_answer_caller` -> per-subject
+        `apply_answer` (catching `Blocked` itself, since this module's own `generate_partition`
+        does not) -> `write_partition_file`."""
+        import io
+        import json as json_mod
+        from contextlib import redirect_stdout
+
+        called_with = {}
+
+        def _fake_live_answer_caller(config):
+            called_with["config"] = config
+            return lambda brief, schema: _valid_answer("Live-Wired Gem", "gem.live-wired")
+
+        with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"), \
+             mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller",
+                       _fake_live_answer_caller):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                exit_code = run_mod.main(["--slot", "2", "--batch-size", "1", "--write",
+                                         "--endpoint", "http://unit-test-endpoint",
+                                         "--model", "unit-test-model"])
+            summary = json_mod.loads(buf.getvalue())
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(called_with["config"].endpoint, "http://unit-test-endpoint")
+        self.assertEqual(called_with["config"].model, "unit-test-model")
+        written = json_mod.loads((self.gems_dir / "g2.json").read_text(encoding="utf-8"))
+        names = {e["name"] for e in written["entries"]}
+        self.assertIn("Live-Wired Gem", names)
+        self.assertEqual(summary, {"planned": 1, "fresh": 1, "blocked": 0, "blockedReasons": {}})
 
 
 if __name__ == "__main__":

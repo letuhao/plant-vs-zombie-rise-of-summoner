@@ -42,22 +42,33 @@ def threshold_pieces(tuning: SetCharmGenTuning,
 
 
 def _identity_fields() -> "dict[str, Any]":
+    """⛔ `nameKey` deliberately removed from here, 2026-09-08 — this schema no longer asks the
+    model for it at all. Two independent real-call findings converge on the same fix:
+    `trees/nodegen`'s own 2026-09-06 finding (`_derive_unique_name_key`'s docstring) found the
+    model repeatedly falls back to a generic templated key decoupled from its own `name` choice;
+    this program's own incident, the same day `maxLength` was added below as a mitigation, found a
+    WORSE failure mode on the identical field — a quantized model (reproduced on two different
+    models) degenerating into a repeated-token loop that burned the full `max_tokens` budget on
+    garbage, with the `maxLength`/`pattern` constraints both silently unenforced by LM Studio's
+    grammar sampler. `nameKey` is pure mechanical derivation from `name` (`set.<slug-of-name>` /
+    `charm.<slug-of-name>`, `seedfile.py`'s own `_derive_unique_name_key`) — there is no
+    information in it the model could add, and no validation value in asking for it that
+    `_identity_fields`'s own removal doesn't already close by construction: with
+    `additionalProperties: false` on every schema that embeds this, the model cannot legally emit
+    a `nameKey` key at all, not merely "is discouraged from" one.
+
+    `type` is `["string", "null"]`, not a bare `"string"` — see `set_schema`'s own docstring for
+    why every optional field in this whole module got the same treatment 2026-09-08.
+    """
     return {
-        "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        # ⛔ maxLength added 2026-09-08: `pattern` alone is NOT decode-time-enforced (llama.cpp's
-        # grammar-from-schema converter does not support it), so without a length bound this field
-        # was completely unconstrained at generation time — the real cause of an incident where a
-        # quantized model looped past 20K tokens inside it. `name`'s own 48 plus headroom for a
-        # dotted/kebab-cased id derived from it.
-        "nameKey": {"type": "string", "pattern": r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$",
-                    "maxLength": 96},
-        "flavor": {"type": "string", "minLength": 8, "maxLength": 400},
+        "name": {"type": ["string", "null"], "minLength": 3, "maxLength": 48},
+        "flavor": {"type": ["string", "null"], "minLength": 8, "maxLength": 400},
     }
 
 
 def _blocked() -> "dict[str, Any]":
     return {
-        "type": "string",
+        "type": ["string", "null"],
         "description": "Set this INSTEAD of the content fields if the brief cannot be satisfied — "
                        "say why. A blocked answer writes nothing and is reported, not retried "
                        "forever.",
@@ -78,30 +89,49 @@ def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("human
     `pieces` values and how many threshold rows there are. Before this, `minItems` was a flat 2 and
     a five-member set (ladder `(2,)`) could not satisfy the schema at all — nor could a two-member
     one, at the other end.
+
+    ⛔ Real incident, 2026-09-08: `"required": []` (every field optional-by-omission) was the
+    ORIGINAL design, needed so a `blocked` answer legally carries none of the content fields.
+    A live 53-subject run — AFTER the brief-truncation and `resolve_capability` fixes closed two
+    other real defects — still escalated on the SAME remaining defect on every subject: the model
+    never emitted `name`/`flavor` at all, not even after 3 self-heal rounds that named the exact
+    missing keys. Direct isolation (calling the model once, outside the retry loop, with the
+    identical brief) proved it: LM Studio's grammar-from-JSON-Schema sampler, given `"required":
+    []`, treats every optional trailing free-text field as safely omittable and the model never
+    generates them — re-prompting with the field names does not help, because nothing at the
+    GRAMMAR level ever offers the tokens for those keys once the sampler has decided to skip them.
+    Making every property `required` and expressing "optional" via `"type": [X, "null"]` instead
+    (the actual OpenAI Structured Outputs `strict: true` contract this schema already opts into
+    via `call_model`'s own `response_format`, and was never actually honoring) fixed it: the SAME
+    live model, same brief, immediately started filling `name`/`flavor` with real content once the
+    schema asked for them this way. `answers.schema_defects` and `answer_declares_content` were
+    both updated the same day to treat an absent key and an explicit `null` identically, so this
+    is purely a wire-format concession to the constrained-decoding sampler, not a new semantic
+    requirement on hand-authored/replayed answers.
     """
     ladder = threshold_ladder(tuning, member_count or tuning.typical_members)
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": [],
+        "required": ["name", "flavor", "blocked", "capability", "members", "thresholds"],
         "properties": {
             **_identity_fields(),
             "blocked": _blocked(),
             "capability": {
-                "type": "object",
+                "type": ["object", "null"],
                 "additionalProperties": False,
-                "required": ["family"],
+                "required": ["family", "variant"],
                 "properties": {
                     "family": {"type": "string",
                                "description": "one capability family id from the brief's closed "
                                               "list — a non-stat.* kind (ssot-sets §3.2)"},
-                    "variant": {"type": "string",
+                    "variant": {"type": ["string", "null"],
                                 "description": "only for a family the brief marks as element-"
-                                               "generated; omit otherwise"},
+                                               "generated; null otherwise"},
                 },
             },
             "members": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": 2,
                 "maxItems": tuning.max_roles,
                 "items": {
@@ -115,24 +145,24 @@ def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("human
                 },
             },
             "thresholds": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": len(ladder),
                 "maxItems": len(ladder),
                 "items": {
                     "type": "object",
                     "additionalProperties": False,
-                    "required": ["pieces"],
+                    "required": ["pieces", "families"],
                     "properties": {
                         "pieces": threshold_pieces(tuning, ladder),
                         "families": {
-                            "type": "array",
+                            "type": ["array", "null"],
                             "minItems": 1,
                             "maxItems": 3,
                             "items": {"type": "string",
                                       "description": "a stat.modify / stat.derived family id from "
-                                                     "the brief's closed list; omitted on the "
-                                                     "lowest threshold, which carries the "
-                                                     "capability instead"},
+                                                     "the brief's closed list; null on the lowest "
+                                                     "threshold, which carries the capability "
+                                                     "instead"},
                         },
                     },
                 },
@@ -147,21 +177,27 @@ def charm_schema(tuning: SetCharmGenTuning) -> "dict[str, Any]":
     `charmClass` is an enum and `apCost` is absent on purpose: the cost is derived from the class
     (ssot-charms §3.4), and a model asked for both would eventually disagree with itself. `axis`
     reuses the five power categories the family library already uses — no new vocabulary.
+
+    ⛔ Every field `required` + nullable, same 2026-09-08 fix as `set_schema` — see that
+    docstring for the live-model evidence. `drawback` stays genuinely optional in MEANING (most
+    charms have none) even though it is now structurally `required`: `null` is exactly "no
+    drawback," which is what an absent key meant before.
     """
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": [],
+        "required": ["name", "flavor", "blocked", "charmClass", "axis", "frameHint", "families",
+                    "drawback"],
         "properties": {
             **_identity_fields(),
             "blocked": _blocked(),
-            "charmClass": {"type": "string",
-                           "enum": [c.id for c in tuning.charm_classes]},
-            "axis": {"type": "string",
-                     "enum": ["offense", "survivability", "control", "utility", "economy"]},
-            "frameHint": {"type": "string", "enum": ["any", "humanoid", "plant"]},
+            "charmClass": {"type": ["string", "null"],
+                           "enum": [c.id for c in tuning.charm_classes] + [None]},
+            "axis": {"type": ["string", "null"],
+                     "enum": ["offense", "survivability", "control", "utility", "economy", None]},
+            "frameHint": {"type": ["string", "null"], "enum": ["any", "humanoid", "plant", None]},
             "families": {
-                "type": "array",
+                "type": ["array", "null"],
                 "minItems": 1,
                 "maxItems": 2,
                 "items": {"type": "string",
@@ -169,7 +205,7 @@ def charm_schema(tuning: SetCharmGenTuning) -> "dict[str, Any]":
                                          "list — never Increased, never More (ssot-charms §3.4)"},
             },
             "drawback": {
-                "type": "object",
+                "type": ["object", "null"],
                 "additionalProperties": False,
                 "required": ["family"],
                 "properties": {

@@ -45,7 +45,7 @@ per this repo's own `/idea` discipline — but that section is the source of tru
 |---|---|---|
 | Spawned by | The PvZ engine itself (a normal lawn plant/zombie) | The RPG layer — summon, fusion, gacha, **and** capture |
 | Identity | Species only — no `instanceId`, nothing persists between spawns | A real specimen: `UniqueActor`, its own `instanceId`, phase FSM |
-| Stats | Species progression only | Species stats **plus** its own equipment, passive build, aspect/action slots |
+| Stats | Empire-wide, per-player, per-species progression fallback only | Own specimen progression, equipment, passive build, aspect/action slots — never the empire species fallback |
 | Used for | Army-scale, disposable, or engine-spawned populations — a lawn wave, **siege garrisons, world-map legions** | An individually-meaningful, player-invested demon — your roster, a Commander/Patron, a Delve party member |
 | Scale model | **Troop-stack**: one type × a count (Heroes 3's own troop-stack shape, cited in `base-defense-ideal.md`) | Never army-scale — a roster is dozens, not thousands |
 
@@ -57,6 +57,13 @@ gacha, summon, fusion, or capture — is a Unique demon** the instant it exists 
 defenders, legions), never something in your own roster. Fusion, gacha, summon, and capture are four
 different **acquisition methods that all produce the same kind of thing** (a `UniqueActor` row) — they
 are not four different *kinds* of demon.
+
+**2026-09-08 owner decision:** the distinction also selects progression. A gameplay-owned spawn
+mechanism declares its progression source. General demons associated with the player's empire use the
+empire-wide species fallback only when that mechanism supplies no dedicated progression source.
+Unique demons and Commanders use their respective dedicated sources and never combine them with the
+fallback. The binding statement is `decisions.md`'s *Demon progression source and spawn ownership*
+row; this idea document follows it.
 
 ### Axis 2 — the two passive-aura roles, and the third thing that isn't a role
 

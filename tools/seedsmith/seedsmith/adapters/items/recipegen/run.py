@@ -402,6 +402,8 @@ def main(argv=None) -> int:
                          "--force)")
     ap.add_argument("--backfill", action="store_true",
                     help="mint any missing container (forge) target before writing")
+    ap.add_argument("--endpoint", default="", help="live model endpoint; enables a real run")
+    ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
     args = ap.parse_args(argv)
 
     ledger = RunLedger(DEFAULT_LEDGER_PATH)
@@ -437,10 +439,44 @@ def main(argv=None) -> int:
             print(plan.subjects[0].brief.render())
         return 0
 
-    raise SystemExit(
-        "REFUSING TO RUN: no model `call` is wired into this CLI entrypoint yet — use --dry-run to "
-        "inspect the plan, or drive `plan_run`/`run_draws` directly with an injected `call` "
-        "(matching basetypegen.run.main's / materialgen's own stated boundary).")
+    if not args.write:
+        raise SystemExit(
+            "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
+            "then re-run with --write --endpoint <url> to actually call a model and persist.")
+    if not args.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
+            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
+
+    # ⛔ Real gap, closed 2026-09-08 — see basetypegen.run.main's own identical fix for the full
+    # account: this branch used to be an unconditional refusal even though `plan_run`/`run_draws`/
+    # `write_corpus` were all real and tested. `--backfill` (declared above, never referenced
+    # anywhere in this function) is wired too — the same live caller mints any missing forge
+    # container target through `run_container_backfill_loop`, the cross-module call into
+    # `basetypegen.run` this module's own docstring already names.
+    import dataclasses
+
+    from ....pipeline.llm_caller import live_answer_caller, load_config
+
+    base_config = load_config()
+    config = dataclasses.replace(base_config, endpoint=args.endpoint,
+                                 model=args.model or base_config.model)
+    caller = live_answer_caller(config)
+    plan = plan_run(count=args.count, ledger=ledger, theme_hint=theme_hint)
+    fresh, blocked = run_draws(plan, ledger=ledger, call=caller)
+    merged = {**plan.existing, **fresh}
+    backfill_result = None
+    if args.backfill and fresh:
+        requested, remaining = run_container_backfill_loop(merged, call=caller)
+        backfill_result = {"requested": len(requested), "stillUnresolved": len(remaining)}
+    if fresh:
+        write_corpus(fresh, existing=plan.existing)
+    summary = {"planned": len(plan.subjects), "fresh": len(fresh), "blocked": len(blocked),
+              "blockedReasons": blocked}
+    if backfill_result is not None:
+        summary["backfill"] = backfill_result
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    return 0
 
 
 if __name__ == "__main__":  # pragma: no cover - dev entrypoint

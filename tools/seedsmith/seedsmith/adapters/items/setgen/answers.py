@@ -145,21 +145,51 @@ def load_answers(path: Path) -> AnswerFile:
 # The schema check a replayed answer does not get from the endpoint.
 # --------------------------------------------------------------------------------------------
 
+def _declared_types(schema: "dict[str, Any]") -> "set[str]":
+    declared = schema.get("type")
+    return {declared} if isinstance(declared, str) else set(declared or ())
+
+
+def _allows_null(schema: "dict[str, Any]") -> bool:
+    """Whether an ABSENT key satisfies a `required` entry for this property.
+
+    ⛔ 2026-09-08: `set_schema`/`charm_schema` moved every optional field from "absent from
+    `required`" to "`required`, but typed `[X, "null"]`" — a concession the live endpoint's own
+    constrained-decoding sampler needed (see `set_schema`'s own docstring for the evidence), not a
+    new semantic requirement on hand-authored/replayed answers. A field typed this way must keep
+    meaning exactly what an absent key always meant, so a required-but-nullable key that is simply
+    MISSING from a replayed draft is not a defect — only a required, NON-nullable key missing
+    still is.
+    """
+    return "null" in _declared_types(schema)
+
+
 def schema_defects(draft: Any, schema: "dict[str, Any]", *, path: str = "$") -> "list[str]":
     """Every way `draft` violates `schema`, as messages naming the field AND the offending value.
 
     The strings become the repair prompt (`make_validate_node`'s own contract), so "the field is
     wrong" is never enough — the message says which value was seen and what was legal.
-    """
-    defects: "list[str]" = []
-    declared = schema.get("type")
 
-    if declared == "object":
+    `type` may be a bare string or a list including `"null"` (`set_schema`/`charm_schema`'s
+    2026-09-08 required+nullable fields) — `draft is None` is checked once, up front, against
+    whichever of those two shapes declared it.
+    """
+    types = _declared_types(schema)
+
+    if draft is None:
+        if "null" in types or not types:
+            return []
+        return [f"{path}: expected {sorted(types)}, got null"]
+
+    concrete = next((t for t in types if t != "null"), None)
+    defects: "list[str]" = []
+
+    if concrete == "object":
         if not isinstance(draft, dict):
             return [f"{path}: expected an object, got {type(draft).__name__}"]
         properties = schema.get("properties") or {}
         for key in schema.get("required") or ():
-            if key not in draft:
+            if key not in draft and not _allows_null(properties.get(key) or {}):
                 defects.append(f"{path}: required field {key!r} is missing")
         if schema.get("additionalProperties") is False:
             for key in draft:
@@ -172,7 +202,7 @@ def schema_defects(draft: Any, schema: "dict[str, Any]", *, path: str = "$") -> 
                 defects.extend(schema_defects(draft[key], sub, path=f"{path}.{key}"))
         return defects
 
-    if declared == "array":
+    if concrete == "array":
         if not isinstance(draft, list):
             return [f"{path}: expected an array, got {type(draft).__name__}"]
         low, high = schema.get("minItems"), schema.get("maxItems")
@@ -186,7 +216,7 @@ def schema_defects(draft: Any, schema: "dict[str, Any]", *, path: str = "$") -> 
                 defects.extend(schema_defects(item, item_schema, path=f"{path}[{index}]"))
         return defects
 
-    if declared == "string":
+    if concrete == "string":
         if not isinstance(draft, str):
             return [f"{path}: expected a string, got {type(draft).__name__}"]
         enum = schema.get("enum")
@@ -202,7 +232,7 @@ def schema_defects(draft: Any, schema: "dict[str, Any]", *, path: str = "$") -> 
             defects.append(f"{path}: {draft!r} does not match the required pattern {pattern}")
         return defects
 
-    if declared == "integer":
+    if concrete == "integer":
         # `bool` is an `int` in Python and would slip through a bare isinstance check.
         if isinstance(draft, bool) or not isinstance(draft, int):
             return [f"{path}: expected an integer, got {type(draft).__name__}"]

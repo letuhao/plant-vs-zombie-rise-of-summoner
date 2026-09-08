@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-lanternchomper",
+    "partition": "sets/lanternchomper",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.lanternchomper-001",
+      "nameKey": "set.spiny-luster",
+      "name": "Spiny Luster",
+      "themeKey": "demon.lanternchomper",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.deathblast",
+            "powerBand": "low",
+            "params": {
+              "element": "light"
+            }
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.elpw-pierce",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A jagged, glowing husk that pierces the dark with its radiant needles.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

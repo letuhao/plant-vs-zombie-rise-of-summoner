@@ -525,6 +525,10 @@ def cmd_items(args: argparse.Namespace) -> int:
     if args.kind == "combination":
         return _cmd_items_combination(args)
 
+    if args.kind in ("base-type", "enhancement-milestone", "recipe", "drop-table", "gem",
+                    "material", "consumable", "affix-family"):
+        return _cmd_items_generate_passthrough(args)
+
     from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import themes as themes_mod
     from ..adapters.items.setgen import tuning as tuning_mod
@@ -533,7 +537,26 @@ def cmd_items(args: argparse.Namespace) -> int:
 
     tuning = tuning_mod.load()
     vocabulary = vocab_mod.build(tuning)
-    ledger = {} if args.ignore_ledger else None
+    # ⛔ Real bug, found 2026-09-08 on a live run: `ledger=None` here fell through to
+    # `plan_run`'s own `read_ledger()` with NO PATH, which reads a hardcoded default
+    # (`data/seed/items/_runs/set-charm-gen.ledger.json`) — a COMPLETELY DIFFERENT file from the
+    # one `_cmd_items_write` actually reads/writes (`<out-dir>/set-charm-gen.ledger.json`, computed
+    # further down at write time). Every `--write` run against a real `--out-dir` therefore always
+    # planned the FULL, un-resumed population — "alreadyDone": 0 on every single invocation, no
+    # matter how many prior runs had already persisted real content — while still correctly
+    # persisting fresh answers under the RIGHT ledger path, silently re-attempting (and, when a
+    # subject succeeded twice, re-writing) subjects a resumed run should have skipped outright.
+    # Read from the SAME path `--write` will use: `--ledger` if given, else `<out-dir>/
+    # set-charm-gen.ledger.json` — matching `_cmd_items_write`'s own resolution below exactly, so
+    # planning and writing can never disagree about which subjects are already done again.
+    if args.ignore_ledger:
+        ledger = {}
+    elif args.ledger:
+        ledger = run_mod.read_ledger(Path(args.ledger))
+    elif args.out_dir:
+        ledger = run_mod.read_ledger(Path(args.out_dir) / "set-charm-gen.ledger.json")
+    else:
+        ledger = None
     try:
         plan = run_mod.plan_run(kind=args.kind, population=args.population,
                                 tuning=tuning, vocabulary=vocabulary, ledger=ledger)
@@ -668,6 +691,103 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     return EXIT_CLEAN if result.persisted and not any(
         o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+
+
+_PASSTHROUGH_MODULE_BY_KIND = {
+    "base-type": "..adapters.items.basetypegen.run",
+    "enhancement-milestone": "..adapters.items.milestonegen.run",
+    "recipe": "..adapters.items.recipegen.run",
+    "drop-table": "..adapters.items.droptablegen.run",
+    "gem": "..adapters.items.gemgen.run",
+    "material": "..adapters.items.materialgen.run",
+    "consumable": "..adapters.items.consumablegen.run",
+    "affix-family": "..adapters.items.affixfamgen.run",
+}
+
+
+def _cmd_items_generate_passthrough(args: argparse.Namespace) -> int:
+    """`seedsmith items generate --kind base-type|enhancement-milestone|recipe|drop-table`.
+
+    Each of these four kinds has real, tested generation machinery of its own
+    (`basetypegen`/`milestonegen`/`recipegen`/`droptablegen`, each `run.py`'s own `main(argv)`) but
+    was never reachable through `items generate --kind <x>` — the shape every one of their own specs
+    (`docs/architecture/item-seedgen/spec-*.md`) already documents as the real invocation. Fixed by
+    passthrough, mirroring `cmd_effects`'s own `--kind affix` dispatch: this function builds an argv
+    list from whichever of the shared flags the operator actually set, and hands it to that module's
+    own argparse — so each module's own flag semantics (including a default `--count` that differs
+    per module, deliberately never forced to one shared value here) apply exactly as if its script
+    had been invoked directly.
+    """
+    import importlib
+
+    mod = importlib.import_module(_PASSTHROUGH_MODULE_BY_KIND[args.kind], package=__package__)
+
+    passthrough: "list[str]" = []
+    if args.kind == "base-type":
+        if not args.role:
+            print("seedsmith: --kind base-type needs --role", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        if not args.frame:
+            print("seedsmith: --kind base-type needs --frame", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        if not args.band:
+            print("seedsmith: --kind base-type needs --band", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        passthrough += ["--role", args.role, "--frame", args.frame, "--band", args.band]
+    if args.kind in ("drop-table", "gem"):
+        if not args.slot:
+            print(f"seedsmith: --kind {args.kind} needs --slot", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        passthrough += ["--slot", str(args.slot)]
+    if args.kind == "consumable" and args.slot:
+        # Optional here (unlike drop-table/gem): consumablegen's own main() only requires --slot
+        # for a brand-new entry, never for --overwrite <existing-id>.
+        passthrough += ["--slot", str(args.slot)]
+    if args.kind == "affix-family":
+        if not args.group:
+            print("seedsmith: --kind affix-family needs --group", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        if not args.affix_kind:
+            print("seedsmith: --kind affix-family needs --affix-kind", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        passthrough += ["--group", args.group, "--affix-kind", args.affix_kind]
+    if args.kind in ("base-type", "enhancement-milestone", "drop-table", "consumable",
+                    "affix-family"):
+        passthrough += ["--theme", args.theme] if args.theme else []
+    if args.kind == "recipe" and args.theme:
+        # recipegen's own flag reads a FILE path, not an inline hint — write the hint to a temp
+        # file so the same shared `--theme` string works uniformly across all four kinds.
+        import os
+        import tempfile
+        fd, brief_path = tempfile.mkstemp(suffix=".txt", text=True)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(args.theme)
+        passthrough += ["--brief", brief_path]
+    if args.count is not None and args.kind not in ("consumable", "affix-family"):
+        # gemgen's own flag is named `--batch-size`, not `--count` (it draws a whole gems/N
+        # partition batch at once, not N independent open-ended draws like the other three) —
+        # the shared `--count` flag still selects it, so an operator does not need to learn a
+        # second flag name per kind. consumablegen/affix-family have no `--count` at all — each
+        # mints exactly one entry per invocation (neither ever had a batch-planning mechanism).
+        passthrough += ["--batch-size" if args.kind == "gem" else "--count", str(args.count)]
+    if args.overwrite and args.kind != "affix-family":
+        # affix-family has no --overwrite: the module's own `force_requests` mechanism needs a
+        # previously-recorded ledger row to reconcile against (a real request's own `word`, which
+        # only becomes known AFTER a model answers) — there is no id string an operator could name
+        # upfront the way every sibling module's own --overwrite <id> takes.
+        passthrough += ["--overwrite", args.overwrite]
+    if args.kind == "recipe" and args.backfill:
+        passthrough.append("--backfill")
+    if args.dry_run:
+        passthrough.append("--dry-run")
+    if args.write:
+        passthrough.append("--write")
+    if args.endpoint:
+        passthrough += ["--endpoint", args.endpoint]
+    if args.model and args.model != "unrecorded":
+        passthrough += ["--model", args.model]
+
+    return mod.main(passthrough)
 
 
 def _cmd_items_combination(args: argparse.Namespace) -> int:
@@ -2119,7 +2239,10 @@ def build_parser() -> argparse.ArgumentParser:
     items = sub.add_parser("items", help="item corpus generation entrypoints (modules 13, 21)")
     items_sub = items.add_subparsers(dest="items_command", required=True)
     igen = items_sub.add_parser("generate", help="plan a set/charm/combination generation run")
-    igen.add_argument("--kind", default="set", choices=("set", "charm", "combination"))
+    igen.add_argument("--kind", default="set",
+                      choices=("set", "charm", "combination", "base-type",
+                               "enhancement-milestone", "recipe", "drop-table", "gem",
+                               "material", "consumable", "affix-family"))
     igen.add_argument("--population", default="species", choices=("species", "build"),
                       help="set/charm only; a combination's grid is closed, so --shape selects it")
     igen.add_argument("--shape", default="strain", choices=("strain", "splice"),
@@ -2172,6 +2295,40 @@ def build_parser() -> argparse.ArgumentParser:
                       help="set/charm --write: the _meta timestamp. Injected, never read from the "
                            "clock — a wall-clock stamp is the one field that makes a generated "
                            "file non-reproducible (pipeline/provenance.py's own rule)")
+    # ⛔ base-type/enhancement-milestone/recipe/drop-table, added 2026-09-08: each spec
+    # (docs/architecture/item-seedgen/spec-*.md) already documented `items generate --kind <x>` as
+    # the real invocation — none of the four were actually wired to it; each only had a private,
+    # undocumented module path (e.g. `python -m seedsmith.adapters.items.basetypegen.run`). Every
+    # flag below passes straight through to that module's own `main(argv)` (`cmd_items`'s own
+    # dispatch, mirroring `cmd_effects`'s passthrough pattern for `--kind affix`) — `--write`/
+    # `--endpoint`/`--model`/`--dry-run` above are reused as-is, not redeclared.
+    igen.add_argument("--role", default="", help="base-type: one of core.v1.json's 15 role ids")
+    igen.add_argument("--frame", default="", choices=("", "humanoid", "plant"),
+                      help="base-type: the partition's frame")
+    igen.add_argument("--band", default="", help="base-type: the partition's band letter")
+    igen.add_argument("--slot", type=int, default=0,
+                      help="drop-table: which of the 4 frozen partition slots (1-4)")
+    igen.add_argument("--theme", default="",
+                      help="base-type/enhancement-milestone/recipe/drop-table: an optional theme "
+                           "hint in the brief")
+    igen.add_argument("--count", type=int, default=None,
+                      help="base-type/enhancement-milestone/recipe/drop-table: how many new "
+                           "entries to draw this run. Left unset, each module keeps its OWN "
+                           "default (1 for base-type/enhancement-milestone/drop-table; 0 == "
+                           "reconcile-only for recipe) — this flag is never forced to a shared "
+                           "default that would silently override that")
+    igen.add_argument("--overwrite", "--force", default="",
+                      help="base-type/enhancement-milestone/recipe/drop-table: comma-separated "
+                           "draw ids to regenerate, or the literal 'all'")
+    igen.add_argument("--backfill", action="store_true",
+                      help="recipe only: mint any missing container (forge) target before writing")
+    igen.add_argument("--group", default="",
+                      help="affix-family only: e.g. 'g.armour' — must have a shipped partition "
+                           "file already")
+    igen.add_argument("--affix-kind", dest="affix_kind", default="",
+                      help="affix-family only: the family's fixed kindId, e.g. 'stat.modify' — "
+                           "distinct from this command's own --kind, which selects which "
+                           "generator runs at all")
     ivalidate = items_sub.add_parser(
         "validate", help="pre-flight dependency checks over the real corpus (module 21)")
     ivalidate.add_argument("--deps", action="store_true",

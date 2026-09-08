@@ -36,14 +36,22 @@ def _core_roles(pick: FamilyPick) -> "tuple[str, ...]":
     return tuple(r for r in pick.roles if r in HYBRID_CORE_ROLES)
 
 
-def _pick_lines(picks: "tuple[FamilyPick, ...]", limit: int) -> str:
-    shown = picks[:limit]
+def _pick_lines(picks: "tuple[FamilyPick, ...]") -> str:
+    """The whole pool, whole and unannotated-by-truncation.
+
+    ⛔ Real incident, 2026-09-08: this used to take a `limit` and truncate — printing the first
+    40 of 69 capability picks and the first 60 of 265 stat picks, with a bare "...and N more"
+    tail. A live 53-subject run escalated EVERY subject on the same defect shape: the model
+    named a family (`atom.sparking`, `atom.econ-bounty`, `atom.sporing`, `atom.deathblast.omni`,
+    ...) that was a REAL, valid pick in the full pool, just never shown to it. This is the exact
+    defect class `_charm_pick_lines` was already rebuilt to fix (its own docstring: "a truncated
+    pool is what produced the collapse this brief was rebuilt to fix") — it had never been
+    applied here. No truncation, matching that precedent.
+    """
     lines = []
-    for p in shown:
+    for p in picks:
         core = _core_roles(p)
         lines.append(f"  - {p.pick_id}" + (f"  (roles: {', '.join(core)})" if core else ""))
-    if len(picks) > limit:
-        lines.append(f"  - ...and {len(picks) - limit} more")
     return "\n".join(lines)
 
 
@@ -81,8 +89,7 @@ def _higher_sentence(higher: "tuple[int, ...]") -> str:
 
 
 def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary, *,
-                    member_count: "int | None" = None, capability_limit: int = 40,
-                    stat_limit: int = 60) -> str:
+                    member_count: "int | None" = None) -> str:
     """One set, one theme. `member_count` defaults to the typical size; a grand set is the exception,
     not the pattern (ssot-sets §3.4), so it is always an explicit ask."""
     members = member_count or tuning.typical_members
@@ -107,18 +114,19 @@ Choose, and nothing else:
 3. `thresholds` — exactly {len(ladder)} entries, at {_and_list(ladder)} pieces. The piece counts are
    FIXED by the {members}-member size and are not yours to choose; give one entry for each, in that
    order. The lowest ({ladder[0]}) takes no families — it carries the capability. {_higher_sentence(higher)}
-4. `name`, `nameKey`, `flavor`.
+4. `name` — a short display name (1-4 words), and `flavor` — one sentence.
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.
+(There is no `nameKey` field to fill in — it is derived automatically from `name`.)
 
 Legal member roles ({len(HYBRID_CORE_ROLES)}):
 {chr(10).join('  - ' + r for r in HYBRID_CORE_ROLES)}
 
 Capability families ({len(capability_pool)} picks):
-{_pick_lines(capability_pool, capability_limit)}
+{_pick_lines(capability_pool)}
 
 Stat families ({len(stat_pool)} picks):
-{_pick_lines(stat_pool, stat_limit)}
+{_pick_lines(stat_pool)}
 
 If this theme cannot carry a set you would be happy to ship, set `blocked` and say why."""
 
@@ -149,10 +157,11 @@ Choose, and nothing else:
 1. `charmClass` — one of: {classes}. A signet is named, carries a drawback, and rolls nothing.
 2. `axis` — one of offense, survivability, control, utility, economy. Pick the one this species
    actually leans into; the population is judged on spread across all five, not on any one of them.
-3. `frameHint`, `families` (one or two always-on families from the list below), `name`, `nameKey`,
-   `flavor`. A signet also names its `drawback` family.
+3. `frameHint`, `families` (one or two always-on families from the list below), `name`, `flavor`.
+   A signet also names its `drawback` family.
 
 Never choose a number, a cost, a strength or a tier. Those are resolved after you answer.
+(There is no `nameKey` field to fill in — it is derived automatically from `name`.)
 
 The list below is the WHOLE legal pool — every id in it is accepted, and nothing outside it is.
 Copy an id exactly as printed, including the element suffix where one is shown.

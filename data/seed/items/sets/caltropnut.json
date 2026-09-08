@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-caltropnut",
+    "partition": "sets/caltropnut",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.caltropnut-001",
+      "nameKey": "set.spiked-nut-carapace",
+      "name": "Spiked Nut Carapace",
+      "themeKey": "demon.caltropnut",
+      "members": [
+        {
+          "role": "core-guard",
+          "frame": "humanoid"
+        },
+        {
+          "role": "armament-primary",
+          "frame": "humanoid"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.plating",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.carapace",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.arm-hardening",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A heavy, spiked shell that reflects every blow back upon the attacker.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

@@ -1,18 +1,21 @@
 # Implementation plan: demon lawn deploy
 
-Covers all three module specs under `docs/architecture/demon-lawn-deploy/` (`spec-lawn-deploy-core.md`,
-`spec-lawn-deploy-events.md`, `spec-zomboss-deploy-ai.md`) and the capability map they sit under
-(`docs/architecture/demon-lawn-deploy-map.md`). All four documents went through an adversarial
-strengthen pass (2026-09-06, four independent reviews) before this plan was written — see each spec's
-own "⛔ Corrections" section for what was found and fixed. This plan does not re-litigate those findings;
-it schedules the work they produced.
+Covers the four module specs under `docs/architecture/demon-lawn-deploy/` (`spec-lawn-deploy-core.md`,
+`spec-lawn-deploy-progression.md`, `spec-lawn-deploy-events.md`, `spec-zomboss-deploy-ai.md`) and the
+capability map they sit under (`docs/architecture/demon-lawn-deploy-map.md`). The progression-source
+prerequisites are tracked in the companion [demon-progression-plan.md](demon-progression-plan.md):
+`spec-progression-source-contract.md`, `spec-general-empire-fallback.md`, and
+`spec-dedicated-progression-isolation.md`. This plan consumes those prerequisites and does not duplicate
+their implementation tasks.
 
 ## Overview
 
 Let a player-owned unique demon (never a Commander or Patron-designated one) deploy onto the live PvZ
 lawn during triggered events, on both sides — the plant side player-initiated, the zombie side AI-driven.
-Three modules, strictly sequential: the deploy mechanism itself, the trigger layer that decides when it's
-available, and the Zomboss policy that decides what it does with an available trigger.
+Four modules with explicit prerequisites: the deploy mechanism; the unique specimen progression and
+receipt projector; the trigger layer that decides when a deploy is available; and the Zomboss policy that
+decides what it does with an available trigger. The source contract and dedicated-isolation plan must
+land before the unique progression projector can claim conformance.
 
 ## Architecture decisions (locked in the specs — restated so the task list is readable)
 
@@ -35,6 +38,13 @@ available, and the Zomboss policy that decides what it does with an available tr
   board ptr, built specifically so a hypnotized/side-swapped entity still resolves to its real owner.
   `zomboss-deploy-ai`'s own `ILawnBoardView` should read through this oracle for side/ownership
   questions, not invent a second one.
+- **Source provenance is a prerequisite, not a type lookup.** Every spawn/death/result fact that can
+  affect progression carries the typed source contract and a replay-stable lifecycle occurrence id.
+  `EmpireGeneral` is the only source eligible for generic species progression; a `UniqueSpecimen` fact
+  can only reach the unique receipt projector.
+- **Unique lawn XP is exact-once Cold projection.** A kill needs a proven lethal attacker pointer; active
+  time uses injector-emitted scaled match milliseconds. Binding close, receipt compare/insert, XP, level
+  unlocks, and roster recovery share one Data transaction. The XP receipt is not a Hot combat path.
 
 ## Gates vs. checkpoints — read before objecting to what's NOT gated here
 
@@ -61,17 +71,20 @@ a follow-up task, not a rebuild — nothing about these defaults locks in an irr
 ## Dependency graph
 
 ```
-T1.1 (Commander/Patron refusal) ──┐
-T1.2 (reconcile-diff binding)  ───┼──> Checkpoint 1 ──> T2.x (events) ──> Checkpoint 2 ──> T3.x (zomboss AI) ──> Checkpoint 3
-T1.3 (overflow-safety check)  ────┤
-T1.4 (side-column decision)   ────┤
-T1.5 (species-magnitude path) ────┤
-T1.6 (live E2E)               ────┘
+D0-D2 (demon-progression-plan) ───────────────┐
+T1.1 (Commander/Patron refusal) ──────────────┤
+T1.2 (reconcile-diff binding)  ───────────────┼──> Checkpoint 1 ──> T4.x (unique XP) ──┐
+T1.3 (overflow-safety check)  ────────────────┤                                      ├──> T2.x (events) ──> Checkpoint 2 ──> T3.x (Zomboss AI) ──> Checkpoint 3
+T1.4 (side-column decision)   ────────────────┤                                      │
+T1.5 (species-magnitude path) ────────────────┤                                      │
+T1.6 (live E2E)               ────────────────┘                                      │
+                                                                                      └── progression-source conformance sweep
 ```
 
-T1.1-T1.5 can build in parallel (independent files/concerns); T1.6 depends on all of them landing. T2.x
-cannot start meaningfully until Checkpoint 1 (a demon can actually deploy with real stats). T3.x cannot
-start until Checkpoint 2 (a real trigger exists to hang a Zomboss decision on).
+D0-D2 are the separate source-contract/general-fallback/isolation phases. T1.1-T1.5 can build in
+parallel once the source contract is available; T1.6 depends on all of them. T4.x depends on D0-D2 and
+Checkpoint 1. T2.x can proceed after Checkpoint 1, but its generic species awards must remain source-gated.
+T3.x cannot start meaningfully until Checkpoint 2 (a real trigger exists to hang a Zomboss decision on).
 
 ## Risks and mitigations
 
@@ -81,11 +94,14 @@ start until Checkpoint 2 (a real trigger exists to hang a Zomboss decision on).
 | A promoted demon's stale binding ships anyway because the diff logic is untested against the promotion case specifically | High — silent, invisible balance bug | T1.2's own acceptance requires a promotion-then-redeploy test, not just a first-deploy test |
 | Zomboss's default roster (T3.2) makes for a degenerate/unfun AI on release | Medium, but explicitly not a build blocker | Named as a tunable default with an explicit "reversible" note above — ship, observe, retune |
 | `lawn-deploy-events`' trigger conditions are pure design/balance guesses | Medium | Same "pick starting values, tune from play" precedent this repo has already used successfully elsewhere this session (T2.11's own phased-rollout decision) |
+| A missing or guessed killer pointer credits the wrong unique, or ptr reuse suppresses a later kill | High | Require native lethal provenance, a per-match occurrence id, and fail closed when either is absent; test replay and ptr reuse before tuning rewards |
+| Binding recovery commits before XP settlement, losing participation XP on a crash | High | Root close, receipt, XP, unlock, and roster transition in the same Data transaction; notify AtomPush only after commit |
 
 ## Verification commands (run after every task, full suite after each checkpoint)
 
 ```powershell
 dotnet test tests/FusionRpg.Data.Tests --filter DemonLawnDeploy
+dotnet test tests/FusionRpg.Data.Tests --filter "ProgressionSource|DedicatedProgression|UniqueLawnXp"
 dotnet test tests/FusionRpg.Core.Tests --filter "LawnDeployEvents|ZombossDeployAi"
 dotnet test tests/FusionRpg.E2E.Tests --filter DemonLawnDeploy
 .\scripts\guard-single-writer.ps1

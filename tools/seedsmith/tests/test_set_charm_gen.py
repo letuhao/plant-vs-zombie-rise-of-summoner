@@ -616,23 +616,28 @@ class NameDistinctnessTests(unittest.TestCase):
     def test_no_two_generated_entries_share_an_exact_name(self) -> None:
         """Zero tolerance, and the shipped population already meets it.
 
-        Population 103 (was 100 through 2026-09-06): the 2026-09-07 set-charm-live-endpoint trial
-        batch added 3 real, distinct names (2 sets + 1 charm) — measured, not assumed."""
+        Population 132 (was 103 through 2026-09-07): the 2026-09-08 live run against
+        `google/gemma-4-26b-a4b-qat` persisted 24 real, distinct set names after fixing the brief-
+        truncation, `resolve_capability`, required+nullable schema, and lowest-threshold-families
+        defects the run itself found; a follow-up continuation, after fixing that same day's
+        ledger-overwrite bug, net-added 2 more; and a further continuation, after fixing that same
+        day's `cmd_items` ledger-READ-path bug (see `test_item_gen_wiring.py`'s
+        `Module13DefectsFixedTests` for both), net-added 3 more."""
         report = dedup.dedup_report(SET_CHARM_NAMES)
-        self.assertEqual(report.population, 103)
+        self.assertEqual(report.population, 132)
         self.assertEqual(report.exact_duplicates, ())
         self.assertLessEqual(len(report.exact_duplicates), TUNING.exact_duplicate_names_max)
 
     def test_the_lexical_near_duplicate_rate_is_at_most_half_a_percent(self) -> None:
-        """⚠ **Measured, with the honest caveat.** Over the 103 shipped set + charm rows (100
-        through 2026-09-06, +3 from that day's set-charm-live-endpoint trial batch) there is
-        exactly **one** genuine near-duplicate pair — `'Root of the Foundation'` /
-        `'Signet of the Foundation'`, true Jaccard 0.652 — which is 9 permille (was 10 at n=100:
-        same pair, same numerator, a larger denominator), above the 5 permille ceiling. **At
-        n=103 the ceiling is still not measurable**: one pair is already 9 permille, so the
-        smallest non-zero value the statistic can take is still well above the threshold.
-        The threshold is derived for the generated population (~1,844 entries, where 5 permille is
-        ~9 pairs) and that population does not exist yet.
+        """⚠ **Measured, with the honest caveat.** Over the 127 shipped set + charm rows (103
+        through 2026-09-07, +24 from the 2026-09-08 live batch) there is still exactly **one**
+        genuine near-duplicate pair — `'Root of the Foundation'` / `'Signet of the Foundation'`,
+        true Jaccard 0.652 — which is 7 permille (was 9 at n=103: same pair, same numerator, a
+        larger denominator), above the 5 permille ceiling. **At n=127 the ceiling is still not
+        measurable**: one pair is already 7 permille, so the smallest non-zero value the statistic
+        can take is still well above the threshold. The threshold is derived for the generated
+        population (~1,844 entries, where 5 permille is ~9 pairs) and that population does not
+        exist yet.
 
         What IS asserted here: the exact count, so a second pair appearing is a failure, and that
         the one pair found is genuinely above the similarity threshold rather than an artefact."""
@@ -640,7 +645,7 @@ class NameDistinctnessTests(unittest.TestCase):
         self.assertEqual(len(report.near_duplicates), 1)
         pair = report.near_duplicates[0]
         self.assertGreaterEqual(pair.jaccard_permille, 600)
-        self.assertEqual(report.rate_permille, 9)
+        self.assertEqual(report.rate_permille, 7)
         self.assertLess(TUNING.near_duplicate_rate_max_permille, report.rate_permille)
 
     def test_the_shared_metrics_minhash_estimate_over_reports_on_short_names(self) -> None:
@@ -760,6 +765,29 @@ class RunTests(unittest.TestCase):
         text = brief_mod.build_set_brief(theme, TUNING, VOCAB)
         for motif in theme.motifs:
             self.assertIn(motif, text)
+
+    def test_the_brief_prints_every_capability_and_stat_pick_no_truncation(self) -> None:
+        """⛔ Real incident, 2026-09-08: a live 53-subject run against a real local model
+        escalated EVERY SINGLE subject, always on the same defect shape — the model named a
+        capability/stat family (`atom.sparking`, `atom.econ-bounty`, `atom.sporing`,
+        `atom.deathblast.omni`, ...) that is a REAL, valid pick in the full 69-capability /
+        265-stat vocabulary, just never shown to it: `build_set_brief`'s own default limits
+        (`capability_limit=40`, `stat_limit=60`) truncated both lists, printing only ~58% of
+        the capability pool and ~23% of the stat pool with a bare "...and N more" tail the model
+        cannot act on. This is the EXACT defect class `_charm_pick_lines`'s own docstring
+        already documents and was fixed for ("a truncated pool is what produced the collapse
+        this brief was rebuilt to fix") — it was never applied to the set brief. Every id in
+        the real pool must appear in the brief, or a model can be blamed for "hallucinating" an
+        id that was actually a legal, unseen choice."""
+        theme = themes_mod.generatable(themes_mod.load_species_themes())[0]
+        text = brief_mod.build_set_brief(theme, TUNING, VOCAB)
+        for pick in VOCAB.capability:
+            with self.subTest(capability=pick.pick_id):
+                self.assertIn(pick.pick_id, text)
+        for pick in VOCAB.stat:
+            with self.subTest(stat=pick.pick_id):
+                self.assertIn(pick.pick_id, text)
+        self.assertNotIn("more", text)
 
 
 # --------------------------------------------------------------------------------------------

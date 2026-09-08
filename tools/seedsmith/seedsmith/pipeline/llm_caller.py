@@ -130,17 +130,112 @@ def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = Non
     return LlmCallerConfig(**resolved)
 
 
+class DegenerateGenerationError(RuntimeError):
+    """⛔ Real incident, 2026-09-08: a quantized local model (reproduced independently on both
+    `meta/muse-glimmer` and `google/gemma-4-26b-a4b-qat` — not one bad model, a transport gap)
+    degenerated into a short repeating token cycle inside a single JSON string field and never
+    recovered on its own. `max_tokens` alone only bounds the WORST case (it still burns the WHOLE
+    budget, tens of minutes, generating garbage); a schema `maxLength` does not help either — LM
+    Studio's grammar-from-JSON-Schema conversion enforces `type`/`enum`/structural keys but not
+    string-length bounds (confirmed live: a `nameKey` field with `maxLength: 96` still ran to
+    16384 tokens of repeated garbage). The only real fix is catching the loop WHILE STREAMING and
+    aborting the connection immediately — see `_has_repetition_loop` and `call_model`'s own
+    streaming loop below."""
+
+
+def _has_repetition_loop(text: str, *, tail: int = 400, min_period: int = 2, max_period: int = 80,
+                         min_repeats: int = 6) -> bool:
+    """True if the trailing `tail` characters of `text` are `min_repeats` or more consecutive,
+    BYTE-IDENTICAL copies of some short unit (`min_period`..`max_period` characters) — the exact
+    shape of the 2026-09-08 incident (a ~50-char unit repeated hundreds of times in a row inside
+    one JSON string value). Checked against only the tail, never the whole accumulated response,
+    so this stays cheap to call after every streamed chunk regardless of how long the response
+    has already grown. `min_repeats=6` is deliberately generous — legitimate JSON content
+    essentially never repeats an identical 2-80 character unit six times in a row, but a real,
+    short, structurally-repeated legal value (unlikely at this scale in this pipeline's own
+    schemas) would still need to clear this bar before being mistaken for a loop.
+    """
+    s = text[-tail:]
+    for period in range(min_period, max_period + 1):
+        window = period * min_repeats
+        if len(s) < window:
+            continue
+        chunk = s[-window:]
+        unit = chunk[:period]
+        if unit * min_repeats == chunk:
+            return True
+    return False
+
+
+def _stream_once(config: LlmCallerConfig, body: bytes) -> str:
+    """One HTTP attempt, read incrementally over an OpenAI-compatible SSE stream (`data: {...}`
+    lines, terminated by `data: [DONE]`). Aborts the connection (raising `DegenerateGenerationError`,
+    caught by `call_model`'s own retry loop exactly like a transport failure) the moment
+    `_has_repetition_loop` fires on the accumulated text — this is what actually stops a
+    degenerate generation in real time, not just bounds its worst case.
+
+    **Observability**: a progress line every 5 real seconds (`[model] N chars received so far`)
+    so a long call is visible in whatever log this process's stdout is redirected to, not only in
+    the model server's own separate console — the 2026-09-08 incident's own first symptom was a
+    completely silent, unreadable log file for over an hour of real, in-flight generation.
+    """
+    req = urllib.request.Request(config.endpoint, data=body,
+                                 headers={"Content-Type": "application/json"})
+    accumulated: "list[str]" = []
+    # ⛔ A rolling tail, capped at 2x the detector's own `tail` window, kept SEPARATELY from
+    # `accumulated` — checking `_has_repetition_loop` against `"".join(accumulated)` on every
+    # chunk would re-join the WHOLE response every time (O(n) per chunk, O(n^2) total), exactly
+    # the kind of cost a fast-abort mechanism must not have once a response is already thousands
+    # of characters long.
+    tail = ""
+    total_len = 0
+    started = time.monotonic()
+    last_log = started
+    with urllib.request.urlopen(req, timeout=config.timeout) as resp:
+        for raw_line in resp:
+            line = raw_line.decode("utf-8", errors="replace").strip()
+            if not line or not line.startswith("data:"):
+                continue
+            data_str = line[len("data:"):].strip()
+            if data_str == "[DONE]":
+                break
+            try:
+                chunk = json.loads(data_str)
+            except json.JSONDecodeError:
+                continue
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            piece = (choices[0].get("delta") or {}).get("content")
+            if not piece:
+                continue
+            accumulated.append(piece)
+            total_len += len(piece)
+            tail = (tail + piece)[-800:]
+            now = time.monotonic()
+            if now - last_log >= 5.0:
+                print(f"seedsmith.llm_caller: [{config.model}] {total_len} chars received so far "
+                     f"({now - started:.0f}s elapsed)", flush=True)
+                last_log = now
+            if _has_repetition_loop(tail):
+                raise DegenerateGenerationError(
+                    f"[{config.model}] repetition loop detected after {total_len} chars "
+                    f"({now - started:.0f}s) -- aborting this attempt rather than burning the "
+                    f"full max_tokens budget on it")
+    return "".join(accumulated)
+
+
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
                temperature: float = 0.2, schema: "dict | None" = None) -> str:
-    """Call a local OpenAI-compatible chat endpoint with reasoning disabled.
+    """Call a local OpenAI-compatible chat endpoint with reasoning disabled, streaming the
+    response so a degenerate generation can be caught and aborted in real time (see
+    `_stream_once`/`_has_repetition_loop`/`DegenerateGenerationError`).
 
-    `max_tokens` (`config.max_tokens`, default 16384) is sent on every call. This is NOT the same
-    protection as `schema`'s `maxLength`/`pattern` constraints — those bound one FIELD; this bounds
-    the WHOLE response, and it is the only thing that stops a degenerate generation (a quantized
-    model stuck repeating a short token cycle) once it starts, since llama.cpp's grammar-from-schema
-    converter does not enforce `pattern` at decode time (a `type: string` field with only a
-    `pattern`, no `maxLength`, is otherwise completely unbounded — the real cause of a 2026-09-08
-    incident where a `nameKey` field ran past 20K tokens with no `max_tokens` sent at all).
+    `max_tokens` (`config.max_tokens`, default 16384) is still sent as a hard backstop for
+    whatever the repetition detector's own heuristic misses, but it is no longer the FIRST line of
+    defense — see `DegenerateGenerationError`'s own docstring for why a schema `maxLength` and
+    `max_tokens` alone were not enough (the 2026-09-08 incident happened with both already in
+    place).
 
     Two redundant fields are sent on every call because different servers/templates read
     different keys: `reasoning_effort` is the OpenAI-style field some servers honor directly;
@@ -150,21 +245,20 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
     template ignores whichever key it doesn't recognize.
 
     `schema` (optional, spec-dependency-baseline.md §2.4) turns on CONSTRAINED DECODING: LM Studio
-    enforces a JSON Schema at decode time via llama.cpp's GBNF grammar sampling for GGUF models, so
-    a token that would break the schema is never sampleable. Measured 2026-09-01 against
-    `google/gemma-4-26b-a4b-qat` with a hostile prompt (demanding prose, ```json fences, and an
-    out-of-enum value): unconstrained returned a prose paragraph and `json.loads` FAILED;
-    constrained returned clean conforming JSON with the illegal enum value unreachable — at no
-    latency cost (3.7s vs 3.9s; mean 3.2s over 8 further calls).
+    enforces a JSON Schema's STRUCTURAL keys (`type`/`enum`/`properties`/`required`) at decode time
+    via llama.cpp's GBNF grammar sampling for GGUF models, so a token that would break one of those
+    is never sampleable. It does NOT enforce `pattern` or, confirmed 2026-09-08, `minLength`/
+    `maxLength` — grammar-from-JSON-Schema conversion commonly skips string-length bounds because
+    expressing "at most N characters" as a context-free grammar production is a much harder
+    problem than a structural or enum check. `extract_json` stays as defense-in-depth regardless.
 
     **Optional on purpose.** `schema=None` produces a byte-identical request body to before this
-    parameter existed, so every existing caller is unaffected — asserted by test. `extract_json`
-    stays as defense-in-depth: JSON Schema does not specify whitespace handling, so schema
-    behaviour is not guaranteed portable across serving implementations.
+    parameter existed, so every existing caller is unaffected — asserted by test.
     """
     payload = {
         "model": config.model, "temperature": temperature,
         "max_tokens": config.max_tokens,
+        "stream": True,
         "reasoning_effort": "none",
         "chat_template_kwargs": {"enable_thinking": False, "thinking": False},
         "messages": [{"role": "system", "content": system},
@@ -179,13 +273,16 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
     last_err: Exception | None = None
     for attempt in range(config.attempts):
         try:
-            req = urllib.request.Request(config.endpoint, data=body,
-                                         headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=config.timeout) as resp:
-                data = json.loads(resp.read())
-            return data["choices"][0]["message"]["content"]
-        except (urllib.error.URLError, TimeoutError, KeyError) as e:
+            started = time.monotonic()
+            result = _stream_once(config, body)
+            print(f"seedsmith.llm_caller: [{config.model}] call complete, {len(result)} chars, "
+                 f"{time.monotonic() - started:.1f}s", flush=True)
+            return result
+        except (urllib.error.URLError, TimeoutError, KeyError, DegenerateGenerationError) as e:
             last_err = e
+            print(f"seedsmith.llm_caller: [{config.model}] attempt {attempt + 1}/{config.attempts} "
+                 f"failed ({type(e).__name__}: {e}); "
+                 f"{'retrying' if attempt + 1 < config.attempts else 'giving up'}", flush=True)
             if attempt + 1 < config.attempts:
                 time.sleep(config.retry_delay)
     raise RuntimeError(f"model call failed after {config.attempts} attempts: {last_err}")
@@ -213,6 +310,34 @@ def extract_json(text: str) -> dict:
         if pairs:
             return {k: v for k, v in pairs}
         raise
+
+
+AnswerCallFn = Callable[[str, dict], dict]
+
+
+def live_answer_caller(config: LlmCallerConfig) -> AnswerCallFn:
+    """A `call(brief, schema) -> dict` bound to a real model endpoint through `call_model`.
+
+    This is the shape `basetypegen.run.run_draws`, `milestonegen.run.run_draws`,
+    `recipegen.run.run_draws`, and `droptablegen.run.run_draws` all already declare and test against
+    (`Callable[[str, dict], dict]`) — each module's own brief embeds its full instructions as a
+    single user-role message (there is no separate system prompt to manage, unlike `setgen`'s own
+    `live_caller`, which is a different shape for a different, graph-based caller convention).
+    Lifted here, generic and shared, rather than reimplemented once per module — the four modules
+    above each carried a `main()` that explicitly refused to run for exactly this missing piece
+    (`"REFUSING TO RUN: no model call is wired into this CLI entrypoint yet"`) until this existed.
+
+    Schema-constrained decoding is honored (via `call_model`'s own `schema` parameter) whenever the
+    caller's own schema dict is non-empty; `extract_json` is defense-in-depth for the (rare, per
+    `call_model`'s own docstring) case where a server enforces `type`/`maxLength` but not full
+    strict-mode conformance.
+    """
+
+    def _call(brief: str, schema: dict) -> dict:
+        raw = call_model("", brief, config=config, schema=schema or None)
+        return extract_json(raw)
+
+    return _call
 
 
 def _default_heal_user(items: dict, out: dict, hard: dict) -> str:

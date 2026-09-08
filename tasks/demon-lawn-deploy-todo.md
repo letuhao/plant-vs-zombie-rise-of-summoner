@@ -1,13 +1,17 @@
 # Task list: demon lawn deploy
 
-Plan: [demon-lawn-deploy-plan.md](demon-lawn-deploy-plan.md). Specs:
+Plan: [demon-lawn-deploy-plan.md](demon-lawn-deploy-plan.md). Source prerequisites:
+[demon-progression-todo.md](demon-progression-todo.md). Specs:
 [docs/architecture/demon-lawn-deploy-map.md](../docs/architecture/demon-lawn-deploy-map.md),
 [docs/architecture/demon-lawn-deploy/](../docs/architecture/demon-lawn-deploy/) (`spec-lawn-deploy-core.md`,
-`spec-lawn-deploy-events.md`, `spec-zomboss-deploy-ai.md`).
+`spec-lawn-deploy-progression.md`, `spec-lawn-deploy-events.md`, `spec-zomboss-deploy-ai.md`), plus
+the source/isolation specs listed in [demon-progression-todo.md](demon-progression-todo.md).
 
-Dependency order: Phase 1 (`lawn-deploy-core`) → Checkpoint 1 → Phase 2 (`lawn-deploy-events`) →
-Checkpoint 2 → Phase 3 (`zomboss-deploy-ai`) → Checkpoint 3 (program close). T1.1-T1.5 may build in
-parallel; T1.6 needs all of them.
+Dependency order: source prerequisites D0-D2 (`demon-progression-todo.md`) → Phase 1
+(`lawn-deploy-core`) → Checkpoint 1 → Phase 4 (`lawn-deploy-progression`) → Phase 2
+(`lawn-deploy-events`) → Checkpoint 2 → Phase 3 (`zomboss-deploy-ai`) → Checkpoint 3 (program close).
+The existing Phase 1–3 entries record prior work; Phase 4 is still required for full spec conformance.
+T1.1-T1.5 may build in parallel after D0; T1.6 needs all of them.
 
 ## Phase 1 — `lawn-deploy-core`
 
@@ -912,8 +916,101 @@ parallel; T1.6 needs all of them.
       `Match/Ai/` and two new, narrow server endpoints/store methods, nothing shared with any deferred
       item's own surface.
 
-**The program (`demon-lawn-deploy`) is now feature-complete**: a player-owned unique demon can deploy
-onto the live PvZ lawn during a triggered event on both sides — plant-side player-initiated (Phase 1-2),
-zombie-side Zomboss-AI-driven (Phase 3) — through the same unmodified `DeployAsync`/Funnel write path,
-with every numeric knob tunable, every roll seeded and reproducible, and the type boundary between "the
-AI's own read" and "full board access" structurally enforced rather than merely documented.
+**Phases 1–3 establish the deploy/trigger/AI path**: a player-owned unique demon can deploy onto the live
+PvZ lawn during a triggered event on both sides — plant-side player-initiated (Phase 1–2), zombie-side
+Zomboss-AI-driven (Phase 3) — through the same unmodified `DeployAsync`/Funnel write path, with every
+numeric knob tunable, every roll seeded and reproducible, and the type boundary between "the AI's own read"
+and "full board access" structurally enforced. The program is not source/progression-complete until Phase
+4 and the companion `demon-progression-todo.md` checkpoint pass.
+
+## Phase 4 — `lawn-deploy-progression` (required conformance work)
+
+The earlier Phase 1–3 implementation predates the approved source/progression contract. These tasks add
+the unique specimen XP path and close the generic-species leakage and replay gaps found in the audit.
+
+### T4.1 — Capture provenance and lifecycle identity · **M** · 4 files — **TODO**
+
+Add a closed, additive capture contract for source-specific progression. Every relevant spawn, death, bind,
+and result record carries a per-match monotonic `lifecycleOccurrenceId`, preserved on retry. Death capture
+sets `killerPtr` only when the same fatal interaction provides a verified attacker; indirect or unknown
+attribution remains absent. Activity projection returns the existing canonical fact id on replay and no
+longer uses ptr alone as a death identity.
+
+- **Acceptance:**
+  - [ ] A replay has the same occurrence/fact identity; a reused Unity ptr receives a new occurrence/fact.
+  - [ ] A lethal hook with no proven attacker emits no unique-kill candidate; no last-attacker inference exists.
+  - [ ] `demon.progression.v1` source claims parse through the closed source contract and are retained on
+        facts consumed by progression.
+- **Verification:** focused Injector/Core/Data tests; `dotnet test tests/FusionRpg.Core.Tests --filter
+  "ProgressionSource|Activity"`; `dotnet test tests/FusionRpg.Data.Tests --filter
+  "ProgressionSource|Activity"`.
+- **Dependencies:** D0 (`progression-source-contract`).
+- **Files likely touched:** `src/FusionRpg.Contracts/EffectDtos.cs`, `src/FusionRpg.Injector/GameHooks.cs`,
+  `src/FusionRpg.Core/Activity/PvzActivityKinds.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.cs`.
+- **Estimated scope:** Medium.
+
+### T4.2 — Binding sessions and atomic terminal settlement · **L** · 3-5 files — **TODO**
+
+Create the binding-session and receipt schema in Data, including uniqueness for one open `(run,
+correlation)` and `(run, ptr)` mapping. Move unique binding creation, terminal close, receipt conflict
+comparison, XP mutation, level-gain unlocks, and `ActiveBound → Roster` recovery into the capture
+transaction. Post-commit notifications may refresh AtomHub state but cannot participate in settlement.
+
+- **Acceptance:**
+  - [ ] Bound creates exactly one session; correlation or open-ptr collisions are refused.
+  - [ ] Exact receipt replay is a no-op; a collision with different immutable identity or delta is an
+        integrity error.
+  - [ ] A crash/failure rolls back close, receipt, XP, unlocks, and roster recovery together.
+- **Verification:** Data transaction tests for concurrent delivery, crash rollback, ptr reuse, same-run
+  redeploy, specimen death, and match-end settlement; `dotnet test tests/FusionRpg.Data.Tests --filter
+  "UniqueLawnXp|UniqueActor"`.
+- **Dependencies:** T4.1, D2 (`dedicated-progression-isolation`), Phase 1 Checkpoint 1.
+- **Files likely touched:** `src/FusionRpg.Data/Sqlite/RpgStore.cs`,
+  `src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs`,
+  `src/FusionRpg.Data/Sqlite/RpgStore.Compaction.cs`.
+- **Estimated scope:** Large; split schema/projector and test work if it exceeds one focused session.
+
+### T4.3 — Unique lawn rewards and tuning · **M** · 4 files — **TODO**
+
+Add the named specimen lawn award values to the next progression tuning version and parse/validate them as
+positive `long`s. Award verified kills and completed active-Bound intervals through the existing unique XP
+mutator, preserving its level-gain action-unlock path. Generic species completion must consume only
+`EmpireGeneral` facts; unique facts never award `RpgActorKinds.Species`.
+
+- **Acceptance:**
+  - [ ] Kill XP and duration XP use independent tuning values and checked `long` arithmetic with no hard cap.
+  - [ ] Zero/negative interval or award tuning is rejected before arithmetic.
+  - [ ] A unique and general demon sharing a type/species never cross-credit XP or allocation.
+- **Verification:** Core tuning/parser tests, Data projection tests, and `python scripts/audit-magic-numbers.py
+  --summary`; run `dotnet test tests/FusionRpg.Core.Tests --filter Progression`.
+- **Dependencies:** T4.2, D1 (`general-empire-fallback`).
+- **Files likely touched:** `src/FusionRpg.Core/Progression/ProgressionTuning.cs`,
+  `data/tuning/progression.v{n}.json`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs`,
+  `src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs`.
+- **Estimated scope:** Medium.
+
+### T4.4 — Conformance and regression sweep · **M** · 4-5 files — **TODO**
+
+Prove the complete lawn path from Bound capture through kill/participation settlement and rehydrate. Add
+regressions for missing attribution, occurrence replay, pointer reuse, source isolation, terminal races,
+level-up unlocks, and no Hot-plane/server round-trip. Keep the existing Phase 1–3 behavior byte-identical
+where the new source data is absent or irrelevant.
+
+- **Acceptance:**
+  - [ ] A verified kill pays once and a later redeploy can earn again under its new binding correlation.
+  - [ ] Participation excludes paused/server wall-clock time and pays only completed active intervals.
+  - [ ] Full source-isolation and boundary guards pass; no new lawn route or Injector SQLite access exists.
+- **Verification:** `dotnet test tests/FusionRpg.Core.Tests`; `dotnet test tests/FusionRpg.Data.Tests`;
+  `dotnet test tests/FusionRpg.Injector.Tests`; `dotnet test tests/FusionRpg.Server.Tests`;
+  `dotnet test tests/FusionRpg.Guard.Tests`; `python scripts/audit-overflow.py`.
+- **Dependencies:** T4.3.
+- **Files likely touched:** `tests/FusionRpg.Core.Tests/`, `tests/FusionRpg.Data.Tests/`,
+  `tests/FusionRpg.Injector.Tests/`, `tests/FusionRpg.Server.Tests/`, `tests/FusionRpg.Guard.Tests/`.
+- **Estimated scope:** Medium.
+
+### Checkpoint 4 — source/progression conformance
+
+- [ ] All seven specs in the two plans have an implemented or explicitly deferred task with evidence.
+- [ ] Unique lawn XP is exact-once under replay, crash, pointer reuse, and redeploy.
+- [ ] Generic species XP is source-gated to `EmpireGeneral`; dedicated paths never fall through.
+- [ ] Core/Data/Injector/Server/Guard suites and numeric audits are green, with unrelated failures recorded.

@@ -402,3 +402,90 @@ def test_ledger_write_is_deterministic_across_two_runs(ledger: RunLedger) -> Non
     run_mod.mark_family_written(ledger, request, "atom.arm-det")
     second = ledger.path.read_bytes()
     assert first == second
+
+
+# ---------------------------------------------------------------------------------------------
+# CLI — real gap, closed 2026-09-08: this module had no entrypoint of any kind before this.
+# ---------------------------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def isolated_families_dir(tmp_path, monkeypatch):
+    """Copies the real, shipped `g-armour.json` into an isolated tmp dir and points `FAMILIES_DIR`
+    at it — `g.armour` is a REAL registered group (`NAMING_REGISTRY` is not monkeypatched, so
+    `group_stem` resolves it correctly), but every read/write in this fixture's tests lands in the
+    tmp copy, never the live repo file."""
+    families_dir = tmp_path / "affix-families"
+    families_dir.mkdir()
+    real_doc = (FAMILIES_DIR / "g-armour.json").read_text(encoding="utf-8")
+    (families_dir / "g-armour.json").write_text(real_doc, encoding="utf-8")
+    monkeypatch.setattr(brief_mod, "FAMILIES_DIR", families_dir)
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER", tmp_path / "ledger.json")
+    return families_dir
+
+
+def test_cli_dry_run_prints_the_brief_and_makes_no_model_call(isolated_families_dir, capsys):
+    exit_code = run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--dry-run"])
+    assert exit_code == 0
+    out = capsys.readouterr().out
+    assert "g.armour" in out
+
+
+def test_cli_write_without_endpoint_refuses(isolated_families_dir):
+    with pytest.raises(SystemExit):
+        run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write"])
+
+
+def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir, capsys, monkeypatch):
+    """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account. One
+    real divergence from every sibling module: this module's own brief asks the MODEL to choose
+    `word` (the thing every sibling module's caller decides beforehand) — the fake answer supplies
+    it exactly like a real model would."""
+    called_with = {}
+
+    def _fake_live_answer_caller(config):
+        called_with["config"] = config
+
+        def _call(brief, schema):
+            called_with["schema"] = schema
+            # arm1Max only ships Flat/Increased on the real, shipped partition — More is free.
+            return {"word": "livewired", "channel": "arm1Max", "op": "More",
+                    "roles": ["tank"], "tags": ["defensive"], "powerBand": "medium",
+                    "name": "Live-Wired Ward", "nameKey": "affix.live-wired-ward",
+                    "displayTemplate": "+{value} Defense"}
+        return _call
+
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        _fake_live_answer_caller)
+
+    exit_code = run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write",
+                             "--endpoint", "http://unit-test-endpoint",
+                             "--model", "unit-test-model"])
+
+    assert exit_code == 0
+    assert called_with["config"].endpoint == "http://unit-test-endpoint"
+    assert called_with["config"].model == "unit-test-model"
+    assert called_with["schema"]  # a real, non-empty constrained-decoding schema was sent
+    written = json.loads((isolated_families_dir / "g-armour.json").read_text(encoding="utf-8"))
+    ids = {e["id"] for e in written["entries"]}
+    assert "atom.arm-livewired" in ids
+    out = json.loads(capsys.readouterr().out)
+    assert out == {"outcome": "persisted", "id": "atom.arm-livewired"}
+
+
+def test_cli_blocked_answer_is_reported_and_writes_nothing(isolated_families_dir, capsys, monkeypatch):
+    def _fake_live_answer_caller(config):
+        return lambda brief, schema: {"blocked": "no legal (channel, op) pair left"}
+
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        _fake_live_answer_caller)
+    before = (isolated_families_dir / "g-armour.json").read_text(encoding="utf-8")
+
+    exit_code = run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write",
+                             "--endpoint", "http://unit-test-endpoint"])
+
+    assert exit_code == 0
+    after = (isolated_families_dir / "g-armour.json").read_text(encoding="utf-8")
+    assert before == after
+    out = json.loads(capsys.readouterr().out)
+    assert out["outcome"] == "blocked"

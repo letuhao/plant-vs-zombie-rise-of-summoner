@@ -15,8 +15,10 @@ Three groups, matching the spec's own "Testing strategy":
 """
 from __future__ import annotations
 
+import json
 import sys
 import unittest
+import unittest.mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -322,6 +324,99 @@ class DocCitationStillLiveTests(unittest.TestCase):
         for name in ("atom.affliction", "atom.stalwart", "atom.immunity", "atom.susceptibility"):
             with self.subTest(name=name):
                 self.assertIn(name, families)
+
+
+# ------------------------------------------------------------------------------------------------
+# CLI — real gap, closed 2026-09-08: this module had no entrypoint of any kind before this.
+# ------------------------------------------------------------------------------------------------
+class CliTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        tmp_path = Path(self._tmp.name)
+        self.consumables_dir = tmp_path / "consumables"
+        self.consumables_dir.mkdir()
+        self.ledger_path = tmp_path / "ledger.json"
+        self._dir_patch = unittest.mock.patch.object(run_mod, "CONSUMABLES_DIR",
+                                                      self.consumables_dir)
+        self._ledger_patch = unittest.mock.patch.object(run_mod, "DEFAULT_LEDGER", self.ledger_path)
+        self._dir_patch.start()
+        self._ledger_patch.start()
+        self.addCleanup(self._dir_patch.stop)
+        self.addCleanup(self._ledger_patch.stop)
+
+    def test_cli_default_with_no_theme_reconciles_and_makes_no_model_call(self) -> None:
+        import io
+        import json as json_mod
+        from contextlib import redirect_stdout
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            exit_code = run_mod.main([])
+        self.assertEqual(exit_code, 0)
+        report = json_mod.loads(buf.getvalue())
+        self.assertEqual(report["total"], 0)  # the isolated tmp corpus is empty
+
+    def test_cli_theme_without_write_refuses(self) -> None:
+        with self.assertRaises(SystemExit):
+            run_mod.main(["--theme", "fire", "--slot", "1"])
+
+    def test_cli_a_real_live_run_writes_a_real_partition_file(self) -> None:
+        """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account.
+        No schema exists yet for this module's own answer shape, unlike its siblings — the live
+        caller is invoked with an empty schema (`{}`), matching `call_model`'s own documented
+        `schema=None` fallback rather than inventing one."""
+        import io
+        import json as json_mod
+        from contextlib import redirect_stdout
+
+        called_with = {}
+
+        def _fake_live_answer_caller(config):
+            called_with["config"] = config
+
+            def _call(brief, schema_arg):
+                called_with["schema"] = schema_arg
+                return _clean_answer(name="Live-Wired Tonic")
+            return _call
+
+        with unittest.mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller",
+                                 _fake_live_answer_caller):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                exit_code = run_mod.main(["--theme", "fire", "--slot", "1", "--write",
+                                         "--endpoint", "http://unit-test-endpoint",
+                                         "--model", "unit-test-model"])
+            outcome = json_mod.loads(buf.getvalue())
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(outcome["outcome"], "persisted")
+        self.assertEqual(called_with["config"].endpoint, "http://unit-test-endpoint")
+        self.assertEqual(called_with["schema"], {})
+        written = json_mod.loads((self.consumables_dir / "k1-cli.json").read_text(encoding="utf-8"))
+        names = {e["name"] for e in written["entries"]}
+        self.assertIn("Live-Wired Tonic", names)
+
+    def test_cli_a_second_live_run_is_additive_not_overwriting(self) -> None:
+        # `live_answer_caller(config)` is invoked fresh inside `main()` on EVERY call, so the
+        # iterator has to live outside the factory closure — otherwise each `main()` call would
+        # see a brand-new `iter(...)` and always produce "First".
+        calls = iter([_clean_answer(name="First"), _clean_answer(name="Second")])
+
+        def _fake_live_answer_caller(config):
+            return lambda brief, schema_arg: next(calls)
+
+        with unittest.mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller",
+                                 _fake_live_answer_caller):
+            run_mod.main(["--theme", "fire", "--slot", "1", "--write",
+                        "--endpoint", "http://unit-test-endpoint"])
+            run_mod.main(["--theme", "fire", "--slot", "1", "--write",
+                        "--endpoint", "http://unit-test-endpoint"])
+
+        written = json.loads((self.consumables_dir / "k1-cli.json").read_text(encoding="utf-8"))
+        names = {e["name"] for e in written["entries"]}
+        self.assertEqual(names, {"First", "Second"})
 
 
 if __name__ == "__main__":

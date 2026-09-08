@@ -421,10 +421,47 @@ def test_cli_dry_run_prints_a_sample_brief_and_makes_no_model_calls(tmp_path, mo
 
 
 def test_cli_refuses_a_real_run_with_no_model_call_wired(tmp_path, monkeypatch):
+    """⛔ Renamed in spirit 2026-09-08, unchanged in assertion — see basetypegen's identical test
+    for the full account: this now refuses for lack of `--write`, not lack of wiring."""
     monkeypatch.setattr(run_mod, "OUTPUT_PATH", tmp_path / "milestones.json")
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
     with pytest.raises(SystemExit):
         run_mod.main([])
+
+
+def test_cli_write_without_endpoint_refuses(tmp_path, monkeypatch):
+    monkeypatch.setattr(run_mod, "OUTPUT_PATH", tmp_path / "milestones.json")
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    with pytest.raises(SystemExit):
+        run_mod.main(["--write"])
+
+
+def test_cli_a_real_live_run_writes_a_real_corpus_file(tmp_path, monkeypatch, capsys):
+    """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account:
+    `--write --endpoint <url>` was unreachable before this."""
+    monkeypatch.setattr(run_mod, "OUTPUT_PATH", tmp_path / "milestones.json")
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+
+    called_with = {}
+
+    def _fake_live_answer_caller(config):
+        called_with["config"] = config
+        return _fake_call_for(word="Live-Wired")
+
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        _fake_live_answer_caller)
+
+    exit_code = run_mod.main(["--count", "1", "--write", "--endpoint", "http://unit-test-endpoint",
+                             "--model", "unit-test-model"])
+
+    assert exit_code == 0
+    assert called_with["config"].endpoint == "http://unit-test-endpoint"
+    assert called_with["config"].model == "unit-test-model"
+    written = json.loads((tmp_path / "milestones.json").read_text(encoding="utf-8"))
+    names = {e["name"] for e in written["entries"]}
+    assert "Enhancement Live-Wired" in names
+    summary = json.loads(capsys.readouterr().out)
+    assert summary == {"planned": 1, "fresh": 1, "blocked": 0, "blockedReasons": {}}
 
 
 def test_cli_overwrite_all_and_by_id_both_route_through_the_real_ledger(tmp_path, monkeypatch, capsys):

@@ -198,6 +198,11 @@ def main(argv=None) -> int:
                          "(--force is an accepted alias, matching content-completeness-core's "
                          "own naming convention -- RunLedger.force()/generate_commander_effects.py "
                          "--force)")
+    ap.add_argument("--endpoint", default="", help="live model endpoint; enables a real run")
+    ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
+    ap.add_argument("--authored-utc", default="", dest="authored_utc",
+                    help="stamped into a NEW partition file's _meta.authoredUtc; an existing "
+                         "partition keeps its own")
     args = ap.parse_args(argv)
 
     ledger = RunLedger(DEFAULT_LEDGER_PATH)
@@ -218,9 +223,36 @@ def main(argv=None) -> int:
         print(json.dumps({"overwrite": ids_needing_work}, ensure_ascii=False))
         return 0
 
-    raise SystemExit(
-        "REFUSING TO RUN: no model `call` is wired into this CLI entrypoint yet — use --dry-run to "
-        "inspect the plan, or drive `plan_run`/`run_draws` directly with an injected `call`.")
+    if not args.write:
+        raise SystemExit(
+            "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
+            "then re-run with --write --endpoint <url> to actually call a model and persist.")
+    if not args.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
+            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
+
+    # ⛔ Real gap, closed 2026-09-08: this branch used to be an unconditional `raise SystemExit`
+    # ("REFUSING TO RUN: no model call is wired into this CLI entrypoint yet") — `plan_run`/
+    # `run_draws`/`write_corpus` were all real and tested, but nothing in this file ever built the
+    # `call` `run_draws` already declares and tests against. `live_answer_caller` is that piece.
+    import dataclasses
+
+    from ....pipeline.llm_caller import live_answer_caller, load_config
+
+    base_config = load_config()
+    config = dataclasses.replace(base_config, endpoint=args.endpoint,
+                                 model=args.model or base_config.model)
+    plan = plan_run(role=args.role, frame=args.frame, band=args.band, count=args.count,
+                    ledger=ledger, theme_hint=args.theme)
+    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config))
+    if fresh:
+        write_corpus(args.role, args.frame, args.band, fresh, existing=plan.existing,
+                    model=config.model, authored_utc=args.authored_utc)
+    print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
+                      "blocked": len(blocked), "blockedReasons": blocked},
+                     ensure_ascii=False, indent=2))
+    return 0
 
 
 if __name__ == "__main__":  # pragma: no cover - dev entrypoint

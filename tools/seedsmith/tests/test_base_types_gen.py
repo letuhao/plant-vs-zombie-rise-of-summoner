@@ -518,8 +518,50 @@ def test_cli_dry_run_prints_a_sample_brief_and_makes_no_model_calls(capsys):
 
 
 def test_cli_refuses_a_real_run_with_no_model_call_wired():
+    """⛔ Renamed in spirit 2026-09-08, unchanged in assertion: this no longer refuses because
+    "no model call is wired" (that gap is closed below) — it refuses because `--write` was not
+    passed, exactly like `items generate`'s own dry-by-default convention."""
     with pytest.raises(SystemExit):
         run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a"])
+
+
+def test_cli_write_without_endpoint_refuses(tmp_path, monkeypatch):
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    with pytest.raises(SystemExit):
+        run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
+                     "--write"])
+
+
+def test_cli_a_real_live_run_writes_a_real_partition_file(tmp_path, monkeypatch, capsys):
+    """⛔ Real gap, closed 2026-09-08: before this, `--write --endpoint <url>` was UNREACHABLE —
+    every path through `main()` past `--dry-run`/`--overwrite` raised `SystemExit`
+    unconditionally. Proves the full wire: CLI args -> `load_config()`-based config ->
+    `live_answer_caller` -> `run_draws` -> `write_corpus`, landing a real file on disk."""
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(tuning_mod, "BASE_TYPES_DIR", tmp_path / "base-types")
+
+    called_with = {}
+
+    def _fake_live_answer_caller(config):
+        called_with["config"] = config
+        return _fake_call(name="Live-Wired Widget")
+
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        _fake_live_answer_caller)
+
+    exit_code = run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
+                             "--count", "1", "--write", "--endpoint", "http://unit-test-endpoint",
+                             "--model", "unit-test-model"])
+
+    assert exit_code == 0
+    assert called_with["config"].endpoint == "http://unit-test-endpoint"
+    assert called_with["config"].model == "unit-test-model"
+    written = json.loads((tmp_path / "base-types" / "humanoid-armament-primary-a.json")
+                        .read_text(encoding="utf-8"))
+    names = {e["name"] for e in written["entries"]}
+    assert "Live-Wired Widget" in names
+    summary = json.loads(capsys.readouterr().out)
+    assert summary == {"planned": 1, "fresh": 1, "blocked": 0, "blockedReasons": {}}
 
 
 def test_cli_overwrite_routes_through_the_real_ledger(tmp_path, monkeypatch):

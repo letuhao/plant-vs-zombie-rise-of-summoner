@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-lanternpea",
+    "partition": "sets/lanternpea",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.lanternpea-001",
+      "nameKey": "set.solar-spicule-array",
+      "name": "Solar Spicule Array",
+      "themeKey": "demon.lanternpea",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.sparking",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.elpw-focus",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A collection of needle-like glass shards that focus concentrated light into devastating beams.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

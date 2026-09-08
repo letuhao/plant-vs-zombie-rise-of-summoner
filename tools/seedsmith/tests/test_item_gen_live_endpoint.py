@@ -51,6 +51,11 @@ from test_item_gen_wiring import (  # noqa: E402
 # --------------------------------------------------------------------------------------------
 
 class _Handler(http.server.BaseHTTPRequestHandler):
+    """⛔ Rewritten 2026-09-08 to speak real SSE streaming — `call_model` now always sends
+    `"stream": true` and reads an OpenAI-compatible `data: {...}` chunk stream (see
+    `llm_caller._stream_once`), so a mock that replied with one plain JSON body no longer matches
+    what the real transport sends or expects."""
+
     def log_message(self, fmt, *args):  # silence stdlib per-request logging
         pass
 
@@ -60,11 +65,15 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self.server.requests.append(body)  # type: ignore[attr-defined]
         queued = self.server.responses  # type: ignore[attr-defined]
         content = queued.pop(0) if queued else "{}"
-        payload = json.dumps({"choices": [{"message": {"content": content}}]}).encode("utf-8")
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", "text/event-stream")
         self.end_headers()
-        self.wfile.write(payload)
+        chunk_size = 4
+        for i in range(0, len(content), chunk_size):
+            piece = content[i:i + chunk_size]
+            frame = json.dumps({"choices": [{"delta": {"content": piece}}]})
+            self.wfile.write(f"data: {frame}\n\n".encode("utf-8"))
+        self.wfile.write(b"data: [DONE]\n\n")
 
 
 class MockModelServer:
@@ -95,6 +104,18 @@ class MockModelServer:
 def _write_args(**overrides) -> "cli_mod.argparse.Namespace":
     base = dict(kind="set", population="build", answers="", endpoint="", model="",
                 out_dir="", allow_production_tree=False, ledger="",
+                authored_utc="1970-01-01T00:00:00Z")
+    base.update(overrides)
+    return cli_mod.argparse.Namespace(**base)
+
+
+def _generate_args(**overrides) -> "cli_mod.argparse.Namespace":
+    """The full `cmd_items` Namespace — unlike `_write_args`, this drives `cmd_items` itself (the
+    dispatcher that calls `plan_run` before `_cmd_items_write`), not `_cmd_items_write` directly."""
+    base = dict(items_command="generate", kind="set", population="build", dry_run=False,
+                write=True, sample_brief=False, limit=1, briefs_out="",
+                answers="", endpoint="", out_dir="", allow_production_tree=False,
+                ledger="", ignore_ledger=False, model="unrecorded",
                 authored_utc="1970-01-01T00:00:00Z")
     base.update(overrides)
     return cli_mod.argparse.Namespace(**base)
@@ -191,6 +212,69 @@ class RefusalNarrowingTests(unittest.TestCase):
     # with N-1 good subjects and one dead endpoint call loses the whole batch, not just that
     # subject) worth flagging but out of this module's file scope (`authored.py`'s exception
     # handling, not `cli.py`/`run.py`).
+
+
+class LedgerReadPathMatchesWritePathTests(unittest.TestCase):
+    """⛔ Real incident, 2026-09-08: a live 53-subject production run, resumed across THREE
+    separate `items generate --write` invocations against the same `--out-dir`, reported
+    `"alreadyDone": 0` and `"toGenerate": 53` — the FULL, un-resumed population — every single
+    time, no matter how many subjects earlier invocations had already persisted. Root cause:
+    `cmd_items` passed `ledger=None` to `plan_run` whenever `--ignore-ledger` was not given,
+    which fell through to `plan_run`'s own `read_ledger()` with NO PATH — a hardcoded default
+    (`data/seed/items/_runs/set-charm-gen.ledger.json`) completely disconnected from the ledger
+    `_cmd_items_write` actually reads and writes (`<out-dir>/set-charm-gen.ledger.json`, computed
+    separately, further down, only once `--write` runs). This is `cmd_items` itself under test —
+    not `_cmd_items_write` directly, the way `RefusalNarrowingTests`/`LiveEndToEndTests` above
+    test it — because the bug is entirely in the PLANNING call that happens before `_cmd_items_write`
+    ever sees a ledger path."""
+
+    def setUp(self) -> None:
+        self.server = MockModelServer()
+
+    def tearDown(self) -> None:
+        self.server.close()
+
+    def test_a_second_invocation_does_not_redo_the_first_invocations_subject(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = str(Path(tmp) / "sets")
+            self.server.queue(json.dumps(_clean_set_answer()))
+            first = _generate_args(endpoint=self.server.url, out_dir=out_dir, limit=1)
+            with patch("sys.stdout"):
+                exit_code = cli_mod.cmd_items(first)
+            self.assertEqual(exit_code, cli_mod.EXIT_CLEAN)
+            self.assertEqual(len(self.server.requests), 1)
+
+            self.server.queue(json.dumps(_clean_set_answer()))
+            second = _generate_args(endpoint=self.server.url, out_dir=out_dir, limit=1)
+            with patch("sys.stdout"):
+                cli_mod.cmd_items(second)
+
+            self.assertEqual(len(self.server.requests), 2, "the second run must still call the "
+                             "model once for whatever NEW subject it plans")
+            files = [f for f in Path(out_dir).glob("*.json")
+                    if f.name != "set-charm-gen.ledger.json"]
+            self.assertEqual(len(files), 2,
+                             "a resumed run must add a SECOND subject's file, not overwrite the "
+                             "first invocation's already-persisted one")
+
+    def test_ignore_ledger_still_replans_the_full_population(self):
+        """The fix must not accidentally make `--ignore-ledger` a no-op — it is the documented
+        escape hatch for "replan every generatable subject, even ones a previous run recorded"."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out_dir = str(Path(tmp) / "sets")
+            self.server.queue(json.dumps(_clean_set_answer()))
+            first = _generate_args(endpoint=self.server.url, out_dir=out_dir, limit=1)
+            with patch("sys.stdout"):
+                cli_mod.cmd_items(first)
+
+            self.server.queue(json.dumps(_clean_set_answer()))
+            second = _generate_args(endpoint=self.server.url, out_dir=out_dir, limit=1,
+                                    ignore_ledger=True)
+            with patch("sys.stdout"):
+                cli_mod.cmd_items(second)
+
+            self.assertEqual(self.server.requests[0]["messages"], self.server.requests[1]["messages"],
+                             "--ignore-ledger must re-plan the SAME first subject, not advance past it")
 
 
 # --------------------------------------------------------------------------------------------

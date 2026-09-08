@@ -95,8 +95,11 @@ def _legal_charm_family() -> str:
 
 
 def _clean_set_answer() -> dict:
+    # ⛔ `nameKey` removed 2026-09-08 — the model is no longer asked for it at all (see
+    # `setgen.schema._identity_fields`'s own docstring); a clean answer fixture must match what a
+    # real, well-formed model answer now looks like, not the old contract.
     return {
-        "name": "Proof Set", "nameKey": "set.proof-set",
+        "name": "Proof Set",
         "flavor": "A fixture, and it says so.",
         "capability": {"family": _legal_capability()},
         "members": [{"role": r, "frame": "plant"} for r in SET_ROLES],
@@ -106,7 +109,7 @@ def _clean_set_answer() -> dict:
 
 def _clean_charm_answer() -> dict:
     return {
-        "name": "Proof Charm", "nameKey": "charm.proof-charm",
+        "name": "Proof Charm",
         "flavor": "A fixture, and it says so.",
         "charmClass": "minor", "axis": "survivability", "frameHint": "any",
         "families": [_legal_charm_family()],
@@ -230,8 +233,11 @@ class SchemaCheckTests(unittest.TestCase):
                               "is not one of"),
             "bad pieces enum": ({**_clean_set_answer(),
                                  "thresholds": [{"pieces": 5}, {"pieces": 4}]}, "is not one of"),
-            "bad nameKey pattern": ({**_clean_set_answer(), "nameKey": "Set Proof"},
-                                    "does not match the required pattern"),
+            # ⛔ Real gap closed 2026-09-08 — `nameKey` is no longer a schema property at all (it
+            # is derived deterministically from `name`, never asked of the model), so a draft that
+            # still supplies one is an UNKNOWN field now, not a pattern violation.
+            "nameKey is not a legal field anymore": ({**_clean_set_answer(), "nameKey": "set.x"},
+                                                     "unknown field"),
             "short name": ({**_clean_set_answer(), "name": "x"}, "below the minimum"),
             "too many families": ({**_clean_set_answer(),
                                    "thresholds": [{"pieces": 2},
@@ -277,6 +283,120 @@ class IdTests(unittest.TestCase):
         self.assertGreater(seedfile_mod.next_charm_seq("off-ctrl"), 1)
 
 
+class DeriveNameKeyTests(unittest.TestCase):
+    """⛔ Real gap closed 2026-09-08: `nameKey` used to be a field the model filled in directly.
+    Two independent findings (`trees.nodegen`'s 2026-09-06 fallback-key finding, and this
+    program's own 2026-09-08 degenerate-generation incident on the identical field) converge on
+    never asking for it — `derive_name_key` computes it mechanically from `name` instead."""
+
+    def test_matches_the_real_shipped_convention(self) -> None:
+        # Measured directly off the real corpus 2026-09-08: name "Stillmarch" -> nameKey
+        # "set.stillmarch"; name "Vengeful Bastion" -> nameKey "set.vengeful-bastion";
+        # name "Hoarded Kernel" -> nameKey "charm.hoarded-kernel".
+        self.assertEqual(seedfile_mod.derive_name_key("set", "Stillmarch"), "set.stillmarch")
+        self.assertEqual(seedfile_mod.derive_name_key("set", "Vengeful Bastion"),
+                         "set.vengeful-bastion")
+        self.assertEqual(seedfile_mod.derive_name_key("charm", "Hoarded Kernel"),
+                         "charm.hoarded-kernel")
+
+    def test_punctuation_collapses_to_a_single_hyphen(self) -> None:
+        self.assertEqual(seedfile_mod.derive_name_key("set", "Frost & Fire!!"), "set.frost-fire")
+
+    def test_never_produces_a_leading_or_trailing_hyphen(self) -> None:
+        self.assertEqual(seedfile_mod.derive_name_key("set", "  --Edge--  "), "set.edge")
+
+    def test_pure_punctuation_falls_back_to_a_named_default_not_an_empty_slug(self) -> None:
+        """The real `NAME_KEY_PATTERN` every schema in this program uses requires at least one
+        character after the kind prefix — a bare `set.` would be structurally illegal."""
+        self.assertEqual(seedfile_mod.derive_name_key("set", "!!!"), "set.item")
+
+    def test_the_derived_key_matches_the_real_schema_pattern(self) -> None:
+        import re
+        pattern = re.compile(r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$")
+        for name in ("Stillmarch", "Vengeful Bastion", "Frost & Fire!!", "  --Edge--  ", "!!!"):
+            with self.subTest(name=name):
+                self.assertRegex(seedfile_mod.derive_name_key("set", name), pattern)
+
+
+class ResolveCapabilityTests(unittest.TestCase):
+    """⛔ Real incident, 2026-09-08: a live 53-subject run, AFTER the brief-truncation fix
+    (see `test_set_charm_gen.py`'s own truncation test), still escalated on the same
+    `capability` field, now for a DIFFERENT reason — the model never split an elemental pick's
+    `family`/`variant` the way `resolve_capability`'s object contract expects, and there is
+    nowhere else in this program a model is asked to produce a family as anything but one plain
+    string (`resolve_pick`'s own docstring already tolerates two SPELLINGS of a plain string;
+    this is a different shape problem). Two live shapes were observed:
+
+    1. An elemental pick's full printed id echoed into BOTH fields:
+       `{"family": "atom.deathblast.fire", "variant": "atom.deathblast.fire"}` instead of the
+       split `{"family": "atom.deathblast", "variant": "fire"}` the schema actually asks for.
+    2. A flat (variant-less) pick given a placeholder `variant` instead of omitting it:
+       `{"family": "atom.freezing", "variant": "none"}`.
+
+    Both are legal, unambiguous picks a human reading the printed list would recognize
+    instantly. `resolve_capability` now tries the untouched `family` value as a plain pick_id
+    FIRST (`resolve_pick`, the same tolerant lookup every stat/charm family already goes
+    through) before falling back to the family+variant combination — so a model that never
+    learned the split still resolves correctly.
+    """
+
+    def test_the_full_pick_id_echoed_into_both_fields_still_resolves(self) -> None:
+        node = {"family": "atom.deathblast.fire", "variant": "atom.deathblast.fire"}
+        pick = seedfile_mod.resolve_capability(VOCAB, node)
+        self.assertIsNotNone(pick)
+        self.assertEqual(pick.pick_id, "atom.deathblast.fire")
+
+    def test_a_flat_pick_with_a_placeholder_variant_still_resolves(self) -> None:
+        node = {"family": "atom.freezing", "variant": "none"}
+        pick = seedfile_mod.resolve_capability(VOCAB, node)
+        self.assertIsNotNone(pick)
+        self.assertEqual(pick.pick_id, "atom.freezing")
+
+    def test_the_correctly_split_shape_still_resolves(self) -> None:
+        """The fix must not break the shape the schema actually documents."""
+        node = {"family": "atom.deathblast", "variant": "fire"}
+        pick = seedfile_mod.resolve_capability(VOCAB, node)
+        self.assertIsNotNone(pick)
+        self.assertEqual(pick.pick_id, "atom.deathblast.fire")
+
+    def test_a_flat_pick_named_plainly_with_no_variant_key_still_resolves(self) -> None:
+        node = {"family": "atom.freezing"}
+        pick = seedfile_mod.resolve_capability(VOCAB, node)
+        self.assertIsNotNone(pick)
+        self.assertEqual(pick.pick_id, "atom.freezing")
+
+    def test_a_family_that_names_nothing_real_returns_none(self) -> None:
+        node = {"family": "atom.does-not-exist", "variant": "fire"}
+        self.assertIsNone(seedfile_mod.resolve_capability(VOCAB, node))
+
+
+class AnswerDeclaresContentBlockedLengthTests(unittest.TestCase):
+    """⛔ Real incident, 2026-09-08, first live `charm` run: a real model answer came back
+    `{"blocked": "blocked", ...}` — a bare placeholder repeating the field's own name, accepted
+    as a legitimate refusal and silently dropping real, generatable content. `answer_declares_content`
+    now refuses a `blocked` string too short to be a real explanation, naming it as a defect
+    instead of a legitimate escape hatch."""
+
+    def test_a_bare_placeholder_matching_the_field_name_is_a_named_defect(self) -> None:
+        draft = {**_clean_charm_answer(), "blocked": "blocked"}
+        defects = graph_mod.answer_declares_content(draft, {"kind": "charm"})
+        self.assertTrue(any("too short" in d for d in defects), defects)
+
+    def test_a_bare_none_placeholder_is_a_named_defect(self) -> None:
+        draft = {**_clean_set_answer(), "blocked": "none"}
+        defects = graph_mod.answer_declares_content(draft, {"kind": "set"})
+        self.assertTrue(any("too short" in d for d in defects), defects)
+
+    def test_a_real_reason_at_the_length_floor_is_accepted(self) -> None:
+        draft = {"blocked": "no motifs land"}  # 15 chars, the existing fixture's own real reason
+        self.assertEqual(graph_mod.answer_declares_content(draft, {"kind": "set"}), [])
+
+    def test_a_null_blocked_with_complete_content_is_unaffected(self) -> None:
+        self.assertEqual(
+            graph_mod.answer_declares_content({**_clean_set_answer(), "blocked": None},
+                                              {"kind": "set"}), [])
+
+
 class BatchTests(unittest.TestCase):
     def test_a_small_batch_runs_end_to_end_and_writes_a_seed_file(self):
         import tempfile
@@ -300,6 +420,57 @@ class BatchTests(unittest.TestCase):
             self.assertIn("capability", entry["thresholds"][0])
             self.assertIn("atoms", entry["thresholds"][1])
             self.assertTrue((out / "ledger.json").exists())
+
+    def test_a_second_batch_does_not_erase_the_first_batchs_ledger_entries(self):
+        """⛔ Real incident, 2026-09-08: a live full run persisted 24 sets and wrote a ledger with
+        those 24 subject ids. A CONTINUATION run (freeing up one colliding subject for retry, then
+        re-invoking `items generate --write` — the exact resumable-batch workflow this ledger
+        exists for) came back reporting the same 24-persisted/29-escalated shape, and the ledger on
+        disk afterward had ONLY 24 entries again, but a DIFFERENT 24 than the first run's — several
+        subjects the first run had legitimately persisted (and whose seed files were still
+        correctly on disk, untouched) had silently vanished from the ledger. Root cause: `run_batch`
+        starts `done = {}` fresh every call and `write_ledger` does a full overwrite — so a batch
+        that (correctly) skips already-done subjects never re-adds them to `done`, and the ledger
+        write erases them. A THIRD run would then treat those subjects as never-generated and
+        redo (and overwrite) them. Proven directly: two `run_batch` calls against the SAME ledger
+        path, second call's plan containing only a DIFFERENT subject, must leave BOTH subjects'
+        entries in the ledger afterward."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "sets"
+            ledger_path = out / "ledger.json"
+            first_plan = _set_plan(1)
+            first_id = first_plan.subjects[0].subject_id
+            authored_mod.run_batch(
+                plan=first_plan,
+                answers=_answer_file("set", "build", {first_id: _clean_set_answer()}),
+                tuning=TUNING, vocabulary=VOCAB, out_dir=out, kind="set", population="build",
+                authored_utc="1970-01-01T00:00:00Z", model="fixture", ledger_path=ledger_path)
+
+            second_theme = Theme(
+                theme_key="build.might-defense", species_id=None,
+                display_name="Might / Defense", motifs=("might", "guard"), anti_motifs=(),
+                expression_item="stat emphasis and threshold shape", basis="derived", rarity=None,
+                retired=False, population="build", aptitude="Might", archetype="defense")
+            second_subject = Subject(
+                subject_id="set-build-build.might-defense", kind="set", population="build",
+                theme_key=second_theme.theme_key,
+                entry_id=emit.build_set_id("might", "defense", 1),
+                brief=brief_mod.build_set_brief(second_theme, TUNING, VOCAB))
+            second_plan = RunPlan(subjects=[second_subject], held=[], already_done=[first_id])
+            authored_mod.run_batch(
+                plan=second_plan,
+                answers=_answer_file("set", "build",
+                                     {second_subject.subject_id: _clean_set_answer()}),
+                tuning=TUNING, vocabulary=VOCAB, out_dir=out, kind="set", population="build",
+                authored_utc="1970-01-01T00:00:00Z", model="fixture", ledger_path=ledger_path)
+
+            final_ledger = json.loads(ledger_path.read_text(encoding="utf-8"))["done"]
+            self.assertIn(first_id, final_ledger,
+                         "the first batch's subject must survive a second batch's ledger write")
+            self.assertIn(second_subject.subject_id, final_ledger)
+            self.assertTrue((out / "might-offense.json").exists(),
+                            "the first batch's seed file must not be touched by the second batch")
 
     def test_a_charm_batch_mints_its_id_from_the_axis_the_model_chose(self):
         import tempfile
@@ -591,14 +762,107 @@ class Module13DefectsFixedTests(unittest.TestCase):
 
         30 -> 32 on 2026-09-07: the set-charm-live-endpoint trial batch added 2 real sets
         (set.retribution-offense-001/-002, a real build.* theme with no prior generated content),
-        each landing in its own new cell — 28 -> 30 cells, 26 -> 28 singletons, max unchanged."""
+        each landing in its own new cell — 28 -> 30 cells, 26 -> 28 singletons, max unchanged.
+
+        32 -> 56 on 2026-09-08: the first real `items generate --write` batch against a live local
+        model (`google/gemma-4-26b-a4b-qat`), after fixing the four real defects the run itself
+        found that day (brief truncation, `resolve_capability`'s family/variant shape mismatch,
+        the schema's `required: []` silently suppressing `name`/`flavor` under grammar-constrained
+        decoding, and the lowest threshold being validated against the stat vocabulary it was
+        never supposed to carry) — 24 subjects persisted, each its own new cell: 30 -> 53 cells,
+        28 -> 50 singletons, max unchanged.
+
+        56 -> 58 same day: a continuation run (freeing one exact-name collision, `'Triple-Line
+        Volley'` on both `demon.allpeater` and `demon.threepeater`, for a fresh regenerate) hit a
+        FIFTH real bug the same run found — `authored.run_batch` starting `done = {}` fresh every
+        call and `write_ledger` doing a full overwrite meant the continuation's own ledger write
+        erased the first run's entries outright (their seed files stayed on disk, untouched, but a
+        third run would have redone and overwritten them). Fixed by merging with the on-disk
+        ledger before writing. The continuation net-added 2 entries, each its own new cell:
+        53 -> 55 cells, 50 -> 52 singletons, max unchanged.
+
+        58 -> 61 same day: chasing that same regenerate down turned up a SIXTH real bug —
+        `cmd_items` passed `ledger=None` to `plan_run` whenever `--ignore-ledger` was not given,
+        which read a hardcoded default ledger path completely disconnected from the one
+        `--write` actually reads/writes, so every invocation replanned the FULL population
+        (`"alreadyDone": 0` always) regardless of what earlier runs had already persisted. Fixed
+        in `cmd_items` to read the same `<out-dir>/set-charm-gen.ledger.json` `--write` uses. That
+        fixed run itself net-added 3 more subjects, and separately reproduced 'Triple-Line
+        Volley' again (this model converges on the same name for near-identical `species` themes
+        at `temperature=0.2`) plus a second such collision, `'Glacial Spike Volley'` on
+        `demon.snowgatling`/`demon.snowpeashooter` — both resolved by re-running just those two
+        subjects through `run_batch`'s existing injectable `call` at `temperature=0.9`, no
+        schema/CLI change needed. Measured directly, not derived: 55 -> 59 cells, 52 -> 57
+        singletons, max unchanged."""
         entries = []
         for path in sorted((REPO_ROOT / "data" / "seed" / "items" / "sets").glob("*.json")):
             doc = json.loads(path.read_text(encoding="utf-8"))
             entries.extend(doc.get("entries") or [])
         report = cells.cell_report(entries)
         self.assertEqual((report.population, report.cells, report.maximum, report.singletons),
-                         (32, 30, 2, 28))
+                         (61, 59, 2, 57))
+
+
+class SetIsDistributableMissingPiecesTests(unittest.TestCase):
+    """⛔ Real bug, found 2026-09-08 on a live run against `meta/muse-glimmer`: a threshold with no
+    `pieces` at all crashed `int(None)` uncaught inside `_resolved_stats`, aborting the WHOLE batch
+    (every remaining subject, not just this one bad draft) instead of reporting a named defect for
+    the self-heal loop. `google/gemma-4-26b-a4b-qat` never happened to produce this shape in any
+    prior run, so nothing caught it until a different model did."""
+
+    def test_a_threshold_missing_pieces_is_a_named_defect_not_a_crash(self):
+        answer = {**_clean_set_answer(),
+                 "thresholds": [{"families": [_legal_set_stat()]}, {"pieces": 4}]}
+        defects = graph_mod.set_is_distributable(answer, {"tuning": TUNING, "vocabulary": VOCAB})
+        self.assertTrue(any("pieces" in d for d in defects), defects)
+
+    def test_a_threshold_with_a_null_pieces_is_a_named_defect_not_a_crash(self):
+        answer = {**_clean_set_answer(),
+                 "thresholds": [{"pieces": None, "families": [_legal_set_stat()]},
+                                {"pieces": 4}]}
+        defects = graph_mod.set_is_distributable(answer, {"tuning": TUNING, "vocabulary": VOCAB})
+        self.assertTrue(any("pieces" in d for d in defects), defects)
+
+    def test_a_boolean_pieces_is_rejected_not_silently_treated_as_0_or_1(self):
+        answer = {**_clean_set_answer(),
+                 "thresholds": [{"pieces": True, "families": [_legal_set_stat()]},
+                                {"pieces": 4}]}
+        defects = graph_mod.set_is_distributable(answer, {"tuning": TUNING, "vocabulary": VOCAB})
+        self.assertTrue(any("pieces" in d for d in defects), defects)
+
+    def test_a_well_formed_threshold_is_unaffected_by_the_guard(self):
+        by_threshold, defects = graph_mod._resolved_stats(_clean_set_answer(), VOCAB)
+        self.assertEqual(defects, [])
+        self.assertIn(4, by_threshold)
+
+    def test_the_lowest_threshold_carrying_families_anyway_is_not_a_defect(self):
+        """⛔ Real incident, 2026-09-08: even after the brief-truncation and `resolve_capability`
+        fixes, a live run kept escalating on `thresholds[2].families: 'atom.volley' is not a stat
+        family` — the model reused its OWN `capability` pick inside the LOWEST threshold's
+        `families`, exactly the field the brief tells it "takes no families — it carries the
+        capability". The schema now lets a model answer `null` there (the 2026-09-08
+        required+nullable fix), but a model that instead echoes its capability pick anyway is not
+        wrong about anything the distributor actually uses — `_resolved_stats` already ignores the
+        lowest threshold's families when building `by_threshold` (nothing reads it), so validating
+        it against the STAT vocabulary only punishes a field that carries no real content, exactly
+        as `set_schema`'s own field description already says."""
+        answer = {**_clean_set_answer(),
+                 "thresholds": [{"pieces": 2, "families": [_legal_capability()]},
+                                {"pieces": 4, "families": [_legal_set_stat()]}]}
+        by_threshold, defects = graph_mod._resolved_stats(answer, VOCAB)
+        self.assertEqual(defects, [])
+        self.assertNotIn(2, by_threshold)
+
+    def test_an_empty_members_list_is_a_named_defect_not_a_crash(self):
+        """⛔ A second real bug, found 2026-09-08 on the SAME live run, minutes after the first:
+        an empty `members` list reached `distribute_set` -> `tuning.set_budget_milli`, which
+        raises `SetCharmTuningError('a set has at least one member, got 0')` uncaught — the
+        identical crash-the-whole-batch failure shape, a different unguarded precondition.
+        `set_is_distributable` now catches `SetCharmTuningError` generally rather than needing a
+        third live crash to find the next one."""
+        answer = {**_clean_set_answer(), "members": []}
+        defects = graph_mod.set_is_distributable(answer, {"tuning": TUNING, "vocabulary": VOCAB})
+        self.assertTrue(any("member" in d for d in defects), defects)
 
 
 if __name__ == "__main__":

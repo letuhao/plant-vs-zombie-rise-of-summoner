@@ -234,3 +234,99 @@ def write_partition_file(entries: "list[dict]", *, path: Path, partition: str, b
         Path(tmp_name).unlink(missing_ok=True)
         raise
     return path
+
+
+def _next_seq_for_partition(entries: "dict[str, dict]", prefix: str) -> int:
+    indices = [int(eid[len(prefix):]) for eid in entries
+              if eid.startswith(prefix) and eid[len(prefix):].isdigit()]
+    return (max(indices) + 1) if indices else 1
+
+
+def main(argv=None) -> int:
+    """`seedsmith items generate --kind consumable` (item-seedgen module `consumables-gen`).
+
+    ⛔ **Real gap, closed 2026-09-08.** This module had `reconcile_grants_and_cooldowns`/
+    `generate_one`/`write_partition_file` and a spec (`docs/architecture/item-seedgen/
+    spec-consumables-gen.md`) documenting `items generate --kind consumable --brief <theme-file>
+    --write` as the real invocation, but no CLI entrypoint of any kind. Default (no `--theme`, no
+    `--overwrite`) reconciles the real 60-row corpus and makes no model call — the spec's own stated
+    default. `--theme` mints exactly ONE new consumable into the partition `--slot` names (this
+    module never had an id-minting helper for a NEW entry — `--slot`'s own next-free seq is scanned
+    fresh here, the same convention `basetypegen`/`droptablegen` already establish for their own
+    open-ended partitions). No schema exists yet for this module's own answer shape (unlike its
+    siblings) — constrained decoding is honestly skipped (`schema={}`) rather than inventing one.
+    """
+    import argparse
+    import dataclasses
+
+    ap = argparse.ArgumentParser(description="Reconcile the consumables corpus, or author one new "
+                                             "entry into a named partition.")
+    ap.add_argument("--slot", type=int, default=0, help="the k<N> partition a new entry lands in")
+    ap.add_argument("--theme", default="", help="an inline theme hint; mints one new entry")
+    ap.add_argument("--write", action="store_true", help="write the new partition entry to disk")
+    ap.add_argument("--overwrite", default="",
+                    help="a full existing consumable id to regenerate in place (needs --theme too)")
+    ap.add_argument("--endpoint", default="", help="live model endpoint; enables a real run")
+    ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
+    args = ap.parse_args(argv)
+
+    if not args.theme:
+        entries = load_corpus()
+        report = reconcile_grants_and_cooldowns(entries)
+        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+        return 0
+
+    if not args.write:
+        raise SystemExit(
+            "seedsmith: refused — no --write. --theme with no --write has nothing further to "
+            "inspect (this module has no --dry-run brief preview yet); re-run with --write "
+            "--endpoint <url> to actually call a model and persist.")
+    if not args.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
+            "(--endpoint <url> [--model <name>]).")
+
+    if args.overwrite:
+        entry_id = args.overwrite
+    else:
+        if not args.slot:
+            raise SystemExit("seedsmith: a new entry needs --slot (which k<N> partition it lands in)")
+        entries = load_corpus()
+        prefix = f"consumable.k{args.slot}-"
+        entry_id = f"{prefix}{_next_seq_for_partition(entries, prefix):03d}"
+
+    seq = int(entry_id.rsplit("-", 1)[-1])
+
+    from ....pipeline.llm_caller import live_answer_caller, load_config
+
+    base_config = load_config()
+    config = dataclasses.replace(base_config, endpoint=args.endpoint,
+                                 model=args.model or base_config.model)
+    caller = live_answer_caller(config)
+    brief = brief_mod.build_consumable_brief(args.theme)
+    answer = caller(brief, {})
+
+    ledger = RunLedger(DEFAULT_LEDGER)
+    outcome = generate_one(entry_id, answer, entry_id=entry_id, seq=seq, ledger=ledger)
+    if outcome.outcome == "persisted":
+        slot = args.slot or int(entry_id.split("-")[0].removeprefix("consumable.k"))
+        # Additive: this module's own `write_partition_file` writes exactly the entries handed to
+        # it (never merges) — a fresh CLI-authored partition accumulates across runs the same way
+        # every sibling module's own `write_corpus` does, so a second run does not wipe the first.
+        cli_partition_path = CONSUMABLES_DIR / f"k{slot}-cli.json"
+        existing = {}
+        if cli_partition_path.exists():
+            existing = {e["id"]: e for e in
+                       json.loads(cli_partition_path.read_text(encoding="utf-8")).get("entries", [])}
+        merged = {**existing, outcome.entry["id"]: outcome.entry}
+        write_partition_file(
+            [merged[k] for k in sorted(merged)], path=cli_partition_path,
+            partition=f"consumables/k{slot}", batch_name=f"consumables-k{slot}-cli",
+            model=config.model, authored_utc="", source_ref="entry-shapes.md#8")
+    print(json.dumps({"entryId": entry_id, "outcome": outcome.outcome,
+                      "defects": list(outcome.defects)}, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - dev entrypoint
+    raise SystemExit(main())

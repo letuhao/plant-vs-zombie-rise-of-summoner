@@ -10,7 +10,8 @@ triggered cases.**
 Status: **proposed — pending owner review. No build authorized.**
 
 Module specs live in [demon-lawn-deploy/](demon-lawn-deploy/), one per module id, written in dependency
-order.
+order. Implementation plan/task list: [tasks/demon-lawn-deploy-plan.md](../../tasks/demon-lawn-deploy-plan.md) /
+[tasks/demon-lawn-deploy-todo.md](../../tasks/demon-lawn-deploy-todo.md).
 
 **Strengthen pass (2026-09-06):** four independent adversarial reviews (mechanism soundness, cross-
 program/economy, hard-rule compliance, spec-quality-vs-this-repo's-own-bar), matching
@@ -107,10 +108,11 @@ internal checkboxes while a player never actually sees a working deploy in a liv
 | Module id | Responsibility | Depends on |
 |---|---|---|
 | `lawn-deploy-core` | Resolve a demon specimen's traits into `effect_binding` rows (mirroring an equipment slot bind, as a **reconciled diff on every deploy**, never a one-time mint-time snapshot) so the existing atom-push pipeline (`AtomPushService.Build` → `RpgHub.BuildApplyCommand`) delivers them; wire `UniqueActorService.DeployAsync` to admit a demon-kind `instanceId`, refuse a Commander/Patron-designated one, and pick the right spawn side/type from `DeployMode`. No new Injector code — `UniqueBoundLoadout.TryApply`/the Funnel are already generic. | — |
+| `lawn-deploy-progression` | **Approved 2026-09-08.** Award a Bound unique specimen its own lawn XP for attributed enemy kills and active Bound duration. Persist binding sessions and idempotent receipts; use the `UniqueSpecimen` source and never species XP or the empire fallback. Spec: [spec-lawn-deploy-progression.md](demon-lawn-deploy/spec-lawn-deploy-progression.md). | `lawn-deploy-core`, `progression-source-contract` |
 | `lawn-deploy-events` | Define trigger conditions for when a unique-demon deploy becomes available during a lawn run (frequency, cost, which side, player-facing UI for the plant side), reading a Hot/Cold-safe roster snapshot rather than a live Cold-plane query mid-tick. No reusable trigger/condition system exists yet anywhere in the tree for the live lawn (`AmbushDraw` is Delve-only and itself only partially built) — this is new. | `lawn-deploy-core` |
 | `zomboss-deploy-ai` | The zombie-side counterpart: decides *whether and which* unique demon Zomboss deploys during an active event, reading board state through an explicit, enforcing view type (never `WorldState`/full Cold-plane access) — mirroring `spec-ai-commander.md`'s own `IWorldView` discipline in shape, not in code (this is lawn-scale, not world-turn-scale). Deliberately **not** a reuse of `ai-commander` (world-map turns, fog-of-war belief state, days-scale) despite the shared "Zomboss decides something" flavor; the data shape and decision cadence are unrelated. | `lawn-deploy-core`, `lawn-deploy-events` |
 
-Build order: `lawn-deploy-core` → `lawn-deploy-events` → `zomboss-deploy-ai`.
+Build order: `lawn-deploy-core` → (`lawn-deploy-progression` after `progression-source-contract` || `lawn-deploy-events`) → `zomboss-deploy-ai`.
 
 ## Deliberately deferred (not in any module here)
 

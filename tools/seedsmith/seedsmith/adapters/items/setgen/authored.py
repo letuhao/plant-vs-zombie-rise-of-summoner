@@ -28,7 +28,7 @@ from . import cells, dedup, emit
 from .answers import (AnswerExhausted, AnswerFile, AnswerMissing, ReplayTransport,
                       replay_caller)
 from .brief import PROMPT_VERSION
-from .run import RunPlan, Subject, write_ledger
+from .run import RunPlan, Subject, read_ledger, write_ledger
 from .seedfile import (SeedFileMeta, axis_group_map, charm_entry, next_charm_seq, seed_document,
                        set_entry, write_seed_file)
 from .tuning import SetCharmGenTuning
@@ -198,7 +198,14 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
     result.metrics, result.report = _measure(result.entries, kind=kind, tuning=tuning,
                                              held=[key for key, _ in plan.held])
     if ledger_path is not None and done:
-        write_ledger(done, ledger_path)
+        # ⛔ Real incident, 2026-09-08: `done` starts empty on every call — it only ever holds
+        # THIS batch's newly-persisted subjects, never `plan.already_done`'s. A resumed run that
+        # (correctly) skips already-done subjects never re-adds them here, so a plain overwrite
+        # erased every earlier run's ledger entries — their seed files stayed on disk untouched,
+        # but a THIRD run would see them as never-generated and redo (and overwrite) them. Merged
+        # with whatever is already on disk instead: this batch's own entries win on a genuine
+        # collision, but nothing an earlier batch already recorded is lost.
+        write_ledger({**read_ledger(ledger_path), **done}, ledger_path)
     return result
 
 

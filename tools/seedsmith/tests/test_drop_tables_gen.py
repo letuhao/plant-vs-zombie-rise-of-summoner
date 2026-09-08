@@ -393,9 +393,44 @@ class TestHarness:
         assert "Author ONE NEW drop table" in out
 
     def test_cli_refuses_a_real_run_with_no_model_call_wired(self, monkeypatch, tmp_path):
+        """⛔ Renamed in spirit 2026-09-08, unchanged in assertion — see basetypegen's identical
+        test for the full account: this now refuses for lack of `--write`, not lack of wiring."""
         monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
         with pytest.raises(SystemExit):
             run_mod.main(["--slot", "1", "--count", "1"])
+
+    def test_cli_write_without_endpoint_refuses(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+        with pytest.raises(SystemExit):
+            run_mod.main(["--slot", "1", "--count", "1", "--write"])
+
+    def test_cli_a_real_live_run_writes_a_real_partition_file(self, monkeypatch, tmp_path, capsys):
+        """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account:
+        `--write --endpoint <url>` was unreachable before this."""
+        monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+        monkeypatch.setattr(tuning_mod, "DROP_TABLES_DIR", tmp_path / "drop-tables")
+
+        called_with = {}
+
+        def _fake_live_answer_caller(config):
+            called_with["config"] = config
+            return _fake_call(name="Live-Wired Table")
+
+        monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                            _fake_live_answer_caller)
+
+        exit_code = run_mod.main(["--slot", "1", "--count", "1", "--write",
+                                 "--endpoint", "http://unit-test-endpoint",
+                                 "--model", "unit-test-model"])
+
+        assert exit_code == 0
+        assert called_with["config"].endpoint == "http://unit-test-endpoint"
+        assert called_with["config"].model == "unit-test-model"
+        written = json.loads((tmp_path / "drop-tables" / "d1.json").read_text(encoding="utf-8"))
+        names = {e["name"] for e in written["entries"]}
+        assert "Live-Wired Table" in names
+        summary = json.loads(capsys.readouterr().out)
+        assert summary == {"planned": 1, "fresh": 1, "blocked": 0, "blockedReasons": {}}
 
     def test_cli_force_is_an_accepted_alias_for_overwrite(self, tmp_path, monkeypatch, capsys):
         """seedsmith-content-standard Task 6: `--force` is `content-completeness-core`'s own naming

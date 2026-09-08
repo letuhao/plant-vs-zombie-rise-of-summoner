@@ -16,6 +16,7 @@ import json
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -321,6 +322,53 @@ class RunPlanAndBatchTests(unittest.TestCase):
         self.assertEqual(outcome.outcome, "refused")
         self.assertTrue(any("below the minimum" in d for d in outcome.defects), outcome.defects)
         self.assertEqual(result.persisted, ())
+
+
+# ------------------------------------------------------------------------------------------------
+# CLI — real gap, closed 2026-09-08: this module had no entrypoint of any kind before this.
+# ------------------------------------------------------------------------------------------------
+class CliTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        tmp_path = Path(self._tmp.name)
+        self.materials_path = tmp_path / "materials.json"
+        self.ledger_path = tmp_path / "ledger.json"
+        self._materials_patch = unittest.mock.patch.object(
+            run_mod, "MATERIALS_PATH", self.materials_path)
+        self._ledger_patch = unittest.mock.patch.object(
+            run_mod, "DEFAULT_LEDGER_PATH", self.ledger_path)
+        self._materials_patch.start()
+        self._ledger_patch.start()
+        self.addCleanup(self._materials_patch.stop)
+        self.addCleanup(self._ledger_patch.stop)
+
+    def test_cli_write_without_endpoint_refuses(self) -> None:
+        with self.assertRaises(SystemExit):
+            run_mod.main(["--overwrite", "shard.chaff", "--write"])
+
+    def test_cli_a_real_live_run_writes_a_real_corpus_file(self) -> None:
+        """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account:
+        `run_batch` here takes a pre-built `{subject_id: answer}` mapping, not a `call` callable —
+        `main()` builds that mapping from `live_answer_caller` before calling it."""
+        called_with = {}
+
+        def _fake_live_answer_caller(config):
+            called_with["config"] = config
+            return lambda brief, schema: _clean_answer(name="Live-Wired Shard")
+
+        with unittest.mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller",
+                                 _fake_live_answer_caller):
+            exit_code = run_mod.main(["--overwrite", "shard.chaff", "--write",
+                                     "--endpoint", "http://unit-test-endpoint",
+                                     "--model", "unit-test-model"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(called_with["config"].endpoint, "http://unit-test-endpoint")
+        self.assertEqual(called_with["config"].model, "unit-test-model")
+        written = json.loads(self.materials_path.read_text(encoding="utf-8"))
+        names = {e["name"] for e in written["entries"]}
+        self.assertIn("Live-Wired Shard", names)
 
 
 if __name__ == "__main__":

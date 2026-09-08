@@ -2,419 +2,487 @@
   "schemaVersion": 1,
   "kind": "charm",
   "_meta": {
+    "batch": "charm-gen-off-ctrl",
     "partition": "charms/off-ctrl",
     "contractVersion": 1,
-    "exemplarVersion": 1,
-    "promptVersion": 1,
-    "batch": "charms-1c",
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "docs/architecture/item/entry-shapes.md#7",
     "registryVersions": {
-      "core": 1,
       "bands": 1,
-      "themes": 1,
+      "core": 2,
+      "naming": 6,
       "tags": 4,
-      "classes": 2,
-      "naming": 4,
+      "classes": 3,
+      "themes": 1,
       "words": 5
-    }
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
   },
   "entries": [
     {
-      "id": "charm.off-ctrl-001",
-      "nameKey": "charm.frostbitten-husk",
-      "name": "Frostbitten Husk",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "control",
+      "id": "charm.off-ctrl-021",
+      "nameKey": "charm.cinder-bolt-spire",
+      "name": "Cinder-Bolt Spire",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.freezing", "powerBand": "trivial" }
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        }
       ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.frostbitten-husk",
-      "flavorKey": "flavor.charm.frostbitten-husk",
-      "flavor": "It marched through the freeze rather than around it, and never quite thawed all the way through.",
-      "notes": "themeId: frostbitten-vanguard"
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, charred rod of obsidian that radiates a heat so absolute it leaves nothing behind but ash.",
+      "notes": "themeKey: demon.ashthreepeater"
     },
     {
-      "id": "charm.off-ctrl-002",
-      "nameKey": "charm.verdant-tendril",
-      "name": "Verdant Tendril",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "control",
+      "id": "charm.off-ctrl-022",
+      "nameKey": "charm.iron-skull-impact",
+      "name": "Iron-Skull Impact",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.entangling", "powerBand": "trivial" }
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "powerBand": "low"
+        }
       ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive", "rooted"],
-      "iconKey": "icon.charm.verdant-tendril",
-      "flavorKey": "flavor.charm.verdant-tendril",
-      "flavor": "Grafted on for one purpose: to close around whatever gets close enough to graft.",
-      "notes": "themeId: verdant-graft"
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, dented iron helmet that vibrates with the force of a thousand headbutts.",
+      "notes": "themeKey: demon.bucketnutzombie"
     },
     {
-      "id": "charm.off-ctrl-003",
-      "nameKey": "charm.pod-of-the-seedfall",
-      "name": "Pod of the Seedfall",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "control",
+      "id": "charm.off-ctrl-023",
+      "nameKey": "charm.three-line-volley",
+      "name": "Three-Line Volley",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.sporing", "powerBand": "low" }
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.cherry-bloom",
+          "powerBand": "high"
+        }
       ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.pod-of-the-seedfall",
-      "flavorKey": "flavor.charm.pod-of-the-seedfall",
-      "flavor": "It was never going to root where it landed. It just needed you to stop moving.",
-      "notes": "themeId: windswept-spore"
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A trio of semi-ripe cherry stems bound by necrotic twine, designed to launch projectiles in rapid succession.",
+      "notes": "themeKey: demon.cherrythreepeater"
     },
     {
-      "id": "charm.off-ctrl-004",
-      "nameKey": "charm.moldering-rind",
-      "name": "Moldering Rind",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "control",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.withering", "powerBand": "low" }
-      ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.moldering-rind",
-      "flavorKey": "flavor.charm.moldering-rind",
-      "flavor": "What's left after the good part rotted away still knows how to spread.",
-      "notes": "themeId: rot-bloom"
-    },
-    {
-      "id": "charm.off-ctrl-005",
-      "nameKey": "charm.seething-gall",
-      "name": "Seething Gall",
+      "id": "charm.off-ctrl-024",
+      "nameKey": "charm.frozen-obstacle",
+      "name": "Frozen Obstacle",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "control",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.venomous", "powerBand": "low" }
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.entangling"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.seething-gall",
-      "flavorKey": "flavor.charm.seething-gall",
-      "flavor": "A single growth swollen with everything the swarm couldn't finish eating.",
-      "notes": "themeId: umbral-swarm"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A solid, unmoving block of frozen cream that reveals itself only when stepped upon.",
+      "notes": "themeKey: demon.conezombie"
     },
     {
-      "id": "charm.off-ctrl-006",
-      "nameKey": "charm.husk-of-the-murmuration",
-      "name": "Husk of the Murmuration",
+      "id": "charm.off-ctrl-025",
+      "nameKey": "charm.scorched-volley",
+      "name": "Scorched Volley",
       "charmClass": "standard",
       "apCost": 2,
-      "axis": "control",
+      "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.mesmerizing", "powerBand": "low" }
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.entangling"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.husk-of-the-murmuration",
-      "flavorKey": "flavor.charm.husk-of-the-murmuration",
-      "flavor": "It hums along with the flock, and after a while so does whatever's listening.",
-      "notes": "themeId: umbral-swarm"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of charred, pepper-like seeds encased in a volatile, expanding glass sphere.",
+      "notes": "themeKey: demon.darkthreepeater"
     },
     {
-      "id": "charm.off-ctrl-007",
-      "nameKey": "charm.bramble-of-the-barrow",
-      "name": "Bramble of the Barrow",
-      "charmClass": "standard",
-      "apCost": 3,
-      "axis": "control",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.bloodletting", "powerBand": "medium" }
-      ],
-      "roleGroups": ["atom.sporing"],
-      "prefixRolls": 2,
-      "suffixRolls": 0,
-      "tags": ["offensive", "undead"],
-      "iconKey": "icon.charm.bramble-of-the-barrow",
-      "flavorKey": "flavor.charm.bramble-of-the-barrow",
-      "flavor": "Its roots found what the ground was hiding, and never stopped drinking.",
-      "notes": "themeId: charnel-bloom"
-    },
-    {
-      "id": "charm.off-ctrl-008",
-      "nameKey": "charm.charnel-bloat",
-      "name": "Charnel Bloat",
+      "id": "charm.off-ctrl-026",
+      "nameKey": "charm.spike-volley",
+      "name": "Spike Volley",
       "charmClass": "standard",
       "apCost": 2,
-      "axis": "control",
+      "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.withering", "powerBand": "medium" }
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.sporing"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive", "undead"],
-      "iconKey": "icon.charm.charnel-bloat",
-      "flavorKey": "flavor.charm.charnel-bloat",
-      "flavor": "Swollen past what the field ever meant to hold, and still finding room to grow.",
-      "notes": "themeId: charnel-bloom"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of jagged, emerald-hued needles that vibrate with kinetic energy, ready to launch in a sudden, overwhelming burst.",
+      "notes": "themeKey: demon.doomcactus"
     },
     {
-      "id": "charm.off-ctrl-009",
-      "nameKey": "charm.drifting-kernel",
-      "name": "Drifting Kernel",
-      "charmClass": "standard",
-      "apCost": 2,
-      "axis": "control",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.sporing", "powerBand": "low" }
-      ],
-      "roleGroups": ["atom.entangling"],
-      "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.drifting-kernel",
-      "flavorKey": "flavor.charm.drifting-kernel",
-      "flavor": "It never picks a direction. The wind was always going to pick one for it.",
-      "notes": "themeId: windswept-spore"
-    },
-    {
-      "id": "charm.off-ctrl-010",
-      "nameKey": "charm.permafrost-marrow",
-      "name": "Permafrost Marrow",
+      "id": "charm.off-ctrl-027",
+      "nameKey": "charm.iron-gate-ransom",
+      "name": "Iron Gate Ransom",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
       "frameHint": "any",
-      "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.freezing", "powerBand": "high" },
-        { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
       "prefixRolls": 0,
       "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.permafrost-marrow",
-      "flavorKey": "flavor.charm.permafrost-marrow",
-      "flavor": "The cold got into the bone years ago and set up permanent residence there.",
-      "notes": "themeId: frostbitten-vanguard"
+      "tags": [],
+      "flavor": "A heavy, rusted iron padlock fused to a collection of human teeth and jagged scrap metal, symbolizing the hostage's desperate grip on life.",
+      "notes": "themeKey: demon.doorzombie",
+      "uniqueCarry": true
     },
     {
-      "id": "charm.off-ctrl-011",
-      "nameKey": "charm.rusted-bulb",
-      "name": "Rusted Bulb",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "offense",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.might", "powerBand": "trivial" }
-      ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive", "mechanical"],
-      "iconKey": "icon.charm.rusted-bulb",
-      "flavorKey": "flavor.charm.rusted-bulb",
-      "flavor": "Requisitioned, painted over, and swelling right on schedule regardless.",
-      "notes": "themeId: rusted-legion"
-    },
-    {
-      "id": "charm.off-ctrl-012",
-      "nameKey": "charm.riveted-sprig",
-      "name": "Riveted Sprig",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "offense",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.might", "powerBand": "low" }
-      ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive", "mechanical"],
-      "iconKey": "icon.charm.riveted-sprig",
-      "flavorKey": "flavor.charm.riveted-sprig",
-      "flavor": "Somebody bolted a green thing to the chassis. Nobody's told it that's unusual.",
-      "notes": "themeId: thorned-chassis"
-    },
-    {
-      "id": "charm.off-ctrl-013",
-      "nameKey": "charm.earthen-cutting",
-      "name": "Earthen Cutting",
-      "charmClass": "minor",
-      "apCost": 1,
-      "axis": "offense",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.hit-followthrough", "powerBand": "low" }
-      ],
-      "prefixRolls": 0,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.earthen-cutting",
-      "flavorKey": "flavor.charm.earthen-cutting",
-      "flavor": "It struck root in packed ground and simply never stopped pushing.",
-      "notes": "themeId: earthen-bastion"
-    },
-    {
-      "id": "charm.off-ctrl-014",
-      "nameKey": "charm.scion-of-the-overhaul",
-      "name": "Scion of the Overhaul",
+      "id": "charm.off-ctrl-028",
+      "nameKey": "charm.corporate-blitz",
+      "name": "Corporate Blitz",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.retribution", "powerBand": "medium" }
+        {
+          "family": "atom.tempo-stampede",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "medium"
+        }
       ],
-      "roleGroups": ["atom.might"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive", "mechanical"],
-      "iconKey": "icon.charm.scion-of-the-overhaul",
-      "flavorKey": "flavor.charm.scion-of-the-overhaul",
-      "flavor": "Every part they stripped off the old frame came back sharper on the new one.",
-      "notes": "themeId: thorned-chassis"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, leather-wrapped ball of stitched flesh and industrial steel, smelling of fresh turf and stale office air.",
+      "notes": "themeKey: demon.footballzombie"
     },
     {
-      "id": "charm.off-ctrl-015",
-      "nameKey": "charm.smoldering-bloom",
-      "name": "Smoldering Bloom",
+      "id": "charm.off-ctrl-029",
+      "nameKey": "charm.tri-line-venous-vial",
+      "name": "Tri-Line Venous Vial",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "fire" } }
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.hit-followthrough"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.smoldering-bloom",
-      "flavorKey": "flavor.charm.smoldering-bloom",
-      "flavor": "It opens once, on the last warm day before the frost, and it burns like it knows.",
-      "notes": "themeId: ember-harvest"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A glass vessel containing three pulsating, toxic veins of ichor that rhythmically throb with a sickly glow.",
+      "notes": "themeKey: demon.garlicthreepeater"
     },
     {
-      "id": "charm.off-ctrl-016",
-      "nameKey": "charm.root-of-the-rampart",
-      "name": "Root of the Rampart",
+      "id": "charm.off-ctrl-030",
+      "nameKey": "charm.the-major-arcana-shell",
+      "name": "The Major Arcana Shell",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "earth" } }
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.might"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.root-of-the-rampart",
-      "flavorKey": "flavor.charm.root-of-the-rampart",
-      "flavor": "It grew through the wall instead of around it, and came out the other side still hungry.",
-      "notes": "themeId: earthen-bastion"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, metallic canister etched with tarot symbols, designed to launch high-velocity peas.",
+      "notes": "themeKey: demon.ironpeazombie"
     },
     {
-      "id": "charm.off-ctrl-017",
-      "nameKey": "charm.scudding-vine",
-      "name": "Scudding Vine",
+      "id": "charm.off-ctrl-031",
+      "nameKey": "charm.spike-shot-core",
+      "name": "Spike-Shot Core",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "air" } }
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        }
       ],
-      "roleGroups": ["atom.retribution"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.scudding-vine",
-      "flavorKey": "flavor.charm.scudding-vine",
-      "flavor": "It never roots long enough to be caught, or to stop cutting.",
-      "notes": "themeId: windswept-spore"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, pressurized canister of hardened obsidian that vibrates with kinetic energy.",
+      "notes": "themeKey: demon.jalapeashooter"
     },
     {
-      "id": "charm.off-ctrl-018",
-      "nameKey": "charm.chitin-of-the-undertow",
-      "name": "Chitin of the Undertow",
-      "charmClass": "standard",
-      "apCost": 3,
-      "axis": "offense",
-      "frameHint": "any",
-      "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "high", "params": { "element": "dark" } }
-      ],
-      "roleGroups": ["atom.hit-followthrough"],
-      "prefixRolls": 2,
-      "suffixRolls": 0,
-      "tags": ["offensive", "undead"],
-      "iconKey": "icon.charm.chitin-of-the-undertow",
-      "flavorKey": "flavor.charm.chitin-of-the-undertow",
-      "flavor": "Shed a dozen times by whatever the swarm dragged under, and still not satisfied.",
-      "notes": "themeId: umbral-swarm"
-    },
-    {
-      "id": "charm.off-ctrl-019",
-      "nameKey": "charm.bloom-of-the-equinox",
-      "name": "Bloom of the Equinox",
+      "id": "charm.off-ctrl-032",
+      "nameKey": "charm.splatter-seed-launcher",
+      "name": "Splatter-Seed Launcher",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
       "frameHint": "any",
       "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "light" } }
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
       ],
-      "roleGroups": ["atom.retribution"],
       "prefixRolls": 1,
-      "suffixRolls": 0,
-      "tags": ["offensive"],
-      "iconKey": "icon.charm.bloom-of-the-equinox",
-      "flavorKey": "flavor.charm.bloom-of-the-equinox",
-      "flavor": "It keeps the one balanced day of the year folded tight inside itself, waiting to spend it.",
-      "notes": "themeId: sunwoven-almanac"
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, pulpy orb of pressurized fruit rind that bursts upon impact, coating the battlefield in sticky, damaging juice.",
+      "notes": "themeKey: demon.melonpult"
     },
     {
-      "id": "charm.off-ctrl-020",
-      "nameKey": "charm.clockwork-graft",
-      "name": "Clockwork Graft",
+      "id": "charm.off-ctrl-033",
+      "nameKey": "charm.the-unfinished-column",
+      "name": "The Unfinished Column",
       "charmClass": "signet",
       "apCost": 5,
-      "axis": "offense",
+      "axis": "control",
       "frameHint": "any",
-      "uniqueCarry": true,
       "fixedAtoms": [
-        { "family": "atom.deathblast", "powerBand": "high", "params": { "element": "omni" } },
-        { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.prec-fixation",
+          "powerBand": "low",
+          "params": {
+            "element": "dark"
+          }
+        },
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
       ],
       "prefixRolls": 0,
       "suffixRolls": 0,
-      "tags": ["offensive", "mechanical"],
-      "iconKey": "icon.charm.clockwork-graft",
-      "flavorKey": "flavor.charm.clockwork-graft",
-      "flavor": "It detonates exactly once, exactly on schedule, and the gears never ask what it costs the rest of you.",
-      "notes": "themeId: gilded-porcelain"
+      "tags": [],
+      "flavor": "A folded newspaper, its ink bleeding into a grey, pulsating mass of brain matter that refuses to be read.",
+      "notes": "themeKey: demon.paperzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.off-ctrl-034",
+      "nameKey": "charm.kinetic-aperture",
+      "name": "Kinetic Aperture",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A polished brass lens that vibrates with the tension of a coiled spring, ready to release a concentrated burst of energy.",
+      "notes": "themeKey: demon.peasunflower"
+    },
+    {
+      "id": "charm.off-ctrl-035",
+      "nameKey": "charm.spore-scented-panic",
+      "name": "Spore-Scented Panic",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "control",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A hollowed, trembling fungal bulb that rhythmically ejects clouds of toxic dust at anything that draws near.",
+      "notes": "themeKey: demon.scaredyshroom"
+    },
+    {
+      "id": "charm.off-ctrl-036",
+      "nameKey": "charm.glacial-spikes",
+      "name": "Glacial Spikes",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, frost-coated rod of permafrost that vibrates with the kinetic energy of a thousand discharged rounds.",
+      "notes": "themeKey: demon.snowgatling"
+    },
+    {
+      "id": "charm.off-ctrl-037",
+      "nameKey": "charm.trifecta-volley",
+      "name": "Trifecta Volley",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A series of three parallel metal rods, aligned and tensioned to release a single, devastating kinetic burst.",
+      "notes": "themeKey: demon.threepeater"
     }
   ]
 }
