@@ -1,14 +1,12 @@
 # Spec: lawn-deploy-events (`demon-lawn-deploy` module 2)
 
-**Status: proposed — pending owner review. No build authorized.**
+**Status: partial implementation landed 2026-09-07; tuning and UX refinement remain.**
 
-**Greenfield module — flagged plainly.** Unlike `lawn-deploy-core`, no existing trigger/condition
-evaluator was found for the live PvZ lawn. `AmbushDraw` (`src/FusionRpg.Core/Delve/Events/AmbushDraw.cs`)
-is the nearest analog in shape, but it is Delve-only and its own header says it is "partially built —
-nothing in Delve/Attrition calls this yet." `demon-system-map.md`'s "Ecology / blood moon / roaming" row
-names an intended "run modifiers" concept for the lawn but it is unbuilt (`docs/guide/mechanisms/
-world-events.md` states plainly: "Vision … Not finished / not playable yet"). Everything below is
-design, not a discovered wiring gap — treat every claim as an assumption to confirm, not a citation.
+**Greenfield module — historical context.** No reusable live-lawn trigger evaluator existed when this
+spec was drafted; `AmbushDraw` (`src/FusionRpg.Core/Delve/Events/AmbushDraw.cs`) was only a Delve
+analogy. The current slice now has the Core evaluator, per-match roster/run-state holders, and tuning
+loader. Trigger balance and the plant-side UX remain design refinements, not missing plumbing to infer
+from the old Delve path.
 
 ## Objective
 
@@ -65,10 +63,10 @@ Every numeric knob below is a real balance-surface number per this repo's own tu
 
 ## Commands
 
-No commands beyond standard build/test until a concrete implementation shape is chosen — this module
-needs its own planning pass once `lawn-deploy-core`'s approach is confirmed built.
+The implementation uses the existing Core evaluator/tuning loader and the Injector event loop; no new
+command or server round-trip was introduced.
 
-## Project structure (proposed, not confirmed)
+## Project structure (implemented)
 
 - `src/FusionRpg.Core/Match/` — a new, small condition-evaluator type, matching `AmbushDraw`'s own shape
   (pure function over match state + the Correction-2 roster snapshot → yes/no + which case), not a rules
@@ -95,7 +93,8 @@ own `DeriveStream(worldSeed, "ai:{factionId}:{turn}")` already uses for an analo
   this-run} — mirroring `spec-ai-commander.md`'s own per-rule fire/no-fire matrix, not a single smoke test.
 - A determinism test: same `(matchSeed, caseId)` twice ⇒ byte-identical decision, matching
   `spec-ai-commander.md`'s own explicit determinism assertion shape.
-- No live E2E possible until `lawn-deploy-core` is real.
+- The live deploy chain was exercised after the core module landed; remaining live verification is
+  owner-observable UI timing rather than an unavailable dependency.
 
 ## Boundaries
 
@@ -117,6 +116,6 @@ own `DeriveStream(worldSeed, "ai:{factionId}:{turn}")` already uses for an analo
 3. ~~Does the player choose *which* owned demon deploys, or is it pre-selected (e.g., always the
    roster's Commander)?~~ **Resolved by Correction 1**: never a Commander. Still open: does the player
    choose among their eligible roster, or is a specific demon pre-selected some other way?
-4. Where exactly does the Correction-2 roster snapshot live, and who owns refreshing it — is this a new,
-   dedicated snapshot, or does it belong alongside whatever `commander-surface-map.md`'s own
-   `match-snapshot`-shaped module (if/when authorized) already builds for the same Hot/Cold problem?
+4. ~~Where exactly does the Correction-2 roster snapshot live?~~ **Resolved:** the dedicated
+   `LawnDeployRosterSessionCache` → `LawnDeployRosterSnapshotHolder` chain owns refresh and match freeze,
+   mirroring the Commander snapshot without sharing mutable state.

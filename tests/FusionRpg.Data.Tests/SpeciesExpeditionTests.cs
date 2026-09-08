@@ -7,10 +7,8 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
-/// <summary>`species-build` T1.4 (module 3, `species-xp`) — the expedition source
-/// (spec-species-xp.md §2 "Expedition"), and this program's standalone-first proof: a species can
-/// level with the game closed, purely off an expedition battle win, no lawn run anywhere in the test.
-/// The lawn source (T1.2/T1.3) lives in `SpeciesProgressionTests.cs`.</summary>
+/// <summary>Dedicated unique-specimen expedition progression remains isolated from the empire species
+/// fallback. The game-closed path awards the specimen only; species progression is lawn-general-only.</summary>
 public class SpeciesExpeditionTests : IDisposable
 {
     readonly string _dir;
@@ -46,7 +44,7 @@ public class SpeciesExpeditionTests : IDisposable
     };
 
     [Fact]
-    public void Expedition_win_levels_the_species_with_no_lawn_run_at_all()
+    public void Expedition_win_levels_only_the_specimen_with_no_lawn_run_at_all()
     {
         // The game-closed proof itself: nothing in this test ever calls AppendPvzActivityFact or
         // InsertEvent — the ONLY progression source touched is the expedition reward path.
@@ -64,16 +62,16 @@ public class SpeciesExpeditionTests : IDisposable
         Assert.True(applied.Applied);
 
         var species = _store.GetRpgActor(1, RpgActorKinds.Species, CatalogSpecies.DemonTypeId);
-        Assert.NotNull(species);
-        Assert.Equal(30, species!.Xp); // the same xp the specimen earned, mirrored onto its species
+        Assert.Null(species);
+        var after = _store.ListDemonRoster(1).Items.Single(s => s.Profile.InstanceId == instanceId).Actor;
+        Assert.Equal(30, after.Xp);
     }
 
     [Fact]
-    public void Species_award_shares_the_specimen_awards_transaction()
+    public void Dedicated_specimen_award_shares_the_reward_transaction()
     {
         // Mirrors ExpeditionRewardApplyTests' own "Bad_material_in_rewards_applies_nothing": when the
-        // WHOLE reward apply throws (bad material id), NEITHER the specimen NOR its species may have
-        // gained anything -- proving the species award rides the same transaction, not a separate one.
+        // WHOLE reward apply throws (bad material id), the specimen must not gain anything.
         var (specimen, _) = _store.MintDemon(1, Spec());
         var instanceId = specimen.Actor.InstanceId;
         var (_, _, row) = _store.DispatchExpedition(1, "species-exp-2", "scout-30m", new[] { instanceId }, 1);
@@ -109,6 +107,6 @@ public class SpeciesExpeditionTests : IDisposable
         Assert.False(retry.Applied);
 
         var species = _store.GetRpgActor(1, RpgActorKinds.Species, CatalogSpecies.DemonTypeId);
-        Assert.Equal(30, species!.Xp); // once, not twice
+        Assert.Null(species); // no empire fallback award on a dedicated expedition source
     }
 }

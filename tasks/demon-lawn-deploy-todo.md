@@ -222,7 +222,7 @@ T1.1-T1.5 may build in parallel after D0; T1.6 needs all of them.
   `tests/FusionRpg.Data.Tests/DemonLawnDeployMagnitudeTests.cs` (new, 3 tests),
   `tests/FusionRpg.Core.Tests/Demons/ConcreteSpeciesSeedReaderTests.cs` (edit, +1 test).
 
-### T1.6 — Live E2E proof · **S**, grew to **M** · 3 files — **CI half DONE 2026-09-07, live-lawn half pending**
+### T1.6 — Live E2E proof · **S**, grew to **M** · 3 files — **CI + prior live-lawn proof DONE; current provenance re-probe pending**
 
 - Extended `StorageE2ETests.cs`'s own `deploy → ack → assert ActiveBound` pattern to a real demon
   specimen minted through the real `/api/test/mint-demon` seam (`FusionEndpoints.cs`'s own existing
@@ -307,7 +307,11 @@ T1.1-T1.5 may build in parallel after D0; T1.6 needs all of them.
         and server are left running for the owner to look at directly if desired.
 - Verify: `dotnet test tests/FusionRpg.E2E.Tests --filter DemonLawnDeployE2E` — 2/2;
   `dotnet test tests/FusionRpg.E2E.Tests --filter StorageE2E` — 7/7 (regression baseline);
-  `live-lawn-quick-start` skill — pending.
+  prior `live-lawn-quick-start` deploy proof is recorded above. A fresh 2026-09-08 run loaded the
+  rebuilt MelonLoader injector (`injectorConnected=true`, `simEnabled=false`), entered Adventure
+  level 1 through the gated debug API, and ran the live lab board. A real roster specimen reached
+  `ActiveBound` with a Unity pointer; its `pvz.spawn.extra.ack` carried both `activeMatchMs` and
+  `lifecycleOccurrence`. The new lethal-killer bridge still needs a real combat death probe.
 - Files: `tests/FusionRpg.E2E.Tests/DemonLawnDeployE2ETests.cs` (new, 2 tests),
   `tests/FusionRpg.E2E.Tests/RpgApiFactory.cs` (edit — the species-seeding fix, affects every E2E test).
 
@@ -928,7 +932,15 @@ and "full board access" structurally enforced. The program is not source/progres
 The earlier Phase 1–3 implementation predates the approved source/progression contract. These tasks add
 the unique specimen XP path and close the generic-species leakage and replay gaps found in the audit.
 
-### T4.1 — Capture provenance and lifecycle identity · **M** · 4 files — **TODO**
+## Build status (2026-09-08)
+
+The working-tree implementation now includes lifecycle occurrence ids, canonical replay fact lookup,
+dedicated specimen kill/duration receipt storage, source-gated species projection, unique allocation
+composition, and scaled active-match timestamps. Focused source/tuning/activity and unique-store
+checks are green. The remaining binding-id receipt and attribution-proof work is intentionally still
+listed as TODO.
+
+### T4.1 — Capture provenance and lifecycle identity · **M** · 4 files — **PARTIAL 2026-09-08**
 
 Add a closed, additive capture contract for source-specific progression. Every relevant spawn, death, bind,
 and result record carries a per-match monotonic `lifecycleOccurrenceId`, preserved on retry. Death capture
@@ -937,10 +949,18 @@ attribution remains absent. Activity projection returns the existing canonical f
 longer uses ptr alone as a death identity.
 
 - **Acceptance:**
-  - [ ] A replay has the same occurrence/fact identity; a reused Unity ptr receives a new occurrence/fact.
-  - [ ] A lethal hook with no proven attacker emits no unique-kill candidate; no last-attacker inference exists.
-  - [ ] `demon.progression.v1` source claims parse through the closed source contract and are retained on
+  - [x] A replay has the same occurrence/fact identity; a reused Unity ptr receives a new occurrence/fact.
+  - [x] A lethal hook with no proven attacker emits no unique-kill candidate; no last-attacker inference exists.
+  - [x] `demon.progression.v1` source claims parse through the closed source contract and are retained on
         facts consumed by progression.
+  - [x] Lifecycle payloads carry kernel-scaled `activeMatchMs`; Data persists Bound time and does not
+        fall back to server wall-clock duration.
+  - [ ] The Injector wires `killerPtr` only when `Die` is reached synchronously from the target's
+        active `TakeDamage` interaction; this path does not poll or read back HP. A 2026-09-08 live
+        melee probe confirmed `AttackPlant → Plant.TakeDamage`, but the shipped game deferred
+        `Plant.Die` by about 16 ms, so no `killerPtr` was emitted under the strict rule. The next
+        slice needs a proven deferred-death bridge (or a lethal callback); it must not add HP scans,
+        last-attacker inference, or an unbounded cache. Unknown and indirect attackers remain absent.
 - **Verification:** focused Injector/Core/Data tests; `dotnet test tests/FusionRpg.Core.Tests --filter
   "ProgressionSource|Activity"`; `dotnet test tests/FusionRpg.Data.Tests --filter
   "ProgressionSource|Activity"`.
@@ -949,7 +969,7 @@ longer uses ptr alone as a death identity.
   `src/FusionRpg.Core/Activity/PvzActivityKinds.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.cs`.
 - **Estimated scope:** Medium.
 
-### T4.2 — Binding sessions and atomic terminal settlement · **L** · 3-5 files — **TODO**
+### T4.2 — Binding sessions and atomic terminal settlement · **L** · 3-5 files — **PARTIAL 2026-09-08**
 
 Create the binding-session and receipt schema in Data, including uniqueness for one open `(run,
 correlation)` and `(run, ptr)` mapping. Move unique binding creation, terminal close, receipt conflict
@@ -957,20 +977,28 @@ comparison, XP mutation, level-gain unlocks, and `ActiveBound → Roster` recove
 transaction. Post-commit notifications may refresh AtomHub state but cannot participate in settlement.
 
 - **Acceptance:**
-  - [ ] Bound creates exactly one session; correlation or open-ptr collisions are refused.
+  - [x] A successful Bound ack creates or refreshes exactly one durable session in the same
+        transaction as the actor phase transition.
+  - [x] A second open session using the same match correlation or Unity pointer is refused with
+        `binding.collision`; partial unique indexes enforce the invariant at the database boundary.
   - [ ] Exact receipt replay is a no-op; a collision with different immutable identity or delta is an
         integrity error.
-  - [ ] A crash/failure rolls back close, receipt, XP, unlocks, and roster recovery together.
-- **Verification:** Data transaction tests for concurrent delivery, crash rollback, ptr reuse, same-run
-  redeploy, specimen death, and match-end settlement; `dotnet test tests/FusionRpg.Data.Tests --filter
-  "UniqueLawnXp|UniqueActor"`.
+  - [x] The current ptr/match recovery path wraps receipt insertion, specimen XP, level-gain unlocks,
+        session close, and roster recovery in one SQLite transaction; a forced overflow regression
+        proves the receipt, XP, and phase all roll back together.
+  - [ ] The full binding-id receipt schema and collision checks above are still open; current sessions remain
+        keyed by specimen/match and require the T4.4 conformance migration.
+- **Verification:** The focused Data transaction/recovery set is green (`46/46` for
+  `UniqueLawnXp|UniqueActor|ProgressionSource|DedicatedProgression`), including a forced-overflow
+  crash rollback that proves receipt, XP, and roster recovery move together. Concurrent delivery,
+  binding-id collision, ptr reuse, and same-run redeploy coverage remain in T4.4.
 - **Dependencies:** T4.1, D2 (`dedicated-progression-isolation`), Phase 1 Checkpoint 1.
 - **Files likely touched:** `src/FusionRpg.Data/Sqlite/RpgStore.cs`,
   `src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs`,
   `src/FusionRpg.Data/Sqlite/RpgStore.Compaction.cs`.
 - **Estimated scope:** Large; split schema/projector and test work if it exceeds one focused session.
 
-### T4.3 — Unique lawn rewards and tuning · **M** · 4 files — **TODO**
+### T4.3 — Unique lawn rewards and tuning · **M** · 4 files — **PARTIAL 2026-09-08**
 
 Add the named specimen lawn award values to the next progression tuning version and parse/validate them as
 positive `long`s. Award verified kills and completed active-Bound intervals through the existing unique XP
@@ -978,9 +1006,9 @@ mutator, preserving its level-gain action-unlock path. Generic species completio
 `EmpireGeneral` facts; unique facts never award `RpgActorKinds.Species`.
 
 - **Acceptance:**
-  - [ ] Kill XP and duration XP use independent tuning values and checked `long` arithmetic with no hard cap.
-  - [ ] Zero/negative interval or award tuning is rejected before arithmetic.
-  - [ ] A unique and general demon sharing a type/species never cross-credit XP or allocation.
+  - [x] Kill XP and duration XP use independent tuning values and checked `long` arithmetic with no hard cap.
+  - [x] Zero/negative interval or award tuning is rejected before arithmetic.
+  - [x] A unique and general demon sharing a type/species never cross-credit XP or allocation.
 - **Verification:** Core tuning/parser tests, Data projection tests, and `python scripts/audit-magic-numbers.py
   --summary`; run `dotnet test tests/FusionRpg.Core.Tests --filter Progression`.
 - **Dependencies:** T4.2, D1 (`general-empire-fallback`).

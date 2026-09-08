@@ -180,15 +180,18 @@ public sealed partial class RpgStore
 
     /// <summary>Deploying → ActiveBound on spawn ack (by correlationId).</summary>
     public (bool Ok, string Reason, UniqueActorDto? Actor) TryAckUniqueSpawn(
-        string correlationId, string ptr, string? matchKey = null)
+        string correlationId, string ptr, string? matchKey = null, long? activeMatchMs = null)
     {
         if (string.IsNullOrWhiteSpace(correlationId) || string.IsNullOrWhiteSpace(ptr))
             return (false, "bad_args", null);
+        if (activeMatchMs is < 0)
+            return (false, "bad_active_match_ms", null);
         var corr = correlationId.Trim();
         var p = ptr.Trim();
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
             var row = FindUniqueByCorrelationUnlocked(db, corr);
             if (row is null) return (false, "not_found", null);
             if (!string.Equals(row.Phase, UniqueActorPhases.Deploying, StringComparison.Ordinal))
@@ -196,8 +199,27 @@ public sealed partial class RpgStore
 
             var now = DateTime.UtcNow.ToString("o");
             var mk = NullIfEmpty(matchKey) ?? row.MatchKey;
+            if (!string.IsNullOrWhiteSpace(mk))
+            {
+                using var collision = db.CreateCommand();
+                collision.Transaction = tx;
+                collision.CommandText = """
+                    SELECT instance_id FROM rpg_unique_lawn_sessions
+                    WHERE match_key = $mk AND instance_id <> $id
+                      AND ((correlation_id IS NOT NULL AND correlation_id = $corr)
+                           OR (ptr IS NOT NULL AND ptr = $ptr))
+                    LIMIT 1;
+                    """;
+                collision.Parameters.AddWithValue("$mk", mk!);
+                collision.Parameters.AddWithValue("$id", row.InstanceId);
+                collision.Parameters.AddWithValue("$corr", corr);
+                collision.Parameters.AddWithValue("$ptr", p);
+                if (collision.ExecuteScalar() is not null and not DBNull)
+                    return (false, "binding.collision", row);
+            }
             using (var cmd = db.CreateCommand())
             {
+                cmd.Transaction = tx;
                 cmd.CommandText = """
                     UPDATE rpg_unique_actors SET
                       phase = $phase,
@@ -214,6 +236,27 @@ public sealed partial class RpgStore
                 cmd.Parameters.AddWithValue("$id", row.InstanceId);
                 cmd.ExecuteNonQuery();
             }
+            if (!string.IsNullOrWhiteSpace(mk))
+            {
+                using var session = db.CreateCommand();
+                session.Transaction = tx;
+                session.CommandText = """
+                    INSERT INTO rpg_unique_lawn_sessions(instance_id, player_id, match_key, bound_utc, correlation_id, ptr, bound_active_ms)
+                    VALUES($id, $p, $mk, $t, $corr, $ptr, $activeMs)
+                    ON CONFLICT(instance_id) DO UPDATE SET
+                      player_id=$p, match_key=$mk, bound_utc=$t, correlation_id=$corr, ptr=$ptr,
+                      bound_active_ms=$activeMs;
+                    """;
+                session.Parameters.AddWithValue("$id", row.InstanceId);
+                session.Parameters.AddWithValue("$p", row.PlayerId);
+                session.Parameters.AddWithValue("$mk", mk!);
+                session.Parameters.AddWithValue("$t", now);
+                session.Parameters.AddWithValue("$corr", corr);
+                session.Parameters.AddWithValue("$ptr", p);
+                session.Parameters.AddWithValue("$activeMs", (object?)activeMatchMs ?? DBNull.Value);
+                session.ExecuteNonQuery();
+            }
+            tx.Commit();
             return (true, "", ReadUniqueActorUnlocked(db, row.InstanceId));
         }
     }
@@ -564,12 +607,15 @@ public sealed partial class RpgStore
     /// session, so an item equipped or unequipped after connecting never reached the runner.
     /// </returns>
     public IReadOnlyList<long> ObserveUniqueActorEvents(IEnumerable<(string Kind, string? MatchKey, string PayloadJson)> events)
+        => ObserveUniqueActorEvents(events.Select(e => (e.Kind, e.MatchKey, e.PayloadJson, (string?)null)));
+
+    public IReadOnlyList<long> ObserveUniqueActorEvents(IEnumerable<(string Kind, string? MatchKey, string PayloadJson, string? EventTime)> events)
     {
         var affected = new List<long>();
         try
         {
             foreach (var e in events)
-                foreach (var pid in ObserveUniqueActorEvent(e.Kind, e.MatchKey, e.PayloadJson ?? "{}"))
+                foreach (var pid in ObserveUniqueActorEvent(e.Kind, e.MatchKey, e.PayloadJson ?? "{}", e.EventTime))
                     if (!affected.Contains(pid))
                         affected.Add(pid);
         }
@@ -585,16 +631,17 @@ public sealed partial class RpgStore
     /// <returns>Every player id whose ActiveBound roster changed as a result of this one event —
     /// almost always zero or one, but a shared `match_key` recovering more than one specimen at once
     /// is handled without assuming they all belong to the same player.</returns>
-    IReadOnlyList<long> ObserveUniqueActorEvent(string kind, string? matchKey, string payloadJson)
+    IReadOnlyList<long> ObserveUniqueActorEvent(string kind, string? matchKey, string payloadJson, string? eventTime)
     {
         if (string.IsNullOrWhiteSpace(kind)) return NoPlayers;
         if (string.Equals(kind, "pvz.spawn.extra.ack", StringComparison.OrdinalIgnoreCase))
         {
             var corr = TryString(payloadJson, "correlationId");
             var ptr = TryString(payloadJson, "ptr");
+            var activeMatchMs = TryLong(payloadJson, "activeMatchMs");
             if (!string.IsNullOrWhiteSpace(corr) && !string.IsNullOrWhiteSpace(ptr))
             {
-                var ack = TryAckUniqueSpawn(corr!, ptr!, matchKey);
+                var ack = TryAckUniqueSpawn(corr!, ptr!, matchKey, activeMatchMs);
                 if (ack.Ok && ack.Actor is not null) return new[] { ack.Actor.PlayerId };
             }
             return NoPlayers;
@@ -604,48 +651,200 @@ public sealed partial class RpgStore
             string.Equals(kind, "zombie.die", StringComparison.OrdinalIgnoreCase))
         {
             var ptr = TryString(payloadJson, "ptr");
-            return !string.IsNullOrWhiteSpace(ptr) ? TryRecoverActiveByPtr(ptr!) : NoPlayers;
+            if (string.IsNullOrWhiteSpace(ptr)) return NoPlayers;
+            var activeMatchMs = TryLong(payloadJson, "activeMatchMs");
+            var targetSide = string.Equals(kind, "plant.die", StringComparison.OrdinalIgnoreCase)
+                ? "plant" : "zombie";
+            return TryRecoverActiveByPtr(
+                ptr!, matchKey, TryString(payloadJson, "lifecycleOccurrence"), eventTime,
+                TryString(payloadJson, "killerPtr"), targetSide, activeMatchMs);
         }
 
         if (string.Equals(kind, "board.end", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(kind, "match.result", StringComparison.OrdinalIgnoreCase))
         {
-            return !string.IsNullOrWhiteSpace(matchKey) ? TryRecoverActiveByMatchKey(matchKey!) : NoPlayers;
+            return !string.IsNullOrWhiteSpace(matchKey) ? TryRecoverActiveByMatchKey(matchKey!, eventTime, TryLong(payloadJson, "activeMatchMs")) : NoPlayers;
         }
 
         return NoPlayers;
     }
 
-    IReadOnlyList<long> TryRecoverActiveByPtr(string ptr)
+    IReadOnlyList<long> TryRecoverActiveByPtr(
+        string ptr, string? matchKey, string? occurrenceId, string? eventTime,
+        string? killerPtr, string targetSide, long? activeMatchMs)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
             using var cmd = db.CreateCommand();
+            cmd.Transaction = tx;
             cmd.CommandText = """
-                SELECT instance_id, player_id FROM rpg_unique_actors
+                SELECT instance_id, player_id, match_key FROM rpg_unique_actors
                 WHERE phase = $phase AND last_ptr = $ptr;
                 """;
             cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.ActiveBound);
             cmd.Parameters.AddWithValue("$ptr", ptr);
-            var rows = new List<(string Id, long PlayerId)>();
+            var rows = new List<(string Id, long PlayerId, string? MatchKey)>();
             using (var r = cmd.ExecuteReader())
             {
                 while (r.Read())
-                    rows.Add((r.GetString(0), r.GetInt64(1)));
+                    rows.Add((r.GetString(0), r.GetInt64(1), r.IsDBNull(2) ? null : r.GetString(2)));
             }
-            foreach (var (id, _) in rows)
-                RecoverToRosterUnlocked(db, id);
+            // The dead ptr identifies the terminal specimen, not its killer. A kill award is only
+            // eligible when the capture supplies a causal killerPtr that resolves to an opposing,
+            // still-bound specimen in this same match.
+            if (!string.IsNullOrWhiteSpace(killerPtr) && !string.IsNullOrWhiteSpace(matchKey))
+            {
+                using var killer = db.CreateCommand();
+                killer.Transaction = tx;
+                killer.CommandText = """
+                    SELECT instance_id, player_id, side, match_key FROM rpg_unique_actors
+                    WHERE phase = $phase AND last_ptr = $ptr AND match_key = $mk;
+                    """;
+                killer.Parameters.AddWithValue("$phase", UniqueActorPhases.ActiveBound);
+                killer.Parameters.AddWithValue("$ptr", killerPtr!);
+                killer.Parameters.AddWithValue("$mk", matchKey!);
+                var killers = new List<(string Id, long PlayerId, string Side)>();
+                using (var kr = killer.ExecuteReader())
+                {
+                    while (kr.Read())
+                    {
+                        var side = kr.GetString(2);
+                        if (!string.Equals(side, targetSide, StringComparison.Ordinal))
+                            killers.Add((kr.GetString(0), kr.GetInt64(1), side));
+                    }
+                }
+                foreach (var (id, _, _) in killers)
+                    AwardUniqueLawnKillUnlocked(db, id, matchKey, occurrenceId, tx);
+            }
+            foreach (var (id, _, actorMatchKey) in rows)
+            {
+                AwardUniqueLawnDurationUnlocked(db, id, actorMatchKey ?? matchKey, activeMatchMs, tx);
+                RecoverToRosterUnlocked(db, id, tx);
+            }
+            tx.Commit();
             return rows.Select(x => x.PlayerId).Distinct().ToList();
         }
     }
 
-    IReadOnlyList<long> TryRecoverActiveByMatchKey(string matchKey)
+    /// <summary>Applies the dedicated specimen lawn-kill factor once per lifecycle occurrence. The
+    /// receipt is keyed by specimen, match, occurrence, and reason so retries and pointer reuse are
+    /// harmless. Missing occurrence identity is refused rather than falling back to a pointer.</summary>
+    void AwardUniqueLawnKillUnlocked(SqliteConnection db, string instanceId, string? matchKey, string? occurrenceId,
+        SqliteTransaction? tx = null)
+    {
+        if (string.IsNullOrWhiteSpace(matchKey) || string.IsNullOrWhiteSpace(occurrenceId)) return;
+        long delta;
+        try { delta = RpgXpAwards.SpecimenLawnKill; }
+        catch (InvalidOperationException) { return; }
+        if (delta <= 0) return;
+
+        var now = DateTime.UtcNow.ToString("o");
+        using var receipt = db.CreateCommand();
+        receipt.Transaction = tx;
+        receipt.CommandText = """
+            INSERT OR IGNORE INTO rpg_unique_lawn_xp_receipts
+              (instance_id, match_key, occurrence_id, reason, xp, created_utc)
+            VALUES($id, $mk, $occ, $reason, $xp, $now);
+            """;
+        receipt.Parameters.AddWithValue("$id", instanceId);
+        receipt.Parameters.AddWithValue("$mk", matchKey!);
+        receipt.Parameters.AddWithValue("$occ", occurrenceId!);
+        receipt.Parameters.AddWithValue("$reason", RpgXpReasons.SpecimenLawnKill);
+        receipt.Parameters.AddWithValue("$xp", delta);
+        receipt.Parameters.AddWithValue("$now", now);
+        if (receipt.ExecuteNonQuery() <= 0)
+        {
+            using var check = db.CreateCommand();
+            check.Transaction = tx;
+            check.CommandText = "SELECT xp FROM rpg_unique_lawn_xp_receipts WHERE instance_id=$id AND match_key=$mk AND occurrence_id=$occ AND reason=$reason;";
+            check.Parameters.AddWithValue("$id", instanceId);
+            check.Parameters.AddWithValue("$mk", matchKey!);
+            check.Parameters.AddWithValue("$occ", occurrenceId!);
+            check.Parameters.AddWithValue("$reason", RpgXpReasons.SpecimenLawnKill);
+            if (Convert.ToInt64(check.ExecuteScalar() ?? 0L) != delta)
+                throw new InvalidOperationException("unique lawn XP receipt collision");
+            return;
+        }
+
+        var (ok, _, actor, levelsGained) = AwardUniqueActorXpUnlocked(db, instanceId, delta, tx);
+        if (ok && actor is not null && levelsGained > 0)
+            TryRollActionUnlocks(db, instanceId, actor.TypeId, levelsGained, tx);
+    }
+
+    void AwardUniqueLawnDurationUnlocked(SqliteConnection db, string instanceId, string? matchKey, long? activeMatchMs,
+        SqliteTransaction? tx = null)
+    {
+        if (string.IsNullOrWhiteSpace(matchKey)) return;
+        long intervalMs;
+        long intervalXp;
+        try
+        {
+            intervalMs = RpgXpAwards.SpecimenBoundIntervalMs;
+            intervalXp = RpgXpAwards.SpecimenBoundIntervalXp;
+        }
+        catch (InvalidOperationException) { return; }
+        if (intervalMs <= 0 || intervalXp <= 0) return;
+
+        using var read = db.CreateCommand();
+        read.Transaction = tx;
+        read.CommandText = "SELECT bound_active_ms FROM rpg_unique_lawn_sessions WHERE instance_id=$id AND match_key=$mk;";
+        read.Parameters.AddWithValue("$id", instanceId);
+        read.Parameters.AddWithValue("$mk", matchKey!);
+        if (read.ExecuteScalar() is not { } boundValue || boundValue is DBNull || activeMatchMs is not { } endedMs)
+            return;
+        var startedMs = Convert.ToInt64(boundValue);
+        if (endedMs < startedMs) return;
+        var elapsedMs = endedMs - startedMs;
+        if (elapsedMs <= 0) return;
+        long delta;
+        checked { delta = (elapsedMs / intervalMs) * intervalXp; }
+
+        var now = DateTime.UtcNow.ToString("o");
+        using var receipt = db.CreateCommand();
+        receipt.Transaction = tx;
+        receipt.CommandText = """
+            INSERT OR IGNORE INTO rpg_unique_lawn_xp_receipts
+              (instance_id, match_key, occurrence_id, reason, xp, created_utc)
+            VALUES($id, $mk, 'duration', $reason, $xp, $now);
+            """;
+        receipt.Parameters.AddWithValue("$id", instanceId);
+        receipt.Parameters.AddWithValue("$mk", matchKey!);
+        receipt.Parameters.AddWithValue("$reason", RpgXpReasons.SpecimenLawnDuration);
+        receipt.Parameters.AddWithValue("$xp", delta);
+        receipt.Parameters.AddWithValue("$now", now);
+        if (receipt.ExecuteNonQuery() <= 0)
+        {
+            using var check = db.CreateCommand();
+            check.Transaction = tx;
+            check.CommandText = "SELECT xp FROM rpg_unique_lawn_xp_receipts WHERE instance_id=$id AND match_key=$mk AND occurrence_id='duration' AND reason=$reason;";
+            check.Parameters.AddWithValue("$id", instanceId);
+            check.Parameters.AddWithValue("$mk", matchKey!);
+            check.Parameters.AddWithValue("$reason", RpgXpReasons.SpecimenLawnDuration);
+            if (Convert.ToInt64(check.ExecuteScalar() ?? 0L) != delta)
+                throw new InvalidOperationException("unique lawn XP duration receipt collision");
+            return;
+        }
+
+        var (ok, _, actor, levelsGained) = AwardUniqueActorXpUnlocked(db, instanceId, delta, tx);
+        if (ok && actor is not null && levelsGained > 0)
+            TryRollActionUnlocks(db, instanceId, actor.TypeId, levelsGained, tx);
+        using var clear = db.CreateCommand();
+        clear.Transaction = tx;
+        clear.CommandText = "DELETE FROM rpg_unique_lawn_sessions WHERE instance_id=$id;";
+        clear.Parameters.AddWithValue("$id", instanceId);
+        clear.ExecuteNonQuery();
+    }
+
+    IReadOnlyList<long> TryRecoverActiveByMatchKey(string matchKey, string? eventTime, long? activeMatchMs)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
             using var cmd = db.CreateCommand();
+            cmd.Transaction = tx;
             cmd.CommandText = """
                 SELECT instance_id, player_id FROM rpg_unique_actors
                 WHERE phase = $phase AND match_key = $mk;
@@ -659,16 +858,21 @@ public sealed partial class RpgStore
                     rows.Add((r.GetString(0), r.GetInt64(1)));
             }
             foreach (var (id, _) in rows)
-                RecoverToRosterUnlocked(db, id);
+            {
+                AwardUniqueLawnDurationUnlocked(db, id, matchKey, activeMatchMs, tx);
+                RecoverToRosterUnlocked(db, id, tx);
+            }
+            tx.Commit();
             return rows.Select(x => x.PlayerId).Distinct().ToList();
         }
     }
 
-    void RecoverToRosterUnlocked(SqliteConnection db, string instanceId)
+    void RecoverToRosterUnlocked(SqliteConnection db, string instanceId, SqliteTransaction? tx = null)
     {
         // ActiveBound → Recovering → Roster in one write (persist_ok immediate for W4).
         var now = DateTime.UtcNow.ToString("o");
         using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
         cmd.CommandText = """
             UPDATE rpg_unique_actors SET
               phase = $phase,
@@ -684,6 +888,11 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$id", instanceId);
         cmd.Parameters.AddWithValue("$active", UniqueActorPhases.ActiveBound);
         cmd.ExecuteNonQuery();
+        using var session = db.CreateCommand();
+        session.Transaction = tx;
+        session.CommandText = "DELETE FROM rpg_unique_lawn_sessions WHERE instance_id=$id;";
+        session.Parameters.AddWithValue("$id", instanceId);
+        session.ExecuteNonQuery();
     }
 
     void ClearBindToRosterUnlocked(SqliteConnection db, string instanceId)
@@ -719,9 +928,10 @@ public sealed partial class RpgStore
         return r.Read() ? MapUniqueActor(r) : null;
     }
 
-    UniqueActorDto? ReadUniqueActorUnlocked(SqliteConnection db, string instanceId)
+    UniqueActorDto? ReadUniqueActorUnlocked(SqliteConnection db, string instanceId, SqliteTransaction? tx = null)
     {
         using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
         cmd.CommandText = """
             SELECT instance_id, player_id, side, type_id, phase, level, xp,
                    match_key, last_ptr, deploy_correlation_id, revision, created_utc, updated_utc
@@ -1542,22 +1752,23 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            var (ok, why, actor, levelsGained) = AwardUniqueActorXpUnlocked(db, id, delta);
+            using var tx = db.BeginTransaction();
+            var (ok, why, actor, levelsGained) = AwardUniqueActorXpUnlocked(db, id, delta, tx);
             _ = reason; // audit reason reserved; no type progression write
-            // A21 (spec-action-instance-and-grant.md §4): same critical section as the XP write
-            // above, never a post-commit hook -- see TryRollActionUnlocks's own doc comment for why
-            // "same lock" is this class's real atomicity guarantee, not a shared SQL transaction.
+            // A21 (spec-action-instance-and-grant.md §4): the XP write and unlock roll share this
+            // transaction, never a post-commit hook.
             if (ok && levelsGained > 0 && actor is not null)
-                TryRollActionUnlocks(id, actor.TypeId, levelsGained);
+                TryRollActionUnlocks(db, id, actor.TypeId, levelsGained, tx);
+            tx.Commit();
             return (ok, why, actor);
         }
     }
 
     /// <summary>XP award inside an open transaction — used by the expedition reward apply.</summary>
     internal (bool Ok, string Reason, UniqueActorDto? Actor, int LevelsGained) AwardUniqueActorXpUnlocked(
-        SqliteConnection db, string instanceId, long delta)
+        SqliteConnection db, string instanceId, long delta, SqliteTransaction? tx = null)
     {
-        var row = ReadUniqueActorUnlocked(db, instanceId);
+        var row = ReadUniqueActorUnlocked(db, instanceId, tx);
         if (row is null) return (false, "not_found", null, 0);
         if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
             return (false, "phase.retired", row, 0);
@@ -1575,6 +1786,7 @@ public sealed partial class RpgStore
 
         var now = DateTime.UtcNow.ToString("o");
         using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
         cmd.CommandText = """
             UPDATE rpg_unique_actors SET
               xp = $xp,
@@ -1591,7 +1803,7 @@ public sealed partial class RpgStore
         // A21 (spec-action-instance-and-grant.md §4): trailing, additive field -- the same
         // "zero call-site rewrite needed" shape CompiledAction.Category/ActionCostRow.AllowLethal
         // already established. row.Level is the BEFORE value (read above, before this UPDATE).
-        return (true, "", ReadUniqueActorUnlocked(db, instanceId), (int)(level - row.Level));
+        return (true, "", ReadUniqueActorUnlocked(db, instanceId, tx), (int)(level - row.Level));
     }
 
     /// <summary>Standard FNV-1a 64-bit (public-domain hash, not app logic) -- mirrors
@@ -1615,13 +1827,12 @@ public sealed partial class RpgStore
     /// real, `RpgStore`-backed delegates -- `ActionUnlockGrantService` itself stays pure/DB-free.
     /// Called once per `LevelsGained` by both production callers of `AwardUniqueActorXpUnlocked`
     /// (`AwardUniqueActorXp` below, the expedition reward apply in `RpgStore.Expeditions.cs`), right
-    /// after the XP write each already made, under the SAME `lock (_gate)` critical section --
-    /// this class's own established concurrency discipline (every method serializes through one gate),
-    /// so no interleaving writer can ever observe the level and the roll as two separable facts even
-    /// though `GetUnlockState`/`SaveUnlockState`/`UpsertGrant` each open their own connection rather
-    /// than sharing one SQL transaction with the XP `UPDATE` above.
+    /// after the XP write each already made, under the SAME SQLite transaction and `lock (_gate)`
+    /// critical section -- no interleaving writer can observe the level and roll as separable facts,
+    /// and a grant failure rolls the XP write back with the unlock state.
     /// </summary>
-    void TryRollActionUnlocks(string instanceId, int typeId, int levelsGained)
+    void TryRollActionUnlocks(SqliteConnection db, string instanceId, int typeId, int levelsGained,
+        SqliteTransaction? tx = null)
     {
         if (levelsGained <= 0) return;
         // No configured host has opted into the unlock ladder yet (every test project except the
@@ -1648,13 +1859,19 @@ public sealed partial class RpgStore
         var unlockStateOwner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
         var grantOwner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
         var service = new ActionUnlockGrantService(
-            loadUnlockState: _ => GetUnlockState(unlockStateOwner),
-            saveUnlockState: (_, state) => SaveUnlockState(unlockStateOwner, state),
-            catalog: () => ListActionIds().Select(GetAction).Where(a => a is not null).Select(a => a!).ToList(),
+            loadUnlockState: _ => GetUnlockStateUnlocked(db, unlockStateOwner, tx),
+            saveUnlockState: (_, state) => SaveUnlockStateUnlocked(db, unlockStateOwner, state, tx),
+            catalog: () => ListActionIdsUnlocked(db, tx).Select(id => GetActionUnlocked(db, id, tx)).Where(a => a is not null).Select(a => a!).ToList(),
             familyOf: ActionFamilyMapPolicy.Map,
-            grant: (_, actionId) => UpsertGrant(
-                new ActionGrantRow(grantOwner.Kind, grantOwner.Key, actionId, Source: "unlock-ladder"),
-                grantId: $"unlock:{instanceId}:{actionId}"));
+            grant: (_, actionId) =>
+            {
+                var rejection = UpsertGrantUnlocked(
+                    db,
+                    new ActionGrantRow(grantOwner.Kind, grantOwner.Key, actionId, Source: "unlock-ladder"),
+                    grantId: $"unlock:{instanceId}:{actionId}", tx: tx);
+                if (!rejection.IsOk)
+                    throw new InvalidOperationException($"action unlock grant refused: {rejection.Reason}");
+            });
 
         var specimenSeed = Fnv1a64(instanceId);
         for (var i = 0; i < levelsGained; i++)

@@ -40,7 +40,9 @@ public static class RpgXpAwardMap
     // the XP multiply this constant used to feed.
     static readonly double NoKillPowerScaleYet = 1.0;
 
-    public static IReadOnlyList<Award> FromActivity(string factKind, string? resultRaw, int? typeId, string? payloadJson = null)
+    public static IReadOnlyList<Award> FromActivity(
+        string factKind, string? resultRaw, int? typeId, string? payloadJson = null,
+        string? sourceKind = null, string? sourceId = null)
     {
         switch (factKind)
         {
@@ -62,11 +64,11 @@ public static class RpgXpAwardMap
             case PvzActivityKinds.PlantPlaced:
                 return WithSpeciesPlacement(
                     new Award(RpgActorKinds.Plant, typeId ?? 0, RpgXpAwards.PlantPlace, RpgXpReasons.PlantPlace),
-                    "plant", typeId);
+                    "plant", typeId, sourceKind, sourceId);
             case PvzActivityKinds.ZombieSpawned:
                 return WithSpeciesPlacement(
                     new Award(RpgActorKinds.Zombie, typeId ?? 0, RpgXpAwards.ZombieSpawn, RpgXpReasons.ZombieSpawn),
-                    "zombie", typeId);
+                    "zombie", typeId, sourceKind, sourceId);
             default:
                 return Array.Empty<Award>();
         }
@@ -82,12 +84,19 @@ public static class RpgXpAwardMap
     ///
     /// <para>Best-effort, never a hard requirement: most progression tests never configure
     /// <see cref="DemonSpeciesCatalog"/> or <see cref="SpeciesProgressionTuningHub"/>, and awarding the
-    /// existing type/player XP above must keep working identically without either configured. Only the
-    /// two live-game hosts (`Server/Program.cs`, `Injector/Host/RpgHost.cs`) configure the roster, and
-    /// only the server configures species tuning, so this only ever fires for real.</para>
+    /// existing type/player XP above must keep working identically without either configured. A
+    /// species award additionally requires a typed <c>EmpireGeneral</c> provenance claim; the legacy
+    /// <paramref name="payloadJson"/> argument remains for call-site compatibility but is not a
+    /// source discriminator.</para>
     /// </summary>
-    static IReadOnlyList<Award> WithSpeciesPlacement(Award typeAward, string side, int? gameTypeId)
+    static IReadOnlyList<Award> WithSpeciesPlacement(
+        Award typeAward, string side, int? gameTypeId, string? sourceKind, string? sourceId)
     {
+        // Source provenance is the only discriminator. A missing, malformed, unique, or commander
+        // claim is ineligible for the empire fallback; payload fields such as `instanceId` and the
+        // injector's opaque `source` token are deliberately ignored.
+        if (!IsEmpireGeneralSource(sourceKind, sourceId, side, gameTypeId))
+            return new[] { typeAward };
         if (gameTypeId is not { } tid || !DemonSpeciesCatalog.IsConfigured || !SpeciesProgressionTuningHub.IsConfigured)
             return new[] { typeAward };
 
@@ -102,5 +111,22 @@ public static class RpgXpAwardMap
                 SpeciesProgressionTuningHub.Tuning.PlacementAward, typeAward.Reason,
                 ScopeKey: species.SpeciesId)
         };
+    }
+
+    static bool IsEmpireGeneralSource(string? sourceKind, string? sourceId, string side, int? gameTypeId)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(sourceId)
+            || gameTypeId is not { } tid
+            || !DemonSpeciesCatalog.IsConfigured) return false;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind!, sourceId!)
+                is not DemonProgressionSource.EmpireGeneralSource general) return false;
+            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, tid, out var species)
+                && string.Equals(species.SpeciesId, general.SpeciesId, StringComparison.Ordinal);
+        }
+        catch (InvalidOperationException) { return false; }
+        catch (FormatException) { return false; }
     }
 }

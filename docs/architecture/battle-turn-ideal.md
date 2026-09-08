@@ -193,6 +193,16 @@ So mode 1 is an **adapter, not a scheduler**: the injector projects observed gam
 
 Stated plainly: **one state vocabulary everywhere; scheduling authority only where we actually have it.**
 
+### Death events carry cause only where the simulator owns the cause
+
+Server-owned BattleEngine runs may attach an optional `KillerActorKey` to the existing `die`
+occurrence. The report emitter maps that stable actor key to the run's synthetic pointer and adds
+`killerPtr` to the existing `plant.die`/`zombie.die` payload; attackerless or unproven deaths leave
+the field absent. This is metadata on one lifecycle occurrence, not a second event or a new scheduler
+path. The PvZ realtime adapter remains observation-only: Unity owns HP and lifetime, so the server
+does not shadow-simulate lawn combat or manufacture a replacement death event. See
+[spec-death-attribution-events.md](battle/spec-death-attribution-events.md).
+
 ---
 
 ## 7. Turn-order forecast — a free read-model

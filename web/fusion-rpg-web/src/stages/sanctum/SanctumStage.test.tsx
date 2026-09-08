@@ -99,7 +99,7 @@ describe("SanctumStage", () => {
     expect(screen.getByTestId("rail-sanctum")).toHaveAttribute("data-state", "active");
   });
 
-  it("shows the first-run script when the player has no bound creature", () => {
+  it("shows the legacy first-run script while server-backed onboarding is pending", () => {
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     expect(screen.getByTestId("focus-card-first-run")).toBeInTheDocument();
     expect(screen.queryByTestId("focus-card-actor")).not.toBeInTheDocument();

@@ -98,7 +98,7 @@ class LiveFlavourMissingTests(unittest.TestCase):
         self.assertEqual(findings["consumable"].evidence["missingCount"], 63)
         self.assertEqual(findings["consumable"].evidence["totalCount"], 63)
         self.assertEqual(findings["charm"].evidence["missingCount"], 30)
-        self.assertEqual(findings["charm"].evidence["totalCount"], 70)
+        self.assertEqual(findings["charm"].evidence["totalCount"], 96)
 
 
 @unittest.skipUnless(LIVE_ITEMS_ROOT.is_dir(), "live item corpus not present in this checkout")

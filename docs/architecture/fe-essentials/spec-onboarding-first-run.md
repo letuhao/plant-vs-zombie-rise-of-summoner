@@ -1,5 +1,10 @@
 # Spec: `onboarding-first-run`
 
+> **Legacy specification (superseded 2026-09-08).** This document specifies the old sunflower/bind
+> reveal. It remains for implementation history and must not be used to define the product's current
+> onboarding. Follow [`../../standalone/spec-first-session-progression.md`](../../standalone/spec-first-session-progression.md)
+> for the server-backed victory → Dave → species → equipment sequence.
+
 **Module id:** `onboarding-first-run` · **Program:** [fe-essentials-map.md](../fe-essentials-map.md) ·
 **Status:** Draft — pending owner review.
 

@@ -33,10 +33,15 @@ public static class PvzActivityKinds
     };
 
     /// <summary>Dedupe key for capture projection (never empty when possible).</summary>
-    public static string DedupeKeyForCapture(string factKind, string? ptr, int? col, int? row, string t) =>
+    public static string DedupeKeyForCapture(string factKind, string? ptr, int? col, int? row, string t,
+        long? lifecycleOccurrence = null) =>
         factKind switch
         {
             MatchStarted or MatchEnded => "run",
+            // Death occurrences are monotonic within a match. Pointer-only identity is retained as
+            // a legacy fallback for older captures, but must not be used when the injector supplied
+            // the stronger lifecycle identity (pointers are reused by the game).
+            ZombieKilled or PlantLost when lifecycleOccurrence is { } occurrence => $"occ:{occurrence}",
             ZombieKilled or PlantLost or MowerUsed or ZombieSpawned =>
                 !string.IsNullOrWhiteSpace(ptr) ? ptr! : $"t:{t}",
             PlantPlaced =>

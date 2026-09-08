@@ -1134,7 +1134,9 @@ public static partial class BattleEngine
                 {
                     attacker.Kills++;
                     killsThisHit++;
-                    Events.Add(new BattleEventRec(round, BattleEventKinds.Die, victim.Setup.Key, victim.Setup.TypeId, victim.Setup.Side));
+                    Events.Add(new BattleEventRec(
+                        round, BattleEventKinds.Die, victim.Setup.Key, victim.Setup.TypeId, victim.Setup.Side,
+                        KillerActorKey: attacker.Setup.Key));
                     Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(victim.Setup.Key));
                 }
             }

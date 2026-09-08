@@ -1,6 +1,6 @@
 # Spec: lawn-deploy-progression (`demon-lawn-deploy` module 2)
 
-**Status:** approved 2026-09-08; specification only.  
+**Status:** approved 2026-09-08; partial implementation landed 2026-09-08.
 **Depends on:** `lawn-deploy-core`, [progression-source-contract](../demons/spec-progression-source-contract.md).  
 **Decision:** [decisions.md](../decisions.md) — *Unique lawn XP receipts (2026-09-08)*.
 
@@ -21,6 +21,20 @@ This module adds the durable, Cold projection for a lawn `UniqueSpecimen` source
 - expose a player-readable XP receipt later through the existing specimen/actor-sheet surfaces, not a new lawn route.
 
 It does not change the deploy trigger cadence or cost (`lawn-deploy-events` owns that), create a new Unity prefab, award Souls, change general demon species XP, make a Commander or Patron deployable, or determine a unique allocation plan. It consumes the source-isolation contract; it does not reopen its source variants.
+
+## Implementation status
+
+The current slice adds lifecycle-occurrence dedupe, durable unique lawn session/receipt tables, kill
+XP settlement when a verified occurrence is supplied, active-duration settlement, dedicated tuning
+keys. Bound acknowledgement now persists the actor transition and lawn session atomically, and a
+per-event SQLite transaction covers receipt, XP, unlock, session close, and roster recovery. The
+Injector now stamps lifecycle payloads with the kernel's scaled active-match milliseconds, and Data
+persists the Bound timestamp and refuses wall-clock fallback. It also wires source-gated species
+projection and dedicated allocation isolation. A fresh live melee probe confirmed that the shipped
+game defers `Plant.Die` after `Plant.TakeDamage`; the strict no-HP-read path therefore fails closed
+without `killerPtr` until a proven deferred-death bridge is added. The remaining spec work is
+explicit: the binding-id receipt model and that bridge (basic open correlation/pointer collision
+indexes now exist).
 
 ## Source and eligibility contract
 
@@ -55,7 +69,22 @@ Specimen death or match.result(occurrenceId, activeMatchMs)
 
 The Injector adds a per-match monotonic `lifecycleOccurrenceId` to every relevant lifecycle record, preserves it on transport retry, and emits a causal `killerPtr` only when the actual fatal interaction proves it. It also emits a monotonic `activeMatchMs` for bind, death, and match-result lifecycle records. `activeMatchMs` measures Unity scaled active match time and therefore excludes pause time. The injector remains SQLite-free: it records facts and returns. The Server/Data projection performs the lookup and durable write after capture. The current ptr-only death dedupe (`PvzActivityKinds.cs:35-47`) is insufficient because a reused ptr would suppress a later death; the implementation must use `lifecycleOccurrenceId` to locate the canonical activity fact on both first delivery and replay.
 
-Current evidence makes this addition necessary: `EffectEventDto` can carry `killerPtr` (`src/FusionRpg.Contracts/EffectDtos.cs:161`), but the current `zombie.die` payload omits it (`src/FusionRpg.Injector/GameHooks.cs:1032-1041`). `RpgStore.Project` records a death but has no unique-kill projector (`src/FusionRpg.Data/Sqlite/RpgStore.cs:2617-2621`).
+The Injector now carries a one-shot causal token from a lethal `TakeDamage` interaction into the
+matching `plant.die`/`zombie.die` payload. The proof is a synchronous `Die` call while that target's
+`TakeDamage` source is active; the attribution path does not poll or read back HP. Direct
+plant/zombie attackers are eligible; bullets and indirect or deferred sources remain absent. A live
+game probe is still required to confirm the bridge against the shipped Unity signatures.
+`RpgStore.Project` records the death, while dedicated settlement runs in `ObserveUniqueActorEvents`.
+
+### Server-owned battle exception
+
+The [battle-death-attribution-events](../battle/spec-death-attribution-events.md) module may provide
+`killerPtr` on `plant.die`/`zombie.die` events emitted by the server-owned `BattleEngine` for web or
+standalone battles. That pointer is authoritative for that report because the battle resolver owns
+the HP state and lethal interaction. It does **not** satisfy the live-lawn proof above: a live PvZ
+death remains a Unity-captured fact, and the server must not shadow-simulate it or infer a killer
+from `combat.hit`, `*.damage`, event order, or arrival time. Live unique-kill XP therefore remains
+fail-closed when the captured death has no exact causal killer; active-duration XP is unchanged.
 
 ### Durable records
 
@@ -156,4 +185,6 @@ dotnet test tests/FusionRpg.Guard.Tests
 - [x] Recorded the new behavior lock in `decisions.md` before this specification.
 - [x] Kept reward values out of code and named their configuration units.
 - [x] Identified implementation and verification commands.
-- [ ] No constraint test was run: this is a documentation-only specification.
+- [x] Focused Core/Data/Server checks and numeric audits were run for the implementation slice.
+- [ ] Full transaction, binding-id receipt, attribution, Injector, and guard conformance tests remain open in
+  `tasks/demon-lawn-deploy-todo.md` Phase 4.

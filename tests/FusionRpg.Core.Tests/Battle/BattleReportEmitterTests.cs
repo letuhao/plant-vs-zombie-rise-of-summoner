@@ -111,6 +111,71 @@ public class BattleReportEmitterTests
     }
 
     [Fact]
+    public void Die_event_maps_a_valid_killer_key_to_the_synthetic_pointer()
+    {
+        var report = new BattleReport
+        {
+            WaveId = "killer-wave",
+            Actors = new[]
+            {
+                new BattleActorResult("squad:0", "squad", "squad-species", 10_001, 100, 100, 1, true, false, 1000),
+                new BattleActorResult("wave:0", "wave", "wave-species", 10_002, 0, 100, 0, false, false, 1000)
+            },
+            Events = new[]
+            {
+                new BattleEventRec(1, BattleEventKinds.Die, "wave:0", 10_002, "wave", KillerActorKey: "squad:0")
+            }
+        };
+
+        var die = Assert.Single(BattleReportEmitter.Emit(report, "killer-match"), e => e.Kind == "zombie.die");
+        var payload = PayloadOf(die);
+
+        Assert.Equal("web:killer-match:1", payload["ptr"]);
+        Assert.Equal("web:killer-match:0", payload["killerPtr"]);
+    }
+
+    [Fact]
+    public void Die_event_omits_killer_pointer_when_the_cause_is_unknown()
+    {
+        var report = new BattleReport
+        {
+            WaveId = "unknown-cause-wave",
+            Actors = new[]
+            {
+                new BattleActorResult("squad:0", "squad", "squad-species", 10_001, 100, 100, 0, true, false, 1000),
+                new BattleActorResult("wave:0", "wave", "wave-species", 10_002, 0, 100, 0, false, false, 1000)
+            },
+            Events = new[]
+            {
+                new BattleEventRec(1, BattleEventKinds.Die, "wave:0", 10_002, "wave")
+            }
+        };
+
+        var die = Assert.Single(BattleReportEmitter.Emit(report, "unknown-match"), e => e.Kind == "zombie.die");
+
+        Assert.False(PayloadOf(die).ContainsKey("killerPtr"));
+    }
+
+    [Fact]
+    public void Die_event_rejects_a_killer_key_missing_from_report()
+    {
+        var report = new BattleReport
+        {
+            WaveId = "missing-killer-wave",
+            Actors = new[]
+            {
+                new BattleActorResult("wave:0", "wave", "wave-species", 10_002, 0, 100, 0, false, false, 1000)
+            },
+            Events = new[]
+            {
+                new BattleEventRec(1, BattleEventKinds.Die, "wave:0", 10_002, "wave", KillerActorKey: "missing")
+            }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => BattleReportEmitter.Emit(report, "missing-killer-match"));
+    }
+
+    [Fact]
     public void Blank_match_keys_reject()
     {
         Assert.Throws<ArgumentException>(() => BattleReportEmitter.Emit(Stomp(), " "));

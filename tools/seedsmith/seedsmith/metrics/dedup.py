@@ -83,6 +83,8 @@ class _Named:
 def _named_entries(corpus) -> "list[_Named]":
     result = []
     for kind in corpus.kinds:
+        if kind == "display-template":
+            continue  # parameterized rendering patterns are not player-facing item identities
         for entry in corpus.by_kind(kind):
             name = entry.get("name")
             if name:

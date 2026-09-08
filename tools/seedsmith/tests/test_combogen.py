@@ -30,6 +30,8 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -43,6 +45,7 @@ from seedsmith.adapters.items.combogen import tuning as tuning_mod  # noqa: E402
 from seedsmith.adapters.items.setgen.answers import AnswerFile  # noqa: E402
 from seedsmith.pipeline.model import audit_schema  # noqa: E402
 from seedsmith.pipeline.run_ledger import RunLedger  # noqa: E402
+from seedsmith.report import cli as cli_mod  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -295,6 +298,31 @@ class AuthoredBatchTests(unittest.TestCase):
         self.assertNotIn("import call_model", source)
         self.assertNotIn(" call_model(", source)
         self.assertNotIn("live_caller(", source)
+
+
+class CombinationLiveTransportTests(unittest.TestCase):
+    """The CLI must bind the existing injected graph seam to a live model caller."""
+
+    def test_write_with_endpoint_uses_the_live_caller(self) -> None:
+        import tempfile
+
+        tuning = _real_tuning()
+        supply = _real_supply()
+        plan = run_mod.plan_run(shape="strain", tuning=tuning, supply=supply)
+        plan = dataclasses.replace(plan, subjects=plan.subjects[:1])
+        with tempfile.TemporaryDirectory() as temp:
+            args = SimpleNamespace(
+                out_dir=temp, answers="", endpoint="http://127.0.0.1:9876/v1/chat/completions",
+                model="test-live-model", allow_production_tree=False, ledger="",
+                authored_utc="1970-01-01T00:00:00Z")
+            result = SimpleNamespace(persisted=[object()], outcomes=[], to_dict=lambda: {})
+            with patch("seedsmith.adapters.items.combogen.authored.run_batch", return_value=result) as batch:
+                done = cli_mod._cmd_items_combination_write(args, plan=plan, tuning=tuning)
+
+        self.assertEqual(0, done)
+        kwargs = batch.call_args.kwargs
+        self.assertEqual("test-live-model", kwargs["model"])
+        self.assertIsNotNone(kwargs["call"])
 
 
 if __name__ == "__main__":

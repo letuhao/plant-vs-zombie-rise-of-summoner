@@ -1,7 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.ActorSurface;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -36,20 +35,13 @@ public static class UniqueActorHubCompose
 
         var powerIndex = new Power.ServerPowerIndexProvider(store, PowerTuningHub.Tuning);
 
-        var speciesSource = new SpeciesAllocationSource(
-            resolveSpeciesId: (side, typeId) => DemonSpeciesCatalog.IsConfigured
-                ? new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side.ToString().ToLowerInvariant(), typeId, out var def)
-                    ? SpeciesLookupResult.Hit(def.SpeciesId)
-                    : SpeciesLookupResult.NoSpecies
-                : SpeciesLookupResult.NotConfigured,
-            resolveSpeciesAllocation: speciesId =>
-                store.EffectiveSpeciesAllocation(actor.PlayerId, speciesId, AptitudeTuningHub.Tuning),
-            resolveCommanderAllocation: pid => pid is { } p
-                ? store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(p))
-                : AptitudeAllocation.Empty,
-            reportUnconfigured: msg => Console.Error.WriteLine($"[actor-hub] {msg}"));
-
         var specimenId = actor.InstanceId;
+        var commanderAllocation = store.LoadAllocation(
+            AllocationScope.Commander, AptitudeEndpoints.ScopeKey(actor.PlayerId));
+        // A unique specimen is a dedicated progression source. Its aptitude input is keyed by the
+        // specimen instance and never falls back to the empire-wide DemonType allocation; general
+        // lawn spawns resolve that fallback at their own spawn seam instead.
+        var uniqueAllocation = store.LoadAllocation(AllocationScope.UniqueDemon, specimenId);
         IReadOnlyList<BoundDerivedAtom> BoundAtoms(StatContext _)
         {
             var list = new List<BoundDerivedAtom>();
@@ -61,7 +53,7 @@ public static class UniqueActorHubCompose
         var hub = ActorHubBootstrap.CreateDefault(
             powerIndex: powerIndex,
             aptitudeTuning: AptitudeTuningHub.Tuning,
-            aptitudeAllocation: speciesSource.Resolve,
+            aptitudeAllocation: _ => commanderAllocation + uniqueAllocation,
             boundDerivedAtoms: BoundAtoms);
 
         return (hub, ctx);

@@ -16,12 +16,11 @@ against resuming the separate, real-money WRITE step, which is exactly what ever
 generator in this program (gemgen, basetypegen, materialgen, consumablegen, milestonegen) already
 uses `RunLedger` for.
 
-⚠ **Its transport is an authored-answer file, not a live endpoint** — same as `setgen.authored`
-today: the graph's `call` is injected, so the identical driver runs against
-`pipeline.llm_caller.call_model` the day a live transport lands (that is a SEPARATE module's own
-scope, `set-charm-live-endpoint`, and this file does not anticipate it). `setgen.answers` is reused
-directly rather than duplicated — nothing in `AnswerFile`/`schema_defects`/`ReplayTransport` is
-set-specific; it is a generic authored-answer reader and JSON-Schema walker.
+⚠ **Transport stays injected.** The default is an authored-answer file; the CLI may instead pass
+the shared live caller. `authored` itself remains transport-agnostic and never imports the live
+model client, so replay-based tests cannot reach the network. `setgen.answers` is reused directly
+rather than duplicated — nothing in `AnswerFile`/`schema_defects`/`ReplayTransport` is set-specific;
+it is a generic authored-answer reader and JSON-Schema walker.
 """
 from __future__ import annotations
 

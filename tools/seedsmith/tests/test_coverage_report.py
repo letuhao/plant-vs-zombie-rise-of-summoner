@@ -258,7 +258,7 @@ class UnpairedPayoffTests(unittest.TestCase):
         cov = _simple_ctx([], pairing_table={k: tuple(v) for k, v in pairing_table.items()})
         findings = cr.pairing_reach_findings("m", cov)
         self.assertEqual(len(findings), 1)
-        self.assertIn("2/100 authored affix families are reachable payoff keys", findings[0].message)
+        self.assertIn("2/112 authored affix families are reachable payoff keys", findings[0].message)
         self.assertEqual(set(findings[0].evidence["reachablePayoffKeys"]),
                          {"atom.chill-punisher", "atom.rot-punisher"})
 

@@ -1,6 +1,6 @@
 # Spec: zomboss-deploy-ai (`demon-lawn-deploy` module 3)
 
-**Status: proposed — pending owner review. No build authorized.**
+**Status: partial implementation landed 2026-09-07; progression integration remains.**
 
 **Greenfield module.** Depends on `lawn-deploy-core` (the mechanism) and `lawn-deploy-events` (the
 trigger) both existing first — this module only decides the zombie side's own *choice* once a trigger
@@ -47,9 +47,8 @@ principle here is enforced by prose only so far — see Correction 2 below for t
    deploy still goes through the exact same `DeployAsync`/Funnel path a player's deploy uses — a real,
    easy-to-violate boundary now stated directly (see Boundaries) so a builder isn't tempted to give
    Zomboss a shortcut write.
-4. **Zomboss's own demon roster is a named, blocking, owner-level gap — not an implementation detail.**
-   Elevated out of this spec's own Open Questions into `demon-lawn-deploy-map.md`'s own "Deliberately
-   deferred" section directly, so it isn't lost track of the way a spec's own open question sometimes is.
+4. **Zomboss's own demon roster is implemented for the current slice.** Data provisions an idempotent
+   Zomboss player and roster mint path; future roster composition/balance remains tunable work.
 
 ## Assumptions (surfaced, not hidden)
 
@@ -74,10 +73,11 @@ must live in a new `data/tuning/zomboss-deploy-ai.v1.json`, never a bare literal
 
 ## Commands
 
-No commands beyond standard build/test until `lawn-deploy-core`/`lawn-deploy-events` land and this
-module's own concrete shape is planned.
+The current slice uses the existing `DeployAsync`/Funnel path after the Core policy chooses a roster
+entry. No Zomboss-specific Injector command or shortcut write was introduced. Remaining work is
+progression integration and live tuning verification.
 
-## Project structure (proposed, not confirmed)
+## Project structure (implemented)
 
 - `src/FusionRpg.Core/Match/Ai/` (new) — `ILawnBoardView` (Correction 2) and the pure scorer type reading
   only that interface. Exact location deferred to planning once module 2 exists to depend on.
@@ -104,24 +104,24 @@ throughout this codebase.
 - A `ILawnBoardView`-boundary test proving the scorer's own type signature cannot compile against
   `MatchRuntime`/`Board` directly — the same kind of "the leak is structurally impossible" proof
   `spec-ai-commander.md`'s own Correction 3 established for `IWorldView`.
-- No live E2E possible until modules 1-2 are real and this module has an actual roster to draw from
-  (Correction 4).
+- The live Zomboss deployment path was exercised after the roster/mint path landed; remaining checks
+  are progression settlement and broader balance coverage.
 
 ## Boundaries
 
 - **Always do**: read board state only through `ILawnBoardView` — no privileged reads, enforced by the
   type boundary itself (Correction 2), not just a comment. Always deploy through the existing
   `DeployAsync`/Funnel path (Correction 3) — never a new write.
-- **Ask first**: where Zomboss's own demon roster/pool comes from (Assumption 1, Correction 4) — a real,
-  unresolved, owner-level design question, not an implementation detail.
+- **Ask first**: changing the current Zomboss roster composition or policy contract; balance changes
+  belong in the existing tuning file.
 - **Never do**: give Zomboss's AI a stat or information advantage as a stand-in for difficulty — per
   `spec-ai-commander.md`'s own established principle, difficulty is which policy, not a handicap. Never
   let the scorer accept a type that could carry full `WorldState`/`MatchRuntime`/`Board` access.
 
 ## Open questions (real — blocking task breakdown, not filler)
 
-1. ~~Where does Zomboss's own unique-demon roster come from?~~ Elevated to the map's own "Deliberately
-   deferred" section (Correction 4) — still unresolved, now tracked at program level so it isn't lost.
+1. ~~Where does Zomboss's own unique-demon roster come from?~~ **Resolved for this slice:** the
+   server-owned Zomboss player and mint/pool path are in `RpgStore.ZombossDeploy.cs`.
 2. Is there one policy for all difficulties, or does difficulty select among several? (Assumption 3 names
    the shape; the actual mapping is still undecided.)
 3. Does this module ever need to coordinate with the world-map `ai-commander` (e.g., a legion's own

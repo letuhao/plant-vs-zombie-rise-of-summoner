@@ -52,6 +52,7 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.PlantPlaced,
             RunId = 1,
+            SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""",
             DedupeKey = "place-1"
         });
@@ -81,6 +82,7 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.PlantPlaced,
             RunId = 1,
+            SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""",
             DedupeKey = "same-fact"
         };
@@ -100,6 +102,7 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.ZombieSpawned,
             RunId = 1,
+            SourceKind = "demon.progression.v1", SourceId = "general:polevaulterzombie",
             PayloadJson = """{"type":3}""",
             DedupeKey = "spawn-1"
         });
@@ -119,6 +122,7 @@ public class SpeciesProgressionTests : IDisposable
             {
                 Kind = PvzActivityKinds.PlantPlaced,
                 RunId = 1,
+                SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
                 PayloadJson = """{"type":7}""",
                 DedupeKey = $"place-{i}"
             });
@@ -146,7 +150,8 @@ public class SpeciesProgressionTests : IDisposable
         var player = _store.CreatePlayer("SpeciesRunReplay");
         _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
         {
-            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, PayloadJson = """{"type":7}""", DedupeKey = "place-1"
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            PayloadJson = """{"type":7}""", DedupeKey = "place-1"
         });
         var matchEnd = new PvzActivityAppendRequest
         {
@@ -170,7 +175,8 @@ public class SpeciesProgressionTests : IDisposable
         {
             _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
             {
-                Kind = PvzActivityKinds.PlantPlaced, RunId = 1, PayloadJson = """{"type":7}""",
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            PayloadJson = """{"type":7}""",
                 DedupeKey = $"heavy-{i}"
             });
         }
@@ -208,7 +214,12 @@ public class SpeciesProgressionTests : IDisposable
         _store.InsertEvent(new EventEnvelope
         {
             Game = RpgConstants.GameIdWebRpg, Kind = "plant.place", MatchKey = matchKey,
-            Payload = new { type = FumeshroomGameTypeId }
+            Payload = new
+            {
+                type = FumeshroomGameTypeId,
+                sourceKind = DemonProgressionSource.ContractKind,
+                sourceId = "general:fumeshroom"
+            }
         });
 
         var plantType = _store.GetRpgActor(player.Id, RpgActorKinds.Plant, FumeshroomGameTypeId);
@@ -217,6 +228,57 @@ public class SpeciesProgressionTests : IDisposable
         var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
         Assert.NotNull(species); // the new rule: a species row is not a PvZ almanac type
         Assert.Equal(4, species!.Xp);
+    }
+
+    [Fact]
+    public void Capture_with_malformed_or_contradictory_source_claim_fails_closed()
+    {
+        var player = _store.CreatePlayer("SpeciesInvalidClaim");
+        _store.SetCurrentPlayer(player.Id);
+        const string matchKey = "invalid-source-claim";
+        _store.InsertEvent(new EventEnvelope
+        {
+            Game = RpgConstants.GameIdWebRpg, Kind = "board.start", MatchKey = matchKey,
+            Payload = new { }
+        });
+        _store.InsertEvent(new EventEnvelope
+        {
+            Game = RpgConstants.GameIdWebRpg, Kind = "plant.place", MatchKey = matchKey,
+            Payload = new
+            {
+                type = FumeshroomGameTypeId,
+                sourceKind = DemonProgressionSource.ContractKind,
+                sourceId = "unique:not-a-general-claim"
+            }
+        });
+
+        var fact = _store.ListPvzActivityFacts(player.Id)!.Items.Single(x => x.Kind == PvzActivityKinds.PlantPlaced);
+        Assert.Equal("untrusted", fact.SourceKind);
+        Assert.Equal("invalid-claim", fact.SourceId);
+        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId));
+    }
+
+    [Fact]
+    public void Capture_with_only_an_opaque_injector_source_does_not_infer_empire_species()
+    {
+        var player = _store.CreatePlayer("SpeciesOpaqueSource");
+        _store.SetCurrentPlayer(player.Id);
+        const string matchKey = "opaque-source";
+        _store.InsertEvent(new EventEnvelope
+        {
+            Game = RpgConstants.GameIdWebRpg, Kind = "board.start", MatchKey = matchKey,
+            Payload = new { }
+        });
+        _store.InsertEvent(new EventEnvelope
+        {
+            Game = RpgConstants.GameIdWebRpg, Kind = "plant.place", MatchKey = matchKey,
+            Payload = new { type = FumeshroomGameTypeId, source = "start" }
+        });
+
+        var fact = _store.ListPvzActivityFacts(player.Id)!.Items.Single(x => x.Kind == PvzActivityKinds.PlantPlaced);
+        Assert.Equal("capture", fact.SourceKind);
+        Assert.Equal("plant.place", fact.SourceId);
+        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId));
     }
 
     [Fact]
@@ -234,7 +296,8 @@ public class SpeciesProgressionTests : IDisposable
         var player = _store.CreatePlayer("SpeciesCollision");
         var ex = Record.Exception(() => _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
         {
-            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, PayloadJson = """{"type":999}""",
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:aaa-winner",
+            PayloadJson = """{"type":999}""",
             DedupeKey = "collide-1"
         }));
         Assert.Null(ex);

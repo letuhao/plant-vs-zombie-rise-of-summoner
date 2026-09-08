@@ -489,6 +489,28 @@ class BatchTests(unittest.TestCase):
             self.assertEqual(entry["apCost"], TUNING.charm_class("minor").ap_cost,
                              "apCost is derived from the class, never taken from the answer")
 
+    def test_a_second_charm_batch_preserves_the_first_partitions_rows(self):
+        """A continuation may add a charm, never replace its partition with that one row."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "charms"
+            plan = _charm_plan()
+            subject_id = plan.subjects[0].subject_id
+            answers = _answer_file("charm", "species", {subject_id: _clean_charm_answer()})
+            first = authored_mod.run_batch(
+                plan=plan, answers=answers, tuning=TUNING, vocabulary=VOCAB, out_dir=out,
+                kind="charm", population="species", authored_utc="1970-01-01T00:00:00Z",
+                model="fixture", corpus_root=Path(tmp))
+            second = authored_mod.run_batch(
+                plan=plan, answers=answers, tuning=TUNING, vocabulary=VOCAB, out_dir=out,
+                kind="charm", population="species", authored_utc="1970-01-01T00:00:00Z",
+                model="fixture", corpus_root=Path(tmp))
+
+            target = second.files[0]
+            entries = json.loads(target.read_text(encoding="utf-8"))["entries"]
+            self.assertEqual({entry["id"] for entry in entries},
+                             {first.entries[0]["id"], second.entries[0]["id"]})
+
     def test_a_signets_drawback_is_marked_negative_the_way_the_corpus_marks_it(self):
         """`charm.econ-019` writes its cost as `params.sign = "negative"` on an ordinary fixed
         atom. Emitting it unmarked would turn a signet's cost into a second bonus."""
@@ -619,8 +641,9 @@ class Module13DefectsFixedTests(unittest.TestCase):
 
     def test_a_charm_on_every_one_of_the_five_axes_is_authorable_from_the_brief(self):
         """DEFECT 1's consequence, FIXED. The surviving pool was 14 families, all defensive, so
-        `offense` / `control` / `utility` / `economy` were unauthorable — four of the five shipped
-        axes and 48 of the 70 shipped rows. The pool now spans every tag the family corpus has."""
+        `offense` / `control` / `utility` / `economy` were unauthorable — four of the five axes in
+        the historical 70-row corpus, covering 48 of those rows. The pool now spans every tag the
+        family corpus has."""
         pool = charm_rules.charm_pool(TUNING, VOCAB.all_picks)
         families = {p.family for p in pool}
         self.assertIn("atom.might", families, "an offense charm needs an offense family")
@@ -634,14 +657,14 @@ class Module13DefectsFixedTests(unittest.TestCase):
                 self.assertIn(named, families)
 
     def test_the_charm_pool_now_covers_the_families_the_shipped_corpus_uses(self):
-        """DEFECT 2, FIXED. 22 of the 29 distinct families the 70 shipped charms use are CAPABILITY
-        families; the brief offered `vocabulary.stat` only, so a generated population could not
-        resemble the authored one. The pool is drawn from both buckets now.
+        """DEFECT 2, FIXED. 22 of the 29 distinct families in the historical 70-row corpus are
+        CAPABILITY families; the brief offered `vocabulary.stat` only, so a generated population
+        could not resemble the authored one. The pool is drawn from both buckets now.
 
         ⚠ Two named divergences survive on purpose and are asserted rather than smoothed away:
-        three families the shipped charms use are declared by no `affix-families/*.json` file, and
-        11 of the families it uses are ssot-charms §3.6's ring layer — 20 of the 70 shipped rows,
-        which is shipped content standing against §3.6, not a generator defect. The generator
+        three families the historical corpus uses are declared by no `affix-families/*.json` file,
+        and 11 of its families are ssot-charms §3.6's ring layer — 20 historical rows, which are
+        shipped content standing against §3.6, not a generator defect. The generator
         refuses to author more of it; changing the corpus is a separate, content-owning decision.
         """
         charms_dir = REPO_ROOT / "data" / "seed" / "items" / "charms"
@@ -666,7 +689,7 @@ class Module13DefectsFixedTests(unittest.TestCase):
         # `len(ring)` grew 13->20 after the sockets-gen family-count fix earlier this session
         # (SUPPLY.family_count 34->54: 20 new affix families, several with a ring-layer kind) --
         # a real, already-verified corpus growth, not a generator defect. `used & ring` (what the
-        # SHIPPED charms actually draw from) is unaffected, so that count stays 11.
+        # restored corpus actually draws from) is unaffected, so that count stays 11.
         self.assertEqual(len(ring), 20)
         self.assertEqual(len(used & ring), 11)
         for path in sorted(charms_dir.glob("*.json")):
@@ -674,7 +697,7 @@ class Module13DefectsFixedTests(unittest.TestCase):
             for entry in doc.get("entries") or []:
                 if any(a["family"] in ring for a in entry.get("fixedAtoms") or []):
                     rows_on_ring += 1
-        self.assertEqual(rows_on_ring, 20, "shipped rows standing against §3.6, counted not guessed")
+        self.assertEqual(rows_on_ring, 20, "restored rows standing against §3.6, counted not guessed")
 
     def test_the_set_brief_names_the_derived_piece_counts_and_the_schema_agrees(self):
         """DEFECT 3, FIXED. The schema offered `pieces` from `[2, 3, 4, 6]` and the brief said

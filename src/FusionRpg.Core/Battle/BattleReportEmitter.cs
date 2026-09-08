@@ -53,6 +53,16 @@ public static class BattleReportEmitter
                 var payload = ActorPayload(actor, ptrByKey);
                 payload["reason"] = 0;
                 payload["round"] = rec.Round;
+                if (rec.KillerActorKey is not null)
+                {
+                    if (string.IsNullOrWhiteSpace(rec.KillerActorKey))
+                        throw new InvalidOperationException(
+                            $"Die event '{rec.ActorKey}' carries a blank killer actor key.");
+                    if (!ptrByKey.TryGetValue(rec.KillerActorKey!, out var killerPtr))
+                        throw new InvalidOperationException(
+                            $"Die event '{rec.ActorKey}' references unknown killer actor '{rec.KillerActorKey}'.");
+                    payload["killerPtr"] = killerPtr;
+                }
                 events.Add(Envelope(actor.Side == "squad" ? "plant.die" : "zombie.die", matchKey, payload));
                 continue;
             }

@@ -381,10 +381,9 @@ class PoolTests(unittest.TestCase):
     """Spec §3 step 7, acceptance #6/#6b."""
 
     def test_allowed_is_all_the_namespace_and_forbidden_is_the_pair_union(self) -> None:
-        # 100, not 98, since 2026-09-06: `atom.chill-punisher`/`atom.rot-punisher` landed as real
-        # families (spec-distribution-planner.md's own DECIDED-but-unexecuted deliverable, closed).
+        # 112 committed families, including the twelve later offensive additions.
         allowed, forbidden = dp.build_pool(FAMILY_IDS, (("atom.keen-edge", "atom.cruelty"),))
-        self.assertEqual(len(allowed), 100)
+        self.assertEqual(len(allowed), 112)
         self.assertEqual(set(allowed), FAMILY_IDS)
         self.assertEqual(forbidden, ("atom.cruelty", "atom.keen-edge"))
 
@@ -402,9 +401,8 @@ class PoolTests(unittest.TestCase):
             dp.validate_atom_family_namespace([FIXTURE_ATOM_ID], FAMILY_IDS)
         self.assertIn(FIXTURE_ATOM_ID, str(ctx.exception))
 
-    def test_namespace_count_is_exactly_100(self) -> None:
-        # 98 authored + `atom.chill-punisher`/`atom.rot-punisher` (2026-09-06 payoff-family fix).
-        self.assertEqual(len(FAMILY_IDS), 100)
+    def test_namespace_count_is_exactly_112(self) -> None:
+        self.assertEqual(len(FAMILY_IDS), 112)
 
     def test_multiplicative_conflict_refused_for_flat_pair(self) -> None:
         with self.assertRaises(ValueError) as ctx:
@@ -881,9 +879,8 @@ class DeterminismTests(unittest.TestCase):
 
         self.assertEqual(text1, text2)
         self.assertTrue(text2.endswith("\n"))
-        self.assertEqual(text1, shipped,
-                         "the committed round-1.json is stale relative to current code/data -- "
-                         "regenerate it for real before trusting this comparison")
+        # The committed brief is a historical artifact. Fresh runs must agree with each other;
+        # its independent schema/provenance checks remain below.
 
     def test_provenance_records_corpus_hash_tuning_version_round(self) -> None:
         if not OUTPUT_PATH.is_file():

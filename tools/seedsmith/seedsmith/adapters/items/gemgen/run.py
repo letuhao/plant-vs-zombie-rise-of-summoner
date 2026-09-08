@@ -59,7 +59,7 @@ class Subject:
     partition: str           # "gems/2"
     family_id: str
     family_row: dict
-    entry_id: str             # "gem.g2-001" -- minted from this subject's own batch position
+    entry_id: str             # "gem.g2-021" -- minted after the partition's existing sequence
     index: int                 # zero-based position within THIS batch; feeds the power-band rotation
     brief: str
 
@@ -107,14 +107,44 @@ def _build_subjects(partition: str, pool: "list[dict]", wanted_ids: "set[str]",
     return subjects
 
 
+def _partition_path(partition: str, directory: Path) -> Path:
+    return directory / f"g{emit.partition_slot(partition)}.json"
+
+
+def _existing_partition_entries(partition: str, directory: Path) -> "list[dict]":
+    path = _partition_path(partition, directory)
+    if not path.exists():
+        return []
+
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if document.get("kind") != "gem":
+        raise ValueError(f"{path} is not a gem partition")
+    meta = document.get("_meta") or {}
+    if meta.get("partition") != partition:
+        raise ValueError(f"{path} belongs to partition {meta.get('partition')!r}, not {partition!r}")
+    entries = document.get("entries") or []
+    if not all(isinstance(entry, dict) and isinstance(entry.get("id"), str) for entry in entries):
+        raise ValueError(f"{path} has an invalid gem entry list")
+    return entries
+
+
+def _next_partition_sequence(partition: str, directory: Path) -> int:
+    prefix = f"gem.g{emit.partition_slot(partition)}-"
+    sequences = [int(entry["id"][len(prefix):]) for entry in
+                 _existing_partition_entries(partition, directory)
+                 if entry["id"].startswith(prefix) and entry["id"][len(prefix):].isdigit()]
+    return (max(sequences) + 1) if sequences else 1
+
+
 def plan_partition(partition: str, *, batch_size: int = DEFAULT_BATCH_SIZE,
                    gems_dir: "Path | None" = None, ledger: "RunLedger | dict | None" = None,
-                   start_seq: int = 1) -> RunPlan:
+                   start_seq: "int | None" = None) -> RunPlan:
     """Deterministic: identical on-disk state (the gems corpus AND the ledger) produces identical
     subjects, ids and order on every call. `ledger` may be a real `RunLedger` (its own `.plan()` is
     used, so reconcile runs for real) or an already-read `done` dict (tests pass one directly so
     they don't need a file on disk)."""
     directory = gems_dir or GEMS_DIR
+    sequence = start_seq if start_seq is not None else _next_partition_sequence(partition, directory)
     pool = brief_mod.unauthored_families(limit=batch_size, gems_dir=directory)
     all_ids = [_subject_id(partition, row["id"]) for row in pool]
 
@@ -124,14 +154,15 @@ def plan_partition(partition: str, *, batch_size: int = DEFAULT_BATCH_SIZE,
         done = ledger or {}
         needing = {sid for sid in all_ids if sid not in done or not _ledger_is_valid(sid, done[sid])}
 
-    subjects = _build_subjects(partition, pool, needing, start_seq)
+    subjects = _build_subjects(partition, pool, needing, sequence)
     already = [sid for sid in all_ids if sid not in needing]
     return RunPlan(partition=partition, subjects=subjects, already_done=already)
 
 
 def plan_overwrite(partition: str, target: "str | list[str]", *,
                    batch_size: int = DEFAULT_BATCH_SIZE, gems_dir: "Path | None" = None,
-                   ledger: "RunLedger | None" = None, start_seq: int = 1) -> "list[Subject]":
+                   ledger: "RunLedger | None" = None,
+                   start_seq: "int | None" = None) -> "list[Subject]":
     """`target` is either the literal `"all"` or an explicit list of subject ids — mirrors
     `RunLedger.force`'s own refusal of a bare, unscoped overwrite ("a typo'd --overwrite fails
     loudly", spec-generator-harness.md's own boundary): passing anything else raises inside
@@ -143,6 +174,7 @@ def plan_overwrite(partition: str, target: "str | list[str]", *,
             f"the 'typo'd --overwrite fails loudly' boundary this harness exists to enforce")
 
     directory = gems_dir or GEMS_DIR
+    sequence = start_seq if start_seq is not None else _next_partition_sequence(partition, directory)
     pool = brief_mod.unauthored_families(limit=batch_size, gems_dir=directory)
     all_ids = [_subject_id(partition, row["id"]) for row in pool]
 
@@ -151,7 +183,7 @@ def plan_overwrite(partition: str, target: "str | list[str]", *,
     ledger = ledger or RunLedger(DEFAULT_LEDGER_PATH)
     forced = set(ledger.force(wanted, scope=scope))
 
-    return _build_subjects(partition, pool, forced, start_seq)
+    return _build_subjects(partition, pool, forced, sequence)
 
 
 def apply_answer(subject: Subject, answer: dict) -> dict:
@@ -206,9 +238,10 @@ def generate_partition(partition: str, *, answer_fn: "Callable[[Subject], dict]"
 
 def entries_from_ledger(partition: str, *, ledger_path: "Path | None" = None) -> "list[dict]":
     """Every assembled entry the ledger already holds for `partition`, sorted by entry id — a pure
-    resume/flush read, distinct from `generate_partition`'s own answer-collecting loop. This is what
-    a caller uses to assemble a partition FILE from ledger rows without re-answering anything on a
-    run that was interrupted after `mark_done` but before the file write."""
+    resume/flush read, distinct from `generate_partition`'s own answer-collecting loop. These are
+    flush candidates after a run interrupted between `mark_done` and the file write;
+    `write_partition_file` merges them with the on-disk partition instead of treating this ledger
+    subset as a complete corpus."""
     ledger = RunLedger(ledger_path or DEFAULT_LEDGER_PATH)
     done = ledger.read_done()
     prefix = f"gem-{partition}-"
@@ -225,13 +258,21 @@ def write_partition_file(partition: str, entries: "list[dict]", *, path: "Path |
     temp-file-then-replace discipline `RunLedger.write_done` and `setgen/run.py`'s own
     `write_ledger` both use, so a killed process leaves either the old file or the new one, never
     half of one. `registryVersions` is read fresh via `registries.load_versions()` rather than
-    copied from a sibling partition's own (potentially stale) `_meta` block.
+    copied from a sibling partition's own (potentially stale) `_meta` block. Incoming rows merge
+    by id with the existing partition; a conflicting payload for the same id fails before replace.
     """
     import os
     import tempfile
 
     slot = emit.partition_slot(partition)
     target = path or (GEMS_DIR / f"g{slot}.json")
+    existing = _existing_partition_entries(partition, target.parent)
+    merged = {entry["id"]: entry for entry in existing}
+    for entry in entries:
+        previous = merged.get(entry["id"])
+        if previous is not None and previous != entry:
+            raise ValueError(f"{target} already contains a different row for {entry['id']!r}")
+        merged[entry["id"]] = entry
     doc = {
         "schemaVersion": 1,
         "kind": "gem",
@@ -246,7 +287,7 @@ def write_partition_file(partition: str, entries: "list[dict]", *, path: "Path |
             "authoredUtc": authored_utc,
             "sourceRef": "entry-shapes.md#1",
         },
-        "entries": entries,
+        "entries": [merged[entry_id] for entry_id in sorted(merged)],
     }
     target.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
@@ -341,8 +382,8 @@ def main(argv=None) -> int:
         fresh[subject.subject_id] = entry
         ledger.mark_done(subject.subject_id, {"entryId": subject.entry_id, "entry": entry})
 
-    if fresh:
-        all_entries = entries_from_ledger(partition, ledger_path=DEFAULT_LEDGER_PATH)
+    all_entries = entries_from_ledger(partition, ledger_path=DEFAULT_LEDGER_PATH)
+    if fresh or all_entries:
         write_partition_file(partition, all_entries, model=config.model)
     print(json.dumps({"planned": len(subjects), "fresh": len(fresh), "blocked": len(blocked),
                       "blockedReasons": blocked}, ensure_ascii=False, indent=2))

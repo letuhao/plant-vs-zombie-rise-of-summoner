@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FirstRunReveal } from "./FirstRunReveal";
 
-describe("FirstRunReveal", () => {
-  it("renders the plate's reveal copy, not the old placeholder CTA", () => {
+describe("FirstRunReveal (legacy compatibility)", () => {
+  it("renders the legacy plate copy while the server-backed flow is pending", () => {
     render(<FirstRunReveal onBind={vi.fn()} />);
     expect(screen.getByText("This one answered")).toBeInTheDocument();
     expect(screen.getByText(/A sunflower has bound itself to you/)).toBeInTheDocument();

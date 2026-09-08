@@ -301,8 +301,15 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = """
+            return GetActionUnlocked(db, actionId);
+        }
+    }
+
+    ActionRow? GetActionUnlocked(SqliteConnection db, string actionId, SqliteTransaction? tx = null)
+    {
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = """
                 SELECT action_id, name, kind, rung, tags_json, enabled, revision,
                        grantable, default_attack_eligible, container_id,
                        time_cost_ticks, speed_channel, cooldown_channel, windup_ticks, resolve_offsets_json,
@@ -314,11 +321,10 @@ public sealed partial class RpgStore
                        rung_band_json, projectile_penalties, description_key
                 FROM rpg_action WHERE action_id = $id;
                 """;
-            cmd.Parameters.AddWithValue("$id", actionId);
-            using var r = cmd.ExecuteReader();
-            if (!r.Read()) return null;
-            return ReadAction(r);
-        }
+        cmd.Parameters.AddWithValue("$id", actionId);
+        using var r = cmd.ExecuteReader();
+        if (!r.Read()) return null;
+        return ReadAction(r);
     }
 
     /// <summary>Action ids in stable order — future content-hash and assembly-order consumers need this.</summary>
@@ -327,13 +333,19 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT action_id FROM rpg_action ORDER BY action_id;";
-            using var r = cmd.ExecuteReader();
-            var list = new List<string>();
-            while (r.Read()) list.Add(r.GetString(0));
-            return list;
+            return ListActionIdsUnlocked(db);
         }
+    }
+
+    IReadOnlyList<string> ListActionIdsUnlocked(SqliteConnection db, SqliteTransaction? tx = null)
+    {
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = "SELECT action_id FROM rpg_action ORDER BY action_id;";
+        using var r = cmd.ExecuteReader();
+        var list = new List<string>();
+        while (r.Read()) list.Add(r.GetString(0));
+        return list;
     }
 
     static ActionRow ReadAction(SqliteDataReader r)
@@ -543,14 +555,21 @@ public sealed partial class RpgStore
 
     public ActionRejection UpsertGrant(ActionGrantRow grant, string? grantId = null)
     {
-        var check = ActionValidator.ValidateGrant(grant, GetAction);
-        if (!check.IsOk) return check;
-
-        var id = string.IsNullOrWhiteSpace(grantId) ? Guid.NewGuid().ToString("N") : grantId!;
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            return UpsertGrantUnlocked(db, grant, grantId);
+        }
+    }
+
+    ActionRejection UpsertGrantUnlocked(SqliteConnection db, ActionGrantRow grant, string? grantId = null,
+        SqliteTransaction? tx = null)
+    {
+        var check = ActionValidator.ValidateGrant(grant, id => GetActionUnlocked(db, id, tx));
+        if (!check.IsOk) return check;
+
+        var id = string.IsNullOrWhiteSpace(grantId) ? Guid.NewGuid().ToString("N") : grantId!;
+        if (tx is null)
             ExecParams(db, """
                 INSERT INTO rpg_action_grant (grant_id, owner_kind, owner_key, action_id, source, grant_role)
                 VALUES ($id, $kind, $key, $action, $source, $role)
@@ -560,8 +579,16 @@ public sealed partial class RpgStore
                 """,
                 ("$id", id), ("$kind", OwnerScope.Name(grant.OwnerKind)), ("$key", grant.OwnerKey ?? ""),
                 ("$action", grant.ActionId), ("$source", grant.Source ?? ""), ("$role", grant.GrantRole ?? ""));
-        }
-
+        else
+            ExecParams(db, tx, """
+                INSERT INTO rpg_action_grant (grant_id, owner_kind, owner_key, action_id, source, grant_role)
+                VALUES ($id, $kind, $key, $action, $source, $role)
+                ON CONFLICT(grant_id) DO UPDATE SET
+                  owner_kind = excluded.owner_kind, owner_key = excluded.owner_key,
+                  action_id = excluded.action_id, source = excluded.source, grant_role = excluded.grant_role;
+                """,
+                ("$id", id), ("$kind", OwnerScope.Name(grant.OwnerKind)), ("$key", grant.OwnerKey ?? ""),
+                ("$action", grant.ActionId), ("$source", grant.Source ?? ""), ("$role", grant.GrantRole ?? ""));
         return ActionRejection.Ok;
     }
 
@@ -664,6 +691,16 @@ public sealed partial class RpgStore
     static void ExecParams(SqliteConnection db, string sql, params (string Name, object Value)[] args)
     {
         using var cmd = db.CreateCommand();
+        cmd.CommandText = sql;
+        foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
+        cmd.ExecuteNonQuery();
+    }
+
+    static void ExecParams(SqliteConnection db, SqliteTransaction tx, string sql,
+        params (string Name, object Value)[] args)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
         cmd.CommandText = sql;
         foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
         cmd.ExecuteNonQuery();

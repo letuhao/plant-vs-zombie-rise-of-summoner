@@ -362,6 +362,19 @@ class CliTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             run_mod.main(["--theme", "fire", "--slot", "1"])
 
+    def test_cli_theme_dry_run_prints_a_brief_without_calling_a_model(self) -> None:
+        import io
+        from contextlib import redirect_stdout
+
+        with unittest.mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller") as caller:
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                exit_code = run_mod.main(["--theme", "fire", "--slot", "1", "--dry-run"])
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Author ONE consumable for 'fire'", buf.getvalue())
+        caller.assert_not_called()
+
     def test_cli_a_real_live_run_writes_a_real_partition_file(self) -> None:
         """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account.
         No schema exists yet for this module's own answer shape, unlike its siblings — the live

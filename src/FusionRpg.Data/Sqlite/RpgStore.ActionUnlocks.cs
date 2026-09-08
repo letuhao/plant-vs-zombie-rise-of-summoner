@@ -49,30 +49,36 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-
-            long earnCount = 0;
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = "SELECT earn_count FROM rpg_actor_unlock_state WHERE owner_kind = $kind AND owner_key = $key;";
-                cmd.Parameters.AddWithValue("$kind", OwnerScope.Name(owner.Kind));
-                cmd.Parameters.AddWithValue("$key", owner.Key ?? "");
-                var result = cmd.ExecuteScalar();
-                if (result is not null and not DBNull) earnCount = Convert.ToInt64(result);
-            }
-
-            var held = new List<HeldUnlock>();
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = "SELECT unlock_id, earn_count_at_acceptance FROM rpg_actor_held_unlock WHERE owner_kind = $kind AND owner_key = $key;";
-                cmd.Parameters.AddWithValue("$kind", OwnerScope.Name(owner.Kind));
-                cmd.Parameters.AddWithValue("$key", owner.Key ?? "");
-                using var r = cmd.ExecuteReader();
-                while (r.Read())
-                    held.Add(new HeldUnlock(r.GetString(0), r.GetInt64(1)));
-            }
-
-            return UnlockState.FromPersisted(earnCount, held);
+            return GetUnlockStateUnlocked(db, owner);
         }
+    }
+
+    UnlockState GetUnlockStateUnlocked(SqliteConnection db, OwnerScope owner, SqliteTransaction? tx = null)
+    {
+        long earnCount = 0;
+        using (var cmd = db.CreateCommand())
+        {
+            if (tx is not null) cmd.Transaction = tx;
+            cmd.CommandText = "SELECT earn_count FROM rpg_actor_unlock_state WHERE owner_kind = $kind AND owner_key = $key;";
+            cmd.Parameters.AddWithValue("$kind", OwnerScope.Name(owner.Kind));
+            cmd.Parameters.AddWithValue("$key", owner.Key ?? "");
+            var result = cmd.ExecuteScalar();
+            if (result is not null and not DBNull) earnCount = Convert.ToInt64(result);
+        }
+
+        var held = new List<HeldUnlock>();
+        using (var cmd = db.CreateCommand())
+        {
+            if (tx is not null) cmd.Transaction = tx;
+            cmd.CommandText = "SELECT unlock_id, earn_count_at_acceptance FROM rpg_actor_held_unlock WHERE owner_kind = $kind AND owner_key = $key;";
+            cmd.Parameters.AddWithValue("$kind", OwnerScope.Name(owner.Kind));
+            cmd.Parameters.AddWithValue("$key", owner.Key ?? "");
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                held.Add(new HeldUnlock(r.GetString(0), r.GetInt64(1)));
+        }
+
+        return UnlockState.FromPersisted(earnCount, held);
     }
 
     /// <summary>Persists a full <see cref="UnlockState"/> for one owner — a full rebuild (delete then
@@ -86,26 +92,36 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
+            SaveUnlockStateUnlocked(db, owner, state);
+        }
+    }
 
-            ExecParams(db, """
+    void SaveUnlockStateUnlocked(SqliteConnection db, OwnerScope owner, UnlockState state, SqliteTransaction? tx = null)
+    {
+        void Exec(string sql, params (string Name, object Value)[] args)
+        {
+            if (tx is null) ExecParams(db, sql, args);
+            else ExecParams(db, tx, sql, args);
+        }
+
+        Exec("""
                 INSERT INTO rpg_actor_unlock_state (owner_kind, owner_key, earn_count)
                 VALUES ($kind, $key, $earn)
                 ON CONFLICT(owner_kind, owner_key) DO UPDATE SET earn_count = excluded.earn_count;
                 """,
                 ("$kind", OwnerScope.Name(owner.Kind)), ("$key", owner.Key ?? ""), ("$earn", state.EarnCount));
 
-            ExecParams(db, "DELETE FROM rpg_actor_held_unlock WHERE owner_kind = $kind AND owner_key = $key;",
-                ("$kind", OwnerScope.Name(owner.Kind)), ("$key", owner.Key ?? ""));
+        Exec("DELETE FROM rpg_actor_held_unlock WHERE owner_kind = $kind AND owner_key = $key;",
+            ("$kind", OwnerScope.Name(owner.Kind)), ("$key", owner.Key ?? ""));
 
-            foreach (var h in state.Held)
-            {
-                ExecParams(db, """
+        foreach (var h in state.Held)
+        {
+            Exec("""
                     INSERT INTO rpg_actor_held_unlock (owner_kind, owner_key, unlock_id, earn_count_at_acceptance)
                     VALUES ($kind, $key, $uid, $earn);
                     """,
                     ("$kind", OwnerScope.Name(owner.Kind)), ("$key", owner.Key ?? ""),
                     ("$uid", h.UnlockId), ("$earn", h.EarnCountAtAcceptance));
-            }
         }
     }
 }

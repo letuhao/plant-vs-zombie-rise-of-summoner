@@ -61,9 +61,9 @@ test.describe("Sanctum stage (T9)", () => {
     await expect(page.getByTestId("focus-card-cta")).toBeVisible();
   });
 
-  // fe-essentials T1: the authored first-run reveal (plate 01 §D) replaces the old bare
-  // "Bind your first creature" CTA — real copy, real navigation, not just testid presence.
-  test("a fresh, empty-roster save shows the authored reveal, and Bind reaches Creatures for real", async ({ page }) => {
+  // Legacy fe-essentials T1 compatibility check. The sunflower/bind branch is retained only until
+  // the server-backed first-session progression sequence replaces it; it is not current onboarding.
+  test("legacy empty-roster reveal remains internally consistent until replacement", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/sanctum");
 

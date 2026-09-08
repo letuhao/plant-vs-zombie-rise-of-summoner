@@ -42,6 +42,8 @@ public static class RpgXpReasons
     /// a specimen's battle-won xp also levels its species row, in the same transaction as the
     /// specimen award. The standalone-first proof source — reachable with the game closed.</summary>
     public const string SpeciesExpedition = "species_expedition";
+    public const string SpecimenLawnKill = "specimen_lawn_kill";
+    public const string SpecimenLawnDuration = "specimen_lawn_duration";
 }
 
 /// <summary>Arithmetic XP curve per actor kind (POC-tuned; faster early levels). Config-backed
@@ -122,6 +124,9 @@ public static class RpgXpAwards
     public static long Mower => Tuning.Mower;
     public static long PlantPlace => Tuning.PlantPlace;
     public static long ZombieSpawn => Tuning.ZombieSpawn;
+    public static long SpecimenLawnKill => Tuning.SpecimenLawnKill;
+    public static long SpecimenBoundIntervalMs => Tuning.SpecimenBoundIntervalMs;
+    public static long SpecimenBoundIntervalXp => Tuning.SpecimenBoundIntervalXp;
 }
 
 public sealed class RpgActorState

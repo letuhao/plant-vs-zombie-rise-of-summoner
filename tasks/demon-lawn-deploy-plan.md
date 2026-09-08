@@ -1,5 +1,11 @@
 # Implementation plan: demon lawn deploy
 
+**Status: partially implemented 2026-09-08.** Core deploy, trigger, and Zomboss slices are landed;
+the unique-lawn progression consumer remains partial (T4.1-T4.4). Terminal settlement is now
+transactional for the current ptr/match recovery path, and lifecycle active-time capture is wired;
+the binding-id/collision model and live verification of the fatal-killer bridge still need
+conformance work.
+
 Covers the four module specs under `docs/architecture/demon-lawn-deploy/` (`spec-lawn-deploy-core.md`,
 `spec-lawn-deploy-progression.md`, `spec-lawn-deploy-events.md`, `spec-zomboss-deploy-ai.md`) and the
 capability map they sit under (`docs/architecture/demon-lawn-deploy-map.md`). The progression-source
@@ -42,27 +48,24 @@ land before the unique progression projector can claim conformance.
   affect progression carries the typed source contract and a replay-stable lifecycle occurrence id.
   `EmpireGeneral` is the only source eligible for generic species progression; a `UniqueSpecimen` fact
   can only reach the unique receipt projector.
-- **Unique lawn XP is exact-once Cold projection.** A kill needs a proven lethal attacker pointer; active
-  time uses injector-emitted scaled match milliseconds. Binding close, receipt compare/insert, XP, level
-  unlocks, and roster recovery share one Data transaction. The XP receipt is not a Hot combat path.
+- **Unique lawn XP is an exact-once Cold projection target.** A kill needs a proven lethal attacker
+  pointer; active time uses injector-emitted scaled match milliseconds. Binding close, receipt
+  compare/insert, XP, level unlocks, and roster recovery share one Data transaction. The current
+  slice has transactional settlement and active-time capture; the binding-id receipt model and
+  proven killer provenance remain open in T4.2/T4.4. The XP receipt is not a Hot combat path.
 
 ## Gates vs. checkpoints — read before objecting to what's NOT gated here
 
-Two real, owner-level open questions exist in the specs (the `side`-column mutation approach, and
-Zomboss's own demon-roster source). **Neither is a pre-work gate in this plan.** Per this repo's own
+One real, owner-level open question remains in the specs (Zomboss's own demon-roster source).
+**It is not a pre-work gate in this plan.** Per this repo's own
 rule (a hard gate is reserved for a genuinely irreversible action with no answerable default; everything
-else ships behind a reversible/tunable default, tracked as a non-blocking follow-up): both open questions
-get a stated default below, and the build proceeds. If the owner later prefers a different answer, it's
-a follow-up task, not a rebuild — nothing about these defaults locks in an irreversible schema choice.
+else ships behind a reversible/tunable default, tracked as a non-blocking follow-up): this open question
+gets a stated default below, and the build proceeds. If the owner later prefers a different answer, it's
+a follow-up task, not a rebuild — nothing about this default locks in an irreversible schema choice.
 
-- **`side`-column decision (spec-lawn-deploy-core Open Q3/Q4) — REVISED 2026-09-06, no longer a simple
-  default.** T1.3/investigation found the existing `"zombie.hypno"`/`SpecimenOwnershipOracle` precedent
-  keeps board-mechanical side and ownership as separate axes for exactly this kind of case, which makes
-  the original "just update the column" default look likely wrong, not just unconfirmed. This is now the
-  ONE genuinely gate-worthy-feeling item in this plan — but per this plan's own rule, it still isn't a
-  hard pre-work gate on the REST of Phase 1 (T1.1-T1.3, T1.5, T1.6 do not depend on it). It gates T1.4
-  specifically: do not write T1.4's code until this is actually answered, rather than shipping a guessed
-  default for a subtle PvZ-specific mechanic that ordinary review would struggle to catch if wrong.
+- **`side`-column decision (spec-lawn-deploy-core Open Q3/Q4) — RESOLVED 2026-09-06.** T1.4
+  confirmed `side`/`typeId` pass through unchanged for both deploy modes. `HypnoAlly` remains a
+  named refusal until the native hypnotize bridge is verified; no column mutation is planned.
 - **Zomboss's own demon roster (zomboss-deploy-ai Open Q1, elevated to the map's own deferred list)**:
   default is **the same summonable species pool the player draws from, filtered to the current level's
   own threat band** (T3.2) — no new content authoring, no new roster table. Reversible: a dedicated
@@ -75,7 +78,7 @@ D0-D2 (demon-progression-plan) ───────────────┐
 T1.1 (Commander/Patron refusal) ──────────────┤
 T1.2 (reconcile-diff binding)  ───────────────┼──> Checkpoint 1 ──> T4.x (unique XP) ──┐
 T1.3 (overflow-safety check)  ────────────────┤                                      ├──> T2.x (events) ──> Checkpoint 2 ──> T3.x (Zomboss AI) ──> Checkpoint 3
-T1.4 (side-column decision)   ────────────────┤                                      │
+T1.4 (side/type pass-through) ────────────────┤                                      │
 T1.5 (species-magnitude path) ────────────────┤                                      │
 T1.6 (live E2E)               ────────────────┘                                      │
                                                                                       └── progression-source conformance sweep

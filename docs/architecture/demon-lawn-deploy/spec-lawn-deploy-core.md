@@ -1,6 +1,6 @@
 # Spec: lawn-deploy-core (`demon-lawn-deploy` module 1)
 
-**Status: proposed — pending owner review. No build authorized.**
+**Status: partial implementation landed 2026-09-06/2026-09-08; follow-up hardening remains.**
 
 ## Objective
 
@@ -30,9 +30,9 @@ Traced end to end before writing this:
   the Injector-side apply step — calls `UniqueLoadoutSpec.BindToPtr(bound.Ptr)` → `BindGrant` per grant
   → `funnel.EnqueueModifier`. This is source-agnostic: it applies whatever grants it's given through the
   same path combat math already reads. **No Injector code needs to change.**
-- The actual gap: nothing today resolves a demon specimen's `TraitIds` (its own rolled traits, e.g.
-  `["critical-hunter","guardian"]`) or its species magnitudes into anything that reaches this deploy
-  path. `GetUniqueStatModsJson` only knows about equipment.
+- The trait-binding gap is now closed by `ReconcileDemonTraitBindingsUnlocked` on every deploy;
+  species-magnitude delivery is also wired through the dedicated binding path. Remaining gaps are the
+  explicitly refused `HypnoAlly` native mind-control operation and any future Commander-instance binding.
 - **The wrong fix, ruled out before writing this spec**: appending demon-derived grants onto whatever
   `UniqueLoadoutMerge.Merge` already assembles. Its own doc comment
   (`UniqueLoadoutSpec.cs:22-25`, `Merge` logic) says it is *not* additive — "empty-ish deploy falls back
@@ -57,7 +57,8 @@ Four real defects the first draft did not survive:
 1. **Patron must be refused, not just "assumed already designated" — DONE 2026-09-06.** The map's own
    first draft said this program deploys "a unique demon or Commander" — directly contradicting
    `demon-system-map.md`'s Axis 2 ("neither one ever fights"). No code guard existed: `IsPatronUnlocked`
-   was checked only at `RpgStore.Fusion.cs:354` for sacrifice refusal, never in the deploy path.
+   was checked only at `RpgStore.Fusion.cs:354` for sacrifice refusal; the deploy path now has its own
+   active-Patron refusal gate.
    **Implemented**: `RpgStore.UniqueActors.cs`'s `TryBeginUniqueDeploy` now calls the same
    `IsPatronUnlocked` check and refuses with `"patron.cannot-deploy"` before admitting a spawn. **Proven,
    not just built**: `tests/FusionRpg.Data.Tests/DemonLawnDeployCommanderRefusalTests.cs` (3 cases: the
@@ -93,25 +94,19 @@ Four real defects the first draft did not survive:
    (`AuraDerivedEndpoints.cs:36-52`) reads that column to resolve `ForZombie`/`ForPlant` species/stat
    data. If a `HypnoAlly` deploy overrides the WIRE side (what actually spawns) without also updating the
    column, this endpoint would resolve the wrong side relative to what's actually alive on the board.
-   **Open, not silently decided**: either (a) `DeployAsync` also updates the `side` column for a
-   `HypnoAlly` demon at deploy time (a real, deliberate mutation of a column every other code path
-   currently treats as immutable — needs its own review), or (b) `AuraDerivedEndpoints` becomes
-   `DeployMode`-aware. Named as Open Question 4 below, not assumed away.
-4. **A demon's own species magnitudes (not just `TraitIds`) need a delivery path too, and none exists
-   yet.** The original framing named both "traits and species magnitudes" as what needs to reach the
-   spawned unit, but the actual `effect_binding` design above only wires trait ids. `ConcreteSpecies`'s
-   own magnitudes (already `long`-typed, `PTheta`-derived) still have no path into a deploy grant. Named
-   as Open Question 5, not silently dropped.
+   **Resolved**: side/type pass through unchanged and `HypnoAlly` deploy is refused until a verified
+   native mind-control bridge exists; `rpg_unique_actors.side` is not mutated.
+4. **Species-magnitude delivery is implemented in the T1.5 binding slice.** The remaining verification
+   is the overflow/rehydration regression coverage tracked in `demon-lawn-deploy-todo.md`.
 
 ## Project structure (files this module likely touches)
 
 - `src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs` — new `ReconcileDemonTraitBindingsUnlocked`,
   mirroring `ReconcileUniqueEquipmentAtomBindingsUnlocked`'s exact diff shape, called from `DeployAsync`.
-- `src/FusionRpg.Server/UniqueActorService.cs` — `DeployAsync`: call the new reconcile method; refuse
-  Commander/Patron-designated specimens by name (Correction 1); resolve spawn `side`/`typeId` from the
-  demon's own `DeployMode` per whichever Open Question 4 resolution is chosen.
-- No `src/FusionRpg.Injector` changes anticipated (see above) — a task that discovers otherwise should
-  treat that as a real, reportable finding, not something to route around silently.
+- `src/FusionRpg.Server/UniqueActorService.cs` — `DeployAsync` calls the reconciler and enforces the
+  Patron/HypnoAlly refusal gates; side/type pass through unchanged.
+- `src/FusionRpg.Injector/Match/MatchHost.cs` — event/AI trigger wiring is now present; it remains
+  SQLite-free and uses the existing client queue.
 - New tests: `tests/FusionRpg.Data.Tests/DemonLawnDeployTests.cs` (binding creation AND reconciliation —
   explicitly including a promotion-then-redeploy case per Correction 2, not just a first-deploy case), a
   new case in `tests/FusionRpg.E2E.Tests/StorageE2ETests.cs`-style live E2E asserting a demon deploy
@@ -162,8 +157,8 @@ method and `ModsAbsorptionTests.cs`'s own before/after-state assertion style for
 
 - **Always do**: reuse `AtomPushService`/`effect_binding` — never invent a second content-delivery wire
   format for demons specifically. Always reconcile bindings at deploy time, never trust a stale snapshot.
-- **Ask first**: Open Question 4 (the `side`-column decision) — a real, cross-cutting design choice, not
-  an implementation detail this spec can resolve unilaterally.
+- **Ask first**: any future change to the resolved side/type pass-through or the native `HypnoAlly`
+  mind-control bridge; the current deploy path keeps the refusal fail-closed.
 - **Never do**: change `UniqueLoadoutMerge.Merge`'s own semantics, or the legacy `mods_json` shape — both
   are mid-migration away from (`spec-mods-absorption.md`) and this module must not add a new dependent
   on the path being retired. Never let a Commander- or Patron-designated specimen deploy.

@@ -263,6 +263,8 @@ def main(argv=None) -> int:
                                              "entry into a named partition.")
     ap.add_argument("--slot", type=int, default=0, help="the k<N> partition a new entry lands in")
     ap.add_argument("--theme", default="", help="an inline theme hint; mints one new entry")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="with --theme, print the one-entry brief without calling a model")
     ap.add_argument("--write", action="store_true", help="write the new partition entry to disk")
     ap.add_argument("--overwrite", default="",
                     help="a full existing consumable id to regenerate in place (needs --theme too)")
@@ -274,6 +276,10 @@ def main(argv=None) -> int:
         entries = load_corpus()
         report = reconcile_grants_and_cooldowns(entries)
         print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+        return 0
+
+    if args.dry_run:
+        print(brief_mod.build_consumable_brief(args.theme))
         return 0
 
     if not args.write:

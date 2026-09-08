@@ -10,7 +10,18 @@ namespace FusionRpg.Core.Progression;
 public sealed record XpCurveParams(long First, long Step);
 
 /// <summary>Award deltas in whole XP — same integer rule as <see cref="XpCurveParams"/>.</summary>
-public sealed record XpAwardsTuning(long Kill, long Defeat, long Mower, long PlantPlace, long ZombieSpawn);
+public sealed record XpAwardsTuning(long Kill, long Defeat, long Mower, long PlantPlace, long ZombieSpawn)
+{
+    /// <summary>Dedicated unique-specimen lawn kill award. Zero keeps older tuning documents
+    /// compatible until the balance file opts into the dedicated source.</summary>
+    public long SpecimenLawnKill { get; init; }
+
+    /// <summary>Active-match milliseconds in one dedicated participation interval.</summary>
+    public long SpecimenBoundIntervalMs { get; init; }
+
+    /// <summary>Dedicated unique-specimen XP awarded per completed active interval.</summary>
+    public long SpecimenBoundIntervalXp { get; init; }
+}
 
 /// <summary>Progression balance surface (tunables-ssot.md T1) — RpgXpCurve/RpgXpAwards.</summary>
 public sealed record ProgressionTuning(
@@ -54,7 +65,12 @@ public static class ProgressionTuningLoader
                     Defeat: Long(awards, "defeat"),
                     Mower: Long(awards, "mower"),
                     PlantPlace: Long(awards, "plantPlace"),
-                    ZombieSpawn: Long(awards, "zombieSpawn")));
+                    ZombieSpawn: Long(awards, "zombieSpawn"))
+                {
+                    SpecimenLawnKill = OptionalPositiveLong(awards, "specimenLawnKill"),
+                    SpecimenBoundIntervalMs = OptionalPositiveLong(awards, "specimenBoundIntervalMs"),
+                    SpecimenBoundIntervalXp = OptionalPositiveLong(awards, "specimenBoundIntervalXp")
+                });
         }
     }
 
@@ -96,6 +112,15 @@ public static class ProgressionTuningLoader
         if (raw < long.MinValue || raw > long.MaxValue)
             throw new ProgressionTuningRejection($"progression tuning: '{key}' = {raw} is out of range for long");
         return (long)raw;
+    }
+
+    static long OptionalPositiveLong(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out _)) return 0L;
+        var value = Long(parent, key);
+        if (value <= 0)
+            throw new ProgressionTuningRejection($"progression tuning: '{key}' must be positive");
+        return value;
     }
 }
 

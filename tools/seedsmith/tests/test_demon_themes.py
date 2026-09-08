@@ -160,24 +160,27 @@ def test_a_demon_key_becomes_legal_once_unioned_in():
 
 
 def test_all_existing_live_themed_entries_still_validate():
-    """spec-demon-themes.md's own words: 'the row that decides whether this ships.' Measured
-    2026-08-31 against the real corpus: 30 sets + 8 uniques = 38 themed entries, all `theme.*`."""
+    """Every committed theme key must be legal through its owning published vocabulary."""
     corpus = Corpus.load(LIVE_ITEMS_ROOT)
     themed = [e for e in corpus.entries.values() if e.get("themeKey")]
-    assert len(themed) == 38, "the corpus moved — re-measure before trusting this test's count"
+    assert len(themed) == 69, "the committed themed-entry acceptance count changed"
 
-    vocab = load_vocabularies()  # no demon keys unioned in — proves legacy alone still suffices
+    demon_keys = frozenset(e.get("themeKey") for e in themed
+                           if e.get("themeKey").startswith("demon."))
+    vocab = load_vocabularies(demon_theme_keys=demon_keys)
     from seedsmith.adapters.base import RegistrySet
     registries = RegistrySet(vocabularies=vocab)
     broken = [e.id for e in themed if not registries.is_legal("themeKey", e.get("themeKey"))]
     assert broken == [], f"turning themeKey into a closed vocabulary broke: {broken}"
 
 
-def test_live_theme_keys_used_are_a_subset_of_the_five_known_ones():
+def test_live_theme_keys_used_are_in_their_declared_legacy_build_or_demon_namespaces():
     corpus = Corpus.load(LIVE_ITEMS_ROOT)
     used = {e.get("themeKey") for e in corpus.entries.values() if e.get("themeKey")}
-    assert used == {"theme.frostbitten-vanguard", "theme.rusted-legion", "theme.sunwoven-almanac",
-                    "theme.thorned-chassis", "theme.verdant-graft"}
+    demon_keys = frozenset(key for key in used if key.startswith("demon."))
+    declared = load_theme_keys() | demon_keys
+    assert used <= declared
+    assert {key.split(".", 1)[0] for key in used} == {"theme", "build", "demon"}
 
 
 # ---- Cross-artifact consistency (added 2026-09-01 after a real, undetected staleness) -----------

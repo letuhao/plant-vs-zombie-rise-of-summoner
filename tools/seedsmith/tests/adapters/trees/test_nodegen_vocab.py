@@ -14,15 +14,14 @@ class RealCorpusCountsTests(unittest.TestCase):
     """Reads the REAL committed affix-family corpus — the same one `items/setgen/vocab.py`
     reads — so a drift in the corpus is caught here too, never silently re-derived."""
 
-    def test_counts_100_families_and_exactly_three_tag_values(self) -> None:
-        # ⛔ CORRECTED 2026-09-06: 100 families / 43 offensive, not 98/41 -- g-punisher.json added
-        # atom.chill-punisher/atom.rot-punisher, both tagged ["offensive"] only (the action-corpus
-        # pairing-tier fix). defensive/utility counts are unaffected.
+    def test_counts_112_families_and_exactly_three_tag_values(self) -> None:
+        # The committed affix corpus grew by twelve offensive families after the earlier 100-family
+        # snapshot. Keep this acceptance value explicit so a corpus change is reviewed here.
         vocabulary = vocab.build()
-        self.assertEqual(vocabulary.count, 100)
+        self.assertEqual(vocabulary.count, 112)
         tag_counts = vocabulary.tag_counts()
         self.assertEqual(set(tag_counts), {"offensive", "defensive", "utility"})
-        self.assertEqual(tag_counts["offensive"], 43)
+        self.assertEqual(tag_counts["offensive"], 55)
         self.assertEqual(tag_counts["defensive"], 40)
         self.assertEqual(tag_counts["utility"], 17)
 
@@ -66,8 +65,8 @@ class PermittedForBranchTests(unittest.TestCase):
         self.assertTrue(options)
         for option in options:
             self.assertTrue("offensive" in option.tags or "utility" in option.tags)
-        self.assertEqual(len(options), 43 + 17 - len(
-            [o for o in self.vocabulary.options if "offensive" in o.tags and "utility" in o.tags]))
+        self.assertEqual(len(options), len([o for o in self.vocabulary.options
+                                            if "offensive" in o.tags or "utility" in o.tags]))
 
     def test_defensive_branch_gets_defensive_and_utility_tagged_affixes(self) -> None:
         options = self.vocabulary.permitted_for_branch("defensive")

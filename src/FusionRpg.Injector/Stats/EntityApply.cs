@@ -132,8 +132,11 @@ public static class EntityApply
             {
                 try
                 {
+                    var spawnSource = CheatState.ConsumeSpawnSourceTag(ptr) ?? source;
+                    var payload = GameDumps.Plant(p, spawnSource, baseline.Hp, baseline.MaxHp, baseline.Atk);
+                    AddGeneralProgressionSource(payload, "plant", (int)p.thePlantType, spawnSource);
                     GameHooks.Emit("plant.spawn",
-                        Tag(GameDumps.Plant(p, CheatState.ConsumeSpawnSourceTag(ptr) ?? source, baseline.Hp, baseline.MaxHp, baseline.Atk)));
+                        Tag(payload));
                 }
                 catch { }
             }
@@ -256,9 +259,12 @@ public static class EntityApply
             {
                 try
                 {
+                    var spawnSource = CheatState.ConsumeSpawnSourceTag(ptr) ?? source;
+                    var payload = GameDumps.Zombie(z, spawnSource, baseline.Hp, baseline.MaxHp, baseline.Atk, baseline.Arm1,
+                        baseline.Arm1Max);
+                    AddGeneralProgressionSource(payload, "zombie", (int)z.theZombieType, spawnSource);
                     GameHooks.Emit("zombie.spawn",
-                        Tag(GameDumps.Zombie(z, CheatState.ConsumeSpawnSourceTag(ptr) ?? source, baseline.Hp, baseline.MaxHp, baseline.Atk, baseline.Arm1,
-                            baseline.Arm1Max)));
+                        Tag(payload));
                 }
                 catch { }
             }
@@ -270,6 +276,26 @@ public static class EntityApply
     {
         CheatState.TagProbe(payload);
         return payload;
+    }
+
+    /// <summary>
+    /// First-session progression T4: ordinary PvZ spawns carry an explicit empire-general claim.
+    /// Dedicated extra/unique/commander mechanisms are intentionally left untouched; the server
+    /// rejects missing or contradictory claims rather than inferring a source from the type id.
+    /// </summary>
+    static void AddGeneralProgressionSource(Dictionary<string, object> payload, string side, int typeId, string source)
+    {
+        var token = (source ?? string.Empty).ToLowerInvariant();
+        if (token.Contains("extra", StringComparison.Ordinal)
+            || token.Contains("unique", StringComparison.Ordinal)
+            || token.Contains("commander", StringComparison.Ordinal)
+            || token.Contains("patron", StringComparison.Ordinal))
+            return;
+        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured) return;
+        var index = new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+        if (!index.TryGet(side, typeId, out var species)) return;
+        payload["sourceKind"] = FusionRpg.Core.Demons.DemonProgressionSource.EmpireGeneralKind;
+        payload["sourceId"] = "general:" + species.SpeciesId;
     }
 
     /// <summary>

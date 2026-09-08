@@ -5,6 +5,7 @@ using FusionRpg.Data.Abstractions;
 using FusionRpg.Data.Policies;
 using FusionRpg.Data.Sqlite;
 using FusionRpg.Data.Sqlite.Migrations;
+using FusionRpg.Core.Demons;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -362,6 +363,20 @@ public sealed partial class RpgStore : IRpgDb
               through_fact_id INTEGER NOT NULL DEFAULT 0,
               schema_version INTEGER NOT NULL DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS rpg_onboarding_checkpoint (
+              player_id INTEGER NOT NULL,
+              checkpoint_id TEXT NOT NULL,
+              state TEXT NOT NULL,
+              earned_run_id INTEGER,
+              reward_ref TEXT,
+              payload_json TEXT,
+              earned_utc TEXT NOT NULL,
+              claimed_utc TEXT,
+              revision INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (player_id, checkpoint_id)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_onboarding_checkpoint_player
+              ON rpg_onboarding_checkpoint(player_id, checkpoint_id);
             CREATE TABLE IF NOT EXISTS rpg_actor_progression (
               player_id INTEGER NOT NULL,
               kind TEXT NOT NULL,
@@ -418,6 +433,28 @@ public sealed partial class RpgStore : IRpgDb
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_corr ON rpg_unique_actors(deploy_correlation_id);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_ptr ON rpg_unique_actors(last_ptr);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_match ON rpg_unique_actors(match_key);
+            CREATE TABLE IF NOT EXISTS rpg_unique_lawn_xp_receipts (
+              instance_id TEXT NOT NULL,
+              match_key TEXT NOT NULL,
+              occurrence_id TEXT NOT NULL,
+              reason TEXT NOT NULL,
+              xp INTEGER NOT NULL,
+              created_utc TEXT NOT NULL,
+              PRIMARY KEY (instance_id, match_key, occurrence_id, reason)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_unique_lawn_xp_match
+              ON rpg_unique_lawn_xp_receipts(match_key, occurrence_id);
+            CREATE TABLE IF NOT EXISTS rpg_unique_lawn_sessions (
+              instance_id TEXT NOT NULL PRIMARY KEY,
+              player_id INTEGER NOT NULL,
+              match_key TEXT NOT NULL,
+              bound_utc TEXT NOT NULL,
+              correlation_id TEXT,
+              ptr TEXT,
+              bound_active_ms INTEGER
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_unique_lawn_sessions_match
+              ON rpg_unique_lawn_sessions(match_key);
             -- party-dungeon D2.23 (spec-delve-attrition.md §1, verbatim SQL): cross-delve pool
             -- persistence (attrition.persistAcrossDelves[], "hunger" today) and the Recovering
             -- counter. Neither carries a *_utc column -- "recovery is counted, never timed" (§7).
@@ -605,6 +642,21 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "through_ledger_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
+        // demon-lawn-deploy T4.2: preserve correlation/pointer identity on migrated lawn sessions so
+        // the partial unique indexes can reject two open bindings for one run identity.
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "correlation_id", "TEXT");
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "ptr", "TEXT");
+        EnsureColumn(db, "rpg_unique_lawn_sessions", "bound_active_ms", "INTEGER");
+        // A run cannot have two live bindings for the same deployment correlation or Unity pointer.
+        // Create these only after the additive columns exist on migrated databases.
+        Exec(db, """
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_rpg_unique_lawn_sessions_match_corr
+              ON rpg_unique_lawn_sessions(match_key, correlation_id)
+              WHERE correlation_id IS NOT NULL AND correlation_id <> '';
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_rpg_unique_lawn_sessions_match_ptr
+              ON rpg_unique_lawn_sessions(match_key, ptr)
+              WHERE ptr IS NOT NULL AND ptr <> '';
+            """);
         // species-build T1.1 (spec-species-xp.md §1 Option A): kind='species' rows key on
         // DemonSpeciesDef.DemonTypeId in the existing type_id column (already unique per species) —
         // this nullable text column carries the human-readable speciesId alongside it, so a row can be
@@ -817,6 +869,8 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_player_commander;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
+                             "DELETE FROM rpg_unique_lawn_xp_receipts;",
+                             "DELETE FROM rpg_unique_lawn_sessions;",
                              "DELETE FROM rpg_aptitude_allocation;",
                              "DELETE FROM rpg_tree_node_state;",
                              "DELETE FROM rpg_tree_respec_count;",
@@ -1505,18 +1559,39 @@ public sealed partial class RpgStore : IRpgDb
                 var dedupe = string.IsNullOrWhiteSpace(req.DedupeKey)
                     ? Guid.NewGuid().ToString("N")
                     : req.DedupeKey.Trim();
+                var sourceKind = string.IsNullOrWhiteSpace(req.SourceKind) ? "feature" : req.SourceKind.Trim();
+                var sourceId = string.IsNullOrWhiteSpace(req.SourceId) ? "manual" : req.SourceId.Trim();
+                // Only unique-specimen claims require ownership/correlation validation. General
+                // and commander sources use the same versioned contract kind but have different
+                // grammars; treating every contract source as a unique claim would silently
+                // rewrite valid empire-general facts to `untrusted`.
+                var isUniqueClaim = false;
+                if (string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal))
+                {
+                    try
+                    {
+                        isUniqueClaim = DemonProgressionSource.Parse(sourceKind, sourceId)
+                            is DemonProgressionSource.UniqueSpecimenSource;
+                    }
+                    catch (FormatException) { /* malformed claims fail closed in progression */ }
+                }
+                if (isUniqueClaim && !IsOwnedUniqueSourceUnlocked(db, playerId, sourceKind, sourceId))
+                {
+                    sourceKind = "untrusted";
+                    sourceId = "manual";
+                }
                 var inserted = InsertPvzActivityFactUnlocked(
                     db, playerId, req.RunId, t, kind,
                     string.IsNullOrWhiteSpace(req.PluginId) ? "rpg.feature" : req.PluginId.Trim(),
-                    string.IsNullOrWhiteSpace(req.SourceKind) ? "feature" : req.SourceKind.Trim(),
-                    string.IsNullOrWhiteSpace(req.SourceId) ? "manual" : req.SourceId.Trim(),
+                    sourceKind, sourceId,
                     req.PayloadJson, req.MatchKey, dedupe);
                 IReadOnlyList<RpgProgressionDirty> progression = Array.Empty<RpgProgressionDirty>();
                 if (inserted.Inserted)
                 {
                     BumpAndApplyPvzActivityDeltaUnlocked(db, playerId, inserted.FactId, kind, req.PayloadJson);
                     progression = ApplyRpgProgressionFromActivityUnlocked(
-                        db, playerId, req.RunId, t, kind, req.PayloadJson ?? "{}", dedupe, inserted.FactId);
+                        db, playerId, req.RunId, t, kind, req.PayloadJson ?? "{}", dedupe, inserted.FactId,
+                        sourceKind: sourceKind, sourceId: sourceId);
                 }
                 else
                     EnsurePvzActivityRollupUnlocked(db, playerId);
@@ -1624,19 +1699,90 @@ public sealed partial class RpgStore : IRpgDb
             TryString(payload, "ptr"),
             TryInt(payload, "col"),
             TryInt(payload, "row"),
-            t);
+            t,
+            TryLong(payload, "lifecycleOccurrence"));
+        var sourceKind = "capture";
+        var sourceId = kind;
+        var instanceId = TryString(payload, "instanceId");
+        // The spawn mechanism chooses the source variant. `extra` is the dedicated unique-spawn
+        // mechanism; it must never fall through to the empire-general species row when ownership
+        // cannot be proven. Ordinary lawn/general spawns must carry a typed claim in `sourceKind`
+        // and `sourceId`; the injector's opaque operation token is not enough. The type id is used
+        // solely to verify species identity *after* that mechanism decision, never to select it.
+        var spawnSource = TryString(payload, "source");
+        var isDedicatedExtra = string.Equals(spawnSource, "extra", StringComparison.OrdinalIgnoreCase);
+        var claimedKind = TryString(payload, "sourceKind");
+        var claimedId = TryString(payload, "sourceId");
+        var hasExplicitClaim = !string.IsNullOrWhiteSpace(claimedKind) || !string.IsNullOrWhiteSpace(claimedId);
+        if (hasExplicitClaim
+            && factKind is FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced or FusionRpg.Core.Activity.PvzActivityKinds.ZombieSpawned)
+        {
+            var side = factKind == FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+            if (TryInt(payload, "type") is { } typeId && IsMatchingEmpireGeneralClaim(claimedKind, claimedId, side, typeId))
+            {
+                sourceKind = claimedKind!;
+                sourceId = claimedId!;
+            }
+            else
+            {
+                // A malformed, contradictory, unique, or Commander claim cannot be reclassified
+                // from this capture. Preserve the fact for diagnostics, but make it ineligible for
+                // every source-specific progression award.
+                sourceKind = "untrusted";
+                sourceId = "invalid-claim";
+            }
+        }
+        if (!hasExplicitClaim && !string.IsNullOrWhiteSpace(instanceId) && isDedicatedExtra)
+        {
+            var occurrence = TryString(payload, "correlationId") ?? dedupe;
+            if (IsOwnedUniqueSourceUnlocked(db, playerId, DemonProgressionSource.UniqueSpecimenKind,
+                    $"unique:{instanceId}:{occurrence}"))
+            {
+                var source = DemonProgressionSource.UniqueSpecimen(instanceId!, occurrence);
+                sourceKind = source.Kind;
+                sourceId = source.Id;
+            }
+        }
         var inserted = InsertPvzActivityFactUnlocked(
             db, playerId, runId, t, factKind,
-            "pvz.capture", "capture", kind, payload, matchKey, dedupe);
+            "pvz.capture", sourceKind, sourceId, payload, matchKey, dedupe);
         if (inserted.Inserted)
         {
             BumpAndApplyPvzActivityDeltaUnlocked(db, playerId, inserted.FactId, factKind, payload);
             _activityNotifyBatch?.Add(playerId);
             ApplyRpgProgressionFromActivityUnlocked(
-                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId, pvzGame);
+                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId, pvzGame,
+                sourceKind, sourceId);
             // Soul earns ride the same transaction as the fact — a crash can never lose one (spec-soul-economy.md).
             ApplySoulEarnFromActivityUnlocked(db, playerId, runId, t, factKind, payload, inserted.FactId);
+            ApplyOnboardingFromSettledCaptureUnlocked(
+                db, playerId, runId, factKind, payload, inserted.FactId, t, pvzGame);
         }
+    }
+
+    /// <summary>
+    /// First-session progression T3: checkpoint facts are committed inside the same transaction as the
+    /// captured result, progression, and Souls. This first slice only settles the first-win reveal;
+    /// species and equipment remain ineligible until their source and owner paths land.
+    /// </summary>
+    void ApplyOnboardingFromSettledCaptureUnlocked(
+        SqliteConnection db, long playerId, long runId, string factKind, string payload,
+        long factId, string t, bool pvzGame)
+    {
+        if (!pvzGame || factKind != FusionRpg.Core.Activity.PvzActivityKinds.MatchEnded || runId == 0)
+            return;
+        if (FusionRpg.Core.Activity.PvzActivityKinds.NormalizeMatchResult(TryString(payload, "result")) != "victory")
+            return;
+
+        var rewardPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.FirstWinDave,
+            commanderId = "commander:dave",
+            sourceFactId = factId
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.FirstWinDave,
+            runId, $"fact:{factId}", rewardPayload, t);
     }
 
     (bool Inserted, long FactId) InsertPvzActivityFactUnlocked(
@@ -1661,7 +1807,21 @@ public sealed partial class RpgStore : IRpgDb
             cmd.Parameters.AddWithValue("$m", (object?)matchKey ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$d", string.IsNullOrWhiteSpace(dedupeKey) ? "" : dedupeKey);
             if (cmd.ExecuteNonQuery() <= 0)
-                return (false, 0);
+            {
+                // INSERT OR IGNORE is the idempotence gate, but callers still need the canonical
+                // fact id on a replay so downstream ledgers can reference the original receipt.
+                using var existing = db.CreateCommand();
+                existing.CommandText = """
+                    SELECT id FROM pvz_activity_facts
+                    WHERE player_id=$p AND run_id=$r AND kind=$k AND dedupe_key=$d
+                    LIMIT 1;
+                    """;
+                existing.Parameters.AddWithValue("$p", playerId);
+                existing.Parameters.AddWithValue("$r", runId ?? 0L);
+                existing.Parameters.AddWithValue("$k", kind);
+                existing.Parameters.AddWithValue("$d", string.IsNullOrWhiteSpace(dedupeKey) ? "" : dedupeKey);
+                return (false, Convert.ToInt64(existing.ExecuteScalar() ?? 0L));
+            }
         }
         using var idCmd = db.CreateCommand();
         idCmd.CommandText = "SELECT last_insert_rowid();";
@@ -3207,6 +3367,50 @@ public sealed partial class RpgStore : IRpgDb
         }
         catch { }
         return null;
+    }
+
+    static long? TryLong(string json, string prop)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty(prop, out var p)) return null;
+            if (p.ValueKind == JsonValueKind.Number && p.TryGetInt64(out var n)) return n;
+            if (p.ValueKind == JsonValueKind.String && long.TryParse(p.GetString(), out n)) return n;
+        }
+        catch { }
+        return null;
+    }
+
+    static bool IsMatchingEmpireGeneralClaim(string? sourceKind, string? sourceId, string side, int typeId)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(sourceId) || !DemonSpeciesCatalog.IsConfigured) return false;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind!, sourceId!)
+                is not DemonProgressionSource.EmpireGeneralSource general) return false;
+            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, typeId, out var species)
+                && string.Equals(general.SpeciesId, species.SpeciesId, StringComparison.Ordinal);
+        }
+        catch (InvalidOperationException) { return false; }
+        catch (FormatException) { return false; }
+    }
+
+    bool IsOwnedUniqueSourceUnlocked(SqliteConnection db, long playerId, string sourceKind, string sourceId)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.UniqueSpecimenKind, StringComparison.Ordinal))
+            return true;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind, sourceId) is not DemonProgressionSource.UniqueSpecimenSource unique)
+                return false;
+            var actor = ReadUniqueActorUnlocked(db, unique.InstanceId);
+            return actor is not null && actor.PlayerId == playerId
+                && !string.IsNullOrWhiteSpace(actor.DeployCorrelationId)
+                && string.Equals(actor.DeployCorrelationId, unique.OccurrenceId, StringComparison.Ordinal);
+        }
+        catch (FormatException) { return false; }
     }
 
     static double? TryDouble(string json, string prop)

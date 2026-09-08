@@ -898,33 +898,56 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
     owns (`items validate --deps`, schema/`audit_schema` conformance, `dependency_validator`), not
     against `tools/ItemSeedValidator`.
     """
+    import dataclasses
+
     from ..adapters.items.combogen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
+    from ..adapters.items.setgen import run as set_run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
+    from ..pipeline.llm_caller import load_config
 
-    if not args.answers or not args.out_dir:
+    if not args.out_dir:
+        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
+              "land.", file=sys.stderr)
+        return EXIT_REFUSED
+    if not args.answers and not args.endpoint:
         print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_combination.py) is wired, but its only transport today is an "
-              "authored-answer file: emit briefs with --briefs-out, have a model answer them, then "
-              "pass --answers <file> --out-dir <dir>. There is no live-endpoint path here yet "
-              "(that is set-charm-live-endpoint's own scope, not this one's).", file=sys.stderr)
+              "(workflow/graphs/item_combination.py) accepts an authored-answer file (emit briefs "
+              "with --briefs-out, then pass --answers <file>) or a live model endpoint "
+              "(--endpoint <url> [--model <name>]).", file=sys.stderr)
         return EXIT_REFUSED
     try:
         out_dir = seedfile_mod.resolve_out_dir(
             args.out_dir, allow_production_tree=args.allow_production_tree)
-        answers = answers_mod.load_answers(Path(args.answers))
-    except (seedfile_mod.OutDirRefused, answers_mod.AnswerFileError) as exc:
+    except seedfile_mod.OutDirRefused as exc:
         print(f"seedsmith: {exc}", file=sys.stderr)
         return EXIT_REFUSED
-    if answers.kind != "combination":
-        print(f"seedsmith: the answer file is for --kind {answers.kind!r}; this run is "
-              f"'combination'", file=sys.stderr)
-        return EXIT_REFUSED
+
+    call = None
+    if args.answers:
+        try:
+            answers = answers_mod.load_answers(Path(args.answers))
+        except answers_mod.AnswerFileError as exc:
+            print(f"seedsmith: {exc}", file=sys.stderr)
+            return EXIT_REFUSED
+        if answers.kind != "combination":
+            print(f"seedsmith: the answer file is for --kind {answers.kind!r}; this run is "
+                  f"'combination'", file=sys.stderr)
+            return EXIT_REFUSED
+        effective_model = args.model
+    else:
+        answers = answers_mod.AnswerFile(
+            kind="combination", population="n/a", prompt_version="live", by_subject={})
+        base_config = load_config()
+        effective_model = (args.model if args.model and args.model != "unrecorded"
+                           else base_config.model)
+        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
+        call = set_run_mod.live_caller(config)
 
     ledger_path = Path(args.ledger) if args.ledger else None
     result = authored_mod.run_batch(
         plan=plan, answers=answers, tuning=tuning, out_dir=out_dir,
-        authored_utc=args.authored_utc, model=args.model, ledger_path=ledger_path)
+        authored_utc=args.authored_utc, model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     return EXIT_CLEAN if result.persisted and not any(
@@ -2252,10 +2275,8 @@ def build_parser() -> argparse.ArgumentParser:
                       help="the default and currently the only mode — assemble the plan, make no "
                            "model calls")
     igen.add_argument("--write", action="store_true",
-                      help="set/charm: run the planned subjects through the generation graph and "
-                           "write seed files; needs --out-dir and one of --answers or --endpoint. "
-                           "combination: same shape, --answers + --out-dir only (no live endpoint "
-                           "yet, that is set-charm-live-endpoint's own scope)")
+                      help="run planned subjects through the generation graph and write seed files; "
+                           "set/charm/combination need --out-dir and one of --answers or --endpoint")
     igen.add_argument("--sample-brief", dest="sample_brief", action="store_true",
                       help="print the first subject's assembled brief")
     igen.add_argument("--limit", type=int, default=0,
@@ -2265,34 +2286,34 @@ def build_parser() -> argparse.ArgumentParser:
                       help="set/charm: write the planned subjects and their assembled briefs to "
                            "this JSON file, for a model to answer")
     igen.add_argument("--answers", default="",
-                      help="set/charm --write: an authored-answer file keyed by subjectId (a list "
+                      help="set/charm/combination --write: an authored-answer file keyed by subjectId (a list "
                            "of attempts per subject is legal — the graph's repair edge consumes "
                            "them in order). The deterministic path; mutually exclusive with "
                            "--endpoint in practice (--answers wins if both are given)")
     igen.add_argument("--endpoint", default="",
-                      help="set/charm --write: call a real model endpoint via "
+                      help="set/charm/combination --write: call a real model endpoint via "
                            "pipeline.llm_caller.call_model instead of replaying an answer file — "
                            "the same live transport --endpoint already selects for effects/demons "
                            "generate. Ignored when --answers is also given")
     igen.add_argument("--out-dir", dest="out_dir", default="",
-                      help="set/charm --write: where the seed files land. No default, and a path "
+                      help="set/charm/combination --write: where the seed files land. No default, and a path "
                            "inside data/seed/items/ is refused unless --allow-production-tree")
     igen.add_argument("--allow-production-tree", dest="allow_production_tree",
                       action="store_true",
-                      help="set/charm --write: permit an --out-dir inside data/seed/items/. This "
+                      help="set/charm/combination --write: permit an --out-dir inside data/seed/items/. This "
                            "is the production run; every items metric globs that tree")
     igen.add_argument("--ledger", default="",
-                      help="set/charm --write: resume-ledger path (default: <out-dir>/"
-                           "set-charm-gen.ledger.json, so a sample never touches the real one)")
+                      help="set/charm/combination --write: resume-ledger path (default: generator-specific "
+                           "ledger inside --out-dir, so a sample never touches the real one)")
     igen.add_argument("--ignore-ledger", dest="ignore_ledger", action="store_true",
                       help="plan every generatable subject, even ones a previous run recorded")
     igen.add_argument("--model", default="unrecorded",
-                      help="set/charm --write: with --answers, metadata only — the model id "
+                      help="set/charm/combination --write: with --answers, metadata only — the model id "
                            "stamped into each seed file's _meta. With --endpoint, also the model "
                            "id sent on the live call (falls back to llm_caller's own default if "
                            "left unset)")
     igen.add_argument("--authored-utc", dest="authored_utc", default="1970-01-01T00:00:00Z",
-                      help="set/charm --write: the _meta timestamp. Injected, never read from the "
+                      help="set/charm/combination --write: the _meta timestamp. Injected, never read from the "
                            "clock — a wall-clock stamp is the one field that makes a generated "
                            "file non-reproducible (pipeline/provenance.py's own rule)")
     # ⛔ base-type/enhancement-milestone/recipe/drop-table, added 2026-09-08: each spec

@@ -7,7 +7,8 @@ demons** (species-stats-only, no owned instance — already the `SpeciesAllocati
 **A new event/AI layer lets either side additionally deploy a unique demon onto the lawn in specific,
 triggered cases.**
 
-Status: **proposed — pending owner review. No build authorized.**
+Status: **partially implemented 2026-09-08.** The core deploy, event, and Zomboss-AI slices are
+landed and their live checkpoints are recorded; progression-source conformance remains in Phase 4.
 
 Module specs live in [demon-lawn-deploy/](demon-lawn-deploy/), one per module id, written in dependency
 order. Implementation plan/task list: [tasks/demon-lawn-deploy-plan.md](../../tasks/demon-lawn-deploy-plan.md) /
@@ -26,12 +27,11 @@ finding detail, mirroring `spec-ai-commander.md`'s own format.
 **The first draft of this map said "deploy a unique demon or Commander" throughout — wrong, caught by
 the strengthen pass before any task was broken down.** `demon-system-map.md`'s own Axis 2 (added the
 SAME day this map was first drafted) is unambiguous: *"Neither one ever fights"* and *"Do not use
-'commander' to mean 'the demon fighting for me.'"* No code-level guard against this exists today —
-`TryBeginUniqueDeploy` (`RpgStore.UniqueActors.cs:78-134`) checks `not_found`/idempotency/
-`expedition.locked`/phase/contract, and `IsPatronUnlocked` is checked ONLY at `RpgStore.Fusion.cs:354`
-(fusion-sacrifice refusal) — never in the deploy path. Left unfixed, a Patron (100-soul switch cost,
-"unconsumable") or a Commander could get its aura AND free lawn combat value from the same instance,
-voiding both economies. **`lawn-deploy-core`'s own acceptance now includes a real, tested refusal**: a
+'commander' to mean 'the demon fighting for me.'"* The deploy path now enforces the active Patron
+refusal in `TryBeginUniqueDeploy` (`RpgStore.UniqueActors.cs:78-134`). Commander-instance refusal remains
+unimplemented because no persisted instance-to-Commander binding exists yet. The same path checks
+`not_found`/idempotency/`expedition.locked`/phase/contract. **`lawn-deploy-core`'s own acceptance now
+includes a real, tested refusal**: a
 demon currently designated Commander or holding the active Patron aura refuses deploy outright. This
 program deploys *unique demons only*, full stop — the map's own name never meant to imply otherwise, and
 every mention of "or Commander" below has been removed.
@@ -80,11 +80,11 @@ in it checks "is this equipment," and `AtomPushService.OwnersForPlayer` already 
 `ActiveBound` `rpg_unique_actors` row regardless of kind (confirmed by the strengthen pass,
 `AtomPushService.cs:33-43`). A demon specimen could be admitted through this exact endpoint today.
 
-What's actually missing is narrower: nothing today resolves a demon specimen's own `TraitIds` and species
-magnitudes into the grants that reach the spawned unit. That is a **content-resolution gap, not a
-plumbing gap** — module 1 below is scoped to close exactly that, reusing the atom/`effect_binding`
-pipeline equipment already migrated to (`spec-mods-absorption.md`), not the legacy `mods_json` blob it is
-migrating away from. It also is NOT the only real consumer of `trait.{traitId}` containers —
+The remaining content work is narrower: keep the specimen's own `TraitIds` and species magnitudes
+flowing into the grants that reach the spawned unit. The core deploy slice now reconciles trait bindings
+on every deploy through the atom/`effect_binding` pipeline equipment already migrated to
+(`spec-mods-absorption.md`), not the legacy `mods_json` blob it is migrating away from. It is also NOT
+the only real consumer of `trait.{traitId}` containers —
 `TraitAtomSource.cs`/`BattleStatComposer.cs` already resolve the same ids for the turn-based expedition
 battle path; module 1's own spec names this sibling consumer explicitly so the two never silently drift.
 
@@ -98,8 +98,9 @@ internal checkboxes while a player never actually sees a working deploy in a liv
 > **A real lawn run, played to a triggered event, on both sides**: the plant-side prompt fires, the
 > player deploys an owned unique demon, and the spawned entity's combat stats/trait effects are provably
 > the specimen's own (not vanilla `type_id` defaults) — **and**, separately, a Zomboss-triggered event
-> results in Zomboss deploying one of its own unique demons, chosen by the real policy, not a stub. Until
-> an E2E proves both halves in one sitting, the program is not done, regardless of module status.
+> results in Zomboss deploying one of its own unique demons, chosen by the real policy, not a stub. Both
+> halves were proven in one continuous live game/server sitting on 2026-09-07. Progression-source
+> conformance and atomic lawn-XP settlement remain open in Phase 4.
 
 ---
 
@@ -108,7 +109,7 @@ internal checkboxes while a player never actually sees a working deploy in a liv
 | Module id | Responsibility | Depends on |
 |---|---|---|
 | `lawn-deploy-core` | Resolve a demon specimen's traits into `effect_binding` rows (mirroring an equipment slot bind, as a **reconciled diff on every deploy**, never a one-time mint-time snapshot) so the existing atom-push pipeline (`AtomPushService.Build` → `RpgHub.BuildApplyCommand`) delivers them; wire `UniqueActorService.DeployAsync` to admit a demon-kind `instanceId`, refuse a Commander/Patron-designated one, and pick the right spawn side/type from `DeployMode`. No new Injector code — `UniqueBoundLoadout.TryApply`/the Funnel are already generic. | — |
-| `lawn-deploy-progression` | **Approved 2026-09-08.** Award a Bound unique specimen its own lawn XP for attributed enemy kills and active Bound duration. Persist binding sessions and idempotent receipts; use the `UniqueSpecimen` source and never species XP or the empire fallback. Spec: [spec-lawn-deploy-progression.md](demon-lawn-deploy/spec-lawn-deploy-progression.md). | `lawn-deploy-core`, `progression-source-contract` |
+| `lawn-deploy-progression` | **Partial implementation 2026-09-08.** Award a Bound unique specimen its own lawn XP for attributed enemy kills and active Bound duration. Persist binding sessions and idempotent receipts; use the `UniqueSpecimen` source and never species XP or the empire fallback. Spec: [spec-lawn-deploy-progression.md](demon-lawn-deploy/spec-lawn-deploy-progression.md). | `lawn-deploy-core`, `progression-source-contract` |
 | `lawn-deploy-events` | Define trigger conditions for when a unique-demon deploy becomes available during a lawn run (frequency, cost, which side, player-facing UI for the plant side), reading a Hot/Cold-safe roster snapshot rather than a live Cold-plane query mid-tick. No reusable trigger/condition system exists yet anywhere in the tree for the live lawn (`AmbushDraw` is Delve-only and itself only partially built) — this is new. | `lawn-deploy-core` |
 | `zomboss-deploy-ai` | The zombie-side counterpart: decides *whether and which* unique demon Zomboss deploys during an active event, reading board state through an explicit, enforcing view type (never `WorldState`/full Cold-plane access) — mirroring `spec-ai-commander.md`'s own `IWorldView` discipline in shape, not in code (this is lawn-scale, not world-turn-scale). Deliberately **not** a reuse of `ai-commander` (world-map turns, fog-of-war belief state, days-scale) despite the shared "Zomboss decides something" flavor; the data shape and decision cadence are unrelated. | `lawn-deploy-core`, `lawn-deploy-events` |
 
@@ -118,9 +119,5 @@ Build order: `lawn-deploy-core` → (`lawn-deploy-progression` after `progressio
 
 - The Commander-picker UI (who is designated Commander at all) — `commander-surface-map.md`'s own scope,
   proposed but not owner-authorized.
-- **Zomboss's own unique-demon roster/pool source** — `zomboss-deploy-ai` cannot build without this, and
-  nothing in the codebase gives the zombie side a demon roster today. Named here explicitly (not just
-  buried in that module's own open questions) so it isn't lost: this is a real, blocking, owner-level
-  design decision that gates the third module, not an implementation detail to discover mid-build.
 - class-system's own per-instance point-economy delivery path (see "What this program is" above) —
   a real gap this program's own investigation found, owned by `class-system-map.md`, not here.

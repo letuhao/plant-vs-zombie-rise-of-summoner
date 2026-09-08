@@ -77,6 +77,8 @@ def is_process_alive(pid: int) -> bool:
     live run (spec §6: "it does not silently take over, and it does not refuse forever")."""
     if pid <= 0:
         return False
+    if pid == os.getpid():
+        return True
     try:
         os.kill(pid, 0)
     except ProcessLookupError:

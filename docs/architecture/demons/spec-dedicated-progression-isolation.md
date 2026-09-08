@@ -1,7 +1,7 @@
 # Dedicated progression isolation
 
 **Module:** `dedicated-progression-isolation`  
-**Status:** approved 2026-09-08; specification only  
+**Status:** approved 2026-09-08; partial implementation landed 2026-09-08
 **Depends on:** `progression-source-contract`, unique-actor runtime  
 **Decision:** [decisions.md](../decisions.md) — *Demon progression source and spawn ownership (2026-09-08)*
 
@@ -44,7 +44,7 @@ All selected inputs continue through the existing ActorHub bootstrap. No dedicat
 
 ## Rewards and persistence
 
-Activity and match outcomes with `UniqueSpecimen` can update the unique's own durable progression only through the existing unique progression rules. They must not produce `RpgActorKinds.Species` awards. [demon-lawn-deploy/spec-lawn-deploy-progression.md](../demon-lawn-deploy/spec-lawn-deploy-progression.md) owns the lawn's attributed-kill and Bound-duration faucets; this module supplies its non-fallback rule. The generic lawn match-completion projector must therefore select fielded species only from facts carrying `EmpireGeneral`; it must exclude every `UniqueSpecimen` fact even when the side and `typeId` map to a known species. The same rule applies to expedition/battle resolution: `RpgStore.Expeditions` currently grants both unique and species XP, so the dedicated-source branch must retain only the valid unique reward.
+Activity and match outcomes with `UniqueSpecimen` can update the unique's own durable progression only through the existing unique progression rules. They must not produce `RpgActorKinds.Species` awards. [demon-lawn-deploy/spec-lawn-deploy-progression.md](../demon-lawn-deploy/spec-lawn-deploy-progression.md) owns the lawn's attributed-kill and Bound-duration faucets; this module supplies its non-fallback rule. The generic lawn match-completion projector must therefore select fielded species only from facts carrying `EmpireGeneral`; it must exclude every `UniqueSpecimen` fact even when the side and `typeId` map to a known species. The same rule applies to expedition/battle resolution: the historical species mirror in `RpgStore.Expeditions` has been removed, so the dedicated-source branch now retains only the valid unique reward.
 
 Existing settled ledgers remain intact; this module does not deduct prior species XP or rewrite activity history. New and replayed dedicated-source outcomes are source-gated. A missing unique row, ownership mismatch, or unknown source is rejected/diagnosed and earns neither unique nor species progression.
 
@@ -52,12 +52,19 @@ Existing settled ledgers remain intact; this module does not deduct prior specie
 
 Unique and Commander systems may have different progression inputs and deploy mechanisms, but their level-derived power remains part of the repository's one `PowerLadder`. This module adds no balance number, progression ceiling, or tuning file. Any future dedicated allocation plan must be authored by its owning system, be tunable where balance-facing, and use `long` for magnitudes.
 
+## Implementation status
+
+Unique ActorHub and web-battle composition now consume Commander plus persisted `UniqueDemon`
+allocation only. Expedition rewards retain specimen XP without mirroring into species progression,
+and generic lawn species projection excludes dedicated source claims. Focused Server/Data tests pass.
+Atomic terminal settlement and complete source-producer validation remain open in the lawn-deploy plan.
+
 ## Migration targets
 
-- `src/FusionRpg.Server/UniqueActorHubCompose.cs:46` currently merges `EffectiveSpeciesAllocation` for each unique actor; replace that merge with `UniqueSpecimen` resolution.
-- `src/FusionRpg.Server/WebMatchService.cs:647` currently builds unique battle actors with species allocation; route through the source-aware dedicated resolver instead.
-- `src/FusionRpg.Data/Sqlite/RpgStore.Expeditions.cs:338` currently awards both unique and species XP; remove the species branch for a dedicated source.
-- `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:76-115` currently infers run-completion species eligibility from `plant.place`/`zombie.spawn` type data. It must instead read the parsed `EmpireGeneral` claim; this prevents a unique lawn deploy from silently levelling the matching empire species.
+- `src/FusionRpg.Server/UniqueActorHubCompose.cs:38-56` now loads Commander plus `UniqueDemon` allocation; no species fallback remains.
+- `src/FusionRpg.Server/WebMatchService.cs:649-670` now resolves dedicated unique battle aptitude input.
+- `src/FusionRpg.Data/Sqlite/RpgStore.Expeditions.cs` now awards specimen progression without a species mirror.
+- `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:76-115` now filters run completion by parsed `EmpireGeneral` provenance.
 - `src/FusionRpg.Core/Stats/Aptitudes/UniqueDemonAllocation.cs:29` is the existing dedicated allocation primitive; do not duplicate its budget logic in server or web code.
 
 ## Acceptance criteria
@@ -87,4 +94,5 @@ Add regression tests proving that a unique and a general demon with the same spe
 - [x] Verified the current unique composition, battle composition, expedition reward, and dedicated allocation paths in the files named above.
 - [x] Kept the progression-source behavior lock in `decisions.md` as the governing decision.
 - [x] Identified implementation and verification commands.
-- [ ] No constraint test was run: this is a documentation-only specification.
+- [x] Focused unique actor, expedition, species-isolation, and Server build checks were run.
+- [ ] Full conformance and transaction-boundary tests remain open in Phase 4.

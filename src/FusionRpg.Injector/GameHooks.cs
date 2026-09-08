@@ -22,6 +22,14 @@ public static class GameHooks
     public static int CatalogPlantCount;
     public static readonly HashSet<IntPtr> Applied = new();
     public static readonly HashSet<IntPtr> DeadZombies = new();
+    // Main-thread-only causal tokens. A token is recorded only by a Die hook reached synchronously
+    // from the target's active TakeDamage interaction. This is not a last-attacker cache: no HP
+    // scan or post-hit HP read is needed, and deferred/indirect deaths fail closed.
+    static readonly Dictionary<IntPtr, string> FatalKillers = new();
+    // The game may call Die from inside TakeDamage, before the postfix runs. Keep the current
+    // interaction source only for that synchronous call frame so the Die prefix can prove the same
+    // fatal interaction; it is cleared as soon as TakeDamage returns.
+    static readonly Dictionary<IntPtr, IDamageMaker?> ActiveDamageSources = new();
     static readonly HashSet<IntPtr> MowerStarted = new();
     static int _lastSun = int.MinValue;
     static int _lastMoney = int.MinValue;
@@ -32,6 +40,10 @@ public static class GameHooks
     static bool _conveyDumped;
     static bool _catalogRetried;
     static int _catalogPending;
+    // Per-match lifecycle identity. Pointer values are reused by the game, so death facts need a
+    // monotonic occurrence in addition to ptr. The payload is persisted with the event and therefore
+    // remains stable when the same capture is retried.
+    static long _lifecycleOccurrence;
 
     public static void ClearMatch()
     {
@@ -44,6 +56,8 @@ public static class GameHooks
         CheatState.Stats.ClearBaselines();
         // Effect ClearAll is owned by MatchHost after board.start/end Apply (W2-C).
         DeadZombies.Clear();
+        FatalKillers.Clear();
+        ActiveDamageSources.Clear();
         MowerStarted.Clear();
         LastWave = -1;
         _lastSun = int.MinValue;
@@ -52,6 +66,7 @@ public static class GameHooks
         _lastLevelName = null;
         _conveyDumped = false;
         _catalogRetried = false;
+        _lifecycleOccurrence = 0;
     }
 
     internal static bool Ready() => Board != null && RpgHost.Client != null;
@@ -69,6 +84,24 @@ public static class GameHooks
                 !dict.ContainsKey("matchKey"))
             {
                 dict["matchKey"] = MatchKey!;
+            }
+            if (dict != null && IsProgressionLifecycle(kind) &&
+                !dict.ContainsKey("activeMatchMs"))
+            {
+                // KernelDriveHost is the one scaled active-match clock. Missing/zero is valid at
+                // board.start; terminal settlement fails closed if a lifecycle event lacks a real
+                // active timestamp instead of falling back to server wall time.
+                dict["activeMatchMs"] = string.Equals(kind, "board.start", StringComparison.OrdinalIgnoreCase)
+                    ? 0L
+                    : Effects.KernelDriveHost.NowMilliseconds;
+            }
+            if (dict != null && IsProgressionLifecycle(kind) &&
+                !dict.ContainsKey("lifecycleOccurrence"))
+            {
+                // Assign once at capture time so the same payload keeps its identity across
+                // transport retries. Death hooks stamp their id before Emit because they need
+                // the occurrence while constructing the terminal payload.
+                dict["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence);
             }
 
             using var _perf = PerfProbe.Measure(PerfSection.MatchApply);
@@ -90,6 +123,53 @@ public static class GameHooks
         }
 
         RpgHost.Client?.Enqueue(kind, payload, MatchKey);
+    }
+
+    static bool IsProgressionLifecycle(string kind) =>
+        string.Equals(kind, "board.start", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(kind, "board.end", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(kind, "match.result", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(kind, "plant.die", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(kind, "zombie.die", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(kind, "pvz.spawn.extra.ack", StringComparison.OrdinalIgnoreCase);
+
+    static void CaptureFatalKiller(IntPtr targetPtr, IDamageMaker? damageFrom)
+    {
+        if (targetPtr == IntPtr.Zero || damageFrom is not Il2CppObjectBase source)
+            return;
+        try
+        {
+            if (source.Pointer == IntPtr.Zero || source.Pointer == targetPtr) return;
+            if (source.TryCast<Bullet>() != null) return;
+            if (source.TryCast<Plant>() == null && source.TryCast<Zombie>() == null) return;
+            if (!FatalKillers.ContainsKey(targetPtr))
+                FatalKillers[targetPtr] = GameDumps.Ptr(source);
+        }
+        catch { }
+    }
+
+    static string? TakeFatalKiller(IntPtr targetPtr)
+    {
+        if (!FatalKillers.Remove(targetPtr, out var killer)) return null;
+        return killer;
+    }
+
+    static void BeginDamageSource(IntPtr targetPtr, IDamageMaker? damageFrom)
+    {
+        if (targetPtr != IntPtr.Zero) ActiveDamageSources[targetPtr] = damageFrom;
+    }
+
+    static bool TryGetDamageSource(IntPtr targetPtr, out IDamageMaker? damageFrom) =>
+        ActiveDamageSources.TryGetValue(targetPtr, out damageFrom);
+
+    static void EndDamageSource(IntPtr targetPtr)
+    {
+        if (targetPtr != IntPtr.Zero) ActiveDamageSources.Remove(targetPtr);
+    }
+
+    static void AddFatalKiller(Dictionary<string, object> payload, string? killer)
+    {
+        if (!string.IsNullOrWhiteSpace(killer)) payload["killerPtr"] = killer;
     }
 
     static Dictionary<string, object>? CoercePayloadDict(object payload)
@@ -563,6 +643,17 @@ public static class GameHooks
     [HarmonyPatch(typeof(Plant), nameof(Plant.Die))]
     public static class PlantDie
     {
+        public static void Prefix(Plant __instance)
+        {
+            if (__instance == null) return;
+            try
+            {
+                if (TryGetDamageSource(__instance.Pointer, out var source))
+                    CaptureFatalKiller(__instance.Pointer, source);
+            }
+            catch { }
+        }
+
         public static void Postfix(Plant __instance, Plant.DieReason reason)
         {
             if (__instance == null) return;
@@ -571,14 +662,17 @@ public static class GameHooks
             try { Effects.InjectorEntityRegistry.Remove(__instance.Pointer); } catch { }
             Effects.InjectorBoardSnapshot.Invalidate();
             // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
-            Emit("plant.die", new Dictionary<string, object>
+            var diePayload = new Dictionary<string, object>
             {
                 ["type"] = (int)__instance.thePlantType,
                 ["typeName"] = GameDumps.EnumName(__instance.thePlantType),
                 ["ptr"] = GameDumps.Ptr(__instance),
                 ["reason"] = (int)reason,
-                ["reasonName"] = GameDumps.EnumName(reason)
-            });
+                ["reasonName"] = GameDumps.EnumName(reason),
+                ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
+            };
+            AddFatalKiller(diePayload, TakeFatalKiller(__instance.Pointer));
+            Emit("plant.die", diePayload);
             ForgetEntity(__instance.Pointer);
         }
     }
@@ -621,6 +715,7 @@ public static class GameHooks
         // Plant signature: (int damage, IDamageMaker damageFrom, DamageType damageType, PlantType reportType, bool fix)
         public static void Prefix(Plant __instance, ref int damage, IDamageMaker damageFrom, DamageType damageType, PlantType reportType, bool fix)
         {
+            BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("P-GOD")) { damage = 0; return; }
             if (OverlayApplyGuard.IsActive) return;
@@ -680,6 +775,11 @@ public static class GameHooks
             if (!Effects.EventDrainHost.Enabled || telemetry)
                 TryEmitCombatHitFromBullet("plant", damageFrom, plantTarget: __instance, zombieTarget: null, fallbackDamage: damage);
         }
+
+        public static void Postfix(Plant __instance, IDamageMaker damageFrom)
+        {
+            EndDamageSource(__instance?.Pointer ?? IntPtr.Zero);
+        }
     }
 
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.Start))]
@@ -712,6 +812,12 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, int reason)
         {
+            try
+            {
+                if (__instance != null && TryGetDamageSource(__instance.Pointer, out var source))
+                    CaptureFatalKiller(__instance.Pointer, source);
+            }
+            catch { }
             NoteZombieDead(__instance, reason);
         }
     }
@@ -730,6 +836,7 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
+            BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("Z-GOD")) { theDamage = 0; return; }
             if (OverlayApplyGuard.IsActive) return;
@@ -791,6 +898,11 @@ public static class GameHooks
             try { DebugRuntime.OnCombatHit("zombie", __instance, null); } catch (Exception ex) { CheatState.Error("debug onhit zombie: " + ex.Message); }
             if (!Effects.EventDrainHost.Enabled || telemetry)
                 TryEmitCombatHitFromBullet("zombie", damageFrom, plantTarget: null, zombieTarget: __instance, fallbackDamage: theDamage);
+        }
+
+        public static void Postfix(Zombie __instance, IDamageMaker damageFrom)
+        {
+            EndDamageSource(__instance?.Pointer ?? IntPtr.Zero);
         }
     }
 
@@ -1034,8 +1146,10 @@ public static class GameHooks
             ["type"] = (int)z.theZombieType,
             ["typeName"] = GameDumps.EnumName(z.theZombieType),
             ["ptr"] = p.ToString("X"),
-            ["reason"] = reason
+            ["reason"] = reason,
+            ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
         };
+        AddFatalKiller(diePayload, TakeFatalKiller(p));
         DebugRuntime.Stamp(diePayload);
         // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
         Emit("zombie.die", diePayload);

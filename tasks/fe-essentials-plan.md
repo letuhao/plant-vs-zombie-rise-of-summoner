@@ -12,6 +12,11 @@ parallel-programs convention — `tasks/plan.md`/`tasks/todo.md` belong to the p
 
 ## 1. Shape of the work
 
+> **Onboarding note (2026-09-08):** Phase 1's sunflower/bind slice is legacy history. The current
+> onboarding contract is the server-backed first-session progression sequence in
+> [`docs/architecture/standalone/spec-first-session-progression.md`](../docs/architecture/standalone/spec-first-session-progression.md).
+> Do not extend the Phase 1 UI as if it were the approved flow.
+
 **3 modules, 3 phases, 7 tasks.** Every task is one complete build-and-verify path, not a horizontal layer.
 
 ```text

@@ -1,7 +1,10 @@
 import { Button } from "@/ui";
 
 /**
- * Plate 01 §D's authored first-run beat (GG-43/GG-44): a written beginning, not an empty box.
+ * Legacy Plate 01 §D first-run beat (GG-43/GG-44). The sunflower/bind flow is retained only as
+ * historical UI until the server-backed first-session progression sequence replaces this branch;
+ * it must not be treated as the current onboarding contract (see
+ * docs/architecture/standalone/spec-first-session-progression.md).
  * No name input here — `CreaturesLayer.tsx`'s own comment confirms display-name resolution isn't
  * wired anywhere in the FE yet, so a text field would be a non-functional control (fe-essentials
  * spec-onboarding-first-run.md Assumption 1). "Bind" reaches the same real destination the old

@@ -773,6 +773,7 @@ app.MapAuraDerived();
 app.MapDerivedSurface();
 app.MapAuraRuntime();
 app.MapAuraCatalog();
+app.MapOnboarding();
 // item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing
 // and salvaging already have owners (modules 4, 16, 14), and a second write path through the
 // presentation layer is the "second surface" this module exists to prevent.

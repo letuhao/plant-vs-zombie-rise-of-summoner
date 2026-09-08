@@ -260,12 +260,17 @@ class AtomFamilyTests(unittest.TestCase):
         self.assertTrue(bound, "fixture assumption: at least one shipped family carries icdKey")
         self.assertEqual(load_grantable_atom_families() & bound, set())
 
-    def test_grantable_matches_the_measured_nine_generic_stat_families(self) -> None:
+    def test_grantable_matches_the_measured_generic_stat_families(self) -> None:
         # Named explicitly so a future atom-catalog change that silently narrows or widens this
         # pool is a loud, reviewed diff here rather than a quiet content-time surprise.
         self.assertEqual(load_grantable_atom_families(), frozenset({
-            "atom.bulwark", "atom.ferocity", "atom.fortitude", "atom.mending", "atom.might",
-            "atom.resilience", "atom.savagery", "atom.vitality", "atom.warding",
+            "atom.arm-hardening", "atom.arm-riveting", "atom.arm-welding", "atom.bulwark",
+            "atom.evd-flinch", "atom.evd-harden", "atom.evd-seal", "atom.ferocity",
+            "atom.fortitude", "atom.life-graft", "atom.life-surge", "atom.mending",
+            "atom.might", "atom.resilience", "atom.savagery", "atom.shld-breach",
+            "atom.shld-cycle", "atom.shld-surge", "atom.tempo-haste", "atom.tempo-stampede",
+            "atom.tempo-surge", "atom.tempo-wildgrowth", "atom.tempo-yield", "atom.vitality",
+            "atom.ward-harden", "atom.warding",
         }))
 
 

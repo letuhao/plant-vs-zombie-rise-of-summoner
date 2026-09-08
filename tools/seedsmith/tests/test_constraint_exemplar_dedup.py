@@ -181,6 +181,17 @@ class SemanticDedupTests(unittest.TestCase):
         findings = run_all(registry, Ctx(corpus=corpus, adapter=None))
         self.assertEqual([f for f in findings if f.evidence["code"] == "ExactDuplicateName"], [])
 
+    def test_display_templates_are_not_player_facing_names(self) -> None:
+        write(self.root, "display-templates/a.json", "display-template", [
+            {"id": "disptpl.a-001", "name": "{value} bonus damage on hit"},
+            {"id": "disptpl.a-002", "name": "{value} bonus damage on hit"},
+        ])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=None))
+        self.assertEqual([f for f in findings if f.evidence["code"] == "ExactDuplicateName"], [])
+
     def test_canonical_duplicate_ignores_word_order(self) -> None:
         write(self.root, "gems/a.json", "gem", [
             {"id": "gem.g1-001", "nameKey": "g.1", "name": "Ashen Fang"},

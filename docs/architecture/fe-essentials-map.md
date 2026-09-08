@@ -1,5 +1,11 @@
 # Capability map: fe-essentials
 
+> **Onboarding status (2026-09-08):** `onboarding-first-run` below describes the legacy sunflower/
+> bind slice and is superseded. The current first-session contract is
+> [`../standalone/spec-first-session-progression.md`](standalone/spec-first-session-progression.md).
+> Keep the legacy module only as an explicitly labelled compatibility surface; do not extend its
+> copy, tests, or acceptance criteria as the product onboarding flow.
+
 Source: [docs/design/README.md](../design/README.md) (foundation methodology), the 2026-08-29 FE
 implementation audit (this session — one entity, Actor, actually built; the rest are type stubs or
 dead adapters), and [docs/design/visual-completeness-audit-2026-08-24.md](../design/visual-completeness-audit-2026-08-24.md)

@@ -1,6 +1,37 @@
 # First-session progression reveals
 
-**Status:** Confirmed product direction. This is an idea brief, not implementation authorisation.
+**Status:** Confirmed product direction; audited 2026-09-08. The implementation contract is
+[spec-first-session-progression.md](../architecture/standalone/spec-first-session-progression.md).
+This brief is not implementation authorisation by itself.
+
+## Audit verdict
+
+The three-beat order is coherent and should stay. The idea was not yet live-testable, however:
+
+- The existing first-session UI still implements the old sunflower bind beat, while
+  `docs/design/07-flows.html:276-303` still specifies sunflower, elemental, and relic beats. That
+  flow is now legacy and must be retired or explicitly placed before this sequence; it cannot claim
+  the first-win checkpoint.
+- Crazy Dave is a stable commander view, not a persistent unique actor
+  (`src/FusionRpg.Server/CommanderEndpoints.cs:43-82`). The existing item equip route only accepts
+  persistent unique specimens (`src/FusionRpg.Server/ItemEquipEndpoints.cs:307-338`), so “Dave's first
+  equipment” has no valid owner/write path yet. The reward must not be faked with an aura loadout or a
+  fabricated specimen id.
+- Checkpoints have no durable table, API, or atomic reward receipt. `Player 1` is seeded, but player
+  progression is lazy (`src/FusionRpg.Data/Sqlite/RpgStore.cs:3423-3447`;
+  `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:318-397`). A browser-only flag would replay or lose
+  rewards after reload.
+- The capture projection now fails closed for missing or contradictory source claims and the mapper
+  ignores payload `instanceId`/opaque source tokens. The remaining gap is producer-side: normal PvZ
+  spawns still need to emit a typed `EmpireGeneral` claim before the level-3 checkpoint can be live.
+  The source contract says the spawn mechanism must declare `EmpireGeneral`/`UniqueSpecimen`/
+  `Commander`; type id alone is not authority (`src/FusionRpg.Data/Sqlite/RpgStore.cs:1678-1734`).
+- The ordinary species, level-pacing proof, Dave item id/slot, and live reset/replay script are not
+  selected. Until those are fixed, a “live test” can only prove transport, not the product idea.
+
+The corrected contract fixes these gaps without adding a new loop: one per-player checkpoint ledger,
+settled-victory trigger, source-validated species evidence, ordered idempotent queue, and an explicit
+commander-item ownership prerequisite.
 
 ## Problem statement
 
@@ -55,7 +86,9 @@ The result sequence is server-authoritative and persisted in SQLite. The fronten
 - [ ] A level-3 lawn encounter can associate the shown general demon with the current player's empire without inventing a unique specimen, and passes an explicit progression-source classification instead of relying only on `typeId`.
 - [ ] Player-level gates that are crossed together persist and return every unclaimed reveal in their authored order; reload, duplicate result delivery, and a skipped browser acknowledgement cannot mint Dave's item twice or suppress the level-3 lesson.
 - [ ] The configured species XP award for that encounter reliably produces a meaningful reveal. The implementation must display the server result, not assume a specific XP threshold in the client.
-- [ ] Dave has a real compatible basic-equipment slot and persistence path by the level-4 slice. The reward must be an equippable item, not illustrative UI.
+- [ ] A commander-owned item scope (or an explicitly approved persistent Dave actor) exists, with a real
+      item catalog entry, `standard` role, mint/acquire/assign transaction, and sheet projection. The
+      current unique-specimen equip route is not sufficient.
 - [ ] The onboarding checkpoint survives reload, retry, and interrupted runs without replaying a reward. Its persistence belongs in the Data layer because SQLite access is owned exclusively there (`docs/architecture/data-architecture.md:104-110`).
 
 ## MVP scope
@@ -76,12 +109,22 @@ The result sequence is server-authoritative and persisted in SQLite. The fronten
 - **First-run equipment** — Dave's equipment waits until player level 4, after the species-progression lesson.
 - **A second save system, cloud profiles, or browser-local tutorial authority** — one local SQLite profile is the product model.
 
-## Open questions for the implementation spec
+## Resolved implementation rules and remaining gates
 
-- Which ordinary demon species and lawn event introduce the level-3 reveal while fitting the existing catalog?
-- Which Dave equipment slot and basic item are the first legitimate reward?
-- Which durable onboarding-state representation best makes the checkpoints idempotent without overloading unrelated progression facts?
-- Should the title remain as a simple Continue/settings shell, or should launch enter the Sanctum immediately once `Player 1` exists?
+- **Checkpoint trigger:** first settled **PvZ lawn** `match.result` with normalized `victory`; defeat,
+  stalemate, abandoned runs, and `webrpg-1`/other non-PvZ simulations do not count. The existing
+  Soul policy may still pay later victories; “first” applies to the onboarding checkpoint only.
+- **Level jumps:** gates are evaluated after the transaction applies XP. A jump never skips queue order;
+  level 3 still needs a qualifying general spawn, and level 4 waits behind the first two checkpoints.
+- **State:** Data-owned `rpg_onboarding_checkpoint` rows with a unique `(player_id, checkpoint_id)`;
+  reward minting and checkpoint insertion commit atomically with the settled result.
+- **Species content:** choose one catalog-known ordinary species and one real lawn spawn mechanism, then
+  record its source claim in the live-test fixture. No type-id-only fallback is accepted.
+- **Dave item:** choose the item and `standard` role only after the commander ownership scope is approved.
+- **Title:** Continue should enter Sanctum for the auto-seeded Player 1; save-slot management remains an
+  optional legacy surface, not a prerequisite for the normal first-player path.
+- **Live-test gate:** do not call the idea complete until the four-step acceptance in the implementation
+  spec passes from a fresh SQLite directory, including restart and duplicate-result replay.
 
 ## Design-gate evidence
 

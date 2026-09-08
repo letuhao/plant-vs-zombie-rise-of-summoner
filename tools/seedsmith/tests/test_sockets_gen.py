@@ -346,6 +346,32 @@ class RunPlanTests(unittest.TestCase):
         self.assertEqual(len(doc["entries"]), 2)
         self.assertEqual(doc["entries"], entries)
 
+    def test_write_partition_file_preserves_existing_entries(self) -> None:
+        """A partial ledger must never be allowed to replace a real partition on disk."""
+        target = self.tmp_path / "g2.json"
+        existing = {"id": "gem.g2-001", "name": "Existing Gem", "family": "atom.affliction"}
+        fresh = {"id": "gem.g2-002", "name": "Fresh Gem", "family": "atom.arm-hardening"}
+
+        run_mod.write_partition_file("gems/2", [existing], path=target)
+        run_mod.write_partition_file("gems/2", [fresh], path=target)
+
+        doc = json.loads(target.read_text(encoding="utf-8"))
+        self.assertEqual([entry["id"] for entry in doc["entries"]],
+                         ["gem.g2-001", "gem.g2-002"])
+
+    def test_plan_partition_continues_after_an_existing_gem_sequence(self) -> None:
+        existing = {
+            "schemaVersion": 1,
+            "kind": "gem",
+            "_meta": {"partition": "gems/1"},
+            "entries": [{"id": "gem.g1-001", "family": "atom.affliction"}],
+        }
+        (self.gems_dir / "g1.json").write_text(json.dumps(existing), encoding="utf-8")
+
+        plan = run_mod.plan_partition("gems/1", batch_size=1, gems_dir=self.gems_dir, ledger={})
+
+        self.assertEqual([subject.entry_id for subject in plan.subjects], ["gem.g1-002"])
+
 
 # ------------------------------------------------------------------------------------------------
 # The real, shipped corpus — this module's own acceptance evidence
@@ -451,6 +477,33 @@ class CliTests(unittest.TestCase):
              mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"):
             with self.assertRaises(SystemExit):
                 run_mod.main(["--slot", "2", "--write"])
+
+    def test_cli_flushes_a_completed_ledger_row_after_an_interrupted_write(self) -> None:
+        """A restart with no fresh model answers must still persist a row marked done before a
+        process interruption; the ledger is a recovery source, not a replacement corpus."""
+        import io
+        import json as json_mod
+        from contextlib import redirect_stdout
+
+        ledger_path = self.tmp_path / "ledger.json"
+        recovered = {"id": "gem.g2-001", "name": "Recovered Gem"}
+        RunLedger(ledger_path).mark_done(
+            "gem-gems/2-atom.affliction",
+            {"entryId": recovered["id"], "entry": recovered},
+        )
+        empty_plan = run_mod.RunPlan(partition="gems/2", subjects=[], already_done=[])
+
+        with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", ledger_path), \
+             mock.patch.object(run_mod, "plan_partition", return_value=empty_plan), \
+             mock.patch("seedsmith.pipeline.llm_caller.live_answer_caller", return_value=lambda *_: {}):
+            with redirect_stdout(io.StringIO()):
+                exit_code = run_mod.main(["--slot", "2", "--write",
+                                         "--endpoint", "http://unit-test-endpoint"])
+
+        self.assertEqual(exit_code, 0)
+        written = json_mod.loads((self.gems_dir / "g2.json").read_text(encoding="utf-8"))
+        self.assertEqual(written["entries"], [recovered])
 
     def test_cli_a_real_live_run_writes_a_real_partition_file(self) -> None:
         """⛔ Real gap, closed 2026-09-08: this module (`sockets-gen`) had no CLI entrypoint of any

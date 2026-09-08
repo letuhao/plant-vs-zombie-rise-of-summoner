@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Progression;
 using FusionRpg.Data;
 using Xunit;
 
@@ -57,6 +58,21 @@ public class UniqueActorStoreTests : IDisposable
         Assert.Equal(UniqueActorPhases.ActiveBound, ack.Actor!.Phase);
         Assert.Equal("0xABC", ack.Actor.LastPtr);
         Assert.Equal("m-1", ack.Actor.MatchKey);
+    }
+
+    [Fact]
+    public void Bound_ack_refuses_open_pointer_collision_in_same_match()
+    {
+        var first = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        var second = _store.CreateUniqueActor(_playerId, "zombie", 2);
+        Assert.True(_store.TryBeginUniqueDeploy(first.InstanceId, "corr-bind-a", "m-bind").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-bind-a", "ptr-live", "m-bind").Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(second.InstanceId, "corr-bind-b", "m-bind").Ok);
+
+        var collision = _store.TryAckUniqueSpawn("corr-bind-b", "ptr-live", "m-bind");
+        Assert.False(collision.Ok);
+        Assert.Equal("binding.collision", collision.Reason);
+        Assert.Equal(UniqueActorPhases.Deploying, _store.GetUniqueActor(second.InstanceId)!.Phase);
     }
 
     [Fact]
@@ -517,5 +533,173 @@ public class UniqueActorStoreTests : IDisposable
         var afterProg = _store.GetRpgActor(_playerId, "plant", a.TypeId);
         Assert.Equal(beforeProg?.Xp ?? 0, afterProg?.Xp ?? 0);
         Assert.Equal(beforeProg?.Level ?? 1, afterProg?.Level ?? 1);
+    }
+
+    [Fact]
+    public void Lawn_kill_observation_awards_attributed_unique_xp_once()
+    {
+        ProgressionTuningHub.Configure(ContractTuningTestBootstrap.DefaultProgression with
+        {
+            Awards = ContractTuningTestBootstrap.DefaultProgression.Awards with { SpecimenLawnKill = 18 }
+        });
+        var a = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-lawn", "m-lawn").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-lawn", "killer-ptr", "m-lawn").Ok);
+
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-lawn", "{\"ptr\":\"enemy-ptr\",\"killerPtr\":\"killer-ptr\",\"lifecycleOccurrence\":1}", (string?)null)
+        });
+        var after = _store.GetUniqueActor(a.InstanceId)!;
+        Assert.Equal(18, after.Xp);
+        Assert.Equal(UniqueActorPhases.ActiveBound, after.Phase);
+
+        // The actor remains bound after the enemy kill; replaying the same occurrence cannot award
+        // the receipt a second time.
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-lawn", "{\"ptr\":\"enemy-ptr\",\"killerPtr\":\"killer-ptr\",\"lifecycleOccurrence\":1}", (string?)null)
+        });
+        Assert.Equal(18, _store.GetUniqueActor(a.InstanceId)!.Xp);
+
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("board.end", (string?)"m-lawn", "{}", (string?)null)
+        });
+        Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(a.InstanceId)!.Phase);
+    }
+
+    [Fact]
+    public void Lawn_duration_uses_scaled_active_match_milliseconds_only()
+    {
+        var baseline = ContractTuningTestBootstrap.DefaultProgression;
+        ProgressionTuningHub.Configure(baseline with
+        {
+            Awards = baseline.Awards with
+            {
+                SpecimenBoundIntervalMs = 1_000,
+                SpecimenBoundIntervalXp = 5
+            }
+        });
+        var actor = _store.CreateUniqueActor(_playerId, "zombie", 1);
+        Assert.True(_store.TryBeginUniqueDeploy(actor.InstanceId, "corr-duration", "m-duration").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-duration", "ptr-duration", "m-duration", 100).Ok);
+
+        // 3,000 active milliseconds pays exactly three intervals. The wall-clock event time is
+        // intentionally unrelated; settlement must use the injector's scaled match clock.
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("zombie.die", (string?)"m-duration",
+                "{\"ptr\":\"ptr-duration\",\"lifecycleOccurrence\":1,\"activeMatchMs\":3100}",
+                (string?)DateTimeOffset.UtcNow.AddDays(-3).ToString("o"))
+        });
+
+        var recovered = _store.GetUniqueActor(actor.InstanceId)!;
+        Assert.Equal(15, recovered.Xp);
+        Assert.Equal(UniqueActorPhases.Roster, recovered.Phase);
+    }
+
+    [Fact]
+    public void Lawn_terminal_settlement_rolls_back_receipt_xp_and_recovery_on_failure()
+    {
+        var baseline = ContractTuningTestBootstrap.DefaultProgression;
+        var overflow = baseline with
+        {
+            Awards = baseline.Awards with
+            {
+                SpecimenLawnKill = 18,
+                SpecimenBoundIntervalMs = 1,
+                SpecimenBoundIntervalXp = long.MaxValue
+            }
+        };
+        ProgressionTuningHub.Configure(overflow);
+        var killer = _store.CreateUniqueActor(_playerId, "zombie", 2);
+        var target = _store.CreateUniqueActor(_playerId, "plant", 3);
+        Assert.True(_store.TryBeginUniqueDeploy(killer.InstanceId, "corr-atomic-k", "m-atomic").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-atomic-k", "ptr-killer", "m-atomic", 0).Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(target.InstanceId, "corr-atomic-t", "m-atomic").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-atomic-t", "ptr-target", "m-atomic", 0).Ok);
+
+        // Duration settlement overflows after the kill receipt is inserted. The per-event
+        // transaction must roll back both that receipt and the XP/recovery writes.
+        var eventTime = DateTimeOffset.UtcNow.AddSeconds(2).ToString("o");
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-atomic", "{\"ptr\":\"ptr-target\",\"killerPtr\":\"ptr-killer\",\"lifecycleOccurrence\":1,\"activeMatchMs\":2000}", (string?)eventTime)
+        });
+        var failedKiller = _store.GetUniqueActor(killer.InstanceId)!;
+        var failedTarget = _store.GetUniqueActor(target.InstanceId)!;
+        Assert.Equal(UniqueActorPhases.ActiveBound, failedKiller.Phase);
+        Assert.Equal(UniqueActorPhases.ActiveBound, failedTarget.Phase);
+        Assert.Equal(0, failedKiller.Xp);
+        Assert.Equal(0, failedTarget.Xp);
+
+        // Restore valid tuning and replay the same lifecycle event: a missing receipt proves the
+        // failed attempt did not partially commit, and the retry settles exactly once.
+        ProgressionTuningHub.Configure(baseline with
+        {
+            Awards = baseline.Awards with { SpecimenLawnKill = 18 }
+        });
+        _store.ObserveUniqueActorEvents(new[]
+        {
+            ("plant.die", (string?)"m-atomic", "{\"ptr\":\"ptr-target\",\"killerPtr\":\"ptr-killer\",\"lifecycleOccurrence\":1,\"activeMatchMs\":2000}", (string?)eventTime)
+        });
+        var recoveredKiller = _store.GetUniqueActor(killer.InstanceId)!;
+        var recoveredTarget = _store.GetUniqueActor(target.InstanceId)!;
+        Assert.Equal(18, recoveredKiller.Xp);
+        Assert.Equal(UniqueActorPhases.ActiveBound, recoveredKiller.Phase);
+        Assert.Equal(UniqueActorPhases.Roster, recoveredTarget.Phase);
+        Assert.Equal(0, recoveredTarget.Xp);
+    }
+
+    [Fact]
+    public void Activity_projection_retains_explicit_unique_source_claim()
+    {
+        var matchKey = "m-source-" + Guid.NewGuid().ToString("N");
+        var actor = _store.CreateUniqueActor(_playerId, "zombie", 3);
+        Assert.True(_store.TryBeginUniqueDeploy(actor.InstanceId, "corr-7", matchKey).Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-7", "source-ptr", matchKey).Ok);
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "board.start", MatchKey = matchKey, Payload = new { levelName = "source" }
+            },
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "zombie.spawn", MatchKey = matchKey,
+                Payload = new { type = 3, ptr = "source-ptr", source = "extra", instanceId = actor.InstanceId, correlationId = "corr-7" }
+            }
+        });
+
+        var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
+        Assert.Equal("demon.progression.v1", fact.SourceKind);
+        Assert.Equal($"unique:{actor.InstanceId}:corr-7", fact.SourceId);
+    }
+
+    [Fact]
+    public void Activity_projection_does_not_promote_unowned_extra_spawn_to_empire_species()
+    {
+        var matchKey = "m-unowned-extra-" + Guid.NewGuid().ToString("N");
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "board.start", MatchKey = matchKey, Payload = new { levelName = "source" }
+            },
+            new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"), Game = RpgConstants.GameId,
+                Kind = "zombie.spawn", MatchKey = matchKey,
+                Payload = new { type = 3, ptr = "unowned-extra-ptr", source = "extra", instanceId = "missing-instance" }
+            }
+        });
+
+        var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
+        Assert.NotEqual("demon.progression.v1", fact.SourceKind);
+        Assert.Null(_store.GetRpgActor(_playerId, RpgActorKinds.Species, 10003));
     }
 }

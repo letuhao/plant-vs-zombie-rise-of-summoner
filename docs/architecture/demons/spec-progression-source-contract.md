@@ -1,7 +1,7 @@
 # Progression source contract
 
 **Module:** `progression-source-contract`  
-**Status:** approved 2026-09-08; specification only  
+**Status:** approved 2026-09-08; partial implementation landed 2026-09-08
 **Depends on:** `demon-core`  
 **Decision:** [decisions.md](../decisions.md) — *Demon progression source and spawn ownership (2026-09-08)*
 
@@ -32,14 +32,19 @@ Each future gameplay mechanism adds a reviewed source producer or an explicit ne
 
 ## Contract
 
-Introduce an internal discriminated contract equivalent to the following shape. Names may follow surrounding C# conventions, but the variants and required identities are stable.
+The implementation uses a closed value object with the versioned `Kind`, canonical `Id`, and a
+stable `ScopeKey`; Data performs player/catalog ownership checks at the boundary. The equivalent
+shape is:
 
 ```csharp
-public abstract record DemonProgressionSource
+public abstract record DemonProgressionSource(string Kind, string Id, string ScopeKey)
 {
-    public sealed record EmpireGeneral(long PlayerId, string SpeciesId) : DemonProgressionSource;
-    public sealed record UniqueSpecimen(long PlayerId, Guid InstanceId) : DemonProgressionSource;
-    public sealed record Commander(long PlayerId, string CommanderId) : DemonProgressionSource;
+    public sealed record EmpireGeneralSource(string SpeciesId)
+        : DemonProgressionSource("demon.progression.v1", $"general:{SpeciesId}", SpeciesId);
+    public sealed record UniqueSpecimenSource(string InstanceId, string CorrelationId)
+        : DemonProgressionSource("demon.progression.v1", $"unique:{InstanceId}:{CorrelationId}", InstanceId);
+    public sealed record CommanderSource(string CommanderId)
+        : DemonProgressionSource("demon.progression.v1", $"commander:{CommanderId}", CommanderId);
 }
 ```
 
@@ -84,11 +89,12 @@ Existing facts do not need a destructive rewrite or reward rollback. They retain
 
 ## Current-code evidence and migration targets
 
-- `SpeciesAllocationSource.Resolve` currently resolves allocation from a species lookup and has no source classification (`src/FusionRpg.Core/Stats/Aptitudes/SpeciesAllocationSource.cs:69`).
-- `UniqueActorHubCompose` currently passes `EffectiveSpeciesAllocation` into every unique actor (`src/FusionRpg.Server/UniqueActorHubCompose.cs:46`).
-- `RpgStore.Progression` awards species XP from activity fact/type and match-end fielded species without source provenance (`src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:20`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:76`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:111`).
+- `DemonProgressionSource` now owns the closed grammar (`src/FusionRpg.Core/Demons/DemonProgressionSource.cs`).
+- `RpgStore.Progression` now requires a parsed `EmpireGeneral` claim before species XP (`src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:20`, `:135`).
+- Unique composition now reads Commander plus `UniqueDemon` allocation (`src/FusionRpg.Server/UniqueActorHubCompose.cs:38-56`; `src/FusionRpg.Server/WebMatchService.cs:649-670`).
 
-Those paths are intentionally migrated by the two dependent modules; this contract must land first so neither implements another ad-hoc discriminator.
+Those paths were migrated by the two dependent modules; future producers must continue using this
+contract rather than adding another ad-hoc discriminator.
 
 ## Acceptance criteria
 
@@ -115,4 +121,5 @@ Add Core tests for all valid variants, missing/invalid source rejection, and a r
 - [x] Verified the current allocation and progression paths in code named above.
 - [x] Recorded the behavior lock in `decisions.md` before this specification.
 - [x] Identified implementation and verification commands.
-- [ ] No constraint test was run: this change is documentation only and introduces no executable behavior yet.
+- [x] Core source, tuning, Data projection, and Server build checks were run for the implementation slice.
+- [ ] Full conformance remains open: atomic terminal settlement, verified killer attribution, and active-match-time capture are tracked in the lawn-deploy plan.

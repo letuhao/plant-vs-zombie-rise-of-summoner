@@ -4,6 +4,7 @@ using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Progression;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
 using Microsoft.AspNetCore.Builder;
@@ -36,6 +37,17 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        // The real Program configures the progression hub before accepting events.  This fixture
+        // hosts only the event endpoint, so configure the same SSOT explicitly; otherwise a
+        // zombie.die event fails its activity projection before the unique-actor recovery observer
+        // can run, leaving the specimen ActiveBound and making the test depend on another class's
+        // process-global tuning setup.
+        var tuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "progression.v1.json");
+        ProgressionTuningHub.Configure(ProgressionTuningLoader.Parse(File.ReadAllText(tuningPath)));
+        var soulTuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "souls.v1.json");
+        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(File.ReadAllText(soulTuningPath)));
+
         var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-unique-repush-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);
         var store = new RpgStore(dir);
@@ -108,6 +120,14 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         var port = ((System.Net.IPEndPoint)l.LocalEndpoint).Port;
         l.Stop();
         return port;
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "AGENTS.md")))
+            dir = dir.Parent;
+        return dir?.FullName ?? throw new InvalidOperationException("repository root not found");
     }
 
     async Task PostEventAsync(string kind, string? matchKey, object payload)

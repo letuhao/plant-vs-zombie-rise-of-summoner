@@ -212,11 +212,9 @@ class TestPolicyTests:
 
 class TestRealCorpusTests:
     def test_the_real_corpus_loads_and_reports_without_error(self):
-        # ⛔ CORRECTED 2026-09-06: 100, not 98 -- g-punisher.json added atom.chill-punisher/
-        # atom.rot-punisher (the action-corpus pairing-tier fix); they are real, zero-usage
-        # members of the same population this report measures over.
+        # Explicit acceptance value for the shared committed affix-family corpus.
         report = build_report(REPO_ROOT).to_dict()
-        assert report["populationSize"] == 100
+        assert report["populationSize"] == 112
         assert report["acceptedCount"] > 0
 
     def test_the_report_is_byte_identical_across_two_runs(self):
@@ -224,7 +222,7 @@ class TestRealCorpusTests:
         b = canonical_dump(build_report(REPO_ROOT).to_dict())
         assert a == b
 
-    def test_load_affix_family_ids_finds_all_100_real_families(self):
+    def test_load_affix_family_ids_finds_all_112_real_families(self):
         ids = load_affix_family_ids(REPO_ROOT)
-        assert len(ids) == 100
+        assert len(ids) == 112
         assert "atom.might" in ids

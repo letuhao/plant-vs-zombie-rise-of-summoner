@@ -18,6 +18,9 @@
     "defeat": -100,
     "mower": -30,
     "plantPlace": 8,
-    "zombieSpawn": 9
+    "zombieSpawn": 9,
+    "specimenLawnKill": 18,
+    "specimenBoundIntervalMs": 1000,
+    "specimenBoundIntervalXp": 2
   }
 }

@@ -371,18 +371,15 @@ public sealed class WebMatchService
         // re-derived from a different assumption, and never affects combat math or goldens (a pure
         // additional event, not a resolver input).
         //
-        // species-build `battle-allocation` (module 10, path 3 of its own "four read paths" table):
-        // this event used to hard-code `scope="commander"` and omit every species contribution — a
-        // battle report missing the term that actually decided the battle. Extended, not replaced:
-        // `shares` still names the commander-only shares (still meaningful — one per player, not per
-        // actor), and `species` adds each fielded species' own EFFECTIVE shares alongside it.
+        // Unique specimens use their own persisted allocation. Do not label this as a species
+        // allocation: the empire fallback is a separate source used only by general spawns.
         var aptitudeShares = _store.LoadAllocation(
             FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId)).Shares();
-        var speciesShares = new Dictionary<string, IReadOnlyDictionary<string, double>>(StringComparer.Ordinal);
-        foreach (var speciesId in setup.Squad.Select(a => a.SpeciesId).Where(id => !string.IsNullOrEmpty(id)).Distinct(StringComparer.Ordinal))
+        var uniqueShares = new Dictionary<string, IReadOnlyDictionary<string, double>>(StringComparer.Ordinal);
+        foreach (var instanceId in setup.Squad.Select(a => a.SpecimenId).Where(id => !string.IsNullOrEmpty(id)).Distinct(StringComparer.Ordinal))
         {
-            speciesShares[speciesId] = _store.EffectiveSpeciesAllocation(
-                playerId, speciesId, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning).Shares();
+            uniqueShares[instanceId!] = _store.LoadAllocation(
+                FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId!).Shares();
         }
         events.Add(new EventEnvelope
         {
@@ -392,9 +389,9 @@ public sealed class WebMatchService
             MatchKey = matchKey,
             Payload = new Dictionary<string, object?>
             {
-                ["scope"] = "commander+species",
+                ["scope"] = "commander+unique",
                 ["shares"] = aptitudeShares,
-                ["species"] = speciesShares
+                ["unique"] = uniqueShares
             }
         });
 
@@ -562,7 +559,7 @@ public sealed class WebMatchService
                 ChannelMods = StarChannelMods(s.Profile.Star, level)
                     .Concat(LoyaltyChannelMods(
                         contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(AptitudeChannelMods(level, playerId, _store, species.SpeciesId, commanderAllocation))
+                    .Concat(UniqueDemonAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
                     .ToList(),
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
@@ -649,6 +646,25 @@ public sealed class WebMatchService
         var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
         return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
             merged, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
+            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+    }
+
+    /// <summary>Dedicated unique-demon battle input. A specimen receives the commander layer plus
+    /// its own persisted UniqueDemon allocation; the empire species fallback is intentionally not
+    /// consulted for this source.</summary>
+    public static IReadOnlyList<BattleChannelMod> UniqueDemonAptitudeChannelMods(
+        int level, long playerId, RpgStore store, string instanceId,
+        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
+    {
+        if (string.IsNullOrWhiteSpace(instanceId))
+            throw new ArgumentException("instanceId must not be empty", nameof(instanceId));
+        var commander = commanderAllocation ?? store.LoadAllocation(
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
+        var unique = store.LoadAllocation(
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId.Trim());
+        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
+        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
+            commander + unique, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
             FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 

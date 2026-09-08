@@ -1,5 +1,9 @@
 # Implementation plan: demon progression sources
 
+**Status: partially implemented 2026-09-08.** The typed source grammar, general-species source gate,
+dedicated allocation isolation, and replay identity slice are landed. Full provenance diagnostics and
+the lawn consumer's atomic terminal settlement remain open; do not mark this plan source-complete yet.
+
 Covers the three approved cross-cutting progression specs under `docs/architecture/demons/`:
 [spec-progression-source-contract.md](../docs/architecture/demons/spec-progression-source-contract.md),
 [spec-general-empire-fallback.md](../docs/architecture/demons/spec-general-empire-fallback.md), and
@@ -40,7 +44,8 @@ D0 source contract + provenance parser
 
 `D0` must land first. `D1` and `D2` can proceed in parallel after the contract is available, but the
 generic projector and dedicated composition migration must be verified together before any consumer is
-called source-complete. The lawn XP phase additionally depends on the lawn deploy Bound lifecycle.
+called source-complete. The current implementation passes the focused source and isolation checks;
+observable invalid-source diagnostics and the lawn XP phase's atomic Bound settlement remain open.
 
 ## Phases
 

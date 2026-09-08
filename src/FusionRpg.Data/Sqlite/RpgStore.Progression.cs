@@ -19,7 +19,8 @@ public sealed partial class RpgStore
 
     List<RpgProgressionDirty> ApplyRpgProgressionFromActivityUnlocked(
         SqliteConnection db, long playerId, long? runId, string t, string factKind,
-        string payload, string dedupeKey, long factId, bool pvzGame = true)
+        string payload, string dedupeKey, long factId, bool pvzGame = true,
+        string? sourceKind = null, string? sourceId = null)
     {
         var dirty = new List<RpgProgressionDirty>();
         var result = TryString(payload, "result");
@@ -28,8 +29,10 @@ public sealed partial class RpgStore
         // matches — a second match's defeat XP was silently eaten by INSERT OR IGNORE. Fact-level
         // dedupe still gates true replays; this key only separates distinct facts.
         var runScopedDedupe = (runId ?? 0) + ":" + dedupeKey;
-        foreach (var award in RpgXpAwardMap.FromActivity(factKind, result, typeId, payload))
+        foreach (var award in RpgXpAwardMap.FromActivity(factKind, result, typeId, payload, sourceKind, sourceId))
         {
+            if (award.Kind == RpgActorKinds.Species && !IsEmpireGeneralSource(sourceKind, sourceId, factKind, typeId))
+                continue;
             // Web-mode runs never level PvZ almanac type actors (audit 2026-08-21) —
             // player-kind XP still flows (one economy); demon specimen XP is expedition-owned.
             // species-build T1.2: a species row is NOT a PvZ almanac type (spec-species-xp.md §2's
@@ -51,8 +54,8 @@ public sealed partial class RpgStore
         }
 
         // species-build T1.3: the run-completion term (the DOMINANT term, spec-species-xp.md §3)
-        // fires once per resolved match for every species that had at least one PlantPlaced/
-        // ZombieSpawned fact in THIS run — derived entirely from facts already recorded above by
+        // fires once per resolved match for every EMPIRE-GENERAL species that had at least one
+        // source-validated PlantPlaced/ZombieSpawned fact in THIS run — derived entirely from facts already recorded above by
         // earlier calls to this same method, never a new injector capture. Not `!pvzGame`-gated for
         // the same reason the per-placement award above isn't (a species row is not a PvZ almanac
         // type). `runId` of 0/null has no real run scope to query, so it's skipped rather than
@@ -83,7 +86,7 @@ public sealed partial class RpgStore
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = """
-                SELECT kind, payload_json FROM pvz_activity_facts
+                SELECT kind, payload_json, source_kind, source_id FROM pvz_activity_facts
                 WHERE player_id=$p AND run_id=$r AND kind IN ($pp, $zs);
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
@@ -95,6 +98,9 @@ public sealed partial class RpgStore
             {
                 var kind = r.GetString(0);
                 var payloadJson = r.IsDBNull(1) ? "{}" : r.GetString(1);
+                var sourceKind = r.IsDBNull(2) ? null : r.GetString(2);
+                var sourceId = r.IsDBNull(3) ? null : r.GetString(3);
+                if (!IsEmpireGeneralSource(sourceKind, sourceId, kind, TryInt(payloadJson, "type"))) continue;
                 if (TryInt(payloadJson, "type") is not { } tid) continue;
                 var side = kind == PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
                 if (!index.TryGet(side, tid, out var species)) continue;
@@ -114,6 +120,24 @@ public sealed partial class RpgStore
             if (d is { } item) results.Add(item);
         }
         return results;
+    }
+
+    static bool IsEmpireGeneralSource(string? sourceKind, string? sourceId, string? factKind = null, int? typeId = null)
+    {
+        if (!string.Equals(sourceKind, DemonProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(sourceId)) return false;
+        try
+        {
+            if (DemonProgressionSource.Parse(sourceKind!, sourceId) is not DemonProgressionSource.EmpireGeneralSource general)
+                return false;
+            if (factKind is not (PvzActivityKinds.PlantPlaced or PvzActivityKinds.ZombieSpawned)) return true;
+            if (typeId is not { } tid || !DemonSpeciesCatalog.IsConfigured) return false;
+            var side = factKind == PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, tid, out var species)
+                && string.Equals(species.SpeciesId, general.SpeciesId, StringComparison.Ordinal);
+        }
+        catch (InvalidOperationException) { return false; }
+        catch (FormatException) { return false; }
     }
 
     static string MergePowerScalePayload(string? payloadJson, double powerScale)

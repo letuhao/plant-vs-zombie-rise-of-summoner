@@ -190,11 +190,11 @@ public sealed class UniqueActorService
     public void ObserveEvents(IReadOnlyList<EventEnvelope> batch)
     {
         if (batch.Count == 0) return;
-        var mapped = new List<(string Kind, string? MatchKey, string PayloadJson)>(batch.Count);
+        var mapped = new List<(string Kind, string? MatchKey, string PayloadJson, string? EventTime)>(batch.Count);
         foreach (var e in batch)
         {
             if (string.IsNullOrWhiteSpace(e.Kind)) continue;
-            mapped.Add((e.Kind, e.MatchKey, RpgStore.PayloadToJson(e.Payload)));
+            mapped.Add((e.Kind, e.MatchKey, RpgStore.PayloadToJson(e.Payload), e.T));
         }
         var affectedPlayers = _store.ObserveUniqueActorEvents(mapped);
         foreach (var playerId in affectedPlayers)
@@ -207,9 +207,9 @@ public sealed class UniqueActorService
     /// unique actor that deployed (or recovered) after Hello never actually reached the runner. Fires
     /// on exactly the phase transitions <see cref="RpgStore.ObserveUniqueActorEvents"/> reports
     /// (bind ↔ ActiveBound), reusing the SAME union Hello already builds — never a second, divergent
-    /// list — and sends it as an atoms-only <c>effects.grants.apply</c> (no `grants` key: a mid-match
-    /// equip/unequip never touches the player's own session Effect-bag grants, only the compiled atom
-    /// push those grants travel beside at Hello).
+    /// list — and sends it as an atom rehydrate <c>effects.grants.apply</c>. The payload carries the
+    /// compiled grants for the affected owners but no player-session grant, so a mid-match equip or
+    /// unequip never touches the player's own session Effect-bag state.
     ///
     /// <para>P1.5-L (2026-09-07): also the real remaining half of a rolled item's LAWN wiring. Made
     /// public so <see cref="ItemEquipEndpoints"/> can call it — bind/unbind was never the only

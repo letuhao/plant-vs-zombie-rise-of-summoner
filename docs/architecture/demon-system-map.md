@@ -63,8 +63,8 @@ A player's empire general demon with no dedicated progression mechanism uses the
 fallback. A unique demon uses its own specimen progression; a Commander uses the Commander source.
 Neither may also consume the empire species fallback. A `(side, typeId) → species` catalog lookup
 identifies a species but is insufficient to select a progression source. This is the binding
-`decisions.md` **Demon progression source and spawn ownership** row; the current unique-compose path
-still needs its follow-on migration.
+`decisions.md` **Demon progression source and spawn ownership** row; unique composition now reads
+dedicated allocation, while terminal provenance validation remains tracked in the lawn-deploy plan.
 
 ### Axis 2 — the two passive-aura roles (both assignable only to a unique demon)
 
@@ -110,9 +110,9 @@ a different loop from the lawn Commander/Patron pick entirely.
 |---|---|---|---|
 | `element-extension` | Extend the ElementHub roster + matchup matrix (light/dark); decisions.md amendment; golden tests | — | **V1** |
 | `demon-core` | Specimen identity superset: species link, rarity, variants, trait slots, element typing, Codex discovery state | element-extension | **V1** |
-| `progression-source-contract` | Typed spawn/progression-source contract. A gameplay mechanism declares whether an actor resolves through the empire-general fallback, its own unique specimen, or Commander progression; source is never inferred from `typeId`. Spec: [demons/spec-progression-source-contract.md](demons/spec-progression-source-contract.md) | demon-core | approved 2026-09-08 |
-| `general-empire-fallback` | Lawn-facing, per-player/per-species general-demon progression. Applies only when the declared source is the empire-general fallback; owns the corresponding species-XP eligibility rules. Spec: [demons/spec-general-empire-fallback.md](demons/spec-general-empire-fallback.md) | progression-source-contract, species-build allocation transport | approved 2026-09-08 |
-| `dedicated-progression-isolation` | Route unique demons to specimen progression and Commander effects to Commander progression. Removes empire species fallback and species XP from dedicated-source paths. Spec: [demons/spec-dedicated-progression-isolation.md](demons/spec-dedicated-progression-isolation.md) | progression-source-contract, unique-actor-runtime | approved 2026-09-08 |
+| `progression-source-contract` | Typed spawn/progression-source contract. A gameplay mechanism declares whether an actor resolves through the empire-general fallback, its own unique specimen, or Commander progression; source is never inferred from `typeId`. Spec: [demons/spec-progression-source-contract.md](demons/spec-progression-source-contract.md) | demon-core | partial 2026-09-08 |
+| `general-empire-fallback` | Lawn-facing, per-player/per-species general-demon progression. Applies only when the declared source is the empire-general fallback; owns the corresponding species-XP eligibility rules. Spec: [demons/spec-general-empire-fallback.md](demons/spec-general-empire-fallback.md) | progression-source-contract, species-build allocation transport | partial 2026-09-08 |
+| `dedicated-progression-isolation` | Route unique demons to specimen progression and Commander effects to Commander progression. Removes empire species fallback and species XP from dedicated-source paths. Spec: [demons/spec-dedicated-progression-isolation.md](demons/spec-dedicated-progression-isolation.md) | progression-source-contract, unique-actor-runtime | partial 2026-09-08 |
 | `soul-economy` | Souls ledger: earn rules from Activity facts, spend API, balances | demon-core | **V1** |
 | `demon-summoning` | Summoning/gacha: banners, Souls-funded pulls, rarity/variant/trait rolls, mint specimens | demon-core, soul-economy | **V1** |
 | `demon-contracts` | Binding slots (Soul-priced capacity) + loyalty with daily upkeep decay, personality rate modifiers, hard deploy refusal for unbound/insubordinate demons — **shipped 2026-08-21**, spec in [demons/spec-demon-contracts.md](demons/spec-demon-contracts.md); server + web only | demon-core, soul-economy, demon-fusion | shipped |

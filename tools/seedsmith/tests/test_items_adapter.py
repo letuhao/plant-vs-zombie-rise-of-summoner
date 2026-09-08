@@ -125,15 +125,23 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         cls.adapter = ItemsAdapter()
 
     def test_loads_the_expected_entry_and_file_counts(self) -> None:
-        # ⛔ CORRECTED 2026-09-07 (second pass, same day): 1513/129, not 1498/124 -- a follow-up round
-        # of small trial batches across every remaining item-seedgen pipeline (owner-requested, to
-        # prove each one runs before the full generative pass) added more real content: 3 new
-        # affix-families, 3 new consumables (in 3 new partition files), 2 new milestones, 2 new
-        # recipes, 2 new combinations (a brand-new partition), 2 new set pieces (a brand-new
-        # partition) and 1 new charm -- all landed in the same live corpus this test loads.
-        self.assertEqual(len(self.corpus.entries), 1513)
+        # Explicit committed-corpus acceptance values. Re-measure these when a deliberate content
+        # batch or a recovery merge changes the corpus; do not preserve an obsolete snapshot.
+        self.assertEqual(len(self.corpus.entries), 1570)
         seen_files = {e.path for e in self.corpus.entries.values()}
-        self.assertEqual(len(seen_files), 129)
+        self.assertEqual(len(seen_files), 158)
+
+    def test_authored_item_names_are_unique_across_kinds(self) -> None:
+        """Identity names are global player-facing labels, not merely unique within one kind."""
+        by_name: "dict[str, list[str]]" = {}
+        for entry in self.corpus.entries.values():
+            if entry.kind == "display-template":
+                continue  # templates deliberately reuse placeholders; they are not item identities
+            name = entry.get("name")
+            if isinstance(name, str) and name:
+                by_name.setdefault(name, []).append(entry.id)
+        duplicates = {name: ids for name, ids in by_name.items() if len(ids) > 1}
+        self.assertEqual(duplicates, {})
 
     def test_exactly_six_empty_partitions_and_no_others(self) -> None:
         # ⛔ CORRECTED 2026-09-07: was 9, including two real, previously-undiscovered false positives.

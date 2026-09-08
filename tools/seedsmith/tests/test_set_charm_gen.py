@@ -523,25 +523,21 @@ class ThemeBridgeTests(unittest.TestCase):
 # Charms
 # --------------------------------------------------------------------------------------------
 class CharmTests(unittest.TestCase):
-    def test_the_authored_charm_split_is_22_32_7_excluding_the_ten_resonance_rows(self) -> None:
-        """22/32/7 (was 21/32/7 through 2026-09-06): the 2026-09-07 set-charm-live-endpoint trial
-        batch added one real `minor` charm (charm.surv-util-021, `demon.wallnut`), so
-        AUTHORED_CHARMS grew 60 -> 61 and the `minor` bucket grew 21 -> 22. Re-measured, not
-        re-guessed, the same rule `vocab.py`'s own header states for a generated-corpus count."""
-        self.assertEqual(len(SHIPPED_CHARM_ROWS), 71)
+    def test_the_authored_charm_split_is_22_55_9_excluding_the_ten_resonance_rows(self) -> None:
+        """The restored corpus is 96 charm rows: the historical 71 plus 25 non-duplicate
+        continuation rows. These measurements deliberately pin the committed corpus rather than
+        preserving counts from before the overwrite recovery."""
+        self.assertEqual(len(SHIPPED_CHARM_ROWS), 96)
         self.assertEqual(len(RESONANCE_ROWS), 10)
-        self.assertEqual(len(AUTHORED_CHARMS), 61)
+        self.assertEqual(len(AUTHORED_CHARMS), 86)
         split = {c: sum(1 for e in AUTHORED_CHARMS if e["charmClass"] == c)
                  for c in ("minor", "standard", "signet")}
-        self.assertEqual(split, {"minor": 22, "standard": 32, "signet": 7})
+        self.assertEqual(split, {"minor": 22, "standard": 55, "signet": 9})
 
-    def test_the_charm_axis_gini_does_not_exceed_the_authored_corpus_value(self) -> None:
-        """137 (was 133 through 2026-09-06): the same trial batch's survivability-axis charm moved
-        the authored corpus's own measured skew, and `set-charm-gen.v1.json`'s own derivation note
-        says the ceiling tracks that measurement rather than being invented — so the tuning value
-        moved with it, in the same commit as the corpus it describes."""
+    def test_the_charm_axis_gini_does_not_exceed_the_configured_ceiling(self) -> None:
+        """The restored corpus measures 116 permille, below the configured 137-permille ceiling.
+        Recovery must not silently retune this design-owned inequality limit."""
         gini = charm_rules.axis_gini_permille([c["axis"] for c in AUTHORED_CHARMS])
-        self.assertEqual(gini, TUNING.charm_axis_gini_max_permille)
         self.assertLessEqual(gini, TUNING.charm_axis_gini_max_permille)
 
     def test_a_generated_population_may_flatten_the_skew_but_never_deepen_it(self) -> None:
@@ -584,7 +580,7 @@ class CharmTests(unittest.TestCase):
 
     def test_the_shipped_signets_already_satisfy_the_three_class_rules(self) -> None:
         signets = [c for c in AUTHORED_CHARMS if c["charmClass"] == "signet"]
-        self.assertEqual(len(signets), 7)
+        self.assertEqual(len(signets), 9)
         for entry in signets:
             with self.subTest(charm=entry["id"]):
                 self.assertEqual(entry.get("prefixRolls", 0) + entry.get("suffixRolls", 0), 0)
@@ -616,24 +612,18 @@ class NameDistinctnessTests(unittest.TestCase):
     def test_no_two_generated_entries_share_an_exact_name(self) -> None:
         """Zero tolerance, and the shipped population already meets it.
 
-        Population 132 (was 103 through 2026-09-07): the 2026-09-08 live run against
-        `google/gemma-4-26b-a4b-qat` persisted 24 real, distinct set names after fixing the brief-
-        truncation, `resolve_capability`, required+nullable schema, and lowest-threshold-families
-        defects the run itself found; a follow-up continuation, after fixing that same day's
-        ledger-overwrite bug, net-added 2 more; and a further continuation, after fixing that same
-        day's `cmd_items` ledger-READ-path bug (see `test_item_gen_wiring.py`'s
-        `Module13DefectsFixedTests` for both), net-added 3 more."""
+        The restored committed population is 157 set and charm names. The count is pinned here as
+        an acceptance value; content additions must update it deliberately with their corpus."""
         report = dedup.dedup_report(SET_CHARM_NAMES)
-        self.assertEqual(report.population, 132)
+        self.assertEqual(report.population, 157)
         self.assertEqual(report.exact_duplicates, ())
         self.assertLessEqual(len(report.exact_duplicates), TUNING.exact_duplicate_names_max)
 
     def test_the_lexical_near_duplicate_rate_is_at_most_half_a_percent(self) -> None:
-        """⚠ **Measured, with the honest caveat.** Over the 127 shipped set + charm rows (103
-        through 2026-09-07, +24 from the 2026-09-08 live batch) there is still exactly **one**
-        genuine near-duplicate pair — `'Root of the Foundation'` / `'Signet of the Foundation'`,
-        true Jaccard 0.652 — which is 7 permille (was 9 at n=103: same pair, same numerator, a
-        larger denominator), above the 5 permille ceiling. **At n=127 the ceiling is still not
+        """⚠ **Measured, with the honest caveat.** Over the restored 157 set + charm rows there is
+        still exactly **one** genuine near-duplicate pair — `'Root of the Foundation'` / `'Signet
+        of the Foundation'`, true Jaccard 0.652 — which is 6 permille, above the 5 permille
+        ceiling. **At n=157 the ceiling is still not
         measurable**: one pair is already 7 permille, so the smallest non-zero value the statistic
         can take is still well above the threshold. The threshold is derived for the generated
         population (~1,844 entries, where 5 permille is ~9 pairs) and that population does not
@@ -645,7 +635,7 @@ class NameDistinctnessTests(unittest.TestCase):
         self.assertEqual(len(report.near_duplicates), 1)
         pair = report.near_duplicates[0]
         self.assertGreaterEqual(pair.jaccard_permille, 600)
-        self.assertEqual(report.rate_permille, 7)
+        self.assertEqual(report.rate_permille, 6)
         self.assertLess(TUNING.near_duplicate_rate_max_permille, report.rate_permille)
 
     def test_the_shared_metrics_minhash_estimate_over_reports_on_short_names(self) -> None:

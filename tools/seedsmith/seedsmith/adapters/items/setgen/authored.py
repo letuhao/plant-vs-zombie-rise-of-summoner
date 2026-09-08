@@ -20,6 +20,7 @@ measured beside every number, and `verdict` still refuses to call a held run a p
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -98,6 +99,33 @@ def _partition_of(entry_id: str) -> str:
     sequence, which is what `naming.v1.json`'s `idTemplate` already says it is."""
     body = entry_id.split(".", 1)[1]
     return body.rsplit("-", 1)[0]
+
+
+def _merged_partition_rows(path: Path, rows: "list[dict]", *, kind: str,
+                           partition: str) -> "list[dict]":
+    """Preserve an existing partition while appending this batch's newly minted rows.
+
+    The ledger tracks whether a subject was attempted; the seed file remains the source of truth
+    for every row already committed to that partition. A conflicting id is corruption or an
+    unsupported rewrite request, so it fails before replacing authored content.
+    """
+    if not path.exists():
+        return rows
+
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if document.get("kind") != kind:
+        raise ValueError(f"{path} is not a {kind} partition")
+    meta = document.get("_meta") or {}
+    if meta.get("partition") != partition:
+        raise ValueError(f"{path} belongs to partition {meta.get('partition')!r}, not {partition!r}")
+
+    merged = {row["id"]: row for row in document.get("entries") or []}
+    for row in rows:
+        existing = merged.get(row["id"])
+        if existing is not None and existing != row:
+            raise ValueError(f"{path} already contains a different row for {row['id']!r}")
+        merged[row["id"]] = row
+    return [merged[entry_id] for entry_id in sorted(merged)]
 
 
 def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
@@ -192,8 +220,11 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             prompt_version=PROMPT_VERSION, model=model, authored_utc=authored_utc,
             source_ref="docs/architecture/item/spec-set-charm-gen.md",
             registry_versions=versions)
+        target = out_dir / f"{partition}.json"
+        merged_rows = _merged_partition_rows(
+            target, rows, kind=kind, partition=f"{kind}s/{partition}")
         result.files.append(write_seed_file(out_dir, f"{partition}.json",
-                                            seed_document(kind, rows, meta)))
+                                            seed_document(kind, merged_rows, meta)))
 
     result.metrics, result.report = _measure(result.entries, kind=kind, tuning=tuning,
                                              held=[key for key, _ in plan.held])

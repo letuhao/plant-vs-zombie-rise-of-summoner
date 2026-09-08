@@ -38,6 +38,10 @@ namespace FusionRpg.Injector.Effects;
 /// </summary>
 public static class KernelDriveHost
 {
+    // Structural time-unit conversions, not balance values: the Core timeline stores milliseconds
+    // while the injector offers measured frame time in integer microseconds.
+    const long MicrosecondsPerSecond = 1_000_000;
+
     /// <summary>
     /// Per-frame runtime cap — structural, not a balance number and not a progression ceiling
     /// (<c>tunables-ssot.md</c> §1 lists per-frame caps as exempt, and requires saying so).
@@ -90,6 +94,9 @@ public static class KernelDriveHost
 
     /// <summary>Simulated milliseconds since this board began. 0 off-board.</summary>
     public static long NowTicks { get { lock (Gate) return _clock?.Now ?? 0; } }
+
+    /// <summary>Whole active-match milliseconds since board start. Paused time is excluded.</summary>
+    public static long NowMilliseconds => NowTicks;
 
     /// <summary>Start a fresh timeline. Called from <c>MatchHost.Apply</c> on <c>board.start</c>.</summary>
     public static void BeginBoard()
@@ -156,7 +163,7 @@ public static class KernelDriveHost
         if (!(scaledDeltaTime > 0f)) return;
 
         using var _perf = PerfProbe.Measure(PerfSection.KernelTick);
-        var micros = (long)Math.Round((double)scaledDeltaTime * 1_000_000.0);
+        var micros = (long)Math.Round((double)scaledDeltaTime * MicrosecondsPerSecond);
         drive.Tick(micros, BudgetTicks(realFrameSeconds));
     }
 

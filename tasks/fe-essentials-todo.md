@@ -20,7 +20,14 @@ actually inspected) all green.
 
 ---
 
-## Phase 1 — `onboarding-first-run`
+## Phase 1 — `onboarding-first-run` (legacy; superseded 2026-09-08)
+
+The original sunflower/bind slice below is historical implementation work. It is not the current
+onboarding contract and must not be extended. The approved first-session sequence is defined by
+[`spec-first-session-progression.md`](../docs/architecture/standalone/spec-first-session-progression.md):
+first settled victory → Crazy Dave sheet, player level 3 with a qualifying general spawn → empire
+species progression, then player level 4 → Dave's deterministic basic equipment. Replace or gate the
+legacy branch only after that server-backed sequence is implemented.
 
 - [x] **T1: `FirstRunReveal` component + `FocusCard` wiring** · **S/M**
   - New `web/fusion-rpg-web/src/stages/sanctum/FirstRunReveal.tsx` — stateless, `{ onBind: () => void }`,

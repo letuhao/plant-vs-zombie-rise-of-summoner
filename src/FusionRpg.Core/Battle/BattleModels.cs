@@ -481,11 +481,15 @@ public enum BattleOutcome
 
 /// <summary>
 /// One structured battle occurrence — the emitter maps these onto the event vocabulary.
-/// Shield events (battle-adoption) carry the optional tail fields; spawn/die leave them default.
+/// Shield events (battle-adoption) carry the optional tail fields; death events may additionally
+/// carry the explicit attacker key that caused the lethal interaction.
 /// </summary>
 public sealed record BattleEventRec(
     int Round, string Kind, string ActorKey, int TypeId, string Side,
-    long Amount = 0, string? Element = null, string? ShieldId = null);
+    long Amount = 0, string? Element = null, string? ShieldId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(
+        Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    string? KillerActorKey = null);
 
 public static class BattleEventKinds
 {

@@ -1,7 +1,7 @@
 # General empire fallback
 
 **Module:** `general-empire-fallback`  
-**Status:** approved 2026-09-08; specification only  
+**Status:** approved 2026-09-08; partial implementation landed 2026-09-08
 **Depends on:** `progression-source-contract`, species-build allocation transport  
 **Decision:** [decisions.md](../decisions.md) — *Demon progression source and spawn ownership (2026-09-08)*
 
@@ -52,10 +52,19 @@ The existing `SpeciesAllocation` scope remains `(playerId, speciesId)`. Its exis
 
 The fallback is global to the player's empire in data scope even though this module's only presentation/runtime consumer is the lawn. A future gameplay mode may reuse it only by declaring `EmpireGeneral` through the source contract and adding its own reviewed spawn adapter.
 
+## Implementation status
+
+The normal lawn projection now emits `demon.progression.v1/general:{speciesId}` claims from the
+catalog and gates placement/spawn plus run-completion species XP on that parsed claim. Dedicated
+unique and Commander sources are excluded. Focused Core/Data regression suites pass; the remaining
+ownership diagnostics and atomic terminal settlement work is tracked by `demon-lawn-deploy` Phase 4.
+
 ## Migration targets
 
-- Replace direct species-only selection in `SpeciesAllocationSource.Resolve` with a source-aware adapter at the composition boundary (`src/FusionRpg.Core/Stats/Aptitudes/SpeciesAllocationSource.cs:69`).
-- Carry activity provenance through `ApplyRpgProgressionFromActivityUnlocked` and `ApplyRunCompletionSpeciesAwardsUnlocked` (`src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:20`, `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:76`).
+- Source-gated composition is now enforced at the unique/server boundaries; general allocation remains
+  the existing `EffectiveSpeciesAllocation` path for general consumers.
+- Activity provenance now flows through `ApplyRpgProgressionFromActivityUnlocked` and
+  `ApplyRunCompletionSpeciesAwardsUnlocked` (`src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:20`, `:76`).
 - Keep the existing `species-build/spec-allocation-transport.md` payload shape; this module selects when it is legal to consume it, not a new allocation transport.
 
 No historical award rollback is part of this module. New unclassified facts fail closed until their producer is updated.
@@ -85,4 +94,5 @@ Add integration coverage for: a lawn general with species allocation; a source/s
 - [x] Verified the current species allocation and activity/match-end award paths in `SpeciesAllocationSource.cs` and `RpgStore.Progression.cs`.
 - [x] Kept the progression-source behavior lock in `decisions.md` as the governing decision.
 - [x] Identified implementation and verification commands.
-- [ ] No constraint test was run: this is a documentation-only specification.
+- [x] Focused species, expedition, activity, and source-parser tests were run.
+- [ ] Full guard/conformance sweep remains open and is recorded in `tasks/demon-progression-todo.md`.

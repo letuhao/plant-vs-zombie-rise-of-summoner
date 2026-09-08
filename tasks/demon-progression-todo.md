@@ -8,9 +8,18 @@ The dependent lawn consumer is tracked in [demon-lawn-deploy-todo.md](demon-lawn
 
 Dependency order: D0 → (D1 || D2) → checkpoint → dependent lawn progression.
 
+## Build status (2026-09-08)
+
+The first implementation slice is landed in the working tree: Core now has the closed source-value
+grammar; death captures carry a per-match lifecycle occurrence; Data returns canonical fact ids on
+replay, excludes `source=extra` facts from empire species projection, and records dedicated unique
+specimen lawn-kill receipts; unique ActorHub and web squads read `uniqueDemon` allocation only; and
+expedition specimen rewards no longer mirror into species rows. Atomic provenance ownership validation,
+crash-safe terminal settlement, and the full guard sweep remain open below.
+
 ## Phase 0 — `progression-source-contract`
 
-### D0.1 — Typed source model and closed grammar · **M** · 4-5 files — **TODO**
+### D0.1 — Typed source model and closed grammar · **M** · 4-5 files — **PARTIAL 2026-09-08**
 
 Implement the three source variants and Data-owned parser/serializer for the versioned
 `demon.progression.v1` `source_kind/source_id` grammar. Validate ownership, catalog species, Commander
@@ -28,7 +37,7 @@ observable diagnostic.
   `src/FusionRpg.Data/Sqlite/`, `tests/FusionRpg.Core.Tests/`, `tests/FusionRpg.Data.Tests/`.
 - **Estimated scope:** Medium.
 
-### D0.2 — Activity propagation and canonical replay identity · **M** · 4 files — **TODO**
+### D0.2 — Activity propagation and canonical replay identity · **M** · 4 files — **PARTIAL 2026-09-08**
 
 Carry the typed claim through every activity fact used by source-specific progression. Replace ptr-only
 death identity with an Injector-emitted per-match lifecycle occurrence id; a duplicate returns the existing
@@ -54,7 +63,7 @@ source in the existing fields.
 
 ## Phase 1 — `general-empire-fallback`
 
-### D1.1 — Source-gated species XP projector · **M** · 3-4 files — **TODO**
+### D1.1 — Source-gated species XP projector · **M** · 3-4 files — **PARTIAL 2026-09-08**
 
 Update normal lawn species XP and run-completion selection to consume only parsed `EmpireGeneral` facts.
 Preserve the existing per-player/per-species progression row, automatic allocation, run dedupe, and
@@ -71,7 +80,7 @@ PowerLadder arithmetic. A `UniqueSpecimen` or `Commander` fact is excluded even 
   `src/FusionRpg.Core/Progression/`, `tests/FusionRpg.Data.Tests/`.
 - **Estimated scope:** Medium.
 
-### D1.2 — Source-aware general allocation adapter · **M** · 3-5 files — **TODO**
+### D1.2 — Source-aware general allocation adapter · **M** · 3-5 files — **PARTIAL 2026-09-08**
 
 Make the general-demon allocation path explicit at composition boundaries. Retain the empire-wide,
 per-player/per-species row and automatic primary-stat distribution; reject unique/Commander source input
@@ -90,7 +99,7 @@ instead of falling through to it.
 
 ## Phase 2 — `dedicated-progression-isolation`
 
-### D2.1 — Unique ActorHub dedicated input · **M** · 3-5 files — **TODO**
+### D2.1 — Unique ActorHub dedicated input · **M** · 3-5 files — **PARTIAL 2026-09-08**
 
 Route unique composition through the authoritative specimen row and `UniqueDemonAllocation` when a valid
 plan exists. Remove `EffectiveSpeciesAllocation` from `UniqueActorHubCompose` and web battle composition;
@@ -108,7 +117,7 @@ empty dedicated input is explicit and diagnosed until a plan exists.
   `tests/FusionRpg.Server.Tests/`.
 - **Estimated scope:** Medium.
 
-### D2.2 — Dedicated rewards and expedition isolation · **M** · 3-4 files — **TODO**
+### D2.2 — Dedicated rewards and expedition isolation · **M** · 3-4 files — **PARTIAL 2026-09-08**
 
 Remove species XP from unique/Commander outcomes while retaining specimen XP and existing level-gain action
 unlock handling. Keep each reward in its existing transaction and preserve settled history.

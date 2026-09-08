@@ -89,6 +89,17 @@ public class BattleEngineTests
     }
 
     [Fact]
+    public void Direct_lethal_hits_record_the_attacker_key_on_each_death()
+    {
+        var report = BattleEngine.Resolve(Setup(squadLevel: 10, waveLevel: 1, squadN: 1, waveN: 1), 5);
+        var death = Assert.Single(report.Events.Where(e => e.Kind == BattleEventKinds.Die));
+
+        Assert.Equal("wave:0", death.ActorKey);
+        Assert.Equal("squad:0", death.KillerActorKey);
+        Assert.Equal(1, report.Actors.Single(a => a.Key == "squad:0").Kills);
+    }
+
+    [Fact]
     public void Element_advantage_swings_a_mirror_match()
     {
         // Fire squad vs ice wave (STR) should on average end faster / better than the mirror.
