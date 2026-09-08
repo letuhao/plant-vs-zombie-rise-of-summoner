@@ -19,7 +19,9 @@ hand-typed copies of the same list eventually do.
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
+
+from seedsmith.pipeline.run import validate_against_schema
 
 from . import opvocab
 
@@ -100,3 +102,33 @@ def affix_family_schema(kind_id: str, *, channels: "tuple[str, ...]", roles: "tu
             "powerBand": {"type": "string", "enum": list(power_bands)},
         },
     }
+
+
+def validate_answer(answer: Mapping[str, Any], schema: Mapping[str, Any], *,
+                    channel_ops: "Mapping[str, tuple[str, ...]] | None" = None,
+                    kind_id: str | None = None) -> "list[str]":
+    """Validate an affix answer locally, including the live partition's occupied mechanics."""
+    defects = validate_against_schema(answer, schema)
+    blocked = answer.get("blocked")
+    if "blocked" in answer:
+        if not isinstance(blocked, str) or not blocked.strip():
+            defects.append("field 'blocked' must be a non-empty reason string")
+        if set(answer) != {"blocked"}:
+            defects.append("a blocked answer must not include content fields")
+        return defects
+
+    required = ("name", "nameKey", "displayTemplate", "word", "channel", "op", "roles", "tags",
+                "powerBand")
+    defects.extend(f"missing required content field {name!r}" for name in required if name not in answer)
+    channel = answer.get("channel")
+    op = answer.get("op")
+    if channel_ops is not None and isinstance(channel, str) and isinstance(op, str):
+        try:
+            canonical = opvocab.canonical_op(kind_id or "", op)
+        except ValueError as error:
+            defects.append(str(error))
+        else:
+            if canonical in channel_ops.get(channel, ()):
+                defects.append(
+                    f"partition already ships (channel={channel!r}, op={canonical!r}); choose a free pair")
+    return defects

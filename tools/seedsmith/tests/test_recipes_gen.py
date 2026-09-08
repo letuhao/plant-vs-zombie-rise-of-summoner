@@ -143,6 +143,21 @@ def test_recipe_schema_refuses_empty_vocabularies():
         schema_mod.recipe_schema(operations=("bore",), material_pool=("catalyst.forge",), cost_bands=())
 
 
+def test_recipe_answer_validation_names_an_operation_cost_incompatibility():
+    schema = schema_mod.recipe_schema(
+        operations=("temper",), material_pool=("essence.fire", "catalyst.temper"),
+        cost_bands=("cheap",),
+    )
+    answer = {
+        "name": "Bad Temper", "flavor": "", "operation": "temper", "frame": "any",
+        "costLines": [{"material": "essence.fire", "costBand": "cheap"}],
+    }
+
+    defects = schema_mod.validate_answer(answer, schema)
+
+    assert any("may not spend a essence" in defect for defect in defects)
+
+
 def test_recipe_schema_offers_output_target_only_when_container_candidates_given():
     without = schema_mod.recipe_schema(
         operations=("bore",), material_pool=("catalyst.forge",), cost_bands=("cheap",))
@@ -152,6 +167,13 @@ def test_recipe_schema_offers_output_target_only_when_container_candidates_given
         container_candidates=("item.humanoid-torso-a-005",))
     assert withit["properties"]["outputTarget"]["enum"] == [
         "item.humanoid-torso-a-005", schema_mod.MINT_NEW_SENTINEL]
+
+
+def test_recipe_material_pool_excludes_issuable_but_unobtainable_materials():
+    pool = brief_mod.load_material_pool()
+
+    assert "shard.sprout" in pool
+    assert "shard.grafted" not in pool
 
 
 # ---------------------------------------------------------------------------------------------
@@ -165,17 +187,22 @@ def test_load_cost_bands_matches_the_real_frozen_bands_registry():
     assert bands[0] == "cheap" and bands[-1] == "exorbitant", "sorted by ascending multiplier"
 
 
-def test_load_material_pool_is_the_27_id_issuable_vocabulary():
+def test_load_material_pool_is_the_obtainable_issued_vocabulary():
     pool = brief_mod.load_material_pool()
-    assert len(pool) == 27
+    assert len(pool) == 19
     assert "shard.common" not in pool, "a legacy shard id is never issuable"
     assert "substrate.humanoid.crude" in pool
+    assert "shard.grafted" not in pool, "an issued material needs an acquisition path before use"
 
 
 def test_build_recipe_brief_excludes_forge_when_no_target_is_scoped():
     b = brief_mod.build_recipe_brief()
     assert "forge" not in b.operations
     assert "outputTarget" not in b.schema["properties"]
+    assert "temper: catalyst, substrate" in b.render()
+    assert "elevate: catalyst, shard, substrate; if using a catalyst, it must be catalyst.temper" in b.render()
+    assert "An empty list is always legal" in b.render()
+    assert "19 obtainable, issuable ids" in b.render()
 
 
 def test_build_recipe_brief_with_a_forge_target_offers_forge_and_its_candidates():
@@ -451,6 +478,28 @@ def test_run_draws_marks_the_ledger_done_and_partitions_fresh_vs_blocked(tmp_pat
     assert set(done) == {"recipe-draw-000"}
 
 
+def test_run_draws_keeps_going_after_a_semantically_invalid_model_recipe(tmp_path):
+    recipes_path = tmp_path / "recipes.json"
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(count=2, ledger=ledger, recipes_path=recipes_path)
+    calls = iter([
+        {"name": "Invalid Temper", "operation": "temper", "frame": "any",
+         "costLines": [{"material": "essence.fire", "costBand": "modest"}]},
+        _fake_recipe_call(name="Recovered Recipe"),
+    ])
+
+    def call(brief: str, schema: dict) -> dict:
+        result = next(calls)
+        return result(brief, schema) if callable(result) else result
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=call)
+
+    assert {entry["name"] for entry in fresh.values()} == {"Recovered Recipe"}
+    assert set(blocked) == {"recipe-draw-000"}
+    assert "may not spend a essence" in blocked["recipe-draw-000"]["reason"]
+    assert set(ledger.read_done()) == {"recipe-draw-001"}
+
+
 def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_path):
     recipes_path = tmp_path / "recipes.json"
     ledger = RunLedger(tmp_path / "ledger.json")
@@ -553,7 +602,7 @@ def test_cli_a_real_live_run_writes_a_real_corpus_file(tmp_path, monkeypatch, ca
 
     called_with = {}
 
-    def _fake_live_answer_caller(config):
+    def _fake_live_answer_caller(config, *, validator=None):
         called_with["config"] = config
         return _fake_recipe_call(name="Live-Wired Recipe")
 

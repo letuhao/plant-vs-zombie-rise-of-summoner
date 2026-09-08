@@ -99,7 +99,7 @@ describe("SanctumStage", () => {
     expect(screen.getByTestId("rail-sanctum")).toHaveAttribute("data-state", "active");
   });
 
-  it("shows the legacy first-run script while server-backed onboarding is pending", () => {
+  it("shows the first-run prompt while server-backed onboarding is empty", () => {
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     expect(screen.getByTestId("focus-card-first-run")).toBeInTheDocument();
     expect(screen.queryByTestId("focus-card-actor")).not.toBeInTheDocument();

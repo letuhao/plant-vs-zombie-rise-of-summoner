@@ -337,6 +337,7 @@ type CommanderListRowDto = {
   activeAuraName: string | null;
   locationStub: string | null;
   legionStub: string | null;
+  equipment?: { instanceId: string; containerId: string; role: string } | null;
 };
 
 type CommanderListResponseDto = {
@@ -375,7 +376,8 @@ export function adaptCommanderList(dto: CommanderListResponseDto): CommanderList
         activeAuraId: row.activeAuraId,
         activeAuraName: row.activeAuraName,
         locationStub: row.locationStub,
-        legionStub: row.legionStub
+        legionStub: row.legionStub,
+        ...(row.equipment ? { equipment: row.equipment } : {})
       })
     )
   };

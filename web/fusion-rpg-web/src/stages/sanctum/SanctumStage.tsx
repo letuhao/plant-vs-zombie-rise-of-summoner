@@ -17,6 +17,7 @@ import type { ActorRungState } from "@/ui/actor";
 import { FocusCard } from "./FocusCard";
 import { SanctumHome } from "./SanctumHome";
 import { SanctumHud } from "./SanctumHud";
+import { OnboardingReveal } from "./OnboardingReveal";
 
 // GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
 // layer's real weight (a wrapped page, in most cases) loads once it's opened for the first time,
@@ -223,6 +224,7 @@ export function SanctumStage() {
         <Rail entries={railEntries} onSelect={(id) => id !== "sanctum" && openLayerById(id)} />
 
         <div className="min-w-0 flex-1 p-5" data-testid="sanctum-body">
+          <OnboardingReveal playerId={playerId} onOpenCommanders={() => openLayerById("commanders")} />
           <FocusCard
             actorCount={actors.length}
             firstActor={firstActorState}

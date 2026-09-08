@@ -939,6 +939,25 @@ export type CommanderListRow = {
   activeAuraName: string | null;
   locationStub: string | null;
   legionStub: string | null;
+  equipment?: { instanceId: string; containerId: string; role: string } | null;
+};
+
+export type OnboardingCheckpoint = {
+  checkpointId: string;
+  state: string;
+  earnedRunId: number | null;
+  rewardRef: string | null;
+  payloadJson: string | null;
+  earnedUtc: string;
+  claimedUtc: string | null;
+  revision: number;
+};
+
+export type OnboardingState = {
+  playerId: number;
+  playerLevel: number;
+  revision: number;
+  checkpoints: OnboardingCheckpoint[];
 };
 
 export type CommanderListView = {

@@ -442,6 +442,27 @@ def test_run_draws_marks_the_ledger_done_and_partitions_fresh_vs_blocked(tmp_pat
     assert set(done) == {"basetype-draw-armament-primary-humanoid-a-000"}
 
 
+def test_run_draws_keeps_going_after_one_malformed_live_response(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=2,
+                            ledger=ledger, base_types_dir=base_types_dir)
+    calls = iter([ValueError("no JSON object in model output"), _fake_call(name="Recovered Widget")])
+
+    def call(brief: str, schema: dict) -> dict:
+        next_result = next(calls)
+        if isinstance(next_result, Exception):
+            raise next_result
+        return next_result(brief, schema)
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=call)
+
+    assert {entry["name"] for entry in fresh.values()} == {"Recovered Widget"}
+    assert set(blocked) == {"basetype-draw-armament-primary-humanoid-a-000"}
+    assert "no JSON object" in blocked["basetype-draw-armament-primary-humanoid-a-000"]["reason"]
+    assert set(ledger.read_done()) == {"basetype-draw-armament-primary-humanoid-a-001"}
+
+
 def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_path):
     ledger = RunLedger(tmp_path / "ledger.json")
     base_types_dir = tmp_path / "base-types"

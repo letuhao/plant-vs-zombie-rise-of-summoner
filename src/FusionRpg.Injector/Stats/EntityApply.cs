@@ -285,11 +285,11 @@ public static class EntityApply
     /// </summary>
     static void AddGeneralProgressionSource(Dictionary<string, object> payload, string side, int typeId, string source)
     {
-        var token = (source ?? string.Empty).ToLowerInvariant();
-        if (token.Contains("extra", StringComparison.Ordinal)
-            || token.Contains("unique", StringComparison.Ordinal)
-            || token.Contains("commander", StringComparison.Ordinal)
-            || token.Contains("patron", StringComparison.Ordinal))
+        // Only the vanilla lifecycle entry points identify an ordinary lawn spawn. Debug,
+        // recapture, extra, patron, and other opaque operations are deliberately not evidence;
+        // a deny-list would make a newly added dedicated mechanism fall through by accident.
+        if (!string.Equals(source, "start", StringComparison.Ordinal)
+            && !string.Equals(source, "initHealth", StringComparison.Ordinal))
             return;
         if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured) return;
         var index = new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);

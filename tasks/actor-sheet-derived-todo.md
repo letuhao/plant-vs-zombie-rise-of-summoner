@@ -1,31 +1,11 @@
-# Actor-sheet derived surface — todo
+# ActorSheet Derived — FE structure cut todo
 
-**Plan:** [actor-sheet-derived-plan.md](actor-sheet-derived-plan.md)
+Program: `actor-sheet`. Plan scratch: Cursor `derived_fe_structure_*.plan.md`.  
+Structure SSOT: [actor-sheet-derived-structure.md](actor-sheet-derived-structure.md).
 
-## Runtime cook (this plan)
-
-- [x] Author `data/tuning/derived-stat-catalog.v2.json` (28 combat + 6 status + 4 resource + other)
-- [x] v2 loader + rejection rules (missing `en`, leaf-as-family, combat/status/resource parity)
-- [x] `ConfigureAll` in `Program.cs`; boot off v2
-- [x] `DerivedSurfaceCook` + Contracts DTOs
-- [x] `GET /api/catalogs/derived-surface?lang=&side=`
-- [x] Expand ↔ registry parity tests (269 unchanged)
-- [x] Gap table in plan; map/ideal/spec pointers
-
-## Completeness audit (2026-09-08)
-
-- [x] Fix six catalog `unitClass` mismatches vs `CombatFamilyUnitClass` + loader parity reject
-- [x] Cook: status `presentationOnly` passthrough; resource ordinals from `ResourceIds`
-- [x] `FindSurface` family-boundary match; sheet DisplayName asserts
-- [x] Injector `RpgHost` `ConfigureAll` (HUD catalogs)
-- [x] FE fixture on v2 + `expandDerivedFamily` by expand kind (not plate redesign)
-- [x] Rejection matrix + unitClass mirror tests
-- [x] Doc errata (hosts-inject, 269, expand/sheetGroup)
-
-## Follow-ons (not this plan)
-
-- [ ] FE Derived rewrite / plate 13 InspectSplit join to cook + `/sheet`
-- [ ] Sparse open-prefix status live join on sheet
-- [ ] Embed cook on full `GET /api/catalogs/actor-surface` when that endpoint ships
-- [ ] Hub §6.1 unattributed producers
-- [ ] Sheet `?lang=` (cook already localizes; sheet still resolves `en`)
+- [x] structure-artifact — `tasks/actor-sheet-derived-structure.md` written
+- [x] extract-cook — `derived/derivedCook.ts`; update imports/tests
+- [x] cut-shell — shell + row + inspector + gauges; no wrapper under `.console`
+- [x] thin-tab — `DerivedTab` = hooks → model → shell
+- [x] contracts-spec — `:scope > .inspect-split`; sync `spec-derived-tab.md`
+- [x] visual-gap-gate — wwwroot rebuild; ssot PNGs; [gap report](actor-sheet-derived-gap-report.md); **owner gate pending**

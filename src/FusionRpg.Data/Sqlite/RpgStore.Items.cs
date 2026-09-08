@@ -14,6 +14,11 @@ public sealed record RpgItemRuleRow(
 public sealed record RpgItemEventRow(
     string EventId, string InstanceId, string PlayerId, string Kind, string? Detail, string CreatedUtc);
 
+/// <summary>One player-owned assignment. Commander equipment uses this scope instead of pretending
+/// that the commander is a persistent unique specimen.</summary>
+public sealed record RpgPlayerItemAssignmentRow(
+    string PlayerId, FusionRpg.Core.Items.ItemRole Role, string RefKind, string RefId, string AssignedUtc);
+
 /// <summary>A saved loadout — the library `armoury` claims beside its own store (I13 §3.5/§4.5).</summary>
 public sealed record RpgItemLoadoutRow(
     string LoadoutId, string PlayerId, string Name, string? Frame, string CreatedUtc, long Revision);
@@ -153,6 +158,19 @@ public sealed partial class RpgStore
               PRIMARY KEY (specimen_id, role)
             );
             CREATE INDEX IF NOT EXISTS ix_rpg_item_assignment_ref ON rpg_item_assignment(ref_kind, ref_id);
+
+            -- Commander-owned equipment is keyed by player, not by a fabricated specimen id. Keep it
+            -- separate from the unique-actor assignment table so the two ownership scopes cannot bleed.
+            CREATE TABLE IF NOT EXISTS rpg_player_item_assignment (
+              player_id TEXT NOT NULL,
+              role TEXT NOT NULL,
+              ref_kind TEXT NOT NULL,
+              ref_id TEXT NOT NULL,
+              assigned_utc TEXT NOT NULL,
+              PRIMARY KEY (player_id, role)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_player_item_assignment_ref
+              ON rpg_player_item_assignment(ref_kind, ref_id);
 
             -- item-ideal.md, slot-roles (module 3). Mirrors core.v1.json's roles.list -- a normalized,
             -- SQL-joinable copy of the same fifteen rows ItemRoleRegistry parses in Core, never a
@@ -689,6 +707,53 @@ public sealed partial class RpgStore
             {
                 if (!FusionRpg.Core.Items.ItemRoles.TryParse(r.GetString(0), out var role)) continue;
                 list.Add(new FusionRpg.Core.Items.EquipAssignment(specimenId, role, r.GetString(1), r.GetString(2), r.GetString(3)));
+            }
+            return list;
+        }
+    }
+
+    /// <summary>Assign one item to the player's commander-owned standard slot.</summary>
+    public void SavePlayerItemAssignment(string playerId, FusionRpg.Core.Items.ItemRole role,
+        string refKind, string refId, string? assignedUtc = null)
+    {
+        if (string.IsNullOrWhiteSpace(playerId)) throw new ArgumentException("player id is required", nameof(playerId));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            SavePlayerItemAssignmentUnlocked(db, tx, playerId, role, refKind, refId,
+                assignedUtc ?? DateTime.UtcNow.ToString("O"));
+            tx.Commit();
+        }
+    }
+
+    internal void SavePlayerItemAssignmentUnlocked(SqliteConnection db, SqliteTransaction tx,
+        string playerId, FusionRpg.Core.Items.ItemRole role, string refKind, string refId, string assignedUtc)
+    {
+        ExecIn(db, tx, """
+            INSERT INTO rpg_player_item_assignment (player_id, role, ref_kind, ref_id, assigned_utc)
+            VALUES ($p, $role, $rk, $rid, $utc)
+            ON CONFLICT(player_id, role) DO UPDATE SET
+              ref_kind = excluded.ref_kind, ref_id = excluded.ref_id, assigned_utc = excluded.assigned_utc;
+            """,
+            ("$p", playerId), ("$role", FusionRpg.Core.Items.ItemRoles.Id(role)),
+            ("$rk", refKind), ("$rid", refId), ("$utc", assignedUtc));
+    }
+
+    public IReadOnlyList<RpgPlayerItemAssignmentRow> ListPlayerItemAssignments(string playerId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT player_id, role, ref_kind, ref_id, assigned_utc FROM rpg_player_item_assignment WHERE player_id = $p ORDER BY role;";
+            cmd.Parameters.AddWithValue("$p", playerId);
+            using var r = cmd.ExecuteReader();
+            var list = new List<RpgPlayerItemAssignmentRow>();
+            while (r.Read())
+            {
+                if (!FusionRpg.Core.Items.ItemRoles.TryParse(r.GetString(1), out var role)) continue;
+                list.Add(new RpgPlayerItemAssignmentRow(r.GetString(0), role, r.GetString(2), r.GetString(3), r.GetString(4)));
             }
             return list;
         }

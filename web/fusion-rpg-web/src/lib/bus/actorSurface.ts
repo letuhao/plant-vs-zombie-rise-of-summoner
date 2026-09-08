@@ -161,6 +161,183 @@ export async function fetchActorSurfaceCatalog(): Promise<ActorSurfaceCatalog> {
   }
 }
 
+export type DerivedSurfaceVariant = {
+  id: string;
+  displayName: string;
+  ordinal: number;
+  presentationOnly: boolean;
+};
+
+export type DerivedSurfaceFamily = {
+  family: string;
+  displayName: string;
+  reading: string;
+  compose: string;
+  unitClass: string;
+  icon: string;
+  gauge: string;
+  capRef: string | null;
+  expand: DerivedExpandKind;
+  channelPattern: string;
+};
+
+export type DerivedSurfaceCategory = {
+  id: string;
+  displayName: string;
+  order: number;
+  families: DerivedSurfaceFamily[];
+};
+
+export type DerivedSurfaceTab = {
+  id: string;
+  displayName: string;
+  order: number;
+  expand: DerivedExpandKind;
+  variants: DerivedSurfaceVariant[];
+  actionCategoryVariants?: DerivedSurfaceVariant[] | null;
+  categories: DerivedSurfaceCategory[];
+};
+
+export type DerivedSurfaceDto = {
+  lang: string;
+  side: string;
+  schemaVersion: number;
+  versionStamp: string;
+  tabs: DerivedSurfaceTab[];
+};
+
+/** Offline / missing-endpoint: cook-shaped surface mirroring DerivedSurfaceCook tabs. */
+export function derivedSurfaceFromFixture(
+  surface: ActorSurfaceCatalog = fixtureCatalog,
+  side = "plant"
+): DerivedSurfaceDto {
+  const raw = derivedCatalogJson as {
+    tabs: { id: string; displayName: string | LocaleMap; order: number; expand: string }[];
+    sheetGroups: { id: string; tab: string; displayName: string | LocaleMap; order: number }[];
+    statusCategoryVariants: {
+      id: string;
+      displayName: string | LocaleMap;
+      ordinal: number;
+      presentationOnly?: boolean;
+    }[];
+    actionCategoryVariants: { id: string; displayName: string | LocaleMap; ordinal: number }[];
+  };
+
+  const byGroup = new Map<string, DerivedFamilyCatalogRow[]>();
+  for (const family of surface.families) {
+    const list = byGroup.get(family.sheetGroup) ?? [];
+    list.push(family);
+    byGroup.set(family.sheetGroup, list);
+  }
+
+  const toFamily = (f: DerivedFamilyCatalogRow): DerivedSurfaceFamily => ({
+    family: f.family,
+    displayName: f.displayName,
+    reading: f.reading,
+    compose: f.compose,
+    unitClass: f.unitClass,
+    icon: f.icon,
+    gauge: f.gauge,
+    capRef: f.capRef,
+    expand: f.expand,
+    channelPattern: f.expand === "none" ? "{family}" : "{family}.{variant}"
+  });
+
+  const tabs: DerivedSurfaceTab[] = [...raw.tabs]
+    .sort((a, b) => a.order - b.order)
+    .map((tab) => {
+      const categories: DerivedSurfaceCategory[] = raw.sheetGroups
+        .filter((g) => g.tab === tab.id)
+        .sort((a, b) => a.order - b.order)
+        .map((g) => ({
+          id: g.id,
+          displayName: localeEn(g.displayName),
+          order: g.order,
+          families: (byGroup.get(g.id) ?? []).map(toFamily)
+        }));
+
+      let variants: DerivedSurfaceVariant[] = [];
+      let actionCategoryVariants: DerivedSurfaceVariant[] | null = null;
+
+      if (tab.id === "elements") {
+        variants = surface.elements
+          .slice()
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((e) => ({
+            id: e.id,
+            displayName: e.displayName,
+            ordinal: e.ordinal,
+            presentationOnly: e.presentationOnly
+          }));
+      } else if (tab.id === "status") {
+        variants = raw.statusCategoryVariants
+          .slice()
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((v) => ({
+            id: v.id,
+            displayName: localeEn(v.displayName),
+            ordinal: v.ordinal,
+            presentationOnly: v.presentationOnly ?? false
+          }));
+      } else if (tab.id === "resources") {
+        variants = surface.resources.map((r, i) => ({
+          id: r.id,
+          displayName: side === "zombie" ? r.labels.zombie : r.labels.plant,
+          ordinal: i,
+          presentationOnly: false
+        }));
+      } else if (tab.id === "other") {
+        actionCategoryVariants = raw.actionCategoryVariants
+          .slice()
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((v) => ({
+            id: v.id,
+            displayName: localeEn(v.displayName),
+            ordinal: v.ordinal,
+            presentationOnly: false
+          }));
+      }
+
+      return {
+        id: tab.id,
+        displayName: localeEn(tab.displayName),
+        order: tab.order,
+        expand: tab.expand as DerivedExpandKind,
+        variants,
+        actionCategoryVariants,
+        categories
+      };
+    });
+
+  return {
+    lang: "en",
+    side,
+    schemaVersion: 2,
+    versionStamp: surface.versionStamp,
+    tabs
+  };
+}
+
+export async function fetchDerivedSurface(lang = "en", side = "plant"): Promise<DerivedSurfaceDto> {
+  try {
+    const cooked = await tryGetJson<DerivedSurfaceDto>(
+      `/api/catalogs/derived-surface?lang=${encodeURIComponent(lang)}&side=${encodeURIComponent(side)}`
+    );
+    if (cooked?.tabs?.length) return cooked;
+  } catch {
+    /* fall through to fixture cook-shape */
+  }
+  return derivedSurfaceFromFixture(fixtureCatalog, side);
+}
+
+export function useDerivedSurface(lang = "en", side = "plant") {
+  return useQuery({
+    queryKey: ["derivedSurface", lang, side] as const,
+    queryFn: () => fetchDerivedSurface(lang, side),
+    staleTime: Infinity
+  });
+}
+
 export function useActorSurfaceCatalog() {
   const query = useQuery({
     queryKey: ["actorSurfaceCatalog"] as const,

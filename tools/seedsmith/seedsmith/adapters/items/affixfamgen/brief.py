@@ -116,6 +116,21 @@ class PartitionContext:
         return tuple(sorted(self.channel_ops))
 
 
+def free_channel_ops(partition: PartitionContext, kind_id: str) -> "tuple[tuple[str, str], ...]":
+    """The mechanically distinguishable slots still available in one partition.
+
+    A model cannot create a new mechanic when every registered channel already carries every op
+    legal for the requested kind. Detect that deterministic fact before spending a live call.
+    """
+    legal_ops = opvocab.legal_ops(kind_id)
+    return tuple(
+        (channel, op)
+        for channel in partition.channels
+        for op in legal_ops
+        if op not in partition.channel_ops.get(channel, ())
+    )
+
+
 def load_partition_context(group_id: str, *, families_dir: "Path | None" = None,
                            naming_path: "Path | None" = None) -> PartitionContext:
     """Reads the real, current partition file for `group_id` (e.g. `g.armour` ->

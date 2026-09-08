@@ -1762,8 +1762,8 @@ public sealed partial class RpgStore : IRpgDb
 
     /// <summary>
     /// First-session progression T3: checkpoint facts are committed inside the same transaction as the
-    /// captured result, progression, and Souls. This first slice only settles the first-win reveal;
-    /// species and equipment remain ineligible until their source and owner paths land.
+    /// captured result, progression, and Souls. The level-3 species reveal is derived from the same
+    /// source-validated lawn facts that feed species XP; no client claim can unlock it.
     /// </summary>
     void ApplyOnboardingFromSettledCaptureUnlocked(
         SqliteConnection db, long playerId, long runId, string factKind, string payload,
@@ -1783,6 +1783,190 @@ public sealed partial class RpgStore : IRpgDb
         TryEarnOnboardingCheckpointUnlocked(
             db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.FirstWinDave,
             runId, $"fact:{factId}", rewardPayload, t);
+
+        // The first general species seen in this settled lawn run is the deterministic teaching
+        // target. It must be an explicit EmpireGeneral claim whose type agrees with the catalog;
+        // unique/commander/opaque spawns are deliberately invisible to this fallback checkpoint.
+        if (ReadActorStateUnlocked(db, playerId, FusionRpg.Core.Progression.RpgActorKinds.Player, 0).Level < 3
+            || ReadOnboardingCheckpointUnlocked(
+                db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies) is not null
+            || !DemonSpeciesCatalog.IsConfigured)
+            return;
+
+        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        DemonSpeciesDef? species = null;
+        long sourceFactId = 0;
+        using (var facts = db.CreateCommand())
+        {
+            facts.CommandText = """
+                SELECT id, kind, payload_json, source_kind, source_id
+                FROM pvz_activity_facts
+                WHERE player_id=$p AND run_id=$r
+                  AND kind IN ($plant, $zombie)
+                ORDER BY id;
+                """;
+            facts.Parameters.AddWithValue("$p", playerId);
+            facts.Parameters.AddWithValue("$r", runId);
+            facts.Parameters.AddWithValue("$plant", FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced);
+            facts.Parameters.AddWithValue("$zombie", FusionRpg.Core.Activity.PvzActivityKinds.ZombieSpawned);
+            using var reader = facts.ExecuteReader();
+            while (reader.Read())
+            {
+                var kind = reader.GetString(1);
+                var payloadJson = reader.IsDBNull(2) ? "{}" : reader.GetString(2);
+                var claimedKind = reader.IsDBNull(3) ? null : reader.GetString(3);
+                var claimedId = reader.IsDBNull(4) ? null : reader.GetString(4);
+                var typeId = TryInt(payloadJson, "type");
+                if (!IsEmpireGeneralSource(claimedKind, claimedId, kind, typeId)
+                    || typeId is not { } tid)
+                    continue;
+                var side = kind == FusionRpg.Core.Activity.PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+                if (index.TryGet(side, tid, out var candidate))
+                {
+                    species = candidate;
+                    sourceFactId = reader.GetInt64(0);
+                    break;
+                }
+            }
+        }
+
+        if (species is null) return;
+        var speciesState = ReadActorStateUnlocked(db, playerId,
+            FusionRpg.Core.Progression.RpgActorKinds.Species, species.DemonTypeId);
+        // Allocation is a projection of the already-applied species row. Hosts configure the
+        // aptitude/plan hubs at startup; capture-only fixtures may omit them, so an empty map is
+        // explicit rather than a fabricated stat distribution.
+        var allocation = new Dictionary<string, long>(StringComparer.Ordinal);
+        try
+        {
+            var baseline = FusionRpg.Core.Stats.Aptitudes.SpeciesAllocation.Baseline(
+                FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.SharesFor(species.SpeciesId),
+                speciesState.Level,
+                FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+            foreach (var aptitude in FusionRpg.Core.Stats.Aptitudes.AptitudeCatalog.All)
+            {
+                var points = baseline.PointsAt(
+                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, aptitude.Id);
+                if (points > 0) allocation[aptitude.Id] = points;
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Optional presentation hubs are not allowed to reject a valid captured result.
+        }
+
+        var speciesPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies,
+            speciesId = species.SpeciesId,
+            demonTypeId = species.DemonTypeId,
+            sourceFactId,
+            speciesLevel = speciesState.Level,
+            speciesXp = speciesState.Xp,
+            allocation,
+            allocationMode = "auto-primary-stats"
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies,
+            runId, $"fact:{sourceFactId}", speciesPayload, t);
+
+        // Level 4 is the first commander item reveal. Dave is a stable commander id, not a unique
+        // specimen row, so the item is owned by the player and occupies the reserved standard role.
+        // The fixed first-clear container is content-authored; no roll or client-provided item id is
+        // accepted here. Mint, ownership, assignment, and the checkpoint share this transaction.
+        if (ReadActorStateUnlocked(db, playerId, FusionRpg.Core.Progression.RpgActorKinds.Player, 0).Level < 4
+            || ReadOnboardingCheckpointUnlocked(
+                db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment) is not null)
+            return;
+
+        const string containerId = "item.first-clear-almanac-seed";
+        var instanceId = $"onboarding-dave-equipment-{playerId}";
+        var container = GetContainer(containerId);
+        if (container is null) return;
+        var rejection = FusionRpg.Core.Effects.Atoms.Instantiator.TryInstantiate(
+            container, GetAtom, GetAffix, unchecked((long)playerId),
+            FusionRpg.Core.Power.PowerTuningHub.Tuning.Curve.PinIndex,
+            FusionRpg.Core.Power.PowerTuningHub.Tuning, out var instance,
+            FusionRpg.Core.Effects.Atoms.InstanceOrigin.Grant);
+        if (!rejection.IsOk || instance is null) return;
+        SaveOnboardingInstanceUnlocked(db, instanceId, instance, t);
+
+        var playerKey = playerId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        ExecOnboarding(db, """
+            INSERT INTO rpg_item
+              (instance_id, player_id, acquired_utc, origin_kind, origin_ref, locked, disposition, revision)
+            VALUES ($id, $player, $utc, 'onboarding', $ref, 1, 'owned', 1)
+            ON CONFLICT(instance_id) DO UPDATE SET player_id=excluded.player_id,
+              origin_kind=excluded.origin_kind, origin_ref=excluded.origin_ref, locked=1,
+              disposition='owned', revision=rpg_item.revision+1;
+            """, ("$id", instanceId), ("$player", playerKey), ("$utc", t),
+            ("$ref", FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment));
+        ExecOnboarding(db, """
+            INSERT OR IGNORE INTO rpg_item_event(event_id, instance_id, player_id, kind, detail, created_utc)
+            VALUES ($id, $inst, $player, 'acquired', 'onboarding', $utc);
+            """, ("$id", $"onboarding-dave-equipment-acquired-{playerId}"),
+            ("$inst", instanceId), ("$player", playerKey), ("$utc", t));
+        SavePlayerItemAssignmentOnConnectionUnlocked(db, playerKey,
+            FusionRpg.Core.Items.ItemRole.Standard, FusionRpg.Core.Items.EquipRefKinds.Rolled,
+            instanceId, t);
+
+        var equipmentPayload = JsonSerializer.Serialize(new
+        {
+            checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment,
+            commanderId = "commander:dave",
+            itemInstanceId = instanceId,
+            containerId,
+            ownerKind = "player",
+            ownerKey = playerId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            role = FusionRpg.Core.Items.ItemRoles.Id(FusionRpg.Core.Items.ItemRole.Standard),
+            assignmentMode = "auto-equip",
+        });
+        TryEarnOnboardingCheckpointUnlocked(
+            db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level4DaveEquipment,
+            runId, $"item:{instanceId}", equipmentPayload, t);
+    }
+
+    void SaveOnboardingInstanceUnlocked(SqliteConnection db, string instanceId,
+        FusionRpg.Core.Effects.Atoms.InstanceRow instance, string utc)
+    {
+        ExecOnboarding(db, """
+            INSERT INTO effect_instance
+              (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+               theta_content, content_scale_milli)
+            VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
+            ON CONFLICT(instance_id) DO UPDATE SET container_id=excluded.container_id,
+              roll_seed=excluded.roll_seed, origin=excluded.origin, theta_content=excluded.theta_content,
+              content_scale_milli=excluded.content_scale_milli;
+            """, ("$id", instanceId), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
+            ("$rev", instance.CatalogRevision), ("$utc", utc), ("$origin", "grant"),
+            ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
+        ExecOnboarding(db, "DELETE FROM effect_instance_atom WHERE instance_id=$id;", ("$id", instanceId));
+        foreach (var atom in instance.Atoms)
+            ExecOnboarding(db, """
+                INSERT INTO effect_instance_atom(instance_id, seq, atom_id, values_json, power_json, identity_digest)
+                VALUES ($id, $seq, $atom, $values, $power, $digest);
+                """, ("$id", instanceId), ("$seq", atom.Seq), ("$atom", atom.AtomId),
+                ("$values", atom.ValuesJson), ("$power", (object?)atom.PowerJson ?? DBNull.Value),
+                ("$digest", (object?)atom.IdentityDigestHex ?? DBNull.Value));
+    }
+
+    static void SavePlayerItemAssignmentOnConnectionUnlocked(SqliteConnection db, string playerId,
+        FusionRpg.Core.Items.ItemRole role, string refKind, string refId, string utc) =>
+        ExecOnboarding(db, """
+            INSERT INTO rpg_player_item_assignment(player_id, role, ref_kind, ref_id, assigned_utc)
+            VALUES ($p, $role, $rk, $rid, $utc)
+            ON CONFLICT(player_id, role) DO UPDATE SET ref_kind=excluded.ref_kind,
+              ref_id=excluded.ref_id, assigned_utc=excluded.assigned_utc;
+            """, ("$p", playerId), ("$role", FusionRpg.Core.Items.ItemRoles.Id(role)),
+            ("$rk", refKind), ("$rid", refId), ("$utc", utc));
+
+    static void ExecOnboarding(SqliteConnection db, string sql,
+        params (string Name, object Value)[] args)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = sql;
+        foreach (var (name, value) in args) cmd.Parameters.AddWithValue(name, value);
+        cmd.ExecuteNonQuery();
     }
 
     (bool Inserted, long FactId) InsertPvzActivityFactUnlocked(

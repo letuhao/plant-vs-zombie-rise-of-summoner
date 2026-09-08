@@ -229,4 +229,29 @@ public class SeedImportRunnerTests : IDisposable
             try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
         }
     }
+
+    [Fact]
+    public void The_atom_import_path_ignores_present_dungeon_seed_schemas()
+    {
+        var searchStart = _dir + "-tree7";
+        var atomDir = Path.Combine(searchStart, "data", "seed", "atoms");
+        var dungeonDir = Path.Combine(searchStart, "data", "seed", "dungeon", "domains");
+        Directory.CreateDirectory(atomDir);
+        Directory.CreateDirectory(dungeonDir);
+        File.WriteAllText(Path.Combine(atomDir, "vitality.json"), ValidAtomFile);
+        File.WriteAllText(Path.Combine(dungeonDir, "domain.json"), "{\"domainId\":\"domain.test\"}");
+
+        try
+        {
+            var result = SeedImportRunner.RunSelfHealing(_store, searchStart);
+
+            Assert.Equal(SeedImportStatus.Imported, result.Status);
+            Assert.NotNull(_store.GetAtom("atom.selfheal-vitality.t1"));
+            Assert.DoesNotContain("dungeon", result.Detail ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+        }
+    }
 }

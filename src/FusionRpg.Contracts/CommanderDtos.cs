@@ -17,6 +17,14 @@ public sealed class CommanderListRowDto
     [JsonPropertyName("activeAuraName")] public string? ActiveAuraName { get; set; }
     [JsonPropertyName("locationStub")] public string? LocationStub { get; set; }
     [JsonPropertyName("legionStub")] public string? LegionStub { get; set; }
+    [JsonPropertyName("equipment")] public CommanderEquipmentDto? Equipment { get; set; }
+}
+
+public sealed class CommanderEquipmentDto
+{
+    [JsonPropertyName("instanceId")] public string InstanceId { get; set; } = "";
+    [JsonPropertyName("containerId")] public string ContainerId { get; set; } = "";
+    [JsonPropertyName("role")] public string Role { get; set; } = "standard";
 }
 
 public sealed class SetDefaultLawnCommanderRequest

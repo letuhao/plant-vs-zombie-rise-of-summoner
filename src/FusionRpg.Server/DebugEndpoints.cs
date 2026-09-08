@@ -470,6 +470,41 @@ public static class DebugEndpoints
             return await AcceptDebugSpawnExtra(b, store, hub, inbox, reasonDefault: "debug.fire");
         });
 
+        // Derived sheet audit: real UniqueActor → Hub → /sheet (never a synthetic 269 paint).
+        g.MapPost("/derived-audit-actor", (JsonElement? body, RpgStore store) =>
+        {
+            var b = BodyOrEmpty(body);
+            long? playerId = null;
+            if (b.ValueKind == JsonValueKind.Object
+                && b.TryGetProperty("playerId", out var p) && p.TryGetInt64(out var pid))
+                playerId = pid;
+            try
+            {
+                return Results.Ok(DerivedAuditActor.Seed(store, playerId));
+            }
+            catch (Exception ex)
+            {
+                return Results.Conflict(new { ok = false, error = ex.Message });
+            }
+        });
+
+        g.MapGet("/derived-audit-coverage", (string? instanceId, bool? writeArtifact, string? artifactPath, RpgStore store) =>
+        {
+            try
+            {
+                var write = writeArtifact == true;
+                var path = artifactPath;
+                if (write && string.IsNullOrWhiteSpace(path))
+                    path = Path.Combine(AppContext.BaseDirectory, "derived-audit-coverage.json");
+                var json = DerivedAuditActor.CoverageJson(store, instanceId, write, path);
+                return Results.Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                return Results.Conflict(new { ok = false, error = ex.Message });
+            }
+        });
+
         g.MapPost("/arm/{kind}", async (string kind, JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var payload = JsonSerializer.SerializeToElement(MergeKind(BodyOrEmpty(body), kind));

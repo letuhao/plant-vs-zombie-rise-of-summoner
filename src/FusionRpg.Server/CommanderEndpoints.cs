@@ -60,6 +60,16 @@ public static class CommanderEndpoints
         var firstActive = active.Count > 0 ? active[0] : null;
 
         var rows = new List<CommanderListRowDto>();
+        var commanderEquipment = store.ListPlayerItemAssignments(
+                playerId.ToString(System.Globalization.CultureInfo.InvariantCulture))
+            .Where(a => a.Role == FusionRpg.Core.Items.ItemRole.Standard)
+            .Select(a => new CommanderEquipmentDto
+            {
+                InstanceId = a.RefId,
+                ContainerId = store.GetInstance(a.RefId)?.ContainerId ?? "",
+                Role = FusionRpg.Core.Items.ItemRoles.Id(a.Role),
+            })
+            .FirstOrDefault();
         foreach (var commander in PlayerEmpireCommanders.ForPlayer(playerId))
         {
             var stableId = commander.ToStableId();
@@ -80,6 +90,7 @@ public static class CommanderEndpoints
                 ActiveAuraName = activeAuraName,
                 LocationStub = null,
                 LegionStub = null,
+                Equipment = commander == CommanderId.Dave ? commanderEquipment : null,
             });
         }
 

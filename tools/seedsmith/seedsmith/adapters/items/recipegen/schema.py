@@ -13,8 +13,12 @@ own class doc: "authors write bands, never magnitudes").
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
+from seedsmith.pipeline.run import validate_against_schema
+
+from ..materialgen import vocab as material_vocab
+from . import opvocab
 NAME_MIN_LEN = 3
 NAME_MAX_LEN = 64
 FLAVOR_MIN_LEN = 0
@@ -118,3 +122,47 @@ def schema_field_names(schema: "dict[str, Any]") -> "tuple[str, ...]":
     """Every property name in the schema — for a test asserting `outputKind`/`outputQty`/`id`/
     `nameKey` are ABSENT (P1: the model never authors them)."""
     return tuple(sorted(schema.get("properties", {})))
+
+
+def validate_answer(answer: Mapping[str, Any], schema: Mapping[str, Any]) -> "list[str]":
+    """Validate a complete recipe or a deliberate, descriptive refusal locally.
+
+    The endpoint's constrained decoding is an optimization, not the acceptance boundary. This
+    function rechecks the operation/material relation with the same material vocabulary and cost
+    matrix used by the emitter before a response can reach a ledger or corpus write.
+    """
+    defects = validate_against_schema(answer, schema)
+    blocked = answer.get("blocked")
+    if "blocked" in answer:
+        if not isinstance(blocked, str) or not blocked.strip():
+            defects.append("field 'blocked' must be a non-empty reason string")
+        if set(answer) != {"blocked"}:
+            defects.append("a blocked answer must not include content fields")
+        return defects
+
+    # `emit.assemble_entry` deliberately defaults frame/costLines and omits an empty flavor,
+    # matching the existing corpus and test-call contract. Do not turn those defaults into a
+    # false local rejection; only the two fields assembly cannot derive are mandatory.
+    required = ("name", "operation")
+    defects.extend(f"missing required content field {name!r}" for name in required if name not in answer)
+    operation = answer.get("operation")
+    cost_lines = answer.get("costLines")
+    if not isinstance(operation, str) or not isinstance(cost_lines, list):
+        return defects
+    for index, line in enumerate(cost_lines):
+        if not isinstance(line, Mapping):
+            defects.append(f"costLines[{index}] must be an object")
+            continue
+        material_id = line.get("material")
+        if not isinstance(material_id, str):
+            defects.append(f"costLines[{index}].material must be a string")
+            continue
+        material = material_vocab.ISSUABLE_BY_ID.get(material_id)
+        if material is None:
+            defects.append(f"costLines[{index}].material {material_id!r} is not issuable")
+            continue
+        try:
+            opvocab.check_cost_class(operation, material.material_class, material_id)
+        except ValueError as error:
+            defects.append(str(error))
+    return defects

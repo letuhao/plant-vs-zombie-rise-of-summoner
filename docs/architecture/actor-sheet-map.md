@@ -1,8 +1,9 @@
 # Capability map: actor-sheet
 
 **Status:** Draft — pending owner review. **No build authorized until approved.** Ideal:
-[actor-sheet-ideal.md](actor-sheet-ideal.md). Visual:
-[13-actor-sheet.html](../design/13-actor-sheet.html). Sibling HUD:
+[actor-sheet-ideal.md](actor-sheet-ideal.md). Shell visual:
+[13-actor-sheet.html](../design/13-actor-sheet.html). **Derived pane visual SSOT:**
+[derived-combat-console.html](../design/derived-combat-console.html) (modern-stat-hud bar). Sibling HUD:
 [actor-hud-ideal.md](actor-hud-ideal.md) (glyphs consume the same catalogs). Sibling lawn chrome
 (not this program): [lawn-interactive-map.md](lawn-interactive-map.md) · design landing
 [spec-lawn-interactive.md](../design/spec-lawn-interactive.md). Plan parked:

@@ -143,6 +143,9 @@ if ($LoaderHost -eq "MelonLoader") {
 else {
     dotnet build $InjectorProj -c Release -p:GameDir=$GameDir -p:GameProfile=$GameProfile
 }
+if ($LASTEXITCODE -ne 0) {
+    throw "injector build failed — the deployed DLLs were not refreshed"
+}
 if (-not (Test-Path (Join-Path $PluginDir $InjectorDll))) {
     throw "Injector DLL missing after build: $PluginDir\$InjectorDll"
 }
@@ -157,24 +160,45 @@ if (-not (Test-Path (Join-Path $PluginDir "FusionRpg.Core.dll"))) {
 # Either way the deployed injector silently disagrees with FusionRpg.Core.dll beside it, which
 # surfaces as a runtime `MethodNotFound` mid-match rather than a build error. Compare against the
 # newest source we actually compiled, so both cases fail HERE, loudly.
-$newestSrc = Get-ChildItem -Path (Join-Path $Root "src") -Recurse -Filter *.cs -File -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } |
-    Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
-if ($newestSrc) {
-    foreach ($dll in @($InjectorDll, "FusionRpg.Core.dll")) {
-        $built = Get-Item (Join-Path $PluginDir $dll)
-        if ($built.LastWriteTimeUtc -lt $newestSrc.LastWriteTimeUtc) {
-            throw @"
-STALE DEPLOY: $dll is older than the newest source file.
-  $dll      $($built.LastWriteTimeUtc.ToString('u'))
-  newest .cs  $($newestSrc.LastWriteTimeUtc.ToString('u'))  ($($newestSrc.Name))
+# Check each deployed artifact against the source trees that can produce it. Comparing every DLL
+# with every `src/**/*.cs` file is a false-positive: the server/Data tree can change after the
+# injector was built, even though it is not a dependency of either deployed game assembly. The old
+# global check blocked a valid deploy immediately after a server-only edit (2026-09-08).
+$hostSourceRoot = if ($LoaderHost -eq "MelonLoader") {
+    if ($GameProfile -eq "pvzrh-3.9") { Join-Path $Root "src\FusionRpg.Injector.MelonLoader.39" }
+    else { Join-Path $Root "src\FusionRpg.Injector.MelonLoader" }
+} else { Join-Path $Root "src\FusionRpg.Injector.BepInEx" }
+$injectorSourceRoots = @(
+    (Join-Path $Root "src\FusionRpg.Injector"),
+    $hostSourceRoot,
+    (Join-Path $Root "src\FusionRpg.Contracts"),
+    (Join-Path $Root "src\FusionRpg.Core"),
+    (Join-Path $Root "src\FusionRpg.CheatCore"))
+$coreSourceRoots = @(
+    (Join-Path $Root "src\FusionRpg.Core"),
+    (Join-Path $Root "src\FusionRpg.Contracts"))
+function Get-NewestSource([string[]]$roots) {
+    Get-ChildItem -Path $roots -Recurse -Filter *.cs -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } |
+        Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+}
+$freshnessChecks = @(
+    @{ Dll = $InjectorDll; Source = Get-NewestSource $injectorSourceRoots },
+    @{ Dll = "FusionRpg.Core.dll"; Source = Get-NewestSource $coreSourceRoots })
+foreach ($check in $freshnessChecks) {
+    if ($null -eq $check.Source) { continue }
+    $built = Get-Item (Join-Path $PluginDir $check.Dll)
+    if ($built.LastWriteTimeUtc -lt $check.Source.LastWriteTimeUtc) {
+        throw @"
+STALE DEPLOY: $($check.Dll) is older than the newest source in its dependency set.
+  $($check.Dll)  $($built.LastWriteTimeUtc.ToString('u'))
+  newest .cs    $($check.Source.LastWriteTimeUtc.ToString('u'))  ($($check.Source.Name))
 The build did not actually produce this DLL. Usual causes: the game is still running and holds a
 lock on it, or the injector project skipped compiling. Close the game and re-run.
 "@
-        }
     }
-    Write-Host "==> Freshness OK — injector and Core are newer than the newest source"
 }
+Write-Host "==> Freshness OK — deployed injector artifacts match their source trees"
 
 function Test-ServerUp {
     try {

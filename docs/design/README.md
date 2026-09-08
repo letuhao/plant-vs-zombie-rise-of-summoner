@@ -11,6 +11,11 @@ behaviour. Plates are static. Interaction lives in the app.
 **Binding rules.** Every plate obeys [architecture/game-gui-principles.md](../architecture/game-gui-principles.md)
 (GG-1 … GG-64). A plate that violates a GG rule is wrong even if it looks good.
 
+**Porting a plate into React.** Do not mood-board in Tailwind. Follow
+[architecture/html-design-implementation.md](../architecture/html-design-implementation.md)
+(structure breakdown → component contract → side-by-side gate). Procedure skill (local):
+`html-design-implementation`.
+
 ---
 
 ## 1. How to view

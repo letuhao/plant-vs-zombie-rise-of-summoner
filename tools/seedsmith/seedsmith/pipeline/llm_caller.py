@@ -313,9 +313,15 @@ def extract_json(text: str) -> dict:
 
 
 AnswerCallFn = Callable[[str, dict], dict]
+AnswerValidator = Callable[[dict, dict], list[str]]
+
+# Structural retry bound: one repair prompt distinguishes a formatting lapse from an unavailable
+# model without turning a malformed response into an unbounded second generation loop.
+_JSON_REPAIR_ATTEMPTS = 1
 
 
-def live_answer_caller(config: LlmCallerConfig) -> AnswerCallFn:
+def live_answer_caller(config: LlmCallerConfig, *,
+                       validator: AnswerValidator | None = None) -> AnswerCallFn:
     """A `call(brief, schema) -> dict` bound to a real model endpoint through `call_model`.
 
     This is the shape `basetypegen.run.run_draws`, `milestonegen.run.run_draws`,
@@ -328,14 +334,78 @@ def live_answer_caller(config: LlmCallerConfig) -> AnswerCallFn:
     (`"REFUSING TO RUN: no model call is wired into this CLI entrypoint yet"`) until this existed.
 
     Schema-constrained decoding is honored (via `call_model`'s own `schema` parameter) whenever the
-    caller's own schema dict is non-empty; `extract_json` is defense-in-depth for the (rare, per
-    `call_model`'s own docstring) case where a server enforces `type`/`maxLength` but not full
-    strict-mode conformance.
+    caller's own schema dict is non-empty, but it is never the only guard: local type/enum checks
+    run after parsing and a caller may supply domain validation. One repair prompt names a parse or
+    validation defect before the error reaches the per-subject batch boundary.
     """
+
+    def _validate_schema(answer: dict, schema: dict) -> list[str]:
+        if not schema:
+            return []
+        defects: list[str] = []
+        properties = schema.get("properties") or {}
+        for field in schema.get("required") or ():
+            if field not in answer:
+                defects.append(f"missing required field {field!r}")
+        type_map = {"string": str, "boolean": bool, "object": dict, "array": list,
+                    "number": (int, float), "integer": int}
+        for field, value in answer.items():
+            spec = properties.get(field)
+            if not isinstance(spec, dict):
+                if properties:
+                    defects.append(f"field {field!r} is not in the schema")
+                continue
+            declared = spec.get("type")
+            expected = type_map.get(declared)
+            if expected is not None:
+                if declared in ("number", "integer") and isinstance(value, bool):
+                    defects.append(f"field {field!r} is a boolean, not {declared}")
+                elif not isinstance(value, expected):
+                    defects.append(f"field {field!r} should be {declared}")
+            allowed = spec.get("enum")
+            if allowed is not None and value not in allowed:
+                defects.append(f"field {field!r} value {value!r} is not one of {list(allowed)}")
+        return defects
+
+    def _parse_and_validate(raw: str, schema: dict) -> dict:
+        answer = extract_json(raw)
+        defects = _validate_schema(answer, schema)
+        if validator is not None:
+            defects.extend(validator(answer, schema))
+        if defects:
+            raise ValueError("local validation failed: " + "; ".join(defects))
+        return answer
+
+    def _repair_prompt(error: ValueError, brief: str) -> str:
+        if "no JSON object" in str(error):
+            return (
+                "Your previous response was not a JSON object. Return exactly one JSON object "
+                "that satisfies the requested schema, with no prose or Markdown.\n\n"
+                "Original authoring brief:\n"
+                f"{brief}"
+            )
+        return (
+            "Your previous JSON response failed local validation:\n"
+            f"- {error}\n\n"
+            "Return exactly one corrected JSON object that satisfies the requested schema, "
+            "with no prose or Markdown.\n\n"
+            "Original authoring brief:\n"
+            f"{brief}"
+        )
 
     def _call(brief: str, schema: dict) -> dict:
         raw = call_model("", brief, config=config, schema=schema or None)
-        return extract_json(raw)
+        try:
+            return _parse_and_validate(raw, schema)
+        except ValueError as error:
+            repair = _repair_prompt(error, brief)
+            for _ in range(_JSON_REPAIR_ATTEMPTS):
+                raw = call_model("", repair, config=config, schema=schema or None)
+                try:
+                    return _parse_and_validate(raw, schema)
+                except ValueError:
+                    continue
+            raise error
 
     return _call
 

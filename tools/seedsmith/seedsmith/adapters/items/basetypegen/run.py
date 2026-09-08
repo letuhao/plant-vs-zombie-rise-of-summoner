@@ -142,11 +142,21 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
     blocked: "dict[str, dict]" = {}
 
     for subject in plan.subjects:
-        answer = call(subject.brief, subject.schema)
+        try:
+            answer = call(subject.brief, subject.schema)
+        except ValueError as exc:
+            # A local model can ignore constrained decoding and return text rather than JSON.
+            # This is one draw's failed answer, not a reason to discard the rest of a batch.
+            blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
+            continue
         if answer.get("blocked"):
             blocked[subject.subject_id] = {"reason": answer["blocked"]}
             continue
-        entry = resolve_answer(answer, partition=plan.partition, seq=subject.seq, gen_tuning=gt)
+        try:
+            entry = resolve_answer(answer, partition=plan.partition, seq=subject.seq, gen_tuning=gt)
+        except ValueError as exc:
+            blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
+            continue
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue

@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Derived combat console — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<style>
+  /*
+    Visual SSOT for ActorSheet → Derived (modern-stat-hud bar).
+    Real data shapes: cook tabs/categories/families, sheet channelId + contributions,
+    six states, CAP only when a cap exists. Not a CSS port of plate 13 flat rows.
+  */
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgb(61 107 69 / 0.18), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 90% 10%, rgb(224 180 75 / 0.08), transparent 50%),
+      var(--soil);
+    color: var(--text);
+    font-family: var(--font-ui);
+  }
+  .page {
+    max-width: min(1600px, 96vw);
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+  .page > h1 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.02em;
+  }
+  .lede {
+    margin: 0 0 20px;
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .lede code { color: var(--sun); font-size: 12px; }
+
+  .console {
+    display: flex;
+    flex-direction: column;
+    height: min(820px, 88vh);
+    border: 1px solid var(--border-control);
+    border-radius: var(--r-md);
+    background:
+      linear-gradient(180deg, rgb(51 43 33 / 0.55), rgb(18 15 12 / 0.35)),
+      var(--panel);
+    box-shadow:
+      inset 0 1px 0 rgb(242 234 216 / 0.06),
+      0 24px 48px rgb(0 0 0 / 0.35);
+    overflow: hidden;
+  }
+
+  /* —— header —— */
+  .console-hd {
+    flex: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: end;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--soil-raised), transparent);
+  }
+  .identity .who {
+    font-family: var(--font-display);
+    font-size: 18px;
+    line-height: 1.1;
+  }
+  .identity .meta {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .identity .meta b { color: var(--sun); font-weight: 700; }
+  .hd-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .search {
+    width: min(220px, 40vw);
+    padding: 7px 10px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--r-sm);
+    background: var(--panel-inset);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+  }
+  .search:focus { outline: none; border-color: var(--sun); }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle .track {
+    width: 28px; height: 16px; border-radius: 999px;
+    background: var(--panel-inset);
+    border: 1px solid var(--border-control);
+    position: relative;
+  }
+  .toggle .knob {
+    position: absolute; top: 1px; left: 1px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--faint);
+    transition: transform 160ms ease, background 160ms ease;
+  }
+  .toggle.is-on .knob { transform: translateX(12px); background: var(--lawn-hot); }
+  .toggle.is-on { color: var(--text); }
+
+  /* Do NOT use kit `.rail` — that class is a 92px vertical stage nav. */
+  .cat-bar {
+    flex: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgb(18 15 12 / 0.35);
+  }
+  .cat-bar .chip {
+    appearance: none;
+    border: 1px solid var(--border-control);
+    background: var(--panel-raised);
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    height: auto;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cat-bar .chip:hover { border-color: var(--border-strong); color: var(--text); background: var(--panel); }
+  .cat-bar .chip.is-on {
+    border-color: var(--lawn-hot);
+    color: var(--text);
+    background: rgb(61 107 69 / 0.28);
+    box-shadow: inset 0 0 0 1px rgb(90 143 98 / 0.25);
+  }
+  .cat-bar .chip .n {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--faint);
+  }
+  .cat-bar.variant-bar {
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    padding-top: 8px;
+    padding-bottom: 10px;
+  }
+  .cat-bar.variant-bar .chip.is-on {
+    border-color: var(--sun);
+    background: rgb(224 180 75 / 0.14);
+  }
+  .cat-bar.variant-bar .chip[data-el] {
+    border-left-width: 3px;
+  }
+  .cat-bar.variant-bar .chip[data-el="fire"] { border-left-color: var(--el-fire); }
+  .cat-bar.variant-bar .chip[data-el="ice"] { border-left-color: var(--el-ice); }
+  .cat-bar.variant-bar .chip[data-el="air"] { border-left-color: var(--el-air); }
+  .cat-bar.variant-bar .chip[data-el="earth"] { border-left-color: var(--el-earth); }
+  .cat-bar.variant-bar .chip[data-el="light"] { border-left-color: var(--el-light); }
+  .cat-bar.variant-bar .chip[data-el="dark"] { border-left-color: var(--el-dark); }
+  .cat-bar.variant-bar .chip[data-el="omni"] { border-left-color: var(--el-omni); }
+
+  /* Full remaining height: list LEFT | inspector RIGHT (kit inspect-split grammar). */
+  .console > .inspect-split {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    overflow: hidden;
+  }
+  .console > .inspect-split > .dock {
+    flex: 1 1 58%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-right: 1px solid var(--border);
+  }
+  .console > .inspect-split > .inspect {
+    flex: 1 1 42%;
+    min-width: 280px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(160deg, rgb(61 107 69 / 0.08), transparent 40%),
+      var(--soil-raised);
+    padding: 14px 16px 20px;
+  }
+  @media (max-width: 900px) {
+    .console > .inspect-split { flex-direction: column; }
+    .console > .inspect-split > .dock,
+    .console > .inspect-split > .inspect {
+      flex: 1 1 50%;
+      min-width: 0;
+      border-right: 0;
+    }
+    .console > .inspect-split > .dock { border-bottom: 1px solid var(--border); }
+  }
+
+  .list-pane {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 10px 12px 16px;
+  }
+  .family-block { margin-bottom: 14px; }
+  .family-hd {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 6px;
+    padding: 0 2px;
+  }
+  .family-hd h3 {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .family-hd .hint { font-size: 10px; color: var(--faint); }
+
+  /* Non-identical row treatments */
+  .row {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    appearance: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    margin: 0 0 6px;
+    padding: 8px 10px;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    background: transparent;
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease, opacity 140ms ease;
+  }
+  .row:hover {
+    border-color: var(--border-control);
+    background: rgb(51 43 33 / 0.55);
+  }
+  .row.is-on {
+    border-color: var(--sun);
+    background: linear-gradient(90deg, rgb(224 180 75 / 0.12), rgb(51 43 33 / 0.4));
+    box-shadow: 0 0 0 1px rgb(224 180 75 / 0.15);
+    animation: select-pulse 420ms ease;
+  }
+  .row.is-dim { opacity: 0.45; }
+  .row.is-dim:hover { opacity: 0.7; }
+  .row[data-kind="matrix"] {
+    background: linear-gradient(180deg, rgb(34 28 22 / 0.8), rgb(18 15 12 / 0.5));
+    border-color: var(--border);
+  }
+  .row[data-kind="matrix"].is-on { border-color: var(--sun); }
+  .row[data-kind="capped"] {
+    border-left: 3px solid var(--warn);
+    background: rgb(216 169 79 / 0.06);
+  }
+  .row[data-kind="stub"] {
+    border-style: dashed;
+    border-color: var(--border-control);
+  }
+  .row[data-kind="no-producer"] {
+    opacity: 0.55;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 6px,
+      rgb(125 112 96 / 0.06) 6px,
+      rgb(125 112 96 / 0.06) 12px
+    );
+  }
+  .glyph {
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    border-radius: 6px;
+    background: var(--panel-inset);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--sun);
+  }
+  .nm { display: block; font-size: 13px; line-height: 1.15; }
+  .rd { display: block; margin-top: 2px; font-size: 10px; color: var(--muted); line-height: 1.25; }
+  .pips { display: flex; gap: 3px; margin-top: 5px; }
+  .pip {
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 1px solid rgb(0 0 0 / 0.35);
+    opacity: 0.35;
+  }
+  .pip.on { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  .pip[data-el="omni"]  { background: var(--el-omni); color: var(--el-omni); }
+  .pip[data-el="fire"]  { background: var(--el-fire); color: var(--el-fire); }
+  .pip[data-el="ice"]   { background: var(--el-ice); color: var(--el-ice); }
+  .pip[data-el="air"]   { background: var(--el-air); color: var(--el-air); }
+  .pip[data-el="earth"] { background: var(--el-earth); color: var(--el-earth); }
+  .pip[data-el="light"] { background: var(--el-light); color: var(--el-light); }
+  .pip[data-el="dark"]  { background: var(--el-dark); color: var(--el-dark); }
+  .val {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+    animation: tick 320ms ease;
+  }
+  .badge {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 2px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--warn);
+    color: var(--warn);
+  }
+  .state-tag {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .inspect .hd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .inspect .hd .nm {
+    font-family: var(--font-display);
+    font-size: 16px;
+  }
+  .inspect .big {
+    margin: 8px 0 4px;
+    font-family: var(--font-mono);
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    animation: tick 360ms ease;
+  }
+  .inspect .reading {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .sentence {
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--panel-inset);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .sentence b { color: var(--sun); font-weight: 600; }
+  .cap-note {
+    margin: 0 0 14px;
+    font-size: 11px;
+    color: var(--warn);
+  }
+  .cap-note.ok { color: var(--ok); }
+
+  .contrib h4 {
+    margin: 0 0 8px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .stack-row .bar {
+    height: 12px;
+    border-radius: 2px;
+    background: var(--panel-inset);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .stack-row .fill {
+    display: block;
+    height: 100%;
+    border-radius: 1px;
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: grow-bar 520ms cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .stack-row .share {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--faint);
+    text-align: right;
+    width: 36px;
+  }
+  .stack-row {
+    display: grid;
+    grid-template-columns: 88px 1fr 36px 52px;
+    gap: 8px;
+    align-items: center;
+    font-size: 11px;
+  }
+  .stack-row .amt {
+    font-family: var(--font-mono);
+    text-align: right;
+    color: var(--text);
+  }
+  .stack-row[data-src="base"] .fill { background: var(--faint); }
+  .stack-row[data-src="aptitude"] .fill { background: var(--info); }
+  .stack-row[data-src="equip"] .fill { background: var(--sun); }
+  .stack-row[data-src="tree"] .fill { background: var(--lawn-hot); }
+  .stack-row[data-src="status"] .fill { background: var(--el-fire); }
+  .stack-row[data-src="grant"] .fill { background: var(--el-light); }
+  .stack-row[data-src="neg"] .fill { background: var(--bad); }
+
+  .share-donut {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .share-donut svg { flex: none; }
+  .share-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .share-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 4px;
+  }
+  .share-legend i {
+    width: 8px; height: 8px; border-radius: 2px; flex: none;
+  }
+
+  .sources {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: var(--panel-inset);
+  }
+  .sources li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .sources li:last-child { border-bottom: 0; }
+  .sources .lab { color: var(--muted); }
+  .sources .v { font-family: var(--font-mono); }
+
+  .foot {
+    flex: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--faint);
+    background: var(--soil-raised);
+  }
+
+  @keyframes tick {
+    from { opacity: 0.4; transform: translateY(3px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes select-pulse {
+    0% { box-shadow: 0 0 0 0 rgb(224 180 75 / 0.45); }
+    100% { box-shadow: 0 0 0 1px rgb(224 180 75 / 0.15); }
+  }
+  @keyframes grow-bar {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .row.is-on, .val, .inspect .big, .stack-row .fill { animation: none; }
+    .stack-row .fill { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <h1>Derived combat console</h1>
+    <p class="lede">
+      Visual SSOT for ActorSheet → Derived. Cook tabs <code>Elements / Status / Resources / Other</code>
+      with <strong>variant sub-tabs</strong> (each element, each status category, …). List is
+      <strong>one channel per family</strong> for the selected variant — no element×family matrix bloat.
+      Join to <code>/sheet</code> by channelId. Target bar:
+      <a href="modern-stat-hud.md">modern-stat-hud.md</a>.
+    </p>
+
+    <div class="console" data-testid="derived-combat-console">
+      <header class="console-hd">
+        <div class="identity">
+          <div class="who">Emberling</div>
+          <div class="meta">Lv <b>24</b> · plant · combat power <b>2,847</b> · cook <b>combat</b></div>
+        </div>
+        <div class="hd-tools">
+          <input class="search" type="search" placeholder="Search channels…" id="q" aria-label="Search derived channels">
+          <label class="toggle" id="show-unchanged" title="Persist in localStorage">
+            <span class="track"><span class="knob"></span></span>
+            Show unchanged
+          </label>
+        </div>
+      </header>
+
+      <nav class="cat-bar" aria-label="Derived surface tabs" id="tabs">
+        <button type="button" class="chip is-on" data-tab="elements">Elements <span class="n">28</span></button>
+        <button type="button" class="chip" data-tab="status">Status <span class="n">6</span></button>
+        <button type="button" class="chip" data-tab="resources">Resources <span class="n">4</span></button>
+        <button type="button" class="chip" data-tab="other">Other <span class="n">8</span></button>
+      </nav>
+      <nav class="cat-bar variant-bar" aria-label="Variant sub-tabs" id="variants"></nav>
+
+      <div class="inspect-split">
+        <div class="dock">
+          <div class="list-pane" id="list"></div>
+        </div>
+        <aside class="inspect" id="inspect" aria-live="polite"></aside>
+      </div>
+
+      <footer class="foot">
+        <span>Hidden unchanged: <b id="hidden-n">0</b> · expand×join · UnitClass closed</span>
+        <span>Deferred in FE v1: live build compare · full xyflow calc graph</span>
+      </footer>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const ELS = [
+    { id: "omni", label: "Omni" },
+    { id: "fire", label: "Fire" },
+    { id: "ice", label: "Ice" },
+    { id: "air", label: "Air" },
+    { id: "earth", label: "Earth" },
+    { id: "light", label: "Light" },
+    { id: "dark", label: "Dark" }
+  ];
+  const STATUS_VARIANTS = [
+    { id: "omni", label: "Omni" },
+    { id: "dot", label: "DoT" },
+    { id: "cc", label: "CC" },
+    { id: "contagion", label: "Contagion" }
+  ];
+  const RESOURCE_VARIANTS = [
+    { id: "hp", label: "HP" },
+    { id: "stamina", label: "Stamina" },
+    { id: "hunger", label: "Sun" },
+    { id: "spirit", label: "Spirit" },
+    { id: "qi", label: "Yang" },
+    { id: "poise", label: "Poise" }
+  ];
+  const ACTION_VARIANTS = [
+    { id: "attack", label: "Attack" },
+    { id: "defense", label: "Defense" },
+    { id: "support", label: "Support" },
+    { id: "movement", label: "Movement" },
+    { id: "status", label: "Status" }
+  ];
+  const COMPOSE = {
+    FlatSum: "Sources add together.",
+    FlatReplace: "The strongest source wins — these do not add.",
+    SumIncreased: "Sources add, up to the cap.",
+    MaxPriorityFlag: "On or off — the strongest source decides."
+  };
+  const UNIT = {
+    GameUnits: "Game units — uncapped magnitude.",
+    PerMilleRatio: "Per-mille ratio (÷1000).",
+    SigmoidPoints: "Sigmoid points into a chance curve.",
+    UnitInterval: "Unit interval 0…1."
+  };
+
+  const SHEET = {
+    "combat.power.omni": {
+      value: 420, compose: "FlatSum", unit: "GameUnits",
+      reading: "Untyped attack magnitude before element bias.",
+      contrib: [
+        { sourceId: "rpg.progression", label: "Progression", op: "Flat", value: 180 },
+        { sourceId: "aptitude.Might", label: "Aptitude · Might", op: "Flat", value: 96 },
+        { sourceId: "equip:muzzle:ember-bore", label: "Equip · muzzle (ember-bore)", op: "Flat", value: 112 },
+        { sourceId: "tree.ember.kindle", label: "Tree · ember/kindle", op: "Flat", value: 32 }
+      ]
+    },
+    "combat.power.fire": {
+      value: 2847, compose: "FlatSum", unit: "GameUnits",
+      reading: "Fire-aspected power. What is making you strong?",
+      contrib: [
+        { sourceId: "rpg.progression", label: "Progression", op: "Flat", value: 420 },
+        { sourceId: "aptitude.Might", label: "Aptitude · Might", op: "Flat", value: 185 },
+        { sourceId: "equip:muzzle:ember-bore", label: "Equip · muzzle (ember-bore)", op: "Flat", value: 980 },
+        { sourceId: "tree.ember.kindle", label: "Tree · ember/kindle", op: "Flat", value: 312 },
+        { sourceId: "status:kindled-1", label: "Status · kindled-1", op: "Flat", value: 245 },
+        { sourceId: "grant:aura.sunflare", label: "Grant · aura.sunflare", op: "Flat", value: 705 }
+      ]
+    },
+    "combat.power.ice": {
+      value: 40, compose: "FlatSum", unit: "GameUnits",
+      reading: "Ice bias — thin on this build.",
+      contrib: [{ sourceId: "rpg.progression", label: "Progression", op: "Flat", value: 40 }]
+    },
+    "combat.crit.omni": {
+      value: 150, compose: "FlatSum", unit: "SigmoidPoints",
+      reading: "Crit chance inputs before sigmoid.",
+      contrib: [
+        { sourceId: "aptitude.Finesse", label: "Aptitude · Finesse", op: "Flat", value: 80 },
+        { sourceId: "equip:crown:ash-circlet", label: "Equip · crown (ash-circlet)", op: "Flat", value: 70 }
+      ]
+    },
+    "combat.defense.omni": {
+      value: 610, compose: "FlatSum", unit: "GameUnits",
+      reading: "Baseline mitigation pool.",
+      contrib: [
+        { sourceId: "rpg.progression", label: "Progression", op: "Flat", value: 200 },
+        { sourceId: "aptitude.Bastion", label: "Aptitude · Bastion", op: "Flat", value: 160 },
+        { sourceId: "equip:stem:heartwood", label: "Equip · stem (heartwood)", op: "Flat", value: 250 }
+      ]
+    },
+    "status.resist.omni": {
+      value: 0.22, compose: "SumIncreased", unit: "UnitInterval",
+      reading: "Omni resist — uncapped by design.",
+      contrib: [
+        { sourceId: "tree.ward.omni", label: "Tree · ward/omni", op: "Increased", value: 0.12 },
+        { sourceId: "equip:sheath:resin", label: "Equip · sheath (resin)", op: "Increased", value: 0.1 }
+      ]
+    },
+    "status.resist.dot": {
+      value: 0.95, compose: "SumIncreased", unit: "UnitInterval", cap: 0.95,
+      reading: "DOT resist. Next point does nothing.",
+      contrib: [
+        { sourceId: "tree.ward.dot", label: "Tree · ward/dot", op: "Increased", value: 0.55 },
+        { sourceId: "equip:sheath:resin", label: "Equip · sheath (resin)", op: "Increased", value: 0.4 }
+      ]
+    },
+    "status.resist.cc": {
+      value: 0.4, compose: "SumIncreased", unit: "UnitInterval", cap: 0.95,
+      reading: "Crowd-control resist — room to grow.",
+      contrib: [{ sourceId: "aptitude.Bastion", label: "Aptitude · Bastion", op: "Increased", value: 0.4 }]
+    },
+    "resource.max.hp": {
+      value: 1200, compose: "FlatSum", unit: "GameUnits",
+      reading: "Max HP pool.",
+      contrib: [{ sourceId: "rpg.progression", label: "Progression", op: "Flat", value: 1200 }]
+    },
+    "skill.cooldown.attack": {
+      value: 0.12, compose: "SumIncreased", unit: "UnitInterval",
+      reading: "Attack skill cooldown reduction.",
+      contrib: [{ sourceId: "tree.ember.kindle", label: "Tree · ember/kindle", op: "Increased", value: 0.12 }]
+    },
+    "progression.power": {
+      value: 1, compose: "FlatReplace", unit: "GameUnits", stub: true,
+      reading: "Placeholder — the real curve is not built.",
+      contrib: [{ sourceId: "rpg.progression", label: "Progression", op: "Replace", value: 1 }]
+    },
+    "progression.bonus.arm1": { missing: true }
+  };
+
+  /** Cook-shaped tabs: one channel per family for the selected variant — no matrix bloat. */
+  const TABS = {
+    elements: {
+      variants: ELS,
+      categories: [
+        {
+          id: "offense", label: "Offense",
+          families: [
+            { family: "combat.power", displayName: "Power", expand: "element", reading: "Attack magnitude by element.", compose: "FlatSum", unit: "GameUnits", icon: "⚔" },
+            { family: "combat.crit", displayName: "Crit rate", expand: "element", reading: "Crit chance inputs.", compose: "FlatSum", unit: "SigmoidPoints", icon: "◇" }
+          ]
+        },
+        {
+          id: "defense", label: "Defense",
+          families: [
+            { family: "combat.defense", displayName: "Defense", expand: "element", reading: "Mitigation pool.", compose: "FlatSum", unit: "GameUnits", icon: "⛨" }
+          ]
+        }
+      ]
+    },
+    status: {
+      variants: STATUS_VARIANTS,
+      categories: [
+        {
+          id: "status", label: "Status",
+          families: [
+            { family: "status.resist", displayName: "Resist", expand: "status-category", reading: "Category resist slots.", compose: "SumIncreased", unit: "UnitInterval", icon: "⊘" },
+            { family: "status.power", displayName: "Status power", expand: "status-category", reading: "Category power slots.", compose: "FlatSum", unit: "GameUnits", icon: "⚡" }
+          ]
+        }
+      ]
+    },
+    resources: {
+      variants: RESOURCE_VARIANTS,
+      categories: [
+        {
+          id: "pools", label: "Pools",
+          families: [
+            { family: "resource.max", displayName: "Max", expand: "resource", reading: "Pool ceiling.", compose: "FlatSum", unit: "GameUnits", icon: "◎" }
+          ]
+        }
+      ]
+    },
+    other: {
+      variants: ACTION_VARIANTS,
+      categories: [
+        {
+          id: "progression", label: "Progression",
+          families: [
+            { family: "progression.power", displayName: "Tier power", expand: "none", reading: "Stub curve input.", compose: "FlatReplace", unit: "GameUnits", icon: "▲" },
+            { family: "progression.bonus.arm1", displayName: "Arm bonus 1", expand: "none", reading: "Nothing grants this yet.", compose: "FlatSum", unit: "GameUnits", icon: "·" }
+          ]
+        },
+        {
+          id: "skill", label: "Skill",
+          families: [
+            { family: "skill.cooldown", displayName: "Cooldown", expand: "action-category", reading: "Cooldown reduction by action category.", compose: "SumIncreased", unit: "UnitInterval", icon: "⏱" }
+          ]
+        }
+      ]
+    }
+  };
+
+  let tabId = "elements";
+  let variantId = "fire";
+  let showUnchanged = localStorage.getItem("derived.showUnchanged") === "1";
+  let selected = "combat.power.fire";
+  let query = "";
+
+  function joinId(family, expand, variant) {
+    if (expand === "none") return family;
+    return `${family}.${variant}`;
+  }
+
+  function stateOf(channelId) {
+    const s = SHEET[channelId];
+    if (!s || s.missing) return "no-producer";
+    if (s.stub) return "stub";
+    if (s.cap != null && s.value >= s.cap - 1e-9) return "capped";
+    if (!s.contrib || s.contrib.length === 0 || (s.value === 0 && s.contrib.every((c) => c.value === 0)))
+      return "default";
+    return "active";
+  }
+
+  function isUnchanged(channelId) {
+    const st = stateOf(channelId);
+    return st === "default" || st === "no-producer";
+  }
+
+  function formatValue(channelId) {
+    const s = SHEET[channelId];
+    if (!s || s.missing) return "—";
+    if (s.unit === "UnitInterval") return s.value.toFixed(2);
+    return Number(s.value).toLocaleString();
+  }
+
+  function currentRows() {
+    const tab = TABS[tabId];
+    const rows = [];
+    for (const cat of tab.categories) {
+      for (const fam of cat.families) {
+        const v = fam.expand === "none" ? null : variantId;
+        if (fam.expand !== "none" && !v) continue;
+        const channelId = joinId(fam.family, fam.expand, v);
+        rows.push({ cat, fam, channelId, variantLabel: v ? (tab.variants.find((x) => x.id === v)?.label || v) : "" });
+      }
+    }
+    return rows;
+  }
+
+  function renderVariants() {
+    const rail = document.getElementById("variants");
+    const tab = TABS[tabId];
+    if (!tab.variants.length) {
+      rail.innerHTML = "";
+      rail.hidden = true;
+      return;
+    }
+    rail.hidden = false;
+    rail.innerHTML = tab.variants.map((v) => {
+      const on = v.id === variantId ? " is-on" : "";
+      const elAttr = tabId === "elements" ? ` data-el="${v.id}"` : "";
+      return `<button type="button" class="chip${on}" data-v="${v.id}"${elAttr}>${v.label}</button>`;
+    }).join("");
+  }
+
+  function renderList() {
+    const list = document.getElementById("list");
+    let hidden = 0;
+    const q = query.trim().toLowerCase();
+    const rows = currentRows();
+    const byCat = new Map();
+    for (const row of rows) {
+      if (q && !(`${row.channelId} ${row.fam.displayName} ${row.cat.label}`.toLowerCase().includes(q))) continue;
+      if (!showUnchanged && isUnchanged(row.channelId) && row.channelId !== selected) {
+        hidden++;
+        continue;
+      }
+      const bucket = byCat.get(row.cat.id) || { label: row.cat.label, rows: [] };
+      bucket.rows.push(row);
+      byCat.set(row.cat.id, bucket);
+    }
+
+    let html = "";
+    for (const [, group] of byCat) {
+      html += `<div class="family-block"><div class="family-hd"><h3>${group.label}</h3><span class="hint">${tabId} · ${variantId || "—"}</span></div>`;
+      for (const row of group.rows) {
+        const st = stateOf(row.channelId);
+        const sheet = SHEET[row.channelId];
+        const dim = st === "default" ? " is-dim" : "";
+        const on = row.channelId === selected ? " is-on" : "";
+        const kind = st === "capped" ? "capped" : st === "stub" ? "stub" : st === "no-producer" ? "no-producer" : "plain";
+        const badge = st === "capped" ? `<span class="badge">CAP</span>` : `<span class="state-tag">${st}</span>`;
+        const sub = row.variantLabel ? `<span class="rd" style="text-transform:uppercase;letter-spacing:.06em;font-size:9px">${row.variantLabel}</span>` : "";
+        html += `
+          <button type="button" class="row${dim}${on}" data-kind="${kind}" data-id="${row.channelId}">
+            <span class="glyph" aria-hidden="true">${row.fam.icon}</span>
+            <span>
+              <span class="nm">${row.fam.displayName}</span>
+              <span class="rd">${sheet?.reading || row.fam.reading}</span>
+              ${sub}
+            </span>
+            <span class="val">${formatValue(row.channelId)}</span>
+            ${badge}
+          </button>`;
+      }
+      html += `</div>`;
+    }
+    if (!html) html = `<p class="rd">No channels in this filter.</p>`;
+    list.innerHTML = html;
+    document.getElementById("hidden-n").textContent = String(hidden);
+    list.querySelectorAll(".row").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        selected = btn.dataset.id;
+        render();
+      });
+    });
+  }
+
+  function bucketContrib(contrib) {
+    const buckets = { base: 0, aptitude: 0, equip: 0, tree: 0, status: 0, grant: 0, neg: 0 };
+    for (const c of contrib || []) {
+      const v = c.value;
+      if (v < 0) { buckets.neg += Math.abs(v); continue; }
+      if (c.sourceId === "rpg.progression" || c.sourceId.startsWith("primary:")) buckets.base += v;
+      else if (c.sourceId.startsWith("aptitude.")) buckets.aptitude += v;
+      else if (c.sourceId.startsWith("equip:")) buckets.equip += v;
+      else if (c.sourceId.startsWith("tree.")) buckets.tree += v;
+      else if (c.sourceId.startsWith("status:")) buckets.status += v;
+      else if (c.sourceId.startsWith("grant:")) buckets.grant += v;
+      else buckets.base += v;
+    }
+    return buckets;
+  }
+
+  function findRow(channelId) {
+    return currentRows().find((r) => r.channelId === channelId)
+      || Object.keys(TABS).flatMap((tid) => {
+        const prev = tabId; tabId = tid;
+        const rows = currentRows();
+        tabId = prev;
+        return rows;
+      }).find((r) => r.channelId === channelId);
+  }
+
+  function renderInspect() {
+    const el = document.getElementById("inspect");
+    const row = findRow(selected);
+    const sheet = SHEET[selected];
+    const st = stateOf(selected);
+    if (!row) {
+      el.innerHTML = `<p class="reading">Select a channel.</p>`;
+      return;
+    }
+    if (st === "no-producer") {
+      el.innerHTML = `
+        <div class="hd"><span class="glyph">${row.fam.icon}</span><span class="nm">${row.fam.displayName}</span></div>
+        <div class="big">—</div>
+        <p class="reading">Nothing grants this yet.</p>
+        <p class="sentence"><code>${selected}</code> is registered and readable, but no producer writes it (<b>no-producer</b>).</p>`;
+      return;
+    }
+    const buckets = bucketContrib(sheet.contrib);
+    const totalPos = Object.entries(buckets).filter(([k, v]) => k !== "neg" && v > 0).reduce((a, [, v]) => a + v, 0) || 1;
+    const max = Math.max(1, ...Object.values(buckets));
+    const labels = {
+      base: "Base / progression", aptitude: "Aptitude", equip: "Equip",
+      tree: "Tree", status: "Status", grant: "Grant", neg: "Penalties"
+    };
+    const colors = {
+      base: "var(--faint)", aptitude: "var(--info)", equip: "var(--sun)",
+      tree: "var(--lawn-hot)", status: "var(--el-fire)", grant: "var(--el-light)", neg: "var(--bad)"
+    };
+    const entries = Object.entries(buckets).filter(([, v]) => v > 0);
+    const stack = entries
+      .map(([k, v]) => {
+        const barPct = Math.max(4, Math.round((v / max) * 100));
+        const sharePct = Math.round((v / totalPos) * 100);
+        return `<div class="stack-row" data-src="${k}">
+          <span>${labels[k]}</span>
+          <span class="bar"><span class="fill" style="width:${barPct}%"></span></span>
+          <span class="share">${sharePct}%</span>
+          <span class="amt">${sheet.unit === "UnitInterval" ? v.toFixed(2) : "+" + Math.round(v).toLocaleString()}</span>
+        </div>`;
+      })
+      .join("");
+
+    let angle = -90;
+    const slices = entries.filter(([k]) => k !== "neg").map(([k, v]) => {
+      const frac = v / totalPos;
+      const sweep = frac * 360;
+      const start = angle;
+      angle += sweep;
+      const r = 34;
+      const c = 40;
+      const toRad = (d) => (d * Math.PI) / 180;
+      const x1 = c + r * Math.cos(toRad(start));
+      const y1 = c + r * Math.sin(toRad(start));
+      const x2 = c + r * Math.cos(toRad(start + sweep));
+      const y2 = c + r * Math.sin(toRad(start + sweep));
+      const large = sweep > 180 ? 1 : 0;
+      const d = sweep >= 359.9
+        ? `M ${c} ${c - r} A ${r} ${r} 0 1 1 ${c - 0.01} ${c - r} Z`
+        : `M ${c} ${c} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+      return `<path d="${d}" fill="${colors[k] || "var(--muted)"}"></path>`;
+    }).join("");
+    const legend = entries.filter(([k]) => k !== "neg").map(([k, v]) => {
+      const sharePct = Math.round((v / totalPos) * 100);
+      return `<li><i style="background:${colors[k]}"></i>${labels[k]} · ${sharePct}%</li>`;
+    }).join("");
+    const donut = entries.some(([k, v]) => k !== "neg" && v > 0)
+      ? `<div class="share-donut" aria-hidden="true">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" fill="var(--panel-inset)" stroke="var(--border)" stroke-width="1"/>
+            ${slices}
+            <circle cx="40" cy="40" r="18" fill="var(--soil-raised)"/>
+          </svg>
+          <ul class="share-legend">${legend}</ul>
+        </div>`
+      : "";
+
+    const sources = (sheet.contrib || [])
+      .map((c) => `<li><span class="lab">${c.label}</span><span class="v">${c.value >= 0 ? "+" : ""}${sheet.unit === "UnitInterval" ? c.value.toFixed(2) : c.value.toLocaleString()}</span></li>`)
+      .join("");
+    const capNote = sheet.cap != null
+      ? (st === "capped"
+        ? `<p class="cap-note">At soft cap ${sheet.cap} — the next point does nothing.</p>`
+        : `<p class="cap-note ok">Cap ${sheet.cap} — more still counts.</p>`)
+      : `<p class="cap-note ok">No registry cap on this channel.</p>`;
+    const title = row.variantLabel ? `${row.fam.displayName} · ${row.variantLabel}` : row.fam.displayName;
+    el.innerHTML = `
+      <div class="hd"><span class="glyph">${row.fam.icon}</span><span class="nm">${title}</span></div>
+      <div class="big">${formatValue(selected)}</div>
+      <p class="reading">${sheet.reading}</p>
+      <p class="sentence"><b>Compose:</b> ${COMPOSE[sheet.compose] || sheet.compose}<br><b>Unit:</b> ${UNIT[sheet.unit] || sheet.unit}<br><b>Join:</b> <code>${selected}</code></p>
+      ${capNote}
+      <div class="contrib">
+        <h4>Why this number</h4>
+        ${donut}
+        <div class="stack">${stack || "<p class=\"rd\">No contributions.</p>"}</div>
+        <h4>Sources (GG-49)</h4>
+        <ul class="sources">${sources || "<li><span class=\"lab\">Empty</span></li>"}</ul>
+      </div>`;
+  }
+
+  function pickDefaultSelection() {
+    const rows = currentRows().filter((r) => !isUnchanged(r.channelId) || showUnchanged);
+    const active = rows.find((r) => stateOf(r.channelId) === "active");
+    selected = (active || rows[0])?.channelId || selected;
+  }
+
+  function render() {
+    document.getElementById("show-unchanged").classList.toggle("is-on", showUnchanged);
+    document.querySelectorAll("#tabs .chip").forEach((c) => {
+      c.classList.toggle("is-on", c.dataset.tab === tabId);
+    });
+    renderVariants();
+    if (!currentRows().some((r) => r.channelId === selected)) pickDefaultSelection();
+    renderList();
+    renderInspect();
+  }
+
+  document.getElementById("show-unchanged").addEventListener("click", () => {
+    showUnchanged = !showUnchanged;
+    localStorage.setItem("derived.showUnchanged", showUnchanged ? "1" : "0");
+    render();
+  });
+  document.getElementById("tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip");
+    if (!btn) return;
+    tabId = btn.dataset.tab;
+    variantId = (TABS[tabId].variants[0] && TABS[tabId].variants[0].id) || null;
+    if (tabId === "elements") variantId = "fire";
+    pickDefaultSelection();
+    render();
+  });
+  document.getElementById("variants").addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip");
+    if (!btn) return;
+    variantId = btn.dataset.v;
+    pickDefaultSelection();
+    render();
+  });
+  document.getElementById("q").addEventListener("input", (e) => {
+    query = e.target.value;
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

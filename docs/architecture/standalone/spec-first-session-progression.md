@@ -2,7 +2,7 @@
 
 **Module id:** `first-session-progression` · **Program:** [../standalone-rpg-map.md](../standalone-rpg-map.md)  
 **Depends on:** `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip  
-**Status:** audited 2026-09-08; implementation not authorized by this document alone
+**Status:** implemented in code; live deploy acceptance remains environment-gated
 
 ## Purpose
 
@@ -94,10 +94,10 @@ The species row is the per-player/per-species empire fallback, not an individual
 No checkpoint code may infer a source from `typeId`, payload `instanceId`, or a shared species name.
 The capture projection now accepts only a matching typed claim (and derives a unique claim from a
 persisted owned specimen); missing or contradictory claims are stored as `untrusted` and cannot
-award species XP (`src/FusionRpg.Data/Sqlite/RpgStore.cs:1678-1734`). The remaining live gap is the
-normal PvZ spawn producer: the injector still emits an opaque operation/source token, so it must be
-extended to carry the typed `EmpireGeneral` claim as `sourceKind`/`sourceId` transport fields before
-calling this spec live.
+award species XP (`src/FusionRpg.Data/Sqlite/RpgStore.cs`). The normal PvZ spawn producer
+now carries the typed `EmpireGeneral` claim as `sourceKind`/`sourceId`
+transport fields; capture verifies the claim against side/type before applying it. Injector
+restore/build and real-game acceptance remain environment-gated.
 
 The species reveal reports the actual applied ledger delta and the post-apply allocation. Automatic
 allocation is a projection of the species level (`src/FusionRpg.Core/Stats/Aptitudes/SpeciesAllocation.cs:15-36`), not a second manually persisted build. The later allocation/respec surface remains optional.
@@ -111,12 +111,12 @@ route resolves only a persistent unique specimen (`src/FusionRpg.Server/ItemEqui
 `ItemEquipService.TryResolveSpecimen`), while Dave's current player-owned loadout is an aura/action
 loadout (`src/FusionRpg.Server/LoadoutEndpoints.cs:15-79`).
 
-Therefore level 4 is **blocked until one of these is designed and implemented**:
+The recommended commander-owned scope is now implemented:
 
-1. a commander-owned item assignment scope (recommended: `OwnerKind.Player` + player id, with the
-   `standard` commander role) that uses the existing item mint/assignment/effect projection safely; or
-2. a deliberate product change that makes Dave a persistent unique actor, including its deployment and
-   commander-vs-combat boundary.
+`rpg_player_item_assignment` keys `OwnerKind.Player` by player id and the reserved `standard` role;
+Dave remains `commander:dave`. The unique-specimen route rejects `standard`, so it cannot fabricate a
+Dave specimen or write the commander cell. The fixed `item.first-clear-almanac-seed` container is
+minted, owned, assigned, and recorded with the level-4 checkpoint in the settlement transaction.
 
 The onboarding must not call the unique-specimen route with a fabricated Dave instance id, and it
 must not present an aura/action as equipment. The first item id, role, catalog entry, and deterministic
@@ -163,8 +163,11 @@ checkpoint response, Souls ledger, XP ledger, species row, allocation, item row,
 5. Kill/reload the browser at every reveal. The next GET returns the same ordered unclaimed queue;
    claiming once is enough and claiming again is a replay, not a second grant.
 
-The live test is blocked until the Dave ownership prerequisite, concrete species/event, onboarding API,
-and checkpoint transaction exist. Existing BattleEngine death attribution is orthogonal: it supports
+The Dave ownership prerequisite, concrete item path, species event, onboarding API, and checkpoint
+transaction are implemented in the server/Data slice. Live testing is currently blocked by the existing
+repository-wide seed import rejecting unrelated `data/seed/dungeon/**` files with `schemaVersion: 0`;
+this environment issue must be repaired before a real lawn run can be captured.
+Existing BattleEngine death attribution is orthogonal: it supports
 unique specimen lawn XP and must not be used as a substitute for general-source onboarding evidence.
 
 ## Design-gate checklist
@@ -175,5 +178,7 @@ unique specimen lawn XP and must not be used as a substitute for general-source 
       checked before writing this spec.
 - [x] Claims above are tied to current code or named specs.
 - [x] No new loop, private XP curve, client authority, or combat stat writer is introduced.
-- [ ] Full implementation conformance is still open: checkpoint schema/API, source classifier cleanup,
-      commander item scope, concrete content, and live acceptance have not shipped.
+- [x] Full implementation conformance is shipped for checkpoint schema/API, source classifier cleanup,
+      commander item scope, concrete content, and in-stage reveal queue.
+- [ ] Real deploy-play acceptance is still environment-gated; no game binary is patched and no HP polling
+      is used as onboarding evidence.

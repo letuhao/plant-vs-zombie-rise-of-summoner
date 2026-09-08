@@ -1,49 +1,46 @@
-import { useMemo, useState } from "react";
-import { Sparkline } from "react-tiny-sparkline";
-import type {
-  ActorSurfaceCatalog,
-  DerivedFamilyCatalogRow,
-  ElementCatalogRow
-} from "@/lib/bus/actorSurface";
-import { useActorDerived, type DerivedChannelDto } from "@/lib/bus/aura";
+/**
+ * ActorSheet → Derived. Compose only: hooks → cook model → console shell.
+ * Visual SSOT = docs/design/derived-combat-console.html.
+ * Structure: tasks/actor-sheet-derived-structure.md
+ */
+import { useEffect, useMemo, useState } from "react";
+import { isKnown } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
-import { ChannelContributions } from "./ChannelContributions";
+import {
+  derivedSurfaceFromFixture,
+  type ActorSurfaceCatalog,
+  useDerivedSurface
+} from "@/lib/bus/actorSurface";
+import { useActorDerived, useActorSheet } from "@/lib/bus/aura";
+import { DerivedCombatConsole } from "./derived/DerivedCombatConsole";
+import {
+  COOK_PRIMARY_TAB_IDS,
+  FORBIDDEN_PRIMARY_TAB_IDS,
+  SHOW_UNCHANGED_KEY,
+  bucketContributions,
+  expandDerivedFamily,
+  isUnchangedState,
+  joinDerivedChannelId,
+  resolveDerivedRenderState,
+  toLiveMap,
+  type DerivedRowModel,
+  type DerivedRenderState,
+  type ExpandedDerivedChannel,
+  type LiveChannelView
+} from "./derived/derivedCook";
 
-export type ExpandedDerivedChannel = {
-  channelId: string;
-  element: ElementCatalogRow | null;
+export {
+  COOK_PRIMARY_TAB_IDS,
+  FORBIDDEN_PRIMARY_TAB_IDS,
+  bucketContributions,
+  expandDerivedFamily,
+  isUnchangedState,
+  joinDerivedChannelId,
+  resolveDerivedRenderState,
+  type DerivedRenderState,
+  type ExpandedDerivedChannel,
+  type LiveChannelView
 };
-
-const STATUS_CATEGORY_VARIANTS = ["omni", "dot", "cc", "contagion"] as const;
-const ACTION_CATEGORY_VARIANTS = ["attack", "defense", "support", "movement", "status"] as const;
-
-export function expandDerivedFamily(
-  family: DerivedFamilyCatalogRow,
-  elements: ElementCatalogRow[],
-  resources: { id: string }[] = []
-): ExpandedDerivedChannel[] {
-  switch (family.expand) {
-    case "element":
-      return [...elements]
-        .sort((a, b) => a.ordinal - b.ordinal)
-        .map((element) => ({ channelId: `${family.family}.${element.id}`, element }));
-    case "status-category":
-      return STATUS_CATEGORY_VARIANTS.map((id) => ({
-        channelId: `${family.family}.${id}`,
-        element: null
-      }));
-    case "resource":
-      return resources.map((r) => ({ channelId: `${family.family}.${r.id}`, element: null }));
-    case "action-category":
-      return ACTION_CATEGORY_VARIANTS.map((id) => ({
-        channelId: `${family.family}.${id}`,
-        element: null
-      }));
-    case "none":
-    default:
-      return [{ channelId: family.family, element: null }];
-  }
-}
 
 export function DerivedTab({
   data,
@@ -52,115 +49,175 @@ export function DerivedTab({
   data: ActorView;
   surface: ActorSurfaceCatalog;
 }) {
+  const cook = useDerivedSurface("en", data.side);
+  const sheet = useActorSheet(data.instanceId);
   const derived = useActorDerived(data.instanceId);
-  const groups = [...new Set(surface.families.map((family) => family.sheetGroup))];
-  const [openGroup, setOpenGroup] = useState(groups[0] ?? "");
+
+  const [showUnchanged, setShowUnchanged] = useState(() => {
+    try {
+      return localStorage.getItem(SHOW_UNCHANGED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [tabId, setTabId] = useState("elements");
+  const [variantId, setVariantId] = useState<string | null>(null);
+
+  const tabs = useMemo(() => {
+    const cooked = cook.data?.tabs?.length
+      ? cook.data.tabs
+      : derivedSurfaceFromFixture(surface, data.side).tabs;
+    return [...cooked].sort((a, b) => a.order - b.order);
+  }, [cook.data, surface, data.side]);
+
+  const activeTab = tabs.find((t) => t.id === tabId) ?? tabs[0] ?? null;
+
+  const variantChoices = useMemo(() => {
+    if (!activeTab) return [] as { id: string; displayName: string; presentationOnly?: boolean }[];
+    if (activeTab.id === "other") {
+      return (activeTab.actionCategoryVariants ?? []).map((v) => ({
+        id: v.id,
+        displayName: v.displayName,
+        presentationOnly: v.presentationOnly
+      }));
+    }
+    return activeTab.variants.map((v) => ({
+      id: v.id,
+      displayName: v.displayName,
+      presentationOnly: v.presentationOnly
+    }));
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!tabs.some((t) => t.id === tabId) && tabs[0]) setTabId(tabs[0].id);
+  }, [tabs, tabId]);
+
+  useEffect(() => {
+    if (variantChoices.length === 0) {
+      setVariantId(null);
+      return;
+    }
+    if (!variantId || !variantChoices.some((v) => v.id === variantId)) {
+      const preferFire =
+        activeTab?.id === "elements" && variantChoices.some((v) => v.id === "fire")
+          ? "fire"
+          : variantChoices[0]!.id;
+      setVariantId(preferFire);
+    }
+  }, [variantChoices, variantId, activeTab?.id]);
+
   const byId = useMemo(
-    () => new Map((derived.data?.channels ?? []).map((channel) => [channel.channelId, channel])),
-    [derived.data]
+    () => toLiveMap(sheet.data?.derived, derived.data?.channels),
+    [sheet.data, derived.data]
   );
 
+  const familyRows = useMemo(() => {
+    if (!activeTab) return [] as DerivedRowModel[];
+    const rows: DerivedRowModel[] = [];
+    for (const cat of activeTab.categories) {
+      for (const family of cat.families) {
+        let channelVariant = variantId;
+        let variantLabel =
+          variantChoices.find((v) => v.id === variantId)?.displayName ?? variantId ?? "";
+
+        if (family.expand === "none") {
+          channelVariant = null;
+          variantLabel = family.displayName;
+        } else if (!variantId) {
+          continue;
+        }
+
+        const channelId = joinDerivedChannelId(family.family, family.expand, channelVariant);
+        const element =
+          family.expand === "element"
+            ? (surface.elements.find((e) => e.id === channelVariant) ?? null)
+            : null;
+        const entry: ExpandedDerivedChannel = {
+          channelId,
+          element,
+          variantLabel
+        };
+        const live = byId.get(channelId);
+        const state = resolveDerivedRenderState(channelId, live, family.capRef);
+        rows.push({
+          family,
+          categoryId: cat.id,
+          categoryLabel: cat.displayName,
+          entry,
+          live,
+          state,
+          displayName: family.displayName
+        });
+      }
+    }
+    return rows;
+  }, [activeTab, variantId, variantChoices, byId, surface.elements]);
+
+  const q = query.trim().toLowerCase();
+  const visibleRows = familyRows.filter((row) => {
+    if (
+      q &&
+      !`${row.displayName} ${row.entry.channelId} ${row.family.reading} ${row.categoryLabel}`
+        .toLowerCase()
+        .includes(q)
+    ) {
+      return false;
+    }
+    if (!showUnchanged && isUnchangedState(row.state) && row.entry.channelId !== selectedId) {
+      return false;
+    }
+    return true;
+  });
+  const hiddenCount = familyRows.length - visibleRows.length;
+
+  useEffect(() => {
+    if (selectedId && visibleRows.some((r) => r.entry.channelId === selectedId)) return;
+    const firstActive = visibleRows.find((r) => r.state === "active") ?? visibleRows[0];
+    setSelectedId(firstActive?.entry.channelId ?? null);
+  }, [visibleRows, selectedId]);
+
+  const selected = visibleRows.find((r) => r.entry.channelId === selectedId) ?? null;
+  const loading = sheet.isLoading && derived.isLoading;
+  const errored = sheet.isError && derived.isError;
+
+  const groupedVisible = useMemo(() => {
+    const map = new Map<string, { label: string; rows: DerivedRowModel[] }>();
+    for (const row of visibleRows) {
+      const bucket = map.get(row.categoryId) ?? { label: row.categoryLabel, rows: [] };
+      bucket.rows.push(row);
+      map.set(row.categoryId, bucket);
+    }
+    return [...map.entries()] as [string, { label: string; rows: DerivedRowModel[] }][];
+  }, [visibleRows]);
+
+  const displayName = isKnown(data.displayName) ? data.displayName.value : data.instanceId;
+
   return (
-    <div className="mt-4" data-testid="derived-tab">
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Derived stat groups">
-        {groups.map((group) => (
-          <button
-            key={group}
-            type="button"
-            role="tab"
-            aria-selected={openGroup === group}
-            onClick={() => setOpenGroup(group)}
-            className={
-              openGroup === group
-                ? "rounded-sm bg-lawn px-3 py-1.5 text-sm text-text"
-                : "rounded-sm bg-panel-inset px-3 py-1.5 text-sm text-muted"
-            }
-          >
-            {group}
-          </button>
-        ))}
-      </div>
-
-      {derived.isLoading ? <p className="mt-4 text-xs text-muted">Loading derived stats…</p> : null}
-      {derived.isError ? <p className="mt-4 text-xs text-muted">Derived stats are unavailable right now.</p> : null}
-
-      <div className="mt-3 space-y-3">
-        {surface.families
-          .filter((family) => family.sheetGroup === openGroup)
-          .map((family) => (
-            <DerivedFamilyRow
-              key={family.family}
-              family={family}
-              expanded={expandDerivedFamily(family, surface.elements, surface.resources)}
-              byId={byId}
-            />
-          ))}
-      </div>
-    </div>
-  );
-}
-
-function DerivedFamilyRow({
-  family,
-  expanded,
-  byId
-}: {
-  family: DerivedFamilyCatalogRow;
-  expanded: ExpandedDerivedChannel[];
-  byId: Map<string, DerivedChannelDto>;
-}) {
-  const [open, setOpen] = useState(false);
-  const values = expanded.map((entry) => byId.get(entry.channelId)?.value ?? 0);
-
-  return (
-    <article className="rounded-sm border border-border-control bg-panel-inset" data-testid={`derived-family-${family.family}`}>
-      <button
-        type="button"
-        className="flex w-full items-center gap-3 p-3 text-left"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="min-w-0 flex-1">
-          <span className="block font-ui text-sm text-text">{family.displayName}</span>
-          <span className="block truncate text-xs text-muted">{family.reading}</span>
-        </span>
-        <Sparkline
-          data={values.length > 1 ? values : [0, values[0] ?? 0]}
-          width={88}
-          height={28}
-          animate={false}
-          aria-label={`${family.displayName} values`}
-          className="text-lawn-hot"
-        />
-        <span aria-hidden="true" className="text-muted">
-          {open ? "−" : "+"}
-        </span>
-      </button>
-
-      {open ? (
-        <ul className="border-t border-border px-3 py-2" data-testid={`derived-family-expanded-${family.family}`}>
-          {expanded.map((entry) => {
-            const channel = byId.get(entry.channelId);
-            return (
-              <li
-                key={entry.channelId}
-                className="border-b border-border/60 py-2 last:border-0"
-                data-testid={`derived-channel-${entry.channelId}`}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-text">{entry.element?.displayName ?? family.displayName}</span>
-                  <span className="font-mono text-sm text-text">
-                    {channel ? channel.value.toLocaleString() : "No producer"}
-                  </span>
-                </div>
-                {channel && channel.contributions.length > 0 ? (
-                  <ChannelContributions contributions={channel.contributions} />
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
-    </article>
+    <DerivedCombatConsole
+      displayName={displayName}
+      level={data.level}
+      side={data.side}
+      loading={loading}
+      errored={errored}
+      tabs={tabs}
+      activeTab={activeTab}
+      tabId={activeTab?.id ?? tabId}
+      onTabId={setTabId}
+      variantChoices={variantChoices}
+      variantId={variantId}
+      onVariantId={setVariantId}
+      query={query}
+      onQuery={setQuery}
+      showUnchanged={showUnchanged}
+      onShowUnchanged={setShowUnchanged}
+      groupedVisible={groupedVisible}
+      visibleCount={visibleRows.length}
+      hiddenCount={hiddenCount}
+      selectedId={selectedId}
+      selected={selected}
+      onSelect={setSelectedId}
+    />
   );
 }

@@ -232,6 +232,24 @@ def test_assemble_entry_rejects_a_duplicate_channel_op_pair(armour_partition) ->
         emit.assemble_entry(answer, armour_partition, "stat.modify")
 
 
+def test_answer_validation_names_a_duplicate_channel_op_pair(armour_partition) -> None:
+    schema = schema_mod.affix_family_schema(
+        "stat.modify", channels=armour_partition.channels, roles=("standard",),
+        tags=("defensive",), power_bands=("low",),
+    )
+    answer = {
+        "word": "second-warding", "channel": "defense", "op": "Flat",
+        "roles": ["standard"], "tags": ["defensive"], "powerBand": "low",
+        "name": "Second Warding", "nameKey": "affix.second-warding",
+        "displayTemplate": "+{value} defense",
+    }
+
+    defects = schema_mod.validate_answer(
+        answer, schema, channel_ops=armour_partition.channel_ops, kind_id="stat.modify")
+
+    assert any("already ships" in defect for defect in defects)
+
+
 def test_assemble_entry_rejects_an_illegal_op_for_the_kind(armour_partition) -> None:
     answer = {
         "word": "brand-new", "channel": "arm1Max", "op": "Override",
@@ -443,7 +461,7 @@ def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir,
     it exactly like a real model would."""
     called_with = {}
 
-    def _fake_live_answer_caller(config):
+    def _fake_live_answer_caller(config, *, validator=None):
         called_with["config"] = config
 
         def _call(brief, schema):
@@ -474,7 +492,7 @@ def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir,
 
 
 def test_cli_blocked_answer_is_reported_and_writes_nothing(isolated_families_dir, capsys, monkeypatch):
-    def _fake_live_answer_caller(config):
+    def _fake_live_answer_caller(config, *, validator=None):
         return lambda brief, schema: {"blocked": "no legal (channel, op) pair left"}
 
     monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
@@ -489,3 +507,44 @@ def test_cli_blocked_answer_is_reported_and_writes_nothing(isolated_families_dir
     assert before == after
     out = json.loads(capsys.readouterr().out)
     assert out["outcome"] == "blocked"
+
+
+def test_cli_refuses_a_boolean_blocked_field_and_writes_nothing(
+    isolated_families_dir, capsys, monkeypatch,
+):
+    """A local endpoint once ignored the schema and emitted exactly this malformed answer."""
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        lambda config, *, validator=None: lambda brief, schema: {"blocked": True})
+    before = (isolated_families_dir / "g-armour.json").read_text(encoding="utf-8")
+
+    exit_code = run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write",
+                              "--endpoint", "http://unit-test-endpoint"])
+
+    assert exit_code == 3
+    assert (isolated_families_dir / "g-armour.json").read_text(encoding="utf-8") == before
+    out = json.loads(capsys.readouterr().out)
+    assert out["outcome"] == "refused"
+    assert "blocked" in out["reason"]
+
+
+def test_cli_skips_the_model_when_no_channel_op_pair_is_available(tmp_path, monkeypatch, capsys):
+    """`g.attack` exhausts its sole channel's Flat/Increased/More mechanics."""
+    families_dir = tmp_path / "affix-families"
+    families_dir.mkdir()
+    source = FAMILIES_DIR / "g-attack.json"
+    target = families_dir / "g-attack.json"
+    target.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+    monkeypatch.setattr(brief_mod, "FAMILIES_DIR", families_dir)
+    monkeypatch.setattr(run_mod, "DEFAULT_LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
+                        lambda *args, **kwargs: pytest.fail("model must not be called"))
+    before = target.read_text(encoding="utf-8")
+
+    exit_code = run_mod.main(["--group", "g.attack", "--affix-kind", "stat.modify", "--write",
+                              "--endpoint", "http://unit-test-endpoint"])
+
+    assert exit_code == 0
+    assert target.read_text(encoding="utf-8") == before
+    out = json.loads(capsys.readouterr().out)
+    assert out["outcome"] == "blocked"
+    assert "no free" in out["reason"]

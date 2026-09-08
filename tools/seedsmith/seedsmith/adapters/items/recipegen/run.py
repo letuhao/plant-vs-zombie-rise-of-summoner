@@ -59,6 +59,7 @@ from ..basetypegen import run as basetype_run
 from ..basetypegen import tuning as basetype_tuning
 from ..materialgen import vocab as material_vocab
 from . import opvocab
+from . import schema as schema_mod
 from .brief import ForgeTarget, RecipeBrief, build_recipe_brief
 from .emit import assemble_entry, emit_document, next_seq, write_document
 
@@ -337,11 +338,24 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
     blocked: "dict[str, dict]" = {}
 
     for subject in plan.subjects:
-        answer = call(subject.brief.render(), dict(subject.brief.schema))
+        try:
+            answer = call(subject.brief.render(), dict(subject.brief.schema))
+        except ValueError as exc:
+            blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
+            continue
+        defects = schema_mod.validate_answer(answer, subject.brief.schema)
+        if defects:
+            blocked[subject.subject_id] = {"reason": "invalid model response: " + "; ".join(defects)}
+            continue
         if answer.get("blocked"):
             blocked[subject.subject_id] = {"reason": answer["blocked"]}
             continue
-        entry = assemble_entry(answer, seq=subject.seq, forge_target=subject.brief.forge_target)
+        try:
+            entry = assemble_entry(answer, seq=subject.seq,
+                                   forge_target=subject.brief.forge_target)
+        except ValueError as exc:
+            blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
+            continue
         fresh[entry["id"]] = entry
         ledger.mark_done(subject.subject_id, {"entryId": entry["id"], "operation": entry["operation"]})
 
@@ -461,7 +475,7 @@ def main(argv=None) -> int:
     base_config = load_config()
     config = dataclasses.replace(base_config, endpoint=args.endpoint,
                                  model=args.model or base_config.model)
-    caller = live_answer_caller(config)
+    caller = live_answer_caller(config, validator=schema_mod.validate_answer)
     plan = plan_run(count=args.count, ledger=ledger, theme_hint=theme_hint)
     fresh, blocked = run_draws(plan, ledger=ledger, call=caller)
     merged = {**plan.existing, **fresh}

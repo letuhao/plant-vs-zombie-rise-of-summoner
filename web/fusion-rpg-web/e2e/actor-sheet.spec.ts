@@ -37,6 +37,25 @@ test.describe("ActorSheet catalog-era shell", () => {
           body: JSON.stringify({ channels: [] })
         })
       );
+      await page.route("**/api/actors/**/sheet**", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            instanceId: "mock",
+            playerId: 1,
+            side: "plant",
+            typeId: 1,
+            displayName: null,
+            level: 1,
+            derived: [],
+            primary: []
+          })
+        })
+      );
+      await page.route("**/api/catalogs/derived-surface**", (route) =>
+        route.fulfill({ status: 404, body: "" })
+      );
 
       await page.goto("/#/actor-ladder-demo?mock=1");
       await page.getByTestId("actor-ladder-open-panel").click();
@@ -112,6 +131,58 @@ test.describe("ActorSheet catalog-era shell", () => {
 
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("actor-panel")).not.toBeVisible();
+  });
+
+  test("Derived tab: InspectSplit + Show unchanged", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await mockShell(page);
+    await page.route("**/api/actors/**/sheet**", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          instanceId: "mock",
+          playerId: 1,
+          side: "plant",
+          typeId: 1,
+          displayName: "Emberling",
+          level: 24,
+          derived: [
+            {
+              channelId: "combat.power.fire",
+              displayName: "Power",
+              reading: "Fire",
+              composeKind: "FlatSum",
+              value: 100,
+              contributions: [
+                { sourceId: "aptitude.Might", label: "Aptitude · Might", op: "Flat", value: 100 }
+              ]
+            }
+          ],
+          primary: []
+        })
+      })
+    );
+    await page.route("**/api/actors/**/derived**", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ channels: [] })
+      })
+    );
+    await page.route("**/api/catalogs/derived-surface**", (route) =>
+      route.fulfill({ status: 404, body: "" })
+    );
+
+    await page.goto("/#/actor-ladder-demo?mock=1");
+    await page.getByTestId("actor-ladder-open-panel").click();
+    await page.getByTestId("actor-sheet-tab-derived").click();
+    await expect(page.getByTestId("derived-tab")).toBeVisible();
+    await expect(page.getByTestId("derived-inspect")).toBeVisible();
+    await expect(page.getByTestId("derived-show-unchanged")).toBeVisible();
+    await page.getByTestId("derived-tab-elements").click();
+    await page.getByTestId("derived-variant-fire").click();
+    await expect(page.getByTestId("derived-channel-combat.power.fire")).toBeVisible();
   });
 
   test("publishes actor-surface catalog onto window for HUD resolve", async ({ page }) => {

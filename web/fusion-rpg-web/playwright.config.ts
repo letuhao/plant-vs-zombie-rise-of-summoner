@@ -1,9 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 import { isLiveActorHudE2e } from "./e2e/helpers/live-gate";
+import { isLiveDerivedSheetE2e } from "./e2e/helpers/derived-live-gate";
 
-const isLiveE2e = isLiveActorHudE2e();
-if (isLiveE2e) {
+const isLiveE2e = isLiveActorHudE2e() || isLiveDerivedSheetE2e();
+if (isLiveActorHudE2e()) {
   process.env.ACTOR_HUD_LIVE_E2E = "1";
+}
+if (isLiveDerivedSheetE2e()) {
+  process.env.DERIVED_SHEET_LIVE_E2E = "1";
 }
 
 export default defineConfig({
@@ -43,12 +47,22 @@ export default defineConfig({
       // A project-level testIgnore replaces, rather than adds to, the top-level one above — so the
       // `.test.ts` exclusion has to be repeated here too, or this project re-collects every
       // vitest-only file the top-level pattern was meant to keep out.
-      testIgnore: [/\.test\.ts$/, /actor-hud-live\.spec\.ts$/],
+      testIgnore: [
+        /\.test\.ts$/,
+        /actor-hud-live\.spec\.ts$/,
+        /derived-sheet-visual\.spec\.ts$/,
+        /derived-ssot-side-by-side\.spec\.ts$/
+      ],
       use: { ...devices["Desktop Chrome"] }
     },
     {
       name: "live-chromium",
       testMatch: /actor-hud-live\.spec\.ts$/,
+      use: { ...devices["Desktop Chrome"] }
+    },
+    {
+      name: "derived-live-chromium",
+      testMatch: /derived-(sheet-visual|ssot-side-by-side)\.spec\.ts$/,
       use: { ...devices["Desktop Chrome"] }
     }
   ]

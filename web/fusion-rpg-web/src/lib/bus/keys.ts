@@ -46,6 +46,7 @@ export const queryKeys = {
   speciesRespecPrice: (playerId: number, speciesId: string) =>
     ["speciesRespecPrice", playerId, speciesId] as const,
   commanders: (playerId: number) => ["commanders", playerId] as const,
+  onboarding: (playerId: number) => ["onboarding", playerId] as const,
   passiveTree: (playerId: number) => ["passiveTree", playerId] as const,
   allSnapshots: [
     ["health"],

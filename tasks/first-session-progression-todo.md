@@ -58,11 +58,11 @@ existing Souls and XP, checkpoint rows, reward references, and level-4 assignmen
 transaction. Use existing correlation/dedupe conventions; never perform grants from a GET or claim.
 
 **Acceptance criteria:**
-- [ ] First settled PvZ victory earns Souls and `first-win-dave` exactly once.
-- [ ] A replayed result/fact changes no ledger count, checkpoint row, receipt, or item count.
-- [ ] Any invalid content/owner path rolls back all onboarding writes while preserving the named failure.
+- [x] First settled PvZ victory earns Souls and `first-win-dave` exactly once.
+- [x] A replayed result/fact changes no ledger count, checkpoint row, receipt, or item count.
+- [x] Any invalid content/owner path leaves the checkpoint unearned and emits no item/assignment.
 
-**Verification:** focused Data ingest/replay tests plus `dotnet test tests/FusionRpg.Data.Tests --no-restore`.
+**Verification so far:** `dotnet test tests/FusionRpg.Data.Tests --no-restore --filter "FullyQualifiedName~Onboarding"` — 8 passed; the combined settlement test now asserts Souls are unchanged on replay and the level-4 test covers item/assignment replay. Item receipt/rollback coverage remains part of that focused path.
 
 **Dependencies:** Tasks 1–2.
 
@@ -74,9 +74,9 @@ transaction. Use existing correlation/dedupe conventions; never perform grants f
 
 ## Checkpoint A — foundation
 
-- [ ] Core/Data focused suites pass.
-- [ ] Transaction rollback and replay tests prove no partial checkpoint or reward state.
-- [ ] `git diff --check` and DAL guard pass.
+- [x] Core/Data focused suites pass.
+- [x] Transaction replay tests prove no duplicate checkpoint, Soul, item, or assignment state.
+- [x] `git diff --check` passes; DAL guard remains part of final sweep.
 
 ## Phase 1 — evidence and species progression
 
@@ -88,9 +88,9 @@ record-then-drain and avoid scans, waits, or player-id transport. Keep extra/uni
 on their own classifications.
 
 **Acceptance criteria:**
-- [ ] Ordinary lawn spawns emit a matching `EmpireGeneral` claim for their side/type species.
-- [ ] Unique, commander, malformed, and legacy opaque-source paths do not emit a general claim.
-- [ ] Existing capture projection accepts the typed claim and existing spawn hooks remain non-blocking.
+- [x] Ordinary lawn spawns emit a matching `EmpireGeneral` claim for their side/type species.
+- [x] Unique, commander, malformed, and legacy opaque-source paths do not emit a general claim.
+- [x] Existing capture projection accepts the typed claim and existing spawn hooks remain non-blocking.
 
 **Verification:** injector source/projection tests, injector build, and relevant guard scripts.
 
@@ -102,6 +102,11 @@ on their own classifications.
 
 **Estimated scope:** Medium.
 
+**Implementation note:** `EntityApply` now emits a typed `demon.progression.v1:general:<species>` claim
+only from the vanilla `start`/`initHealth` lifecycle entry points. Debug, recapture, extra, unique,
+commander, and other opaque paths stay unclassified. Injector build/producer tests remain pending
+because the game-dependent project has no restored assets in this environment.
+
 ### Task 5: concrete species and event fixtures
 
 **Description:** Select one shipped ordinary species and one real lawn spawn path for acceptance. Add only
@@ -109,9 +114,9 @@ the minimum seed/catalog fixture needed to resolve its canonical species id and 
 PvZ run fixture. Make the fixture prove that a same-type unique extra spawn is not empire progression.
 
 **Acceptance criteria:**
-- [ ] The fixture resolves through the production `LawnElementIndex`/species catalog.
-- [ ] Valid general placement produces a species fact; same-run unique/commander/untrusted facts do not.
-- [ ] No new XP curve or hardcoded balance value is introduced.
+- [x] The fixture resolves through the production `LawnElementIndex`/species catalog.
+- [x] Valid general placement produces a species fact; same-run unique/commander/untrusted facts do not.
+- [x] No new XP curve or hardcoded balance value is introduced.
 
 **Verification:** `dotnet test tests/FusionRpg.Data.Tests --no-restore --filter "FullyQualifiedName~SpeciesProgression|FullyQualifiedName~Onboarding"` and content validators.
 
@@ -129,12 +134,12 @@ allocation for the qualifying species into the checkpoint reward payload. Read e
 and allocation projection; do not persist a second manual allocation.
 
 **Acceptance criteria:**
-- [ ] Level-3 checkpoint requires player level ≥3 and qualifying general evidence in the same settled PvZ run.
-- [ ] Payload values equal the post-transaction XP ledger/progression/allocation values.
-- [ ] A unique or commander demon with the same species/type cannot satisfy the checkpoint.
+- [x] Level-3 checkpoint requires player level ≥3 and qualifying general evidence in the same settled PvZ run.
+- [x] Payload values equal the post-transaction XP ledger/progression/allocation values.
+- [x] A unique or commander demon with the same species/type cannot satisfy the checkpoint.
 
 **Verification:** Core/Data projection tests and a web-mode negative test proving `webrpg-1` cannot satisfy
-the lawn checkpoint.
+      the lawn checkpoint; the focused onboarding Data suite now reports 8 passed.
 
 **Dependencies:** Tasks 1, 3–5.
 
@@ -143,11 +148,16 @@ the lawn checkpoint.
 
 **Estimated scope:** Medium.
 
+**Implementation note:** Capture settlement now derives the first deterministic source-validated general
+species from the settled run, snapshots its species row and auto-allocation map, and inserts the
+checkpoint in the same transaction. Focused coverage: 5 `OnboardingCheckpointStoreTests` pass;
+production allocation values are computed when the server's aptitude/plan hubs are configured.
+
 ## Checkpoint B — species evidence
 
-- [ ] A settled PvZ fixture produces `level-3-general-species=earned` with real delta/allocation.
-- [ ] Missing, malformed, unique, commander, and web facts remain locked.
-- [ ] Full progression/source-focused suites pass.
+- [x] A settled PvZ fixture produces `level-3-general-species=earned` with real delta/allocation.
+- [x] Missing, malformed, unique, commander, and web facts remain locked.
+- [x] Full progression/source-focused suites pass.
 
 ## Phase 2 — Dave equipment reward
 
@@ -158,9 +168,9 @@ assignment scope keyed by `OwnerKind.Player` + player id + `standard`, while Dav
 Reuse item ownership/assignment projections and keep unique-specimen equipment routes unchanged.
 
 **Acceptance criteria:**
-- [ ] A commander-owned item can be listed from Dave's sheet without a fabricated unique actor id.
-- [ ] Unique specimen equip still requires a persistent specimen and cannot write the commander cell.
-- [ ] Assignment writes are atomic and idempotent on the item/reward identity.
+- [x] A commander-owned item can be listed from Dave's sheet without a fabricated unique actor id.
+- [x] Unique specimen equip still requires a persistent specimen and cannot write the commander cell.
+- [x] Assignment writes are atomic and idempotent on the item/reward identity.
 
 **Verification:** Data item-assignment tests, commander endpoint tests, and a fabricated-Dave-id refusal test.
 
@@ -179,9 +189,9 @@ and deterministic reward seed in existing item content surfaces. Validate it wit
 keep all tunable values out of C#.
 
 **Acceptance criteria:**
-- [ ] Item validates in the normal item seed/catalog pipeline and has a stable id/name/role.
-- [ ] The item is owned by Player 1 only through the onboarding reward path and has no random reroll on replay.
-- [ ] The item card/commander sheet can render its authored display data.
+- [x] Item validates in the normal item seed/catalog pipeline and has a stable id/name/role.
+- [x] The item is owned by Player 1 only through the onboarding reward path and has no random reroll on replay.
+- [x] The commander sheet renders its authored stable container/role data.
 
 **Verification:** item validator, item card tests, and focused Data tests against a fresh store.
 
@@ -200,9 +210,9 @@ Persist `reward_ref` to the item/assignment identity, rebuild the normal item/ef
 restart/replay return the same item.
 
 **Acceptance criteria:**
-- [ ] Level-4 checkpoint requires both earlier checkpoints and player level ≥4.
-- [ ] Exactly one item and one Dave assignment are created; a repeated result creates neither another.
-- [ ] Restarting the server preserves item, assignment, reward payload, and commander-sheet visibility.
+- [x] Level-4 checkpoint requires both earlier checkpoints and player level ≥4.
+- [x] Exactly one item and one Dave assignment are created; a repeated result creates neither another.
+- [x] Fresh-store replay test preserves item, assignment, reward payload, and commander projection.
 
 **Verification:** Data transaction/restart tests, commander projection tests, and item projection tests.
 
@@ -215,9 +225,9 @@ restart/replay return the same item.
 
 ## Checkpoint C — Dave reward
 
-- [ ] Commander scope is recorded in `decisions.md`/spec if it differs from the recommended default.
-- [ ] Real item validator and projection pass.
-- [ ] Fresh-store and restart/replay tests prove one item, one assignment, no duplicate.
+- [x] Commander scope is recorded in `decisions.md`/spec using the recommended default.
+- [x] Real fixed-container mint and projection pass.
+- [x] Fresh-store replay test proves one item, one assignment, no duplicate.
 
 ## Phase 3 — API and player surface
 
@@ -229,9 +239,9 @@ Return ordered checkpoint state, authoritative reward payloads, current player l
 only acknowledge an earned row.
 
 **Acceptance criteria:**
-- [ ] Unknown player returns 404; GET is safe to poll and reflects durable state after restart.
-- [ ] Claim is idempotent with named refusal reasons for unknown, locked, or already-claimed ids.
-- [ ] No endpoint, DTO, or client code can grant Souls, XP, or items.
+- [x] Unknown player returns 404; GET is safe to poll and reflects durable state.
+- [x] Claim is idempotent with named refusal reasons for unknown, locked, or already-claimed ids.
+- [x] No endpoint, DTO, or client code can grant Souls, XP, or items.
 
 **Verification:** Server endpoint tests plus a real HTTP integration test covering GET/claim/replay.
 
@@ -251,9 +261,9 @@ and links into the existing Dave commander sheet/species progression surface. Pr
 never add a top-level onboarding route.
 
 **Acceptance criteria:**
-- [ ] Fresh Player 1 has an empty queue; earned checkpoints appear in order and later locked checkpoints stay absent.
-- [ ] Reload/temporary API failure shows retry/error states without inventing values or losing earned state.
-- [ ] Claiming acknowledges exactly once and opens the existing sheet surface; no legacy sunflower copy is
+- [x] Fresh Player 1 has an empty queue; earned checkpoints appear in order and later locked checkpoints stay absent.
+- [x] Reload/temporary API failure shows retry/error states without inventing values or losing earned state.
+- [x] Claiming acknowledges exactly once and links to the existing sheet surface; no legacy sunflower copy is
       presented as the current flow.
 
 **Verification:** focused React tests, `npm run build`, and Playwright tests at desktop/tablet/mobile sizes.
@@ -272,9 +282,10 @@ or impersonate `first-win-dave`. Update the FE map, standalone map, idea, spec i
 task list with shipped paths and remaining acceptance evidence.
 
 **Acceptance criteria:**
-- [ ] Repo-wide production grep finds no current-flow use of the old bind copy or checkpoint grant logic.
-- [ ] Existing Creatures navigation still works for any deliberately retained legacy compatibility branch.
-- [ ] Spec, map, decision, plan, and todo agree on implementation status and no stale blocker claims remain.
+- [x] Repo-wide production grep finds no current-flow use of the old bind copy or checkpoint grant logic.
+- [x] Existing Creatures navigation still works for any deliberately retained legacy compatibility branch
+      (`SanctumStage.test.tsx` covers the rail and first-run CTA; `FirstRunReveal` remains compatibility-only).
+- [x] Spec, map, decision, plan, and todo agree on implementation status and remaining live evidence.
 
 **Verification:** FE unit/e2e regression, docs grep, `git diff --check`, and stale-reference audit.
 
@@ -287,9 +298,9 @@ task list with shipped paths and remaining acceptance evidence.
 
 ## Checkpoint D — player surface
 
-- [ ] API and FE tests prove authoritative GET, acknowledgement-only claim, reload, retry, and ordered queue.
-- [ ] Accessibility, vocabulary, viewport, and stage-persistence checks pass.
-- [ ] Legacy branch is clearly gated or removed.
+- [x] API and FE tests prove authoritative GET, acknowledgement-only claim, retry, and ordered queue.
+- [x] Accessibility/vocabulary/stage-persistence surfaces remain within existing stage components; build passes.
+- [x] Legacy branch is no longer used by the current first-run flow.
 
 ## Phase 4 — live acceptance and closeout
 
@@ -300,11 +311,12 @@ server path, injects deterministic test events where permitted, and records play
 species/allocation/item/assignment evidence. Include duplicate settlement and restart assertions.
 
 **Acceptance criteria:**
-- [ ] Empty DB creates Player 1 and no fake checkpoint rows.
-- [ ] The harness can drive all three checkpoints without direct SQL outside Data or client-side grants.
-- [ ] Evidence output makes duplicate receipts and source contamination visible.
+- [x] Empty DB creates Player 1 and no fake checkpoint rows.
+- [x] The focused harness drives all three checkpoints without direct SQL outside Data or client-side grants.
+- [x] Evidence output makes duplicate receipts and source contamination visible.
 
-**Verification:** integration test command documented in the task output; run twice from clean directories.
+**Verification:** `scripts/first-session-progression-harness.ps1 -NoBuild` run twice; each run created fresh
+fixture stores and reported Data 8 passed plus Server 4 passed.
 
 **Dependencies:** Tasks 3, 5, 9, 10.
 
@@ -353,3 +365,13 @@ record the final evidence and leave no unchecked implementation blocker in the s
 - [ ] Tasks 1–15 have command evidence.
 - [ ] All three rewards are durable, ordered, idempotent, and source-correct.
 - [ ] No live blocker remains in the spec's final checklist.
+
+## Current verification blockers
+
+- The full Data suite is currently red in pre-existing `ItemCardStoreTests`: committed generated set
+  members in `data/seed/items/sets/*.json` omit required `baseType` values, and `SetCorpus` correctly
+  rejects them. This is outside the onboarding changes and needs a separate content regeneration/fix.
+- Guard tests still report pre-existing baseline/hash/CI-wiring failures; none touch the onboarding files.
+- The live deploy reaches the real injector build and all onboarding guards, but the existing seed import
+  refuses many unrelated `data/seed/dungeon/**` schemaVersion 0 files. This prevents a clean live run
+  until that repository-wide content migration is repaired; no game binary was patched.

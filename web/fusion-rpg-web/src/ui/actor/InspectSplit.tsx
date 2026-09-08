@@ -17,11 +17,11 @@ export function InspectSplit({
     <div
       data-testid={testId}
       className={cn(
-        "mt-4 grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]",
+        "mt-4 grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]",
         className
       )}
     >
-      <div className="min-h-0 min-w-0" data-testid={`${testId}-list`}>
+      <div className="min-h-0 min-w-0 overflow-y-auto" data-testid={`${testId}-list`}>
         {list}
       </div>
       <aside

@@ -43,6 +43,67 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// Debug/audit upsert: stable <paramref name="instanceId"/> for the current player's playable
+    /// derived-sheet specimen. Sets level (progression surface) without inventing derived values.
+    /// </summary>
+    public UniqueActorDto EnsureUniqueActorForAudit(
+        long playerId, string instanceId, string side, int typeId, long level)
+    {
+        if (string.IsNullOrWhiteSpace(instanceId))
+            throw new ArgumentException("instanceId required", nameof(instanceId));
+        if (typeId < 0) throw new ArgumentOutOfRangeException(nameof(typeId));
+        if (level < 1) throw new ArgumentOutOfRangeException(nameof(level));
+        var s = NormalizeUniqueSide(side);
+        var id = instanceId.Trim();
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            if (GetPlayerUnlocked(db, playerId) is null)
+                throw new InvalidOperationException("player not found");
+            var existing = ReadUniqueActorUnlocked(db, id);
+            var now = DateTime.UtcNow.ToString("o");
+            if (existing is not null)
+            {
+                if (existing.PlayerId != playerId)
+                    throw new InvalidOperationException("unique actor belongs to another player");
+                using var upd = db.CreateCommand();
+                upd.CommandText = """
+                    UPDATE rpg_unique_actors SET
+                      side = $side, type_id = $type, level = $lvl, xp = 0,
+                      revision = revision + 1, updated_utc = $now
+                    WHERE instance_id = $id;
+                    """;
+                upd.Parameters.AddWithValue("$side", s);
+                upd.Parameters.AddWithValue("$type", typeId);
+                upd.Parameters.AddWithValue("$lvl", level);
+                upd.Parameters.AddWithValue("$now", now);
+                upd.Parameters.AddWithValue("$id", id);
+                upd.ExecuteNonQuery();
+                return ReadUniqueActorUnlocked(db, id)!;
+            }
+
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    INSERT INTO rpg_unique_actors(
+                      instance_id, player_id, side, type_id, phase, level, xp,
+                      match_key, last_ptr, deploy_correlation_id, revision, created_utc, updated_utc)
+                    VALUES($id, $pid, $side, $type, $phase, $lvl, 0, NULL, NULL, NULL, 0, $now, $now);
+                    """;
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.Parameters.AddWithValue("$pid", playerId);
+                cmd.Parameters.AddWithValue("$side", s);
+                cmd.Parameters.AddWithValue("$type", typeId);
+                cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Roster);
+                cmd.Parameters.AddWithValue("$lvl", level);
+                cmd.Parameters.AddWithValue("$now", now);
+                cmd.ExecuteNonQuery();
+            }
+            return ReadUniqueActorUnlocked(db, id)!;
+        }
+    }
+
     public UniqueActorDto? GetUniqueActor(string instanceId)
     {
         if (string.IsNullOrWhiteSpace(instanceId)) return null;

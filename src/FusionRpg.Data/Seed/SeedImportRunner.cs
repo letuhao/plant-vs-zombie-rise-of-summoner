@@ -79,7 +79,7 @@ public static class SeedImportRunner
     }
 
     public static IReadOnlyList<string> Roots(string seedRoot, bool explicitRoot) =>
-        SeedScanner.Roots(seedRoot, explicitRoot, Directory.Exists);
+        SeedScanner.AtomRoots(seedRoot, explicitRoot, Directory.Exists);
 
     public static IReadOnlyList<string> Files(IReadOnlyList<string> roots) =>
         SeedScanner.Files(roots);

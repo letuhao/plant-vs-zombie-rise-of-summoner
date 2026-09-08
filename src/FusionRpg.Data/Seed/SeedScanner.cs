@@ -27,13 +27,13 @@ public static class SeedScanner
     /// file goes — `data/seed/power/coefficients.v1.json` is the canonical path the spec names, but
     /// the folder is swept whole, the same as every other owned folder here.
     ///
-    /// <para><b>D4.16</b> (spec-domain-catalog.md §1) added the seven `dungeon` corpus folders this
-    /// program's own content lives under — `_registry`/`_plan`/`_containers` (the hubs') are
-    /// deliberately NOT listed, `Order` already skips `_`-prefixed entries on its own. None of the
-    /// seven exist on disk yet (confirmed: `data/seed/dungeon/` holds only the three hub folders) —
-    /// adding them here is a no-op today, since `Roots()`'s own `.Where(exists)` filter skips a
-    /// folder that is not there; it only takes effect once a real anchor is authored under one of
-    /// them.</para>
+    /// <para><b>D4.16</b> (spec-domain-catalog.md §1) added the seven `dungeon` corpus folders the
+    /// repository owns — `_registry`/`_plan`/`_containers` (the hubs') are deliberately NOT listed,
+    /// `Order` already skips `_`-prefixed entries on its own. These files use the dungeon-specific
+    /// seed schemas, not the atom importer envelope, so <see cref="AtomRoots"/> deliberately leaves
+    /// them to their dedicated loaders while <see cref="Roots"/> remains the complete ownership map.
+    /// Keeping the distinction here prevents a player's atom import from rejecting an otherwise valid
+    /// install merely because another subsystem's content is present.</para>
     ///
     /// <para><b>`demons/species-effects`</b> (T5.3, spec-species-effects.md §6) added 2026-09-06,
     /// the exact same "two halves must name the same folder" discipline `effects/affixes` above
@@ -41,13 +41,21 @@ public static class SeedScanner
     /// here. Unlike the dungeon folders above, this one is NOT a no-op today: a real pilot batch
     /// (`plant/pilot-batch.json`, `zombie/pilot-batch.json`) is already committed under it.</para>
     /// </summary>
-    public static readonly string[] OwnedFolders =
+    public static readonly string[] AtomFolders =
         {
             "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools",
             "effects/affixes", "power", "demons/species-effects",
+        };
+
+    public static readonly string[] DungeonFolders =
+        {
             "dungeon/domains", "dungeon/rooms", "dungeon/layouts", "dungeon/events", "dungeon/quests",
             "dungeon/encounters", "dungeon/supplies",
         };
+
+    /// <summary>Every seed subtree owned by a repository content program. This is an ownership
+    /// inventory, not necessarily the input set for one parser.</summary>
+    public static readonly string[] OwnedFolders = AtomFolders.Concat(DungeonFolders).ToArray();
 
     /// <summary>
     /// The folders to sweep. A root the caller named explicitly is swept whole — that is the escape
@@ -59,6 +67,19 @@ public static class SeedScanner
         if (explicitRoot) return new[] { seedRoot };
 
         return OwnedFolders
+            .Select(d => Path.Combine(seedRoot, d))
+            .Where(exists)
+            .ToArray();
+    }
+
+    /// <summary>The default roots accepted by the atom importer. Dungeon content is owned by the
+    /// dungeon loaders and has a different JSON envelope, so it must not be fed to AtomSeedFile.
+    /// An explicitly named root remains the documented migration escape hatch and is swept whole.</summary>
+    public static IReadOnlyList<string> AtomRoots(string seedRoot, bool explicitRoot, Func<string, bool> exists)
+    {
+        if (explicitRoot) return new[] { seedRoot };
+
+        return AtomFolders
             .Select(d => Path.Combine(seedRoot, d))
             .Where(exists)
             .ToArray();

@@ -8,4 +8,5 @@ export * from "./log-store";
 export * from "./cheat-dirty";
 export * from "./demons";
 export * from "./commanders";
+export * from "./onboarding";
 export * from "./actorSurface";

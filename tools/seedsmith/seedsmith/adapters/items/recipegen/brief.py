@@ -21,6 +21,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from seedsmith.adapters.items.acquisition import Acquisition
+from seedsmith.corpus import Corpus
 from seedsmith.pipeline.model import audit_schema
 
 from ..basetypegen import emit as basetype_emit
@@ -56,13 +58,23 @@ def load_cost_bands(path: "Path | None" = None) -> "tuple[str, ...]":
     return tuple(sorted(numeric, key=lambda k: numeric[k]))
 
 
-def load_material_pool() -> "tuple[str, ...]":
-    """The 27-id issuable vocabulary, in `MaterialCatalog.All`'s own order — never the four legacy
-    shard ids (`materialgen.vocab.is_legacy_shard_id`), which resolve but are never issuable, so a
-    recipe naming one is a recipe `MaterialRecipeCatalog.Load` refuses at import
-    (`MaterialUnissuableRule` — confirmed against the real 30-entry corpus, see this package's
-    `run.py` module docstring for the finding)."""
-    return tuple(m.runtime_id for m in material_vocab.ISSUABLE)
+def load_material_pool(items_root: "Path | None" = None) -> "tuple[str, ...]":
+    """Issued materials the player can obtain in the current corpus, in catalog order.
+
+    Issuable is necessary but insufficient: a recipe spending an issued material that no drop table
+    yields and no material-output recipe produces is a gated reachability defect. This mirrors
+    `metrics.linkage.RecipeInputs` before the model sees its vocabulary, so new recipes cannot add
+    another unreachable input while old corpus debt is reconciled separately.
+    """
+    corpus = Corpus.load(items_root or REPO_ROOT / "data" / "seed" / "items")
+    acquisition = Acquisition.build(corpus)
+    obtainable = set(acquisition.material_runtime_ids)
+    obtainable.update(
+        recipe.get("outputRef")
+        for recipe in corpus.by_kind("recipe")
+        if recipe.get("outputKind") == "material" and recipe.get("outputRef")
+    )
+    return tuple(m.runtime_id for m in material_vocab.ISSUABLE if m.runtime_id in obtainable)
 
 
 def load_used_container_refs(recipes_path: "Path | None" = None) -> "frozenset[str]":
@@ -159,6 +171,13 @@ class RecipeBrief:
 
     def render(self) -> str:
         theme_line = f"\nTheme: {self.theme_note}" if self.theme_note else ""
+        def cost_rule(operation: str) -> str:
+            allowed = ', '.join(sorted(opvocab.ALLOWED_CLASSES[operation])) or '(no materials)'
+            catalyst = opvocab.catalyst_for(operation)
+            return f"  - {operation}: {allowed}" + (
+                f"; if using a catalyst, it must be {catalyst}" if catalyst else "")
+
+        cost_rules = "\n".join(cost_rule(operation) for operation in self.operations)
         forge_lines = ""
         if self.forge_target is not None:
             candidates = existing_forge_candidates(self.forge_target)
@@ -181,14 +200,16 @@ Choose, and nothing else:
    instance the player already owns.
 4. `frame` — `humanoid`, `plant`, or `any` (every mutation-output recipe in the shipped corpus is
    `any`, since it works on whatever instance the player owns).
-5. `costLines` — zero or more `{{material, costBand}}` pairs. `material` is one of the 27 issuable
-   ids below; `costBand` is one of the 5 bands below. Never invent a material id or a bare number —
-   a band is what you author, not a quantity.
+5. `costLines` — zero or more `{{material, costBand}}` pairs. `material` is one of the
+   {len(self.material_pool)} obtainable, issuable ids below; `costBand` is one of the 5 bands below.
+   Never invent a material id or a bare number — a band is what you author, not a quantity. An empty list is always legal. If you add a material,
+   its class MUST be permitted for your chosen operation by this matrix:
+{cost_rules}
 6. `soulsCostBand` — optional, one of the 5 bands below.{forge_lines}
 
 Legal operations ({len(self.operations)}): {', '.join(self.operations)}
 
-Issuable material ids ({len(self.material_pool)}): {', '.join(self.material_pool)}
+Obtainable material ids ({len(self.material_pool)}): {', '.join(self.material_pool)}
 
 Legal cost bands ({len(self.cost_bands)}): {', '.join(self.cost_bands)}
 

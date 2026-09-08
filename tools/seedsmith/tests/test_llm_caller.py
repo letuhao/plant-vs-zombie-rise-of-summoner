@@ -229,12 +229,51 @@ class LiveAnswerCallerTests(unittest.TestCase):
         call = live_answer_caller(self.config)
         self.assertEqual(call("brief", {}), {"name": "Test Widget"})
 
+    def test_non_json_answer_gets_one_explicit_json_repair_prompt(self) -> None:
+        self.server.queue("I cannot provide that format.")
+        self.server.queue('{"name": "Repaired Widget"}')
+        call = live_answer_caller(self.config)
+
+        self.assertEqual(call("brief", {}), {"name": "Repaired Widget"})
+        self.assertEqual(len(self.server.requests), 2)
+        self.assertIn("not a JSON object", self.server.requests[1]["messages"][1]["content"])
+        self.assertIn("Original authoring brief:\nbrief",
+                      self.server.requests[1]["messages"][1]["content"])
+
     def test_blocked_answer_passes_through_as_a_plain_field(self) -> None:
         """`{"blocked": "..."}` is not special to this function — it is just another field the
         caller (`run_draws`) itself interprets; this proves it survives the round trip unchanged."""
         self.server.queue('{"blocked": "no theme fits"}')
         call = live_answer_caller(self.config)
         self.assertEqual(call("brief", {}), {"blocked": "no theme fits"})
+
+    def test_validator_defect_gets_one_named_repair_prompt(self) -> None:
+        """Endpoint-side strict mode is advisory; the local validator owns acceptance."""
+        self.server.queue('{"blocked": true}', '{"blocked": "no legal family fits"}')
+
+        def validate(answer: dict, _schema: dict) -> list[str]:
+            if answer.get("blocked") is True:
+                return ["field 'blocked' should be string"]
+            return []
+
+        call = live_answer_caller(self.config, validator=validate)
+        self.assertEqual(call("brief", {"type": "object"}),
+                         {"blocked": "no legal family fits"})
+        self.assertEqual(len(self.server.requests), 2)
+        repair = self.server.requests[1]["messages"][1]["content"]
+        self.assertIn("failed local validation", repair)
+        self.assertIn("field 'blocked' should be string", repair)
+
+    def test_schema_type_violation_gets_one_named_repair_prompt_without_adapter_help(self) -> None:
+        """The transport boundary catches a server that ignores `strict` response formatting."""
+        self.server.queue('{"blocked": true}', '{"blocked": "no legal family fits"}')
+        schema = {"type": "object", "properties": {"blocked": {"type": "string"}}}
+
+        call = live_answer_caller(self.config)
+        self.assertEqual(call("brief", schema), {"blocked": "no legal family fits"})
+        self.assertEqual(len(self.server.requests), 2)
+        self.assertIn("field 'blocked' should be string",
+                      self.server.requests[1]["messages"][1]["content"])
 
 
 class SelfHealTests(unittest.TestCase):

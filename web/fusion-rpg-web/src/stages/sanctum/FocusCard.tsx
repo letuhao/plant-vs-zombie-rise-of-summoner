@@ -1,7 +1,6 @@
 import type { ActorRungState } from "@/ui/actor";
 import { ActorCard } from "@/ui/actor";
 import { Button } from "@/ui";
-import { FirstRunReveal } from "./FirstRunReveal";
 
 export type OverdueContract = {
   instanceId: string;
@@ -43,7 +42,14 @@ export function FocusCard({
   onOpenExpeditions?: () => void;
 }) {
   if (actorCount === 0 || !firstActor) {
-    return <FirstRunReveal onBind={onOpenCreatures} />;
+    return (
+      <div className="rounded-md border border-panel bg-panel p-4" data-testid="focus-card-first-run">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">First lawn run</p>
+        <p className="mt-1 font-display text-lg text-text">Win a run to meet Crazy Dave</p>
+        <p className="mt-1 text-sm text-muted">Your first victory unlocks the commander and starts the saved progression path.</p>
+        <Button size="sm" className="mt-3" data-testid="focus-card-cta" onClick={onOpenCreatures}>View creatures</Button>
+      </div>
+    );
   }
 
   if (overdueContract) {

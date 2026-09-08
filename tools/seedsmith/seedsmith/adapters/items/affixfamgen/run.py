@@ -22,6 +22,7 @@ from seedsmith.pipeline.run_ledger import RunLedger
 
 from . import brief as brief_mod
 from . import emit
+from . import schema as schema_mod
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_LEDGER = REPO_ROOT / "data" / "seed" / "items" / "_runs" / "affix-families-gen.ledger.json"
@@ -162,12 +163,28 @@ def main(argv=None) -> int:
             "seedsmith: --write refused — no --endpoint. A real run needs a live model "
             "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
 
+    free_pairs = brief_mod.free_channel_ops(brief.partition, args.affix_kind)
+    if not free_pairs:
+        print(json.dumps({
+            "outcome": "blocked",
+            "reason": "no free (channel, op) pair remains in this partition for the requested kind",
+        }, ensure_ascii=False, indent=2))
+        return 0
+
     from ....pipeline.llm_caller import live_answer_caller, load_config
 
     base_config = load_config()
     config = dataclasses.replace(base_config, endpoint=args.endpoint,
                                  model=args.model or base_config.model)
-    answer = live_answer_caller(config)(brief.render(), brief.schema)
+    validator = lambda answer, schema: schema_mod.validate_answer(
+        answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind)
+    answer = live_answer_caller(config, validator=validator)(brief.render(), brief.schema)
+
+    defects = validator(answer, brief.schema)
+    if defects:
+        print(json.dumps({"outcome": "refused", "reason": "invalid model response: " + "; ".join(defects)},
+                         ensure_ascii=False, indent=2))
+        return 3
 
     if answer.get("blocked"):
         print(json.dumps({"outcome": "blocked", "reason": answer["blocked"]},

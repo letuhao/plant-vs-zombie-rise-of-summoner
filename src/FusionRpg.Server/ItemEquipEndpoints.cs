@@ -94,6 +94,10 @@ public sealed class ItemEquipService
             return Refuse("equip", specimenId, roleId, instanceId,
                 $"equip.role-unknown: '{roleId}' is not one of the sixteen registry roles");
 
+        if (role == ItemRole.Standard)
+            return Refuse("equip", specimenId, roleId, instanceId,
+                "equip.commander-scope-required: the standard role belongs to the player-owned commander scope");
+
         if (!TryResolveSpecimen(playerId, specimenId, out var actor, out var specimenRefusal))
             return Refuse("equip", specimenId, roleId, instanceId, specimenRefusal);
 

@@ -59,6 +59,52 @@ export type ActorDerivedDto = {
   channels: DerivedChannelDto[];
 };
 
+/** Wire shape for GET /api/actors/{id}/sheet (ActorSheetDto). */
+export type ActorContributionDto = {
+  sourceId: string;
+  label: string;
+  op: string;
+  value: number;
+};
+
+export type ActorSheetChannelDto = {
+  channelId: string;
+  displayName: string;
+  reading: string;
+  composeKind: string;
+  value: number;
+  contributions: ActorContributionDto[];
+};
+
+export type ActorSheetDto = {
+  instanceId: string;
+  playerId: number;
+  side: string;
+  typeId: number;
+  displayName: string | null;
+  level: number;
+  derived: ActorSheetChannelDto[];
+  primary: ActorContributionDto[];
+};
+
+/** GG-49 fiction labels when lean `/derived` omits `label`. */
+export function contributionFictionLabel(sourceId: string): string {
+  if (!sourceId.trim()) return "(unattributed)";
+  if (sourceId === "rpg.progression") return "Progression";
+  if (sourceId.startsWith("equip:")) {
+    const parts = sourceId.split(":");
+    const role = parts[1] ?? "unknown";
+    const item = parts[2] ?? "";
+    return !item || item === "unknown" ? `Equip · ${role}` : `Equip · ${role} (${item})`;
+  }
+  if (sourceId.startsWith("aptitude.")) return `Aptitude · ${sourceId.slice("aptitude.".length)}`;
+  if (sourceId.startsWith("tree.")) return `Tree · ${sourceId.slice("tree.".length).replace(/\./g, "/")}`;
+  if (sourceId.startsWith("status:")) return `Status · ${sourceId.slice("status:".length)}`;
+  if (sourceId.startsWith("grant:")) return `Grant · ${sourceId.slice("grant:".length)}`;
+  if (sourceId.startsWith("primary:")) return `Primary · ${sourceId.slice("primary:".length)}`;
+  return sourceId;
+}
+
 // ---- Queries ----
 
 export function useAuraCatalog() {
@@ -81,6 +127,14 @@ export function useActorDerived(instanceId: string | null | undefined) {
   return useQuery({
     queryKey: ["actorDerived", instanceId ?? ""] as const,
     queryFn: () => getJson<ActorDerivedDto>(`/api/actors/${encodeURIComponent(instanceId!)}/derived`),
+    enabled: !!instanceId
+  });
+}
+
+export function useActorSheet(instanceId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["actorSheet", instanceId ?? ""] as const,
+    queryFn: () => getJson<ActorSheetDto>(`/api/actors/${encodeURIComponent(instanceId!)}/sheet`),
     enabled: !!instanceId
   });
 }

@@ -287,16 +287,20 @@ public class SeedScannerTests : IDisposable
     }
 
     [Fact]
-    public void The_real_repos_own_data_seed_dungeon_tree_has_none_of_the_seven_folders_yet()
+    public void The_real_repo_dungeon_tree_has_all_seven_owned_corpus_folders()
     {
-        // Pins the honest, current state this task's own evidence names: adding the seven folders to
-        // OwnedFolders is a no-op today because none of them exist on disk -- if this test ever
-        // starts failing, real dungeon content has landed and the "no-op today" claim needs revisiting.
+        // D4.16 content has landed since the original no-op pin. Keep this test tied to the real tree
+        // so ownership drift is visible, while the atom import path uses AtomRoots and excludes these
+        // dungeon-specific envelopes.
         var root = RepoRoot();
         var dungeonRoot = Path.Combine(root, "data", "seed", "dungeon");
         Assert.True(Directory.Exists(dungeonRoot));
         var subfolders = Directory.GetDirectories(dungeonRoot).Select(Path.GetFileName).ToList();
-        Assert.Equal(new[] { "_containers", "_plan", "_registry" }, subfolders!.OrderBy(x => x, StringComparer.Ordinal));
+        Assert.Contains("_containers", subfolders!);
+        Assert.Contains("_plan", subfolders!);
+        Assert.Contains("_registry", subfolders!);
+        foreach (var folder in new[] { "domains", "rooms", "layouts", "events", "quests", "encounters", "supplies" })
+            Assert.Contains(folder, subfolders!);
     }
 
     static string RepoRoot()
