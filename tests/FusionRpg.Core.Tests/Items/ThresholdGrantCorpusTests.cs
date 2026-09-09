@@ -15,13 +15,15 @@ public class ThresholdGrantCorpusTests
 
     internal static IReadOnlyList<SetDef> Sets() =>
         Directory.EnumerateFiles(Path.Combine(ItemsDir(), "sets"), "*.json")
+            .Where(p => !Path.GetFileName(p).EndsWith(".ledger.json", StringComparison.Ordinal))
             .OrderBy(p => p, StringComparer.Ordinal)
             .SelectMany(p => SetCorpus.Parse(File.ReadAllText(p)))
             .ToList();
 
     internal static IReadOnlyList<CharmDef> Charms() =>
         Directory.EnumerateFiles(Path.Combine(ItemsDir(), "charms"), "*.json")
-            .Where(p => !Path.GetFileName(p).Equals("resonance.json", StringComparison.Ordinal))
+            .Where(p => !Path.GetFileName(p).Equals("resonance.json", StringComparison.Ordinal)
+                     && !Path.GetFileName(p).Equals("set-charm-gen.ledger.json", StringComparison.Ordinal))
             .OrderBy(p => p, StringComparer.Ordinal)
             .SelectMany(p => CharmCorpus.Parse(File.ReadAllText(p)))
             .ToList();

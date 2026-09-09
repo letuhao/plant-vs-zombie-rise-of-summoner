@@ -468,6 +468,286 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-muzzle-b-013",
+      "nameKey": "base.pulsing-pod",
+      "name": "Pulsing Pod",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.pulsing-pod",
+      "flavorKey": "flavor.base.pulsing-pod",
+      "flavor": "A thick, translucent bulb that rhythmically expands and contracts, building internal pressure before a violent release.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-014",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-015",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-016",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A bulbous, calcified pod that rhythmically pulses with internal pressure. It releases a fine mist of caustic spores through a jagged, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-017",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-018",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-019",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-020",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of calcified briars. It releases a fine mist of caustic spores through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

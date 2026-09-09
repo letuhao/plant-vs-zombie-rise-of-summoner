@@ -88,6 +88,26 @@ def _next_seq_from_ledger(done: "dict[str, dict]", prefix: str) -> int:
     return (max(indices) + 1) if indices else 0
 
 
+def _draw_indices(done: "dict[str, dict]", prefix: str, count: int,
+                  existing: "dict[str, dict]") -> "list[int]":
+    """Choose invalid/uncheckpointed draw slots first, then append new slots.
+
+    A prior process can have checkpointed a row before its corpus write completed. Reusing the
+    lowest invalid slot lets resume repair that hole instead of advancing forever past it.
+    """
+    indexed = {
+        idx: (sid, row) for sid, row in done.items()
+        if (idx := _seq_from_subject(sid, prefix)) is not None
+    }
+    invalid = [idx for idx, (sid, row) in indexed.items() if not is_valid(sid, row, existing=existing)]
+    next_index = max(indexed, default=-1) + 1
+    selected = sorted(invalid)
+    while len(selected) < count:
+        selected.append(next_index)
+        next_index += 1
+    return selected[:count]
+
+
 def is_valid(subject_id: str, entry: dict, *, existing: "dict[str, dict]") -> bool:
     entry_id = entry.get("entryId")
     if not entry_id or entry_id not in existing:
@@ -107,14 +127,14 @@ def plan_run(*, role: str, frame: str, band: str, count: int, ledger: RunLedger,
     existing = load_existing(role, frame, band, base_types_dir=base_types_dir)
     done = ledger.read_done()
     prefix = _draw_prefix(role, frame, band)
-    start_draw = _next_seq_from_ledger(done, prefix)
+    draw_indices = _draw_indices(done, prefix, count, existing)
     # The entry's own minted-id sequence continues past the real corpus, never the draw counter —
     # the two are independent numbers (a draw may be blocked and mint nothing).
     start_entry_seq = emit_mod.next_seq(tuple(existing))
 
     subjects = []
     for i in range(count):
-        draw_index = start_draw + i
+        draw_index = draw_indices[i]
         b = brief_mod.build_base_type_brief(role, frame, band, theme_note=theme_hint,
                                             base_types_dir=base_types_dir)
         subjects.append(Subject(
@@ -133,7 +153,9 @@ def resolve_answer(answer: dict, *, partition: "brief_mod.PartitionContext", seq
 
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
-             call: "Callable[[str, dict], dict]") -> "tuple[dict[str, dict], dict[str, dict]]":
+             call: "Callable[[str, dict], dict]",
+             persist: "Callable[[dict], None] | None" = None
+             ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Executes every subject in `plan`, marking each resolved draw done in `ledger` as it
     completes — not all-or-nothing, mirroring `milestonegen.run.run_draws`."""
     gt = tuning.load_gen_tuning()
@@ -160,6 +182,11 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue
+        if persist is not None:
+            # Corpus first, ledger second. If the process dies between these operations, the next
+            # resume retries the unledgered draw instead of advancing past content that was never
+            # written to disk.
+            persist(entry)
         fresh[entry["id"]] = entry
         existing[entry["id"]] = entry
         ledger.mark_done(subject.subject_id, {
@@ -253,10 +280,15 @@ def main(argv=None) -> int:
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     plan = plan_run(role=args.role, frame=args.frame, band=args.band, count=args.count,
                     ledger=ledger, theme_hint=args.theme)
-    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config))
-    if fresh:
-        write_corpus(args.role, args.frame, args.band, fresh, existing=plan.existing,
-                    model=config.model, authored_utc=args.authored_utc)
+    persisted = dict(plan.existing)
+
+    def persist(entry: dict) -> None:
+        write_corpus(args.role, args.frame, args.band, {entry["id"]: entry}, existing=persisted,
+                     model=config.model, authored_utc=args.authored_utc)
+        persisted[entry["id"]] = entry
+
+    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config),
+                               persist=persist)
     print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
                       "blocked": len(blocked), "blockedReasons": blocked},
                      ensure_ascii=False, indent=2))

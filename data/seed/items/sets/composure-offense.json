@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-composure-offense",
+    "partition": "sets/composure-offense",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.composure-offense-001",
+      "nameKey": "set.finesse-of-the-duelist",
+      "name": "Finesse of the Duelist",
+      "themeKey": "build.composure-offense",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.lifesteal",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "omni"
+              }
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.quickening",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A single, precise strike is worth more than a thousand clumsy blows.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

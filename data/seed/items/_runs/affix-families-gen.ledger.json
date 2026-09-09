@@ -15,15 +15,45 @@
       "kindId": "stat.derived",
       "mintedId": "atom.elpw-surfeit"
     },
+    "g.elem-power:stat.derived:surge": {
+      "groupId": "g.elem-power",
+      "kindId": "stat.derived",
+      "mintedId": "atom.elpw-surge"
+    },
+    "g.evade:stat.derived:evd": {
+      "groupId": "g.evade",
+      "kindId": "stat.derived",
+      "mintedId": "atom.evd-evd"
+    },
+    "g.precision:stat.derived:focus": {
+      "groupId": "g.precision",
+      "kindId": "stat.derived",
+      "mintedId": "atom.prec-focus"
+    },
     "g.shield-stat:stat.derived:absolute": {
       "groupId": "g.shield-stat",
       "kindId": "stat.derived",
       "mintedId": "atom.shld-absolute"
     },
+    "g.shield-stat:stat.derived:toughness": {
+      "groupId": "g.shield-stat",
+      "kindId": "stat.derived",
+      "mintedId": "atom.shld-toughness"
+    },
+    "g.tempo:stat.modify:pulse": {
+      "groupId": "g.tempo",
+      "kindId": "stat.modify",
+      "mintedId": "atom.tempo-pulse"
+    },
     "g.tempo:stat.modify:wildgrowth": {
       "groupId": "g.tempo",
       "kindId": "stat.modify",
       "mintedId": "atom.tempo-wildgrowth"
+    },
+    "g.ward:stat.derived:flux": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-flux"
     }
   },
   "schemaVersion": 1

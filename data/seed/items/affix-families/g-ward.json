@@ -427,6 +427,25 @@
         "defensive"
       ],
       "notes": "NEW family, stem `ward`, word `brace`. Fills the one on-hit-defense combination the shipped roster leaves open on combat.crit.resist.*: stoicism is a Flat numeric resist, this is a Flag -- an outright per-element crit immunity, the same shape distinction immunity (Flag on status.immune) makes against stalwart (Flat on status.resist) two entries above, applied to the crit-resist channel instead of the status channel. `powerBand: low` keeps a binary immunity from outclassing stoicism's partial, always-on resist -- a hard gate is worth less per point of item budget than a number that always applies. Graft/bark/chitin imagery keeps this in the fusion register (plant graft plus a hardened zombie/insect plate) rather than reusing calcify/ossify from ward-harden just above. QUARANTINE: stat.derived, D6."
+    },
+    {
+      "id": "atom.ward-flux",
+      "nameKey": "affix.ward-flux",
+      "name": "ward-flux",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "status.resist",
+        "op": "Replace"
+      },
+      "roles": [
+        "ward-array"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "ward-flux",
+      "tags": [
+        "arcane",
+        "defensive"
+      ]
     }
   ]
 }

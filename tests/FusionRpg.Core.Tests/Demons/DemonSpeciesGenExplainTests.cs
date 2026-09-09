@@ -20,7 +20,7 @@ public class DemonSpeciesGenExplainTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesGen")}\" -- --explain Peashooter",
+            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesGen")}\" --no-restore -- --explain Peashooter",
             WorkingDirectory = repoRoot,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -64,7 +64,7 @@ public class DemonSpeciesGenExplainTests
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesGen")}\" -- --export-legacy \"{outPath}\"",
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesGen")}\" --no-restore -- --export-legacy \"{outPath}\"",
                 WorkingDirectory = repoRoot,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

@@ -461,6 +461,26 @@
         "defensive"
       ],
       "notes": "NEW family, stem `evd`, word `husk` — an outer shell that takes the worst of a blow so the body inside does not have to. The floor sibling for `combat.crit.resist.damage.*`, same Replace judgement call as evd-brace and evd-scar above. `powerBand: low`. RUNTIME: quarantined None/None/None (D6) — the seventh and last entry in this partition, closing out the Flat(evasion)/Increased/Replace grid across all three channels this group's fiction covers: dodge, crit resistance, and mitigation of a critical hit that still lands."
+    },
+    {
+      "id": "atom.evd-evd",
+      "nameKey": "affix.evade",
+      "name": "evade",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.dodge.{variant}",
+        "op": "Flag"
+      },
+      "roles": [
+        "core-guard",
+        "ward-array"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "Evade {value}",
+      "tags": [
+        "defensive",
+        "utility"
+      ]
     }
   ]
 }

@@ -23,6 +23,10 @@
     "milestone-draw-005": {
       "entryId": "enh.016",
       "runtimeFamily": "atom.enhance-might"
+    },
+    "milestone-draw-006": {
+      "entryId": "enh.017",
+      "runtimeFamily": "atom.enhance-bloom"
     }
   },
   "schemaVersion": 1

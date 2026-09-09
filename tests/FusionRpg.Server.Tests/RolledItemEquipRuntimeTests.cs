@@ -57,7 +57,7 @@ public class RolledItemEquipRuntimeTests : IDisposable
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
-            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v3.json")));
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v5.json")));
         FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
             FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(Read("battle-resources.v1.json")));
         FusionRpg.Core.Actions.ActionTimingPolicy.Configure(

@@ -602,6 +602,30 @@
       "tags": [],
       "flavor": "A heavy, golden vessel shaped like a blooming sunflower, forged from solidified sunlight and packed with endless, shimmering seeds.",
       "notes": "themeKey: demon.twinflower"
+    },
+    {
+      "id": "charm.econ-022",
+      "nameKey": "charm.gilded-bloom",
+      "name": "Gilded Bloom",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, petal-shaped coin of solid silver, inlaid with a single, brilliant diamond at its center.",
+      "notes": "themeKey: demon.marigold"
     }
   ]
 }

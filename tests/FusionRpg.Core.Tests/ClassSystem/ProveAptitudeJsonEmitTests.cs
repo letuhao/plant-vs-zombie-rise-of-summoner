@@ -99,7 +99,7 @@ public class ProveAptitudeJsonEmitTests : IClassFixture<ProveAptitudeJsonEmitTes
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "ProveAptitude")}\" -- {args}",
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "ProveAptitude")}\" --no-restore -- {args}",
                 CreateNoWindow = true,
                 WorkingDirectory = repoRoot
             };

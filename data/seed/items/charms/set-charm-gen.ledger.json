@@ -114,6 +114,126 @@
       "blockedReason": "blocked: The theme of 'pitcher/attack' requires offensive scaling or multipliers to feel impactful, but the brief restricts charms to FLAT effects only, making it impossible to express the 'power' of a pitcher effectively.",
       "entryId": "charm.(axis-group)-NNN for cabbagepult",
       "attempts": 1
+    },
+    "charm-species-demon.caltrop": {
+      "entryId": "charm.off-ctrl-039",
+      "attempts": 1
+    },
+    "charm-species-demon.caltropnut": {
+      "entryId": "charm.surv-util-030",
+      "attempts": 1
+    },
+    "charm-species-demon.chomper": {
+      "entryId": "charm.off-ctrl-040",
+      "attempts": 1
+    },
+    "charm-species-demon.cornpot": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs '制成' (made/forged) and '子弹' (bullet) imply high-velocity projectiles or rapid-fire mechanics, which are inherently tied to 'volley' or 'death-salvo' families. However, the prompt's constraints on 'material and form' for a charm (which applies to all actors) create a conflict between the 'bullet' motif and the 'flat effect' requirement. A bullet is a projectile meant to be fired, whereas a charm is a passive aura. To represent a bullet as a charm, it must be a 'salvo' of impact, but the species '玉米花盆' (Corn Pot) is not provided with a specific combat style in the brief to justify a specific family choice without violating the 'no multiplier/percentage' rule for 'breadth with depth' mechanics.",
+      "entryId": "charm.(axis-group)-NNN for cornpot",
+      "attempts": 1
+    },
+    "charm-species-demon.dolldiamond": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs 'world' and 'light' suggest a scale and complexity that exceeds the 'flat effect' constraint of a charm.",
+      "entryId": "charm.(axis-group)-NNN for dolldiamond",
+      "attempts": 1
+    },
+    "charm-species-demon.flagzombie": {
+      "entryId": "charm.surv-util-031",
+      "attempts": 2
+    },
+    "charm-species-demon.fumeshroom": {
+      "entryId": "charm.off-ctrl-041",
+      "attempts": 2
+    },
+    "charm-species-demon.garlic": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs of 'zombie' and 'garlic' suggest a theme of rot and warding, but the available families do not allow for a cohesive expression of 'zombie' (undead/reanimation) without violating the 'flat effect only' rule or the specific family constraints.",
+      "entryId": "charm.(axis-group)-NNN for garlic",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicpea": {
+      "entryId": "charm.off-ctrl-042",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingpea": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motif '豌豆' (pea) implies a projectile-based, rapid-fire nature which is best expressed through 'atom.volley' or 'atom.death-salvo', but the prompt's requirement for 'material and form' in a charm (which is a flat effect for all actors) creates a thematic tension between the 'machine gun' identity and the 'flat effect' constraint of a charm.",
+      "entryId": "charm.(axis-group)-NNN for gatlingpea",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnochomper": {
+      "entryId": "charm.off-ctrl-043",
+      "attempts": 1
+    },
+    "charm-species-demon.jalapeno": {
+      "entryId": "charm.surv-util-032",
+      "attempts": 1
+    },
+    "charm-species-demon.jalastar": {
+      "entryId": "charm.off-ctrl-044",
+      "attempts": 1
+    },
+    "charm-species-demon.lanterncactus": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs '仙人掌' (cactus) and '伤害' (damage/harm) are inherently tied to 'plant' and 'growth' concepts which are restricted by the 'Avoid entirely' list (plant, growing, etc.). While the form can be expressed as a shard, the core identity of the species' motif conflicts with the negative constraints.",
+      "entryId": "charm.(axis-group)-NNN for lanterncactus",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternchomper": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The required motifs (cactus, damage, light) cannot be expressed through the provided 'always-on families' without violating the 'Avoid entirely: plant' constraint, as all relevant families (e.g., atom.sunbloom, atom.gardener, atom.life-graft) are explicitly forbidden by the brief's constraints on the theme's expression.",
+      "entryId": "charm.(axis-group)-NNN for lanternchomper",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternpea": {
+      "entryId": "charm.off-ctrl-045",
+      "attempts": 1
+    },
+    "charm-species-demon.marigold": {
+      "entryId": "charm.econ-022",
+      "attempts": 2
+    },
+    "charm-species-demon.normalzombie": {
+      "outcome": "blocked",
+      "blockedReason": "The theme of 'individualism' (个体) and 'unworthiness' (不配) contradicts the mechanical requirement of a charm to apply to 'every deployed actor' as a collective breadth. To honor the motif of the individual vs. the mass, the charm must be a signet that rejects the collective, but the prompt requires a single charm for the species.",
+      "entryId": "charm.(axis-group)-NNN for normalzombie",
+      "attempts": 1
+    },
+    "charm-species-demon.plantern": {
+      "entryId": "charm.off-ctrl-046",
+      "attempts": 1
+    },
+    "charm-species-demon.pumpkin": {
+      "entryId": "charm.surv-util-033",
+      "attempts": 1
+    },
+    "charm-species-demon.snowpeashooter": {
+      "entryId": "charm.off-ctrl-047",
+      "attempts": 2
+    },
+    "charm-species-demon.squash": {
+      "outcome": "blocked",
+      "blockedReason": "The theme of 'approaching' (接近) implies a movement or proximity mechanic that cannot be expressed through a FLAT effect on a charm.",
+      "entryId": "charm.(axis-group)-NNN for squash",
+      "attempts": 1
+    },
+    "charm-species-demon.sunchomper": {
+      "entryId": "charm.surv-util-034",
+      "attempts": 1
+    },
+    "charm-species-demon.threecabbage": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs '弾射' (eject/launch) and '出' (out) imply a kinetic or projectile-based mechanic that requires a 'volley' or 'death-salvo' family, but the species' core identity as a 'launcher' (炮手) is best represented by offensive utility which is not a single-axis choice in the provided schema for a single charm.",
+      "entryId": "charm.(axis-group)-NNN for threecabbage",
+      "attempts": 1
+    },
+    "charm-species-demon.threeplantern": {
+      "outcome": "blocked",
+      "blockedReason": "blocked: The motifs 'three lines' and 'emission' imply a specific geometric/mechanical form that cannot be expressed through the provided 'always-on families' without violating the 'no plant/pot/roof' constraint or the 'flat effect' constraint.",
+      "entryId": "charm.(axis-group)-NNN for threeplantern",
+      "attempts": 1
     }
   }
 }

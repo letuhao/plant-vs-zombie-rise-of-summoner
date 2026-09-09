@@ -469,6 +469,294 @@
           "family": "atom.enhance-vigor"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-013",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-014",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plate designed to deflect incoming kinetic energy away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-015",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It provides a stable foundation for mounting defensive apparatus.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-016",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It serves as a stable mounting point for defensive energy emitters.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-017",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-018",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. Its wide surface area provides a stable mounting point for defensive energy emitters.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-019",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plate designed to deflect kinetic impact away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-020",
+      "nameKey": "base.reinforced-pauldron",
+      "name": "Reinforced Pauldron",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-pauldron",
+      "flavorKey": "flavor.base.reinforced-pauldron",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It provides a stable mounting point for defensive energy emitters.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

@@ -204,6 +204,151 @@
     "set-species-demon.wallnut": {
       "entryId": "set.wallnut-001",
       "attempts": 1
+    },
+    "set-build-build.might-offense": {
+      "outcome": "escalated",
+      "entryId": "set.might-offense-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.omni'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-build-build.might-defense": {
+      "entryId": "set.might-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.might-balance": {
+      "entryId": "set.might-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.fortitude-offense": {
+      "entryId": "set.fortitude-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.fortitude-defense": {
+      "entryId": "set.fortitude-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.fortitude-balance": {
+      "entryId": "set.fortitude-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.vigor-offense": {
+      "entryId": "set.vigor-offense-001",
+      "attempts": 2
+    },
+    "set-build-build.vigor-defense": {
+      "entryId": "set.vigor-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.vigor-balance": {
+      "entryId": "set.vigor-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.onslaught-offense": {
+      "entryId": "set.onslaught-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.onslaught-defense": {
+      "entryId": "set.onslaught-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.onslaught-balance": {
+      "entryId": "set.onslaught-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.agility-offense": {
+      "entryId": "set.agility-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.agility-defense": {
+      "entryId": "set.agility-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.agility-balance": {
+      "entryId": "set.agility-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.composure-offense": {
+      "entryId": "set.composure-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.composure-defense": {
+      "entryId": "set.composure-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.composure-balance": {
+      "entryId": "set.composure-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.pierce-offense": {
+      "entryId": "set.pierce-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.pierce-defense": {
+      "entryId": "set.pierce-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.pierce-balance": {
+      "entryId": "set.pierce-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.focus-offense": {
+      "entryId": "set.focus-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.focus-defense": {
+      "entryId": "set.focus-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.focus-balance": {
+      "entryId": "set.focus-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.bulwark-offense": {
+      "entryId": "set.bulwark-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.bulwark-defense": {
+      "entryId": "set.bulwark-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.bulwark-balance": {
+      "entryId": "set.bulwark-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.retribution-defense": {
+      "entryId": "set.retribution-defense-001",
+      "attempts": 2
+    },
+    "set-build-build.retribution-balance": {
+      "entryId": "set.retribution-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.precision-offense": {
+      "entryId": "set.precision-offense-001",
+      "attempts": 1
+    },
+    "set-build-build.precision-defense": {
+      "entryId": "set.precision-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.precision-balance": {
+      "entryId": "set.precision-balance-001",
+      "attempts": 1
+    },
+    "set-build-build.ferocity-offense": {
+      "entryId": "set.ferocity-offense-001",
+      "attempts": 2
+    },
+    "set-build-build.ferocity-defense": {
+      "entryId": "set.ferocity-defense-001",
+      "attempts": 1
+    },
+    "set-build-build.ferocity-balance": {
+      "entryId": "set.ferocity-balance-001",
+      "attempts": 1
     }
   }
 }

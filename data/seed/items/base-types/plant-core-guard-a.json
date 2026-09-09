@@ -469,6 +469,297 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.plant-stem-a-013",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, knotty protrusion of hardened wood that serves as a natural shield for the plant's most vital junctions.",
+      "tags": [
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-014",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, knotty protrusion of hardened sap and wood that serves as a natural shield for the plant's vital conduits.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-015",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, knotty protrusion of hardened sap and wood, shaped to absorb the impact of a heavy blow.",
+      "tags": [
+        "heavy",
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-016",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, knotty protrusion of hardened growth that serves as a natural shield for the stem's vital conduits.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-017",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, irregular knot of hardened wood that serves as a natural shield against blunt impact.",
+      "tags": [
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-018",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, calcified knot of growth that has hardened into a natural shield. It feels unnaturally heavy for its size, as if it holds the weight of the entire plant's history.",
+      "tags": [
+        "heavy",
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-019",
+      "nameKey": "base.thickened-culm",
+      "name": "Thickened Culm",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-culm",
+      "flavorKey": "flavor.base.thickened-culm",
+      "flavor": "A dense, reinforced section of a primary stem, hardened by mineral deposits to serve as a sturdy defensive pillar.",
+      "tags": [
+        "heavy",
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-020",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, knotty protrusion of hardened sap and wood that serves as a natural shield for the plant's vital conduits.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

@@ -735,6 +735,126 @@
       "flavor": "A dented, heavy iron dome that has lost its luster, containing nothing but the echoes of failed strikes.",
       "notes": "themeKey: demon.bucketzombie",
       "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-030",
+      "nameKey": "charm.spiked-nut-hull-chassis",
+      "name": "Spiked Nut-Hull Chassis",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.hit-retort",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, jagged shell of reinforced nut-matter, bristling with iron-hard thorns and smelling of heavy grease.",
+      "notes": "themeKey: demon.caltropnut"
+    },
+    {
+      "id": "charm.surv-util-031",
+      "nameKey": "charm.hand-of-the-great-banner",
+      "name": "Hand of the Great Banner",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A large, tattered flag held tightly in a skeletal hand, cherished in secret by the undead.",
+      "notes": "themeKey: demon.flagzombie"
+    },
+    {
+      "id": "charm.surv-util-032",
+      "nameKey": "charm.spike-husk-relic",
+      "name": "Spike-Husk Relic",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, calcified shard of dried skin that feels like walking on broken earth.",
+      "notes": "themeKey: demon.jalapeno"
+    },
+    {
+      "id": "charm.surv-util-033",
+      "nameKey": "charm.verdant-canopy",
+      "name": "Verdant Canopy",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.warding",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A woven lattice of thick, fibrous vines and hardened pumpkin rinds, shaped like a protective roof to shelter those beneath.",
+      "notes": "themeKey: demon.pumpkin"
+    },
+    {
+      "id": "charm.surv-util-034",
+      "nameKey": "charm.the-maw-s-completion",
+      "name": "The Maw's Completion",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, circular ring of polished bone and sun-bleached keratin, shaped like a wide, unhinged jaw that has finally snapped shut.",
+      "notes": "themeKey: demon.sunchomper"
     }
   ]
 }

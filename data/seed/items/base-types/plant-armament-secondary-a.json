@@ -465,6 +465,294 @@
           "family": "atom.enhance-quicken"
         }
       ]
+    },
+    {
+      "id": "item.plant-thorn-a-013",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified vine designed to puncture skin and draw out vital fluids through capillary action.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-014",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "seedpod",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem designed to puncture skin and draw out vital fluids. It serves as a conduit for the plant's hunger.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-015",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "seedpod",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem designed to puncture skin and draw out vital fluids through capillary action.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-016",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem tipped with jagged, inward-curving needles. It is designed to puncture and drain.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-017",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem tipped with jagged, inward-curving needles. It is designed to puncture and drain rather than simply strike.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-018",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "seedpod",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem designed to puncture skin and draw vital fluids into its central reservoir.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-019",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem tipped with jagged, inward-curving needles. It is designed to puncture skin and draw life directly into the plant's vascular system.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-a-020",
+      "nameKey": "base.barbed-siphon",
+      "name": "Barbed Siphon",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.barbed-siphon",
+      "flavorKey": "flavor.base.barbed-siphon",
+      "flavor": "A hollowed, calcified stem tipped with jagged, inward-curving needles. It is designed to puncture and drain rather than simply strike.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     }
   ]
 }

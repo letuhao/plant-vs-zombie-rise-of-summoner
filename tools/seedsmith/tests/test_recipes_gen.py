@@ -7,7 +7,7 @@ Five groups:
 3. Brief — real registries/tuning read fresh (cost bands, issuable materials, forge targets).
 4. Emit — id minting, mechanical derivations (outputKind, upcycle output, tags), and validation.
 5. Run / real-corpus regression — acceptance #3 (operation reconcile) and #5 (reference validation
-   + container backfill), proven against the REAL shipped 30-entry corpus, plus harness
+   + container backfill), proven against the current shipped corpus, plus harness
    resume/reconcile/overwrite against a `tmp_path` ledger.
 """
 from __future__ import annotations
@@ -85,17 +85,16 @@ def test_check_cost_class_souls_is_legal_for_every_operation():
         opvocab.check_cost_class(op, "souls", "")
 
 
-def test_reconcile_operations_finds_zero_drift_in_the_real_30_entry_corpus_today():
+def test_reconcile_operations_finds_zero_drift_in_the_current_corpus():
     """Acceptance #3's own evidence: the 2026-09-05 hand patch already fixed the one drift this
     check exists to catch (`"reroll"` -> `"reroll-one"`/`"reroll-all"`), so today's real corpus is
     clean. Had this run against the corpus BEFORE that patch, `reconcile_operations` would have
     flagged every `operation: "reroll"` row as outside `ALL_OPERATIONS`.
 
-    Corpus grew from 30 to 32 on 2026-09-07 (recipes-gen/trial-1, recipe.031/032, see
-    recipes.json's own `_meta.amendments`) — the count below tracks the real shipped corpus,
-    not a fixed constant."""
+    The corpus is intentionally open-ended, so this test checks the live count is non-empty rather
+    than freezing a historical row count."""
     entries = run_mod.load_entries(REAL_RECIPES_PATH)
-    assert len(entries) == 32
+    assert len(entries) >= 32
     drift = opvocab.reconcile_operations(entries)
     assert drift == []
 
@@ -240,9 +239,10 @@ def test_slug_and_recipe_id():
 
 
 def test_next_seq_continues_past_the_real_corpus():
-    """31/32 minted by the 2026-09-07 trial batch (see test above) — next mintable is now 33."""
+    """The next id always follows the highest currently shipped recipe, regardless of corpus growth."""
     entries = run_mod.load_entries(REAL_RECIPES_PATH)
-    assert emit_mod.next_seq(tuple(entries)) == 33
+    highest = max(int(recipe_id.rsplit(".", 1)[1]) for recipe_id in entries)
+    assert emit_mod.next_seq(tuple(entries)) == highest + 1
 
 
 def test_derive_upcycle_output_matches_the_real_corpus_examples():
@@ -478,6 +478,19 @@ def test_run_draws_marks_the_ledger_done_and_partitions_fresh_vs_blocked(tmp_pat
     assert set(done) == {"recipe-draw-000"}
 
 
+def test_run_draws_does_not_checkpoint_before_persist_callback(tmp_path):
+    recipes_path = tmp_path / "recipes.json"
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(count=1, ledger=ledger, recipes_path=recipes_path)
+
+    def persist(_entry):
+        raise RuntimeError("simulated corpus write failure")
+
+    with pytest.raises(RuntimeError, match="corpus write failure"):
+        run_mod.run_draws(plan, ledger=ledger, call=_fake_recipe_call(name="Retry Me"), persist=persist)
+    assert ledger.read_done() == {}
+
+
 def test_run_draws_keeps_going_after_a_semantically_invalid_model_recipe(tmp_path):
     recipes_path = tmp_path / "recipes.json"
     ledger = RunLedger(tmp_path / "ledger.json")
@@ -515,6 +528,14 @@ def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_pat
 def test_reconcile_resurfaces_a_draw_whose_entry_was_deleted_from_the_corpus():
     ledger_entry = {"entryId": "recipe.999", "operation": "bore"}
     assert run_mod.is_valid("x", ledger_entry, existing={}) is False
+
+
+def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(tmp_path):
+    recipes_path = tmp_path / "recipes.json"
+    ledger = RunLedger(tmp_path / "ledger.json")
+    ledger.mark_done("recipe-draw-000", {"entryId": "recipe.999", "operation": "forge"})
+    plan = run_mod.plan_run(count=1, ledger=ledger, recipes_path=recipes_path)
+    assert plan.subjects[0].subject_id == "recipe-draw-000"
 
 
 def test_reconcile_leaves_a_draw_alone_when_its_entry_still_matches():

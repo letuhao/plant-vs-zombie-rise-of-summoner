@@ -493,6 +493,302 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-torso-b-014",
+      "nameKey": "base.reinforced-sternal-plate",
+      "name": "Reinforced Sternal Plate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-sternal-plate",
+      "flavorKey": "flavor.base.reinforced-sternal-plate",
+      "flavor": "A thick slab of layered metal designed to protect the vital organs from direct impact. It is bolted directly to the underlying harness for maximum stability.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-015",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to house the vital organs of a guardian within a sanctified metal casing. It is built to withstand crushing pressure and kinetic impact.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-016",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to protect the vital organs from high-velocity impacts. It serves as a mobile bastion for the wearer's core.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-017",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to protect the vital organs from high-velocity impacts. It serves as a mobile bastion for the wearer's core.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-018",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to preserve the occupant against extreme kinetic impact. It serves as a mobile bastion for those tasked with holding the line.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-019",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to house the vital organs of a guardian within a protective, pressurized chamber.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-020",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to preserve the occupant against extreme kinetic impact. It serves as a mobile bastion for those tasked with holding the line.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-021",
+      "nameKey": "base.reinforced-sarcophagus",
+      "name": "Reinforced Sarcophagus",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.reinforced-sarcophagus",
+      "flavorKey": "flavor.base.reinforced-sarcophagus",
+      "flavor": "A heavy, interlocking shell designed to protect the vital organs from high-velocity impacts. It serves as a mobile bastion for those standing at the front lines.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

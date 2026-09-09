@@ -97,6 +97,22 @@ def _next_draw_index(done: "dict[str, dict]") -> int:
     return (max(indices) + 1) if indices else 0
 
 
+def _draw_indices(done: "dict[str, dict]", count: int,
+                  existing: "dict[str, dict]") -> "list[int]":
+    """Repair ledger slots whose entry is absent or changed before allocating new draws."""
+    indexed = {
+        idx: (sid, row) for sid, row in done.items()
+        if (idx := _draw_index(sid)) is not None
+    }
+    invalid = [idx for idx, (sid, row) in indexed.items() if not is_valid(sid, row, existing=existing)]
+    next_index = max(indexed, default=-1) + 1
+    selected = sorted(invalid)
+    while len(selected) < count:
+        selected.append(next_index)
+        next_index += 1
+    return selected[:count]
+
+
 def is_valid(subject_id: str, entry: dict, *, existing: "dict[str, dict] | None" = None) -> bool:
     """The reconcile check `RunLedger.plan` runs against every "done" ledger row: the recorded
     output id must still exist in the current on-disk corpus, carrying the SAME runtimeFamily the
@@ -117,7 +133,7 @@ def plan_run(*, count: int, ledger: RunLedger,
         raise ValueError(f"count must be >= 1, got {count}")
     ex = existing if existing is not None else load_existing()
     done = ledger.read_done()
-    start = _next_draw_index(done)
+    draw_indices = _draw_indices(done, count, ex)
     channels = channel_vocab()
     schema = answer_schema(channels=channels, tags=TAG_VOCAB)
     existing_names = _existing_names(ex)
@@ -129,7 +145,7 @@ def plan_run(*, count: int, ledger: RunLedger,
             brief=brief_mod.build_brief(channels, TAG_VOCAB, existing_names, theme_hint=theme_hint),
             schema=schema,
         )
-        for i in range(start, start + count)
+        for i in draw_indices
     )
     return RunPlan(subjects=subjects, existing=ex)
 
@@ -158,7 +174,9 @@ def resolve_answer(answer: dict, *, existing_ids: "set[str]",
 
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
-              call: "Callable[[str, dict], dict]") -> "tuple[dict[str, dict], dict[str, dict]]":
+              call: "Callable[[str, dict], dict]",
+              persist: "Callable[[dict], None] | None" = None
+              ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Executes every subject in `plan`, marking each resolved draw done in `ledger` as it completes
     (so a kill mid-run leaves every already-resolved draw committed, per `RunLedger`'s own atomic
     write guarantee) — not all-or-nothing.
@@ -180,6 +198,10 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue
+        if persist is not None:
+            # Write the corpus before checkpointing the draw. A killed process can then only leave
+            # an unledgered, retryable draw; it cannot advance past a row that was never written.
+            persist(entry)
         fresh[entry["id"]] = entry
         existing_ids.add(entry["id"])
         existing_families.add(entry["runtimeFamily"])
@@ -260,9 +282,14 @@ def main(argv=None) -> int:
             "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     plan = plan_run(count=args.count, ledger=ledger, existing=existing, theme_hint=args.theme)
-    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config))
-    if fresh:
-        write_corpus(fresh, existing=existing)
+    persisted = dict(existing)
+
+    def persist(entry: dict) -> None:
+        write_corpus({entry["id"]: entry}, existing=persisted)
+        persisted[entry["id"]] = entry
+
+    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config),
+                               persist=persist)
     print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
                       "blocked": len(blocked), "blockedReasons": blocked},
                      ensure_ascii=False, indent=2))

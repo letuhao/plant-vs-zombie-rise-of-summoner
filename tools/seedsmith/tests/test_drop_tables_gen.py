@@ -335,6 +335,18 @@ class TestHarness:
         done = ledger.read_done()
         assert set(done) == {"droptable-draw-d2-000"}
 
+    def test_run_draws_does_not_checkpoint_before_persist_callback(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        dt_dir = tmp_path / "drop-tables"
+        plan = run_mod.plan_run(slot=2, count=1, ledger=ledger, drop_tables_dir=dt_dir)
+
+        def persist(_entry):
+            raise RuntimeError("simulated corpus write failure")
+
+        with pytest.raises(RuntimeError, match="corpus write failure"):
+            run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Retry Me"), persist=persist)
+        assert ledger.read_done() == {}
+
     def test_resume_never_repeats_a_committed_draw(self, tmp_path):
         ledger = RunLedger(tmp_path / "ledger.json")
         dt_dir = tmp_path / "drop-tables"
@@ -349,6 +361,14 @@ class TestHarness:
     def test_reconcile_resurfaces_a_draw_whose_table_was_deleted(self):
         ledger_entry = {"entryId": "droptable.d1-999", "name": "Ghost Table"}
         assert run_mod.is_valid("x", ledger_entry, existing={}) is False
+
+    def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        ledger.mark_done("droptable-draw-d2-000", {
+            "entryId": "droptable.d2-999", "name": "Ghost Table",
+        })
+        plan = run_mod.plan_run(slot=2, count=1, ledger=ledger, drop_tables_dir=tmp_path / "dt")
+        assert plan.subjects[0].subject_id == "droptable-draw-d2-000"
 
     def test_reconcile_leaves_a_draw_alone_when_it_still_matches(self):
         ledger_entry = {"entryId": "droptable.d1-999", "name": "Ghost Table"}

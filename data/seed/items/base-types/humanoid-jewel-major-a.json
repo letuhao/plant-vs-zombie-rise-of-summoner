@@ -453,6 +453,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-neck-a-013",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to sit high against the throat, catching the light with every movement.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-014",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to protect the throat while catching the light of a high court.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-015",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is primed for intricate engravings.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-016",
+      "nameKey": "base.etched-gorget",
+      "name": "Etched Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gorget",
+      "flavorKey": "flavor.base.etched-gorget",
+      "flavor": "A rigid, polished collar designed to sit high against the throat, serving as a canvas for ceremonial inscriptions.",
+      "tags": [
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-017",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is primed to catch the light of a grand hall.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-018",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A heavy, polished collar designed to protect the throat while signaling high status. Its surface is primed for intricate engravings.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-019",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is primed for intricate engravings.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-a-020",
+      "nameKey": "base.gilded-gorget",
+      "name": "Gilded Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gilded-gorget",
+      "flavorKey": "flavor.base.gilded-gorget",
+      "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is primed for intricate engravings.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

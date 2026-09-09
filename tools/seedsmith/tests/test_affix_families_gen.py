@@ -186,14 +186,16 @@ def test_role_vocabulary_is_the_real_registry_vocabulary() -> None:
 
 
 def test_build_affix_family_brief_end_to_end_for_real_partition() -> None:
-    brief = brief_mod.build_affix_family_brief("g.armour", "stat.modify")
+    # Armour is intentionally full in the current corpus; use a still-runnable shipped
+    # partition for the end-to-end brief contract.
+    brief = brief_mod.build_affix_family_brief("g.elem-power", "stat.derived")
     enum = brief.schema["properties"]["channelOp"]["enum"]
-    assert "arm1Max|More" in enum
+    assert enum
     assert "defense|More" not in enum
-    assert "defense" in brief.partition.channels
+    assert "combat.power" in " ".join(brief.partition.channels)
     assert audit_schema(brief.schema) == []
     text = brief.render()
-    assert "atom.arm-" in text
+    assert "atom.elpw-" in text
     assert "Never choose a number" in text
     assert "channelOp" in text
 
@@ -212,7 +214,17 @@ def test_brief_refuses_a_partition_with_no_channels() -> None:
 
 @pytest.fixture()
 def armour_partition() -> brief_mod.PartitionContext:
-    return brief_mod.load_partition_context("g.armour")
+    # Keep emit/schema tests independent of production slot capacity. The live armour partition
+    # is full today, but these tests need two legal free pairs to exercise successful assembly.
+    return brief_mod.PartitionContext(
+        group_id="g.armour", stem="arm",
+        existing_ids=("atom.warding", "atom.resilience", "atom.plating"),
+        channel_ops={
+            "defense": ("Flat", "Increased", "More"),
+            "arm1Max": ("Flat", "Increased"),
+            "arm2Max": ("Flat", "Increased"),
+        },
+    )
 
 
 def test_assemble_entry_produces_a_shipped_shaped_entry(armour_partition) -> None:
@@ -459,8 +471,18 @@ def isolated_families_dir(tmp_path, monkeypatch):
     tmp copy, never the live repo file."""
     families_dir = tmp_path / "affix-families"
     families_dir.mkdir()
-    real_doc = (FAMILIES_DIR / "g-armour.json").read_text(encoding="utf-8")
-    (families_dir / "g-armour.json").write_text(real_doc, encoding="utf-8")
+    real_doc = json.loads((FAMILIES_DIR / "g-armour.json").read_text(encoding="utf-8"))
+    # The shipped armour partition is full after the latest generation run. Remove only the two
+    # pairs exercised by these CLI tests in the isolated copy; never mutate production data.
+    real_doc["entries"] = [
+        entry for entry in real_doc["entries"]
+        if not (
+            entry.get("params", {}).get("channel") in {"arm1Max", "arm2Max"}
+            and entry.get("params", {}).get("op") == "More"
+        )
+    ]
+    (families_dir / "g-armour.json").write_text(
+        json.dumps(real_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     monkeypatch.setattr(brief_mod, "FAMILIES_DIR", families_dir)
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER", tmp_path / "ledger.json")
     return families_dir

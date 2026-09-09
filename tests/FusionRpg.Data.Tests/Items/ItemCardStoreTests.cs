@@ -114,6 +114,7 @@ public class ItemCardStoreTests : IDisposable
 
     static readonly Lazy<IReadOnlyList<SetDef>> Sets = new(() =>
         Directory.EnumerateFiles(Seed("items", "sets"), "*.json")
+            .Where(f => !Path.GetFileName(f).EndsWith(".ledger.json", StringComparison.Ordinal))
             .OrderBy(f => f, StringComparer.Ordinal)
             .SelectMany(f => SetCorpus.Parse(File.ReadAllText(f)))
             .ToList());

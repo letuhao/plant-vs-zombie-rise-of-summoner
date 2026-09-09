@@ -23,6 +23,25 @@ def test_resume_returns_only_unattempted_subjects(ledger: RunLedger) -> None:
     assert needing_work == ["b", "c"]
 
 
+def test_terminal_escalation_is_typed_and_checkpointed(ledger: RunLedger) -> None:
+    ledger.mark_terminal("a", outcome="escalated", entry_id="set.test-001", attempts=3,
+                         defects=["schema repair exhausted"])
+
+    row = ledger.read_done()["a"]
+    assert row == {
+        "terminalSchemaVersion": 1,
+        "outcome": "escalated",
+        "entryId": "set.test-001",
+        "attempts": 3,
+        "defects": ["schema repair exhausted"],
+    }
+
+
+def test_terminal_row_refuses_a_success_outcome(ledger: RunLedger) -> None:
+    with pytest.raises(ValueError, match="blocked or escalated"):
+        ledger.mark_terminal("a", outcome="persisted", entry_id="set.test-001", attempts=1)
+
+
 def test_reconcile_requeues_a_done_entry_that_fails_validation(ledger: RunLedger) -> None:
     """The reconcile half `setgen/run.py`'s own `plan_run` does not have: a ledger row saying
     'done' must not be trusted blindly if the real shape it describes is now invalid."""

@@ -85,6 +85,22 @@ def _next_draw_index(done: "dict[str, dict]", prefix: str) -> int:
     return (max(indices) + 1) if indices else 0
 
 
+def _draw_indices(done: "dict[str, dict]", prefix: str, count: int,
+                  existing: "dict[str, dict]") -> "list[int]":
+    """Repair invalid ledger slots before allocating new open-ended draws."""
+    indexed = {
+        idx: (sid, row) for sid, row in done.items()
+        if (idx := _seq_from_subject(sid, prefix)) is not None
+    }
+    invalid = [idx for idx, (sid, row) in indexed.items() if not is_valid(sid, row, existing=existing)]
+    next_index = max(indexed, default=-1) + 1
+    selected = sorted(invalid)
+    while len(selected) < count:
+        selected.append(next_index)
+        next_index += 1
+    return selected[:count]
+
+
 def is_valid(_subject_id: str, entry: dict, *, existing: "dict[str, dict]") -> bool:
     """The reconcile half `RunLedger.plan` exists for: a ledger row counts as done only if its
     recorded table id still exists in the CURRENT on-disk partition file AND still carries the same
@@ -105,12 +121,12 @@ def plan_run(*, slot: int, count: int, ledger: RunLedger,
     existing = load_existing(slot, drop_tables_dir=drop_tables_dir)
     done = ledger.read_done()
     prefix = _draw_prefix(slot)
-    start_draw = _next_draw_index(done, prefix)
+    draw_indices = _draw_indices(done, prefix, count, existing)
     start_entry_seq = emit_mod.next_seq(tuple(existing), slot)
 
     subjects = []
     for i in range(count):
-        draw_index = start_draw + i
+        draw_index = draw_indices[i]
         # seq_index for the row-slot rotation is the TABLE's own minted sequence position, so two
         # different partition slots (which start their own entry-seq counters independently) still
         # each rotate deterministically over their own history rather than colliding on index 0.
@@ -147,7 +163,9 @@ def resolve_answer(answer: dict, *, plan: "brief_mod.RowSlotPlan", table_id: str
 
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
-             call: "Callable[[str, dict], dict]") -> "tuple[dict[str, dict], dict[str, dict]]":
+             call: "Callable[[str, dict], dict]",
+             persist: "Callable[[dict], None] | None" = None
+             ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Executes every subject in `plan`, marking each resolved draw done in `ledger` as it
     completes -- not all-or-nothing, mirroring `basetypegen.run.run_draws`."""
     fresh: "dict[str, dict]" = {}
@@ -163,6 +181,10 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue
+        if persist is not None:
+            # Corpus first, ledger second. A kill between these operations leaves the draw
+            # unledgered and therefore safely retryable instead of creating a ledger/file split.
+            persist(entry)
         fresh[entry["id"]] = entry
         ledger.mark_done(subject.subject_id, {"entryId": entry["id"], "name": entry["name"]})
 
@@ -261,9 +283,14 @@ def main(argv=None) -> int:
             "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     plan = plan_run(slot=args.slot, count=args.count, ledger=ledger, theme_hint=args.theme)
-    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config))
-    if fresh:
-        write_corpus(args.slot, fresh, existing=plan.existing, model=config.model)
+    persisted = dict(plan.existing)
+
+    def persist(entry: dict) -> None:
+        write_corpus(args.slot, {entry["id"]: entry}, existing=persisted, model=config.model)
+        persisted[entry["id"]] = entry
+
+    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config),
+                               persist=persist)
     print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
                       "blocked": len(blocked), "blockedReasons": blocked},
                      ensure_ascii=False, indent=2))

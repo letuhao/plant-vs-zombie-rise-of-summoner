@@ -441,6 +441,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-head-b-013",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a wide field of vision while maintaining structural integrity.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-014",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a rigid barrier without obstructing the wearer's field of vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-015",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It is built to withstand the brunt of a frontal assault.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-016",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a rigid barrier without obstructing the wearer's vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-017",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a sturdy foundation for any guard's defensive posture.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-018",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a sturdy foundation for a guard's defensive posture.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-019",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It is built to withstand the brunt of a frontal assault.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-020",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a wide field of vision without compromising cranial protection.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

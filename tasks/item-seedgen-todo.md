@@ -39,13 +39,20 @@ session touched anything, well outside item-seedgen's own scope).
 
 ## Post-build operational repair — `fill-runner`
 
-- [ ] **T31** — Implement [`spec-fill-runner.md`](../docs/architecture/item-seedgen/spec-fill-runner.md):
+- [x] **T31** — Implement [`spec-fill-runner.md`](../docs/architecture/item-seedgen/spec-fill-runner.md):
       classify a recorded escalation separately from a corpus gap, persist it as a typed terminal
       ledger outcome, continue the default fill walk past it, and prove a resume does not re-call it.
-- [ ] **T32** — Complete the full-depth contract tests: both set populations, all discovered
+- [x] **T32** — Complete the full-depth contract tests: both set populations, all discovered
       partitions, gem remaining-family drain, elevated open-kind pass, explicit depth override, and
       stable dry-run order. Socket-word retirement and consumable action/cooldown fields stay out of
       scope.
+- [x] **T33** — Make open-ended generator checkpoints crash-safe: persist each accepted corpus row
+      before marking its ledger draw done, and requeue ledger rows whose recorded entry is missing or
+      changed on resume. This repairs the observed drop-table/milestone ledger-to-file drift instead
+      of silently advancing past holes.
+- [x] **T34** — Reconcile stale capacity assumptions in the fill and affix-family tests. Full affix
+      partitions are skipped deterministically, and corpus-count tests derive expectations from the
+      current open-ended corpus rather than historical row counts.
 
 ## T0 — ✅ Resolved 2026-09-07 (owner decision)
 

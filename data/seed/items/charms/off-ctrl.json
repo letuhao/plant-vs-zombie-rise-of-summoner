@@ -1065,6 +1065,255 @@
       "tags": [],
       "flavor": "A rotating prism of shifting alloys that reconfigures its internal geometry to redistribute kinetic energy into concentrated bursts of fire.",
       "notes": "themeKey: demon.allpeater"
+    },
+    {
+      "id": "charm.off-ctrl-039",
+      "nameKey": "charm.puncture-spore",
+      "name": "Puncture Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of jagged, rubberized thorns that pulse with a slow, necrotic rhythm.",
+      "notes": "themeKey: demon.caltrop"
+    },
+    {
+      "id": "charm.off-ctrl-040",
+      "nameKey": "charm.gnash-bloom",
+      "name": "Gnash-Bloom",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of petrified, tooth-filled petals that pulse with a rhythmic, hungry tremor.",
+      "notes": "themeKey: demon.chomper"
+    },
+    {
+      "id": "charm.off-ctrl-041",
+      "nameKey": "charm.iron-gate-spore",
+      "name": "Iron-Gate Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, rusted iron gate shaped like a mushroom cap, constantly venting thick, pressurized grey smoke from its gills.",
+      "notes": "themeKey: demon.fumeshroom"
+    },
+    {
+      "id": "charm.off-ctrl-042",
+      "nameKey": "charm.visceral-vapors",
+      "name": "Visceral Vapors",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "dark"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, pulsating bladder filled with caustic, swirling bile.",
+      "notes": "themeKey: demon.garlicpea"
+    },
+    {
+      "id": "charm.off-ctrl-043",
+      "nameKey": "charm.gorged-maw-fragment",
+      "name": "Gorged Maw Fragment",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, fleshy petal harvested from a corpse, still twitching with a hunger that never fades.",
+      "notes": "themeKey: demon.hypnochomper"
+    },
+    {
+      "id": "charm.off-ctrl-044",
+      "nameKey": "charm.spike-core-fuse",
+      "name": "Spike-Core Fuse",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, pressurized sphere of volatile obsidian shards that crackles with heat and rough, uneven textures.",
+      "notes": "themeKey: demon.jalastar"
+    },
+    {
+      "id": "charm.off-ctrl-045",
+      "nameKey": "charm.spined-solar-spike",
+      "name": "Spined Solar Spike",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, crystalline cactus needle that pulses with concentrated solar energy, ready to discharge upon impact.",
+      "notes": "themeKey: demon.lanternpea"
+    },
+    {
+      "id": "charm.off-ctrl-046",
+      "nameKey": "charm.lumen-beam",
+      "name": "Lumen Beam",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A polished glass cylinder containing a concentrated, oscillating filament of pure light that pulses with every strike.",
+      "notes": "themeKey: demon.plantern"
+    },
+    {
+      "id": "charm.off-ctrl-047",
+      "nameKey": "charm.glacial-spire",
+      "name": "Glacial Spire",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "offense",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, frost-rimed shard of permafrost that vibrates with the tension of a drawn bowstring.",
+      "notes": "themeKey: demon.snowpeashooter"
     }
   ]
 }

@@ -471,6 +471,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-leaves-b-013",
+      "nameKey": "base.thorned-scion",
+      "name": "Thorned Scion",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thorned-scion",
+      "flavorKey": "flavor.base.thorned-scion",
+      "flavor": "A jagged, whip-like shoot that lashes out with predatory intent. Its surface is coated in a fine, stinging pubescence.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-014",
+      "nameKey": "base.serrated-thistle-whip",
+      "name": "Serrated Thistle-Whip",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.serrated-thistle-whip",
+      "flavorKey": "flavor.base.serrated-thistle-whip",
+      "flavor": "A length of flexible, thorn-studded vine designed to lash out and tear through soft tissue. Its jagged edges are perfectly suited for delivering precise, agonizing lacerations.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-015",
+      "nameKey": "base.serrated-thistle-whip",
+      "name": "Serrated Thistle-Whip",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-thistle-whip",
+      "flavorKey": "flavor.base.serrated-thistle-whip",
+      "flavor": "A length of flexible, thorn-studded vine designed to lash out and catch an opponent's momentum. Its jagged edges are perfect for tearing through soft tissue.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-016",
+      "nameKey": "base.lacerating-spine",
+      "name": "Lacerating Spine",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.lacerating-spine",
+      "flavorKey": "flavor.base.lacerating-spine",
+      "flavor": "A serrated, whip-like stem harvested from predatory flora. It lashes out with a rhythmic, predatory grace.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-017",
+      "nameKey": "base.thorned-scion",
+      "name": "Thorned Scion",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thorned-scion",
+      "flavorKey": "flavor.base.thorned-scion",
+      "flavor": "A sharpened, whip-like shoot that lashes out with predatory intent. Its surface is coated in microscopic, jagged barbs designed to catch and tear.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-018",
+      "nameKey": "base.thorned-scion",
+      "name": "Thorned Scion",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thorned-scion",
+      "flavorKey": "flavor.base.thorned-scion",
+      "flavor": "A jagged, whip-like shoot hardened by concentrated sap. It lashes out with a predatory precision designed to find the gaps in armor.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-019",
+      "nameKey": "base.serrated-thistle-whip",
+      "name": "Serrated Thistle-Whip",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-thistle-whip",
+      "flavorKey": "flavor.base.serrated-thistle-whip",
+      "flavor": "A length of flexible, thorn-studded vine designed to lash out and tear through soft tissue. Its jagged edges are perfectly suited for spreading toxins or drawing blood.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-020",
+      "nameKey": "base.jagged-thistle",
+      "name": "Jagged Thistle",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.jagged-thistle",
+      "flavorKey": "flavor.base.jagged-thistle",
+      "flavor": "A cluster of serrated, needle-like protrusions designed to catch and tear through soft tissue.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

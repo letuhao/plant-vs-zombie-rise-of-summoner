@@ -54,3 +54,11 @@ Widen `--max-partitions` / `--limit` only after smoke is green. Use `--full` onl
 - [x] Set `plan_run`: skip entry ids already on disk (theme rename / ledger drift → caltropnut collision)
 - [x] Unit tests: combogen blocked resume + exit helper; BriefTests paradox/splice framing; set corpus skip; wiring blocked ledger
 - [x] Bounded fill **without** `--continue-on-error`: process **EXIT=0**, all 12 steps `status=ran` / `exit_code=0` (charm+strain legitimate blocked; splice persisted)
+
+### Full-fill runnable (2026-09-09)
+
+- [x] Escalate ledgered like blocked (`RunLedger.mark_terminal` / `terminal_row`); EXIT_GAP still surfaces escalate; resume advances
+- [x] `--full` without explicit `--count`/`--batch-size`: open kinds use elevated pass (8); gem drains remaining unauthored families
+- [x] Fill set steps: `species` then `build`
+- [x] Unit tests: escalate resume, full plan shape, continue-on-error past gap
+- [x] Prove: `items fill --full --dry-run` (build set + gem batch=29 + count=8); live `--full --continue-on-error --kinds set,charm,combination,material,recipe` → **EXIT=0**, all steps `ran` (incl. build set + strain/splice)

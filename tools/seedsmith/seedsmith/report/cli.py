@@ -51,6 +51,7 @@ EXIT_CLEAN = 0
 EXIT_GAP = 1
 EXIT_CANNOT_RUN = 2
 EXIT_REFUSED = 3
+EXIT_ESCALATED = 4
 
 _SEVERITY_ORDER = {Severity.GAP: 0, Severity.NOTE: 1, Severity.NOT_MEASURED: 2}
 
@@ -60,10 +61,11 @@ def _exit_for_graph_batch(result) -> int:
 
     Affix already returns 0 on a coherent `blocked`. Set/charm/combination used to require at least
     one persist this batch, so fill `--limit 1` turned a legitimate decline into `gap` and stalled
-    resume. Escalate remains EXIT_GAP.
+    resume. Escalate has its own result so the fill walker can record it and keep walking without
+    treating a genuine corpus gap as recoverable.
     """
     if any(getattr(o, "outcome", None) == "escalated" for o in getattr(result, "outcomes", ())):
-        return EXIT_GAP
+        return EXIT_ESCALATED
     return EXIT_CLEAN
 
 

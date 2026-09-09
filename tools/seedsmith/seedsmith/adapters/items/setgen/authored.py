@@ -38,6 +38,7 @@ from .vocab import Vocabulary
 from ..charmgen.rules import (CHARM_AXES, axis_gini_permille, min_axis_gini_permille,
                               smallest_measurable_axis_population)
 from ..registries import load_versions
+from ....pipeline.run_ledger import RunLedger
 
 #: The batch driver never reaches these — they are the graph's, injected at build time. Imported
 #: lazily inside `run_batch` so `authored.py` stays importable without the `workflow` extra
@@ -187,12 +188,9 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
                 subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
                 attempts=attempts, defects=defects))
             # Presence alone advances set/charm resume — escalate must not re-hit forever.
-            done[subject.subject_id] = {
-                "outcome": "escalated",
-                "entryId": subject.entry_id,
-                "attempts": attempts,
-                "defects": defects,
-            }
+            done[subject.subject_id] = RunLedger.terminal_row(
+                outcome="escalated", entry_id=subject.entry_id, attempts=attempts,
+                defects=defects)
             continue
         draft = drafts.pop(subject.subject_id, None)
         attempts = int(final.get("attempts", 0))
@@ -202,12 +200,9 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="escalated", attempts=attempts, defects=defects))
-            done[subject.subject_id] = {
-                "outcome": "escalated",
-                "entryId": subject.entry_id,
-                "attempts": attempts,
-                "defects": defects,
-            }
+            done[subject.subject_id] = RunLedger.terminal_row(
+                outcome="escalated", entry_id=subject.entry_id, attempts=attempts,
+                defects=defects)
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
             reason = draft["blocked"].strip()
@@ -215,12 +210,9 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="blocked", attempts=attempts, blocked_reason=reason))
             # Presence alone advances set/charm resume; no seed row for a decline.
-            done[subject.subject_id] = {
-                "outcome": "blocked",
-                "blockedReason": reason,
-                "entryId": subject.entry_id,
-                "attempts": attempts,
-            }
+            done[subject.subject_id] = RunLedger.terminal_row(
+                outcome="blocked", entry_id=subject.entry_id, attempts=attempts,
+                blocked_reason=reason)
             continue
 
         entry_id, row = _row_for(

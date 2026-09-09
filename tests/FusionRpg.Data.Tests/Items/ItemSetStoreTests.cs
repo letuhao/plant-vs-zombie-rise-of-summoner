@@ -43,6 +43,7 @@ public class ItemSetStoreTests : IDisposable
 
     static IReadOnlyList<SetDef> Corpus() =>
         Directory.EnumerateFiles(Path.Combine(RepoRoot(), "data", "seed", "items", "sets"), "*.json")
+            .Where(p => !Path.GetFileName(p).EndsWith(".ledger.json", StringComparison.Ordinal))
             .OrderBy(p => p, StringComparer.Ordinal)
             .SelectMany(p => SetCorpus.Parse(File.ReadAllText(p)))
             .ToList();

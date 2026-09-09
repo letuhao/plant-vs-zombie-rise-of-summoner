@@ -59,6 +59,40 @@ class RunLedger:
         done[subject_id] = entry
         self.write_done(done)
 
+    @staticmethod
+    def terminal_row(*, outcome: str, entry_id: str, attempts: int,
+                     blocked_reason: str = "", defects: "list[str] | None" = None) -> dict:
+        """A non-persisted terminal subject record.
+
+        A bounded model failure is terminal for normal resume, but it is not a successful corpus
+        write. Keeping this shape in the shared harness prevents each graph adapter from inventing
+        an incompatible pseudo-"done" row.
+        """
+        if outcome not in {"blocked", "escalated"}:
+            raise ValueError(f"terminal outcome must be blocked or escalated, got {outcome!r}")
+        if not isinstance(entry_id, str) or not entry_id:
+            raise ValueError("terminal outcome requires a non-empty intended entry id")
+        if attempts < 0:
+            raise ValueError("terminal outcome attempts must be non-negative")
+        row: dict = {
+            "terminalSchemaVersion": 1,
+            "outcome": outcome,
+            "entryId": entry_id,
+            "attempts": attempts,
+        }
+        if blocked_reason:
+            row["blockedReason"] = blocked_reason
+        if defects:
+            row["defects"] = list(defects)
+        return row
+
+    def mark_terminal(self, subject_id: str, *, outcome: str, entry_id: str, attempts: int,
+                      blocked_reason: str = "", defects: "list[str] | None" = None) -> None:
+        """Checkpoint a non-persisted terminal result without labelling it successful content."""
+        self.mark_done(subject_id, self.terminal_row(
+            outcome=outcome, entry_id=entry_id, attempts=attempts,
+            blocked_reason=blocked_reason, defects=defects))
+
     def plan(
         self,
         subject_ids: Iterable[str],

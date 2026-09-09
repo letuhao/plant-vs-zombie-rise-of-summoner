@@ -55,7 +55,10 @@ public class DemonSpeciesImportCliTests : IDisposable
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesImport")}\" -- {args}",
+                // The test host already built the tool's dependency graph.  A child `dotnet run`
+                // must not perform an implicit restore here: this environment deliberately denies
+                // the user NuGet.Config, and the restore adds no coverage to a CLI behaviour test.
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonSpeciesImport")}\" --no-restore --no-build -- {args}",
                 WorkingDirectory = repoRoot,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

@@ -148,7 +148,7 @@ public class RealDataAggregateTests : IDisposable
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "RealDataAggregate")}\" -c Release --no-build -- --data \"{_dbPath}\" {args}",
+            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "RealDataAggregate")}\" -c Release --no-restore --no-build -- --data \"{_dbPath}\" {args}",
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };

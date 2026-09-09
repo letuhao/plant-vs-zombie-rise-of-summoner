@@ -455,6 +455,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-hands-a-013",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced plating designed to channel precise, lethal movements.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-014",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced plating designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-015",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy, reinforced glove fitted with jagged metal ridges designed to catch and tear through flesh.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-016",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced material designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "medium",
+        "offensive",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-017",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A rigid, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-018",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy, articulated sleeve of reinforced leather designed to channel precise, lethal movements.",
+      "tags": [
+        "medium",
+        "offensive",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-019",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy-duty glove fitted with retractable, razor-sharp ridges designed to catch and tear through flesh.",
+      "tags": [
+        "offensive",
+        "metal",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-020",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy-duty glove fitted with jagged, inward-facing blades designed to catch and tear through flesh.",
+      "tags": [
+        "offensive",
+        "metal",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

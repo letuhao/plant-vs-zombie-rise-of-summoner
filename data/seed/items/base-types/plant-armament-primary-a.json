@@ -464,6 +464,287 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-muzzle-a-013",
+      "nameKey": "base.spore-clogged-spout",
+      "name": "Spore-Clogged Spout",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.spore-clogged-spout",
+      "flavorKey": "flavor.base.spore-clogged-spout",
+      "flavor": "A thick, calcified stem that has become choked with volatile fungal matter. It releases its payload through a pressurized, uneven discharge.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-014",
+      "nameKey": "base.pulsing-spore-cask",
+      "name": "Pulsing Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pulsing-spore-cask",
+      "flavorKey": "flavor.base.pulsing-spore-cask",
+      "flavor": "A swollen, translucent bladder filled with volatile fungal matter. It trembles with internal pressure, ready to rupture upon impact.",
+      "tags": [
+        "organic",
+        "fragile",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-015",
+      "nameKey": "base.pulsing-spore-cask",
+      "name": "Pulsing Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.pulsing-spore-cask",
+      "flavorKey": "flavor.base.pulsing-spore-cask",
+      "flavor": "A fleshy, distended bulb that rhythmically expands and contracts, ready to eject its contents with sudden force.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-016",
+      "nameKey": "base.spore-clogged-spout",
+      "name": "Spore-Clogged Spout",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.spore-clogged-spout",
+      "flavorKey": "flavor.base.spore-clogged-spout",
+      "flavor": "A thick, calcified stem that has been repurposed to channel volatile fungal gases through a narrow aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-017",
+      "nameKey": "base.pulsing-spore-cask",
+      "name": "Pulsing Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "seedpod",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pulsing-spore-cask",
+      "flavorKey": "flavor.base.pulsing-spore-cask",
+      "flavor": "A fleshy, bulbous vessel that rhythmically expands and contracts, preparing to eject its volatile contents.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-018",
+      "nameKey": "base.spiked-pod",
+      "name": "Spiked Pod",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.spiked-pod",
+      "flavorKey": "flavor.base.spiked-pod",
+      "flavor": "A dense, calcified husk designed to rupture upon impact, releasing its payload with violent force.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-019",
+      "nameKey": "base.pulsing-spore-cask",
+      "name": "Pulsing Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.pulsing-spore-cask",
+      "flavorKey": "flavor.base.pulsing-spore-cask",
+      "flavor": "A fleshy, distended bulb that rhythmically expands and contracts, ready to vent its pressurized contents in a sudden burst.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-020",
+      "nameKey": "base.spore-clogged-spout",
+      "name": "Spore-Clogged Spout",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spore-clogged-spout",
+      "flavorKey": "flavor.base.spore-clogged-spout",
+      "flavor": "A thick, calcified stem that has been hollowed out by fungal growth to channel pressurized gases.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

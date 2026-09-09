@@ -44,7 +44,10 @@ public class CharmCarryStoreTests : IDisposable
 
     static IReadOnlyList<CharmDef> Corpus() =>
         Directory.EnumerateFiles(CharmsDir(), "*.json")
+            // resonance.json is a separate breakpoint table; the generator ledger is metadata,
+            // not a charm corpus file and has no `entries` array.
             .Where(p => !Path.GetFileName(p).Equals("resonance.json", StringComparison.Ordinal))
+            .Where(p => !Path.GetFileName(p).EndsWith(".ledger.json", StringComparison.Ordinal))
             .OrderBy(p => p, StringComparer.Ordinal)
             .SelectMany(p => CharmCorpus.Parse(File.ReadAllText(p)))
             .ToList();

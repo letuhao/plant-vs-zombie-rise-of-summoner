@@ -470,6 +470,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-crown-b-013",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-014",
+      "nameKey": "base.braided-thicket",
+      "name": "Braided Thicket",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.braided-thicket",
+      "flavorKey": "flavor.base.braided-thicket",
+      "flavor": "A dense weave of living vines and supple willow branches, shaped to brace the neck against heavy impact.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-015",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-016",
+      "nameKey": "base.braided-thicket",
+      "name": "Braided Thicket",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.braided-thicket",
+      "flavorKey": "flavor.base.braided-thicket",
+      "flavor": "A dense weave of living vines and supple stems designed to cushion the skull against heavy impact.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-017",
+      "nameKey": "base.braided-thicket",
+      "name": "Braided Thicket",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.braided-thicket",
+      "flavorKey": "flavor.base.braided-thicket",
+      "flavor": "A dense weave of living vines and supple willow branches, designed to absorb the impact of heavy blows.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-018",
+      "nameKey": "base.braided-thicket-helm",
+      "name": "Braided Thicket-Helm",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.braided-thicket-helm",
+      "flavorKey": "flavor.base.braided-thicket-helm",
+      "flavor": "A dense weave of living vines and supple willow branches, shaped to shield the wearer's brow.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-019",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-020",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

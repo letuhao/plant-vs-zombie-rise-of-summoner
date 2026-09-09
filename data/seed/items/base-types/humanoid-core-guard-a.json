@@ -458,6 +458,300 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-torso-a-013",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to protect the vital organs from direct impact. It is the standard foundation for any frontline defender.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-014",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to absorb the brunt of a direct impact. It sits firmly against the chest to protect the vital organs of the vanguard.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-015",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to deflect direct kinetic impact away from the vital organs. It is the foundation upon which a defender's resolve is built.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-016",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to deflect direct strikes away from the vital organs. It sits snugly against the chest to ensure maximum mobility for the defender.",
+      "tags": [
+        "metal",
+        "heavy",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-017",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to deflect direct blows away from the vital organs. It sits firmly against the chest to provide a stable foundation for heavy armor.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-018",
+      "nameKey": "base.reinforced-cuirass",
+      "name": "Reinforced Cuirass",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-cuirass",
+      "flavorKey": "flavor.base.reinforced-cuirass",
+      "flavor": "A heavy, layered breastplate designed to absorb the brunt of a direct impact. It sits snugly against the chest to provide maximum stability for the wearer.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-019",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to deflect direct strikes away from the vital organs. It sits firmly against the chest, providing a rigid barrier against blunt force.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-020",
+      "nameKey": "base.reinforced-breastplate",
+      "name": "Reinforced Breastplate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-breastplate",
+      "flavorKey": "flavor.base.reinforced-breastplate",
+      "flavor": "A heavy slab of layered steel designed to absorb the brunt of a direct impact. It sits snugly against the chest to distribute weight across the shoulders.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

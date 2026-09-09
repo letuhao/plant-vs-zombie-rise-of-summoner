@@ -290,7 +290,11 @@ public class SiegeAiTests
         var dir = AppContext.BaseDirectory;
         for (var i = 0; i < 10 && dir != null; i++)
         {
-            var candidate = Directory.GetFiles(dir, fileName, SearchOption.AllDirectories);
+            var candidate = Directory.GetFiles(dir, fileName, new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+            });
             if (candidate.Length > 0) return candidate[0];
             dir = Directory.GetParent(dir)?.FullName;
         }

@@ -468,6 +468,294 @@
           "family": "atom.enhance-vigor"
         }
       ]
+    },
+    {
+      "id": "item.plant-sheath-a-013",
+      "nameKey": "base.lignin-scabbard",
+      "name": "Lignin Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lignin-scabbard",
+      "flavorKey": "flavor.base.lignin-scabbard",
+      "flavor": "A rigid, reinforced sleeve carved from dense xylem, designed to protect a blade within a thick layer of protective cellulose.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-014",
+      "nameKey": "base.lignified-scabbard",
+      "name": "Lignified Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lignified-scabbard",
+      "flavorKey": "flavor.base.lignified-scabbard",
+      "flavor": "A rigid, reinforced sleeve of hardened sap and dense cellulose designed to protect a blade's edge from environmental decay.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-015",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-regen",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic emerald light. It seems to tighten its grip around any blade it holds.",
+      "tags": [
+        "organic",
+        "defensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-016",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A tightly woven sleeve of living vines designed to cradle a blade within a protective layer of chlorophyll.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-017",
+      "nameKey": "base.lignified-scabbard",
+      "name": "Lignified Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lignified-scabbard",
+      "flavorKey": "flavor.base.lignified-scabbard",
+      "flavor": "A rigid, reinforced sleeve of hardened sap and dense cellulose designed to protect a blade's edge from environmental decay.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-018",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-regen",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic light. It holds its contents in a state of constant, revitalizing suspension.",
+      "tags": [
+        "organic",
+        "defensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-019",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-regen",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic vitality. It holds its contents in a protective, life-sustaining embrace.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-020",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-regen",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic vitality. It holds its contents in a protective, life-sustaining embrace.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

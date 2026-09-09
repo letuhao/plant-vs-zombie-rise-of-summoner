@@ -62,17 +62,6 @@ def _ledger_is_valid(_subject_id: str, entry: dict) -> bool:
     return False
 
 
-def _ledger_non_persist(outcome: str, *, entry_id: str, attempts: int,
-                        blocked_reason: str = "", defects: "list[str] | None" = None) -> dict:
-    """Ledger row for blocked/escalated — no seed entry, resume treats the subject as done."""
-    row: dict = {"outcome": outcome, "entryId": entry_id, "attempts": attempts}
-    if blocked_reason:
-        row["blockedReason"] = blocked_reason
-    if defects:
-        row["defects"] = list(defects)
-    return row
-
-
 def plan_needing_work(plan: RunPlan, ledger: RunLedger) -> "list[Subject]":
     ids = [s.subject_id for s in plan.subjects]
     needing = set(ledger.plan(ids, _ledger_is_valid))
@@ -235,8 +224,8 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
                 attempts=attempts, defects=defects))
-            ledger.mark_done(subject.subject_id, _ledger_non_persist(
-                "escalated", entry_id=subject.entry_id, attempts=attempts, defects=defects))
+            ledger.mark_terminal(subject.subject_id, outcome="escalated",
+                                 entry_id=subject.entry_id, attempts=attempts, defects=defects)
             continue
 
         draft = drafts.pop(subject.subject_id, None)
@@ -246,8 +235,8 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="escalated", attempts=attempts, defects=defects))
-            ledger.mark_done(subject.subject_id, _ledger_non_persist(
-                "escalated", entry_id=subject.entry_id, attempts=attempts, defects=defects))
+            ledger.mark_terminal(subject.subject_id, outcome="escalated",
+                                 entry_id=subject.entry_id, attempts=attempts, defects=defects)
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
             reason = draft["blocked"].strip()
@@ -255,8 +244,9 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="blocked", attempts=attempts, blocked_reason=reason))
             # No seed entry — but ledger the decline so --limit / resume advances past this cell.
-            ledger.mark_done(subject.subject_id, _ledger_non_persist(
-                "blocked", entry_id=subject.entry_id, attempts=attempts, blocked_reason=reason))
+            ledger.mark_terminal(subject.subject_id, outcome="blocked",
+                                 entry_id=subject.entry_id, attempts=attempts,
+                                 blocked_reason=reason)
             continue
 
         entry = emit.assemble_entry(

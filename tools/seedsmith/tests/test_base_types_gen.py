@@ -464,6 +464,20 @@ def test_run_draws_keeps_going_after_one_malformed_live_response(tmp_path):
     assert set(ledger.read_done()) == {"basetype-draw-armament-primary-humanoid-a-001"}
 
 
+def test_run_draws_does_not_checkpoint_before_persist_callback(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    def persist(_entry):
+        raise RuntimeError("simulated corpus write failure")
+
+    with pytest.raises(RuntimeError, match="corpus write failure"):
+        run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Retry Me"), persist=persist)
+    assert ledger.read_done() == {}
+
+
 def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_path):
     ledger = RunLedger(tmp_path / "ledger.json")
     base_types_dir = tmp_path / "base-types"
@@ -483,6 +497,17 @@ def test_reconcile_resurfaces_a_draw_whose_entry_was_deleted_from_the_corpus():
     ledger_entry = {"entryId": "item.humanoid-main-hand-a-999", "class": "blade",
                     "implicitFamily": "atom.might"}
     assert run_mod.is_valid("x", ledger_entry, existing={}) is False
+
+
+def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    ledger.mark_done("basetype-draw-armament-primary-humanoid-a-000", {
+        "entryId": "item.humanoid-main-hand-a-999", "class": "blade",
+        "implicitFamily": "atom.might",
+    })
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=tmp_path / "base-types")
+    assert plan.subjects[0].subject_id == "basetype-draw-armament-primary-humanoid-a-000"
 
 
 def test_reconcile_leaves_a_draw_alone_when_its_entry_still_matches():

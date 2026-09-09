@@ -463,6 +463,295 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-crown-a-013",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of waxy leaves designed to deflect glancing blows from the brow.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-014",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-015",
+      "nameKey": "base.thickened-burl",
+      "name": "Thickened Burl",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thickened-burl",
+      "flavorKey": "flavor.base.thickened-burl",
+      "flavor": "A dense, knotty growth of hardened sap and bark that serves as a natural reinforcement for the skull.",
+      "tags": [
+        "organic",
+        "heavy",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-016",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-017",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of waxy leaves designed to deflect blows away from the wearer's brow.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-018",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-019",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-020",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

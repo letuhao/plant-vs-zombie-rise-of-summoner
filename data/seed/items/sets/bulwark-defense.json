@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-bulwark-defense",
+    "partition": "sets/bulwark-defense",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.bulwark-defense-001",
+      "nameKey": "set.bastion-of-the-unyielding",
+      "name": "Bastion of the Unyielding",
+      "themeKey": "build.bulwark-defense",
+      "members": [
+        {
+          "role": "core-guard",
+          "frame": "plant"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant"
+        },
+        {
+          "role": "footing",
+          "frame": "plant"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.warded",
+            "powerBand": "low",
+            "params": {
+              "element": "omni"
+            }
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.fortitude",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.immunity",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A wall of iron and resolve that refuses to crumble under the weight of the world.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

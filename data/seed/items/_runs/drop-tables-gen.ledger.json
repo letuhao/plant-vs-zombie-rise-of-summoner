@@ -23,6 +23,82 @@
     "droptable-draw-d1-005": {
       "entryId": "droptable.d1-016",
       "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d2-000": {
+      "entryId": "droptable.d2-011",
+      "name": "Overgrown Reliquary"
+    },
+    "droptable-draw-d2-001": {
+      "entryId": "droptable.d2-012",
+      "name": "Sun-Bleached Reliquary"
+    },
+    "droptable-draw-d2-002": {
+      "entryId": "droptable.d2-013",
+      "name": "Verdant Husk"
+    },
+    "droptable-draw-d2-003": {
+      "entryId": "droptable.d2-014",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d2-004": {
+      "entryId": "droptable.d2-015",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d2-005": {
+      "entryId": "droptable.d2-016",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d3-000": {
+      "entryId": "droptable.d3-011",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d3-001": {
+      "entryId": "droptable.d3-012",
+      "name": "Sun-Bleached Reliquary"
+    },
+    "droptable-draw-d3-002": {
+      "entryId": "droptable.d3-013",
+      "name": "Verdant Husk"
+    },
+    "droptable-draw-d3-003": {
+      "entryId": "droptable.d3-014",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d3-004": {
+      "entryId": "droptable.d3-015",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d3-005": {
+      "entryId": "droptable.d3-016",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d4-000": {
+      "entryId": "droptable.d4-011",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d4-001": {
+      "entryId": "droptable.d4-012",
+      "name": "Sun-Bleached Reliquary"
+    },
+    "droptable-draw-d4-002": {
+      "entryId": "droptable.d4-013",
+      "name": "Verdant Husk"
+    },
+    "droptable-draw-d4-003": {
+      "entryId": "droptable.d4-014",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d4-004": {
+      "entryId": "droptable.d4-015",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d4-005": {
+      "entryId": "droptable.d4-016",
+      "name": "Overgrowth Cache"
+    },
+    "droptable-draw-d4-006": {
+      "entryId": "droptable.d4-017",
+      "name": "Verdant Reliquary"
     }
   },
   "schemaVersion": 1

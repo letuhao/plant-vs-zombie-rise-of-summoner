@@ -124,7 +124,7 @@ public class CombatSimJsonEmitTests : IClassFixture<CombatSimJsonEmitTests.Fixtu
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -c Release --no-build -- {args}",
+            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -c Release --no-restore --no-build -- {args}",
                 CreateNoWindow = true,
                 WorkingDirectory = repoRoot
             };

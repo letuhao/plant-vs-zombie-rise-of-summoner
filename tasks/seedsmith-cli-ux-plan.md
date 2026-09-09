@@ -61,3 +61,22 @@ Shipped:
 4. **Set corpus skip** — [`setgen/run.py`](../tools/seedsmith/seedsmith/adapters/items/setgen/run.py) `plan_run` skips set ids already on disk (fixes theme-rename ledger drift collisions).
 
 Prove: `items fill --limit 1 --max-partitions 1 --count 1 --batch-size 1` (no `--continue-on-error`) → EXIT=0, all steps ran.
+
+## Full-fill runnable (2026-09-09)
+
+Closes the overnight gaps after bounded smoke:
+
+1. **Escalate terminal ledger** — `RunLedger.mark_terminal` / `terminal_row`; combo + set write escalate rows so resume does not re-hit; batch still EXIT_GAP if any escalate.
+2. **`--full` drain** — without explicit `--count`/`--batch-size`, open kinds use pass size 8; gem uses remaining unauthored count per slot.
+3. **Build sets in fill** — species then build population steps.
+
+Operator overnight:
+
+```powershell
+cd tools/seedsmith
+python -m seedsmith items fill --full --dry-run
+python -m seedsmith items fill --full --continue-on-error
+# Re-run same command until EXIT=0 (escalate ledgers advance; gaps surface once)
+```
+
+Sockword migrate remains a follow-on after combo coverage.

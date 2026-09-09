@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-agility-offense",
+    "partition": "sets/agility-offense",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.agility-offense-001",
+      "nameKey": "set.zephyr-s-edge",
+      "name": "Zephyr's Edge",
+      "themeKey": "build.agility-offense",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.flash-freeze",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.swiftness",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.tempo-surge",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "omni"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A fleeting breeze that cuts deeper than any blade.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

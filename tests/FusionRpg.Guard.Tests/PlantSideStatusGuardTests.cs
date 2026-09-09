@@ -96,7 +96,7 @@ public class PlantSideStatusGuardTests
     /// fails this test and forces a deliberate re-pin rather than a silent drift.
     /// </summary>
     [Fact]
-    public void BattleEffects_is_byte_identical_to_its_pre_E39_hash()
+    public void BattleEffects_is_byte_identical_to_its_current_core_baseline()
     {
         var path = Path.Combine(FindRepoRoot(), "src", "FusionRpg.Core", "Battle", "BattleEffects.cs");
         Assert.True(File.Exists(path), "missing " + path);
@@ -105,9 +105,11 @@ public class PlantSideStatusGuardTests
         using var stream = File.OpenRead(path);
         var hash = Convert.ToHexString(sha256.ComputeHash(stream));
 
-        // Pinned 2026-09-04, immediately before E39's Injector-side changes landed.
-        const string preE39Hash = "C9FAF4321C253F16FC6653A2006AEE8FCF8A0819DCF49A6C788E2042674C84F4";
-        Assert.Equal(preE39Hash, hash);
+        // Re-pinned 2026-09-09 after the unrelated AttackerEdge addition (commit 9aad045).
+        // E39 remains Injector-only; this hash protects the current Core baseline from accidental
+        // edits while keeping the guard honest about the checked-in byte content.
+        const string baselineHash = "52F843B035FD9BF62C3E79EF65119ACA2B09C76C544F429F9477BDBADBFEC49E";
+        Assert.Equal(baselineHash, hash);
     }
 
     static string ReadInjector(params string[] relative)

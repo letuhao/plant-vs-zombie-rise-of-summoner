@@ -635,6 +635,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-018",
+      "nameKey": "base.weighted-mace",
+      "name": "Weighted Mace",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weighted-mace",
+      "flavorKey": "flavor.base.weighted-mace",
+      "flavor": "A solid metal rod capped with a dense, unadorned head designed for delivering crushing impact.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-019",
+      "nameKey": "base.heavy-sledge",
+      "name": "Heavy Sledge",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.heavy-sledge",
+      "flavorKey": "flavor.base.heavy-sledge",
+      "flavor": "A massive, solid iron head mounted on a reinforced shaft. It is designed for delivering devastating kinetic impact through sheer mass.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-020",
+      "nameKey": "base.heavy-sledge",
+      "name": "Heavy Sledge",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.heavy-sledge",
+      "flavorKey": "flavor.base.heavy-sledge",
+      "flavor": "A massive, solid-headed implement designed to deliver devastating kinetic impact through sheer mass.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-021",
+      "nameKey": "base.heavy-sledge",
+      "name": "Heavy Sledge",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-sledge",
+      "flavorKey": "flavor.base.heavy-sledge",
+      "flavor": "A massive, solid iron head mounted on a reinforced shaft, designed for delivering devastating kinetic impact.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-022",
+      "nameKey": "base.weighted-mace",
+      "name": "Weighted Mace",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weighted-mace",
+      "flavorKey": "flavor.base.weighted-mace",
+      "flavor": "A dense, solid core encased in a reinforced metal shell. It relies on pure kinetic momentum to shatter through defenses.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-023",
+      "nameKey": "base.weighted-mace",
+      "name": "Weighted Mace",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weighted-mace",
+      "flavorKey": "flavor.base.weighted-mace",
+      "flavor": "A solid metal rod capped with a dense, blunt head designed to deliver devastating kinetic impact.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-024",
+      "nameKey": "base.weighted-mace",
+      "name": "Weighted Mace",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weighted-mace",
+      "flavorKey": "flavor.base.weighted-mace",
+      "flavor": "A solid, unadorned iron head fixed to a reinforced shaft. It relies on pure kinetic momentum to shatter bone and plate alike.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-025",
+      "nameKey": "base.heavy-sledge",
+      "name": "Heavy Sledge",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.heavy-sledge",
+      "flavorKey": "flavor.base.heavy-sledge",
+      "flavor": "A massive, solid iron head mounted on a reinforced shaft. It is designed for delivering devastating kinetic impact through sheer mass.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

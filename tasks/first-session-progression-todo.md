@@ -367,19 +367,17 @@ record the final evidence and leave no unchecked implementation blocker in the s
 
 **Verification:** repository CI-equivalent commands documented in the handoff and the final task report.
 
-**Regression evidence (2026-09-09):** Atom importer 33/33 tests pass; the onboarding, quick-start, and
-stale-board Server slice passes 16/16; the onboarding reveal component passes 3/3; and the Web
-production build passes. The simulator onboarding E2E passes 1/1. The full Web run before the final
-accessibility fix was 2,460 passed / 13
-failed; its remaining guard/Phaser failures are pre-existing, and the focused guard now reports only
-11 legacy violations (the onboarding control is clean). The complete Server run is 352 passed / 25
-failed, with failures in
-pre-existing world projection, derived-surface, and tuning fixtures. Core and Data full invocations
-also reproduced pre-existing ItemCard/set-corpus and NuGet-permission failures; they were stopped after
-those failures were recorded because the suites were still running beyond the verification window.
-The current worktree-wide `git diff --check` is also red on a trailing Markdown line in the unrelated
-status-rail audit. These results keep T15 and the final checkpoint open; they do not identify an
-onboarding regression.
+**Regression evidence (2026-09-09, refreshed):** Atom importer 33/33 tests pass; the onboarding,
+quick-start, and stale-board Server slice passes 16/16; the onboarding reveal component passes 3/3;
+the Web production build passes; and the simulator onboarding E2E passes 1/1. The complete Server
+suite is now 381/381 and the complete Guard suite is 243/243. Restore-sensitive child-process tests
+now use `--no-restore`, and source scans ignore inaccessible cache folders. The Web unit suite is
+2,466 passed / 8 failed; its remaining failures are existing contract/theme/band/accessibility
+guards outside this initiative.
+The onboarding control remains clean. Core is 13,286 passed /
+61 failed; Data's onboarding/import slices are green, while full runs stop on the concurrently edited
+item corpus. Those remaining failures are named below and do not identify an onboarding regression.
+`git diff --check` is clean; only Git's normal LF-to-CRLF notices remain.
 
 **Dependencies:** Task 14.
 
@@ -393,10 +391,14 @@ onboarding regression.
 
 ## Current verification blockers
 
-- The full Data suite is currently red in pre-existing `ItemCardStoreTests`: committed generated set
-  members in `data/seed/items/sets/*.json` omit required `baseType` values, and `SetCorpus` correctly
-  rejects them. This is outside the onboarding changes and needs a separate content regeneration/fix.
-- Guard tests still report pre-existing baseline/hash/CI-wiring failures; none touch the onboarding files.
+- Core/Data full suites remain red in the concurrently edited item corpus, not in onboarding code:
+  generated set members in `data/seed/items/sets/*.json` omit required `baseType` values (the strict
+  `SetCorpus` rejection is correct), and the charm, consumable, gem, affix-family, and display-template
+  counts no longer match their checked-in baselines. The item-seedgen work must finish its P3.3 member
+  binding and then refresh those baselines; do not weaken the parser or silently fill identities here.
+- The Web suite still has 8 pre-existing contract/theme/band/accessibility guard failures in dev and
+  shell surfaces; none touch the onboarding files. Server and Guard are fully green after the
+  stale-test fixes.
 - The seed importer now routes dungeon-specific envelopes to their dedicated loaders; the deployed
   server imports the atom corpus cleanly (26 files, 164 atoms) and reports a stable catalog revision.
   The real game/injector reaches a connected heartbeat and `lawn/quick-start` returns a live board with

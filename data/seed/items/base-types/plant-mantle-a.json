@@ -452,6 +452,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-canopy-a-013",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective layer. It provides a wide area of coverage against the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-014",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a lush, living barrier against the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-015",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a thick layer of shade that buffers the wearer from the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-016",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a thick layer of shade that deflects the harshness of the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-017",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves designed to shield the wearer from the elements. Its thick veins pulse with a slow, rhythmic sap.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-018",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective layer. It provides a lush, living shield against the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-019",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a lush, living barrier against the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-020",
+      "nameKey": "base.verdant-canopy",
+      "name": "Verdant Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-canopy",
+      "flavorKey": "flavor.base.verdant-canopy",
+      "flavor": "A dense, overlapping weave of broad leaves designed to catch the light and shield the wearer from the elements.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

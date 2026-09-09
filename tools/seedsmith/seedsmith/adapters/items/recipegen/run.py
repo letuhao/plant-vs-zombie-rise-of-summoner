@@ -310,6 +310,29 @@ def _draw_prefix() -> str:
     return "recipe-draw-"
 
 
+def _draw_index(subject_id: str, prefix: str) -> "int | None":
+    if not subject_id.startswith(prefix):
+        return None
+    suffix = subject_id[len(prefix):]
+    return int(suffix) if suffix.isdigit() else None
+
+
+def _draw_indices(done: "dict[str, dict]", prefix: str, count: int,
+                  existing: "dict[str, dict]") -> "list[int]":
+    """Repair invalid ledger slots before allocating new open-ended draws."""
+    indexed = {
+        idx: (sid, row) for sid, row in done.items()
+        if (idx := _draw_index(sid, prefix)) is not None
+    }
+    invalid = [idx for idx, (sid, row) in indexed.items() if not is_valid(sid, row, existing=existing)]
+    next_index = max(indexed, default=-1) + 1
+    selected = sorted(invalid)
+    while len(selected) < count:
+        selected.append(next_index)
+        next_index += 1
+    return selected[:count]
+
+
 def plan_run(*, count: int, ledger: RunLedger, forge_target: "ForgeTarget | None" = None,
             theme_hint: str = "", recipes_path: "Path | None" = None) -> RunPlan:
     if count < 1:
@@ -317,21 +340,21 @@ def plan_run(*, count: int, ledger: RunLedger, forge_target: "ForgeTarget | None
     existing = load_entries(recipes_path)
     done = ledger.read_done()
     prefix = _draw_prefix()
-    indices = [int(sid[len(prefix):]) for sid in done
-              if sid.startswith(prefix) and sid[len(prefix):].isdigit()]
-    start_draw = (max(indices) + 1) if indices else 0
+    draw_indices = _draw_indices(done, prefix, count, existing)
     start_seq = next_seq(tuple(existing))
 
     subjects = tuple(
-        Subject(subject_id=f"{prefix}{start_draw + i:03d}", seq=start_seq + i,
+        Subject(subject_id=f"{prefix}{draw_index:03d}", seq=start_seq + i,
                brief=build_recipe_brief(forge_target=forge_target, theme_note=theme_hint,
                                         recipes_path=recipes_path))
-        for i in range(count))
+        for i, draw_index in enumerate(draw_indices))
     return RunPlan(subjects=subjects, existing=existing)
 
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
-             call: Callable[[str, dict], dict]) -> "tuple[dict[str, dict], dict[str, dict]]":
+             call: Callable[[str, dict], dict],
+             persist: "Callable[[dict], None] | None" = None
+             ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Mirrors `basetypegen.run.run_draws`: not all-or-nothing, each resolved draw marked done as it
     completes."""
     fresh: "dict[str, dict]" = {}
@@ -356,6 +379,9 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         except ValueError as exc:
             blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
             continue
+        if persist is not None:
+            # Corpus first, ledger second, so a write failure leaves the draw retryable on resume.
+            persist(entry)
         fresh[entry["id"]] = entry
         ledger.mark_done(subject.subject_id, {"entryId": entry["id"], "operation": entry["operation"]})
 
@@ -475,14 +501,18 @@ def main(argv=None) -> int:
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     caller = live_answer_caller(config, validator=schema_mod.validate_answer)
     plan = plan_run(count=args.count, ledger=ledger, theme_hint=theme_hint)
-    fresh, blocked = run_draws(plan, ledger=ledger, call=caller)
+    persisted = dict(plan.existing)
+
+    def persist(entry: dict) -> None:
+        write_corpus({entry["id"]: entry}, existing=persisted)
+        persisted[entry["id"]] = entry
+
+    fresh, blocked = run_draws(plan, ledger=ledger, call=caller, persist=persist)
     merged = {**plan.existing, **fresh}
     backfill_result = None
     if args.backfill and fresh:
         requested, remaining = run_container_backfill_loop(merged, call=caller)
         backfill_result = {"requested": len(requested), "stillUnresolved": len(remaining)}
-    if fresh:
-        write_corpus(fresh, existing=plan.existing)
     summary = {"planned": len(plan.subjects), "fresh": len(fresh), "blocked": len(blocked),
               "blockedReasons": blocked}
     if backfill_result is not None:

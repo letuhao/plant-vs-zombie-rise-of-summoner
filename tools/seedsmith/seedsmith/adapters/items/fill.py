@@ -105,7 +105,7 @@ class FillStep:
 class FillStepResult:
     kind: str
     argv: "list[str]"
-    status: str  # planned | ran | skipped | refused | gap | error
+    status: str  # planned | ran | skipped | escalated | refused | gap | error
     exit_code: int = 0
     note: str = ""
 
@@ -125,10 +125,12 @@ class FillReport:
 
     @property
     def worst_exit_code(self) -> int:
-        from ...report.cli import EXIT_CANNOT_RUN, EXIT_CLEAN, EXIT_GAP, EXIT_REFUSED
+        from ...report.cli import (EXIT_CANNOT_RUN, EXIT_CLEAN, EXIT_ESCALATED, EXIT_GAP,
+                                   EXIT_REFUSED)
         if self.refused_reason:
             return EXIT_REFUSED
-        codes = [s.exit_code for s in self.steps if s.status in ("refused", "gap", "error")]
+        codes = [s.exit_code for s in self.steps
+                 if s.status in ("escalated", "refused", "gap", "error")]
         if not codes:
             return EXIT_CLEAN
         if EXIT_REFUSED in codes:
@@ -137,6 +139,8 @@ class FillReport:
             return EXIT_CANNOT_RUN
         if EXIT_GAP in codes or any(c == 1 for c in codes):
             return EXIT_GAP
+        if EXIT_ESCALATED in codes:
+            return EXIT_ESCALATED
         return max(codes)
 
 
@@ -225,8 +229,11 @@ def _affix_has_free_pairs(group_id: str, affix_kind: str) -> bool:
     """True when the partition still has a free (channel, op) for this kind."""
     from .affixfamgen import brief as affix_brief
     try:
-        built = affix_brief.build_affix_family_brief(group_id, affix_kind)
-        return bool(affix_brief.free_channel_ops(built.partition, affix_kind))
+        # Inspect the mechanical slot set directly. Building the model brief also validates the
+        # schema and raises for a full partition; that terminal condition must not become a
+        # runnable job merely because planning catches the exception.
+        partition = affix_brief.load_partition_context(group_id)
+        return bool(affix_brief.free_channel_ops(partition, affix_kind))
     except Exception:
         # Unreadable / illegal kind — let the generate step surface the real refuse.
         return True
@@ -439,6 +446,8 @@ def run_fill(*, kinds: "tuple[str, ...] | None" = None, dry_run: bool = False,
 
         if code == cli_mod.EXIT_CLEAN:
             status = "ran"
+        elif code == cli_mod.EXIT_ESCALATED:
+            status = "escalated"
         elif code == cli_mod.EXIT_GAP:
             status = "gap"
         elif code in (cli_mod.EXIT_REFUSED, cli_mod.EXIT_CANNOT_RUN):

@@ -86,7 +86,7 @@ public class DominanceBaselineTests
         var psi = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DominanceBaseline")}\" -c Release --no-build -- {args}",
+            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DominanceBaseline")}\" -c Release --no-restore --no-build -- {args}",
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };

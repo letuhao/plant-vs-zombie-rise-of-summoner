@@ -141,9 +141,11 @@ class ItemsFillTests(unittest.TestCase):
                 return cli_mod.EXIT_REFUSED
             return cli_mod.EXIT_CLEAN
 
-        report = fill_mod.run_fill(
-            kinds=("material", "gem"), dry_run=False, allow_production=True,
-            limits=self._smoke_limits(), dispatch=dispatch, stop_on_error=True)
+        with patch.object(fill_mod, "discover_gem_slots", return_value=[1]), \
+             patch.object(fill_mod, "_gem_slot_has_work", return_value=True):
+            report = fill_mod.run_fill(
+                kinds=("material", "gem"), dry_run=False, allow_production=True,
+                limits=self._smoke_limits(), dispatch=dispatch, stop_on_error=True)
         self.assertGreaterEqual(len(calls), 1)
         self.assertEqual(calls[0][:3], ["--kind", "material", "--write"])
         refused = [s for s in report.steps if s.status == "refused"]
@@ -162,6 +164,29 @@ class ItemsFillTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(report.steps[0].status, "gap")
         self.assertEqual(report.worst_exit_code, cli_mod.EXIT_GAP)
+
+    def test_fill_continues_after_recorded_escalation_by_default(self) -> None:
+        calls: list[str] = []
+
+        def dispatch(argv: list[str]) -> int:
+            kind = argv[argv.index("--kind") + 1]
+            calls.append(kind)
+            return (cli_mod.EXIT_ESCALATED if kind == "material" else cli_mod.EXIT_CLEAN)
+
+        report = fill_mod.run_fill(
+            kinds=("material", "consumable"), dry_run=False, allow_production=True,
+            limits=self._smoke_limits(), dispatch=dispatch, stop_on_error=True)
+        self.assertEqual(calls, ["material", "consumable"])
+        self.assertEqual(report.steps[0].status, "escalated")
+        self.assertEqual(report.steps[1].status, "ran")
+        self.assertEqual(report.worst_exit_code, cli_mod.EXIT_ESCALATED)
+
+    def test_clean_resume_after_prior_escalation_exits_clean(self) -> None:
+        report = fill_mod.run_fill(
+            kinds=("consumable",), dry_run=False, allow_production=True,
+            limits=self._smoke_limits(), dispatch=lambda _argv: cli_mod.EXIT_CLEAN,
+            stop_on_error=True)
+        self.assertEqual(report.worst_exit_code, cli_mod.EXIT_CLEAN)
 
     def test_affix_jobs_only_legal_kinds(self) -> None:
         jobs = fill_mod.discover_affix_family_jobs()
@@ -211,9 +236,11 @@ class ItemsFillTests(unittest.TestCase):
         self.assertIn("--backfill", argv)
 
     def test_max_partitions_caps_gem(self) -> None:
-        steps, _ = fill_mod.plan_fill_steps(
-            kinds=("gem",), allow_production=True,
-            limits=fill_mod.FillLimits(max_partitions=1, batch_size=1))
+        with patch.object(fill_mod, "discover_gem_slots", return_value=[1, 2]), \
+             patch.object(fill_mod, "_gem_slot_has_work", return_value=True):
+            steps, _ = fill_mod.plan_fill_steps(
+                kinds=("gem",), allow_production=True,
+                limits=fill_mod.FillLimits(max_partitions=1, batch_size=1))
         planned = [s for s in steps if s.argv]
         self.assertEqual(len(planned), 1)
         # Outer items generate CLI takes --count; remaps to gemgen --batch-size.
@@ -231,6 +258,16 @@ class ItemsFillTests(unittest.TestCase):
         self.assertEqual(reason, "")
         self.assertTrue(all(not s.argv for s in steps))
         self.assertTrue(any("no free" in s.note for s in steps))
+
+    def test_affix_no_free_pair_value_error_is_not_runnable(self) -> None:
+        with patch(
+            "seedsmith.adapters.items.affixfamgen.brief.load_partition_context",
+            return_value=object(),
+        ), patch(
+            "seedsmith.adapters.items.affixfamgen.brief.free_channel_ops",
+            return_value=(),
+        ):
+            self.assertFalse(fill_mod._affix_has_free_pairs("g.life", "stat.modify"))
 
     def test_gem_empty_slot_planned_as_skipped(self) -> None:
         with patch.object(fill_mod, "discover_gem_slots", return_value=[1]), \
@@ -276,6 +313,17 @@ class ItemsFillTests(unittest.TestCase):
             limits=fill_mod.FillLimits(full=True, count=3, count_explicit=True))
         argv = steps[0].argv
         self.assertEqual(argv[argv.index("--count") + 1], "3")
+
+    def test_full_gem_plan_uses_every_discovered_slot_and_remaining_family_count(self) -> None:
+        with patch.object(fill_mod, "discover_gem_slots", return_value=[1, 4]), \
+             patch.object(fill_mod, "_gem_remaining", side_effect=lambda slot: {1: 3, 4: 7}[slot]):
+            steps, reason = fill_mod.plan_fill_steps(
+                kinds=("gem",), allow_production=True, limits=fill_mod.FillLimits(full=True))
+        self.assertEqual(reason, "")
+        planned = [step for step in steps if step.argv]
+        self.assertEqual(len(planned), 2)
+        self.assertEqual(
+            [step.argv[step.argv.index("--count") + 1] for step in planned], ["3", "7"])
 
     def test_fill_continues_past_gap_when_stop_on_error_false(self) -> None:
         calls: list[str] = []

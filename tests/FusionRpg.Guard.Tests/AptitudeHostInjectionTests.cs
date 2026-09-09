@@ -80,7 +80,12 @@ public class AptitudeHostInjectionTests
             // Strip the two hosts' own path-prefix differences (System.IO. qualification, _pluginDir
             // vs AppContext.BaseDirectory) -- what must match is the Configure/Parse/ReadAllText/file
             // chain shape, not incidental host-local spelling.
-            return snippet.Replace("System.IO.", "", StringComparison.Ordinal);
+            snippet = snippet.Replace("System.IO.", "", StringComparison.Ordinal);
+            // Host-local comments naturally mention different version history. They are not
+            // executable wiring and must not make the shape guard fail on a documentation-only
+            // edit; compare the code after removing line comments.
+            snippet = System.Text.RegularExpressions.Regex.Replace(snippet, @"//[^\r\n]*", "");
+            return snippet;
         }
 
         var injectorWiring = ExtractWiringLine(injectorText);

@@ -44,6 +44,14 @@ diagnostic note. A run with one or more newly observed escalations exits non-zer
 runnable later step has been attempted. A repeat run that finds only previously recorded escalations
 has no fresh escalation and exits zero.
 
+### Corpus/ledger checkpoint ordering
+
+For open-ended generators, an accepted row is written to its corpus partition before its draw is
+marked `done` in the ledger. The writer is additive and atomic. If the corpus write fails or the
+process exits between model resolution and persistence, no `done` row is committed, so the same
+draw remains retryable on resume. A ledger row must never advance the draw counter past content
+that is not present on disk.
+
 ### `--full` depth
 
 `--full` means all discovered partitions and all unbounded closed-grid subjects. Explicit `--count`

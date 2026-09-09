@@ -447,6 +447,25 @@
         "offensive"
       ],
       "notes": "NEW family, stem `prec`, word `truesight`. `op: Flag` on `combat.accuracy.{variant}` — a boolean toggle rather than a graded reading, mechanically distinct from both `precision` (adds resolver points) and `prec-fixation` (sets a fixed point value): this family either applies or it does not, so `displayTemplate` deliberately carries no `{value}` placeholder, the same way `volley`'s spawn.entity sibling in g.on-hit carries no element param when it has nothing to vary. `powerBand: high` reflects a design judgement, not a scaling claim (Flag is structural per `prec-fixation`'s note): a guaranteed-hit effect is strong enough that it should gate to a later item-level tier window rather than show up on an early roll."
+    },
+    {
+      "id": "atom.prec-focus",
+      "nameKey": "affix.precision",
+      "name": "precision",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.accuracy.{variant}",
+        "op": "Increased"
+      },
+      "roles": [
+        "armament-primary"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "precision {word}",
+      "tags": [
+        "mechanical",
+        "offensive"
+      ]
     }
   ]
 }

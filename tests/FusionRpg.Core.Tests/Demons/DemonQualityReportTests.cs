@@ -77,7 +77,7 @@ public class DemonQualityReportTests
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonQualityReport")}\" -- " +
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonQualityReport")}\" --no-restore --no-build -- " +
                             $"--seed \"{speciesDir}\" --trials 50 --json \"{jsonOut}\"",
                 WorkingDirectory = repoRoot,
                 RedirectStandardOutput = true,
@@ -168,7 +168,7 @@ public class DemonQualityReportTests
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonQualityReport")}\" -- " +
+                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DemonQualityReport")}\" --no-restore --no-build -- " +
                             $"--seed \"{speciesDir}\" --trials 20",
                 WorkingDirectory = repoRoot,
                 RedirectStandardOutput = true,

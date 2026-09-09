@@ -452,6 +452,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-canopy-b-013",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves that shifts to catch the light. It clings to the wearer like a second skin of foliage.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-014",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, as if breathing in tandem with them.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-015",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-016",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-017",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-018",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-019",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, as if breathing in unison.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-020",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, mimicking the natural sway of a forest ceiling.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

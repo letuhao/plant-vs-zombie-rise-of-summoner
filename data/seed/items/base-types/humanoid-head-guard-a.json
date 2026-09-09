@@ -455,6 +455,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-head-a-013",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A rigid metal strip designed to protect the eyes and brow from downward strikes. It is bolted directly to the head-guard's existing headwear.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-014",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from heavy downward strikes. Its narrow visor offers a focused view of the battlefield.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-015",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-016",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a clear line of sight for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-017",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the skull and neck from downward strikes. Its smooth surface is built to deflect glancing blows away from the eyes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-018",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from heavy downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-019",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-020",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel basin designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

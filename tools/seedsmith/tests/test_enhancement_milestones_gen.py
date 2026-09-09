@@ -318,6 +318,18 @@ def test_run_draws_marks_the_ledger_done_and_partitions_fresh_vs_blocked(tmp_pat
     assert done["milestone-draw-000"]["runtimeFamily"] == "atom.enhance-ferocity"
 
 
+def test_run_draws_does_not_checkpoint_before_persist_callback(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(count=1, ledger=ledger, existing={})
+
+    def persist(_entry):
+        raise RuntimeError("simulated corpus write failure")
+
+    with pytest.raises(RuntimeError, match="corpus write failure"):
+        run_mod.run_draws(plan, ledger=ledger, call=_fake_call_for(word="Retry Me"), persist=persist)
+    assert ledger.read_done() == {}
+
+
 def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_path):
     ledger = RunLedger(tmp_path / "ledger.json")
     plan1 = run_mod.plan_run(count=2, ledger=ledger, existing={})
@@ -327,9 +339,13 @@ def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_pat
         if "milestone-draw-000" not in ledger.read_done()
         else _fake_call_for(word="Two")(b, s),
     )
+    run_mod.write_corpus(fresh1, existing={}, path=tmp_path / "milestones.json")
     # Second invocation of the whole pipeline (simulating a fresh process) must continue from
     # draw index 2, never re-issuing milestone-draw-000/001.
-    plan2 = run_mod.plan_run(count=2, ledger=ledger, existing={})
+    plan2 = run_mod.plan_run(
+        count=2, ledger=ledger,
+        existing=run_mod.load_existing(tmp_path / "milestones.json"),
+    )
     assert [s.subject_id for s in plan2.subjects] == ["milestone-draw-002", "milestone-draw-003"]
     assert len(fresh1) == 2
 
@@ -347,6 +363,15 @@ def test_reconcile_resurfaces_a_draw_whose_recorded_entry_was_deleted_from_the_c
         lambda sid, entry: run_mod.is_valid(sid, entry, existing=current_corpus),
     )
     assert needing_work == ["milestone-draw-000"]
+
+
+def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    ledger.mark_done("milestone-draw-000", {
+        "entryId": "enh.999", "runtimeFamily": "atom.enhance-ghost",
+    })
+    plan = run_mod.plan_run(count=1, ledger=ledger, existing={})
+    assert plan.subjects[0].subject_id == "milestone-draw-000"
 
 
 def test_reconcile_leaves_a_draw_alone_when_its_entry_still_matches(tmp_path):
