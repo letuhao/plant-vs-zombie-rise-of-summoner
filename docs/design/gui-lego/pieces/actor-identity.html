@@ -2,23 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>actor-identity</title>
+  <title>actor-identity (Condition)</title>
   <link rel="stylesheet" href="_piece-kit.css" />
   <style>
-    .identity { width: 360px; display:flex; gap:12px; padding:12px; border:1px solid #5b5144; border-radius:14px; background:#2f261d; color:#f2ead8; }
-    .portrait { width:48px; height:48px; border:1px solid #7fb4ff; border-radius:8px; background:#111; }
+    .identity {
+      width: 360px; display:flex; gap:12px; padding:12px;
+      border:1px solid #5b5144; border-radius:14px; background:#2f261d; color:#f2ead8;
+    }
+    .portrait { width:48px; height:48px; border:1px solid #7fb4ff; border-radius:8px; background:#111; flex:none; }
+    .eyebrow { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#a39583; }
     .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
     .chip { padding:2px 8px; border:1px solid #5b5144; border-radius:999px; font-size:10px; text-transform:uppercase; color:#a39583; }
   </style>
 </head>
 <body>
-  <section class="identity">
+  <!-- Condition variant: species / phase / elements only — Name + Lv · role stay on the left rail. -->
+  <section class="identity" data-testid="condition-actor-identity">
     <div class="portrait"></div>
     <div>
-      <div style="font:700 18px/1.1 ui-serif">Emberling</div>
-      <div style="margin-top:4px;font-size:12px;color:#a39583">Lv 14 · Plant</div>
+      <p class="eyebrow">Species</p>
+      <div style="font:700 18px/1.1 ui-serif;margin-top:4px">Sunflower</div>
       <div class="chips">
-        <span class="chip">Sunflower</span>
         <span class="chip">ActiveBound</span>
         <span class="chip">fire</span>
         <span class="chip">light</span>

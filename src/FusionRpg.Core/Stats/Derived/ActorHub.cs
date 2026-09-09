@@ -134,15 +134,22 @@ public static class ActorHubBootstrap
     /// <see cref="Subsystems.AtomDerivedSubsystem"/> at all, so every existing caller — including the
     /// hundreds of tests that call this bare — is unaffected. Pass it to give bound `stat.derived`
     /// atoms a consumer on this host.</summary>
+    /// <param name="seedResourceBaseline">
+    /// When true, registers <see cref="Subsystems.ResourceBaselineSubsystem"/> so
+    /// <c>resource.max.*</c>/<c>resource.regen.*</c> are Hub SSOT (UniqueActor /sheet). Default false.
+    /// </param>
     public static ActorHub CreateDefault(StatSystem? stats = null,
         FusionRpg.Core.Power.IPowerIndexProvider? powerIndex = null,
         Aptitudes.AptitudeTuning? aptitudeTuning = null,
         Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null,
         Func<StatContext, IReadOnlyList<Subsystems.BoundDerivedAtom>>? boundDerivedAtoms = null,
-        Func<StatContext, IReadOnlyList<Subsystems.StatusDerivedMod>>? statusDerivedMods = null)
+        Func<StatContext, IReadOnlyList<Subsystems.StatusDerivedMod>>? statusDerivedMods = null,
+        bool seedResourceBaseline = false)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
+        if (seedResourceBaseline)
+            hub.Register(new Subsystems.ResourceBaselineSubsystem(powerIndex));
         hub.Register(new Subsystems.RpgProgressionSubsystem(powerIndex));
         if (aptitudeTuning is not null)
         {

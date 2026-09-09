@@ -4,7 +4,8 @@
 **Depends on:** `actor-sheet-shell` · **Ideal bindings:**
 [spec-derived-stat-sheet.md](../../design/spec-derived-stat-sheet.md) ·
 **Composition kit:** [gui-lego-map.md](../gui-lego-map.md) ·
-**Status:** Implemented (P0 React — fold → bind → RecipeMount).
+**Status:** Implemented structure (P0 React — fold → bind → RecipeMount).  
+**Harden:** [../derived-cook-map.md](../derived-cook-map.md) — six states / CAP wire / paint SSOT / player copy (specs written 2026-09-10).
 
 ---
 

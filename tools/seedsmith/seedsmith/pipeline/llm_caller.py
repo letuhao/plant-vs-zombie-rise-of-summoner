@@ -180,6 +180,11 @@ def resolve_live_transport(
     """
     base = load_config(toml_path, dotenv_path=dotenv_path)
     endpoint = (cli_endpoint or "").strip() or base.endpoint
+    # LM Studio operators commonly paste the API root (`http://localhost:1234/v1`) while the
+    # OpenAI-compatible completion route is `/v1/chat/completions`. Normalize that shorthand so
+    # a reachable root cannot produce an empty/HTML response that looks like a model failure.
+    if endpoint.rstrip("/").endswith("/v1"):
+        endpoint = endpoint.rstrip("/") + "/chat/completions"
     model = (cli_model or "").strip()
     if not model or model == "unrecorded":
         model = base.model
@@ -197,6 +202,10 @@ class DegenerateGenerationError(RuntimeError):
     16384 tokens of repeated garbage). The only real fix is catching the loop WHILE STREAMING and
     aborting the connection immediately — see `_has_repetition_loop` and `call_model`'s own
     streaming loop below."""
+
+
+class EmptyModelResponseError(RuntimeError):
+    """The endpoint completed an SSE stream without emitting assistant content."""
 
 
 def _has_repetition_loop(text: str, *, tail: int = 400, min_period: int = 2, max_period: int = 80,
@@ -278,7 +287,12 @@ def _stream_once(config: LlmCallerConfig, body: bytes) -> str:
                     f"[{config.model}] repetition loop detected after {total_len} chars "
                     f"({now - started:.0f}s) -- aborting this attempt rather than burning the "
                     f"full max_tokens budget on it")
-    return "".join(accumulated)
+    result = "".join(accumulated)
+    if not result.strip():
+        raise EmptyModelResponseError(
+            f"[{config.model}] endpoint returned no assistant content; refusing to parse an empty response"
+        )
+    return result
 
 
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
@@ -334,7 +348,13 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
             print(f"seedsmith.llm_caller: [{config.model}] call complete, {len(result)} chars, "
                  f"{time.monotonic() - started:.1f}s", flush=True)
             return result
-        except (urllib.error.URLError, TimeoutError, KeyError, DegenerateGenerationError) as e:
+        except EmptyModelResponseError:
+            # An empty assistant stream is a deterministic content/configuration failure (for
+            # example, a reasoning-only template), not a transport hiccup. Retrying spends the
+            # same model budget and cannot repair the request, so fail immediately.
+            raise
+        except (urllib.error.URLError, TimeoutError, KeyError,
+                DegenerateGenerationError) as e:
             last_err = e
             print(f"seedsmith.llm_caller: [{config.model}] attempt {attempt + 1}/{config.attempts} "
                  f"failed ({type(e).__name__}: {e}); "

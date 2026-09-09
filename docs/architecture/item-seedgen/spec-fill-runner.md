@@ -66,8 +66,10 @@ its all-subjects meaning; an interruption resumes from the on-disk ledger and co
   files; fill assigns that pool to the first discovered slot with work, so one family cannot be
   planned concurrently for multiple destinations. The selected gem slot draws the deterministic
   remaining count.
-- Base type, enhancement milestone, recipe, and drop-table are intentionally open-ended; they run one
-  documented elevated pass, not a fictional "exhaustion" claim.
+- Base type, enhancement milestone, and drop-table are intentionally open-ended; they run one
+  documented elevated pass, not a fictional "exhaustion" claim. Recipe fill is reconciliation-only:
+  it validates the closed operation vocabulary and hard references without a model call. New recipes
+  require an explicit, partition-scoped generation command backed by an approved forge-coverage plan.
 - Set runs both `species` and `build` populations; charm remains `species` only.
 
 All discovery and depth decisions are deterministic code. The model receives only the individual
@@ -122,8 +124,9 @@ refusals/errors; it is not required merely to get past a recorded escalation.
    fresh escalation occurs.
 4. A generic gap/refusal still stops by default; `--continue-on-error` remains the explicit override.
 5. `--full` plans both set populations, every independent discovered partition, the gem global
-   remaining-family count assigned to one destination slot, and the documented elevated count for
-   each open-ended generator. Explicit depth flags win.
+   remaining-family count assigned to one destination slot, the documented elevated count for each
+   open-ended generator, and a no-model recipe reconciliation. Explicit depth flags win where the
+   generator accepts a depth setting.
 6. The dry-run plan and dispatch order are byte/order stable for identical corpus and ledger input.
 7. `--verify` distinguishes a clean generator walk from finite populations that are pending/held
    and from a corpus with remaining promoted health gaps; it never changes corpus data itself.

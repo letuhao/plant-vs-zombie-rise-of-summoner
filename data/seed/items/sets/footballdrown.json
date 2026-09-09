@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.footballdrown-001",
-      "nameKey": "set.trident-athlete",
-      "name": "Trident Athlete",
+      "nameKey": "set.deep-sea-striker",
+      "name": "Deep Sea Striker",
       "themeKey": "demon.footballdrown",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A decaying champion's relic, forged from rusted iron and fueled by the relentless momentum of a thousand sprints.",
+      "flavor": "A relentless force surging through the tides.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

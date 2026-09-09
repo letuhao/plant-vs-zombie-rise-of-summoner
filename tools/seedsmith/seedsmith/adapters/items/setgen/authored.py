@@ -309,6 +309,8 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             match = re.search(r"use axis `([^`]+)`", subject.brief)
             if match:
                 draft["axis"] = match.group(1)
+            if subject.charm_class_hint:
+                draft["charmClass"] = subject.charm_class_hint
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
             reason = draft["blocked"].strip()
             result.outcomes.append(SubjectOutcome(

@@ -9,19 +9,26 @@ import { foldConditionSurfaceVm } from "@/features/gui-lego/foldConditionSurface
 import { getRecipe } from "@/features/gui-lego/recipeRegistry";
 import { RecipeMount } from "@/ui/gui-lego/RecipeMount";
 import { ensureConditionGuiLegoRegistered } from "@/ui/gui-lego/registerCondition";
+import "@/ui/gui-lego/conditionConsole.css";
 
 /**
  * Condition glance — GUI Lego host. Identity stays in the shell summarize.
+ * Progressive enrichment: ActorView fills the glance while /sheet loads; sheet error keeps the glance
+ * and shows a compact retry strip (never a full-surface swap).
  */
 export function ConditionTab({
   data,
   surface,
   sheet,
+  sheetError = false,
+  onRetry,
   onOpenStatusTab
 }: {
   data: ActorView;
   surface: ActorSurfaceCatalog;
   sheet?: ActorSheetDto | null;
+  sheetError?: boolean;
+  onRetry?: () => void;
   onOpenStatusTab?: () => void;
 }) {
   ensureConditionGuiLegoRegistered();
@@ -35,10 +42,11 @@ export function ConditionTab({
         const id = (p as { poolId?: string })?.poolId;
         if (typeof id === "string") setSelectedPoolId(id);
       }),
-      typedBus.on("condition.status.open", () => onOpenStatusTab?.())
+      typedBus.on("condition.status.open", () => onOpenStatusTab?.()),
+      typedBus.on("condition.retry", () => onRetry?.())
     ];
     return () => offs.forEach((off) => off());
-  }, [typedBus, onOpenStatusTab]);
+  }, [typedBus, onOpenStatusTab, onRetry]);
 
   const vm = useMemo(
     () =>
@@ -52,7 +60,23 @@ export function ConditionTab({
     [data, sheet, surface, selectedPoolId]
   );
   const recipe = getRecipe("condition-console");
-  const plan = useMemo(() => (recipe ? bindSurface(recipe, vm) : null), [recipe, vm]);
+  const plan = useMemo(
+    () => (recipe ? bindSurface(recipe, vm, { preferOverlay: false }) : null),
+    [recipe, vm]
+  );
   if (!plan) return <p className="rd">Condition recipe not registered.</p>;
-  return <RecipeMount plan={plan} bus={bus} />;
+
+  return (
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col" data-testid="condition-tab-host">
+      {sheetError ? (
+        <div className="condition-sheet-retry" data-testid="condition-sheet-retry">
+          <span>Sheet enrichment failed — glance still shows ActorView data.</span>
+          <button type="button" data-testid="condition-sheet-retry-button" onClick={() => typedBus.emit("condition.retry", {})}>
+            Retry
+          </button>
+        </div>
+      ) : null}
+      <RecipeMount plan={plan} bus={bus} />
+    </div>
+  );
 }

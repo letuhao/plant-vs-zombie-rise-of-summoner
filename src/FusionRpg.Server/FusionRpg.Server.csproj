@@ -63,7 +63,8 @@
          defect — silently absent next to the exe, so `MapWorkbench`'s recipe corpus never loads and
          every workbench route 404s/405s on a real published build despite passing every in-process
          test. Same copy pattern as data\seed\dungeon\ above, one directory over. -->
-    <Content Include="..\..\data\seed\items\**\*.json">
+    <Content Include="..\..\data\seed\items\**\*.json"
+             Exclude="..\..\data\seed\items\**\*.ledger.json">
       <Link>data\seed\items\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

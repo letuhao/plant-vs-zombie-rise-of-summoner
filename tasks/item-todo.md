@@ -9942,3 +9942,23 @@ not against zero. ✅ `Guard` and `seedsmith` are clean, so those two *are* zero
     lawn observation, world-map movement, or durable actor lifecycle.
   - Scope: L. Depends on: Phase 7 and a live siege resolver. Ask-first:
     cross-program ownership and public contract shape.
+
+### Future — versioned eight-socket topology
+
+- [ ] Add a new socket-tuning revision that raises the role ceilings to the
+  approved 0–8 table without editing `sockets.v1.json` or silently rewriting
+  existing base-type corpus rows. Keep base-type capacity resolution in the
+  existing deterministic `(role, content band, stable sequence)` path.
+  - Acceptance: persisted socket indices partition into `index / 4` circuits;
+    resonance and at most one four-ingredient Strain/Splice evaluate only
+    within a circuit; indices 3 and 4 never combine; an eight-socket host can
+    expose two independent circuits.
+  - Balance: measure and set the actor-level active-combination budget in the
+    new tuning revision. Suppression is stable and visible; inserting a gem is
+    never refused because a budget was reached.
+  - Verify: focused `SocketGeometry`/evaluator tests for 0–8 capacity,
+    deterministic base-type capacity resolution, two-circuit evaluation,
+    cross-boundary refusal, migration compatibility, and tuning schema
+    validation. Re-run Seedsmith base-type validation before any corpus write.
+  - Scope: M. Depends on module 16 and module 21 contracts. Ask-first:
+    balance budget, migration/rollout timing, or any production corpus rewrite.

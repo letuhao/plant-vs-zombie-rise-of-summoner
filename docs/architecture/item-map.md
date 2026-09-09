@@ -144,7 +144,7 @@ Twenty-one. Model calls in **two** (13 and 21).
 |---|---|---|---|
 | 14 | [`salvage-craft`](item/spec-salvage-craft.md) | I9 — materials, salvage, the cost vocabulary. The first sink, and the cheapest | 2, 7 |
 | 15 | [`enhance-reroll`](item/spec-enhance-reroll.md) | I6 + I7 under one mutation contract. **D7: cost, never luck** — steep tier-keyed cost, a success chance, and **mandatory bad-luck protection** (`rpg_summon_pity` is the precedent). The cost curve is a **configurable soft cap** in `data/tuning/`, never a hard stop | 9, 14 |
-| 16 | [`sockets`](item/spec-sockets.md) | I4 — inserts as instance bindings on the same owner; **the combination evaluator** (25 resonances + Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator. ⚠ *"No atom-table change"* was wrong — the lane requests `bind_ordinal` on `effect_binding` (§5.4) | 4, **15**, 14 |
+| 16 | [`sockets`](item/spec-sockets.md) | I4 — inserts as instance bindings on the same owner; **the combination evaluator** (25 resonances + Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator. ⚠ *"No atom-table change"* was wrong — the lane requests `bind_ordinal` on `effect_binding` (§5.4). **2026-09-10 topology decision:** a future versioned socket tuning revision may raise role ceilings to 8, evaluated as two fixed four-socket circuits; it does not create an eight-ingredient combination or rewrite the shipped corpus. | 4, **15**, 14 |
 
 ### Late and gated
 
@@ -179,7 +179,7 @@ not duplicated here.
 > | 12 `threshold-grants` | **3** | it reads `budgetWeightMilli` and the twelve-role list, and `Core/Items/` does not exist until module 3 creates it |
 > | 13 `set-charm-gen` | **3** | the twelve-role generator cap is module 3's to issue |
 > | 16 `sockets` | **`bind_ordinal` on `effect_binding`** | requested by the lane (§5.4) and **absent** from the shipped DDL |
-> | 21 `strain-splice-gen` | **6** | inert until `socketMax` can reach 4; no shipped base type hosts a 4-ingredient recipe |
+> | 21 `strain-splice-gen` | **6** | requires a host with `socketMax >= 4`; future eight-socket capacity is separate topology work and evaluates as two circuits, not a wider recipe |
 > | 19 `granted-actions` | **6** | ⭐ **added 2026-09-05 when the module was built** — the sixth row of the same kind. `item_granted_action.container_id` keys on the base type (ssot §4.4), and gate **GA2** is blocked by module 6 in the spec's own gate table. §4.3's `armament-primary`-only rule is likewise a base-type role check |
 >
 > **X7** (D27's container kinds) additionally gates **12, 13, 16, 18 and 21**, and **X4** gates **11, 13,

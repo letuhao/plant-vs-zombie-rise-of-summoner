@@ -6,6 +6,7 @@ accepts hardened piece/recipe contracts + assembled surface.
 **Program id:** `gui-lego`  
 **Map:** [gui-lego-map.md](gui-lego-map.md)  
 **Authoring:** [gui-lego-authoring.md](gui-lego-authoring.md)  
+**Idea-UI (menu audits before `/spec`):** [idea-ui-phase.md](idea-ui-phase.md)  
 **Design index:** [../design/gui-lego/README.md](../design/gui-lego/README.md)  
 **Module specs:** [gui-lego/](gui-lego/)  
 **Queue:** [gui-lego/menu-refactor-queue.md](gui-lego/menu-refactor-queue.md)  

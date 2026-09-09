@@ -557,6 +557,8 @@ def cmd_items(args: argparse.Namespace) -> int:
         return _cmd_items_fill(args)
     if args.items_command == "repair-sets":
         return _cmd_items_repair_sets(args)
+    if args.items_command == "repair-names":
+        return _cmd_items_repair_names(args)
     if args.items_command != "generate":
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
@@ -778,6 +780,58 @@ def _cmd_items_repair_sets(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
     print(json.dumps(repair_mod.repair_report(files, write=bool(args.write)),
                      ensure_ascii=False, indent=2))
+    return EXIT_CLEAN
+
+
+def _cmd_items_repair_names(args: argparse.Namespace) -> int:
+    """Plan or apply model-authored surface-name repairs for persisted set/charm collisions."""
+    from ..adapters.items.setgen import name_repair
+    from ..pipeline.llm_caller import live_answer_caller, resolve_live_transport
+
+    root = Path(args.items_dir) if args.items_dir else name_repair.ITEM_SEED_ROOT
+    repairs = name_repair.plan(root)
+    if args.limit > 0:
+        repairs = repairs[:args.limit]
+    payload = {"write": bool(args.write), "repairs": [
+        {"entryId": repair.entry_id, "kind": repair.kind, "oldName": repair.old_name,
+         "keeperId": repair.keeper_id, "brief": name_repair.brief(repair)}
+        for repair in repairs]}
+    if not args.write:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return EXIT_CLEAN
+    try:
+        root.resolve().relative_to(name_repair.ITEM_SEED_ROOT.resolve())
+    except ValueError:
+        pass
+    else:
+        if not args.allow_production_tree:
+            print("seedsmith: repair-names refused — production data/seed/items is read-only "
+                  "unless --allow-production-tree is passed", file=sys.stderr)
+            return EXIT_REFUSED
+    if args.answers:
+        document = json.loads(Path(args.answers).read_text(encoding="utf-8"))
+        answers = document.get("answers", document) if isinstance(document, dict) else None
+        if not isinstance(answers, dict):
+            print("seedsmith: repair-names answers must be a JSON object keyed by entry id", file=sys.stderr)
+            return EXIT_REFUSED
+    else:
+        transport = resolve_live_transport(args.endpoint, args.model)
+        if not transport.endpoint:
+            print("seedsmith: repair-names --write needs --answers or a live endpoint", file=sys.stderr)
+            return EXIT_REFUSED
+        caller = live_answer_caller(transport)
+        try:
+            answers = {repair.entry_id: caller(name_repair.brief(repair), name_repair.schema())
+                       for repair in repairs}
+        except (RuntimeError, ValueError, json.JSONDecodeError) as exc:
+            print(f"seedsmith: repair-names model call failed — {exc}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+    try:
+        changed = name_repair.apply(repairs, answers, write=True, items_root=root)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"seedsmith: repair-names failed — {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    print(json.dumps({**payload, "changed": [str(path) for path in changed]}, ensure_ascii=False, indent=2))
     return EXIT_CLEAN
 
 
@@ -2632,6 +2686,22 @@ def build_parser() -> argparse.ArgumentParser:
                          help="set partition directory (default data/seed/items/sets)")
     irepair.add_argument("--base-types-dir", default="",
                          help="base-type directory (default data/seed/items/base-types)")
+    inames = items_sub.add_parser(
+        "repair-names", help="rename persisted duplicate set/charm names (dry-run by default)")
+    inames.add_argument("--write", action="store_true",
+                        help="apply validated replacement names")
+    inames.add_argument("--allow-production-tree", dest="allow_production_tree", action="store_true",
+                        help="permit writes under data/seed/items/")
+    inames.add_argument("--items-dir", default="",
+                        help="items root containing sets/ and charms/ (default data/seed/items)")
+    inames.add_argument("--answers", default="",
+                        help="JSON object keyed by losing entry id, each with name and optional flavor")
+    inames.add_argument("--endpoint", default="",
+                        help="live model endpoint; omitted when --answers supplies replacements")
+    inames.add_argument("--model", default="unrecorded",
+                        help="live model id; falls through to configured default")
+    inames.add_argument("--limit", type=int, default=0,
+                        help="repair at most N losing rows (0 = every duplicate)")
     imigrate = items_sub.add_parser(
         "combogen-migrate",
         help="report combogen.migrate's own socket-word retirement plan (module 21)")

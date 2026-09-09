@@ -5,6 +5,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
@@ -168,7 +169,27 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.Equal(actor.Xp, sheet.Xp);
         Assert.Equal(actor.Phase, sheet.Phase);
         Assert.Equal("Plant", sheet.RoleLabel);
-        Assert.True(sheet.XpToNext > 0);
+        Assert.Equal(RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level), sheet.XpToNext);
+        Assert.NotNull(sheet.LiveStatuses);
+        Assert.Empty(sheet.LiveStatuses!);
+        Assert.NotNull(sheet.ResourcePools);
+        Assert.Equal(FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds.Count, sheet.ResourcePools!.Count);
+        Assert.All(FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds, id =>
+        {
+            var pool = Assert.Single(sheet.ResourcePools, p => p.ResourceId == id);
+            Assert.True(pool.Max is > 0, $"pool {id} Max must be > 0");
+            Assert.True(pool.Current is >= 0, $"pool {id} Current must be set");
+            Assert.True(pool.Current <= pool.Max, $"pool {id} Current must be <= Max");
+        });
+        // Hub SSOT: resource.max.* channels appear on the derived sheet from ResourceBaselineSubsystem.
+        Assert.All(FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds, id =>
+        {
+            var ch = Assert.Single(sheet.Derived, c => c.ChannelId == $"resource.max.{id}");
+            Assert.True(ch.Value > 0, $"derived resource.max.{id} must be Hub-seeded");
+            Assert.Contains(ch.Contributions, x => x.SourceId == "rpg.resource.base");
+        });
+        Assert.NotNull(sheet.Standing);
+        Assert.Null(sheet.ShieldSummary);
 
         var power = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.power");
         Assert.Equal("FlatReplace", power.ComposeKind);
@@ -217,6 +238,54 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.NotNull(sheet.ElementTyping);
         Assert.Equal(species.ElementPrimary.ToElementId(), sheet.ElementTyping!.Primary);
         Assert.Equal(species.ElementSecondary?.ToElementId(), sheet.ElementTyping.Secondary);
+    }
+
+    [Fact]
+    public async Task Get_sheet_bare_actor_has_null_identity_and_honest_empty_current_state()
+    {
+        var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 3);
+
+        var resp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/sheet");
+        if (!resp.IsSuccessStatusCode) throw new Exception(await resp.Content.ReadAsStringAsync());
+        var sheet = await resp.Content.ReadFromJsonAsync<SheetResponseDto>();
+        Assert.NotNull(sheet);
+        Assert.Null(sheet!.SpeciesId);
+        Assert.Null(sheet.SpeciesName);
+        Assert.Null(sheet.ElementTyping);
+        Assert.Equal(RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level), sheet.XpToNext);
+        Assert.NotNull(sheet.LiveStatuses);
+        Assert.Empty(sheet.LiveStatuses!);
+        Assert.NotNull(sheet.ResourcePools);
+        Assert.Equal(FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds.Count, sheet.ResourcePools!.Count);
+        Assert.NotNull(sheet.Standing);
+        Assert.Null(sheet.ShieldSummary);
+    }
+
+    [Fact]
+    public async Task Get_sheet_projects_standing_from_equipped_stat_derived_atoms()
+    {
+        const string channel = DerivedStatChannels.CombatPowerOmni;
+        const long amount = 175;
+        const string itemRef = "item-hub-standing-fixture";
+        var role = ItemRoles.Id(ItemRole.ArmamentPrimary);
+
+        var actor = _store.CreateUniqueActor(_playerId, "plant", typeId: 11);
+        BindStatDerivedEquip(actor.InstanceId, channel, amount, role, itemRef);
+
+        var resp = await _http.GetAsync($"/api/actors/{actor.InstanceId}/sheet");
+        if (!resp.IsSuccessStatusCode) throw new Exception(await resp.Content.ReadAsStringAsync());
+        var sheet = await resp.Content.ReadFromJsonAsync<SheetResponseDto>();
+        Assert.NotNull(sheet);
+        Assert.NotNull(sheet!.Standing);
+        // Equipped combat.power.omni prices into Offense (stat.derived categories) — non-zero Standing.
+        Assert.True(
+            sheet.Standing!.Offense
+            + sheet.Standing.Survivability
+            + sheet.Standing.Control
+            + sheet.Standing.Utility
+            + sheet.Standing.Economy
+            > 0,
+            "equipped atom must produce a non-zero Standing vector");
     }
 
     [Fact]
@@ -328,8 +397,39 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         public long Xp { get; set; }
         public long? XpToNext { get; set; }
         public SheetElementTypingDto? ElementTyping { get; set; }
+        public SheetStandingDto? Standing { get; set; }
         public List<SheetChannelDto> Derived { get; set; } = new();
         public List<DerivedContributionDto> Primary { get; set; } = new();
+        public List<SheetStatusGlyphDto>? LiveStatuses { get; set; }
+        public List<SheetResourcePoolDto>? ResourcePools { get; set; }
+        public SheetShieldSummaryDto? ShieldSummary { get; set; }
+    }
+
+    sealed class SheetStandingDto
+    {
+        public int Offense { get; set; }
+        public int Survivability { get; set; }
+        public int Control { get; set; }
+        public int Utility { get; set; }
+        public int Economy { get; set; }
+    }
+
+    sealed class SheetStatusGlyphDto
+    {
+        public string StatusId { get; set; } = "";
+    }
+
+    sealed class SheetResourcePoolDto
+    {
+        public string ResourceId { get; set; } = "";
+        public long? Current { get; set; }
+        public long? Max { get; set; }
+    }
+
+    sealed class SheetShieldSummaryDto
+    {
+        public long? Current { get; set; }
+        public long? Max { get; set; }
     }
 
     sealed class SheetElementTypingDto

@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.cabbageumbrella-001",
-      "nameKey": "set.cabbage-launcher",
-      "name": "Cabbage Launcher",
+      "nameKey": "set.cabbage-cannon",
+      "name": "Cabbage Cannon",
       "themeKey": "demon.cabbageumbrella",
       "members": [
         {
@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "flavor": "A pressurized vegetable shell that fires high-velocity seeds at any intruder.",
+      "flavor": "A leafy projectile propelled by high-pressure garden winds.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

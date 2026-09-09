@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.retribution-defense-001",
-      "nameKey": "set.bastion-of-retribution",
-      "name": "Bastion of Retribution",
+      "nameKey": "set.bulwark-of-retribution",
+      "name": "Bulwark of Retribution",
       "themeKey": "build.retribution-defense",
       "members": [
         {
@@ -77,7 +77,7 @@
           ]
         }
       ],
-      "flavor": "The weight of the shield is matched only by the inevitability of the strike.",
+      "flavor": "A steadfast wall against the tide of chaos.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
     }

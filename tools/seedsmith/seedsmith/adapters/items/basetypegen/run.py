@@ -27,6 +27,7 @@ from seedsmith.pipeline.run_ledger import RunLedger
 
 from . import brief as brief_mod
 from . import emit as emit_mod
+from . import partitions
 from . import tuning
 
 REPO_ROOT = tuning.REPO_ROOT
@@ -37,7 +38,7 @@ DEFAULT_LEDGER_PATH = REPO_ROOT / "data" / "seed" / "items" / "_runs" / \
 def _partition_file(role: str, frame: str, band: str, *,
                     base_types_dir: "Path | None" = None) -> Path:
     directory = base_types_dir or tuning.BASE_TYPES_DIR
-    return directory / f"{frame}-{role}-{band}.json"
+    return partitions.file_for(role, frame, band, base_types_dir=directory)
 
 
 def load_existing(role: str, frame: str, band: str, *,

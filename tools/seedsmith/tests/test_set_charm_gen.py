@@ -756,6 +756,20 @@ class RunTests(unittest.TestCase):
         self.assertEqual(len(plan.subjects), held.generatable)
         self.assertFalse(plan.complete)
 
+    def test_charm_class_assignment_is_weighted_and_not_a_model_decision(self) -> None:
+        # A surplus of signets must schedule a minor before the model sees a brief. The weights
+        # are tuning data, not a prompt suggestion, so a semantic answer cannot flood the scarce
+        # unique-carry class again.
+        chosen = run_mod._least_represented_charm_class(
+            TUNING, {"minor": 22, "standard": 32, "signet": 304})
+        self.assertEqual(chosen, "minor")
+
+        plan = self._plan(kind="charm", population="species")
+        self.assertTrue(plan.subjects)
+        subject = plan.subjects[0]
+        self.assertTrue(subject.charm_class_hint)
+        self.assertIn(f"use charmClass `{subject.charm_class_hint}`", subject.brief)
+
     def test_plan_skips_set_ids_already_present_in_the_corpus(self) -> None:
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:

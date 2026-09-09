@@ -714,6 +714,7 @@ Chaos level/realm curves are **reference for future `UpdatePower`** — not the 
 |---|---|---|---|
 | `baseline` | 0 | Y0 in context | — |
 | `rpg.progression` | 100 | no-op | Sets **`progression.power = Θ`** via `IPowerIndexProvider` (0 if un-hydrated) and **`progression.realm = 1.0`** permanently (§3B) |
+| `rpg.resource.base` | 90 | no-op | **Opt-in** (`seedResourceBaseline`) — FlatSum base `resource.max.*` / `resource.regen.*` for UniqueActor Hub / cold `/sheet` (parity with BattleStatComposer seed). SourceId `rpg.resource.base` |
 | `pvz.stats` | 250 | existing plugin | rows on catalog channels when present |
 | `foundation.effect` | 350 | session bag | future timed derived |
 | `status.timed` | 400 | session bag | timed derived from live statuses |
@@ -795,6 +796,7 @@ Every Hot derived modifier carries a non-empty SourceId minted via `Contribution
 | Producer | SourceId | Fiction label example |
 |---|---|---|
 | Progression | `rpg.progression` | Progression |
+| Resource base (UniqueActor Hub opt-in) | `rpg.resource.base` | Resource base |
 | Aptitude | `aptitude.{Share}` | Aptitude · Might |
 | Equip | `equip:{role}:{itemRef}` | Equip · armament-primary (item…) |
 | Tree | `tree.{treeId}.{nodeId}` | Tree · might/…/n0 |

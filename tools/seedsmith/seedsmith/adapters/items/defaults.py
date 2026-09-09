@@ -62,7 +62,17 @@ def resolve_out_dir_arg(kind: str, cli_out_dir: str, *, allow_production: bool,
                         dotenv_path: Path | None = None) -> str:
     """CLI `--out-dir` wins; else production default when allow-production is on."""
     if (cli_out_dir or "").strip():
-        return cli_out_dir.strip()
+        value = cli_out_dir.strip()
+        # Operators commonly invoke the module from tools/seedsmith.  A production-relative
+        # path must still point at the repository's data tree, not tools/seedsmith/data.  Keep
+        # arbitrary scratch paths relative to the caller; only normalize the documented tree.
+        if allow_production:
+            candidate = Path(value)
+            parts = [part.casefold() for part in candidate.parts]
+            marker = ["data", "seed", "items"]
+            if not candidate.is_absolute() and parts[:3] == marker:
+                return str(ITEM_SEED_ROOT.joinpath(*candidate.parts[3:]))
+        return value
     if allow_production:
         return default_out_dir(kind, dotenv_path=dotenv_path)
     return ""

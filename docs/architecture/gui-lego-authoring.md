@@ -31,6 +31,10 @@ rules become composable pieces.
 
 ## 2. Authoring steps (design → React)
 
+0. **Idea-UI first when the surface is still a shape or a bug list** — run `/idea-ui` (procedure:
+   [idea-ui-phase.md](idea-ui-phase.md)). Deliverable is `docs/architecture/<program>-ideal.md`
+   with a **bug → module** map. Do not open a “fix the tab CSS” plan. Example:
+   [condition-glance-ideal.md](condition-glance-ideal.md).
 1. **Find the queue slot** — [menu-refactor-queue.md](gui-lego/menu-refactor-queue.md). New surfaces
    add a row; do not skip the queue.
 2. **Reuse before invent** — check [design/gui-lego/README.md](../design/gui-lego/README.md) piece
@@ -46,7 +50,7 @@ rules become composable pieces.
 8. **React** — registry + fold + mount inside the existing host. Contract tests for landmark/`>`
    DOM. Side-by-side when SSOT-locked.
 
-Do **not** start at step 8.
+Do **not** start at step 8. Do **not** skip step 0 when auditing a live menu that “looks wrong.”
 
 ---
 

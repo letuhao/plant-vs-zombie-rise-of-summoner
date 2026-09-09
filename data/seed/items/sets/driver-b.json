@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.driver-b-001",
-      "nameKey": "set.dancing-chariot",
-      "name": "Dancing Chariot",
+      "nameKey": "set.rhythmic-cavalier",
+      "name": "Rhythmic Cavalier",
       "themeKey": "demon.driver_b",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A rhythmic engine of rot that refuses to let go of its frantic, mechanical pulse.",
+      "flavor": "A driver who moves in perfect harmony with the engine's pulse.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

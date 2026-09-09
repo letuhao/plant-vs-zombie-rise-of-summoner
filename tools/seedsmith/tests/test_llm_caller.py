@@ -24,12 +24,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from seedsmith.pipeline.llm_caller import (  # noqa: E402
     DEFAULT_CONFIG,
     DegenerateGenerationError,
+    EmptyModelResponseError,
     LlmCallerConfig,
     call_model,
     call_with_self_heal,
     extract_json,
     live_answer_caller,
     load_config,
+    resolve_live_transport,
     _has_repetition_loop,
 )
 
@@ -128,6 +130,11 @@ class ReasoningDisabledTests(unittest.TestCase):
                                                           max_tokens=777))
         self.assertEqual(self.server.requests[0]["max_tokens"], 777)
 
+    def test_api_root_endpoint_is_normalized_to_chat_route(self) -> None:
+        config = resolve_live_transport("http://localhost:1234/v1", "m",
+                                        dotenv_path=Path("missing.env"))
+        self.assertEqual(config.endpoint, "http://localhost:1234/v1/chat/completions")
+
     def test_call_model_returns_message_content(self) -> None:
         self.server.queue('{"hello": "world"}')
         result = call_model("sys", "user", config=self.config)
@@ -152,6 +159,17 @@ class RetryExhaustionTests(unittest.TestCase):
         with self.assertRaises(RuntimeError) as ctx:
             call_model("sys", "user", config=config)
         self.assertIn("2 attempts", str(ctx.exception))
+
+    def test_empty_stream_is_a_failure_not_a_success(self) -> None:
+        server = MockModelServer()
+        try:
+            server.queue("")
+            config = LlmCallerConfig(endpoint=server.url, attempts=1, retry_delay=0)
+            with self.assertRaises(RuntimeError) as ctx:
+                call_model("sys", "user", config=config)
+            self.assertIn("no assistant content", str(ctx.exception))
+        finally:
+            server.close()
 
 
 class ExtractJsonTests(unittest.TestCase):

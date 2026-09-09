@@ -87,45 +87,47 @@ Re-issued against `ssot-equip-slots.md` §2.3's fifteen ids, ordered by their pu
 
 | # | `role_id` | Weight ‰ | `socket_max` | Why |
 |---:|---|---:|---:|---|
-| 1 | `armament-primary` | 160 | **4** | the identity slot — where a Strain should live |
-| 2 | `core-guard` | 120 | **4** | the largest defensive budget on the body |
-| 3 | `ward-array` | 90 | **3** | ⭐ **new** — the depleting layer; shields are a real second survivability currency |
-| 4 | `armament-secondary` | 80 | **3** | the answering half |
-| 5 | `jewel-major` | 80 | **1** | earns its place with affixes, not sockets |
-| 6 | `manipulator` | 70 | **2** | rate and follow-through |
-| 7 | `mantle` | 60 | **3** | the resistance home — element gems belong here |
-| 8 | `head-guard` | 60 | **3** | disable resistance |
-| 9 | `girdle` | 60 | **2** | the resource role |
-| 10 | `sense` | 50 | **1** | narrow — accuracy and crit rate |
-| 11 | `footing` | 50 | **2** | frame-split by design |
-| 12 | `infusion` | 50 | **2** | ⭐ **new** — what your hits inflict |
-| 13 | `retinue` | 40 | **2** | ⭐ **new** — what else is on the board |
-| 14 | `jewel-minor-a` | 15 | **1** | the pair's budget is deliberately small |
-| 15 | `jewel-minor-b` | 15 | **1** | identical twin, and that is the point |
+| 1 | `armament-primary` | 160 | **8** | the identity slot — two complete circuits |
+| 2 | `core-guard` | 120 | **8** | the largest defensive budget — two complete circuits |
+| 3 | `ward-array` | 90 | **6** | ⭐ **new** — the depleting layer; shields are a real second survivability currency |
+| 4 | `armament-secondary` | 80 | **6** | the answering half |
+| 5 | `jewel-major` | 80 | **2** | earns its place with affixes, not sockets |
+| 6 | `manipulator` | 70 | **4** | rate and follow-through |
+| 7 | `mantle` | 60 | **6** | the resistance home — element gems belong here |
+| 8 | `head-guard` | 60 | **6** | disable resistance |
+| 9 | `girdle` | 60 | **4** | the resource role |
+| 10 | `sense` | 50 | **2** | narrow — accuracy and crit rate |
+| 11 | `footing` | 50 | **4** | frame-split by design |
+| 12 | `infusion` | 50 | **4** | ⭐ **new** — what your hits inflict |
+| 13 | `retinue` | 40 | **4** | ⭐ **new** — what else is on the board |
+| 14 | `jewel-minor-a` | 15 | **2** | the pair's budget is deliberately small |
+| 15 | `jewel-minor-b` | 15 | **2** | identical twin, and that is the point |
 
-**Thirty-four sockets on a fully-geared pure frame.** Two properties fall out and both are load-bearing:
+**Sixty-eight sockets on a fully-geared pure frame.** Two properties fall out and both are load-bearing:
 
-- **`socket_max` is a ROLE property, fixed per role, not varied per base type.** That is what stops
-  socket count being one number compared across the whole loot pool — a 1-socket ring and a 4-socket
-  cuirass are not in the same conversation. ⚠ If a later module varies it *within* a role, this defence
-  is gone and §8.1's failure returns at full strength.
-- **The maximum is 4, and it is structural, not a progression ceiling.** It is a legibility limit — a
-  four-ingredient recipe is memorable, a six-ingredient one is a wiki lookup — and the `const` must say
-  so in a comment (AGENTS.md's caps rule).
+- **`socketCeiling` is fixed per role; `socketMax` is deterministically resolved for each base type
+  beneath it.** The single resolver reads `(role, content band, stable sequence)` and versioned tuning.
+  The model never sees those inputs or output. A ceiling is therefore a role budget, while capacity
+  remains authored-corpus variety with no free-text or random generator choice.
+- **The maximum is 8, and it is structural, not a progression ceiling.** It is two deterministic
+  four-socket circuits, never an eight-ingredient recipe. Circuit size 4 is the legibility limit;
+  role ceilings are tuning data, and the structural circuit constant must say so in a comment.
 
 ### 4. ⚠ A per-actor Strain/Splice cap — and what the re-issued table does to it
 
 §2g, open #8 records the gap: *"one-per-**item** is capped; twelve Splices on one actor is not. Tunable,
 start at 3."*
 
-**The re-issued table narrows this to a backstop, and the honest reading is worth stating:** D20 fixes a
-Strain/Splice at **4 ingredients**, so only a role with `socket_max = 4` can host one. Under §3 that is
-`armament-primary` and `core-guard` — **exactly the two roles §2g's own chaff-chassis note names**. The
-geometric ceiling is therefore **2 per actor**, not twelve.
+**The re-issued table makes this a real balance backstop:** D20 fixes a
+Strain/Splice at **4 ingredients**, and each complete four-socket circuit can
+host one. The two 8-socket roles host two circuits each; each 4- or 6-socket
+role hosts one complete circuit. The theoretical count is therefore much higher
+than the former two-host shape, and the active-combination cap must be
+re-measured rather than assumed inert.
 
-> **Ship the tunable anyway, at 3, as a non-binding backstop.** It is inert today and becomes live the
-> moment a future `socket_max` revision widens the 4-socket set — which is precisely the change that
-> would otherwise reopen the gap silently. `data/tuning/sockets.v1.json` → `maxCombosPerActor: 3`.
+> **Keep the active-combination limit tunable, but do not retain `3` as an unexamined default.** It now
+> becomes live under the eight-socket topology. Its replacement value needs a dedicated balance sweep
+> and lives in `data/tuning/sockets.v{n}.json`, never code.
 
 A fill that would exceed the cap does not fail the socketing; **the lowest-priority combination simply
 does not fire**, and the socket UI says which and why. Refusing the insert would make a tuning value into
@@ -143,6 +145,31 @@ socketsNow    = socketsAtDrop + (recorded socket-add operations), capped at base
 `socketSeed = SeededRng.DeriveStream(roll_seed, "item.socket")` — domain-separated, so the socket draw
 never consumes the affix pool's stream (`src/FusionRpg.Core/Battle/SeededRng.cs:26`). Nothing is stored,
 so nothing can drift.
+
+### 5.1 Deterministic circuit evaluation
+
+Eight sockets add capacity, not a new combination language. The evaluator derives
+a circuit key from the persisted zero-based `socket_index`:
+
+```text
+circuitIndex    = socketIndex / 4      # integer division
+circuitPosition = socketIndex % 4
+```
+
+It groups inserts by `circuitIndex`, sorts by `circuitPosition`, and evaluates
+each group independently:
+
+1. Generate and bind every resonance satisfied within that four-socket circuit.
+2. Match at most one ordered four-ingredient Strain/Splice within that circuit.
+3. Apply the separately tuned actor-level active-combination policy in stable
+   `(host item, circuit index, combination id)` order; suppressed combinations
+   remain visibly socketed but do not bind.
+
+There is no cross-circuit resonance, no cross-circuit Strain/Splice, no
+eight-ingredient matching, and no model call. Reordering socket rows cannot
+change the result because indices and the order key are persisted facts. This
+needs pure evaluator tests for 0–8 sockets, two independent circuits on an
+eight-socket host, and no match across the index 3/4 boundary.
 
 ⚠ **`rarity.socket_min` / `socket_max` do not exist.** The `rarity` table is
 `rarity_id · ordinal · prefix_rolls · suffix_rolls · min_tier · max_tier`
@@ -355,7 +382,7 @@ src/FusionRpg.Core/Items/ResonanceGenerator.cs        new - the 25, generated at
 src/FusionRpg.Core/Items/SetExclusivityValidator.cs   new - D21
 src/FusionRpg.Data/Sqlite/RpgStore.Sockets.cs         new - item_socket + socket_combo_recipe DDL,
                                                        and the four operations (guard-dal)
-data/tuning/sockets.v1.json                           new - socket_max per role, maxCombosPerActor,
+data/tuning/sockets.v{n}.json                         new - socket ceilings, deterministic capacity ranges, maxCombosPerActor,
                                                        removal tiers, upcycle ratio
 data/seed/combos/resonance.v1.json                    generated - the 25
 data/seed/combos/strain-splice.v1.json                MODULE 21's output - the 102
@@ -380,10 +407,12 @@ static int GrantedTier(ComboRecipe recipe, IReadOnlyList<Fill> ingredients) =>
 static bool AllAttuned(IReadOnlyList<Fill> fills) =>
     fills.Count > 0 && fills.All(f => f.SocketAffinity.Length > 0 && f.SocketAffinity == f.InsertElement);
 
-// socket_max = 4 is STRUCTURAL, not a progression ceiling (AGENTS.md caps rule): a four-ingredient
-// recipe is memorable and a six-ingredient one is a wiki lookup. It bounds LEGIBILITY, not growth -
-// growth past t5 rides contentScale (D29), which this layer never touches.
-public const int SocketMaxCeiling = 4;
+// Four is the structural CIRCUIT size, not the host capacity: a four-ingredient recipe is memorable
+// while an eight-ingredient one is a wiki lookup. Host capacity is tuning-owned (0-8); an eight-socket
+// host has two circuits. This bounds legibility, not growth -- growth past t5 rides contentScale (D29),
+// which this layer never touches.
+public const int SocketCircuitSize = 4;
+public const int SocketCapacityMaximum = 8;
 ```
 
 ## Testing strategy
@@ -396,9 +425,11 @@ public const int SocketMaxCeiling = 4;
 | `bind_ordinal_defaults_to_zero_and_non_socket_bindings_sort_unchanged` | the migration is inert for every existing binding |
 | **`socket_max_is_defined_for_all_fifteen_roles`** | **§3** — the stale twelve-id table cannot come back, and `ward-array`/`infusion`/`retinue` are covered |
 | `no_socket_max_row_exists_for_commander_standard` | D14 — out of scope, not silently included |
-| `socket_max_is_fixed_per_role_and_never_varies_by_base_type` | §8.1's residual risk, closed as a test |
-| `a_four_ingredient_combo_only_fits_armament_primary_or_core_guard` | §4's geometric ceiling, stated rather than assumed |
-| `the_per_actor_combo_cap_is_read_from_tuning_and_is_currently_non_binding` | §4 — the backstop exists and is honest about being inert |
+| `socket_max_never_exceeds_its_role_ceiling` | §3 — capacity may vary only through the deterministic resolver beneath its role ceiling |
+| `socket_max_resolution_is_stable_for_role_band_and_sequence` | §3 — generator inputs, not a model or RNG, decide capacity |
+| `four_ingredient_combo_evaluates_within_one_circuit` | §4/§5.1 — no combination may cross the index 3/4 boundary |
+| `eight_socket_host_evaluates_two_independent_circuits` | §4/§5.1 — capacity doubles build space without widening a recipe |
+| `the_per_actor_combo_cap_is_read_from_tuning_and_suppresses_stably` | §4 — the measured budget is data-owned and never refuses an insert |
 | `exceeding_the_per_actor_cap_drops_the_lowest_combo_and_refuses_no_insert` | a tuning value never becomes a player-facing wall |
 | **`affinity_is_a_bonus_and_a_mismatched_fill_still_fires`** | **D22 as amended** — the gate is gone |
 | `all_attuned_raises_resonance_count_by_one_and_strain_tier_by_one` | the shared `+1` pattern, both arms |
@@ -422,12 +453,12 @@ public const int SocketMaxCeiling = 4;
 **Always:** compose at the **binding** layer — an insert is its own instance on the host's owner; treat
 `item_socket` as the SSOT (D2 clause 13); derive socket count from `roll_seed` with a domain-separated
 stream; keep `socket_max`, the per-actor cap, the removal tiers and the upcycle ratio in
-`data/tuning/sockets.v1.json`; expose `evaluate()` in a write-free preview form for module 20.
+`data/tuning/sockets.v{n}.json`; expose `evaluate()` in a write-free preview form for module 20.
 
-**Ask first:** varying `socket_max` **within** a role (it removes §8.1's main defence); raising the
-per-actor combination cap above the geometric ceiling; a fifth resonance shape; whether the four-ingredient
-count may vary per Strain (D20 fixed it at 4); whether a set tier may reference a socket condition as a
-requirement (the one read-only seam offered to the set layer).
+**Ask first:** adding an input to `socketMax`'s deterministic resolver or changing a published capacity
+range; setting or changing the re-measured per-actor combination budget; a fifth resonance shape; whether
+the four-ingredient count may vary per Strain (D20 fixed it at 4); whether a set tier may reference a
+socket condition as a requirement (the one read-only seam offered to the set layer).
 
 **Never:** append a row to the host's `effect_instance_atom`, or touch its `ContentFingerprint()`. Never
 let a socket reject an insert for element. Never let affinity **scale** an insert's magnitude — inserts

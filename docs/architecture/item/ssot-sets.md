@@ -142,32 +142,71 @@ it is the single rule that makes §3.6 true. Flagged to the owner in §9.
 
 The picked shape is in §4. It adds three tables and zero columns to existing atom tables.
 
-### 3.4 Piece count
+### 3.4 Set topology and member-role count
 
-**Typical set: 4 members. Grand set: 6 members, and rare.**
+The former universal four-member default and six-role cap are retired. They
+protected the mixed-build case by treating every set as a mixed-build set, and
+therefore incorrectly forbade the intended all-slot unique-species collection.
 
-OD2 puts roughly 15 equip slots on a pure frame. The denominator matters more than the numerator:
+There are two deliberately different shapes:
 
-| Set size | Share of ~15 slots | Free slots left | Two of them |
-|---|---|---|---|
-| 4 | 27% | 11 | 8 used, 7 free |
-| 6 | 40% | 9 | 12 used, 3 free |
-| 8 | 53% | 7 | impossible |
+1. **Composable sets** (`general` and `family`) are optional pieces of a mixed
+   build. Their role count grows only through an approved set-planning template,
+   and the template reserves non-set build space.
+2. **Species-bound unique sets** (`unique-species`) are unique-demon loadouts.
+   Their parameterized member-role counts are ten and fifteen: ten is a
+   signature kit, fifteen is a complete kit. Neither is offered as a generic
+   set, and neither is eligible for a hybrid body.
 
-Diablo 2 shipped 3–6 piece sets over ten slots, and its worst set-jail cases were the 6-of-10 ones.
-Elder Scrolls Online runs 5-piece sets over twelve-ish slots and is explicitly built so you wear two
-5-piece sets plus a 2-piece — which is why it is the best-regarded build space in the genre. Four of
-fifteen is deliberately closer to ESO's ratio than to D2's.
+The deterministic Set Topology Planner selects a template from four declared
+inputs, rather than using an authoring default or a language-model judgement:
+
+```text
+(content-power stage, rarity policy, set class, set-progression tier)
+  -> member-role count, bonus-tier ceiling, threshold template,
+     eligibility and non-set-space policy
+```
+
+Every value the template tunes lives in versioned set-planning data. Content
+power reads the shared `Theta` ladder; the planner must not introduce a private
+set-level power curve. A missing template means no set subject is planned.
+
+| Class | Member-role policy | Bonus-tier policy | Commitment |
+|---|---:|---:|---|
+| `general` | 2 | 4 | A splashable broad-theme set. Later set-progression templates may add roles and thresholds while retaining policy-reserved non-set space. |
+| `family` | 5 | 3 | A coherent declared-family set. Later templates may add roles while retaining policy-reserved non-set space. |
+| `unique-species` | 10 or 15 | exactly 2 | A species-bound unique-demon kit. Its thresholds are 2 and its parameterized final member-role count. |
+
+Eligibility is not inferred from the class label. I11's static set-identity
+contract requires a `family` set to name its exact actor family and requires a
+`unique-species` set to name its exact unique-demon species and forbid hybrid
+bodies. `general` and `family` sets remain the set classes a hybrid may use.
+The requirement is checked before assignment; it is not a dormant set-bonus
+condition or a faction alias.
+
+The unique-species two-tier default is intentional. There are already 900+
+potential demon-species subjects, so a ten- or fifteen-piece kit must not
+also multiply into a long bonus ladder. Its early threshold gives the species
+identity; its second threshold rewards completing the fixed template.
 
 Hard rules:
 
-- **Every set has a threshold at 2.** No exceptions. A set whose first bonus is at 3 has an invisible
-  first step and cannot be splashed.
-- **The top threshold must be ≤ the member count** (`SetThresholdUnreachable`).
-- **A set may claim at most 6 roles**, so at least 9 slots on a pure frame are always rare or unique
-  territory.
-- **Grand sets are the exception, not the pattern.** A 6-piece set must also carry thresholds at 2 and 4,
-  so a partial grand set is playable and the last two pieces are a chase rather than a cliff.
+- **Every set has a threshold at 2.** A set whose first bonus is at 3 has an
+  invisible first step and cannot be splashed.
+- **Thresholds are strictly increasing and the top threshold is no greater
+  than member-role count** (`SetThresholdUnreachable`).
+- **A composable set must leave the non-set roles its class template reserves.**
+  The planner rejects a template that consumes those roles; it does not clamp a
+  generated set after the fact.
+- **A unique-species set claims exactly the template's declared ten- or
+  fifteen-role map for its one declared unique demon species.** It is invalid
+  if any role is absent, duplicated, or not equip-legal for that species
+  (`UniqueSetIncompleteRoleMap`). The fifteen-role variant must cover the
+  complete body map; the ten-role signature variant must not silently expand.
+- **A requested bonus-tier count must be reachable from the chosen member-role
+  count.** A two-role starter set has only its 2-piece threshold; later general
+  templates earn additional thresholds by adding distinct roles rather than by
+  duplicating a threshold.
 
 ### 3.5 Set jail — what actually prevents it
 
@@ -185,52 +224,67 @@ bolt-on curve. Violation is `SetTierForbiddenAtom`. This rule makes the Diablo 3
 unauthorable.
 
 **3. A hard budget on total set value.** Denominated in **affix-equivalents (AE)** — one AE is one rolled
-affix at the middle of the set's tier window, a unit I8 owns:
+affix at the middle of the set's tier window, a unit I8 owns. For composable
+sets the limit is:
 
 > Sum of all a set's tier atoms ≤ **1.5 AE per member piece**.
 
-A 4-piece set is capped at 6.0 AE. The piece-level deficit it must pay for is 4–6 AE (§3.9). A completed
+A four-piece set is capped at 6.0 AE. The piece-level deficit it must pay for is 4–6 AE (§3.9). A completed
 set is therefore roughly break-even in raw stats and ahead by one capability — desirable, not mandatory.
 When E9 lands, this cap converts to a power-vector budget; until then it is an authoring rule stated in
 AE, per SC9.
 
-**4. No set owns both weapons.** A set may claim at most one of `armament-primary` /
-`armament-secondary`. Weapons are where build identity lives; a set that owns both owns the build.
-Violation is `SetRoleForbidden`.
+A unique-species set is **not** priced by multiplying this composable budget by
+ten or fifteen. Its total budget and its pieces' individual deficits are
+separate, class-specific tuning inputs, resolved against its declared content
+power, rarity policy, and progression tier. The planner proves the complete kit
+against that one total budget. It may not make a full kit strong merely because
+it has more member rows.
 
-**5. Two partial sets are legal, budgeted for, and expected** (§3.6).
+**4. A composable set may not own both weapons.** A `general` or `family` set
+may claim at most one of `armament-primary` / `armament-secondary`; those roles
+remain the player's mixed-build identity. A unique-species set may claim both
+only because the kit is bound to one non-hybrid unique demon and cannot be used
+as a generic two-weapon package. The wrong class/role combination is
+`SetRoleForbidden`.
 
-### 3.6 Can a player run two partial sets at once?
+**5. Two partial composable sets are legal, budgeted for, and expected** (§3.6).
+A unique-species set is an intentional species commitment, not a violation of
+this mixed-build rule.
+
+### 3.6 Can a player run two partial composable sets at once?
 
 **Yes. Explicitly, and it is the design target.**
 
 Nothing in the model forbids it: the counter is per set id, thresholds are per set, and the tier
-bindings are independent rows. Two 4-piece sets at 2 pieces each costs 4 of ~15 slots and leaves 11 for
-rares.
+bindings are independent rows. Two composable sets at their 2-piece thresholds consume four of roughly
+fifteen slots and leave the remaining roles for rares, uniques, or further partial sets.
 
 This is the rule that decides between builds and a checklist, and it is why the capability was moved to
 the 2-piece threshold in §3.2. If the payoff sat at the top, two partial sets would give two lots of
 stat filler and nothing else, and the "choice" would be fake.
 
-There is **no cap on the number of sets** a wearer may be partially in. The slot budget is the cap: with
-4-piece sets and a threshold at 2, the ceiling is seven partial sets on a pure frame, and a build that
-does that has seven capabilities, no set numbers at all, and one free slot. That is a legal, weird, and
-probably bad build — which is what a build space is supposed to contain.
+There is **no cap on the number of composable sets** a wearer may be partially in. The slot and
+class-policy reservation are the limits. A ten-role unique-species signature set may leave roles for
+ordinary equipment, while its fifteen-role form deliberately leaves none; neither is hybrid-eligible
+or promises the composable partial-set pattern. Their player promise is a coherent unique-demon kit,
+not a set of interchangeable splashes.
 
 ### 3.7 Frames — can a set span them, and can a hybrid complete one?
 
-**A set is frame-neutral. Its members are frame-specific base types, at most one per (role, frame).**
+**A composable set is frame-neutral. Its members are frame-specific base types, at most one per
+(role, frame).**
 
 Ember Legion can declare a humanoid `item.ember-helm` **and** a plant `item.ember-crown`, both on the
 head-protective role. They are two rows, one role, one point. A pure humanoid completes the set with
 humanoid bases; a pure plant with plant bases; nobody sees a slot they cannot fill.
 
-A set may also be authored for one frame only. That is legal, and it is how flavour-locked sets are
-expressed — a plant-only bloom set simply has no humanoid member rows.
+A composable set may also be authored for one frame only. That is legal, and it is how flavour-locked
+sets are expressed — a plant-only bloom set simply has no humanoid member rows.
 
-**Hybrids can complete every set.** This is guaranteed, not hoped for:
+**Hybrids can complete every composable set.** This is guaranteed, not hoped for:
 
-> **A set's member roles must all be in the hybrid role core** — the roles that exist on every frame.
+> **A composable set's member roles must all be in the hybrid role core** — the roles that exist on every frame.
 > Violation is `SetRoleNotUniversal`, at load.
 
 OD3 gives hybrids 12–13 slots instead of ~15, and each role accepts a base type from either frame. So a
@@ -239,21 +293,36 @@ sets with *more* freedom than a pure frame, because it can mix: a humanoid `embe
 `ember-bark` completes two roles of Ember Legion on one body. Since membership is keyed on the member
 container and not on the wearer's frame, that works with no special case at all.
 
-The alternatives were considered and rejected. Lowering thresholds for hybrids makes the tooltip lie —
-"4-piece" would mean different things on different bodies. Weighting hybrid pieces above 1 has the same
-problem inverted. Barring hybrids from sets is the named failure mode "sets make hybrids unplayable",
-and hybrids are a headline feature of the base game (item-ideal §4), not an edge case.
+A unique-species set is body-bound instead. It names one declared unique demon
+species, selects either its ten-role signature map or its complete fifteen-role
+map, and **refuses hybrid bodies**. This is a static identity requirement, not a
+missing hybrid member or a reduced threshold. Hybrids retain the complete
+composable-set build space above, while a unique set is a species-specific
+collection goal.
+
+The alternatives were considered and rejected. Lowering composable thresholds
+for hybrids makes the tooltip lie — "4-piece" would mean different things on
+different bodies. Weighting hybrid pieces above 1 has the same problem inverted.
+Barring hybrids from composable sets is the named failure mode "sets make
+hybrids unplayable", and hybrids are a headline feature of the base game
+(item-ideal §4), not an edge case.
 
 ### 3.8 Legacy sets when new slots unlock
 
 Two directions, and only one is dangerous.
 
-**A role is added.** Nothing breaks. Membership is declared per role and thresholds are absolute counts,
-so an existing 4-piece set is still a 4-piece set on a 16-slot frame. It is a slightly smaller share of
-the body, which is the correct drift.
+**A role is added.** A composable set does not break. Membership is declared per
+role and thresholds are absolute counts, so an existing 4-piece set is still a
+4-piece set on a 16-slot frame. It is a slightly smaller share of the body,
+which is the correct drift. A fifteen-role unique-species set is different: its
+declared full map is no longer complete and `UniqueSetIncompleteRoleMap` fails
+it at import until a reviewed replacement kit/template exists. It may not
+silently become a fourteen-piece "full" set. A ten-role signature set retains
+its exact declared role map until its own template is deliberately revised.
 
-**A role is removed, or leaves the hybrid core.** Every set using it becomes invalid — and it fails
-**loudly**, at import. `SetRoleNotUniversal` fires at load, and import policy is **all-or-nothing**
+**A role is removed, or leaves the hybrid core.** Every composable set using it
+becomes invalid — and it fails **loudly**, at import. `SetRoleNotUniversal`
+fires at load, and import policy is **all-or-nothing**
 (definitions §10): one bad row and nothing imports. So an I2 change that would strand a legacy set stops
 the import rather than shipping a set that can never be completed. That is the protection, and it is
 already policy rather than something this lane has to build.

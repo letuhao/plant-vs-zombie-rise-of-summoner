@@ -2,6 +2,8 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.ActorSurface;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Demons;
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
@@ -56,7 +58,8 @@ public static class UniqueActorHubCompose
             powerIndex: powerIndex,
             aptitudeTuning: AptitudeTuningHub.Tuning,
             aptitudeAllocation: _ => commanderAllocation + uniqueAllocation,
-            boundDerivedAtoms: BoundAtoms);
+            boundDerivedAtoms: BoundAtoms,
+            seedResourceBaseline: true);
 
         return (hub, ctx);
     }
@@ -66,13 +69,18 @@ public static class UniqueActorHubCompose
         var (hub, ctx) = Build(store, actor);
         var primaryFinal = hub.Stats.Resolve(ctx);
         var (snapshot, contributions) = hub.ResolveDerivedWithContributions(ctx);
+        var powerIndex = new Power.ServerPowerIndexProvider(store, PowerTuningHub.Tuning);
         var profile = store.GetDemonProfile(actor.InstanceId);
-        var speciesName = profile != null && DemonSpeciesCatalog.IsKnown(profile.SpeciesId)
+        var speciesName = profile != null
+            && DemonSpeciesCatalog.IsConfigured
+            && DemonSpeciesCatalog.IsKnown(profile.SpeciesId)
             ? DemonSpeciesCatalog.Get(profile.SpeciesId).Name
             : null;
         var displayName = string.IsNullOrWhiteSpace(profile?.Nickname) ? speciesName : profile!.Nickname;
         var roleLabel = string.Equals(actor.Side, "zombie", StringComparison.OrdinalIgnoreCase) ? "Zombie" : "Plant";
         var xpToNext = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level);
+        var standing = ProjectStanding(store, actor, powerIndex);
+        var resourcePools = ProjectResourcePools(store, actor, snapshot, ctx, powerIndex);
 
         IReadOnlyList<DerivedStatSurfaceEntry> surfaceEntries = Array.Empty<DerivedStatSurfaceEntry>();
         try { surfaceEntries = DerivedStatSurfaceCatalogHub.Catalog.Entries; }
@@ -149,10 +157,93 @@ public static class UniqueActorHubCompose
                 Primary = profile.ElementPrimary,
                 Secondary = profile.ElementSecondary
             },
+            Standing = standing,
             Derived = derived,
-            Primary = primary
+            Primary = primary,
+            // Hot current-state: statuses/shield stay Injector/battle session — honest empty on cold sheet.
+            LiveStatuses = Array.Empty<ActorStatusGlyphDto>(),
+            ResourcePools = resourcePools,
+            ShieldSummary = null
         };
     }
+
+    /// <summary>
+    /// Standing = <see cref="PowerVector"/> from durable equip + tree atoms (definitions.md §7).
+    /// Empty grants → Zero vector (ready, not pending).
+    /// </summary>
+    static ActorStandingDto ProjectStanding(
+        RpgStore store, UniqueActorDto actor, IPowerIndexProvider powerIndex)
+    {
+        var atoms = new List<AtomRow>();
+        foreach (var input in EquippedBoundAtoms.InputsFromStore(store, actor.InstanceId))
+            atoms.Add(input.Atom);
+        foreach (var bound in TreeBoundAtoms.ForPlayer(store, powerIndex, actor.PlayerId))
+            atoms.Add(SyntheticStatDerived(bound));
+
+        var vector = ActorPowerCache.Compose(atoms);
+        return new ActorStandingDto
+        {
+            Offense = vector.Offense,
+            Survivability = vector.Survivability,
+            Control = vector.Control,
+            Utility = vector.Utility,
+            Economy = vector.Economy
+        };
+    }
+
+    /// <summary>
+    /// Cold UniqueActor pools: Max from Hub (<see cref="ResourceBaselineSubsystem"/> + gear/tree).
+    /// Current from persisted subset or at-rest full. LiveStatuses/shield stay Hot-only.
+    /// BattleRuleset floor is a last-resort guard only if Hub max is still 0 (should not happen
+    /// when seedResourceBaseline is registered).
+    /// </summary>
+    static IReadOnlyList<ActorResourcePoolDto> ProjectResourcePools(
+        RpgStore store,
+        UniqueActorDto actor,
+        ActorDerivedSnapshot snapshot,
+        StatContext ctx,
+        IPowerIndexProvider powerIndex)
+    {
+        var level = (int)Math.Max(1, actor.Level);
+        var theta = Math.Max(1, powerIndex.ActorIndex(ctx));
+        var baseHp = BattleRuleset.BaseHp(level);
+        var persisted = store.GetUniqueActorPersistedPools(actor.InstanceId);
+        var pools = new List<ActorResourcePoolDto>(DerivedStatChannels.ResourceIds.Count);
+
+        foreach (var id in DerivedStatChannels.ResourceIds)
+        {
+            var max = ResourceChannelReader.Max(snapshot, id);
+            if (max <= 0)
+                max = BattleRuleset.BaseResourceMax(theta, id, baseHp); // overflow guard — Hub seed is SSOT
+            long current;
+            if (persisted.TryGetValue(id, out var stored))
+                current = Math.Clamp(stored, 0, Math.Max(0, max));
+            else
+                current = max; // at-rest refill for ids not in the cross-delve persist subset
+            pools.Add(new ActorResourcePoolDto
+            {
+                ResourceId = id,
+                Current = current,
+                Max = max
+            });
+        }
+
+        return pools;
+    }
+
+    static AtomRow SyntheticStatDerived(BoundDerivedAtom bound) =>
+        new()
+        {
+            AtomId = $"sheet.standing.{bound.SourceId}",
+            KindId = "stat.derived",
+            FamilyId = "sheet.standing",
+            Variant = bound.Channel.Replace('.', '-'),
+            Tier = 1,
+            Name = bound.SourceId,
+            ParamsJson =
+                $"{{\"channel\":\"{bound.Channel}\",\"op\":\"flat\",\"amount\":{bound.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)}}}",
+            Enabled = true
+        };
 
     static DerivedStatSurfaceEntry? FindSurface(IReadOnlyList<DerivedStatSurfaceEntry> entries, string channelId)
     {

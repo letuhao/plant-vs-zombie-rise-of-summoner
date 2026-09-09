@@ -98,6 +98,14 @@ export type ActorShieldSummaryDto = {
   max?: number | null;
 };
 
+export type ActorStandingDto = {
+  offense: number;
+  survivability: number;
+  control: number;
+  utility: number;
+  economy: number;
+};
+
 export type ActorSheetDto = {
   instanceId: string;
   playerId: number;
@@ -112,6 +120,7 @@ export type ActorSheetDto = {
   xp?: number;
   xpToNext?: number | null;
   elementTyping?: ActorElementTypingDto | null;
+  standing?: ActorStandingDto | null;
   liveStatuses?: ActorStatusGlyphDto[];
   resourcePools?: ActorResourcePoolDto[];
   shieldSummary?: ActorShieldSummaryDto | null;
@@ -123,6 +132,7 @@ export type ActorSheetDto = {
 export function contributionFictionLabel(sourceId: string): string {
   if (!sourceId.trim()) return "(unattributed)";
   if (sourceId === "rpg.progression") return "Progression";
+  if (sourceId === "rpg.resource.base") return "Resource base";
   if (sourceId.startsWith("equip:")) {
     const parts = sourceId.split(":");
     const role = parts[1] ?? "unknown";

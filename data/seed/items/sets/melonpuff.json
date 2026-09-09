@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.melonpuff-001",
-      "nameKey": "set.spore-launcher-base",
-      "name": "Spore Launcher Base",
+      "nameKey": "set.melon-burst-cannon",
+      "name": "Melon Burst Cannon",
       "themeKey": "demon.melonpuff",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A heavy fungal pedestal that launches explosive spores with zombie-like tenacity.",
+      "flavor": "A pressurized fruit-based projectile system.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

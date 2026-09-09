@@ -48,6 +48,7 @@ role/frame-only rows.
 | `members[]`: `(role, frame)` pairs | the concrete `baseType` id, by lookup |
 | `thresholds[].pieces`: **an enum**, not an integer | — an `enum` of numbers is a vocabulary, and `audit_schema` allows it (`model.py:60-61`) |
 | `name`, `nameKey`, `flavor` | id, `seq`, partition |
+| charm class | AP cost, roll shape, carry rule, and weighted corpus allocation |
 
 ⚠ **`pieces` is the one place a number is legal, and only as a closed enum** (`{2,3,4,6}`). Written as a
 bare `integer` the schema is rejected at construction. Say it in the schema, not in a comment.

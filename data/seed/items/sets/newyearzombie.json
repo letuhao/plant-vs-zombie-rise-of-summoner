@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.newyearzombie-001",
-      "nameKey": "set.gilded-corpse",
-      "name": "Gilded Corpse",
+      "nameKey": "set.resplendent-revenant",
+      "name": "Resplendent Revenant",
       "themeKey": "demon.newyearzombie",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A wealthy, thick-skinned revenant draped in heavy silks and gold.",
+      "flavor": "A relic of celebration, wrapped in the luster of a forgotten feast.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

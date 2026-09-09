@@ -73,22 +73,21 @@ class DeriveAllLiveTests(unittest.TestCase):
         self.assertEqual(row.derivation, Derivation.STATED)
         self.assertFalse(row.conflict)  # the corpus source IS marked authoritative
 
-    def test_set_row_is_structural_and_matches_the_spec_worked_example(self) -> None:
-        """30 -> 35 on 2026-09-08: the first real `items generate --write` batch against a live
-        local model persisted sets across many distinct new `species` theme partitions (one set
-        each so far), rather than the original 5 `build` theme partitions (6 sets each) the spec's
-        own worked example was measured against — `derive_set_row` reads theme_count and
-        sets_per_theme fresh off the live corpus, so 35 themes x 1 set/theme = 35 is what it now
-        computes, correctly, not a formula regression."""
+    def test_set_row_is_an_unadjudicated_observation_not_a_generation_target(self) -> None:
+        """A total reconstructed from the current corpus cannot be an allocation that tells a
+        subsequent generator what to add.  In particular, changing the number of themes changes
+        the alleged target without an owner decision."""
         row = next(r for r in self.rows if r.dimension == "kind:set")
         self.assertEqual(row.derivation, Derivation.STRUCTURAL)
-        self.assertEqual(row.target, 35)  # 35 themes x 1 set/theme, measured off the live corpus
+        self.assertTrue(row.conflict)
+        self.assertFalse(any(p.authoritative for p in row.provenance))
 
     def test_proportional_base_type_role_targets_sum_exactly_to_the_real_total(self) -> None:
         role_rows = [r for r in self.rows if r.dimension.endswith(":base-type")]
         self.assertEqual(len(role_rows), 15)
         for row in role_rows:
             self.assertEqual(row.derivation, Derivation.PROPORTIONAL)
+            self.assertTrue(row.conflict)
         self.assertEqual(sum(r.target for r in role_rows), len(self.corpus.by_kind("base-type")))
 
 

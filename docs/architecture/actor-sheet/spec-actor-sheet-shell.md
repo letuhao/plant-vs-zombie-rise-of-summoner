@@ -33,9 +33,10 @@ at this path.
 8. **Height reclaim (owner, 2026-09-09):** horizontal pill tab row + fat dual identity header are
    rejected. Identity lives once in the left rail summarize; tabs are a vertical rail with
    expand/collapse.
-9. **Essential identity only:** the left-rail summarize may grow beyond `name / level / role`, but
-   only to the current-recognition set: portrait, name, species, role/side, level, element chips,
-   and phase. It does not absorb XP gauge, pools, Standing, statuses, rarity prose, or kit detail.
+9. **Essential identity only (owner lock 2026-09-09):** left-rail summarize is **portrait + name +
+   `Lv n · role` only** — no species, side, phase, or element chips on the rail. Species / phase /
+   elements live on Condition `actor-identity`. The rail does not absorb XP gauge, pools, Standing,
+   statuses, rarity prose, or kit detail.
 
 → Correct these now or this spec proceeds as written.
 
@@ -112,17 +113,15 @@ data/tuning/actor-sheet.v1.json                      # tabs + optional icon
 ┌ PanelShell slim header (sr-only title · close/Esc) ───────────────────┐
 │ ┌ left rail ──────── [«] ┐  ┌ right panel (flex-1, scrolls) ────────┐ │
 │ │ portrait / name        │  │ active tab body (existing mounts)     │ │
-│ │ species · Lv · role    │  │                                       │ │
-│ │ elements · phase       │  │                                       │ │
+│ │ Lv · role              │  │                                       │ │
 │ │ vertical tabs          │  │                                       │ │
 │ └────────────────────────┘  └───────────────────────────────────────┘ │
 │ leftover · Reset · Confirm — **only when Aptitudes active or dirty**  │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
-**Expanded rail:** portrait · name · species/side/phase chips · `Lv n` · role · up-to-two element
-chips · icon+label tabs.  
-**Collapsed rail:** portrait/glyph only (tooltip = `Name · Species · Lv n · Role`) · icon-only tabs.  
+**Expanded rail:** portrait · name · `Lv n · role` · icon+label tabs (no chips).  
+**Collapsed rail:** portrait/glyph only (tooltip = `Name · Lv n · Role`) · icon-only tabs.  
 **Role:** commander → `Commander`; creature → `Plant` / `Zombie`.
 
 Leftover footer is **only** on Aptitudes (or while an aptitude draft is dirty). Other tabs omit that
@@ -164,7 +163,7 @@ Collapsed tabs keep `aria-label={label}` and `title={label}`.
 
 | Widget | Job |
 |---|---|
-| `ActorSummarize` | essential identity only: portrait / name / species / level / role / elements / phase |
+| `ActorSummarize` | portrait / name / `Lv · role` only (species → Condition `actor-identity`) |
 | `ActorSheetTabRail` | vertical tabs · expand/collapse |
 | `StatRow` / `InspectSplit` / … | unchanged tab kit |
 
@@ -237,8 +236,8 @@ No new combat numbers.
 - [x] ActorSheet uses `min(1800px, 96vw)` × `min(960px, 92vh)`
 - [x] Other PanelShell consumers unchanged at default size
 - [ ] Vertical left rail with expand/collapse; horizontal pill row gone
-- [ ] Actor summarize = portrait / name / species / level / role / elements / phase
-- [ ] Collapsed rail summarize = portrait or glyph + tooltip
+- [ ] Actor summarize = portrait / name / `Lv · role` only (no species/element chips)
+- [ ] Collapsed rail summarize = portrait or glyph + tooltip (`Name · Lv · Role`)
 - [ ] Tabs match `actor-sheet.v1.json` order/labels/`defaultOpen`/icons
 - [ ] InspectSplit does not push band 3; Confirm stays footer on Aptitudes only
 - [ ] Shell visual matches [actor-sheet-shell-rail.html](../../design/actor-sheet-shell-rail.html)

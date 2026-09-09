@@ -108,7 +108,9 @@ export function ActorPanel({
 
   const { data } = state;
   const name = sheet.data?.displayName || (data.displayName.state === "known" ? data.displayName.value : `#${data.instanceId.slice(0, 6)}`);
-  const roleLabel = isCommander ? "Commander" : data.side === "plant" ? "Plant" : "Zombie";
+  const roleLabel =
+    sheet.data?.roleLabel ??
+    (isCommander ? "Commander" : data.side === "plant" ? "Plant" : "Zombie");
 
   const tabs = surface.tabs
     .filter((item) => !item.hidden)
@@ -254,6 +256,8 @@ export function ActorPanel({
                 data={data}
                 surface={surface}
                 sheet={sheet.data}
+                sheetError={sheet.isError}
+                onRetry={() => void sheet.refetch()}
                 onOpenStatusTab={() => setTab("status")}
               />
             </>

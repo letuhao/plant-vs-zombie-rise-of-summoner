@@ -2,18 +2,11 @@ import type { Phase, PiecePayload, ThemeRef } from "./types";
 import type {
   ActorResourcePoolDto,
   ActorSheetDto,
+  ActorStandingDto,
   ActorStatusGlyphDto
 } from "@/lib/bus/aura";
 import type { ActorSurfaceCatalog, ResourceCatalogRow, StatusCatalogRow } from "@/lib/bus/actorSurface";
 import type { ActorView } from "@/contract/types";
-import { isKnown } from "@/contract/pending";
-
-type StandingAxis = {
-  id: string;
-  label: string;
-  value: number;
-  paint: string;
-};
 
 export type ConditionSurfaceVmInput = {
   data: ActorView;
@@ -33,24 +26,24 @@ export type ConditionSurfaceVm = {
   phasePayload: PiecePayload;
 };
 
-const STANDING_AXES: StandingAxis[] = [
-  { id: "offense", label: "Offense", value: 0, paint: "#d98787" },
-  { id: "survivability", label: "Survivability", value: 0, paint: "#6dbb63" },
-  { id: "control", label: "Control", value: 0, paint: "#b48ae6" },
-  { id: "utility", label: "Utility", value: 0, paint: "#6aa4f7" },
-  { id: "economy", label: "Economy", value: 0, paint: "#dcb04e" }
+const STANDING_PENDING_MESSAGE = "Standing vector isn't ready yet.";
+
+const STANDING_AXES: {
+  id: keyof ActorStandingDto;
+  label: string;
+  paint: string;
+}[] = [
+  { id: "offense", label: "Offense", paint: "var(--pw-offense, #d98787)" },
+  { id: "survivability", label: "Survivability", paint: "var(--pw-survivability, #6dbb63)" },
+  { id: "control", label: "Control", paint: "var(--pw-control, #b48ae6)" },
+  { id: "utility", label: "Utility", paint: "var(--pw-utility, #7fb4ff)" },
+  { id: "economy", label: "Economy", paint: "var(--pw-economy, #e0b44b)" }
 ];
 
 function toSurfacePhase(availability: ConditionSurfaceVmInput["availability"]): Phase {
   if (availability === "loading") return "loading";
   if (availability === "error") return "error";
   return "ready";
-}
-
-function currentName(data: ActorView, sheet: ActorSheetDto | null | undefined): string {
-  if (sheet?.displayName) return sheet.displayName;
-  if (isKnown(data.displayName)) return data.displayName.value;
-  return `#${data.instanceId.slice(0, 6)}`;
 }
 
 function poolById(sheet: ActorSheetDto | null | undefined) {
@@ -75,12 +68,51 @@ function buildProgression(data: ActorView, sheet: ActorSheetDto | null | undefin
     piece: "progression-gauge",
     instanceId: "condition:progression",
     phase: xpToNext == null ? "pending" : "ready",
+    gridArea: "prog",
     level,
     xp,
     xpToNext,
     fillPct,
-    valueText: xpToNext == null ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${xpToNext.toLocaleString()} XP`,
+    valueText:
+      xpToNext == null ? `${xp.toLocaleString()} XP` : `${xp.toLocaleString()} / ${xpToNext.toLocaleString()} XP`,
     message: xpToNext == null ? "Next level isn't shown yet" : null
+  };
+}
+
+function buildIdentity(
+  data: ActorView,
+  sheet: ActorSheetDto | null | undefined
+): PiecePayload {
+  const base = {
+    piece: "actor-identity",
+    instanceId: "condition:identity",
+    gridArea: "identity",
+    side: data.side,
+    typeId: sheet?.typeId ?? data.typeId
+  };
+
+  if (sheet == null) {
+    return {
+      ...base,
+      phase: "pending",
+      speciesName: null,
+      phaseLabel: null,
+      elements: [],
+      message: "Species isn't loaded yet."
+    };
+  }
+
+  const elements = sheet.elementTyping
+    ? [sheet.elementTyping.primary, ...(sheet.elementTyping.secondary ? [sheet.elementTyping.secondary] : [])]
+    : [];
+
+  return {
+    ...base,
+    phase: sheet.speciesName || sheet.phase || elements.length ? "ready" : "pending",
+    speciesName: sheet.speciesName ?? null,
+    phaseLabel: sheet.phase ?? null,
+    elements,
+    message: sheet.speciesName ? null : "Species isn't on file for this actor."
   };
 }
 
@@ -111,7 +143,7 @@ function buildHero(
     piece: "cond-hero",
     instanceId: "condition:hero",
     phase: "ready",
-    actorName: currentName(data, sheet),
+    gridArea: "hero",
     selectedPoolId,
     slotsTitle: "Vitality",
     radial: {
@@ -128,7 +160,7 @@ function buildHero(
       shieldPct,
       themeRef: { kind: "resource", id: hpCatalog.id },
       shieldThemeRef: shieldTheme,
-      message: hpPct == null ? "Current / max HP pending until the live pool adapter lands." : null
+      message: hpPct == null ? "Current / max HP pending until pools land." : null
     },
     meters: surface.resources.map((resource) => buildMeter(data, resource, pools.get(resource.id), selectedPoolId))
   };
@@ -163,31 +195,85 @@ function buildMeter(
   };
 }
 
-function buildStanding(): PiecePayload {
+function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
+  const standing = sheet?.standing ?? null;
+  if (standing == null) {
+    return {
+      piece: "stand-row",
+      instanceId: "condition:standing",
+      phase: "ready",
+      gridArea: "stand",
+      radar: {
+        piece: "standing-radar",
+        instanceId: "condition:standing:radar",
+        phase: "pending" as const,
+        title: "Standing · five axes (definitions.md)",
+        message: STANDING_PENDING_MESSAGE
+      },
+      bars: {
+        piece: "standing-bars",
+        instanceId: "condition:standing:bars",
+        phase: "pending" as const,
+        title: "Standing · five axes (definitions.md)",
+        message: STANDING_PENDING_MESSAGE
+      }
+    };
+  }
+
+  const raw = STANDING_AXES.map((axis) => ({
+    id: axis.id,
+    label: axis.label,
+    value: standing[axis.id],
+    paint: axis.paint
+  }));
+  const maxAxis = Math.max(1, ...raw.map((a) => a.value));
+  const axes = raw.map((a) => ({
+    ...a,
+    fillPct: Math.max(0, Math.min(100, Math.round((a.value / maxAxis) * 100)))
+  }));
+
   return {
     piece: "stand-row",
     instanceId: "condition:standing",
     phase: "ready",
+    gridArea: "stand",
     radar: {
       piece: "standing-radar",
       instanceId: "condition:standing:radar",
-      phase: "pending",
+      phase: "ready",
       title: "Standing · five axes (definitions.md)",
-      axes: STANDING_AXES,
-      message: "Standing vector isn't ready yet."
+      axes
     },
     bars: {
       piece: "standing-bars",
       instanceId: "condition:standing:bars",
-      phase: "pending",
+      phase: "ready",
       title: "Standing · five axes (definitions.md)",
-      axes: STANDING_AXES,
-      message: "Standing vector isn't ready yet."
+      axes
     }
   };
 }
 
-function buildStatusStrip(sheet: ActorSheetDto | null | undefined, statuses: StatusCatalogRow[]): PiecePayload {
+function buildStatusStrip(
+  sheet: ActorSheetDto | null | undefined,
+  statuses: StatusCatalogRow[]
+): PiecePayload {
+  const base = {
+    piece: "status-glyph-strip",
+    instanceId: "condition:status-strip",
+    title: "Live status · tap for Status tab",
+    overflowCount: 0
+  };
+
+  if (sheet == null) {
+    return {
+      ...base,
+      phase: "pending",
+      items: [],
+      message: "Live effect instances are not available yet."
+    };
+  }
+
   const liveById = glyphByStatus(sheet);
   const liveRows = statuses
     .filter((row) => liveById.has(row.id))
@@ -202,25 +288,35 @@ function buildStatusStrip(sheet: ActorSheetDto | null | undefined, statuses: Sta
       };
     });
 
+  if (liveRows.length === 0) {
+    return {
+      ...base,
+      phase: "empty",
+      items: [],
+      message: "No live effects applied."
+    };
+  }
+
   return {
-    piece: "status-glyph-strip",
-    instanceId: "condition:status-strip",
-    phase: liveRows.length === 0 ? "pending" : "ready",
-    title: "Live status · tap for Status tab",
+    ...base,
+    phase: "ready",
     items: liveRows,
-    overflowCount: 0,
-    message: liveRows.length === 0 ? "Live effect instances are not available yet." : null
+    message: null
   };
 }
 
 export function foldConditionSurfaceVm(input: ConditionSurfaceVmInput): ConditionSurfaceVm {
   const phase = toSurfacePhase(input.availability);
   const revision = input.revision ?? 1;
+  const standing = buildStanding(input.sheet);
+  // Nest status under stand-row; also pass catalog statuses into the strip.
+  standing.statusStrip = buildStatusStrip(input.sheet, input.surface.statuses);
+
   const main = [
     buildProgression(input.data, input.sheet),
+    buildIdentity(input.data, input.sheet),
     buildHero(input.data, input.sheet, input.surface, input.selectedPoolId),
-    buildStanding(),
-    buildStatusStrip(input.sheet, input.surface.statuses)
+    standing
   ];
 
   return {

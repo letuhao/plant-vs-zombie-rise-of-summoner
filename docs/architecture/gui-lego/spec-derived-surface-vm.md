@@ -1,6 +1,7 @@
 # Module: derived-surface-vm — fold contract
 
 **Program:** `gui-lego`  
+**Harden program:** [../derived-cook-map.md](../derived-cook-map.md) (amend this contract — do not fork)  
 **Ideal:** [../gui-lego-ideal.md](../gui-lego-ideal.md)  
 **Map:** [../gui-lego-map.md](../gui-lego-map.md)  
 **Composition:** [spec-composition.md](spec-composition.md)  

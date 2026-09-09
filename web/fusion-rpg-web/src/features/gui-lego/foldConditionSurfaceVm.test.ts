@@ -24,8 +24,42 @@ function actor(): ActorView {
   };
 }
 
+function baseSheet() {
+  return {
+    instanceId: "a1",
+    playerId: 1,
+    side: "plant" as const,
+    typeId: 3,
+    displayName: "Emberling",
+    speciesName: "Sunflower",
+    phase: "ActiveBound",
+    level: 14,
+    xp: 2140,
+    xpToNext: 3400,
+    elementTyping: { primary: "fire", secondary: "light" },
+    standing: {
+      offense: 77,
+      survivability: 58,
+      control: 36,
+      utility: 26,
+      economy: 49
+    },
+    resourcePools: [
+      { resourceId: "hp", current: 1240, max: 1800 },
+      { resourceId: "stamina", current: 44, max: 60 },
+      { resourceId: "hunger", current: 12, max: 40 },
+      { resourceId: "spirit", current: 22, max: 40 },
+      { resourceId: "qi", current: 8, max: 24 },
+      { resourceId: "poise", current: 18, max: 20 }
+    ],
+    liveStatuses: [] as { statusId: string }[],
+    derived: [],
+    primary: []
+  };
+}
+
 describe("foldConditionSurfaceVm", () => {
-  it("always emits one meter per catalog resource and a progression block", () => {
+  it("emits progression, identity, hero, stand in grid order", () => {
     const surface = actorSurfaceFixture();
     const vm = foldConditionSurfaceVm({
       data: actor(),
@@ -35,35 +69,92 @@ describe("foldConditionSurfaceVm", () => {
       availability: "ready",
       revision: 1
     });
-    expect(vm.phase).toBe("ready");
-    expect(vm.main[0]?.piece).toBe("progression-gauge");
-    const hero = vm.main[1] as { meters?: { poolId: string }[] };
+    expect(vm.main.map((m) => m.piece)).toEqual([
+      "progression-gauge",
+      "actor-identity",
+      "cond-hero",
+      "stand-row"
+    ]);
+    const hero = vm.main[2] as { meters?: { poolId: string }[] };
     expect(hero.meters).toHaveLength(surface.resources.length);
-    expect(hero.meters?.some((m) => m.poolId === "poise")).toBe(true);
   });
 
-  it("uses /sheet xpToNext when available", () => {
+  it("uses /sheet xpToNext and standing when available", () => {
     const vm = foldConditionSurfaceVm({
       data: actor(),
-      sheet: {
-        instanceId: "a1",
-        playerId: 1,
-        side: "plant",
-        typeId: 3,
-        displayName: "Emberling",
-        level: 14,
-        xp: 2140,
-        xpToNext: 3400,
-        derived: [],
-        primary: []
-      },
+      sheet: baseSheet(),
       surface: actorSurfaceFixture(),
       selectedPoolId: "hp",
       availability: "ready",
       revision: 1
     });
-    const prog = vm.main[0] as { fillPct?: number | null; message?: string | null };
+    const prog = vm.main[0] as { fillPct?: number | null; message?: string | null; phase?: string };
     expect(prog.fillPct).toBeGreaterThan(0);
     expect(prog.message).toBeNull();
+    expect(prog.phase).toBe("ready");
+
+    const identity = vm.main[1] as { speciesName?: string; elements?: string[] };
+    expect(identity.speciesName).toBe("Sunflower");
+    expect(identity.elements).toEqual(["fire", "light"]);
+
+    const stand = vm.main[3] as {
+      bars?: { phase?: string; axes?: { id: string; value: number; fillPct: number }[] };
+      statusStrip?: { phase?: string };
+    };
+    expect(stand.bars?.phase).toBe("ready");
+    expect(stand.bars?.axes?.find((a) => a.id === "offense")?.value).toBe(77);
+    expect(stand.bars?.axes?.find((a) => a.id === "offense")?.fillPct).toBe(100);
+    expect(stand.statusStrip?.phase).toBe("empty");
+
+    const hero = vm.main[2] as { radial?: { hpPct?: number | null }; meters?: { fillPct?: number | null }[] };
+    expect(hero.radial?.hpPct).toBeGreaterThan(0);
+    expect(hero.meters?.every((m) => m.fillPct != null)).toBe(true);
+  });
+
+  it("Standing pending never fabricates zero axes", () => {
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: null,
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const standing = vm.main[3] as {
+      radar?: { phase?: string; axes?: unknown[]; message?: string };
+      bars?: { phase?: string; axes?: unknown[] };
+    };
+    expect(standing.radar?.phase).toBe("pending");
+    expect(standing.bars?.phase).toBe("pending");
+    expect(standing.radar?.axes).toBeUndefined();
+    expect(standing.bars?.axes).toBeUndefined();
+  });
+
+  it("sheet present with liveStatuses empty is honest empty on nested strip", () => {
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: { ...baseSheet(), liveStatuses: [] },
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const strip = (vm.main[3] as { statusStrip?: { phase?: string; message?: string } }).statusStrip;
+    expect(strip?.phase).toBe("empty");
+    expect(strip?.message).toMatch(/No live effects/i);
+  });
+
+  it("sheet null marks statuses pending/unwired", () => {
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: null,
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const strip = (vm.main[3] as { statusStrip?: { phase?: string; message?: string } }).statusStrip;
+    expect(strip?.phase).toBe("pending");
+    expect(strip?.message).toMatch(/not available yet/i);
   });
 });

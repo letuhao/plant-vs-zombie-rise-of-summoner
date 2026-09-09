@@ -571,6 +571,9 @@ if (recipeCatalog is { } workbenchRecipes)
         try
         {
             var sets = Directory.EnumerateFiles(setsDir, "*.json")
+                // The generation ledger lives beside the partitions but is not a corpus document.
+                // Parsing it as a set file makes one metadata file abort the entire import.
+                .Where(f => !Path.GetFileName(f).EndsWith(".ledger.json", StringComparison.OrdinalIgnoreCase))
                 .SelectMany(f => FusionRpg.Core.Items.Thresholds.SetCorpus.Parse(File.ReadAllText(f)))
                 .ToList();
             store.ImportSetCorpus(sets);
@@ -601,7 +604,9 @@ if (recipeCatalog is { } workbenchRecipes)
             var defs = new List<FusionRpg.Core.Items.Thresholds.CharmDef>();
             var resonance = new List<FusionRpg.Core.Items.Thresholds.CharmResonanceRow>();
 
-            foreach (var f in Directory.EnumerateFiles(charmsDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))
+            foreach (var f in Directory.EnumerateFiles(charmsDir, "*.json")
+                         .Where(f => !Path.GetFileName(f).EndsWith(".ledger.json", StringComparison.OrdinalIgnoreCase))
+                         .OrderBy(f => f, StringComparer.Ordinal))
             {
                 var json = File.ReadAllText(f);
                 if (Path.GetFileNameWithoutExtension(f).Equals("resonance", StringComparison.OrdinalIgnoreCase))

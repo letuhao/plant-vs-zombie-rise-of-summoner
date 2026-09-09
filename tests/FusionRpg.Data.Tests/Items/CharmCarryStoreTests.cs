@@ -7,8 +7,8 @@ namespace FusionRpg.Data.Tests.Items;
 
 /// <summary>
 /// `charm-carry` (item module 22) at the DAL — ssot-charms.md §4.2's FIVE tables, the pouch writes and
-/// the run-hold lifecycle. Driven with the REAL shipped charm corpus (`data/seed/items/charms/**`):
-/// 60 attunable charms and 10 resonance breakpoints.
+/// the run-hold lifecycle. Driven with the real generated charm corpus (`data/seed/items/charms/**`)
+/// and its 10 resonance breakpoints.
 /// </summary>
 public class CharmCarryStoreTests : IDisposable
 {
@@ -60,16 +60,15 @@ public class CharmCarryStoreTests : IDisposable
     // ---- the catalog -------------------------------------------------------------------------------
 
     [Fact]
-    public void The_real_corpus_round_trips_sixty_defs_and_ten_resonance_rows()
+    public void The_real_corpus_round_trips_defs_and_ten_resonance_rows()
     {
         ImportRealCorpus();
 
         var defs = _store.ListCharmDefs();
-        Assert.Equal(60, defs.Count);
-        Assert.Equal(7, defs.Count(d => d.UniqueCarry));
-        Assert.Equal(7, defs.Count(d => d.Class == CharmClass.Signet));
-        Assert.Equal(21, defs.Count(d => d.Class == CharmClass.Minor));
-        Assert.Equal(32, defs.Count(d => d.Class == CharmClass.Standard));
+        Assert.Equal(Corpus().Count, defs.Count);
+        Assert.NotEmpty(defs);
+        Assert.All(defs.Where(d => d.Class == CharmClass.Signet), d => Assert.True(d.UniqueCarry));
+        Assert.All(defs.Where(d => d.Class != CharmClass.Signet), d => Assert.False(d.UniqueCarry));
 
         var rows = _store.ListCharmResonance();
         Assert.Equal(10, rows.Count);
@@ -82,7 +81,7 @@ public class CharmCarryStoreTests : IDisposable
     {
         ImportRealCorpus();
         ImportRealCorpus();
-        Assert.Equal(60, _store.ListCharmDefs().Count);
+        Assert.Equal(Corpus().Count, _store.ListCharmDefs().Count);
         Assert.Equal(10, _store.ListCharmResonance().Count);
     }
 

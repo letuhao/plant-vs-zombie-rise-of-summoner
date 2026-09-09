@@ -214,6 +214,35 @@ public class ActorHubResolveTests
         Assert.Equal(neutral.RuntimePrimary.Hp, typed.RuntimePrimary.Hp);
     }
 
+    [Fact]
+    public void SeedResourceBaseline_sets_resource_max_for_all_six_ids()
+    {
+        var power = new FixedPowerIndexProvider(theta: 50);
+        var hub = ActorHubBootstrap.CreateDefault(powerIndex: power, seedResourceBaseline: true);
+        var ctx = hub.Stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 500, MaxHp = 500, Atk = 20 });
+        var snap = hub.ResolveDerived(ctx);
+
+        foreach (var id in DerivedStatChannels.ResourceIds)
+        {
+            var max = ResourceChannelReader.Max(snap, id);
+            Assert.True(max > 0, $"resource.max.{id} must be Hub-seeded > 0, got {max}");
+            if (id == "hp")
+                Assert.Equal(500, max);
+        }
+
+        Assert.Contains(hub.Subsystems, s => s.SubsystemId == ContributionSourceIds.ResourceBaseline);
+    }
+
+    [Fact]
+    public void Bare_CreateDefault_does_not_seed_resource_max()
+    {
+        var hub = ActorHubBootstrap.CreateDefault();
+        var ctx = hub.Stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
+        var snap = hub.ResolveDerived(ctx);
+        Assert.Equal(0, ResourceChannelReader.Max(snap, "hp"));
+        Assert.DoesNotContain(hub.Subsystems, s => s.SubsystemId == ContributionSourceIds.ResourceBaseline);
+    }
+
     sealed class FixedPowerIndexProvider : IPowerIndexProvider
     {
         readonly int _theta;

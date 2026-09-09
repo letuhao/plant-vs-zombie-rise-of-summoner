@@ -2,11 +2,11 @@
 
 **Status:** Design locked. **Channels BUILT and registered** — `resource.max.*` / `resource.regen.*` /
 `resource.efficiency.*` ship and are proven live by `tests/FusionRpg.Core.Tests/Stats/ActorChannelsTests.cs`
-(§8). ⚠️ **This header read *"Not built — no `resource.* ` channel family exists yet"* until 2026-09-05,
-contradicting §8 in its own file**; the channels landed 2026-08-25 (F8, `spec-actor-channels.md`).
-⛔ **Still unseeded for battle actors** — `BattleStatComposer.cs:120-128` sets no `resource.*` channel,
-so every battle actor's six pools sit at max 0 and no action in a battle can cost anything. That gap is
-specced as [battle-tempo/spec-battle-resources.md](battle-tempo/spec-battle-resources.md).
+(§8). Battle actors seed base max/regen in `BattleStatComposer`. **UniqueActor cold `/sheet`:** Hub opt-in
+`ResourceBaselineSubsystem` (`seedResourceBaseline: true` on Server compose) seeds the same six
+`resource.max.*` / `resource.regen.*` so `ProjectSheet.resourcePools` reads Hub via
+`ResourceChannelReader` (Current = persisted subset or at-rest Max). Hot LiveStatuses / shield stay
+session-only (honest empty on cold sheet).
 **Parent:** [decisions.md](decisions.md) (ADR row **Resource model**, 2026-08-22; **six** 2026-08-26).
 **Channels:** [actor-hub-ssot.md](actor-hub-ssot.md) §3.G. **Exhaustion vehicle:**
 [status-ssot.md](status-ssot.md). **Consumers:** [action-map.md](action-map.md),

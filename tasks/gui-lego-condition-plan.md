@@ -10,15 +10,15 @@
 
 Refactor ActorSheet Condition into a GUI Lego surface with:
 
-- shell-owned essential identity once on the left rail
-- Condition-owned progression gauge + current-state glance on the right
-- backend support via the existing `/api/actors/{id}/sheet` fan-in DTO
+- shell rail = portrait + name + `Lv · role` only (no chips)
+- Condition 2×2 CSS grid: progression \| species identity / vitality \| Standing
+- `/sheet` projects `standing` (`PowerVector`) + six `resourcePools`; cold liveStatuses honest empty
 
 ## Delivery slices
 
 1. Docs/spec alignment for Condition grammar, shell identity ownership, and `/sheet` backend seam.
-2. Backend `/sheet` contract extension for identity/progression/current-state payloads.
-3. Condition design pack: piece HTML, recipe JSON, assembled surface.
-4. FE fold/bus + piece registration + thin `ConditionTab`.
-5. Enriched `ActorSummarize` consuming `/sheet` identity.
-6. Tests + deploy proof.
+2. Backend `/sheet` Standing + ResourcePools (+ identity/progression).
+3. Condition design pack: piece HTML, recipe JSON, assembled **grid** surface.
+4. FE fold/bus + piece registration + thin `ConditionTab` consuming standing/pools.
+5. Slim `ActorSummarize` (no species/element chips).
+6. Tests + `deploy-play.ps1 -NoServer -NoGame`.

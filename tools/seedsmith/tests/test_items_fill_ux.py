@@ -48,7 +48,7 @@ class ResolveLiveTransportTests(unittest.TestCase):
         cfg = resolve_live_transport(
             "http://cli-only:1/v1", "", dotenv_path=self.no_dotenv,
             toml_path=self.tmp / "no.toml")
-        self.assertEqual(cfg.endpoint, "http://cli-only:1/v1")
+        self.assertEqual(cfg.endpoint, "http://cli-only:1/v1/chat/completions")
 
     def test_empty_cli_uses_dotenv(self) -> None:
         dotenv = self.tmp / ".env"
@@ -56,7 +56,7 @@ class ResolveLiveTransportTests(unittest.TestCase):
             "SEEDSMITH_LLM_ENDPOINT=http://from-env:9/v1\nSEEDSMITH_LLM_MODEL=env/model\n",
             encoding="utf-8")
         cfg = resolve_live_transport("", "", dotenv_path=dotenv, toml_path=self.tmp / "no.toml")
-        self.assertEqual(cfg.endpoint, "http://from-env:9/v1")
+        self.assertEqual(cfg.endpoint, "http://from-env:9/v1/chat/completions")
         self.assertEqual(cfg.model, "env/model")
 
     def test_unrecorded_model_falls_through(self) -> None:
@@ -90,6 +90,12 @@ class ItemsDefaultsTests(unittest.TestCase):
         self.assertTrue(
             defaults_mod.resolve_out_dir_arg("set", "", allow_production=True,
                                              dotenv_path=self.tmp / "x"))
+
+    def test_production_relative_out_dir_is_repo_anchored(self) -> None:
+        path = defaults_mod.resolve_out_dir_arg(
+            "charm", "data/seed/items/charms", allow_production=True,
+            dotenv_path=self.tmp / "absent.env")
+        self.assertEqual(Path(path).resolve(), defaults_mod.PRODUCTION_OUT_DIRS["charm"].resolve())
 
 
 class ItemsWriteDefaultsCliTests(unittest.TestCase):
@@ -195,15 +201,32 @@ class ItemsFillTests(unittest.TestCase):
         for _group, kid in jobs:
             self.assertIn(kid, legal)
 
-    def test_base_type_discovery_skips_legacy_non_role_filenames(self) -> None:
+    def test_base_type_discovery_reads_nested_and_legacy_partitions_by_content(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)
-            for name in ("humanoid-armament-primary-a.json", "humanoid-back-b.json",
-                         "plant-bract-a.json"):
-                (directory / name).write_text("{}", encoding="utf-8")
+            entries = {
+                "humanoid-armament-primary-a.json": {
+                    "frame": "humanoid", "role": "armament-primary", "band": "a",
+                },
+                "humanoid-back-b.json": {
+                    "frame": "humanoid", "role": "mantle", "band": "b",
+                },
+            }
+            for name, entry in entries.items():
+                (directory / name).write_text(
+                    json.dumps({"kind": "base-type", "entries": [entry]}), encoding="utf-8")
+            nested = directory / "footing" / "plant" / "a.json"
+            nested.parent.mkdir(parents=True)
+            nested.write_text(json.dumps({"kind": "base-type", "entries": [{
+                "frame": "plant", "role": "footing", "band": "a",
+            }]}), encoding="utf-8")
             self.assertEqual(
                 fill_mod.discover_base_type_partitions(directory),
-                [("armament-primary", "humanoid", "a")],
+                [
+                    ("armament-primary", "humanoid", "a"),
+                    ("footing", "plant", "a"),
+                    ("mantle", "humanoid", "b"),
+                ],
             )
 
     def test_fill_catches_unexpected_exception(self) -> None:
@@ -238,13 +261,12 @@ class ItemsFillTests(unittest.TestCase):
         self.assertIn("--limit", steps[0].argv)
         self.assertIn("1", steps[0].argv)
 
-    def test_recipe_emits_count(self) -> None:
+    def test_recipe_fill_reconciles_without_an_unscoped_model_draw(self) -> None:
         steps, _ = fill_mod.plan_fill_steps(
             kinds=("recipe",), allow_production=True, limits=self._smoke_limits())
         argv = steps[0].argv
-        self.assertIn("--count", argv)
-        self.assertEqual(argv[argv.index("--count") + 1], "1")
-        self.assertIn("--backfill", argv)
+        self.assertEqual(argv, ["--kind", "recipe"])
+        self.assertIn("reconcile", steps[0].note)
 
     def test_max_partitions_caps_gem(self) -> None:
         with patch.object(fill_mod, "discover_gem_slots", return_value=[1, 2]), \
@@ -317,7 +339,7 @@ class ItemsFillTests(unittest.TestCase):
         set_notes = [s.note for s in planned if s.kind == "set"]
         self.assertEqual(set_notes, ["population=species", "population=build"])
 
-    def test_full_plan_uses_elevated_open_counts_and_no_grid_limit(self) -> None:
+    def test_full_plan_uses_elevated_open_counts_without_unscoped_recipe_generation(self) -> None:
         steps, reason = fill_mod.plan_fill_steps(
             kinds=("enhancement-milestone", "base-type", "set", "combination", "recipe"),
             allow_production=True,
@@ -327,8 +349,7 @@ class ItemsFillTests(unittest.TestCase):
         self.assertEqual(milestone.argv[milestone.argv.index("--count") + 1],
                          str(fill_mod._FULL_OPEN_PASS))
         recipe = next(s for s in steps if s.kind == "recipe" and s.argv)
-        self.assertEqual(recipe.argv[recipe.argv.index("--count") + 1],
-                         str(fill_mod._FULL_OPEN_PASS))
+        self.assertEqual(recipe.argv, ["--kind", "recipe"])
         sets = [s for s in steps if s.kind == "set" and s.argv]
         self.assertEqual(len(sets), 2)
         for step in sets + [s for s in steps if s.kind == "combination" and s.argv]:
@@ -370,12 +391,12 @@ class ItemsFillTests(unittest.TestCase):
         self.assertEqual(calls[1][-2:], ["--limit", str(fill_mod._FULL_GRID_CHECKPOINT)])
         self.assertEqual(len([s for s in report.steps if s.status == "ran"]), 2)
 
-    def test_full_with_explicit_count_keeps_operator_value(self) -> None:
+    def test_full_does_not_turn_an_explicit_global_count_into_recipe_generation(self) -> None:
         steps, _ = fill_mod.plan_fill_steps(
             kinds=("recipe",), allow_production=True,
             limits=fill_mod.FillLimits(full=True, count=3, count_explicit=True))
         argv = steps[0].argv
-        self.assertEqual(argv[argv.index("--count") + 1], "3")
+        self.assertNotIn("--count", argv)
 
     def test_full_gem_plan_assigns_the_global_family_pool_to_one_slot(self) -> None:
         with patch.object(fill_mod, "discover_gem_slots", return_value=[1, 4]), \
@@ -399,18 +420,37 @@ class ItemsFillTests(unittest.TestCase):
             def summary():
                 return {"heldByReason": {"basis=name": 1}}
 
-        with patch("seedsmith.adapters.items.setgen.run.plan_run", return_value=Plan()):
+        with patch("seedsmith.adapters.items.setgen.run.plan_run", return_value=Plan()), \
+             patch.object(fill_mod, "_set_charm_exact_duplicate_count", return_value=0):
             report = fill_mod.generation_completion(kinds=("set",))
 
         self.assertFalse(report["complete"])
         self.assertEqual(report["checks"], [
             {"kind": "set", "population": "species", "toGenerate": 0, "held": 1,
              "ledgered": ANY,
-             "heldByReason": {"basis=name": 1}, "complete": False},
+             "heldByReason": {"basis=name": 1}, "exactDuplicateNames": 0, "complete": False},
             {"kind": "set", "population": "build", "toGenerate": 0, "held": 1,
              "ledgered": ANY,
-             "heldByReason": {"basis=name": 1}, "complete": False},
+             "heldByReason": {"basis=name": 1}, "exactDuplicateNames": 0, "complete": False},
         ])
+
+    def test_generation_completion_refuses_to_call_duplicate_names_complete(self) -> None:
+        class Plan:
+            subjects = ()
+            held = ()
+            complete = True
+
+            @staticmethod
+            def summary():
+                return {"heldByReason": {}}
+
+        with patch("seedsmith.adapters.items.setgen.run.plan_run", return_value=Plan()), \
+             patch.object(fill_mod, "_set_charm_exact_duplicate_count", return_value=1):
+            report = fill_mod.generation_completion(kinds=("charm",))
+
+        self.assertFalse(report["complete"])
+        self.assertEqual(report["checks"][0]["exactDuplicateNames"], 1)
+        self.assertFalse(report["checks"][0]["complete"])
 
     def test_fill_continues_past_gap_when_stop_on_error_false(self) -> None:
         calls: list[str] = []

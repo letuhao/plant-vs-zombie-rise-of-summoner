@@ -15,6 +15,9 @@ contracts hardened — **React still blocked** until owner accepts P0 assembled 
 Sibling programs (do not absorb):
 
 - [actor-sheet-map.md](actor-sheet-map.md) — sheet shell, cook catalogs, tab kinds  
+- [condition-glance-map.md](condition-glance-map.md) — Condition glance (P1)  
+- [derived-cook-map.md](derived-cook-map.md) — Derived cook harden (P0 Harden)  
+- [shield-sheet-map.md](shield-sheet-map.md) — Shield tab + stack projection (P1b)  
 - [fe-game-foundation.md](fe-game-foundation.md) — DPLP  
 - [phaser-kernel-map.md](phaser-kernel-map.md) — canvas runtime (analogue only)  
 - [html-design-implementation.md](html-design-implementation.md) — plate fidelity when SSOT is a plate  

@@ -6124,6 +6124,3944 @@
       "tags": [],
       "flavor": "A jagged collage of pulpy, cherry-red newsprint that crinkles rhythmically, performing a silent, tragic solo.",
       "notes": "themeKey: demon.cherrypaperzombie"
+    },
+    {
+      "id": "charm.surv-util-246",
+      "nameKey": "charm.gilded-ember-spire",
+      "name": "Gilded Ember-Spire",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.firelining",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, molten rod of solidified wealth that radiates a constant, searing heat.",
+      "notes": "themeKey: demon.goldthreetorch",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-247",
+      "nameKey": "charm.epitaph-eraser",
+      "name": "Epitaph Eraser",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, slab-like charm carved from porous tombstone granite that seems to pull the very presence of nearby objects into its hollow core.",
+      "notes": "themeKey: demon.gravebuster",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-248",
+      "nameKey": "charm.bastion-shell-core",
+      "name": "Bastion-Shell Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A dense, unyielding kernel of petrified nut-matter, shaped into a geometric monolith that anchors the battlefield.",
+      "notes": "themeKey: demon.hugewallnut",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-249",
+      "nameKey": "charm.trifolium-necrosis",
+      "name": "Trifolium Necrosis",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A cluster of three wilted, pulsating clover leaves, bound together by thick, necrotic veins that pull at the soul of those nearby.",
+      "notes": "themeKey: demon.hypnoblover",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-250",
+      "nameKey": "charm.spore-husk-reliquary",
+      "name": "Spore-Husk Reliquary",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.dooming",
+          "powerBand": "extreme",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A calcified fungal mass containing the lingering essence of a fallen legion, pulsing with a slow, rhythmic decay.",
+      "notes": "themeKey: demon.hypnodoom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-251",
+      "nameKey": "charm.vaporous-betrayal",
+      "name": "Vaporous Betrayal",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-shift",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A flickering, crimson-hued essence coalesces into the shape of a weeping, elongated pepper, its skin pulsing with a rhythmic, hypnotic glow. Within its translucent flesh, shadows dance in patterns that mimic the frantic, stumbling movements of the undead, luring the unwary into a trance of sudden, devastating betrayal.",
+      "notes": "themeKey: demon.hypnojalapeno",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-252",
+      "nameKey": "charm.fulminating-tuber-core",
+      "name": "Fulminating Tuber-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        },
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, starch-heavy sphere that hums with static electricity, ready to detonate upon impact.",
+      "notes": "themeKey: demon.hypnomine"
+    },
+    {
+      "id": "charm.surv-util-253",
+      "nameKey": "charm.dual-handed-pod-shell",
+      "name": "Dual-Handed Pod-Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pair of heavy, twin-chambered vessels crafted from polished pea-pod husks, designed to pulse with a rhythmic, hypnotic cadence.",
+      "notes": "themeKey: demon.hypnorepeater"
+    },
+    {
+      "id": "charm.surv-util-254",
+      "nameKey": "charm.pod-burst-siphon",
+      "name": "Pod-Burst Siphon",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of swollen, iridescent seed-pods that rhythmically pulse with a hypnotic, emerald light.",
+      "notes": "themeKey: demon.hypnosplit"
+    },
+    {
+      "id": "charm.surv-util-255",
+      "nameKey": "charm.glacial-clover-relic",
+      "name": "Glacial Clover Relic",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A frozen three-leafed charm that emits a continuous, biting wind, hardening the skin of all nearby allies.",
+      "notes": "themeKey: demon.iceblover"
+    },
+    {
+      "id": "charm.surv-util-256",
+      "nameKey": "charm.rime-shard-splinter",
+      "name": "Rime-Shard Splinter",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, translucent needle of condensed frost that pulses with a biting, numbing chill.",
+      "notes": "themeKey: demon.icecaltrop"
+    },
+    {
+      "id": "charm.surv-util-257",
+      "nameKey": "charm.frost-vapor-spore-casing",
+      "name": "Frost-Vapor Spore-Casing",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-husk",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.elemental-defense",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pressurized, frost-coated fungal bulb that releases a thick, freezing mist to shield its allies.",
+      "notes": "themeKey: demon.icefumeshroom"
+    },
+    {
+      "id": "charm.surv-util-258",
+      "nameKey": "charm.glacial-husk-nut",
+      "name": "Glacial Husk-Nut",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A frozen, calcified seed casing that pulses with a rhythmic, necrotic chill.",
+      "notes": "themeKey: demon.icehypno",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-259",
+      "nameKey": "charm.rime-spike-ossuary",
+      "name": "Rime-Spike Ossuary",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-harden",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, crystalline spire of permafrost that feels less like organic life and more like a shard of the void carved into a predatory, fungal shape.",
+      "notes": "themeKey: demon.iceshroom"
+    },
+    {
+      "id": "charm.surv-util-260",
+      "nameKey": "charm.spore-sentry-spore-pod",
+      "name": "Spore-Sentry Spore-Pod",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, iron-encrusted fungal cap that acts as a stationary lookout, pulsing with defensive spores.",
+      "notes": "themeKey: demon.ifvironpuff"
+    },
+    {
+      "id": "charm.surv-util-261",
+      "nameKey": "charm.monochrome-veteran-s-frame",
+      "name": "Monochrome Veteran's Frame",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A silver-nitrate snapshot of a bygone era, capturing the collective intent of those who stood firm in the gray light.",
+      "notes": "themeKey: demon.ironballoonzombie2",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-262",
+      "nameKey": "charm.item",
+      "name": "埃德加的和平遗骸",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-flinch",
+          "powerBand": "low",
+          "params": {
+            "element": "omni",
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "由锈蚀的机械零件与僵尸组织构成的巨大圆环，其表面刻满了象征和平的齿轮纹路，散发着一种令人放松的、甚至有些掉以轻心的陈旧气息。",
+      "notes": "themeKey: demon.irongargantuar",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-263",
+      "nameKey": "charm.heavy-gourd-shell",
+      "name": "Heavy-Gourd Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, unyielding mass of iron-hard rind that anchors the soul to the earth.",
+      "notes": "themeKey: demon.ironsquash"
+    },
+    {
+      "id": "charm.surv-util-264",
+      "nameKey": "charm.stitched-fuse-core",
+      "name": "Stitched Fuse-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, patchwork casing of rotting fabric and scrap metal, concealing a volatile, ticking mechanism that seems to watch its owner.",
+      "notes": "themeKey: demon.jackbox_b"
+    },
+    {
+      "id": "charm.surv-util-265",
+      "nameKey": "charm.the-jester-s-assurance",
+      "name": "The Jester's Assurance",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-brace",
+          "powerBand": "low",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A patchwork of velvet and rusted wire, shaped like a manic grin that promises safety through chaos.",
+      "notes": "themeKey: demon.jackboxzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-266",
+      "nameKey": "charm.the-moonwalk-keepsake",
+      "name": "The Moonwalk Keepsake",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A silver-framed photograph of a dance academy stage, capturing a perfect silhouette in mid-glide.",
+      "notes": "themeKey: demon.jackson_b",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-267",
+      "nameKey": "charm.perpetual-driver-s-license",
+      "name": "Perpetual Driver's License",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-seal",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-husk",
+          "powerBand": "low",
+          "params": {
+            "element": "ice",
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A frozen, crystalline permit that ensures the driver never has to step out of the vehicle.",
+      "notes": "themeKey: demon.jacksondriver",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-268",
+      "nameKey": "charm.lunar-groove-monolith",
+      "name": "Lunar Groove Monolith",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.evasion",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A polished obsidian disc shaped like a spinning record, etched with starlight patterns that pulse to a rhythmic beat.",
+      "notes": "themeKey: demon.jacksonzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-269",
+      "nameKey": "charm.obsidian-barb-chassis",
+      "name": "Obsidian Barb-Chassis",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-harden",
+          "powerBand": "low",
+          "params": {
+            "element": "fire"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, volcanic-tempered frame of serrated iron that absorbs impact through its violent, rhythmic recoil.",
+      "notes": "themeKey: demon.jalagatling"
+    },
+    {
+      "id": "charm.surv-util-270",
+      "nameKey": "charm.searing-gourd-core",
+      "name": "Searing Gourd Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A volatile, pulsating mass of orange rind and pressurized magma, shaped like a spiked squash that thrums with aggressive heat.",
+      "notes": "themeKey: demon.jalasquash"
+    },
+    {
+      "id": "charm.surv-util-271",
+      "nameKey": "charm.ignited-stump-core",
+      "name": "Ignited Stump-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-harden",
+          "powerBand": "low",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, charred stump shaped like a torch, pulsing with internal combustion.",
+      "notes": "themeKey: demon.jalatorch"
+    },
+    {
+      "id": "charm.surv-util-272",
+      "nameKey": "charm.verdant-detonation-knot",
+      "name": "Verdant Detonation Knot",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A tangled mass of hyper-pressurized aquatic flora that ruptures upon contact.",
+      "notes": "themeKey: demon.kelpmine_water"
+    },
+    {
+      "id": "charm.surv-util-273",
+      "nameKey": "charm.ignited-verdant-spore",
+      "name": "Ignited Verdant Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flourishing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, pulsating cluster of aquatic flora, encased in a pressurized glass bulb that glows with a fierce, internal combustion.",
+      "notes": "themeKey: demon.kelptorch"
+    },
+    {
+      "id": "charm.surv-util-274",
+      "nameKey": "charm.escalator-assembly-mandate",
+      "name": "Escalator Assembly Mandate",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-yield",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, iron-bound gear mechanism that pulses with the rhythm of a factory line, ensuring every unit is positioned and ready for the next shift.",
+      "notes": "themeKey: demon.ladderzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-276",
+      "nameKey": "charm.spike-glow-lure",
+      "name": "Spike-Glow Lure",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, translucent shard of calcified cactus flesh that pulses with a blinding, internal radiance.",
+      "notes": "themeKey: demon.lanternchomper"
+    },
+    {
+      "id": "charm.surv-util-277",
+      "nameKey": "charm.luminous-phalanx-array",
+      "name": "Luminous Phalanx Array",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A series of interlocking, high-frequency laser lenses that project a continuous, shimmering barrier of light to stabilize the front line.",
+      "notes": "themeKey: demon.lanternrepeater"
+    },
+    {
+      "id": "charm.surv-util-278",
+      "nameKey": "charm.lumen-silo-canopy",
+      "name": "Lumen-Silo Canopy",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A dense, translucent umbrella of solidified sunlight that captures kinetic impact and stores it as radiant potential.",
+      "notes": "themeKey: demon.lanternumbrella",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-279",
+      "nameKey": "charm.alpha-linkage-compass",
+      "name": "Alpha-Linkage Compass",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.ward-link",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, matte-black tactical compass forged from reinforced scrap and blood-stained iron, its needle always pointing toward the center of the squad's formation.",
+      "notes": "themeKey: demon.legionzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-280",
+      "nameKey": "charm.aloe-suture-spore",
+      "name": "Aloe-Suture Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, succulent-like vessel containing thick, rhythmic sap that pulses with a restorative cadence.",
+      "notes": "themeKey: demon.lotusaloes"
+    },
+    {
+      "id": "charm.surv-util-281",
+      "nameKey": "charm.spruce-bloom-graft",
+      "name": "Spruce-Bloom Graft",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.life-graft",
+          "powerBand": "trivial"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of evergreen needles and soft petals woven into a living, breathing bandage.",
+      "notes": "themeKey: demon.lotusspruce"
+    },
+    {
+      "id": "charm.surv-util-282",
+      "nameKey": "charm.nut-graft-core",
+      "name": "Nut-Graft Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.life-graft",
+          "powerBand": "trivial"
+        },
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, seed-like knot of fused iron and creeping vines that hardens upon impact.",
+      "notes": "themeKey: demon.machineshardplant"
+    },
+    {
+      "id": "charm.surv-util-283",
+      "nameKey": "charm.sludge-seamed-monolith",
+      "name": "Sludge-Seamed Monolith",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, rectangular monolith of rusted iron and jagged scrap, humming with a restless, magnetic hunger.",
+      "notes": "themeKey: demon.magnetbox"
+    },
+    {
+      "id": "charm.surv-util-284",
+      "nameKey": "charm.ferro-spore-monolith",
+      "name": "Ferro-Spore Monolith",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.prec-sync",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, shifting mass of magnetic fungal matter that pulls all nearby debris into its crushing core.",
+      "notes": "themeKey: demon.magnetdoom"
+    },
+    {
+      "id": "charm.surv-util-285",
+      "nameKey": "charm.obsidian-lattice-flux",
+      "name": "Obsidian Lattice Flux",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-shift",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A shifting, geometric lattice of polished obsidian and pulsing violet mercury that ripples like liquid metal, reconfiguring its jagged structure to pull at the essence of the void.",
+      "notes": "themeKey: demon.magnetinterface"
+    },
+    {
+      "id": "charm.surv-util-286",
+      "nameKey": "charm.ferro-spore-siphon",
+      "name": "Ferro-Spore Siphon",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A cluster of magnetic, necrotic fungal filaments that clings to the commander's mantle, pulling essence from the fallen to bolster the living.",
+      "notes": "themeKey: demon.magnetshroom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-287",
+      "nameKey": "charm.vined-spore-coiling",
+      "name": "Vined-Spore Coiling",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, coiled mass of thick melon-vines and rubbery mushroom caps that absorbs impact to build tension.",
+      "notes": "themeKey: demon.melonfume"
+    },
+    {
+      "id": "charm.surv-util-288",
+      "nameKey": "charm.trench-breaker-gourd",
+      "name": "Trench-Breaker Gourd",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, hollowed-out pumpkin reinforced with rusted iron tools, designed to be slammed into the earth to open sudden tunnels.",
+      "notes": "themeKey: demon.minerzombie"
+    },
+    {
+      "id": "charm.surv-util-289",
+      "nameKey": "charm.checklist-of-the-wayfarer",
+      "name": "Checklist of the Wayfarer",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A simple, rectangular slate etched with a series of toggled icons, used to track the progress of a long journey.",
+      "notes": "themeKey: demon.mixanim"
+    },
+    {
+      "id": "charm.surv-util-290",
+      "nameKey": "charm.item",
+      "name": "核爆樱桃·爆裂弹壳",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elpw-overflow",
+          "powerBand": "low",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A massive, heavy-caliber casing forged from condensed cherry-core, designed to release a catastrophic burst of kinetic energy upon impact.",
+      "notes": "themeKey: demon.nucleardoomcherry",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-291",
+      "nameKey": "charm.obsidian-shard-clatter",
+      "name": "Obsidian Shard-Clatter",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A collection of jagged, weathered obsidian fragments that rustle with a dry, rasping sound, constantly pulling themselves back together through sheer force of will.",
+      "notes": "themeKey: demon.obsidianclawzombie"
+    },
+    {
+      "id": "charm.surv-util-292",
+      "nameKey": "charm.item",
+      "name": "玄钢棘壳",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, metallic shell of dark steel spikes that hardens upon impact.",
+      "notes": "themeKey: demon.obsidianwallnut"
+    },
+    {
+      "id": "charm.surv-util-293",
+      "nameKey": "charm.seed-shell-husk",
+      "name": "Seed-Shell Husk",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, fibrous pod carved from dried plant matter, shaped like a ceremonial headpiece to protect the core.",
+      "notes": "themeKey: demon.passionfruit"
+    },
+    {
+      "id": "charm.surv-util-294",
+      "nameKey": "charm.spore-pressure-capsule",
+      "name": "Spore-Pressure Capsule",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-surge",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pressurized fungal bulb that converts kinetic buildup into high-velocity spore bursts.",
+      "notes": "themeKey: demon.peafume"
+    },
+    {
+      "id": "charm.surv-util-295",
+      "nameKey": "charm.marrow-spasm-conduit",
+      "name": "Marrow-Spasm Conduit",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A jagged, calcified tube of necrotic marrow that spits concentrated orbs of decay with a rhythmic, violent exhale.",
+      "notes": "themeKey: demon.peashooter",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-296",
+      "nameKey": "charm.star-spike-silt-core",
+      "name": "Star-Spike Silt-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, star-shaped shard of compressed earth, concealing sharp, starfruit-like edges within its muddy crust.",
+      "notes": "themeKey: demon.pickaxestar"
+    },
+    {
+      "id": "charm.surv-util-297",
+      "nameKey": "charm.verdant-leek-ear-nexus",
+      "name": "Verdant Leek-Ear Nexus",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-freshgraft",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of glowing, fibrous leek-stalks woven into a protective lattice, pulsing with the collective vitality of the swarm.",
+      "notes": "themeKey: demon.pinkonion"
+    },
+    {
+      "id": "charm.surv-util-298",
+      "nameKey": "charm.roof-leaper-s-shard",
+      "name": "Roof-Leaper's Shard",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evasion",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged piece of weathered roof tile, held together by the restless energy of a zombie that refuses to stay grounded.",
+      "notes": "themeKey: demon.pogozombie"
+    },
+    {
+      "id": "charm.surv-util-299",
+      "nameKey": "charm.chronos-kernel-husk",
+      "name": "Chronos-Kernel Husk",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.tempo-surge",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, accelerating core of compressed corn-matter, encased in a shifting temporal shell that hardens upon impact.",
+      "notes": "themeKey: demon.portalcorn"
+    },
+    {
+      "id": "charm.surv-util-300",
+      "nameKey": "charm.chronoshell-core",
+      "name": "Chronoshell Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-shift",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.prec-sync",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A dense, shifting nut of hyper-spatial matter that pulses with the rhythm of a thousand skipped seconds.",
+      "notes": "themeKey: demon.portalnut",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-301",
+      "nameKey": "charm.vines-of-the-fractured-instant",
+      "name": "Vines of the Fractured Instant",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.life-graft",
+          "powerBand": "trivial"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A tangled knot of verdant, shimmering tendrils that exist in multiple moments at once, weaving a protective web of temporal flora.",
+      "notes": "themeKey: demon.portalplant"
+    },
+    {
+      "id": "charm.surv-util-302",
+      "nameKey": "charm.starch-grip-maw",
+      "name": "Starch-Grip Maw",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-muster",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, tuberous charm shaped like a bloated, unblinking mouth, waiting to swallow whatever wanders too close.",
+      "notes": "themeKey: demon.potatochomper",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-304",
+      "nameKey": "charm.cracked-gourd-shell",
+      "name": "Cracked Gourd Shell",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "earth"
+          }
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A low-slung, hollowed pumpkin husk, jagged and leaking volatile gases from its burst seams.",
+      "notes": "themeKey: demon.potatopumpkin"
+    },
+    {
+      "id": "charm.surv-util-305",
+      "nameKey": "charm.verdant-void-box",
+      "name": "Verdant Void-Box",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-freshgraft",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A hollowed wooden crate that spontaneously sprouts thick, thorny vines whenever it is placed upon bare ground.",
+      "notes": "themeKey: demon.present"
+    },
+    {
+      "id": "charm.surv-util-306",
+      "nameKey": "charm.fulminating-shell-core",
+      "name": "Fulminating Shell-Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, spherical casing of blackened iron, containing a volatile, crackling core of condensed lightning that vibrates with imminent detonation.",
+      "notes": "themeKey: demon.projectilezombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-307",
+      "nameKey": "charm.spore-crust-reliquary",
+      "name": "Spore-Crust Reliquary",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.dooming",
+          "powerBand": "extreme"
+        },
+        {
+          "family": "atom.dooming",
+          "powerBand": "extreme",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A calcified, expanding mass of fungal matter that pulses with a rhythmic, destructive hunger.",
+      "notes": "themeKey: demon.puffdoom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-308",
+      "nameKey": "charm.spore-pulse-spore-core",
+      "name": "Spore-Pulse Spore-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.life-surge",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, translucent oceanic mass that rhythmically releases microscopic spores, ensuring the collective's presence is felt everywhere.",
+      "notes": "themeKey: demon.puffseashroom"
+    },
+    {
+      "id": "charm.surv-util-309",
+      "nameKey": "charm.gilded-enigma-capsule",
+      "name": "Gilded Enigma Capsule",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, metallic sphere of polished gold that contains an unknown, shifting essence within its hollow core.",
+      "notes": "themeKey: demon.randompluszombie"
+    },
+    {
+      "id": "charm.surv-util-310",
+      "nameKey": "charm.insomniac-colossus-fragment",
+      "name": "Insomniac Colossus Fragment",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, jagged slab of calcified eyelid and granite, pulsing with the restless energy of a giant who has forgotten how to dream.",
+      "notes": "themeKey: demon.redgargantuar"
+    },
+    {
+      "id": "charm.surv-util-311",
+      "nameKey": "charm.sprout-shell-defiance",
+      "name": "Sprout-Shell Defiance",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A thin, brittle husk that refuses to crack, hardening its core against the weight of the world.",
+      "notes": "themeKey: demon.scaredynut",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-312",
+      "nameKey": "charm.lume-spore-lantern",
+      "name": "Lume-Spore Lantern",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.prec-truesight",
+          "powerBand": "high",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, bioluminescent cap shaped like a streetlamp, casting a wide radius of soft light to guide the way.",
+      "notes": "themeKey: demon.sealantern"
+    },
+    {
+      "id": "charm.surv-util-313",
+      "nameKey": "charm.tuberous-detonator",
+      "name": "Tuberous Detonator",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, starch-filled bulb that swells with volatile pressure until it erupts.",
+      "notes": "themeKey: demon.seamine_land"
+    },
+    {
+      "id": "charm.surv-util-314",
+      "nameKey": "charm.star-spore-hydration",
+      "name": "Star-Spore Hydration",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.flourishing",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, star-shaped membrane that swells with aquatic nutrients, allowing spores to multiply and launch in rapid succession.",
+      "notes": "themeKey: demon.seastarfruit"
+    },
+    {
+      "id": "charm.surv-util-315",
+      "nameKey": "charm.steel-petal-aegis",
+      "name": "Steel-Petal Aegis",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.warding",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A blooming lotus forged from reinforced iron-veined leaves, radiating a soothing verdant light that mends the spirit.",
+      "notes": "themeKey: demon.shulklotus"
+    },
+    {
+      "id": "charm.surv-util-316",
+      "nameKey": "charm.argentine-spore-anchor",
+      "name": "Argentine Spore-Anchor",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, silver-plated fungal cap that anchors the essence of destruction into a stable, unyielding form.",
+      "notes": "themeKey: demon.silverdoom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-317",
+      "nameKey": "charm.frost-veil-spore",
+      "name": "Frost-Veil Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.plating",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, silver-dusted fungal cap that emits a constant, numbing mist, coating everything in a layer of crystalline rime.",
+      "notes": "themeKey: demon.silvericeshroom"
+    },
+    {
+      "id": "charm.surv-util-318",
+      "nameKey": "charm.gilded-crucible-of-abundance",
+      "name": "Gilded Crucible of Abundance",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, ceramic vessel rimmed with molten silver, perpetually overflowing with the scent of fertile loam and the glint of minted coin.",
+      "notes": "themeKey: demon.silverpot",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-319",
+      "nameKey": "charm.rooted-recoil-anchor",
+      "name": "Rooted Recoil Anchor",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, ceramic-reinforced base forged from compressed soil and iron-veined clay, designed to absorb the violent kick of a heavy shot.",
+      "notes": "themeKey: demon.sniperpot"
+    },
+    {
+      "id": "charm.surv-util-320",
+      "nameKey": "charm.submerged-lung-pouch",
+      "name": "Submerged Lung-Pouch",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-shift",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, water-filled bladder made of preserved lung tissue, pulsing rhythmically to mimic the breathing of the drowned.",
+      "notes": "themeKey: demon.snorklezombie"
+    },
+    {
+      "id": "charm.surv-util-321",
+      "nameKey": "charm.glacial-insulation-plaque",
+      "name": "Glacial Insulation Plaque",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.padding",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A thick, frost-rimed slab of compressed snow and insulating fibers, worn with pride by those who refuse to thaw.",
+      "notes": "themeKey: demon.snowconezombie"
+    },
+    {
+      "id": "charm.surv-util-322",
+      "nameKey": "charm.sub-zero-marrow-core",
+      "name": "Sub-Zero Marrow-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-attune",
+          "powerBand": "trivial",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.chill-punisher",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged shard of permafrost that vibrates with a violent, rhythmic tremor, as if the very essence of the zombie within is shivering at temperatures far below freezing.",
+      "notes": "themeKey: demon.snowgatlingpeazombie"
+    },
+    {
+      "id": "charm.surv-util-323",
+      "nameKey": "charm.frost-bound-saddle-spur",
+      "name": "Frost-Bound Saddle-Spur",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A frozen, jagged piece of cavalry tack, forged from the calcified remains of a mount and the rider's own marrow, used to bind the soul to the beast.",
+      "notes": "themeKey: demon.snowmonsterrider",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-324",
+      "nameKey": "charm.spore-pod-ricochet",
+      "name": "Spore-Pod Ricochet",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.hit-retort",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A small, rounded vessel made of hardened seed-husks that bounces with kinetic energy.",
+      "notes": "themeKey: demon.splitpuff"
+    },
+    {
+      "id": "charm.surv-util-325",
+      "nameKey": "charm.spore-cloud-huddle",
+      "name": "Spore-Cloud Huddle",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of trembling, pale caps that release a dense, protective mist whenever the air grows heavy with threat.",
+      "notes": "themeKey: demon.spreadscaredyshroom"
+    },
+    {
+      "id": "charm.surv-util-326",
+      "nameKey": "charm.spruce-splintered-shaft",
+      "name": "Spruce-Splintered Shaft",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A bundle of sharpened spruce needles bound by resin, designed to pierce through the thickest bark.",
+      "notes": "themeKey: demon.spruceshooter"
+    },
+    {
+      "id": "charm.surv-util-327",
+      "nameKey": "charm.vellum-of-the-verdant-husk",
+      "name": "Vellum of the Verdant Husk",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A thick, laminated card made of pressed plant fibers and dried skin, etched with many tiny, intelligent eyes.",
+      "notes": "themeKey: demon.squalour",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-328",
+      "nameKey": "charm.vinedred-thump-core",
+      "name": "Vinedred Thump-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, pulsating gourd of necrotic matter that hovers inches above the ground, rhythmically slamming its weight into the earth.",
+      "notes": "themeKey: demon.squashblover"
+    },
+    {
+      "id": "charm.surv-util-329",
+      "nameKey": "charm.gourd-hearth-shell",
+      "name": "Gourd-Hearth Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A hollowed, dried pumpkin rind lined with soft moss, serving as a cozy sanctuary for small spirits.",
+      "notes": "themeKey: demon.squashpumpkin"
+    },
+    {
+      "id": "charm.surv-util-330",
+      "nameKey": "charm.stellar-orbiting-spore",
+      "name": "Stellar Orbiting Spore",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.prec-sync",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A spinning, star-shaped seed that pulls nearby allies into its gravitational wake.",
+      "notes": "themeKey: demon.starblover"
+    },
+    {
+      "id": "charm.surv-util-331",
+      "nameKey": "charm.star-spore-launcher",
+      "name": "Star-Spore Launcher",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of star-shaped fungal caps that pulse with a rhythmic, zombie-like twitch, ready to transform the battlefield.",
+      "notes": "themeKey: demon.starhypno"
+    },
+    {
+      "id": "charm.surv-util-332",
+      "nameKey": "charm.stellar-axis-shard",
+      "name": "Stellar Axis Shard",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.prec-focus",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.prec-sync",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, five-pointed crystalline shard that spins on a central axis, projecting kinetic radiance along a predetermined vector.",
+      "notes": "themeKey: demon.starpea"
+    },
+    {
+      "id": "charm.surv-util-333",
+      "nameKey": "charm.starlight-stump-core",
+      "name": "Starlight Stump-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, star-shaped stump carved from dense wood, glowing with the heat of a captured torch.",
+      "notes": "themeKey: demon.startorch"
+    },
+    {
+      "id": "charm.surv-util-334",
+      "nameKey": "charm.perfected-volley-lattice",
+      "name": "Perfected Volley-Lattice",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A flawless web of munitions, woven into a lethal fire-net of ballistic precision.",
+      "notes": "themeKey: demon.submarine_b",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-335",
+      "nameKey": "charm.centrifugal-inertia-core",
+      "name": "Centrifugal Inertia-Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.tempo-surge",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.tempo-surge",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A spinning mass of dense, high-velocity scrap and concentrated intellect, designed to stabilize the vessel's trajectory through sheer kinetic momentum.",
+      "notes": "themeKey: demon.submarine_c2",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-336",
+      "nameKey": "charm.edgar-s-silent-projection",
+      "name": "Edgar's Silent Projection",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evd-shift",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A spectral lens of polished obsidian that casts a silent, shimmering parade of light, welcoming the fallen into the fray.",
+      "notes": "themeKey: demon.summonedhorse",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-337",
+      "nameKey": "charm.solaris-cabbage-core",
+      "name": "Solaris Cabbage Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, glowing sphere of layered vegetable matter that pulses with stored sunlight, designed to absorb impact and release kinetic energy.",
+      "notes": "themeKey: demon.suncabbage"
+    },
+    {
+      "id": "charm.surv-util-338",
+      "nameKey": "charm.item",
+      "name": "霜融之核",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "由层层堆叠的寒冰菌丝与凝固的阳光结晶组成，随着时间流逝，其核心会缓慢释放出消融一切的寒气。",
+      "notes": "themeKey: demon.suniceshroom"
+    },
+    {
+      "id": "charm.surv-util-339",
+      "nameKey": "charm.sun-cracked-husk",
+      "name": "Sun-Cracked Husk",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A brittle, sun-bleached shell that yields its inner bounty to the light.",
+      "notes": "themeKey: demon.sunnut"
+    },
+    {
+      "id": "charm.surv-util-340",
+      "nameKey": "charm.spore-sun-sproutling",
+      "name": "Spore-Sun Sproutling",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A translucent, expanding fungal bulb that pulses with captured solar energy, thickening its cap to absorb more light.",
+      "notes": "themeKey: demon.sunshroom"
+    },
+    {
+      "id": "charm.surv-util-341",
+      "nameKey": "charm.viscous-corpse-path",
+      "name": "Viscous Corpse-Path",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A congealed, sliding mass of remains that leaves a trail of sorrowful, slick residue.",
+      "notes": "themeKey: demon.supercaltrop",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-342",
+      "nameKey": "charm.gnash-grit-maw",
+      "name": "Gnash-Grit Maw",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, calcified fragment of a front-line jaw, designed to absorb the first impact of any skirmish.",
+      "notes": "themeKey: demon.superchomper"
+    },
+    {
+      "id": "charm.surv-util-343",
+      "nameKey": "charm.thermal-core-vessel",
+      "name": "Thermal Core Vessel",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, glowing furnace-shaped canister that pulses with rhythmic heat, providing a steady stream of energy to those nearby.",
+      "notes": "themeKey: demon.superfurnace"
+    },
+    {
+      "id": "charm.surv-util-344",
+      "nameKey": "charm.subterranean-sprout-link",
+      "name": "Subterranean Sprout-Link",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.ward-link",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of interconnected tubers pulsing with rhythmic vibrations, allowing the swarm to sense the tremors of their kin through the soil.",
+      "notes": "themeKey: demon.supergatlingpeamine"
+    },
+    {
+      "id": "charm.surv-util-345",
+      "nameKey": "charm.velvet-choke-barrel",
+      "name": "Velvet-Choke Barrel",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.precision",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A polished brass cylinder that pulses with a rhythmic, hypnotic vibration, discharging emerald-tinted legumes at a relentless pace.",
+      "notes": "themeKey: demon.superhypnogatling"
+    },
+    {
+      "id": "charm.surv-util-346",
+      "nameKey": "charm.aether-hull-reliquary",
+      "name": "Aether-Hull Reliquary",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-plate",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.evd-harden",
+          "powerBand": "low",
+          "params": {
+            "element": "air"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A fragment of a shattered sky-fortress, its jagged metal plating humming with the echoes of a thousand fallen sorties.",
+      "notes": "themeKey: demon.superkirov"
+    },
+    {
+      "id": "charm.surv-util-347",
+      "nameKey": "charm.item",
+      "name": "螺纹植被集成核",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.life-graft",
+          "powerBand": "trivial"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "由大量坚果状的机械零件与生长中的植物纤维融合而成，形成了一层厚重的装甲层。",
+      "notes": "themeKey: demon.supermachineshardplant"
+    },
+    {
+      "id": "charm.surv-util-348",
+      "nameKey": "charm.melon-cap-husk",
+      "name": "Melon-Cap Husk",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A thick, dried gourd shell shaped like a wide-brimmed hat, used to deflect long-range strikes.",
+      "notes": "themeKey: demon.superpogozombie"
+    },
+    {
+      "id": "charm.surv-util-349",
+      "nameKey": "charm.glacial-pea-spitter",
+      "name": "Glacial Pea-Spitter",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A frost-encrusted barrel that rhythmically ejects frozen legumes with machine-gun precision.",
+      "notes": "themeKey: demon.supersnowgatling"
+    },
+    {
+      "id": "charm.surv-util-351",
+      "nameKey": "charm.radiant-husk-scepter",
+      "name": "Radiant Husk Scepter",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A magnificent, towering staff carved from sun-drenched fruit rinds and gilded with gold, standing out amongst the common dead to command the light of the grave.",
+      "notes": "themeKey: demon.supersunnutzombie"
+    },
+    {
+      "id": "charm.surv-util-352",
+      "nameKey": "charm.cinder-winged-aegis",
+      "name": "Cinder-Winged Aegis",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.elemental-defense",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A shimmering, iridescent plume of phoenix-down encased in molten glass, shaped like a spreading wing to catch the heat of battle.",
+      "notes": "themeKey: demon.superthreepeater_sp"
+    },
+    {
+      "id": "charm.surv-util-353",
+      "nameKey": "charm.gilded-reliquary-of-the-unliving",
+      "name": "Gilded Reliquary of the Unliving",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, ornate casket forged from tarnished gold and silver, containing the restless essence of a thousand fallen soldiers.",
+      "notes": "themeKey: demon.superumbrella",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-354",
+      "nameKey": "charm.glacial-nut-shell",
+      "name": "Glacial Nut-Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, towering spire of frozen kernel-matter that provides a crunchy, unyielding barrier.",
+      "notes": "themeKey: demon.tallicenut"
+    },
+    {
+      "id": "charm.surv-util-355",
+      "nameKey": "charm.silt-choked-tether",
+      "name": "Silt-Choked Tether",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A tangled mass of waterlogged, necrotic vegetation that pulls at the ankles of the living.",
+      "notes": "themeKey: demon.tanglekelp",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-356",
+      "nameKey": "charm.spiked-winter-sprout-barrier",
+      "name": "Spiked Winter-Sprout Barrier",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A jagged, frozen bamboo shoot that bristles with sharp, defensive thorns, pulsing with the restless energy of a restless corpse.",
+      "notes": "themeKey: demon.thornsbamboo"
+    },
+    {
+      "id": "charm.surv-util-357",
+      "nameKey": "charm.triple-layered-cabbage-launcher",
+      "name": "Triple-Layered Cabbage Launcher",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A tightly wound, layered sphere of verdant leaves that ejects high-velocity seeds through rhythmic, three-tiered pressure.",
+      "notes": "themeKey: demon.threecabbage"
+    },
+    {
+      "id": "charm.surv-util-358",
+      "nameKey": "charm.triptych-tuber-shell",
+      "name": "Triptych Tuber-Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A triple-layered earthen casing that allows units to burrow and rest before erupting in a sudden burst of soil.",
+      "notes": "themeKey: demon.threemine"
+    },
+    {
+      "id": "charm.surv-util-359",
+      "nameKey": "charm.tri-beam-refractor",
+      "name": "Tri-Beam Refractor",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "low",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.prec-sync",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A series of three parallel glass rods that emit a constant, piercing radiance.",
+      "notes": "themeKey: demon.threeplantern"
+    },
+    {
+      "id": "charm.surv-util-360",
+      "nameKey": "charm.trident-spike-shell",
+      "name": "Trident-Spike Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A triple-layered casing of hardened earth and jagged flint, designed to absorb impact and release kinetic energy through subterranean spikes.",
+      "notes": "themeKey: demon.threespike"
+    },
+    {
+      "id": "charm.surv-util-361",
+      "nameKey": "charm.lumen-kernel-convergence",
+      "name": "Lumen-Kernel Convergence",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, glowing nut-shell formed from the concentrated essence of many small embers, marking the point where individual sparks become a singular, unyielding core.",
+      "notes": "themeKey: demon.torchfirenut"
+    },
+    {
+      "id": "charm.surv-util-362",
+      "nameKey": "charm.ignis-spore-core",
+      "name": "Ignis-Spore Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-overflow",
+          "powerBand": "low",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, translucent bulb containing a swirling vortex of embers that absorbs kinetic impact to fuel its rhythmic flare.",
+      "notes": "themeKey: demon.torchseashroom"
+    },
+    {
+      "id": "charm.surv-util-363",
+      "nameKey": "charm.crimson-maw-fuse",
+      "name": "Crimson Maw Fuse",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.cherry-bloom",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "dark"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, spherical cherry-shaped vessel containing a volatile, dark-matter explosive that detonates upon being swallowed.",
+      "notes": "themeKey: demon.tower_cherrychomper"
+    },
+    {
+      "id": "charm.surv-util-364",
+      "nameKey": "charm.conductive-husk-core",
+      "name": "Conductive Husk-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, translucent bulb of layered onion skin, containing a concentrated coil of static electricity that hums with the rhythm of a dying pulse.",
+      "notes": "themeKey: demon.tower_electriconion"
+    },
+    {
+      "id": "charm.surv-util-365",
+      "nameKey": "charm.sprout-spit-capsule",
+      "name": "Sprout-Spit Capsule",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A small, rounded vessel containing a pressurized seed that releases a concentrated burst of green energy.",
+      "notes": "themeKey: demon.tower_peapuff"
+    },
+    {
+      "id": "charm.surv-util-366",
+      "nameKey": "charm.spore-mist-diffuser",
+      "name": "Spore-Mist Diffuser",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.warding",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, humid vessel of compressed fungal matter that exhales a thick, obscuring fog.",
+      "notes": "themeKey: demon.tower_scaredyfume"
+    },
+    {
+      "id": "charm.surv-util-367",
+      "nameKey": "charm.solar-spud-fuse",
+      "name": "Solar-Spud Fuse",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A glowing, starch-heavy tuber encased in a crackling shell of concentrated sunlight and static electricity.",
+      "notes": "themeKey: demon.tower_sunmine"
+    },
+    {
+      "id": "charm.surv-util-368",
+      "nameKey": "charm.mortar-pit-carapace",
+      "name": "Mortar-Pit Carapace",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, reinforced shell of calcified pitcher-walls and rusted iron, designed to absorb the recoil of heavy projectiles.",
+      "notes": "themeKey: demon.tower_watercan"
+    },
+    {
+      "id": "charm.surv-util-369",
+      "nameKey": "charm.spruce-sentry-monolith",
+      "name": "Spruce-Sentry Monolith",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-hardening",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A towering, unyielding pillar of petrified spruce and dense fungal matter, standing as a silent sentinel against all intruders.",
+      "notes": "themeKey: demon.ultimatebamboo",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-370",
+      "nameKey": "charm.relentless-battery-core",
+      "name": "Relentless Battery Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elpw-overflow",
+          "powerBand": "low",
+          "params": {
+            "element": "dark",
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, reinforced sub-species component that grows more stable as it absorbs kinetic impact, channeling energy into continuous discharge.",
+      "notes": "themeKey: demon.ultimatebigsniper",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-371",
+      "nameKey": "charm.cabbage-core-mortar-shell",
+      "name": "Cabbage-Core Mortar Shell",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, leafy projectile encased in a brass-rimmed shell, designed to impact with crushing weight.",
+      "notes": "themeKey: demon.ultimatecabbagecannon"
+    },
+    {
+      "id": "charm.surv-util-372",
+      "nameKey": "charm.magma-core-spore-pod",
+      "name": "Magma-Core Spore-Pod",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elemental-defense",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, semi-translucent fungal bulb filled with pressurized magma, designed to release warmth and command the swarm.",
+      "notes": "themeKey: demon.ultimatecornfume"
+    },
+    {
+      "id": "charm.surv-util-373",
+      "nameKey": "charm.optic-sunder-core",
+      "name": "Optic-Sunder Core",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.prec-focus",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.elpw-overflow",
+          "powerBand": "low",
+          "params": {
+            "element": "light",
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A high-frequency oscillating lens encased in a polished chrome chassis, designed to focus raw energy into a singular, piercing beam.",
+      "notes": "themeKey: demon.ultimatefly",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-374",
+      "nameKey": "charm.glacial-spore-spray",
+      "name": "Glacial Spore-Spray",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A frozen, pressurized fungal bulb that continuously emits a numbing mist across the entire battlefield.",
+      "notes": "themeKey: demon.ultimatefume"
+    },
+    {
+      "id": "charm.surv-util-375",
+      "nameKey": "charm.quad-burst-cherry-core",
+      "name": "Quad-Burst Cherry Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.cherry-bloom",
+          "powerBand": "high"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of four pressurized cherry-shaped canisters that rupture upon impact, releasing a sudden burst of explosive sweetness.",
+      "notes": "themeKey: demon.ultimategatling"
+    },
+    {
+      "id": "charm.surv-util-376",
+      "nameKey": "charm.spore-seal-reliquary",
+      "name": "Spore-Seal Reliquary",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.evd-seal",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.affliction",
+          "powerBand": "medium",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A hollowed, calcified fungal core that exhales a freezing mist of dormant spores, sealing the essence of the melancholy within.",
+      "notes": "themeKey: demon.ultimategloom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-377",
+      "nameKey": "charm.nine-palace-commandment",
+      "name": "Nine-Palace Commandment",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.prec-focus",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-muster",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.prec-verdict",
+          "powerBand": "low",
+          "params": {
+            "element": "dark",
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, square-carved slab of dark jade, etched with the nine forbidden positions of a grandmaster's battlefield.",
+      "notes": "themeKey: demon.ultimatehorse",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-378",
+      "nameKey": "charm.spore-silt-digestion-core",
+      "name": "Spore-Silt Digestion-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.rot-punisher",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, translucent fungal mass that absorbs kinetic impact and converts it into a thick, nutrient-rich sludge.",
+      "notes": "themeKey: demon.ultimatehypno"
+    },
+    {
+      "id": "charm.surv-util-379",
+      "nameKey": "charm.encore-rigging-scaffold",
+      "name": "Encore-Rigging Scaffold",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, rusted framework of stage trusses and rebar, pulsating with the rhythmic, undead energy of a crowd that refuses to leave.",
+      "notes": "themeKey: demon.ultimatejacksondriver"
+    },
+    {
+      "id": "charm.surv-util-381",
+      "nameKey": "charm.trident-of-the-grave-pull",
+      "name": "Trident of the Grave-Pull",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-glean",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A jagged, magnetic three-pronged relic forged from the calcified marrow of a thousand zombies, pulsing with a relentless, hungry pull.",
+      "notes": "themeKey: demon.ultimatemagnet",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-382",
+      "nameKey": "charm.spore-base-splinter",
+      "name": "Spore-Base Splinter",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-freshgraft",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.carapace",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A cluster of fungal sub-species fused into a heavy, unyielding pedestal that ejects its own cellular mass to fortify the ground.",
+      "notes": "themeKey: demon.ultimatemelonpuff"
+    },
+    {
+      "id": "charm.surv-util-383",
+      "nameKey": "charm.item",
+      "name": "永别之刃刻印",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-pierce",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.evd-harden",
+          "powerBand": "low",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "由人造的利刃碎片与不知名的寒冰塑造而成，仿佛在告别时留下的冰冷痕迹。",
+      "notes": "themeKey: demon.ultimatesnowzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-384",
+      "nameKey": "charm.item",
+      "name": "大地脈動の星形楔",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.terraforming",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "地表の震動を糧とし、周期的に現れる星の力を呼び覚ます重厚な楔。",
+      "notes": "themeKey: demon.ultimatestar",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-385",
+      "nameKey": "charm.luminescent-spore-core",
+      "name": "Luminescent Spore-Core",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "low",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A pulsating, translucent sub-species bulb that refracts ambient light into a dense, protective aura.",
+      "notes": "themeKey: demon.ultimatesunmagnet"
+    },
+    {
+      "id": "charm.surv-util-386",
+      "nameKey": "charm.eternal-card-of-the-unyielding-husk",
+      "name": "Eternal Card of the Unyielding Husk",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A deck of calcified, non-decaying cards that pulse with a strange, unmoving rhythm.",
+      "notes": "themeKey: demon.ultimateswordzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-387",
+      "nameKey": "charm.stitched-effigy-knot",
+      "name": "Stitched Effigy Knot",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A lumpy mass of coarse burlap and dried straw, held together by thick, uneven embroidery that creaks with every movement.",
+      "notes": "themeKey: demon.voodoodollzombie"
+    },
+    {
+      "id": "charm.surv-util-388",
+      "nameKey": "charm.permafrost-volley-spire",
+      "name": "Permafrost Volley-Spire",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-salvo",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A jagged, frost-rimed monolith of petrified wood and bone, pulsing with the rhythmic thrum of a thousand frozen heartbeats.",
+      "notes": "themeKey: demon.waterballista",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-389",
+      "nameKey": "charm.nitroglycerin-jest-vial",
+      "name": "Nitroglycerin Jest-Vial",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A volatile glass sphere filled with unstable liquid, designed to be thrown like a joke that never ends, leaving behind a trail of reanimated, explosive corpses.",
+      "notes": "themeKey: demon.waterjackboxjumpzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.surv-util-390",
+      "nameKey": "charm.frost-rind-core",
+      "name": "Frost-Rind Core",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.elemental-power",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A frozen, melon-like sphere of solid ice that radiates a numbing chill, leaking freezing mist from its cracks.",
+      "notes": "themeKey: demon.wintermelon"
+    },
+    {
+      "id": "charm.surv-util-391",
+      "nameKey": "charm.urban-leap-relic",
+      "name": "Urban-Leap Relic",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-grit",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.evasion",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A worn, rubberized fragment of a human sneaker, fused with calcified bone and asphalt, reflecting the relentless momentum of the parkour undead.",
+      "notes": "themeKey: demon.zombie9527"
+    },
+    {
+      "id": "charm.surv-util-392",
+      "nameKey": "charm.crimson-silt-reliquary",
+      "name": "Crimson Silt Reliquary",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.cleansing",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A vessel of scorched petals and nutrient-rich ash, designed to purge the old to feed the new.",
+      "notes": "themeKey: demon.zombieendoflame"
     }
   ]
 }

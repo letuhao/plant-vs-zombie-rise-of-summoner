@@ -8,6 +8,9 @@ public static class ContributionSourceIds
 {
     public const string Progression = "rpg.progression";
 
+    /// <summary>UniqueActor Hub base resource.max/regen seed (Condition /sheet pools).</summary>
+    public const string ResourceBaseline = "rpg.resource.base";
+
     public static string Equip(string role, string itemRefId)
     {
         var r = string.IsNullOrWhiteSpace(role) ? "unknown" : role.Trim();
@@ -32,6 +35,7 @@ public static class ContributionSourceIds
     {
         if (string.IsNullOrWhiteSpace(sourceId)) return "(unattributed)";
         if (string.Equals(sourceId, Progression, StringComparison.Ordinal)) return "Progression";
+        if (string.Equals(sourceId, ResourceBaseline, StringComparison.Ordinal)) return "Resource base";
 
         if (sourceId.StartsWith("equip:", StringComparison.Ordinal))
         {

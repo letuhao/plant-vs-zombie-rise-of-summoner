@@ -70,8 +70,8 @@ not a veto on these packages.
 | `actor-sheet-shell` | Near-fullscreen band-2 panel; header; InspectSplit; leftover sticky footer; tab bar iterates catalog kinds; shared widgets (StatRow, …); `PanelShell` size variant. Esc pops. | `actor-surface-catalog` | [spec-actor-sheet-shell.md](actor-sheet/spec-actor-sheet-shell.md) |
 | `condition-tab` | HP radial + shield overlay, resource meters from resource-catalog, Standing, live status glyphs. | `actor-sheet-shell` | [spec-condition-tab.md](actor-sheet/spec-condition-tab.md) |
 | `aptitudes-tab` | Tiles from aptitude-catalog, leftover Confirm (commander-scope v1). | `actor-sheet-shell` | [spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) |
-| `derived-tab` | StatRows from **`GET /api/catalogs/derived-surface`** (tabbed families + variants) joined to **`/sheet`** by `channelId` (preferred) or lean **`/derived`**. Six states. Runtime cook shipped — see [actor-sheet-derived-plan.md](../../tasks/actor-sheet-derived-plan.md). | `actor-sheet-shell` | [spec-derived-tab.md](actor-sheet/spec-derived-tab.md) |
-| `shield-tab` | Three instance radials; omni shield StatRows. Noun **Shield**. | `actor-sheet-shell` | [spec-shield-tab.md](actor-sheet/spec-shield-tab.md) |
+| `derived-tab` | StatRows from **`GET /api/catalogs/derived-surface`** joined to **`/sheet`**. Six states. **Harden program:** [derived-cook-map.md](derived-cook-map.md). | `actor-sheet-shell` | [spec-derived-tab.md](actor-sheet/spec-derived-tab.md) |
+| `shield-tab` | Segmented stack + omni rows. **Program:** [shield-sheet-map.md](shield-sheet-map.md). Noun **Shield**. | `actor-sheet-shell` | [spec-shield-tab.md](actor-sheet/spec-shield-tab.md) |
 | `status-tab` | Glyphs from status-catalog. | `actor-sheet-shell` | [spec-status-tab.md](actor-sheet/spec-status-tab.md) |
 | `elements-tab` | Radials from element-catalog + mastery StatRows. | `actor-sheet-shell` | [spec-elements-tab.md](actor-sheet/spec-elements-tab.md) |
 | `kit-tab` | ActionSlot chrome + paper-doll roles from actor-sheet catalog. | `actor-sheet-shell` | [spec-kit-tab.md](actor-sheet/spec-kit-tab.md) |

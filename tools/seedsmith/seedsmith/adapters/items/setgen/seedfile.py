@@ -351,7 +351,8 @@ def set_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: S
 def charm_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: CharmPlan,
                 ) -> "dict[str, Any]":
     """One `charm` row. `apCost`, `prefixRolls` and `suffixRolls` come from the CLASS, never from
-    the answer — the model chose `charmClass` and the tuning file prices it (ssot-charms §3.4)."""
+    the answer — deterministic planning assigns `charmClass` and the tuning file prices it
+    (ssot-charms §3.4)."""
     fixed = [_atom_row(pick, pick.power_band or "low") for pick in plan.families]
     row: "dict[str, Any]" = {
         "id": entry_id,

@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.marigold-001",
-      "nameKey": "set.gilded-bloom",
-      "name": "Gilded Bloom",
+      "nameKey": "set.marigold-radiance",
+      "name": "Marigold Radiance",
       "themeKey": "demon.marigold",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A shimmering harvest of minted petals and crystalline wealth.",
+      "flavor": "A sun-drenched essence that lingers long after the petals fall.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
     }

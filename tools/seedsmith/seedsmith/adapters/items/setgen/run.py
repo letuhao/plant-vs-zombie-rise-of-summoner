@@ -55,6 +55,41 @@ def _existing_charm_axis_counts(directory: Path = DEFAULT_CHARMS_DIR) -> dict[st
     return counts
 
 
+def _existing_charm_class_counts(directory: Path = DEFAULT_CHARMS_DIR) -> dict[str, int]:
+    """Measure authored charm classes for deterministic weighted assignment."""
+    counts: dict[str, int] = {}
+    if not directory.is_dir():
+        return counts
+    for path in directory.glob("*.json"):
+        if "ledger" in path.name:
+            continue
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for row in document.get("entries") or ():
+            charm_class = row.get("charmClass") if isinstance(row, dict) else None
+            if isinstance(charm_class, str) and charm_class:
+                counts[charm_class] = counts.get(charm_class, 0) + 1
+    return counts
+
+
+def _least_represented_charm_class(tuning: SetCharmGenTuning,
+                                   counts: "dict[str, int]") -> str:
+    """Choose the smallest actual/target-weight ratio using integer cross multiplication.
+
+    Charm class determines AP cost, rolls and unique-carry semantics.  It cannot be a free model
+    choice: the model is asked for identity, while this makes the corpus' scarce top tier a
+    deterministic tuned allocation.  Ties retain tuning-file order for reproducible plans.
+    """
+    best = tuning.charm_classes[0]
+    for candidate in tuning.charm_classes[1:]:
+        if counts.get(candidate.id, 0) * best.target_weight < \
+                counts.get(best.id, 0) * candidate.target_weight:
+            best = candidate
+    return best.id
+
+
 def _set_entry_on_disk(entry_id: str, *, sets_dir: "Path | None" = None) -> bool:
     """True when the production (or test) sets corpus already carries this id.
 
@@ -108,10 +143,14 @@ class Subject:
     theme_key: str
     entry_id: str
     brief: str
+    charm_class_hint: str = ""
 
     def to_dict(self) -> dict:
-        return {"subjectId": self.subject_id, "kind": self.kind, "population": self.population,
-                "themeKey": self.theme_key, "entryId": self.entry_id}
+        row = {"subjectId": self.subject_id, "kind": self.kind, "population": self.population,
+               "themeKey": self.theme_key, "entryId": self.entry_id}
+        if self.charm_class_hint:
+            row["charmClass"] = self.charm_class_hint
+        return row
 
 
 @dataclass
@@ -193,6 +232,7 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
         from ..charmgen.rules import CHARM_AXES
         charm_axes = tuple(CHARM_AXES)
     axis_counts = _existing_charm_axis_counts() if kind == "charm" else {}
+    class_counts = _existing_charm_class_counts() if kind == "charm" else {}
 
     for theme in pool:
         if theme.hold_reason:
@@ -212,18 +252,24 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
         if kind == "set" and _set_entry_on_disk(entry_id, sets_dir=sets_dir):
             already.append(subject_id)
             continue
+        assigned_class = ""
+        if kind == "charm":
+            assigned_class = _least_represented_charm_class(tuning, class_counts)
         text = (brief_mod.build_set_brief(theme, tuning, vocabulary) if kind == "set"
                 else brief_mod.build_charm_brief(
                     theme, tuning, vocabulary,
                     axis_hint=(min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
                                                                   charm_axes.index(axis)))
-                               if charm_axes else None)))
+                               if charm_axes else None),
+                    class_hint=assigned_class or None))
         if kind == "charm" and charm_axes:
             assigned_axis = min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
                                                                charm_axes.index(axis)))
             axis_counts[assigned_axis] = axis_counts.get(assigned_axis, 0) + 1
+            class_counts[assigned_class] = class_counts.get(assigned_class, 0) + 1
         subjects.append(Subject(subject_id=subject_id, kind=kind, population=population,
-                                theme_key=theme.theme_key, entry_id=entry_id, brief=text))
+                                theme_key=theme.theme_key, entry_id=entry_id, brief=text,
+                                charm_class_hint=assigned_class))
 
     return RunPlan(subjects=subjects, held=list(report.held), already_done=already)
 

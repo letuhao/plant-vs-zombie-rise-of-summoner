@@ -47,6 +47,19 @@ public sealed class ActorShieldSummaryDto
 }
 
 /// <summary>
+/// Standing five-axis vector (<c>PowerVector</c> / definitions.md §7) — offense · survivability ·
+/// control · utility · economy. Projected on cold UniqueActor sheet via <c>ActorPowerCache.Compose</c>.
+/// </summary>
+public sealed class ActorStandingDto
+{
+    public int Offense { get; init; }
+    public int Survivability { get; init; }
+    public int Control { get; init; }
+    public int Utility { get; init; }
+    public int Economy { get; init; }
+}
+
+/// <summary>
 /// Cold UniqueActor identity + Hot Hub resolve with FULL contribution tracing (GG-49).
 /// Hub compose only — never a second private fold.
 /// </summary>
@@ -65,6 +78,7 @@ public sealed class ActorSheetDto
     public long Xp { get; init; }
     public long? XpToNext { get; init; }
     public ActorElementTypingDto? ElementTyping { get; init; }
+    public ActorStandingDto? Standing { get; init; }
     public IReadOnlyList<ActorStatusGlyphDto> LiveStatuses { get; init; } = Array.Empty<ActorStatusGlyphDto>();
     public IReadOnlyList<ActorResourcePoolDto> ResourcePools { get; init; } = Array.Empty<ActorResourcePoolDto>();
     public ActorShieldSummaryDto? ShieldSummary { get; init; }

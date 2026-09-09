@@ -133,7 +133,7 @@ If this theme cannot carry a set you would be happy to ship, set `blocked` and s
 
 
 def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary,
-                      *, axis_hint: str | None = None) -> str:
+                      *, axis_hint: str | None = None, class_hint: str | None = None) -> str:
     """One charm, one theme. Charms are the always-on, side-wide layer.
 
     ⭐ **The pool is `charmgen.rules.charm_pool`, and that is the whole of defects 1 and 2.** This
@@ -149,6 +149,8 @@ def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocab
     pool = charm_pool(tuning, vocabulary.all_picks)
     axis_instruction = (f"\nDeterministic coverage assignment: use axis `{axis_hint}` for this subject."
                         if axis_hint else "")
+    class_instruction = (f"\nDeterministic class assignment: use charmClass `{class_hint}` for this subject."
+                         if class_hint else "")
     return f"""Author ONE charm for the demon species '{theme.display_name}'.
 
 Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
@@ -159,7 +161,8 @@ deployed actor, and it buys that breadth with depth. So it carries FLAT effects 
 percentage, never a multiplier.
 
 Choose, and nothing else:
-1. `charmClass` — one of: {classes}. A signet is named, carries a drawback, and rolls nothing.
+1. `charmClass` — one of: {classes}. Use the assigned class when one is provided. A signet is named,
+   carries a drawback, and rolls nothing.{class_instruction}
 2. `axis` — one of offense, survivability, control, utility, economy. Pick the assigned axis when
    one is provided; otherwise pick the one this species actually leans into.{axis_instruction}
 3. `frameHint`, `families` (one or two always-on families from the list below), `name`, `flavor`.

@@ -17,7 +17,7 @@ export type ActorSummarizeProps = {
 };
 
 /**
- * Left-rail identity — essential actor recognition only. Collapsed: portrait/glyph + tooltip.
+ * Left-rail identity — name / Lv · role only (+ portrait). Species chips live on Condition.
  */
 export function ActorSummarize({
   displayName,
@@ -30,14 +30,10 @@ export function ActorSummarize({
   className
 }: ActorSummarizeProps) {
   const name = sheet?.displayName || (isKnown(displayName) ? displayName.value : `#${instanceId.slice(0, 6)}`);
-  const species = sheet?.speciesName ?? null;
-  const phase = sheet?.phase ?? null;
-  const meta = [`Lv ${sheet?.level ?? level}`, roleLabel].join(" · ");
-  const tip = [name, species, meta].filter(Boolean).join(" · ");
+  const effectiveRole = sheet?.roleLabel ?? roleLabel;
+  const meta = [`Lv ${sheet?.level ?? level}`, effectiveRole].join(" · ");
+  const tip = [name, meta].join(" · ");
   const initial = displayInitial(displayName, side);
-  const elements = sheet?.elementTyping
-    ? [sheet.elementTyping.primary, ...(sheet.elementTyping.secondary ? [sheet.elementTyping.secondary] : [])]
-    : [];
 
   if (collapsed) {
     return (
@@ -88,16 +84,6 @@ export function ActorSummarize({
           <p className="mt-0.5 truncate text-xs text-muted" data-testid="actor-summarize-meta">
             {meta}
           </p>
-          <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] uppercase tracking-wide text-muted">
-            <span className="rounded-full border border-border-control px-2 py-0.5">{side}</span>
-            {species ? <span className="rounded-full border border-border-control px-2 py-0.5">{species}</span> : null}
-            {phase ? <span className="rounded-full border border-border-control px-2 py-0.5">{phase}</span> : null}
-            {elements.map((element) => (
-              <span key={element} className="rounded-full border border-border-control px-2 py-0.5" data-testid={`actor-summarize-element-${element}`}>
-                {element}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
     </div>

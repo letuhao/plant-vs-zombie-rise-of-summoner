@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.ironcorn-001",
-      "nameKey": "set.corn-kernel-launcher",
-      "name": "Corn Kernel Launcher",
+      "nameKey": "set.maize-pellet-spitter",
+      "name": "Maize Pellet Spitter",
       "themeKey": "demon.ironcorn",
       "members": [
         {
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A heavy iron barrel that fires hardened golden kernels with explosive force.",
+      "flavor": "A rapid-fire mechanism that turns dried kernels into high-velocity projectiles.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

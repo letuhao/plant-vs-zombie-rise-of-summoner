@@ -16,7 +16,6 @@ their finite plans are exhausted; this is an orchestration detail, not a reducti
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -30,9 +29,6 @@ PRODUCTION_KINDS = frozenset({"set", "charm", "combination"})
 
 #: Closed grids that explode without --limit unless --full.
 BOUNDED_GRID_KINDS = frozenset({"set", "charm", "combination"})
-
-_BASE_TYPE_STEM = re.compile(
-    r"^(?P<frame>humanoid|plant)-(?P<role>.+)-(?P<band>[a-z])$")
 
 #: Hard edges from item-seedgen-map.md §3 (kind → must precede these dependents).
 #: Used by topo tests; FILL_KIND_ORDER must be a valid linearization.
@@ -67,7 +63,7 @@ class FillLimits:
     batch_size_explicit: bool = False
 
 
-#: Open-ended generators (base-type / milestone / drop / recipe) have no corpus "empty"; under
+#: Open-ended generators (base-type / milestone / drop) have no corpus "empty"; under
 #: --full without an explicit --count, one meaningful pass is this many draws per step.
 _FULL_OPEN_PASS = 8
 
@@ -159,7 +155,8 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
     Generator exit code only says that the scheduled batch ran without a refusal.  It does not
     say that a closed population has no held subjects left.  Keep this check deterministic and
     model-free: read the same production ledgers that the CLI write path uses, then expose the
-    pending/held counts which make a resume genuinely complete (or explain why it is not).
+    pending/held counts and zero-tolerance identity debt which make a resume genuinely complete
+    (or explain why it is not).
 
     Open-ended draw kinds are intentionally omitted.  ``--full`` gives those kinds one elevated
     pass; they have no finite exhaustion condition (see spec-fill-runner.md).
@@ -176,6 +173,7 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
 
     selected = set(kinds) if kinds is not None else set(defaults.FILL_KIND_ORDER)
     checks: list[dict] = []
+    exact_duplicate_names = _set_charm_exact_duplicate_count() if selected & {"set", "charm"} else 0
 
     if selected & {"set", "charm"}:
         tuning = set_tuning.load()
@@ -192,7 +190,8 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
                     "toGenerate": len(plan.subjects), "held": len(plan.held),
                     "ledgered": len(ledger),
                     "heldByReason": plan.summary()["heldByReason"],
-                    "complete": plan.complete,
+                    "exactDuplicateNames": exact_duplicate_names,
+                    "complete": plan.complete and exact_duplicate_names == 0,
                 })
         if "charm" in selected:
             out = Path(defaults.default_out_dir("charm"))
@@ -214,7 +213,8 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
                 "ledgered": len(ledger), "terminalLedgered": terminal,
                 "placeholderLedgered": placeholders,
                 "heldByReason": plan.summary()["heldByReason"],
-                "complete": plan.complete,
+                "exactDuplicateNames": exact_duplicate_names,
+                "complete": plan.complete and exact_duplicate_names == 0,
             })
 
     if "combination" in selected:
@@ -250,30 +250,44 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
     return {"complete": all(row["complete"] for row in checks), "checks": checks}
 
 
+def _set_charm_exact_duplicate_count() -> int:
+    """Count duplicate player-facing names across the two shared identity corpora.
+
+    New batches reject this before writing, but old rows can predate that guard.  A completed
+    ledger must not hide such a repair debt: the next fill cannot repair it by appending, and the
+    operator needs an explicit name-repair pass rather than a false green completion report.
+    """
+    from .setgen import dedup
+
+    names: dict[str, str] = {}
+    for directory_name in ("sets", "charms"):
+        directory = ITEM_SEED_ROOT / directory_name
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("*.json"):
+            try:
+                document = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if document.get("kind") not in {"set", "charm"}:
+                continue
+            for row in document.get("entries") or ():
+                if not isinstance(row, dict):
+                    continue
+                entry_id, name = row.get("id"), row.get("name")
+                if isinstance(entry_id, str) and isinstance(name, str) and name.strip():
+                    names[entry_id] = name
+    return len(dedup.dedup_report(names).exact_duplicates)
+
+
 def discover_base_type_partitions(
         base_types_dir: Path | None = None) -> "list[tuple[str, str, str]]":
-    """Existing canonical `frame-role-band.json` partitions only.
-
-    The corpus still contains legacy filenames such as ``humanoid-back-b.json`` and
-    ``plant-bract-a.json``. Their stems are not `core.v1.json` role ids, so passing them to
-    `basetypegen` only creates deterministic ``UnknownRoleError`` steps and can abort a fill.
-    """
+    """Every existing base-type partition, derived from entry fields not filename conventions."""
+    from .basetypegen import partitions
     from .basetypegen.tuning import load_role_registry
 
     directory = base_types_dir or (ITEM_SEED_ROOT / "base-types")
-    legal_roles = frozenset(load_role_registry())
-    found: "list[tuple[str, str, str]]" = []
-    if not directory.is_dir():
-        return found
-    for path in sorted(directory.glob("*.json")):
-        m = _BASE_TYPE_STEM.match(path.stem)
-        if not m:
-            continue
-        role = m.group("role")
-        if role not in legal_roles:
-            continue
-        found.append((role, m.group("frame"), m.group("band")))
-    return found
+    return partitions.discover(directory, legal_roles=frozenset(load_role_registry()))
 
 
 def discover_drop_table_slots(drop_tables_dir: Path | None = None) -> "list[int]":
@@ -499,11 +513,12 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
         add("charm", argv, "population=species")
 
     if want("recipe"):
-        # count>0 is required for --write/--backfill to run past reconcile in recipegen.
-        add("recipe",
-            ["--kind", "recipe", "--count", str(open_count),
-             "--write", "--backfill"],
-            "reconcile + forge backfill")
+        # recipegen's specified default is a no-model vocabulary/reference reconciliation.  A
+        # broad fill has no approved forge-coverage target or partition scope, so forcing an
+        # open-ended draw here only produces arbitrary mutation recipes and cannot make more base
+        # types forgeable.  Targeted recipe authoring remains the explicit generate command.
+        add("recipe", ["--kind", "recipe"],
+            "reconcile only — targeted recipe generation requires an approved forge coverage plan")
 
     if want("combination"):
         for shape in ("strain", "splice"):  # strain first — never lexicographic note sort

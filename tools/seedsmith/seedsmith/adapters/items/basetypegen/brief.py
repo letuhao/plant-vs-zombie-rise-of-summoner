@@ -24,6 +24,7 @@ from typing import Any, Mapping
 from seedsmith.pipeline.model import audit_schema
 
 from . import tuning
+from . import partitions
 from .schema import base_type_schema
 
 REPO_ROOT = tuning.REPO_ROOT
@@ -75,7 +76,7 @@ def load_partition_context(role: str, frame: str, band: str, *,
     implicit_families = tuning.load_legal_implicit_families(role, classes_path)
 
     directory = base_types_dir or tuning.BASE_TYPES_DIR
-    file_path = directory / f"{frame}-{role}-{band}.json"
+    file_path = partitions.file_for(role, frame, band, base_types_dir=directory)
     existing_ids: "list[str]" = []
     existing_names: "list[str]" = []
     existing_enhance_track: "tuple[tuple[int, str], ...] | None" = None

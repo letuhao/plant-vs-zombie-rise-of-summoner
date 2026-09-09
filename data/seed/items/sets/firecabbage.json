@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.firecabbage-001",
-      "nameKey": "set.cabbage-volley",
-      "name": "Cabbage Volley",
+      "nameKey": "set.spicy-cabbage-burst",
+      "name": "Spicy Cabbage Burst",
       "themeKey": "demon.firecabbage",
       "members": [
         {
@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "flavor": "A dense, leafy projectile that bursts into a thousand green shards upon impact.",
+      "flavor": "A fiery explosion of leafy greens.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

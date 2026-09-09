@@ -6,7 +6,8 @@ namespace FusionRpg.Core.Tests.Items;
 
 /// <summary>
 /// `threshold-grants` (item module 12) against the REAL shipped corpora — `data/seed/items/sets/**`
-/// (30 authored sets), `data/seed/items/charms/**` (60 charms + 10 resonance rows) and
+/// (the generated set population), `data/seed/items/charms/**` (the generated charm population +
+/// 10 resonance rows) and
 /// `data/seed/items/_registry/core.v1.json`. Nothing here is synthetic.
 /// </summary>
 public class ThresholdGrantCorpusTests
@@ -37,13 +38,12 @@ public class ThresholdGrantCorpusTests
     public void The_whole_shipped_set_corpus_parses_and_every_tier_is_reachable()
     {
         // SetCorpus.Parse refuses a tier above the set's distinct ROLE count, so this parsing at all is
-        // the completability assertion. The counts are the corpus as measured 2026-09-04; 30 -> 32
-        // sets (2026-09-07): a set-charm-live-endpoint trial batch added two real sets
-        // (`set.retribution-offense-001`/`-002`, 8 members and 2 tiers each).
+        // the completability assertion. Population size is intentionally not a fixture: the roster
+        // generator appends valid set partitions as species are authored.
         var sets = Sets();
-        Assert.Equal(32, sets.Count);
-        Assert.Equal(196, sets.Sum(s => s.Members.Count));
-        Assert.Equal(90, sets.Sum(s => s.Tiers.Count));
+        Assert.NotEmpty(sets);
+        Assert.All(sets, s => Assert.NotEmpty(s.Members));
+        Assert.All(sets, s => Assert.NotEmpty(s.Tiers));
         Assert.All(sets, s => Assert.True(s.Tiers.Max(t => t.PiecesRequired) <= s.DistinctRoleCount));
     }
 
@@ -139,25 +139,16 @@ public class ThresholdGrantCorpusTests
     [Fact]
     public void One_shipped_item_can_advance_more_than_one_set_and_the_corpus_already_relies_on_it()
     {
-        // ⚠ A real corpus fact, found by a test whose first draft assumed the opposite: the 30 shipped
-        // sets declare 154 distinct (role, base type) member pairs, and 25 of them are members of more
-        // than one set (one is a member of three). So a single equipped item legitimately advances two
-        // or three counts at once. That is I5 §3.6's design working — the evaluator counts per SET ID,
-        // never one merged count — but it is also a DISCLOSURE requirement for module 20's tooltip:
-        // "3 / 4" has to be shown per set, because one piece is three-quarters of an answer.
-        // 154 -> 165 (2026-09-07): the set-charm-live-endpoint trial batch's two new sets declare 16
-        // (role, baseType) member pairs, of which 11 are genuinely new and 5 happen to name a pair an
-        // existing set already declares (re-measured directly, not assumed).
+        // A single equipped item can legitimately advance several set counts. The evaluator counts
+        // per set id, never as one merged count.
         var sets = Sets();
         var owners = MemberOwners(sets);
 
-        Assert.Equal(165, owners.Count);
-        Assert.Equal(28, owners.Count(kv => kv.Value.Count > 1));
-        Assert.Equal(3, owners.Max(kv => kv.Value.Count));
+        Assert.NotEmpty(owners);
+        var shared = owners.First(kv => kv.Value.Count > 1);
 
-        var shared = owners.First(kv => kv.Value.Count == 3);
         var progress = SetEvaluator.Progress(new[] { new EquippedPiece(shared.Key.Role, shared.Key.ContainerId) }, sets);
-        Assert.Equal(3, progress.Count);
+        Assert.Equal(shared.Value.Count, progress.Count);
         Assert.All(progress, p => Assert.Equal(1, p.Count));
     }
 
@@ -165,25 +156,23 @@ public class ThresholdGrantCorpusTests
     public void Two_real_shipped_sets_worn_together_stay_independent()
     {
         var sets = Sets();
-        var owners = MemberOwners(sets);
         var a = sets.Single(s => s.SetId == "frostbitten-vanguard-001");
         var b = sets.Single(s => s.SetId == "sunwoven-almanac-003");
 
-        // Only pieces this set alone claims, so the assertion is about independence rather than about
-        // the shared membership the test above measures.
-        IEnumerable<EquippedPiece> Exclusive(SetDef s) => s.Members
-            .Where(m => owners[(m.Role, m.ContainerId)].Count == 1)
+        // These sets may now share every authored piece with the generated population. Their
+        // progress must nevertheless be independently counted for the pieces they name.
+        IEnumerable<EquippedPiece> FirstTwo(SetDef s) => s.Members
             .Take(2)
             .Select(m => new EquippedPiece(m.Role, m.ContainerId));
 
-        var worn = Exclusive(a).Concat(Exclusive(b)).ToList();
+        var worn = FirstTwo(a).Concat(FirstTwo(b)).ToList();
         Assert.Equal(4, worn.Count);
 
         var progress = SetEvaluator.Progress(worn, sets);
-        Assert.Equal(2, progress.Count);
-        Assert.All(progress, p => Assert.Equal(2, p.Count));
-        Assert.All(progress, p => Assert.Single(p.WantedContainerIds));
-        Assert.Equal(new[] { "frostbitten-vanguard-001", "sunwoven-almanac-003" }, progress.Select(p => p.SetId));
+        var pair = progress.Where(p => p.SetId == a.SetId || p.SetId == b.SetId).ToList();
+        Assert.Equal(2, pair.Count);
+        Assert.All(pair, p => Assert.Equal(2, p.Count));
+        Assert.All(pair, p => Assert.Single(p.WantedContainerIds));
 
         // And their sources never collide, which is what makes withdrawing one safe.
         Assert.NotEqual(SetEvaluator.Consumer(a).SourceKey, SetEvaluator.Consumer(b).SourceKey);
@@ -201,21 +190,14 @@ public class ThresholdGrantCorpusTests
     // ---- the shipped charm catalog -----------------------------------------------------------------
 
     [Fact]
-    public void The_shipped_charm_population_is_twenty_one_minor_thirty_two_standard_and_seven_signets()
+    public void The_shipped_charm_population_adheres_to_the_class_contract()
     {
-        // ssot-charms §3.4's own measurement, re-measured against the live corpus.
-        // 60 -> 61, minor 21 -> 22, apCost=1 21 -> 22 (2026-09-07): a set-charm-live-endpoint trial
-        // batch added one real minor/apCost=1 charm, `charm.surv-util-021` "Carapace of Patience".
         var charms = Charms();
-        Assert.Equal(61, charms.Count);
-        Assert.Equal(22, charms.Count(c => c.Class == CharmClass.Minor));
-        Assert.Equal(32, charms.Count(c => c.Class == CharmClass.Standard));
-        Assert.Equal(7, charms.Count(c => c.Class == CharmClass.Signet));
+        Assert.NotEmpty(charms);
+        Assert.Contains(charms, c => c.Class == CharmClass.Minor);
+        Assert.Contains(charms, c => c.Class == CharmClass.Standard);
+        Assert.Contains(charms, c => c.Class == CharmClass.Signet);
 
-        Assert.Equal(22, charms.Count(c => c.ApCost == 1));
-        Assert.Equal(21, charms.Count(c => c.ApCost == 2));
-        Assert.Equal(11, charms.Count(c => c.ApCost == 3));
-        Assert.Equal(7, charms.Count(c => c.ApCost == 5));
         Assert.All(charms, c => Assert.Contains(c.ApCost, new[] { 1, 2, 3, 5 }));
     }
 
@@ -255,7 +237,8 @@ public class ThresholdGrantCorpusTests
         // §6.1: every shipped signet carries an authored NEGATIVE atom inside its fixed core, so it
         // binds with the rest of the container and never as a separable row. No other class does.
         var charms = Charms();
-        Assert.Equal(7, charms.Count(c => c.Class == CharmClass.Signet && c.HasNegativeAtom));
+        Assert.NotEmpty(charms.Where(c => c.Class == CharmClass.Signet));
+        Assert.All(charms.Where(c => c.Class == CharmClass.Signet), c => Assert.True(c.HasNegativeAtom));
         Assert.DoesNotContain(charms, c => c.Class != CharmClass.Signet && c.HasNegativeAtom);
 
         Assert.Contains("threshold.charm-signet-has-no-drawback",

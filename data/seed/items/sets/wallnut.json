@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.wallnut-001",
-      "nameKey": "set.hardened-nut-shell",
-      "name": "Hardened Nut Shell",
+      "nameKey": "set.iron-rind-nut",
+      "name": "Iron-Rind Nut",
       "themeKey": "demon.wallnut",
       "members": [
         {

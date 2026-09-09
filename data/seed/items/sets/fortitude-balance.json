@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.fortitude-balance-001",
-      "nameKey": "set.bastion-of-equilibrium",
-      "name": "Bastion of Equilibrium",
+      "nameKey": "set.pillar-of-stability",
+      "name": "Pillar of Stability",
       "themeKey": "build.fortitude-balance",
       "members": [
         {
