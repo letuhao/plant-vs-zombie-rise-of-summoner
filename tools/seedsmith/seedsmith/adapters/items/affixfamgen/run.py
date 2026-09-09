@@ -183,9 +183,20 @@ def main(argv=None) -> int:
         raise SystemExit(
             "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
             "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
-    validator = lambda answer, schema: schema_mod.validate_answer(
-        answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind,
-        free_pairs=free_pairs)
+    def validator(answer: dict, schema: dict) -> list[str]:
+        defects = schema_mod.validate_answer(
+            answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind,
+            free_pairs=free_pairs)
+        # The schema constrains the channel/op pair but the minted id also depends on the model's
+        # free-form word. Reject a word collision during the shared repair attempt instead of
+        # letting emit.assemble_entry abort the whole fill step after the model call returns.
+        word = answer.get("word")
+        if isinstance(word, str) and word:
+            minted_id = emit.family_id(brief.partition.stem, word)
+            if minted_id in brief.partition.existing_ids:
+                defects.append(
+                    f"word {word!r} mints existing id {minted_id!r}; choose a new mechanical word")
+        return defects
     answer = live_answer_caller(config, validator=validator)(brief.render(), brief.schema)
 
     defects = validator(answer, brief.schema)

@@ -4,13 +4,12 @@ using Xunit;
 
 namespace FusionRpg.Core.Tests.Stats;
 
-/// <summary>spec-actor-channels.md (T4.4) — the five actor resources, move.range, and the two
-/// progression rates. No reader is wired for any of the 18 channels yet (spec §7's own scope), so
-/// several tests here prove the documented contract/formula shape rather than an end-to-end
-/// consumer — each says so explicitly where that applies.</summary>
+/// <summary>spec-actor-channels.md (T4.4) — the six actor resources, move.range, and the two
+/// progression rates. Several tests here prove the documented contract/formula shape rather than an
+/// end-to-end consumer — each says so explicitly where that applies.</summary>
 public class ActorChannelsTests
 {
-    static readonly string[] ExhaustibleIds = { "stamina", "hunger", "spirit", "qi" };
+    static readonly string[] ExhaustibleIds = { "stamina", "hunger", "spirit", "qi", "poise" };
 
     [Fact]
     public void ResourceChannelsNotInCombatRoster()
@@ -32,14 +31,14 @@ public class ActorChannelsTests
     }
 
     [Fact]
-    public void FourExhaustionDebuffsStack()
+    public void FiveExhaustionDebuffsStack()
     {
-        // spec §2.1 -- the one thing §3G flagged as untested: up to four exhaustion debuffs (stamina,
-        // hunger, spirit, qi -- hp's depletion is death, never an exhaustion debuff per
-        // data/seed/resources/roster.json) stacking on one actor at once. Property 4: same four
+        // spec §2.1 -- the exhaustion debuffs (stamina, hunger, spirit, qi, poise -- hp's depletion
+        // is death, never an exhaustion debuff per data/seed/resources/roster.json) stacking on one
+        // actor at once. Property 4: same five
         // compose kinds, same per-channel caps, no new ordering rule -- this actually runs the
         // combination for the first time. Two debuffs land on qi's efficiency specifically so the cap
-        // is proven to still hold even while the other three pools are simultaneously debuffed.
+        // is proven to still hold even while the other four pools are simultaneously debuffed.
         var registry = DerivedStatRegistry.CreateDefault();
         var composer = new DerivedComposer(registry);
 
@@ -61,7 +60,7 @@ public class ActorChannelsTests
             Assert.Equal(-5, snapshot.Get(DerivedStatChannels.ResourceRegen(id)));
         }
         // 0.7 + 0.7 = 1.4, clamped to DerivedStatPolicy.ResourceEfficiencyCap (1.0) -- the cap holds
-        // under a two-source stack, itself nested inside the four-pool stack above.
+        // under a two-source stack, itself nested inside the five-pool stack above.
         Assert.Equal(DerivedStatPolicy.ResourceEfficiencyCap, snapshot.Get(DerivedStatChannels.ResourceEfficiency("qi")));
 
         // hp is never an exhaustion debuff target (roster.json: "Depletion is death... never an

@@ -1,0 +1,991 @@
+{
+  "_pending": [],
+  "archetype": "broad-and-flat",
+  "archetypes": [
+    {
+      "id": "broad-and-flat",
+      "maxNodeMilli": 91,
+      "mechNodes": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      "nodeBudgetMilli": [
+        [
+          9,
+          9
+        ],
+        [
+          18,
+          18
+        ],
+        [
+          27,
+          28
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          72,
+          73
+        ],
+        [
+          82,
+          82
+        ],
+        [
+          91,
+          91
+        ]
+      ],
+      "rewardPerPointMilli": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "widths": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "id": "gated-deep",
+      "maxNodeMilli": 182,
+      "mechNodes": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "nodeBudgetMilli": [
+        [
+          6,
+          6,
+          6
+        ],
+        [
+          12,
+          12,
+          12
+        ],
+        [
+          18,
+          18,
+          19
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          145
+        ],
+        [
+          164
+        ],
+        [
+          182
+        ]
+      ],
+      "rewardPerPointMilli": [
+        533,
+        500,
+        485,
+        559,
+        615,
+        659,
+        693,
+        800,
+        902,
+        1000
+      ],
+      "widths": [
+        3,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "late-crown",
+      "maxNodeMilli": 73,
+      "mechNodes": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        3,
+        3
+      ],
+      "nodeBudgetMilli": [
+        [
+          18
+        ],
+        [
+          36
+        ],
+        [
+          27,
+          28
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          72,
+          73
+        ],
+        [
+          54,
+          54,
+          56
+        ],
+        [
+          60,
+          60,
+          62
+        ]
+      ],
+      "rewardPerPointMilli": [
+        2667,
+        3000,
+        2000,
+        1667,
+        1500,
+        1400,
+        1333,
+        1286,
+        1115,
+        1000
+      ],
+      "widths": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        3
+      ]
+    }
+  ],
+  "budget": {
+    "branchSplitMilli": 500,
+    "tierShareMilli": [
+      18,
+      36,
+      55,
+      73,
+      91,
+      109,
+      127,
+      145,
+      164,
+      182
+    ]
+  },
+  "budgetPerBranch": 500,
+  "budgetTotal": 1000,
+  "category": "primary",
+  "forcedElement": null,
+  "forcedStatus": null,
+  "gateIndexKind": "aptitudePoints",
+  "gateQuantity": "aptitude.Might@Commander",
+  "gateState": "carrier",
+  "generationWave": 0,
+  "ladder": {
+    "gateCurrency": "aptitudePoints",
+    "reqByTier": [
+      5,
+      15,
+      30,
+      50,
+      75,
+      105,
+      140,
+      180,
+      225,
+      275
+    ],
+    "reqScalePoints": 5,
+    "tierCount": 10
+  },
+  "mechNodesByTier": [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2
+  ],
+  "nodes": [
+    {
+      "branch": "offensive",
+      "budgetPoints": 4,
+      "budgetShareMilli": 9,
+      "id": "skill.might-off-t1-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "handpicked",
+      "tier": 1
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 4,
+      "budgetShareMilli": 9,
+      "id": "skill.might-off-t1-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 1
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 9,
+      "budgetShareMilli": 18,
+      "id": "skill.might-off-t2-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "tier": 2
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 9,
+      "budgetShareMilli": 18,
+      "id": "skill.might-off-t2-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 2
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 13,
+      "budgetShareMilli": 27,
+      "id": "skill.might-off-t3-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "tier": 3
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 14,
+      "budgetShareMilli": 28,
+      "id": "skill.might-off-t3-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 3
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 18,
+      "budgetShareMilli": 36,
+      "id": "skill.might-off-t4-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 4
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 18,
+      "budgetShareMilli": 37,
+      "id": "skill.might-off-t4-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 4
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 22,
+      "budgetShareMilli": 45,
+      "id": "skill.might-off-t5-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 5
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 23,
+      "budgetShareMilli": 46,
+      "id": "skill.might-off-t5-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 5
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 27,
+      "budgetShareMilli": 54,
+      "id": "skill.might-off-t6-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 6
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 27,
+      "budgetShareMilli": 55,
+      "id": "skill.might-off-t6-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 6
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 31,
+      "budgetShareMilli": 63,
+      "id": "skill.might-off-t7-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 7
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 32,
+      "budgetShareMilli": 64,
+      "id": "skill.might-off-t7-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 7
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 36,
+      "budgetShareMilli": 72,
+      "id": "skill.might-off-t8-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 8
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 36,
+      "budgetShareMilli": 73,
+      "id": "skill.might-off-t8-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 8
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 41,
+      "budgetShareMilli": 82,
+      "id": "skill.might-off-t9-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 9
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 41,
+      "budgetShareMilli": 82,
+      "id": "skill.might-off-t9-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 9
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 45,
+      "budgetShareMilli": 91,
+      "id": "skill.might-off-t10-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 10
+    },
+    {
+      "branch": "offensive",
+      "budgetPoints": 50,
+      "budgetShareMilli": 91,
+      "id": "skill.might-off-t10-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 10
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 4,
+      "budgetShareMilli": 9,
+      "id": "skill.might-def-t1-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "tier": 1
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 4,
+      "budgetShareMilli": 9,
+      "id": "skill.might-def-t1-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 1
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 9,
+      "budgetShareMilli": 18,
+      "id": "skill.might-def-t2-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "tier": 2
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 9,
+      "budgetShareMilli": 18,
+      "id": "skill.might-def-t2-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 2
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 13,
+      "budgetShareMilli": 27,
+      "id": "skill.might-def-t3-n0",
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "tier": 3
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 14,
+      "budgetShareMilli": 28,
+      "id": "skill.might-def-t3-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 3
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 18,
+      "budgetShareMilli": 36,
+      "id": "skill.might-def-t4-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 4
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 18,
+      "budgetShareMilli": 37,
+      "id": "skill.might-def-t4-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 4
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 22,
+      "budgetShareMilli": 45,
+      "id": "skill.might-def-t5-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 5
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 23,
+      "budgetShareMilli": 46,
+      "id": "skill.might-def-t5-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 5
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 27,
+      "budgetShareMilli": 54,
+      "id": "skill.might-def-t6-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 6
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 27,
+      "budgetShareMilli": 55,
+      "id": "skill.might-def-t6-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 6
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 31,
+      "budgetShareMilli": 63,
+      "id": "skill.might-def-t7-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 7
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 32,
+      "budgetShareMilli": 64,
+      "id": "skill.might-def-t7-n1",
+      "indexInTier": 1,
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "tier": 7
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 36,
+      "budgetShareMilli": 72,
+      "id": "skill.might-def-t8-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 8
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 36,
+      "budgetShareMilli": 73,
+      "id": "skill.might-def-t8-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 8
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 41,
+      "budgetShareMilli": 82,
+      "id": "skill.might-def-t9-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 9
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 41,
+      "budgetShareMilli": 82,
+      "id": "skill.might-def-t9-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 9
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 45,
+      "budgetShareMilli": 91,
+      "id": "skill.might-def-t10-n0",
+      "indexInTier": 0,
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "tier": 10
+    },
+    {
+      "branch": "defensive",
+      "budgetPoints": 50,
+      "budgetShareMilli": 91,
+      "id": "skill.might-def-t10-n1",
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "tier": 10
+    }
+  ],
+  "potency": {
+    "maxNodeShareMilli": 182,
+    "minTerminalWidth": 1
+  },
+  "propertyVocabulary": {
+    "aptitude": [
+      "Might",
+      "Fortitude",
+      "Vigor",
+      "Onslaught",
+      "Agility",
+      "Composure",
+      "Pierce",
+      "Focus",
+      "Bulwark",
+      "Retribution",
+      "Precision",
+      "Ferocity"
+    ],
+    "atomAttachPoint": [
+      "Board",
+      "Match",
+      "Resource",
+      "Shield",
+      "Stat",
+      "Status",
+      "Ui"
+    ],
+    "atomKind": [
+      "board.action",
+      "box.set",
+      "bullet.modify",
+      "grid.clear",
+      "grid.spawn",
+      "match.modify",
+      "resource.delta",
+      "resource.economy",
+      "shield.grant",
+      "spawn.entity",
+      "stat.derived",
+      "stat.modify",
+      "status.apply",
+      "status.clear",
+      "ui.present",
+      "wave.control"
+    ],
+    "atomTrigger": [
+      "OnActivate",
+      "OnDamageDealt",
+      "OnDamageTaken",
+      "OnDeath",
+      "OnGranted",
+      "OnGridPlace",
+      "OnMatchEnd",
+      "OnMatchStart",
+      "OnRemoved",
+      "OnSpawn",
+      "OnSunCollect",
+      "OnTimer",
+      "OnWave"
+    ],
+    "branch": [
+      "offensive",
+      "defensive"
+    ],
+    "channelFamily": [
+      "ai.aggression",
+      "combat.absorption",
+      "combat.accuracy",
+      "combat.amplification",
+      "combat.block.break",
+      "combat.block.rate",
+      "combat.block.shred",
+      "combat.block.strength",
+      "combat.crit.damage",
+      "combat.crit.rate",
+      "combat.crit.resist",
+      "combat.crit.resist.damage",
+      "combat.defense",
+      "combat.dodge",
+      "combat.heal.power",
+      "combat.parry.break",
+      "combat.parry.rate",
+      "combat.parry.shred",
+      "combat.parry.strength",
+      "combat.penetration",
+      "combat.power",
+      "combat.reduction",
+      "combat.reflect.damage",
+      "combat.reflect.rate",
+      "combat.reflect.resist.damage",
+      "combat.reflect.resist.rate",
+      "combat.shield.capacity",
+      "combat.shield.pen",
+      "combat.shield.regen",
+      "combat.shield.toughness",
+      "loadout.slots",
+      "move.range",
+      "progression.bonus.arm1",
+      "progression.bonus.arm2",
+      "progression.bonus.atk",
+      "progression.bonus.defense",
+      "progression.bonus.maxHp",
+      "progression.breakthroughSuccess",
+      "progression.power",
+      "progression.realm",
+      "progression.xpRate",
+      "resource.efficiency",
+      "resource.max",
+      "resource.regen",
+      "resource.restore",
+      "skill.cooldown",
+      "skill.effectiveness",
+      "status.duration",
+      "status.durationReduction",
+      "status.intensity",
+      "status.intensityReduction",
+      "status.power",
+      "status.resist",
+      "turn.haste",
+      "turn.speed"
+    ],
+    "conversionState": [
+      "converted",
+      "unconverted"
+    ],
+    "element": [
+      "fire",
+      "ice",
+      "air",
+      "earth",
+      "light",
+      "dark",
+      "omni"
+    ],
+    "exclusionForm": [
+      "reroute",
+      "precedence",
+      "nullification"
+    ],
+    "nodeClass": [
+      "mechanism",
+      "magnitude"
+    ],
+    "posture": [
+      "bastion",
+      "finesse",
+      "force"
+    ],
+    "status": [
+      "blight",
+      "bond",
+      "butter",
+      "charm_pulse",
+      "cold",
+      "command",
+      "ember",
+      "expose",
+      "freeze",
+      "hypno",
+      "jala",
+      "kelp",
+      "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
+      "pact_mark",
+      "poison",
+      "rally",
+      "rot",
+      "shatter",
+      "spark",
+      "spore",
+      "wither"
+    ],
+    "tier": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ]
+  },
+  "propertyVocabularyCounts": {
+    "aptitude": 12,
+    "atomAttachPoint": 7,
+    "atomKind": 16,
+    "atomTrigger": 13,
+    "atomTriggerAuthorable": 11,
+    "branch": 2,
+    "channelFamily": 55,
+    "conversionState": 2,
+    "element": 7,
+    "exclusionForm": 3,
+    "nodeClass": 2,
+    "posture": 3,
+    "status": 24,
+    "tier": 10
+  },
+  "roster": {
+    "aptitudes": [
+      "Might",
+      "Fortitude",
+      "Vigor",
+      "Onslaught",
+      "Agility",
+      "Composure",
+      "Pierce",
+      "Focus",
+      "Bulwark",
+      "Retribution",
+      "Precision",
+      "Ferocity"
+    ],
+    "counts": {
+      "aptitudes": 12,
+      "demonFamilies": 19,
+      "elements": 6,
+      "statuses": 24
+    },
+    "demonFamilies": [
+      "base",
+      "bucket",
+      "cactus",
+      "cherry",
+      "chomper",
+      "corn",
+      "dolls",
+      "double",
+      "fire",
+      "fruit",
+      "garlic",
+      "hypno",
+      "ice",
+      "light",
+      "line",
+      "nut",
+      "pea",
+      "sun",
+      "sunflower"
+    ],
+    "elements": [
+      "fire",
+      "ice",
+      "air",
+      "earth",
+      "light",
+      "dark"
+    ],
+    "statuses": [
+      "blight",
+      "bond",
+      "butter",
+      "charm_pulse",
+      "cold",
+      "command",
+      "ember",
+      "expose",
+      "freeze",
+      "hypno",
+      "jala",
+      "kelp",
+      "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
+      "pact_mark",
+      "poison",
+      "rally",
+      "rot",
+      "shatter",
+      "spark",
+      "spore",
+      "wither"
+    ]
+  },
+  "schemaVersion": 1,
+  "treeId": "might",
+  "version": 1
+}

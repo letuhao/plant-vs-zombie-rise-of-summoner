@@ -157,6 +157,19 @@ Twenty-one. Model calls in **two** (13 and 21).
 | **22** | [`charm-carry`](item/spec-threshold-grants.md) | ⭐ **Split out of 12 by D40, 2026-09-04.** The charm pouch: five tables, the carry gate, five reason codes and the run-lifecycle hook. Sized larger than the threshold evaluator it would have ridden inside. ⚠ **Specced inside `spec-threshold-grants.md` today** — it needs its own file when it is scheduled | 12 |
 | **21** | ⭐ [`strain-splice-gen`](item/spec-strain-splice-gen.md) | **Added 2026-09-03.** The 102 generated combinations — 36 Strains (12 aptitudes × 3 archetypes) + 66 Splices (C(12,2)), seedsmith-configured. **The program's second model call.** Also owns retiring the existing element-keyed `socket-word` corpus | **yes** → 8, 16 |
 
+### Requirement trials and maintenance — approved 2026-09-09
+
+| # | id | Capability | Depends on |
+|---|---|---|---|
+| **23** | `requirement-profiles` | Frozen concrete equipment requirement profiles, tuning matrix, deterministic trial evaluation, and Seedsmith validation. Generated requirements never reject an otherwise legal assignment. | 4, 9 |
+| **24** | `equipment-activation` | Deployment-run trial/active/suspended equipment status, canonical upkeep order, HP recovery latch, and filtering at the existing equipment effect-read seam. | 5, 23 |
+| **25** | `set-requirement-reconciliation` | Frozen compatible set requirement envelope, full-set witness validation, and set-level trial activation. | 12, 13, 24 |
+
+Build order: **23 `requirement-profiles` → 24 `equipment-activation` → 25
+`set-requirement-reconciliation`**. Module 20 `item-surfaces` owns the card and API
+disclosure added by these modules; it is amended when the disclosure contract is ready,
+not duplicated here.
+
 > ⚠ **Declared dependencies were reconciled against each spec's own body, 2026-09-04** (a sixth row
 > added 2026-09-05). These rows understated what the module actually reads:
 >
@@ -298,4 +311,3 @@ four rows here; each is this program's file to change, consumed there.
 | Module 19 `ItemGrantValidator` admits unique container ids | `Items/Grants/ItemGrantValidator.cs` | `item_granted_action.container_id` may be a unique's `item.<slug>` beside a base type's — one validator arm — `spec-unique-pipeline.md` §3 | a unique cannot grant an action |
 | Lock check on `rpg_delve_pack_lock` | salvage, transfer, assign and bulk paths in `RpgStore.Items.cs` / `ItemSurfaceEndpoints.cs` | refuse an instance carried in a live delve (`pack.carried`); the armoury listing hides or badges it — `party-dungeon/spec-loot-pack.md` §4 | a carried item can be salvaged at home mid-delve |
 | Item-side derived price (`seed-contract.md` §2.1: price DERIVED, none built) | item program | class × grade × `contentScale(Θ)`; the Delve contributes only `merchant.markupMilli` | the delve merchant refuses (`delve.price-undesigned`) and opens as a sell-nothing rest |
-

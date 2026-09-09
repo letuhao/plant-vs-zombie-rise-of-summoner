@@ -1,0 +1,9 @@
+{
+  "done": {
+    "milestone-draw-000": {
+      "entryId": "enh.999",
+      "runtimeFamily": "atom.enhance-ghost"
+    }
+  },
+  "schemaVersion": 1
+}

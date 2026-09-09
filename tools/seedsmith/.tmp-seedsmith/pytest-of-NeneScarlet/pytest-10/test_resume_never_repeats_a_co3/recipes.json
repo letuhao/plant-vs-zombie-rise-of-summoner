@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "recipe",
+  "_meta": {
+    "batch": "recipes-gen",
+    "partition": "recipes",
+    "contractVersion": 1,
+    "model": "seedsmith-recipegen",
+    "authoredUtc": "",
+    "sourceRef": ""
+  },
+  "entries": [
+    {
+      "id": "recipe.001",
+      "nameKey": "recipe.one",
+      "name": "One",
+      "operation": "bore",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [],
+      "tags": []
+    }
+  ]
+}

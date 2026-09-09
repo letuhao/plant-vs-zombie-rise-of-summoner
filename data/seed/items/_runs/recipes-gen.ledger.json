@@ -115,6 +115,38 @@
     "recipe-draw-028": {
       "entryId": "recipe.059",
       "operation": "temper"
+    },
+    "recipe-draw-029": {
+      "entryId": "recipe.060",
+      "operation": "temper"
+    },
+    "recipe-draw-030": {
+      "entryId": "recipe.061",
+      "operation": "temper"
+    },
+    "recipe-draw-031": {
+      "entryId": "recipe.062",
+      "operation": "temper"
+    },
+    "recipe-draw-032": {
+      "entryId": "recipe.063",
+      "operation": "elevate"
+    },
+    "recipe-draw-033": {
+      "entryId": "recipe.064",
+      "operation": "temper"
+    },
+    "recipe-draw-034": {
+      "entryId": "recipe.065",
+      "operation": "temper"
+    },
+    "recipe-draw-035": {
+      "entryId": "recipe.066",
+      "operation": "temper"
+    },
+    "recipe-draw-036": {
+      "entryId": "recipe.067",
+      "operation": "temper"
     }
   },
   "schemaVersion": 1

@@ -729,6 +729,294 @@
           "family": "atom.enhance-vigor"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-021",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy, layered piece of plating etched with protective sigils designed to deflect kinetic impact.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-022",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy piece of articulated plating etched with protective sigils to deflect incoming kinetic energy.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-023",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy, layered piece of protective plating etched with geometric patterns to stabilize local energy fields.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-024",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy piece of layered plating etched with geometric sigils designed to disperse kinetic impact.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-025",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy piece of layered plating etched with geometric patterns designed to disperse kinetic impact.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-026",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy, layered piece of protective plating etched with geometric patterns designed to disperse kinetic impact.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-027",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy, layered piece of plating etched with protective sigils designed to deflect incoming kinetic force.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-028",
+      "nameKey": "base.etched-mantle",
+      "name": "Etched Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-mantle",
+      "flavorKey": "flavor.base.etched-mantle",
+      "flavor": "A heavy piece of layered metalwork designed to distribute kinetic impact across the collarbone. Its surface is etched with geometric patterns to help stabilize protective fields.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

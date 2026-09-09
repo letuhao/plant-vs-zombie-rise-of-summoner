@@ -1,4 +1,28 @@
 {
+  "abyssswordstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "从天而降",
+      "仙剑",
+      "召唤",
+      "巨剑",
+      "形态"
+    ],
+    "tautological": false
+  },
+  "acientsunnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "受伤",
+      "坚果",
+      "手动",
+      "来回",
+      "消耗"
+    ],
+    "tautological": false
+  },
   "allpeater": {
     "antiMotifs": [],
     "basis": "text",
@@ -8,6 +32,42 @@
       "攻击",
       "模式",
       "火力"
+    ],
+    "tautological": false
+  },
+  "apple": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "免难",
+      "消灾",
+      "安",
+      "护",
+      "苹"
+    ],
+    "tautological": false
+  },
+  "armedgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全副武装",
+      "坚不可摧",
+      "信号灯",
+      "不同",
+      "人们"
+    ],
+    "tautological": false
+  },
+  "armoredimpzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "边角料",
+      "不朽",
+      "保护",
+      "僵尸",
+      "制成"
     ],
     "tautological": false
   },
@@ -23,6 +83,397 @@
     ],
     "tautological": false
   },
+  "balloonzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "创造者",
+      "基洛夫",
+      "缠上去",
+      "作为",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "bamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "对抗",
+      "接触",
+      "消耗",
+      "矗立"
+    ],
+    "tautological": false
+  },
+  "bamboodragon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "召唤",
+      "喷吐",
+      "炸退",
+      "烈火"
+    ],
+    "tautological": false
+  },
+  "bamboofurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冬笋",
+      "吸收",
+      "小松",
+      "路障",
+      "炉"
+    ],
+    "tautological": false
+  },
+  "bamboospruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弓箭手",
+      "冬笋",
+      "发射",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "bedrocksnowzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "闲庭信步",
+      "雪上加霜",
+      "防御力",
+      "不朽",
+      "世界"
+    ],
+    "tautological": false
+  },
+  "bedrocktallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚不可摧",
+      "坚果",
+      "数轴",
+      "方向",
+      "硬度"
+    ],
+    "tautological": false
+  },
+  "bigchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "吞食",
+      "巨口",
+      "成群",
+      "深渊"
+    ],
+    "tautological": false
+  },
+  "biggatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "越战越勇",
+      "发射",
+      "子弹",
+      "射击",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "biggloom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "孢子",
+      "忧郁",
+      "烟雾"
+    ],
+    "tautological": false
+  },
+  "bigpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护",
+      "借助",
+      "南瓜",
+      "植物",
+      "樱桃"
+    ],
+    "tautological": false
+  },
+  "bigseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "击退",
+      "发射",
+      "孢子",
+      "水草"
+    ],
+    "tautological": false
+  },
+  "bigsunnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "僵尸",
+      "坚果",
+      "滚动",
+      "碾压"
+    ],
+    "tautological": false
+  },
+  "bigsunshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产者",
+      "储蓄",
+      "吸收",
+      "增值",
+      "批量"
+    ],
+    "tautological": false
+  },
+  "bigwallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "伤害",
+      "僵尸",
+      "坚果",
+      "滚动"
+    ],
+    "tautological": false
+  },
+  "blackelephantzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "不够",
+      "决定",
+      "博士",
+      "墓园"
+    ],
+    "tautological": false
+  },
+  "blackflagfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "佩戴",
+      "入阵",
+      "利爪",
+      "力量",
+      "对手"
+    ],
+    "tautological": false
+  },
+  "blackfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "实验室",
+      "僵尸",
+      "冲锋",
+      "冷酷"
+    ],
+    "tautological": false
+  },
+  "blackfootball_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "万众瞩目",
+      "橄榄球",
+      "看起来",
+      "保安",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "blackfootball_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "无人知晓",
+      "深不可测",
+      "代名词",
+      "不知",
+      "冲锋"
+    ],
+    "tautological": false
+  },
+  "blackfootball_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "忠心耿耿",
+      "深信不疑",
+      "表彰会",
+      "下属",
+      "人物"
+    ],
+    "tautological": false
+  },
+  "blackfootball_c2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "所向披靡",
+      "铁面无私",
+      "倾泻",
+      "副将",
+      "副手"
+    ],
+    "tautological": false
+  },
+  "blackhorse": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一鼓作气",
+      "愤愤不平",
+      "橄榄球",
+      "僵尸",
+      "公平"
+    ],
+    "tautological": false
+  },
+  "blackjackboxzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "中世纪",
+      "大忙人",
+      "篮球队",
+      "铁面人",
+      "中锋"
+    ],
+    "tautological": false
+  },
+  "blacktrainzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "小天鹅",
+      "主人",
+      "买下",
+      "僵尸",
+      "冰上"
+    ],
+    "tautological": false
+  },
+  "blover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "僵尸",
+      "全场",
+      "气球",
+      "迷雾"
+    ],
+    "tautological": false
+  },
+  "blovermine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "使本格",
+      "入土",
+      "土豆",
+      "武装",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "bloverpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "滋养",
+      "牺牲",
+      "飞行"
+    ],
+    "tautological": false
+  },
+  "bloverumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "叶子",
+      "浮空"
+    ],
+    "tautological": false
+  },
+  "blowerpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "南瓜",
+      "定期",
+      "生成"
+    ],
+    "tautological": false
+  },
+  "bluegargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "阅兵式",
+      "优秀",
+      "作为",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "boatimp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "补救措施",
+      "托付给",
+      "飞行器",
+      "严重",
+      "优秀"
+    ],
+    "tautological": false
+  },
+  "bucketdoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "化作",
+      "增强",
+      "威力",
+      "毁灭",
+      "灰烬"
+    ],
+    "tautological": false
+  },
   "bucketnutzombie": {
     "antiMotifs": [
       "屋顶",
@@ -35,6 +486,30 @@
     "motifs": [
       "铁头功",
       "僵尸"
+    ],
+    "tautological": false
+  },
+  "bucketpaper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "共同点",
+      "手推车",
+      "爆米花",
+      "铁制品",
+      "防护力"
+    ],
+    "tautological": false
+  },
+  "bucketplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚硬",
+      "植物",
+      "融合",
+      "部分",
+      "如"
     ],
     "tautological": false
   },
@@ -54,6 +529,125 @@
     ],
     "tautological": false
   },
+  "bucketzombieduck": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "游泳圈",
+      "不想",
+      "僵尸",
+      "办法",
+      "容易"
+    ],
+    "tautological": false
+  },
+  "bungizombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "从天而降",
+      "体验",
+      "偷取",
+      "僵尸",
+      "冒险"
+    ],
+    "tautological": false
+  },
+  "cabbageblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "提供",
+      "支援",
+      "空中",
+      "投"
+    ],
+    "tautological": false
+  },
+  "cabbagecaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "子弹",
+      "收集",
+      "落地",
+      "攻"
+    ],
+    "tautological": false
+  },
+  "cabbagecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "见者有份",
+      "卷心菜",
+      "区域",
+      "大片",
+      "抛投"
+    ],
+    "tautological": false
+  },
+  "cabbagefume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "乒乓球",
+      "僵尸",
+      "当作",
+      "投掷",
+      "抽打"
+    ],
+    "tautological": false
+  },
+  "cabbagemelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心瓜",
+      "弹跳",
+      "出",
+      "投"
+    ],
+    "tautological": false
+  },
+  "cabbagenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "伤害",
+      "保护",
+      "反击",
+      "受到"
+    ],
+    "tautological": false
+  },
+  "cabbagepot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "包裹",
+      "提升",
+      "攻速",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "cabbagepuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "传递",
+      "喷菇",
+      "底座",
+      "投出"
+    ],
+    "tautological": false
+  },
   "cabbagepult": {
     "antiMotifs": [],
     "basis": "text",
@@ -63,6 +657,42 @@
       "投手",
       "攻击",
       "出"
+    ],
+    "tautological": false
+  },
+  "cabbagesquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "伤害",
+      "体型",
+      "减半",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "cabbageumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "子弹",
+      "弹射",
+      "强化",
+      "投手",
+      "用弹"
+    ],
+    "tautological": false
+  },
+  "cacstusstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "发射",
+      "威胁",
+      "星星",
+      "杨桃"
     ],
     "tautological": false
   },
@@ -96,6 +726,63 @@
     ],
     "tautological": false
   },
+  "cactuscaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "单位",
+      "地刺",
+      "空中",
+      "到",
+      "扎"
+    ],
+    "tautological": false
+  },
+  "cactusfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "专注",
+      "伸长",
+      "低空",
+      "喷射",
+      "打击"
+    ],
+    "tautological": false
+  },
+  "cactusnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "伸长",
+      "坚果",
+      "气球",
+      "针刺"
+    ],
+    "tautological": false
+  },
+  "cactuspumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "南瓜",
+      "针刺",
+      "长满"
+    ],
+    "tautological": false
+  },
+  "cactusumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "特化",
+      "防空"
+    ],
+    "tautological": false
+  },
   "caltrop": {
     "antiMotifs": [],
     "basis": "text",
@@ -108,6 +795,42 @@
     ],
     "tautological": false
   },
+  "caltropfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷出",
+      "喷菇",
+      "地上",
+      "烟雾",
+      "腐蚀"
+    ],
+    "tautological": false
+  },
+  "caltropkelp_land": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "攻击",
+      "水草",
+      "赋予",
+      "陆地"
+    ],
+    "tautological": false
+  },
+  "caltropkelp_water": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "攻击",
+      "水生",
+      "水草",
+      "赋予",
+      "值"
+    ],
+    "tautological": false
+  },
   "caltropnut": {
     "antiMotifs": [],
     "basis": "text",
@@ -117,6 +840,78 @@
       "尖刺",
       "车辆",
       "长满"
+    ],
+    "tautological": false
+  },
+  "caltroppot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "增强",
+      "植物",
+      "特点",
+      "花盆"
+    ],
+    "tautological": false
+  },
+  "catapultzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "力度",
+      "后排",
+      "投掷",
+      "投篮"
+    ],
+    "tautological": false
+  },
+  "cattailgirl": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "全场",
+      "发射",
+      "大战",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "cattaillour": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "乌合之众",
+      "绒绒的",
+      "僵尸",
+      "应对",
+      "能够"
+    ],
+    "tautological": false
+  },
+  "cattailplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "尖刺",
+      "扎破",
+      "气球",
+      "睡莲"
+    ],
+    "tautological": false
+  },
+  "cherryblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "定期",
+      "撞击",
+      "樱桃",
+      "浮空"
     ],
     "tautological": false
   },
@@ -135,6 +930,42 @@
     ],
     "tautological": false
   },
+  "cherrycatapultzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "完前",
+      "完美",
+      "捂着",
+      "樱桃",
+      "炸毁"
+    ],
+    "tautological": false
+  },
+  "cherrychomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "吞食",
+      "樱桃",
+      "炸弹",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "cherryfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "催化",
+      "喷出",
+      "樱桃",
+      "烟雾",
+      "爆炸"
+    ],
+    "tautological": false
+  },
   "cherrygatling": {
     "antiMotifs": [
       "屋顶",
@@ -148,6 +979,54 @@
       "僵尸",
       "樱桃",
       "发射"
+    ],
+    "tautological": false
+  },
+  "cherryhypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "变为",
+      "射手",
+      "时会",
+      "樱桃"
+    ],
+    "tautological": false
+  },
+  "cherryjalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "克星",
+      "炸退",
+      "飞去",
+      "兽"
+    ],
+    "tautological": false
+  },
+  "cherrymagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吸取",
+      "当作",
+      "攻击",
+      "樱桃",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "cherrymine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "催熟",
+      "利用",
+      "土豆",
+      "播种",
+      "爆炸"
     ],
     "tautological": false
   },
@@ -183,6 +1062,18 @@
     ],
     "tautological": false
   },
+  "cherrypaperz95": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "请勿打扰",
+      "专注",
+      "僵尸",
+      "博学",
+      "危险"
+    ],
+    "tautological": false
+  },
   "cherrypaperzombie": {
     "antiMotifs": [
       "屋顶",
@@ -196,6 +1087,54 @@
       "僵尸",
       "樱桃",
       "上演"
+    ],
+    "tautological": false
+  },
+  "cherrypot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喜爱",
+      "射手",
+      "强化",
+      "本格",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "cherrypuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "半熟",
+      "挂载",
+      "樱桃",
+      "爆炸",
+      "爆裂"
+    ],
+    "tautological": false
+  },
+  "cherrypumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "免疫",
+      "南瓜",
+      "樱桃",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "cherryscaredy": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "恼羞成怒",
+      "害怕",
+      "容易",
+      "樱桃",
+      "爆炸"
     ],
     "tautological": false
   },
@@ -215,6 +1154,18 @@
     ],
     "tautological": false
   },
+  "cherryshooterzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "高中生",
+      "世家",
+      "僵尸",
+      "发射",
+      "喜欢"
+    ],
+    "tautological": false
+  },
   "cherrysplit": {
     "antiMotifs": [
       "屋顶",
@@ -231,6 +1182,30 @@
     ],
     "tautological": false
   },
+  "cherrysquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冲动",
+      "力量",
+      "好斗",
+      "樱桃",
+      "炸弹"
+    ],
+    "tautological": false
+  },
+  "cherrysubmarine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "威胁性",
+      "不剩",
+      "僵尸",
+      "动力",
+      "发现"
+    ],
+    "tautological": false
+  },
   "cherrythreepeater": {
     "antiMotifs": [],
     "basis": "text",
@@ -240,6 +1215,54 @@
       "半熟",
       "发射",
       "成熟"
+    ],
+    "tautological": false
+  },
+  "cherrytorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全场",
+      "树桩",
+      "樱桃",
+      "火炬",
+      "生成"
+    ],
+    "tautological": false
+  },
+  "cherryultimatepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "伤害",
+      "僚机",
+      "僵尸",
+      "免疫"
+    ],
+    "tautological": false
+  },
+  "cherryumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "保护",
+      "击退",
+      "利用",
+      "时能"
+    ],
+    "tautological": false
+  },
+  "chickenimp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "高速移动",
+      "冒险者",
+      "试图用",
+      "危险",
+      "啄食"
     ],
     "tautological": false
   },
@@ -255,6 +1278,66 @@
     ],
     "tautological": false
   },
+  "chomperpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "消化液",
+      "嘴花",
+      "帮助",
+      "提供",
+      "消化"
+    ],
+    "tautological": false
+  },
+  "chompersquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "场上",
+      "搜寻",
+      "时会",
+      "留在",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "chrysantheautumn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "精华版",
+      "受伤",
+      "植物",
+      "联动",
+      "范围"
+    ],
+    "tautological": false
+  },
+  "coachpaper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亲身",
+      "僵尸",
+      "出来",
+      "可惜",
+      "喝令"
+    ],
+    "tautological": false
+  },
+  "cobcannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "投手",
+      "炮弹",
+      "点击",
+      "玉米"
+    ],
+    "tautological": false
+  },
   "conezombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -264,6 +1347,90 @@
       "东西",
       "僵尸",
       "发现"
+    ],
+    "tautological": false
+  },
+  "conezombieduck": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不想",
+      "僵尸",
+      "差生",
+      "承认",
+      "文具"
+    ],
+    "tautological": false
+  },
+  "cornblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "提供",
+      "支援",
+      "空中",
+      "黄油"
+    ],
+    "tautological": false
+  },
+  "corncabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弹跳",
+      "玉米",
+      "黄油",
+      "出",
+      "投"
+    ],
+    "tautological": false
+  },
+  "corncaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "减速带",
+      "黏糊糊",
+      "攻击",
+      "无法",
+      "黄油"
+    ],
+    "tautological": false
+  },
+  "cornfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "醍醐灌顶",
+      "僵尸",
+      "喷出",
+      "头顶",
+      "感受"
+    ],
+    "tautological": false
+  },
+  "cornmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "定身",
+      "玉米",
+      "范围",
+      "黄油",
+      "出"
+    ],
+    "tautological": false
+  },
+  "cornnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "醍醐灌顶",
+      "僵尸",
+      "受到",
+      "定身",
+      "感觉"
     ],
     "tautological": false
   },
@@ -279,6 +1446,18 @@
     "motifs": [
       "制成",
       "子弹"
+    ],
+    "tautological": false
+  },
+  "cornpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "出让",
+      "喷菇",
+      "底座",
+      "投手"
     ],
     "tautological": false
   },
@@ -298,6 +1477,18 @@
     ],
     "tautological": false
   },
+  "cornumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伞叶",
+      "僵尸",
+      "击退",
+      "并定",
+      "覆有"
+    ],
+    "tautological": false
+  },
   "dancepolzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -305,6 +1496,18 @@
       "流行乐",
       "运动员",
       "下走",
+      "优秀",
+      "伴舞"
+    ],
+    "tautological": false
+  },
+  "dancepolzombie2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "久而久之",
+      "舞动着",
+      "运动员",
       "优秀",
       "伴舞"
     ],
@@ -319,6 +1522,64 @@
       "火爆",
       "烧焦",
       "辣椒"
+    ],
+    "tautological": false
+  },
+  "deathchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "凝聚",
+      "带给",
+      "新生",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "deathmine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "僵尸",
+      "凝聚",
+      "嘴花",
+      "土豆"
+    ],
+    "tautological": false
+  },
+  "diamondimitater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "出货",
+      "惹出",
+      "祸"
+    ],
+    "tautological": false
+  },
+  "diamondpotatonut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "坚果",
+      "坚硬",
+      "稀有",
+      "钻石"
+    ],
+    "tautological": false
+  },
+  "diamondrandomzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "东西",
+      "光泽",
+      "盲盒",
+      "钻石",
+      "藏"
     ],
     "tautological": false
   },
@@ -365,6 +1626,78 @@
     ],
     "tautological": false
   },
+  "dolphingatlingzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "怒气冲冲",
+      "回笼觉",
+      "上班",
+      "准备",
+      "发射"
+    ],
+    "tautological": false
+  },
+  "dolphinpaper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "下半身",
+      "美人鱼",
+      "医师",
+      "发怒",
+      "回家"
+    ],
+    "tautological": false
+  },
+  "dolphinpeazombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "白海豚",
+      "发射",
+      "喜欢",
+      "回旋",
+      "回答"
+    ],
+    "tautological": false
+  },
+  "dolphinrider": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "水族馆",
+      "饲养员",
+      "僵尸",
+      "兴趣",
+      "兼职"
+    ],
+    "tautological": false
+  },
+  "doomblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "伤害",
+      "灰烬",
+      "羽流",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "doomcabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "伤害",
+      "余烬",
+      "击中",
+      "投出"
+    ],
+    "tautological": false
+  },
   "doomcactus": {
     "antiMotifs": [],
     "basis": "text",
@@ -374,6 +1707,293 @@
       "大量",
       "尖刺",
       "概率"
+    ],
+    "tautological": false
+  },
+  "doomcherry": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "借助",
+      "增强",
+      "威力",
+      "樱桃",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "吞食",
+      "小心",
+      "植物",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "余烬",
+      "利用",
+      "投手",
+      "指挥",
+      "攻敌"
+    ],
+    "tautological": false
+  },
+  "doomfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "完成",
+      "手动",
+      "整行",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomgarlic": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "咬者",
+      "大蒜",
+      "啃",
+      "尸",
+      "爆"
+    ],
+    "tautological": false
+  },
+  "doomgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "四发",
+      "子弹",
+      "毁灭",
+      "菇"
+    ],
+    "tautological": false
+  },
+  "doomjalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "闭目养神",
+      "时会",
+      "植物",
+      "燃烧",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "doomkelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "力量",
+      "毁灭",
+      "水草",
+      "缠绕",
+      "蕴含"
+    ],
+    "tautological": false
+  },
+  "doommelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "余烬",
+      "创造",
+      "地面",
+      "坑洞",
+      "威力"
+    ],
+    "tautological": false
+  },
+  "doomnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "核能",
+      "能力",
+      "蕴藏",
+      "防爆"
+    ],
+    "tautological": false
+  },
+  "doompaper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "毕业设计",
+      "物理学",
+      "享受",
+      "僵尸",
+      "削减"
+    ],
+    "tautological": false
+  },
+  "doompeashooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "好搭档",
+      "伤害",
+      "提高",
+      "毁灭",
+      "胆小"
+    ],
+    "tautological": false
+  },
+  "doomplantern": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "余烬复燃",
+      "促使",
+      "光晕",
+      "激光",
+      "爆破"
+    ],
+    "tautological": false
+  },
+  "doompumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "反应炉",
+      "力量",
+      "南瓜",
+      "植物",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吞食",
+      "喷吐",
+      "毁灭",
+      "炸弹",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "doomseed": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "引爆",
+      "成长",
+      "毁灭",
+      "遥感",
+      "菇"
+    ],
+    "tautological": false
+  },
+  "doomshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "坑洞",
+      "无法",
+      "毁灭",
+      "消灭"
+    ],
+    "tautological": false
+  },
+  "doomsniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "呼啸",
+      "射速",
+      "强劲",
+      "杀伤",
+      "死神"
+    ],
+    "tautological": false
+  },
+  "doomsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冲动",
+      "力量",
+      "好斗",
+      "容易",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "doomstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "化作",
+      "地面",
+      "毁灭",
+      "流星",
+      "砸"
+    ],
+    "tautological": false
+  },
+  "doomsunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "孢子",
+      "引爆",
+      "成长",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomthreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "发射",
+      "子弹",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "doomtorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "影响",
+      "树桩",
+      "毁灭",
+      "火炬",
+      "点燃"
+    ],
+    "tautological": false
+  },
+  "doomzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "制造",
+      "力量",
+      "承受",
+      "摧毁"
     ],
     "tautological": false
   },
@@ -401,6 +2021,16 @@
     "motifs": [
       "发射",
       "子弹"
+    ],
+    "tautological": false
+  },
+  "doublepuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "小"
     ],
     "tautological": false
   },
@@ -434,6 +2064,42 @@
     ],
     "tautological": false
   },
+  "driver_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "所向披靡",
+      "僵尸",
+      "冲锋",
+      "坚固",
+      "大河"
+    ],
+    "tautological": false
+  },
+  "driver_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "爱不释手",
+      "不足以",
+      "改装车",
+      "伴舞",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "driver_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "战列舰",
+      "新发明",
+      "伟大",
+      "传动",
+      "僵尸"
+    ],
+    "tautological": false
+  },
   "driverzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -443,6 +2109,584 @@
       "僵尸",
       "冰机",
       "冰车"
+    ],
+    "tautological": false
+  },
+  "drown_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "新一轮",
+      "代表",
+      "同行",
+      "头盔"
+    ],
+    "tautological": false
+  },
+  "drown_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "听天由命",
+      "三叉戟",
+      "新一轮",
+      "滴眼液",
+      "保护"
+    ],
+    "tautological": false
+  },
+  "drown_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "侧翻",
+      "冲车",
+      "危险",
+      "原本"
+    ],
+    "tautological": false
+  },
+  "drowngargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "体脂率",
+      "体型",
+      "僵尸",
+      "后裔"
+    ],
+    "tautological": false
+  },
+  "drownpult_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "发动机",
+      "火箭弹",
+      "传奇",
+      "倾泻"
+    ],
+    "tautological": false
+  },
+  "drownpult_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "驾驶员",
+      "位置",
+      "倾泻",
+      "冲车"
+    ],
+    "tautological": false
+  },
+  "drownpult_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "过雪兽",
+      "驾驶员",
+      "丰富",
+      "优秀"
+    ],
+    "tautological": false
+  },
+  "drownpultzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "军事法庭",
+      "三叉戟",
+      "不足",
+      "供应",
+      "倾泻"
+    ],
+    "tautological": false
+  },
+  "drownzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "运动员",
+      "下河",
+      "僵尸",
+      "原本"
+    ],
+    "tautological": false
+  },
+  "electriconion": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "传导",
+      "僵尸",
+      "攻击",
+      "汇聚",
+      "电流"
+    ],
+    "tautological": false
+  },
+  "elephantzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "庞然大物",
+      "研究员",
+      "研究所",
+      "大象",
+      "找到"
+    ],
+    "tautological": false
+  },
+  "elephantzombie_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "显而易见",
+      "成功率",
+      "旅行社",
+      "僵尸",
+      "利用"
+    ],
+    "tautological": false
+  },
+  "elephantzombie_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "信任",
+      "值得",
+      "僵尸",
+      "厌烦",
+      "同类"
+    ],
+    "tautological": false
+  },
+  "elephantzombie_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "研究所",
+      "中扎",
+      "优秀",
+      "入选"
+    ],
+    "tautological": false
+  },
+  "elitepaperzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "怒不可遏",
+      "图书馆",
+      "学术界",
+      "老先生",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "emeraldumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "卷心菜",
+      "子弹",
+      "弹射",
+      "弹弹"
+    ],
+    "tautological": false
+  },
+  "endoflame": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "命中",
+      "子弹",
+      "掉落",
+      "死亡",
+      "肥料"
+    ],
+    "tautological": false
+  },
+  "endoflamegirl": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伙伴",
+      "增强",
+      "子弹",
+      "实力",
+      "挥舞"
+    ],
+    "tautological": false
+  },
+  "endoflamezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "源源不断",
+      "恶之花",
+      "人能",
+      "僵尸",
+      "叛徒"
+    ],
+    "tautological": false
+  },
+  "endpumpiner": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "任意",
+      "位置",
+      "共享",
+      "卡牌",
+      "存储"
+    ],
+    "tautological": false
+  },
+  "enumvalue261": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue262": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue263": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue264": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue265": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue266": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue267": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "enumvalue268": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "僵尸",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "eternalzombie_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不纳",
+      "为官",
+      "僵体",
+      "后入",
+      "富商"
+    ],
+    "tautological": false
+  },
+  "eternalzombie_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "翻堂越户",
+      "植亦强",
+      "僵怒",
+      "僵起",
+      "击以"
+    ],
+    "tautological": false
+  },
+  "eternalzombie_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "揭竿而起",
+      "史望者",
+      "义军",
+      "史望",
+      "名姓"
+    ],
+    "tautological": false
+  },
+  "extract_single": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "extract_ten": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "firecabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "命中",
+      "大量",
+      "爆裂",
+      "出"
+    ],
+    "tautological": false
+  },
+  "firecaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "地刺",
+      "映出",
+      "焰光",
+      "刺"
+    ],
+    "tautological": false
+  },
+  "firecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "力量",
+      "植物",
+      "火爆",
+      "炮弹",
+      "赋予"
+    ],
+    "tautological": false
+  },
+  "firecattail": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橙红色",
+      "僵尸",
+      "红温",
+      "尾",
+      "攻"
+    ],
+    "tautological": false
+  },
+  "firecracker": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "胆尽摧",
+      "如束",
+      "如雷",
+      "妖魔",
+      "帛气"
+    ],
+    "tautological": false
+  },
+  "firefume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "施加",
+      "火焰",
+      "红温"
+    ],
+    "tautological": false
+  },
+  "firegloom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "施加",
+      "烟雾",
+      "红温"
+    ],
+    "tautological": false
+  },
+  "firekelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "映出",
+      "水草",
+      "焰光",
+      "缠绕"
+    ],
+    "tautological": false
+  },
+  "firemelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "施加",
+      "火焰",
+      "红温",
+      "西瓜",
+      "出"
+    ],
+    "tautological": false
+  },
+  "firemine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "土豆",
+      "映出",
+      "焰光",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "firenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "口感",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "fireseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吸纳",
+      "映出",
+      "火炬",
+      "焰光",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "firesniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "散播",
+      "狙击",
+      "红温",
+      "高额"
+    ],
+    "tautological": false
+  },
+  "firespikerock": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "触感",
+      "王"
+    ],
+    "tautological": false
+  },
+  "firesquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "汇聚",
+      "焰光",
+      "窝瓜",
+      "成"
+    ],
+    "tautological": false
+  },
+  "firesunshroom_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "萤火虫",
+      "共生",
+      "植物",
+      "联动",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "firesunshroom_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "共生",
+      "形态",
+      "植物",
+      "联动",
+      "萤火"
+    ],
+    "tautological": false
+  },
+  "firesunshroom_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "共生",
+      "形态",
+      "植物",
+      "联动",
+      "萤火"
+    ],
+    "tautological": false
+  },
+  "flagfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橄榄球队",
+      "橄榄球",
+      "将军",
+      "应该",
+      "得出"
     ],
     "tautological": false
   },
@@ -458,6 +2702,66 @@
     ],
     "tautological": false
   },
+  "flyingthreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "乘风",
+      "亚种",
+      "凤凰",
+      "射手",
+      "扶摇"
+    ],
+    "tautological": false
+  },
+  "flyingthreepeater_sp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "凤凰",
+      "射手",
+      "形态",
+      "扬冠"
+    ],
+    "tautological": false
+  },
+  "footballboss": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "虚无缥缈",
+      "不在意",
+      "享受",
+      "体内",
+      "冤魂"
+    ],
+    "tautological": false
+  },
+  "footballdolphin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "如鱼得水",
+      "橄榄球赛",
+      "场上",
+      "头盔",
+      "家伙"
+    ],
+    "tautological": false
+  },
+  "footballdrown": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "运动员",
+      "僵尸",
+      "兼职",
+      "四发"
+    ],
+    "tautological": false
+  },
   "footballzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -467,6 +2771,30 @@
       "球场上",
       "僵尸",
       "公司"
+    ],
+    "tautological": false
+  },
+  "frozenpear": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冲击波",
+      "伤害",
+      "定期",
+      "寒冷",
+      "施加"
+    ],
+    "tautological": false
+  },
+  "fumepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "喷菇",
+      "攻击",
+      "方向",
+      "像"
     ],
     "tautological": false
   },
@@ -482,11 +2810,107 @@
     ],
     "tautological": false
   },
+  "gargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不在意",
+      "代价",
+      "体型",
+      "僵尸",
+      "前进"
+    ],
+    "tautological": false
+  },
   "garlic": {
     "antiMotifs": [],
     "basis": "text",
     "motifs": [
       "僵尸",
+      "大蒜"
+    ],
+    "tautological": false
+  },
+  "garlicblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "僵尸",
+      "全场",
+      "换行",
+      "蒜值"
+    ],
+    "tautological": false
+  },
+  "garliccabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "弹跳",
+      "投出",
+      "投手",
+      "蒜味"
+    ],
+    "tautological": false
+  },
+  "garliccorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "带有",
+      "投出",
+      "投手",
+      "玉米"
+    ],
+    "tautological": false
+  },
+  "garlicfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "烟雾",
+      "蒜值",
+      "蒜味"
+    ],
+    "tautological": false
+  },
+  "garlicgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "机枪",
+      "豌豆",
+      "蒜"
+    ],
+    "tautological": false
+  },
+  "garlicmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "投手",
+      "群体",
+      "蒜值",
+      "蒜味",
+      "西瓜"
+    ],
+    "tautological": false
+  },
+  "garlicnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "入口",
+      "兼具",
+      "口感",
+      "坚果",
       "大蒜"
     ],
     "tautological": false
@@ -506,6 +2930,65 @@
     ],
     "tautological": false
   },
+  "garlicpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "受到",
+      "本格",
+      "植物",
+      "花盆"
+    ],
+    "tautological": false
+  },
+  "garlicpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "兼具",
+      "南瓜",
+      "大蒜",
+      "特点"
+    ],
+    "tautological": false
+  },
+  "garlicrepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "双",
+      "手",
+      "蒜"
+    ],
+    "tautological": false
+  },
+  "garlicsniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "传播",
+      "传染",
+      "制造",
+      "实现",
+      "毒瘴"
+    ],
+    "tautological": false
+  },
+  "garlicsplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "裂荚",
+      "豌豆",
+      "蒜"
+    ],
+    "tautological": false
+  },
   "garlicthreepeater": {
     "antiMotifs": [
       "屋顶",
@@ -522,12 +3005,525 @@
     ],
     "tautological": false
   },
+  "garlictorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变得",
+      "毒性",
+      "浓郁",
+      "熏烤",
+      "豌豆"
+    ],
+    "tautological": false
+  },
+  "garlicultimatechomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一体",
+      "亚种",
+      "兼具",
+      "前排",
+      "大蒜"
+    ],
+    "tautological": false
+  },
+  "garlicumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "僵尸",
+      "击退",
+      "换行",
+      "接近"
+    ],
+    "tautological": false
+  },
+  "gatlingblackfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "停下",
+      "僵尸",
+      "击退",
+      "同事",
+      "坚信"
+    ],
+    "tautological": false
+  },
+  "gatlingdoomscaredy": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "发射",
+      "子弹",
+      "害怕",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "gatlingfootballzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "苦不堪言",
+      "电解质",
+      "僵尸",
+      "发射",
+      "回到"
+    ],
+    "tautological": false
+  },
+  "gatlingpaper_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "发怒",
+      "夜色",
+      "大量",
+      "学者"
+    ],
+    "tautological": false
+  },
+  "gatlingpaper_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "樱桃派",
+      "花园里",
+      "东西",
+      "保证",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "gatlingpaper_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "后果自负",
+      "背井离乡",
+      "樱桃派",
+      "做好",
+      "准备"
+    ],
+    "tautological": false
+  },
   "gatlingpea": {
     "antiMotifs": [],
     "basis": "text",
     "motifs": [
       "发射",
       "豌豆"
+    ],
+    "tautological": false
+  },
+  "gatlingpeazombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "公共场合",
+      "承不承认",
+      "迎接挑战",
+      "僵尸",
+      "发射"
+    ],
+    "tautological": false
+  },
+  "gatlingpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "小"
+    ],
+    "tautological": false
+  },
+  "gloomshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "烟雾",
+      "种植",
+      "穿透"
+    ],
+    "tautological": false
+  },
+  "goldbungizombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "克服",
+      "内向",
+      "夺取",
+      "巨人"
+    ],
+    "tautological": false
+  },
+  "goldcabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "僵尸",
+      "投出",
+      "特制",
+      "出"
+    ],
+    "tautological": false
+  },
+  "goldcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "发射",
+      "含有",
+      "投出",
+      "炮弹"
+    ],
+    "tautological": false
+  },
+  "golddoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "带来",
+      "毁灭",
+      "稳定",
+      "金质",
+      "金钱"
+    ],
+    "tautological": false
+  },
+  "goldgarlic": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "大蒜",
+      "换行",
+      "金质",
+      "咬"
+    ],
+    "tautological": false
+  },
+  "goldhypnodoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "和究极",
+      "高回报",
+      "高风险",
+      "亚种",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "goldiceshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "严寒",
+      "冰菇",
+      "带来",
+      "稳定",
+      "金质"
+    ],
+    "tautological": false
+  },
+  "goldmagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "促使",
+      "吸引",
+      "子弹",
+      "定期",
+      "攻击"
+    ],
+    "tautological": false
+  },
+  "goldmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "下金",
+      "投出",
+      "招降",
+      "西瓜",
+      "大"
+    ],
+    "tautological": false
+  },
+  "goldnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "回血",
+      "坚果",
+      "提高",
+      "金质",
+      "韧性"
+    ],
+    "tautological": false
+  },
+  "goldpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "生产",
+      "联动",
+      "花盆",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "goldscarypot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "过究极",
+      "卡牌",
+      "变为",
+      "回收",
+      "填充"
+    ],
+    "tautological": false
+  },
+  "goldsunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "储存",
+      "取出",
+      "生产",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "goldthreeplantern": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "光照",
+      "利用",
+      "增强",
+      "提供"
+    ],
+    "tautological": false
+  },
+  "goldthreetorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "特殊效果",
+      "伤害",
+      "变为",
+      "增加",
+      "失去"
+    ],
+    "tautological": false
+  },
+  "goldumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "击退",
+      "击飞",
+      "小鬼",
+      "投掷"
+    ],
+    "tautological": false
+  },
+  "goldzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "受欢迎",
+      "埃德加",
+      "纪念品",
+      "介绍",
+      "作为"
+    ],
+    "tautological": false
+  },
+  "gravebuster": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吞噬",
+      "墓碑",
+      "移除",
+      "来"
+    ],
+    "tautological": false
+  },
+  "greengargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "蜂拥而上",
+      "召唤师",
+      "电线杆",
+      "乐趣",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "hamburger": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "秘制款",
+      "冰瓜",
+      "冰锥",
+      "发射"
+    ],
+    "tautological": false
+  },
+  "helmetfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "坚硬",
+      "烟雾",
+      "穿透"
+    ],
+    "tautological": false
+  },
+  "helmetgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橄榄球",
+      "僵尸",
+      "出令",
+      "坚硬",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "helmetplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚硬",
+      "植物",
+      "融合",
+      "部分",
+      "如"
+    ],
+    "tautological": false
+  },
+  "holographicplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "黑曜石",
+      "全息",
+      "坚果",
+      "投影",
+      "高"
+    ],
+    "tautological": false
+  },
+  "horseboss": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "磨刀石",
+      "不了",
+      "不住",
+      "名将",
+      "地狱"
+    ],
+    "tautological": false
+  },
+  "horsezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "骑兵团",
+      "乘骑",
+      "僵尸",
+      "冲击"
+    ],
+    "tautological": false
+  },
+  "hugewallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "难以逾越",
+      "防御力",
+      "场上",
+      "坚实",
+      "堡垒"
+    ],
+    "tautological": false
+  },
+  "hurricaneblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "效果显著",
+      "不稳",
+      "僵尸",
+      "吹退",
+      "接近"
+    ],
+    "tautological": false
+  },
+  "hypnoblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "僵尸",
+      "充满",
+      "牵引",
+      "魅力"
+    ],
+    "tautological": false
+  },
+  "hypnocattailgirl": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "全场",
+      "发射",
+      "大战",
+      "感化"
+    ],
+    "tautological": false
+  },
+  "hypnocattailgirl_land": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "全场",
+      "发射",
+      "感化",
+      "敌人"
     ],
     "tautological": false
   },
@@ -539,6 +3535,65 @@
       "吞食",
       "成分",
       "部分",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "hypnodoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "时会",
+      "毁灭",
+      "离场",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "hypnoemperor": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "召唤",
+      "定期",
+      "强力",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "hypnofume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "充满",
+      "喷射",
+      "喷菇",
+      "烟雾"
+    ],
+    "tautological": false
+  },
+  "hypnogarlic": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大蒜",
+      "头顶",
+      "菌盖",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "hypnogatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "机枪",
+      "豌豆",
       "魅惑"
     ],
     "tautological": false
@@ -558,6 +3613,77 @@
     ],
     "tautological": false
   },
+  "hypnojalapenopickaxezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "殊不知",
+      "看不惯",
+      "伙伴",
+      "偷袭",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "hypnojalapenozombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "完美无缺",
+      "离奇失踪",
+      "僵尸",
+      "参加",
+      "参赛"
+    ],
+    "tautological": false
+  },
+  "hypnomagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "对应",
+      "消耗",
+      "生成",
+      "铁器"
+    ],
+    "tautological": false
+  },
+  "hypnomelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "充满",
+      "成群",
+      "投手",
+      "西瓜"
+    ],
+    "tautological": false
+  },
+  "hypnomine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "爆炸",
+      "魅力",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "hypnonut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "咬者",
+      "坚果",
+      "定期",
+      "概率"
+    ],
+    "tautological": false
+  },
   "hypnopeashooter": {
     "antiMotifs": [
       "屋顶",
@@ -571,6 +3697,66 @@
       "僵尸",
       "变心",
       "作战"
+    ],
+    "tautological": false
+  },
+  "hypnopot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "滋养",
+      "能够",
+      "花盆",
+      "魅力"
+    ],
+    "tautological": false
+  },
+  "hypnopuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "变小",
+      "时会",
+      "魅惑",
+      "咬"
+    ],
+    "tautological": false
+  },
+  "hypnopumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "俘获",
+      "僵尸",
+      "充满",
+      "南瓜"
+    ],
+    "tautological": false
+  },
+  "hypnoqueen": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "魅帝菇",
+      "亚种",
+      "僵尸",
+      "召唤",
+      "定期"
+    ],
+    "tautological": false
+  },
+  "hypnorepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "魅惑",
+      "双",
+      "手"
     ],
     "tautological": false
   },
@@ -589,6 +3775,88 @@
     ],
     "tautological": false
   },
+  "hypnosplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "裂荚",
+      "豌豆",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "hypnosquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "压倒",
+      "敌人",
+      "窝瓜",
+      "魅力"
+    ],
+    "tautological": false
+  },
+  "hypnotorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "作战",
+      "僵尸",
+      "充满",
+      "射手",
+      "映出"
+    ],
+    "tautological": false
+  },
+  "icebean": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "增幅",
+      "寒冰",
+      "射手",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "iceblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "冻结",
+      "刮起",
+      "寒风",
+      "持续"
+    ],
+    "tautological": false
+  },
+  "icecabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "兴奋",
+      "冻僵",
+      "击中",
+      "变得"
+    ],
+    "tautological": false
+  },
+  "icecactus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冻结",
+      "单位",
+      "发射",
+      "寒冰",
+      "尖刺"
+    ],
+    "tautological": false
+  },
   "icecaltrop": {
     "antiMotifs": [
       "屋顶",
@@ -601,6 +3869,250 @@
     "motifs": [
       "地刺",
       "触感"
+    ],
+    "tautological": false
+  },
+  "icecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰菇",
+      "力量",
+      "植物",
+      "炮弹",
+      "赋予"
+    ],
+    "tautological": false
+  },
+  "icecattail": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "寒冷",
+      "蓝色",
+      "冰",
+      "尾"
+    ],
+    "tautological": false
+  },
+  "icecherry": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰制",
+      "卡片",
+      "吸收",
+      "子弹",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "iceclawzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "寒冰高",
+      "不同",
+      "严寒",
+      "伤害",
+      "体质"
+    ],
+    "tautological": false
+  },
+  "icecorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "寒冰",
+      "投出",
+      "雪糕"
+    ],
+    "tautological": false
+  },
+  "icedoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "世界",
+      "伤害",
+      "僵尸",
+      "全场",
+      "关卡"
+    ],
+    "tautological": false
+  },
+  "icefumeshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "寒冷",
+      "施加",
+      "烟雾"
+    ],
+    "tautological": false
+  },
+  "icefurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吸收",
+      "寒冰",
+      "小松",
+      "莲花",
+      "炉"
+    ],
+    "tautological": false
+  },
+  "icegloom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "寒冷",
+      "施加",
+      "烟雾"
+    ],
+    "tautological": false
+  },
+  "icehypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "寒冰高",
+      "僵尸",
+      "变为",
+      "坚果",
+      "时会"
+    ],
+    "tautological": false
+  },
+  "icelaserumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "冰刺",
+      "发射",
+      "寒光",
+      "散射"
+    ],
+    "tautological": false
+  },
+  "icelotus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喜爱",
+      "寒冷",
+      "植物",
+      "治疗",
+      "能量"
+    ],
+    "tautological": false
+  },
+  "icemine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "力量",
+      "寒冰",
+      "浓缩",
+      "爆炸",
+      "膨化"
+    ],
+    "tautological": false
+  },
+  "icenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "口感",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "icepeach": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "联动",
+      "版"
+    ],
+    "tautological": false
+  },
+  "iceplantern": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "光辉",
+      "冷却",
+      "冻伤",
+      "散发"
+    ],
+    "tautological": false
+  },
+  "icepot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冷凝",
+      "变为",
+      "实体",
+      "将焰",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "icepuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰锥",
+      "发射",
+      "寒冷",
+      "施加",
+      "小"
+    ],
+    "tautological": false
+  },
+  "icepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰菇",
+      "力量",
+      "封存",
+      "释放",
+      "寒"
+    ],
+    "tautological": false
+  },
+  "icescaredyshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冻结",
+      "发射",
+      "孢子",
+      "害怕"
+    ],
+    "tautological": false
+  },
+  "iceseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吸食",
+      "寒气",
+      "膨胀",
+      "蘑菇",
+      "身体"
     ],
     "tautological": false
   },
@@ -620,6 +4132,254 @@
     ],
     "tautological": false
   },
+  "icespikerock": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "触感",
+      "王"
+    ],
+    "tautological": false
+  },
+  "icesquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冻结",
+      "力量",
+      "窝瓜",
+      "蕴含"
+    ],
+    "tautological": false
+  },
+  "icetorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "增强",
+      "子弹",
+      "寒意",
+      "寒气",
+      "树桩"
+    ],
+    "tautological": false
+  },
+  "ifvblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "全场",
+      "出击",
+      "听令",
+      "喷菇"
+    ],
+    "tautological": false
+  },
+  "ifvironpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷菇",
+      "狙击",
+      "部队",
+      "铁豆",
+      "防空"
+    ],
+    "tautological": false
+  },
+  "ifvpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "机械化",
+      "串联",
+      "作品",
+      "先进",
+      "功能"
+    ],
+    "tautological": false
+  },
+  "ifvstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "南瓜",
+      "杨桃",
+      "特点",
+      "磁力"
+    ],
+    "tautological": false
+  },
+  "imitater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卡片",
+      "变为",
+      "对应",
+      "放置",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "imitatewheat": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变身",
+      "定期",
+      "实力",
+      "提升",
+      "攻击"
+    ],
+    "tautological": false
+  },
+  "impking": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "万圣节",
+      "不用",
+      "僵尸",
+      "发起",
+      "国王"
+    ],
+    "tautological": false
+  },
+  "impzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "安全感",
+      "潜藏在",
+      "僵尸",
+      "喜欢",
+      "天生"
+    ],
+    "tautological": false
+  },
+  "ironballoonzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喋喋不休",
+      "三叶草",
+      "螺旋桨",
+      "僵尸",
+      "实在"
+    ],
+    "tautological": false
+  },
+  "ironballoonzombie2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "黑白胶片",
+      "集体照",
+      "企图",
+      "僵尸",
+      "元老"
+    ],
+    "tautological": false
+  },
+  "ironconezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "银灰色",
+      "不解",
+      "东西",
+      "僵尸",
+      "吸取"
+    ],
+    "tautological": false
+  },
+  "ironcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "坚硬",
+      "奇效",
+      "投出",
+      "投手"
+    ],
+    "tautological": false
+  },
+  "ironfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "坚硬",
+      "有效",
+      "橄榄"
+    ],
+    "tautological": false
+  },
+  "irongargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "掉以轻心",
+      "爱好和平",
+      "埃德加",
+      "一大",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "ironmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "坚硬",
+      "头戴",
+      "底座",
+      "强力"
+    ],
+    "tautological": false
+  },
+  "ironnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "坚硬",
+      "如",
+      "铁"
+    ],
+    "tautological": false
+  },
+  "ironpea": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "击退",
+      "发射",
+      "坚硬",
+      "射手",
+      "特攻"
+    ],
+    "tautological": false
+  },
+  "ironpeadoorzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全副武装",
+      "全身上下",
+      "不锈钢",
+      "信心",
+      "僵尸"
+    ],
+    "tautological": false
+  },
   "ironpeazombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -629,6 +4389,246 @@
       "僵尸",
       "发射",
       "子弹"
+    ],
+    "tautological": false
+  },
+  "ironpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "击退",
+      "发射",
+      "喷菇",
+      "坚硬",
+      "小铁"
+    ],
+    "tautological": false
+  },
+  "ironpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "坚硬",
+      "磁力",
+      "如",
+      "铁"
+    ],
+    "tautological": false
+  },
+  "ironredgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "作品",
+      "便于",
+      "僵尸",
+      "僵王",
+      "前作"
+    ],
+    "tautological": false
+  },
+  "ironsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "千钧",
+      "坚硬",
+      "窝瓜",
+      "如",
+      "重"
+    ],
+    "tautological": false
+  },
+  "ironstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "坚硬",
+      "星星",
+      "杨桃",
+      "特攻"
+    ],
+    "tautological": false
+  },
+  "jackbox_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一般",
+      "不易",
+      "使用",
+      "偏弱",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "jackbox_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "看得出来",
+      "想一想",
+      "爆炸性",
+      "僵尸",
+      "加装"
+    ],
+    "tautological": false
+  },
+  "jackbox_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "承受能力",
+      "花枝招展",
+      "乔装",
+      "准备",
+      "可怜"
+    ],
+    "tautological": false
+  },
+  "jackboxdoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "增强",
+      "威力",
+      "毁灭",
+      "消灭"
+    ],
+    "tautological": false
+  },
+  "jackboxjumpzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一触即发",
+      "恋爱史",
+      "耸耸肩",
+      "刻苦",
+      "外形"
+    ],
+    "tautological": false
+  },
+  "jackboxplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "爆炸",
+      "玩偶",
+      "融合",
+      "部分"
+    ],
+    "tautological": false
+  },
+  "jackboxpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "爆炸",
+      "玩偶",
+      "磁力",
+      "防御"
+    ],
+    "tautological": false
+  },
+  "jackboxstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "小丑",
+      "星星",
+      "杨桃",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "jackboxzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "精神病人",
+      "一大跳",
+      "马戏团",
+      "东西",
+      "保证"
+    ],
+    "tautological": false
+  },
+  "jackson_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伴舞",
+      "作为",
+      "僵尸",
+      "全球",
+      "学习"
+    ],
+    "tautological": false
+  },
+  "jackson_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "舞蹈学院",
+      "别忘记",
+      "埃德加",
+      "拍下来",
+      "杰克逊"
+    ],
+    "tautological": false
+  },
+  "jackson_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仅仅只是",
+      "指挥官",
+      "金拉风",
+      "闪光灯",
+      "亮色"
+    ],
+    "tautological": false
+  },
+  "jacksondriver": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "驾驶证",
+      "下车",
+      "不止",
+      "僵尸",
+      "冰车"
+    ],
+    "tautological": false
+  },
+  "jacksondriverboss": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "完美无瑕",
+      "就此结束",
+      "全世界",
+      "不舍",
+      "世界"
+    ],
+    "tautological": false
+  },
+  "jacksonzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "杰克逊",
+      "迈克尔",
+      "从事",
+      "传奇",
+      "太空"
     ],
     "tautological": false
   },
@@ -647,6 +4647,29 @@
     ],
     "tautological": false
   },
+  "jalacorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "击中",
+      "战意",
+      "投出",
+      "植物",
+      "沸腾"
+    ],
+    "tautological": false
+  },
+  "jaladoubleshooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "双",
+      "手"
+    ],
+    "tautological": false
+  },
   "jalagatling": {
     "antiMotifs": [
       "屋顶",
@@ -660,6 +4683,30 @@
       "地刺",
       "触感",
       "发射"
+    ],
+    "tautological": false
+  },
+  "jalakelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "力量",
+      "水草",
+      "火爆",
+      "缠绕",
+      "蕴含"
+    ],
+    "tautological": false
+  },
+  "jalamine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "催熟",
+      "利用",
+      "土豆",
+      "播种",
+      "爆炸"
     ],
     "tautological": false
   },
@@ -695,6 +4742,65 @@
     ],
     "tautological": false
   },
+  "jalapenozombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "催泪弹",
+      "交流",
+      "僵尸",
+      "愿意",
+      "整排"
+    ],
+    "tautological": false
+  },
+  "jalapumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全部",
+      "力量",
+      "威力",
+      "存储",
+      "强大"
+    ],
+    "tautological": false
+  },
+  "jalasplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "裂荚",
+      "豌豆"
+    ],
+    "tautological": false
+  },
+  "jalasquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冲动",
+      "力量",
+      "好斗",
+      "火爆",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "jalasquashzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "急性子",
+      "甩出去",
+      "位置",
+      "僵尸",
+      "原本"
+    ],
+    "tautological": false
+  },
   "jalastar": {
     "antiMotifs": [
       "屋顶",
@@ -708,6 +4814,171 @@
       "地刺",
       "触感",
       "易燃易爆"
+    ],
+    "tautological": false
+  },
+  "jalatorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "树桩",
+      "火炬",
+      "点燃",
+      "爆燃",
+      "能力"
+    ],
+    "tautological": false
+  },
+  "kelpfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伸出",
+      "僵尸",
+      "抽打",
+      "水草",
+      "触手"
+    ],
+    "tautological": false
+  },
+  "kelpmine_land": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "缠绕着",
+      "土豆",
+      "水草",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "kelpmine_water": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "水草",
+      "爆炸",
+      "缠绕"
+    ],
+    "tautological": false
+  },
+  "kelpnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "作用",
+      "坚果",
+      "柔韧",
+      "水生",
+      "水草"
+    ],
+    "tautological": false
+  },
+  "kelppuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "合适",
+      "接触",
+      "时会",
+      "条件"
+    ],
+    "tautological": false
+  },
+  "kelptorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "子弹",
+      "旺盛",
+      "水草",
+      "点燃",
+      "焰光"
+    ],
+    "tautological": false
+  },
+  "kirov_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "战术轰炸",
+      "打个招呼",
+      "埃德加",
+      "基洛夫",
+      "轻量化"
+    ],
+    "tautological": false
+  },
+  "kirov_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仔细观察",
+      "基洛夫",
+      "产品",
+      "僚机",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "kirov_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "隆重推出",
+      "信息化",
+      "轰炸机",
+      "一体",
+      "作为"
+    ],
+    "tautological": false
+  },
+  "kirovzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "得力助手",
+      "埃德加",
+      "僵尸",
+      "力作",
+      "博士"
+    ],
+    "tautological": false
+  },
+  "ladderzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "上工",
+      "僵尸",
+      "准备",
+      "地方",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "landsubmarine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "任意",
+      "仿生",
+      "优秀",
+      "召唤",
+      "地形"
+    ],
+    "tautological": false
+  },
+  "lanternblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "光照",
+      "全场",
+      "提供",
+      "明亮"
     ],
     "tautological": false
   },
@@ -742,6 +5013,54 @@
     ],
     "tautological": false
   },
+  "lanternfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光照",
+      "发射",
+      "增强",
+      "威力",
+      "无限"
+    ],
+    "tautological": false
+  },
+  "lanterngatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "战线",
+      "持续",
+      "推进",
+      "激光"
+    ],
+    "tautological": false
+  },
+  "lanternmagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光照",
+      "吸取",
+      "喜光",
+      "磁力",
+      "能力"
+    ],
+    "tautological": false
+  },
+  "lanternnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用光",
+      "僵尸",
+      "光照",
+      "提供",
+      "治疗"
+    ],
+    "tautological": false
+  },
   "lanternpea": {
     "antiMotifs": [
       "屋顶",
@@ -758,6 +5077,386 @@
     ],
     "tautological": false
   },
+  "lanternpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光照",
+      "当作",
+      "提供",
+      "本格",
+      "花盆"
+    ],
+    "tautological": false
+  },
+  "lanternpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用光",
+      "保护",
+      "光照",
+      "提供",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "lanternrepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "战线",
+      "持续",
+      "推进",
+      "激光"
+    ],
+    "tautological": false
+  },
+  "lanternsplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "供给",
+      "发射",
+      "接受",
+      "激光"
+    ],
+    "tautological": false
+  },
+  "lanternstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光照",
+      "喜光",
+      "星星",
+      "杨桃",
+      "能力"
+    ],
+    "tautological": false
+  },
+  "lanternumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "光照",
+      "力量",
+      "子弹",
+      "存储"
+    ],
+    "tautological": false
+  },
+  "laserumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "发射",
+      "攻击",
+      "植物",
+      "治疗"
+    ],
+    "tautological": false
+  },
+  "legionsniperzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "特种部队",
+      "阿尔法",
+      "传唱",
+      "余音",
+      "倾听"
+    ],
+    "tautological": false
+  },
+  "legionzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "同生共死",
+      "指引方向",
+      "死里求生",
+      "特种部队",
+      "阿尔法"
+    ],
+    "tautological": false
+  },
+  "levatationzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "角落里",
+      "起飞前",
+      "驾驶员",
+      "下雪",
+      "冰块"
+    ],
+    "tautological": false
+  },
+  "lilypad": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "睡莲",
+      "种植"
+    ],
+    "tautological": false
+  },
+  "lotusaloes": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "回落",
+      "提升",
+      "攻速",
+      "植物",
+      "治疗"
+    ],
+    "tautological": false
+  },
+  "lotusbamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冬笋",
+      "同类",
+      "坚韧",
+      "成阵",
+      "时会"
+    ],
+    "tautological": false
+  },
+  "lotusspruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "云杉",
+      "伴生",
+      "所需",
+      "植物",
+      "治疗"
+    ],
+    "tautological": false
+  },
+  "luckyblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "幸运",
+      "捕捉",
+      "风"
+    ],
+    "tautological": false
+  },
+  "machinelevatation": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "科技进步",
+      "埃德加",
+      "驾驶员",
+      "伟大",
+      "体质"
+    ],
+    "tautological": false
+  },
+  "machinenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰与火之力",
+      "吸收",
+      "承伤",
+      "来回",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "machinenutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "重力势能",
+      "保龄球",
+      "不动",
+      "僵尸",
+      "动力"
+    ],
+    "tautological": false
+  },
+  "machineshardplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "承伤",
+      "植物",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "magicsnowpea": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "极冰豆",
+      "发射",
+      "弹射",
+      "能够"
+    ],
+    "tautological": false
+  },
+  "magicsnowpea2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "极冰豆",
+      "发射",
+      "寒冰",
+      "射手",
+      "弹射"
+    ],
+    "tautological": false
+  },
+  "magnetblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "全场",
+      "吸取",
+      "强大",
+      "消化"
+    ],
+    "tautological": false
+  },
+  "magnetbox": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "magnetcactus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "善于",
+      "干扰",
+      "打击",
+      "操控"
+    ],
+    "tautological": false
+  },
+  "magnetcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不同",
+      "变为",
+      "对应",
+      "形态",
+      "投手"
+    ],
+    "tautological": false
+  },
+  "magnetdoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变为",
+      "对应",
+      "形态",
+      "毁灭",
+      "磁力"
+    ],
+    "tautological": false
+  },
+  "magnetfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "喷菇",
+      "烟雾",
+      "磁力",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "magnetinterface": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "magnetmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "头戴",
+      "强力",
+      "扣击",
+      "投出"
+    ],
+    "tautological": false
+  },
+  "magnetnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "友方",
+      "吸引",
+      "围绕",
+      "子弹",
+      "平射"
+    ],
+    "tautological": false
+  },
+  "magnetpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "防御能力",
+      "利用",
+      "对应",
+      "磁性",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "magnetshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "利用",
+      "吸取",
+      "磁力",
+      "身上"
+    ],
+    "tautological": false
+  },
+  "magnetstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用",
+      "对应",
+      "磁性",
+      "能力",
+      "融合"
+    ],
+    "tautological": false
+  },
   "marigold": {
     "antiMotifs": [],
     "basis": "text",
@@ -767,6 +5466,90 @@
       "金币",
       "钻石",
       "银币"
+    ],
+    "tautological": false
+  },
+  "melonblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "提供",
+      "支援",
+      "空中",
+      "西瓜",
+      "投"
+    ],
+    "tautological": false
+  },
+  "meloncaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "头晕目眩",
+      "僵尸",
+      "击飞",
+      "弹开",
+      "接近"
+    ],
+    "tautological": false
+  },
+  "meloncannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "大量",
+      "投手",
+      "炮击",
+      "炮弹"
+    ],
+    "tautological": false
+  },
+  "melonfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弹射",
+      "瓜藤",
+      "盘绕",
+      "蓄力",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "melonnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "保护",
+      "反击",
+      "受到",
+      "护盾"
+    ],
+    "tautological": false
+  },
+  "melonpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "充当",
+      "投手",
+      "提升",
+      "溅射",
+      "花盆"
+    ],
+    "tautological": false
+  },
+  "melonpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "喷菇",
+      "威力",
+      "底座",
+      "投手"
     ],
     "tautological": false
   },
@@ -782,6 +5565,100 @@
     ],
     "tautological": false
   },
+  "melonpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "西瓜皮",
+      "保护",
+      "充当",
+      "投手",
+      "攻击"
+    ],
+    "tautological": false
+  },
+  "melonumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "反弹",
+      "子弹",
+      "敌方",
+      "瓜皮",
+      "用弹"
+    ],
+    "tautological": false
+  },
+  "minerzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "地道",
+      "工具",
+      "挖掘",
+      "撞到"
+    ],
+    "tautological": false
+  },
+  "minisandmonster": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "如风滚草般",
+      "出去玩",
+      "小沙兽",
+      "看不见",
+      "不理"
+    ],
+    "tautological": false
+  },
+  "minisnowmonster": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "军营",
+      "准备",
+      "喜爱",
+      "大雪"
+    ],
+    "tautological": false
+  },
+  "mixanim": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "勾选",
+      "旅行",
+      "简单",
+      "设置",
+      "选项"
+    ],
+    "tautological": false
+  },
+  "mixbomb": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "用于",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "newyearzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "皮糙肉厚",
+      "僵尸",
+      "好看",
+      "客气",
+      "富有"
+    ],
+    "tautological": false
+  },
   "normalzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -791,6 +5668,40 @@
       "做出",
       "僵尸",
       "名字"
+    ],
+    "tautological": false
+  },
+  "nucleardoomcherry": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "出可",
+      "威力",
+      "子弹",
+      "巨大",
+      "杀伤"
+    ],
+    "tautological": false
+  },
+  "nuclearsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "待命状态",
+      "蕴含着",
+      "辐射性",
+      "亚种",
+      "威力"
+    ],
+    "tautological": false
+  },
+  "nutblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "护身符",
+      "坚果",
+      "悬浮"
     ],
     "tautological": false
   },
@@ -809,6 +5720,147 @@
     ],
     "tautological": false
   },
+  "nutfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "防御者",
+      "坚果",
+      "并用",
+      "脑袋",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "nutpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "防御型",
+      "花盆",
+      "隔热"
+    ],
+    "tautological": false
+  },
+  "nutpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "坚果",
+      "坚硬",
+      "持续",
+      "有用"
+    ],
+    "tautological": false
+  },
+  "nuttorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "树桩",
+      "火炬",
+      "炙烤",
+      "焰光"
+    ],
+    "tautological": false
+  },
+  "nutumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "兼具",
+      "叶子",
+      "坚果",
+      "特点"
+    ],
+    "tautological": false
+  },
+  "obsidianclawzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "重新聚集",
+      "饱经风霜",
+      "沙沙声",
+      "黑曜石",
+      "任由"
+    ],
+    "tautological": false
+  },
+  "obsidianimpzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "精心设计",
+      "甩出去",
+      "黑曜石",
+      "僵尸",
+      "冲刺"
+    ],
+    "tautological": false
+  },
+  "obsidianjalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全场",
+      "冰菇",
+      "承伤",
+      "植物",
+      "火爆"
+    ],
+    "tautological": false
+  },
+  "obsidianspike": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "强韧",
+      "玄钢",
+      "王"
+    ],
+    "tautological": false
+  },
+  "obsidiantallnutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚不可摧",
+      "坚硬无比",
+      "黑曜石",
+      "交融",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "obsidianwallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "地刺",
+      "坚果",
+      "强韧",
+      "玄钢"
+    ],
+    "tautological": false
+  },
+  "obsidianwheat": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变为",
+      "大麦",
+      "定期",
+      "形态",
+      "植物"
+    ],
+    "tautological": false
+  },
   "paperzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -818,6 +5870,30 @@
       "完成",
       "打断",
       "报纸"
+    ],
+    "tautological": false
+  },
+  "passionfruit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "发射",
+      "头戴",
+      "果籽",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "peablover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "协同",
+      "子弹",
+      "提升",
+      "攻击",
+      "攻速"
     ],
     "tautological": false
   },
@@ -837,6 +5913,30 @@
     ],
     "tautological": false
   },
+  "peafume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "动能",
+      "喷射",
+      "喷菇",
+      "子弹",
+      "射程"
+    ],
+    "tautological": false
+  },
+  "peamine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "出土",
+      "发射",
+      "土豆",
+      "豌豆",
+      "雷"
+    ],
+    "tautological": false
+  },
   "peanut": {
     "antiMotifs": [
       "屋顶",
@@ -849,6 +5949,52 @@
     "motifs": [
       "坚果",
       "穿透"
+    ],
+    "tautological": false
+  },
+  "peapot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "后坐力",
+      "利用",
+      "基座",
+      "家族",
+      "射击"
+    ],
+    "tautological": false
+  },
+  "peapuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "豌豆",
+      "小"
+    ],
+    "tautological": false
+  },
+  "peapumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "习惯",
+      "发射",
+      "子弹",
+      "家族",
+      "射击"
+    ],
+    "tautological": false
+  },
+  "peascaredy": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "前功尽弃",
+      "伤害",
+      "害怕",
+      "提升",
+      "攻速"
     ],
     "tautological": false
   },
@@ -914,6 +6060,133 @@
     ],
     "tautological": false
   },
+  "penguinzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "企鹅",
+      "僵化",
+      "僵尸",
+      "博士",
+      "危险"
+    ],
+    "tautological": false
+  },
+  "pickaxe_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "更胜一筹",
+      "产业链",
+      "许可证",
+      "下界",
+      "事业"
+    ],
+    "tautological": false
+  },
+  "pickaxe_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "下界",
+      "亮眼",
+      "僵尸",
+      "制造",
+      "合金"
+    ],
+    "tautological": false
+  },
+  "pickaxe_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不屑一顾",
+      "前呼后拥",
+      "野心勃勃",
+      "埃德加",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "pickaxeplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地下",
+      "挖掘",
+      "攻击",
+      "植物",
+      "矿工"
+    ],
+    "tautological": false
+  },
+  "pickaxepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "南瓜",
+      "矿工",
+      "磁力",
+      "防御"
+    ],
+    "tautological": false
+  },
+  "pickaxestar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土里",
+      "攻击",
+      "杨桃",
+      "藏"
+    ],
+    "tautological": false
+  },
+  "pickaxezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "传送门",
+      "勘探者",
+      "另一端",
+      "得不到",
+      "金字塔"
+    ],
+    "tautological": false
+  },
+  "pinefurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "寒冷",
+      "帮助",
+      "抵御",
+      "暖炉",
+      "松木"
+    ],
+    "tautological": false
+  },
+  "pinkonion": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "助力",
+      "召唤",
+      "团队",
+      "汇聚"
+    ],
+    "tautological": false
+  },
+  "pit": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
   "plantern": {
     "antiMotifs": [
       "屋顶",
@@ -930,6 +6203,18 @@
     ],
     "tautological": false
   },
+  "pogozombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "有没有",
+      "上用",
+      "僵尸",
+      "喜欢",
+      "屋顶"
+    ],
+    "tautological": false
+  },
   "polevaulterzombie": {
     "antiMotifs": [],
     "basis": "text",
@@ -939,6 +6224,114 @@
       "僵尸",
       "助跑",
       "成就"
+    ],
+    "tautological": false
+  },
+  "polfootballzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橄榄球",
+      "僵尸",
+      "参加",
+      "想要",
+      "撑杆"
+    ],
+    "tautological": false
+  },
+  "portalballoonzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "异时空",
+      "超时空",
+      "乱流",
+      "位体",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "portalcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "超时空",
+      "力量",
+      "加速",
+      "实现",
+      "投手"
+    ],
+    "tautological": false
+  },
+  "portaldoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "超时空",
+      "传送",
+      "力量",
+      "施加",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "portalmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "超时空",
+      "传送",
+      "力量",
+      "底座",
+      "扩散"
+    ],
+    "tautological": false
+  },
+  "portalnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "超时空",
+      "传送",
+      "力量",
+      "咬者",
+      "回溯"
+    ],
+    "tautological": false
+  },
+  "portalpea": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "超时空",
+      "传送",
+      "力量",
+      "子弹",
+      "实现"
+    ],
+    "tautological": false
+  },
+  "portalplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "传送",
+      "力量",
+      "植物",
+      "融合",
+      "部分"
+    ],
+    "tautological": false
+  },
+  "portalpolevaulter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "观众席",
+      "超时空",
+      "乱流",
+      "传送",
+      "依靠"
     ],
     "tautological": false
   },
@@ -954,6 +6347,246 @@
     "motifs": [
       "屋顶",
       "植物"
+    ],
+    "tautological": false
+  },
+  "potatochomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "守株待兔",
+      "嘴花",
+      "土豆",
+      "完成",
+      "消化"
+    ],
+    "tautological": false
+  },
+  "potatodoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "四分五裂",
+      "土豆块",
+      "毁灭性",
+      "成熟",
+      "爆出"
+    ],
+    "tautological": false
+  },
+  "potatofume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "喷射",
+      "土豆",
+      "带有",
+      "炸开"
+    ],
+    "tautological": false
+  },
+  "potatomine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "出土",
+      "土豆",
+      "威力",
+      "强大"
+    ],
+    "tautological": false
+  },
+  "potatonut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "低矮",
+      "坚果",
+      "爆炸",
+      "破损"
+    ],
+    "tautological": false
+  },
+  "potatopuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "繁殖",
+      "继续"
+    ],
+    "tautological": false
+  },
+  "potatopumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "低矮",
+      "南瓜",
+      "爆炸",
+      "破损"
+    ],
+    "tautological": false
+  },
+  "potatosquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "容易",
+      "普通",
+      "比起",
+      "窝瓜",
+      "踩到"
+    ],
+    "tautological": false
+  },
+  "potatosquashbody": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "会长",
+      "僵尸",
+      "压扁",
+      "原地",
+      "土豆"
+    ],
+    "tautological": false
+  },
+  "present": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "放置",
+      "植物",
+      "生成",
+      "空地"
+    ],
+    "tautological": false
+  },
+  "presentzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "倒贴",
+      "僵尸",
+      "甩卖",
+      "盲盒",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "projectilezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "炮弹",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "protalzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "有没有",
+      "老伙计",
+      "超时空",
+      "钻出来",
+      "不想"
+    ],
+    "tautological": false
+  },
+  "pudding": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "反弹",
+      "子弹",
+      "植物",
+      "用弹",
+      "身躯"
+    ],
+    "tautological": false
+  },
+  "puffdoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "敌人",
+      "毁灭",
+      "范围",
+      "身躯"
+    ],
+    "tautological": false
+  },
+  "puffjalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "火爆",
+      "脾气",
+      "身躯",
+      "小"
+    ],
+    "tautological": false
+  },
+  "puffnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "形似",
+      "硬度",
+      "蘑菇",
+      "小"
+    ],
+    "tautological": false
+  },
+  "puffpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "防御性",
+      "周全",
+      "数量",
+      "蘑菇",
+      "防护"
+    ],
+    "tautological": false
+  },
+  "puffseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "重要一环",
+      "强大",
+      "海洋",
+      "繁殖",
+      "能力"
+    ],
+    "tautological": false
+  },
+  "puffsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "娃子",
+      "小瓜",
+      "敌人",
+      "砸击"
+    ],
+    "tautological": false
+  },
+  "pumpiner": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "主位",
+      "作为",
+      "保留",
+      "关卡",
+      "南瓜"
     ],
     "tautological": false
   },
@@ -973,6 +6606,229 @@
     ],
     "tautological": false
   },
+  "qingzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "偏安一隅",
+      "大人物",
+      "世间",
+      "东方",
+      "之骸"
+    ],
+    "tautological": false
+  },
+  "quickjacksonzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "舞蹈学院",
+      "埃德加",
+      "指挥官",
+      "严格",
+      "作为"
+    ],
+    "tautological": false
+  },
+  "randomgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "小心翼翼",
+      "纸袋子",
+      "了让",
+      "作为",
+      "便成"
+    ],
+    "tautological": false
+  },
+  "randompluszombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "东西",
+      "盲盒",
+      "神秘",
+      "金色",
+      "有"
+    ],
+    "tautological": false
+  },
+  "randomzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "应该",
+      "盒子",
+      "知道",
+      "人",
+      "没"
+    ],
+    "tautological": false
+  },
+  "redemeraldumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "绿宝石",
+      "亚种",
+      "反弹",
+      "子弹",
+      "弹弹"
+    ],
+    "tautological": false
+  },
+  "redgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "睡眠不足",
+      "参与者",
+      "上大",
+      "僵尸",
+      "巨人"
+    ],
+    "tautological": false
+  },
+  "redzombieloonnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "僵尸",
+      "刺戳",
+      "地上",
+      "强劲"
+    ],
+    "tautological": false
+  },
+  "refrash": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
+    ],
+    "tautological": false
+  },
+  "sandjackson": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "麦克风",
+      "举办",
+      "伴舞",
+      "分身",
+      "召唤"
+    ],
+    "tautological": false
+  },
+  "scaredfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "喷射",
+      "孢子",
+      "烟雾",
+      "近程"
+    ],
+    "tautological": false
+  },
+  "scaredsun": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产者",
+      "努力",
+      "害怕",
+      "恢复",
+      "时会"
+    ],
+    "tautological": false
+  },
+  "scaredyblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伪装者",
+      "害怕",
+      "悬浮",
+      "植物",
+      "胆小"
+    ],
+    "tautological": false
+  },
+  "scaredydoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "好搭档",
+      "射手",
+      "提升",
+      "攻速",
+      "毁灭"
+    ],
+    "tautological": false
+  },
+  "scaredyhypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "好搭档",
+      "充满",
+      "发射",
+      "喷菇",
+      "孢子"
+    ],
+    "tautological": false
+  },
+  "scaredynut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "反抗",
+      "坚果",
+      "奋起",
+      "瘦成",
+      "胆小"
+    ],
+    "tautological": false
+  },
+  "scaredypot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吹嘘",
+      "植物",
+      "身价",
+      "造势"
+    ],
+    "tautological": false
+  },
+  "scaredypotato": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "发射",
+      "孢子",
+      "消耗",
+      "血量"
+    ],
+    "tautological": false
+  },
+  "scaredypumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "善于",
+      "植物",
+      "胆小",
+      "鼓励"
+    ],
+    "tautological": false
+  },
   "scaredyshroom": {
     "antiMotifs": [],
     "basis": "text",
@@ -982,6 +6838,501 @@
       "发射",
       "孢子",
       "害怕"
+    ],
+    "tautological": false
+  },
+  "scaredystar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "虚张声势",
+      "发射",
+      "地像",
+      "形似",
+      "星星"
+    ],
+    "tautological": false
+  },
+  "seablover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "扇动",
+      "施加",
+      "水流",
+      "阻力"
+    ],
+    "tautological": false
+  },
+  "seacactus": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "仙人掌",
+      "蘑菇",
+      "海"
+    ],
+    "tautological": false
+  },
+  "seafume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "假借",
+      "吓退",
+      "喷菇",
+      "妖菇",
+      "威势"
+    ],
+    "tautological": false
+  },
+  "seahypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "救生圈",
+      "作战",
+      "僵尸",
+      "召唤",
+      "己方"
+    ],
+    "tautological": false
+  },
+  "sealantern": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光照",
+      "当作",
+      "范围",
+      "蘑菇",
+      "路灯"
+    ],
+    "tautological": false
+  },
+  "seamagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "水生",
+      "消化",
+      "磁力",
+      "能力",
+      "铁器"
+    ],
+    "tautological": false
+  },
+  "seamine_land": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "长大",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "seamine_water": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "水生",
+      "长大",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "seanut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "变大",
+      "变高",
+      "吸水",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "seapumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "修补",
+      "南瓜",
+      "能用",
+      "菌丝",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "seascaredyshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "鼓起勇气",
+      "投食",
+      "攻击",
+      "水生",
+      "胆小"
+    ],
+    "tautological": false
+  },
+  "seashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "孢子",
+      "蘑菇",
+      "海"
+    ],
+    "tautological": false
+  },
+  "seasquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "水生",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "seastarfruit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变为",
+      "杨桃",
+      "水生",
+      "连发",
+      "长大"
+    ],
+    "tautological": false
+  },
+  "seasunshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "水生",
+      "生产",
+      "长大",
+      "阳光",
+      "可"
+    ],
+    "tautological": false
+  },
+  "shulkbamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护",
+      "冬笋",
+      "护盾",
+      "持续",
+      "路障"
+    ],
+    "tautological": false
+  },
+  "shulkflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "叶片",
+      "接近",
+      "攻击",
+      "旋转"
+    ],
+    "tautological": false
+  },
+  "shulkfurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "叶草",
+      "吸收",
+      "小松",
+      "炉",
+      "钢"
+    ],
+    "tautological": false
+  },
+  "shulklotus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "护盾",
+      "植物",
+      "治疗",
+      "给予",
+      "莲花"
+    ],
+    "tautological": false
+  },
+  "silvercabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "投出",
+      "银"
+    ],
+    "tautological": false
+  },
+  "silvercorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "玉米粒",
+      "含有",
+      "投出",
+      "钱币",
+      "黄油"
+    ],
+    "tautological": false
+  },
+  "silverdoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "毁灭",
+      "稳定",
+      "银质",
+      "菇"
+    ],
+    "tautological": false
+  },
+  "silvergarlic": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大蒜",
+      "银质",
+      "咬",
+      "啃",
+      "耐"
+    ],
+    "tautological": false
+  },
+  "silvericeshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "寒冰菇",
+      "覆盖",
+      "银霜"
+    ],
+    "tautological": false
+  },
+  "silvermelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "投出",
+      "西瓜",
+      "银"
+    ],
+    "tautological": false
+  },
+  "silvernut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "银质",
+      "韧性",
+      "高"
+    ],
+    "tautological": false
+  },
+  "silverpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产",
+      "花盆",
+      "金钱"
+    ],
+    "tautological": false
+  },
+  "silversunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "生产",
+      "阳光",
+      "快"
+    ],
+    "tautological": false
+  },
+  "silverumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "投掷",
+      "金钱",
+      "弹",
+      "时",
+      "物"
+    ],
+    "tautological": false
+  },
+  "silverzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "纪念品",
+      "价值",
+      "僵尸",
+      "包裹"
+    ],
+    "tautological": false
+  },
+  "smalliceshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冻结",
+      "敌人",
+      "范围",
+      "身躯"
+    ],
+    "tautological": false
+  },
+  "smallpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "叠种",
+      "喷菇",
+      "孢子",
+      "小"
+    ],
+    "tautological": false
+  },
+  "smallumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "击退",
+      "叶子",
+      "喷菇",
+      "底座"
+    ],
+    "tautological": false
+  },
+  "sniperchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吞噬",
+      "子弹",
+      "敌人",
+      "狙击",
+      "獠牙"
+    ],
+    "tautological": false
+  },
+  "sniperpea": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "僵尸",
+      "定期",
+      "狙击",
+      "高额"
+    ],
+    "tautological": false
+  },
+  "sniperpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "后坐力",
+      "利用",
+      "基座",
+      "家族",
+      "射击"
+    ],
+    "tautological": false
+  },
+  "sniperpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "分可",
+      "合可",
+      "喷菇",
+      "爆破",
+      "狙击"
+    ],
+    "tautological": false
+  },
+  "snorklezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "呼吸",
+      "技巧",
+      "水中",
+      "潜伏"
+    ],
+    "tautological": false
+  },
+  "snowbucketzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "全部",
+      "内层",
+      "冰块",
+      "就算"
+    ],
+    "tautological": false
+  },
+  "snowconezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保温材料",
+      "骄傲地",
+      "保暖",
+      "僵尸",
+      "冰块"
+    ],
+    "tautological": false
+  },
+  "snowdolphinrider": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "前进",
+      "博士",
+      "希望",
+      "拒绝"
+    ],
+    "tautological": false
+  },
+  "snowdrownzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弟兄们",
+      "投叉者",
+      "举办",
+      "亮眼",
+      "僵尸"
     ],
     "tautological": false
   },
@@ -1001,6 +7352,78 @@
     ],
     "tautological": false
   },
+  "snowgatlingpeazombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "浑身发抖",
+      "摄氏度",
+      "低于",
+      "体内",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "snowgatlingpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰锥",
+      "发射",
+      "四发",
+      "子弹",
+      "小"
+    ],
+    "tautological": false
+  },
+  "snowgunzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "打雪仗",
+      "僵尸",
+      "冻结",
+      "发射",
+      "发现"
+    ],
+    "tautological": false
+  },
+  "snowmonsterrider": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "个体",
+      "乘骑",
+      "习性",
+      "代价",
+      "假扮"
+    ],
+    "tautological": false
+  },
+  "snowmonsterzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "埃德加",
+      "看起来",
+      "僵尸",
+      "兽皮",
+      "准确"
+    ],
+    "tautological": false
+  },
+  "snownormalzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冒险家",
+      "不同",
+      "伤疤",
+      "僵尸",
+      "冻出"
+    ],
+    "tautological": false
+  },
   "snowpeashooter": {
     "antiMotifs": [
       "屋顶",
@@ -1014,6 +7437,30 @@
       "地刺",
       "触感",
       "发射"
+    ],
+    "tautological": false
+  },
+  "snowpresent": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "促销",
+      "冰点",
+      "冻结",
+      "植物",
+      "礼盒"
+    ],
+    "tautological": false
+  },
+  "snowshieldzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "蝉联冠军",
+      "打雪仗",
+      "持盾者",
+      "有没有",
+      "习惯"
     ],
     "tautological": false
   },
@@ -1032,6 +7479,66 @@
     ],
     "tautological": false
   },
+  "snowzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "出生日期",
+      "三明治",
+      "烤牛肉",
+      "僵尸",
+      "厚重"
+    ],
+    "tautological": false
+  },
+  "solarlily": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "太阳能",
+      "亚种",
+      "变化",
+      "场景",
+      "旅行"
+    ],
+    "tautological": false
+  },
+  "solarpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "植物",
+      "生产",
+      "联动",
+      "花盆",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "solarsunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "从天而降",
+      "子弹",
+      "炮弹",
+      "熔炼",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "spikerock": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "具特",
+      "刺上",
+      "对载",
+      "种植"
+    ],
+    "tautological": false
+  },
   "splitpea": {
     "antiMotifs": [
       "屋顶",
@@ -1047,6 +7554,113 @@
     ],
     "tautological": false
   },
+  "splitpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "回弹",
+      "豌豆",
+      "小"
+    ],
+    "tautological": false
+  },
+  "spreadfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷菇",
+      "形成",
+      "扩散",
+      "蘑菇",
+      "堆"
+    ],
+    "tautological": false
+  },
+  "spreadscaredyshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷菇",
+      "形成",
+      "扩散",
+      "胆小",
+      "蘑菇"
+    ],
+    "tautological": false
+  },
+  "spruceballista": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "云杉",
+      "僵尸",
+      "发射",
+      "延时",
+      "弩箭"
+    ],
+    "tautological": false
+  },
+  "sprucefurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "云杉",
+      "吸收",
+      "小松",
+      "弓手",
+      "炉"
+    ],
+    "tautological": false
+  },
+  "spruceshooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弓箭手",
+      "发射",
+      "杉木",
+      "穿透",
+      "箭矢"
+    ],
+    "tautological": false
+  },
+  "spruceshulk": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "旋钢杉",
+      "僵尸",
+      "发射",
+      "留下",
+      "穿透"
+    ],
+    "tautological": false
+  },
+  "squalour": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "卡片",
+      "数量",
+      "智慧",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "squalourzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "关系",
+      "压到",
+      "召唤",
+      "唱歌"
+    ],
+    "tautological": false
+  },
   "squash": {
     "antiMotifs": [],
     "basis": "text",
@@ -1055,6 +7669,124 @@
       "压扁",
       "接近",
       "窝瓜"
+    ],
+    "tautological": false
+  },
+  "squashblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "反复",
+      "夯击",
+      "浮空",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "squashcorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "压到",
+      "子弹",
+      "投出",
+      "概率"
+    ],
+    "tautological": false
+  },
+  "squashkelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "形似",
+      "总计",
+      "拖入",
+      "水下"
+    ],
+    "tautological": false
+  },
+  "squashmelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "子弹",
+      "投出",
+      "溅射",
+      "破碎"
+    ],
+    "tautological": false
+  },
+  "squashnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "窝瓜",
+      "学"
+    ],
+    "tautological": false
+  },
+  "squashpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "召唤",
+      "小窝",
+      "植物",
+      "温馨",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "squashspike": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "击退",
+      "发射",
+      "地刺",
+      "子弹",
+      "弹跳"
+    ],
+    "tautological": false
+  },
+  "squashtorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "树桩",
+      "火炬",
+      "炙烤",
+      "焰光",
+      "生成"
+    ],
+    "tautological": false
+  },
+  "squashzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "奋不顾身",
+      "忍不住",
+      "僵尸",
+      "压扁",
+      "感动"
+    ],
+    "tautological": false
+  },
+  "starblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "回旋加速",
+      "好搭档",
+      "发射",
+      "吸引",
+      "星星"
     ],
     "tautological": false
   },
@@ -1073,6 +7805,42 @@
     ],
     "tautological": false
   },
+  "starfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "五发",
+      "分裂",
+      "发射",
+      "子弹",
+      "接触"
+    ],
+    "tautological": false
+  },
+  "starhypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射器",
+      "僵尸",
+      "变为",
+      "时会",
+      "星星"
+    ],
+    "tautological": false
+  },
+  "starnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "发射",
+      "受到",
+      "坚果",
+      "形似"
+    ],
+    "tautological": false
+  },
   "starpea": {
     "antiMotifs": [
       "屋顶",
@@ -1085,6 +7853,209 @@
     "motifs": [
       "发射",
       "方向"
+    ],
+    "tautological": false
+  },
+  "starpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "形似",
+      "攻速",
+      "星星",
+      "杨桃"
+    ],
+    "tautological": false
+  },
+  "starpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "好搭档",
+      "杨桃",
+      "阳光",
+      "草"
+    ],
+    "tautological": false
+  },
+  "starsniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "合击",
+      "坠落",
+      "引动",
+      "星星",
+      "流星"
+    ],
+    "tautological": false
+  },
+  "starsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "五指山",
+      "僵尸",
+      "压扁",
+      "坠落",
+      "成群"
+    ],
+    "tautological": false
+  },
+  "startorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "专用",
+      "子弹",
+      "星星",
+      "树桩",
+      "火炬"
+    ],
+    "tautological": false
+  },
+  "stonedancer": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "堆起来",
+      "小沙兽",
+      "伴舞",
+      "僵尸",
+      "包裹"
+    ],
+    "tautological": false
+  },
+  "submarine_a": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仿制品",
+      "企业",
+      "公司",
+      "原版",
+      "坚称"
+    ],
+    "tautological": false
+  },
+  "submarine_b": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "完美无缺",
+      "布雷艇",
+      "火力网",
+      "编织成",
+      "便是"
+    ],
+    "tautological": false
+  },
+  "submarine_b2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不以为然",
+      "不择手段",
+      "埃德加",
+      "设计者",
+      "作战"
+    ],
+    "tautological": false
+  },
+  "submarine_c": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "巡航导弹",
+      "埃德加",
+      "忍不住",
+      "螺旋桨",
+      "上浮"
+    ],
+    "tautological": false
+  },
+  "submarine_c2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "智慧结晶",
+      "苦心孤诣",
+      "加速度",
+      "埃德加",
+      "离心机"
+    ],
+    "tautological": false
+  },
+  "submarinezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "梦寐以求",
+      "仿生学",
+      "埃德加",
+      "潜水艇",
+      "螺旋桨"
+    ],
+    "tautological": false
+  },
+  "summonedhorse": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "列队欢迎",
+      "大放异彩",
+      "无声无息",
+      "埃德加",
+      "投影仪"
+    ],
+    "tautological": false
+  },
+  "sunblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "吹出",
+      "大量",
+      "子弹",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "sunbomb": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "樱桃",
+      "爆炸",
+      "释放",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "suncabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "能产光",
+      "弹射",
+      "投出",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "suncaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "攻击",
+      "生产",
+      "阳光",
+      "时"
     ],
     "tautological": false
   },
@@ -1119,6 +8090,901 @@
     ],
     "tautological": false
   },
+  "sungatlingpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "光锥",
+      "发射",
+      "喷菇",
+      "四发"
+    ],
+    "tautological": false
+  },
+  "sunhypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "弹力",
+      "弹跳",
+      "生产",
+      "离场"
+    ],
+    "tautological": false
+  },
+  "suniceshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "分阶段",
+      "寒气",
+      "时间",
+      "消融",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "sunjalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "增强",
+      "威力",
+      "植物",
+      "燃烧"
+    ],
+    "tautological": false
+  },
+  "sunmagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产",
+      "转化",
+      "铁器",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "sunmine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "爆炸",
+      "生产",
+      "阳光",
+      "时"
+    ],
+    "tautological": false
+  },
+  "sunnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "生产",
+      "破损",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "sunnutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生理需求",
+      "晒太阳",
+      "远大于",
+      "僵尸",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "sunpot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产",
+      "花盆",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "sunpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "光合作用",
+      "利用",
+      "南瓜",
+      "增强",
+      "生产"
+    ],
+    "tautological": false
+  },
+  "sunshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产",
+      "长大",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "sunsquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "战场",
+      "消耗",
+      "离场",
+      "窝瓜",
+      "自信"
+    ],
+    "tautological": false
+  },
+  "sunstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "发射",
+      "星星",
+      "消耗",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "superblackfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "夜以继日",
+      "召集",
+      "团长",
+      "坚果",
+      "坚硬"
+    ],
+    "tautological": false
+  },
+  "superblackhorse": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全副武装",
+      "埃德加",
+      "橄榄球",
+      "不利",
+      "买来"
+    ],
+    "tautological": false
+  },
+  "superbombthrower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "轰炸机",
+      "一般",
+      "压缩",
+      "实力",
+      "战场"
+    ],
+    "tautological": false
+  },
+  "supercaltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "愁之路",
+      "尸",
+      "滑",
+      "黏"
+    ],
+    "tautological": false
+  },
+  "supercaltroppot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "僵尸",
+      "手段",
+      "油帝",
+      "油滑"
+    ],
+    "tautological": false
+  },
+  "supercherrygatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "半熟",
+      "发射",
+      "射手",
+      "机枪",
+      "樱桃"
+    ],
+    "tautological": false
+  },
+  "supercherryshooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "无惧",
+      "樱桃",
+      "爆炸",
+      "范围"
+    ],
+    "tautological": false
+  },
+  "supercherryshooterzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "原因",
+      "发射",
+      "学会",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "superchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "前排",
+      "战神",
+      "抗能",
+      "小",
+      "打"
+    ],
+    "tautological": false
+  },
+  "superdancepolzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "天赋",
+      "惊叹",
+      "推开",
+      "撑杆"
+    ],
+    "tautological": false
+  },
+  "superdriver": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "爱好者",
+      "冰道",
+      "冰面",
+      "发动",
+      "平地"
+    ],
+    "tautological": false
+  },
+  "superfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰锥",
+      "发射",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "superfurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "小松炉",
+      "充能",
+      "存在",
+      "定期",
+      "提供"
+    ],
+    "tautological": false
+  },
+  "supergargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "中世纪",
+      "脱下来",
+      "僵尸",
+      "冒险",
+      "名为"
+    ],
+    "tautological": false
+  },
+  "supergatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "大量",
+      "概率",
+      "豌豆",
+      "有"
+    ],
+    "tautological": false
+  },
+  "supergatlingpeamine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "同类",
+      "土豆",
+      "地下",
+      "沟通"
+    ],
+    "tautological": false
+  },
+  "supergatlingpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "南瓜",
+      "射手",
+      "机枪",
+      "特点"
+    ],
+    "tautological": false
+  },
+  "superhorse": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "所向披靡",
+      "七大洲",
+      "橄榄球",
+      "不利",
+      "严重"
+    ],
+    "tautological": false
+  },
+  "superhurricaneblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "僵尸",
+      "削弱",
+      "增生",
+      "扬起"
+    ],
+    "tautological": false
+  },
+  "superhypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "孢子",
+      "爆炸",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "superhypnodoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "毁灭",
+      "离场",
+      "范围",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "superhypnogatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "射手",
+      "机枪",
+      "豌豆",
+      "魅惑"
+    ],
+    "tautological": false
+  },
+  "superjackboxzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "佼佼者",
+      "僵尸",
+      "口号",
+      "士气",
+      "导致"
+    ],
+    "tautological": false
+  },
+  "superjalanut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "亚种",
+      "僵尸",
+      "受击",
+      "帝果"
+    ],
+    "tautological": false
+  },
+  "superkelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "无冕之王",
+      "三行",
+      "发射",
+      "子弹",
+      "弹跳"
+    ],
+    "tautological": false
+  },
+  "superkirov": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "极乐世界",
+      "战斗机",
+      "飞行物",
+      "不了",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "superladderzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "依赖",
+      "僵尸",
+      "利器",
+      "咒梯",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "superlevatation": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射器",
+      "埃德加",
+      "驾驶员",
+      "驾驶舱",
+      "保留"
+    ],
+    "tautological": false
+  },
+  "supermachinenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "和护盾",
+      "制造",
+      "卡牌",
+      "吸收",
+      "回复"
+    ],
+    "tautological": false
+  },
+  "supermachinenutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "机器人",
+      "僵尸",
+      "公司",
+      "出来"
+    ],
+    "tautological": false
+  },
+  "supermachineshardplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "大量",
+      "承伤",
+      "植物",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "supermelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "分裂",
+      "投出",
+      "概率",
+      "蔬果",
+      "连射"
+    ],
+    "tautological": false
+  },
+  "supernutshooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "坚果",
+      "射手",
+      "机枪",
+      "滚"
+    ],
+    "tautological": false
+  },
+  "superpenguinzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "暴风雪",
+      "企鹅",
+      "作为",
+      "僵尸",
+      "冰面"
+    ],
+    "tautological": false
+  },
+  "superpogozombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不太可能",
+      "瓜皮帽",
+      "长距离",
+      "僵尸",
+      "利用"
+    ],
+    "tautological": false
+  },
+  "superpolevaulter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "爆发力",
+      "优秀",
+      "僵尸",
+      "充分",
+      "冠军"
+    ],
+    "tautological": false
+  },
+  "superpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "仙人掌",
+      "仙人球",
+      "制造",
+      "南瓜"
+    ],
+    "tautological": false
+  },
+  "supersnowgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "寒冰",
+      "射手",
+      "机枪",
+      "豌豆"
+    ],
+    "tautological": false
+  },
+  "supersnowmonsterzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "弹跳力",
+      "兽王",
+      "决定",
+      "出众",
+      "力量"
+    ],
+    "tautological": false
+  },
+  "superspruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "云杉",
+      "充能",
+      "发射",
+      "寒冷",
+      "旋叶"
+    ],
+    "tautological": false
+  },
+  "superstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用光",
+      "力量",
+      "召唤",
+      "和磁",
+      "地面"
+    ],
+    "tautological": false
+  },
+  "supersubmarine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "潜水员",
+      "驾驶员",
+      "优秀",
+      "公司",
+      "加快"
+    ],
+    "tautological": false
+  },
+  "supersunnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "受击",
+      "回血",
+      "点击",
+      "生成"
+    ],
+    "tautological": false
+  },
+  "supersunnutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "鹤立鸡群",
+      "优点",
+      "伤害",
+      "僵尸",
+      "华丽"
+    ],
+    "tautological": false
+  },
+  "superthreegatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "发射",
+      "射手",
+      "机枪",
+      "豌豆"
+    ],
+    "tautological": false
+  },
+  "superthreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "浴火重生",
+      "凤凰",
+      "涅槃"
+    ],
+    "tautological": false
+  },
+  "superthreepeater_sp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "凤凰",
+      "复浴",
+      "射手",
+      "展翼",
+      "形态"
+    ],
+    "tautological": false
+  },
+  "supertorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "剧烈",
+      "树桩",
+      "火炬",
+      "点燃",
+      "爆燃"
+    ],
+    "tautological": false
+  },
+  "superumbrella": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "击退",
+      "变为",
+      "残血",
+      "金银"
+    ],
+    "tautological": false
+  },
+  "swordstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙剑",
+      "发射",
+      "御敌",
+      "方向",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "tallfirenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "口感",
+      "坚果",
+      "高"
+    ],
+    "tautological": false
+  },
+  "tallfirenutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "怒气冲冲",
+      "寒冰高",
+      "僵尸",
+      "兄弟",
+      "冰菇"
+    ],
+    "tautological": false
+  },
+  "tallicenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "口感",
+      "坚果",
+      "高"
+    ],
+    "tautological": false
+  },
+  "tallicenutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "众说纷纭",
+      "于寒冰",
+      "埃德加",
+      "世界",
+      "严寒"
+    ],
+    "tautological": false
+  },
+  "tallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "难以逾越",
+      "坚果",
+      "种植",
+      "需要",
+      "高大"
+    ],
+    "tautological": false
+  },
+  "tallnutfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "坚硬",
+      "如",
+      "钢",
+      "高"
+    ],
+    "tautological": false
+  },
+  "tallnutfootballzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橄榄球",
+      "僵尸",
+      "创在",
+      "原本",
+      "坚果"
+    ],
+    "tautological": false
+  },
+  "tanglekelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "拖入",
+      "接近",
+      "水下",
+      "水草"
+    ],
+    "tautological": false
+  },
+  "thorns": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "迎头痛击",
+      "僵尸",
+      "植物",
+      "爆出",
+      "送去"
+    ],
+    "tautological": false
+  },
+  "thornsbamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冬笋",
+      "对抗",
+      "时会",
+      "炸毛"
+    ],
+    "tautological": false
+  },
+  "thornslotus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大量",
+      "寒冰",
+      "植物",
+      "莲花",
+      "雪寒"
+    ],
+    "tautological": false
+  },
+  "thornsshulk": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "高速旋转",
+      "加快",
+      "叶片",
+      "增多",
+      "效率"
+    ],
+    "tautological": false
+  },
+  "thornsspruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "击中",
+      "反击",
+      "甩出",
+      "雪球",
+      "时"
+    ],
+    "tautological": false
+  },
   "threecabbage": {
     "antiMotifs": [],
     "basis": "text",
@@ -1128,6 +8994,65 @@
       "弹射",
       "能够",
       "出"
+    ],
+    "tautological": false
+  },
+  "threecorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "增加",
+      "子弹",
+      "投出",
+      "投射"
+    ],
+    "tautological": false
+  },
+  "threekelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "发射",
+      "子弹",
+      "水草",
+      "缠绕"
+    ],
+    "tautological": false
+  },
+  "threemelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "西瓜",
+      "出",
+      "投"
+    ],
+    "tautological": false
+  },
+  "threemine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "休整",
+      "出土",
+      "发射",
+      "土豆"
+    ],
+    "tautological": false
+  },
+  "threenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "高高的",
+      "不同",
+      "吐出",
+      "坚果",
+      "射手"
     ],
     "tautological": false
   },
@@ -1162,6 +9087,425 @@
     ],
     "tautological": false
   },
+  "threepot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "作为",
+      "基座",
+      "增幅",
+      "射击",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "threepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "伤势",
+      "僵尸",
+      "加剧",
+      "受伤"
+    ],
+    "tautological": false
+  },
+  "threespike": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "发射",
+      "地刺",
+      "奇效",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "threesquash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "发射",
+      "子弹",
+      "弹跳",
+      "窝瓜"
+    ],
+    "tautological": false
+  },
+  "threetorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变为",
+      "开裂",
+      "树桩",
+      "火炬",
+      "火焰"
+    ],
+    "tautological": false
+  },
+  "thronsaloes": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "投掷",
+      "持续",
+      "植物",
+      "沐浴",
+      "雪球"
+    ],
+    "tautological": false
+  },
+  "torchfirenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "坚果",
+      "汇聚",
+      "焰光",
+      "成"
+    ],
+    "tautological": false
+  },
+  "torchfirepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "区别",
+      "南瓜",
+      "汇聚",
+      "焰光",
+      "成"
+    ],
+    "tautological": false
+  },
+  "torchfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "化为",
+      "压缩",
+      "喷出",
+      "旺盛",
+      "火焰"
+    ],
+    "tautological": false
+  },
+  "torchmine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "点燃",
+      "焰光",
+      "生成",
+      "豌豆"
+    ],
+    "tautological": false
+  },
+  "torchpumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "兼具",
+      "南瓜",
+      "树桩",
+      "火炬",
+      "焰光"
+    ],
+    "tautological": false
+  },
+  "torchseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "反复",
+      "吸纳",
+      "子弹",
+      "点燃",
+      "焰光"
+    ],
+    "tautological": false
+  },
+  "torchspike": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "地刺",
+      "旺盛",
+      "点燃",
+      "焰光",
+      "燃烧"
+    ],
+    "tautological": false
+  },
+  "torchsunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "子弹",
+      "熔炼",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "torchwood": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "增加",
+      "树桩",
+      "火炬",
+      "点燃"
+    ],
+    "tautological": false
+  },
+  "tower_bigsunshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "生产者",
+      "储蓄",
+      "吸收",
+      "增值",
+      "批量"
+    ],
+    "tautological": false
+  },
+  "tower_cherrychomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "吞食",
+      "樱桃",
+      "炸弹",
+      "释放"
+    ],
+    "tautological": false
+  },
+  "tower_cherryshooter": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "樱桃",
+      "爆炸",
+      "范围",
+      "小"
+    ],
+    "tautological": false
+  },
+  "tower_doomfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷菇",
+      "强力",
+      "手动",
+      "攻击",
+      "需要"
+    ],
+    "tautological": false
+  },
+  "tower_doomstar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "化作",
+      "地面",
+      "毁灭",
+      "流星",
+      "砸"
+    ],
+    "tautological": false
+  },
+  "tower_electriconion": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "传导",
+      "僵尸",
+      "攻击",
+      "汇聚",
+      "电流"
+    ],
+    "tautological": false
+  },
+  "tower_gravebuster": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吞噬",
+      "墓碑",
+      "种植"
+    ],
+    "tautological": false
+  },
+  "tower_iceblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叶草",
+      "冻结",
+      "刮起",
+      "寒风",
+      "持续"
+    ],
+    "tautological": false
+  },
+  "tower_icegloom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "喷射",
+      "寒冷",
+      "施加",
+      "烟雾"
+    ],
+    "tautological": false
+  },
+  "tower_lilypad": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "睡莲",
+      "种植"
+    ],
+    "tautological": false
+  },
+  "tower_peapuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "喷菇",
+      "豌豆",
+      "小"
+    ],
+    "tautological": false
+  },
+  "tower_peasunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "命中",
+      "子弹",
+      "阳光",
+      "时"
+    ],
+    "tautological": false
+  },
+  "tower_scaredyfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "喷射",
+      "孢子",
+      "烟雾",
+      "近程"
+    ],
+    "tautological": false
+  },
+  "tower_squashnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚果",
+      "窝瓜",
+      "学"
+    ],
+    "tautological": false
+  },
+  "tower_starnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "发射",
+      "受到",
+      "坚果",
+      "形似"
+    ],
+    "tautological": false
+  },
+  "tower_sunmine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "爆炸",
+      "阳光",
+      "时",
+      "雷"
+    ],
+    "tautological": false
+  },
+  "tower_sunshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "成长",
+      "生产",
+      "阳光"
+    ],
+    "tautological": false
+  },
+  "tower_threemine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三行",
+      "休整",
+      "出土",
+      "发射",
+      "土豆"
+    ],
+    "tautological": false
+  },
+  "tower_watercan": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "迫击炮",
+      "僵尸",
+      "发射",
+      "弹射",
+      "来回"
+    ],
+    "tautological": false
+  },
+  "trainingdummy": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "木桩",
+      "测试",
+      "用于"
+    ],
+    "tautological": false
+  },
+  "treasuremine": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "土豆",
+      "埋头",
+      "宝藏",
+      "寻找",
+      "忙于"
+    ],
+    "tautological": false
+  },
   "twinflower": {
     "antiMotifs": [],
     "basis": "text",
@@ -1169,6 +9513,1064 @@
       "向日葵",
       "产量",
       "阳光"
+    ],
+    "tautological": false
+  },
+  "twinmarigold": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "金盏花",
+      "产量",
+      "金钱"
+    ],
+    "tautological": false
+  },
+  "twinshulk": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "叶片",
+      "接近",
+      "攻击",
+      "旋转"
+    ],
+    "tautological": false
+  },
+  "ulti_cherrygatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "信息",
+      "揭晓",
+      "植物"
+    ],
+    "tautological": false
+  },
+  "ultimatebamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "云杉",
+      "亚种",
+      "强敌",
+      "生韧",
+      "矗立"
+    ],
+    "tautological": false
+  },
+  "ultimatebigchomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用",
+      "吞食",
+      "巨嘴",
+      "样样",
+      "消化"
+    ],
+    "tautological": false
+  },
+  "ultimatebiggatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "越战越勇",
+      "黑曜石",
+      "冷焰",
+      "发射",
+      "大量"
+    ],
+    "tautological": false
+  },
+  "ultimatebigsniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "越战越勇",
+      "亚种",
+      "发射",
+      "机枪",
+      "激光"
+    ],
+    "tautological": false
+  },
+  "ultimateblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "回旋加速",
+      "好搭档",
+      "亚种",
+      "发射",
+      "吸引"
+    ],
+    "tautological": false
+  },
+  "ultimatecabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全场",
+      "召唤",
+      "太阳",
+      "定期",
+      "灼烧"
+    ],
+    "tautological": false
+  },
+  "ultimatecabbagecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "加农炮",
+      "卷心菜",
+      "亚种",
+      "打击",
+      "抛投"
+    ],
+    "tautological": false
+  },
+  "ultimatecactus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "铺天盖地",
+      "亚种",
+      "伤害",
+      "冰锥",
+      "出场"
+    ],
+    "tautological": false
+  },
+  "ultimatecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "加农炮",
+      "主炮",
+      "全场",
+      "副炮",
+      "力量"
+    ],
+    "tautological": false
+  },
+  "ultimatecattail": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "发射",
+      "导弹",
+      "射线",
+      "樱桃"
+    ],
+    "tautological": false
+  },
+  "ultimatechomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一体",
+      "前排",
+      "喜爱",
+      "战神",
+      "攻防"
+    ],
+    "tautological": false
+  },
+  "ultimatecorn": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "投出究",
+      "吸收",
+      "坍缩",
+      "威力",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "ultimatecornfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "取暖",
+      "号令",
+      "喷涌",
+      "弹弹"
+    ],
+    "tautological": false
+  },
+  "ultimatedolphin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "震耳欲聋",
+      "埃德加",
+      "爆炸声",
+      "驭巨鲸",
+      "任务"
+    ],
+    "tautological": false
+  },
+  "ultimatedoomgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "余烬",
+      "发射",
+      "子弹",
+      "射手",
+      "形态"
+    ],
+    "tautological": false
+  },
+  "ultimatedoomscaredy": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "余烬",
+      "发射",
+      "增益",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "ultimateendoflamezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "深火可",
+      "万物",
+      "不到",
+      "世纪",
+      "丛林"
+    ],
+    "tautological": false
+  },
+  "ultimateexplodecannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "加农炮",
+      "力量",
+      "威力",
+      "底座",
+      "引出"
+    ],
+    "tautological": false
+  },
+  "ultimatefireseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "吸纳",
+      "成长",
+      "攻击",
+      "极爆"
+    ],
+    "tautological": false
+  },
+  "ultimatefly": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "高科技",
+      "发射",
+      "激光",
+      "穿透"
+    ],
+    "tautological": false
+  },
+  "ultimatefootballdrown": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不可胜计",
+      "源源不绝",
+      "三叉戟",
+      "意味着",
+      "溺水者"
+    ],
+    "tautological": false
+  },
+  "ultimatefootballzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坐困愁城",
+      "尸山血海",
+      "突出重围",
+      "一战",
+      "一族"
+    ],
+    "tautological": false
+  },
+  "ultimatefume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "减速",
+      "喷射",
+      "寒冷",
+      "持续",
+      "整行"
+    ],
+    "tautological": false
+  },
+  "ultimategargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚如磐石",
+      "水深火热",
+      "中心",
+      "僵尸",
+      "全军"
+    ],
+    "tautological": false
+  },
+  "ultimategarlicsplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "子弹",
+      "射出",
+      "射手",
+      "影响"
+    ],
+    "tautological": false
+  },
+  "ultimategatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "四发",
+      "子弹",
+      "樱桃",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "ultimategatlingblover": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "协同",
+      "射手",
+      "提升",
+      "攻击"
+    ],
+    "tautological": false
+  },
+  "ultimategloom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "体内",
+      "冷寂",
+      "喷吐",
+      "孢子",
+      "封印"
+    ],
+    "tautological": false
+  },
+  "ultimategoldgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "震天撼地",
+      "埃德加",
+      "分身",
+      "制式",
+      "制造"
+    ],
+    "tautological": false
+  },
+  "ultimatehelmetgatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "倾泻",
+      "六发",
+      "发射",
+      "子弹",
+      "弹雨"
+    ],
+    "tautological": false
+  },
+  "ultimatehorse": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "中国象棋",
+      "下属",
+      "不住",
+      "九宫",
+      "争夺"
+    ],
+    "tautological": false
+  },
+  "ultimatehorse2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "孤身一人",
+      "铜墙铁壁",
+      "不负",
+      "主宰",
+      "之威"
+    ],
+    "tautological": false
+  },
+  "ultimatehugenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "势不可当",
+      "泰山压顶",
+      "黑曜石",
+      "家族",
+      "岩崩"
+    ],
+    "tautological": false
+  },
+  "ultimatehypno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用",
+      "力量",
+      "发射",
+      "孢子",
+      "消化"
+    ],
+    "tautological": false
+  },
+  "ultimatehypnodoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不可",
+      "僵尸",
+      "召唤",
+      "捕获",
+      "领袖"
+    ],
+    "tautological": false
+  },
+  "ultimatehypnopumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "僵尸",
+      "汲取",
+      "消磨",
+      "生命"
+    ],
+    "tautological": false
+  },
+  "ultimateicedoom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "使用",
+      "冰流",
+      "冰神",
+      "冻结"
+    ],
+    "tautological": false
+  },
+  "ultimateiceshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冰川",
+      "凝坚",
+      "召唤",
+      "封冻"
+    ],
+    "tautological": false
+  },
+  "ultimateiceshroom2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "共鸣",
+      "冰川",
+      "冰菇",
+      "冰霜"
+    ],
+    "tautological": false
+  },
+  "ultimateimpking": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "风度翩翩",
+      "小鬼头",
+      "一般",
+      "世界",
+      "作为"
+    ],
+    "tautological": false
+  },
+  "ultimatejackboxzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不容置疑",
+      "迫不及待",
+      "小孩子",
+      "送出去",
+      "仆从"
+    ],
+    "tautological": false
+  },
+  "ultimatejacksondriver": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全心投入",
+      "流行乐",
+      "僵尸",
+      "巡演",
+      "搭建"
+    ],
+    "tautological": false
+  },
+  "ultimatejalanut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "保龄",
+      "催生",
+      "僵尸",
+      "帝果"
+    ],
+    "tautological": false
+  },
+  "ultimatejalapeno": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不受",
+      "亡魂",
+      "冰火",
+      "冰菇",
+      "冲击"
+    ],
+    "tautological": false
+  },
+  "ultimatejalapuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "黑曜石",
+      "不受",
+      "亚种",
+      "位置",
+      "保护"
+    ],
+    "tautological": false
+  },
+  "ultimatekelp": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "榨取",
+      "水路",
+      "贪婪",
+      "霸主"
+    ],
+    "tautological": false
+  },
+  "ultimatekirovzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "驾驶员",
+      "制成",
+      "刺眼",
+      "剩下",
+      "升空"
+    ],
+    "tautological": false
+  },
+  "ultimatelanternsplit": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用光",
+      "接收",
+      "流转",
+      "湮灭",
+      "目标"
+    ],
+    "tautological": false
+  },
+  "ultimatelegionzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坚不可摧",
+      "无坚不摧",
+      "阿尔法",
+      "军团",
+      "出动"
+    ],
+    "tautological": false
+  },
+  "ultimatelunarcabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "太阳神",
+      "亚种",
+      "全场",
+      "召唤"
+    ],
+    "tautological": false
+  },
+  "ultimatemachinenut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "全场",
+      "反哺",
+      "回血",
+      "庞大",
+      "承伤"
+    ],
+    "tautological": false
+  },
+  "ultimatemachinenutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄球",
+      "保护",
+      "像是",
+      "僵尸",
+      "公司"
+    ],
+    "tautological": false
+  },
+  "ultimatemagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "伤害",
+      "僵尸",
+      "吸取",
+      "吸引"
+    ],
+    "tautological": false
+  },
+  "ultimatemelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "的究极蒜",
+      "分裂",
+      "投出",
+      "散射",
+      "果卷"
+    ],
+    "tautological": false
+  },
+  "ultimatemeloncannon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "加农炮",
+      "亚种",
+      "僚机",
+      "冷寂",
+      "冻彻"
+    ],
+    "tautological": false
+  },
+  "ultimatemelonpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "分裂",
+      "喷菇",
+      "底座",
+      "投出"
+    ],
+    "tautological": false
+  },
+  "ultimateminigun": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "发射",
+      "启动",
+      "射击",
+      "樱桃",
+      "爆炸"
+    ],
+    "tautological": false
+  },
+  "ultimatepaperzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "另当别论",
+      "埃德加",
+      "作为",
+      "儒雅",
+      "博士"
+    ],
+    "tautological": false
+  },
+  "ultimateplantern": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰辉之力",
+      "亚种",
+      "体内",
+      "冷却",
+      "封存"
+    ],
+    "tautological": false
+  },
+  "ultimatepoisonfume": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "越战越勇",
+      "僵尸",
+      "喷射",
+      "持续",
+      "攻击"
+    ],
+    "tautological": false
+  },
+  "ultimateportalnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "化险为夷",
+      "超时空",
+      "亚种",
+      "僵尸",
+      "吸收"
+    ],
+    "tautological": false
+  },
+  "ultimateportalsniper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "狙击手",
+      "亚种",
+      "凝滞",
+      "协同",
+      "发动"
+    ],
+    "tautological": false
+  },
+  "ultimatepotatonut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "黑曜石",
+      "亚种",
+      "土豆",
+      "坚果",
+      "坚硬"
+    ],
+    "tautological": false
+  },
+  "ultimatepumpkin": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "僵尸",
+      "免疫",
+      "减半",
+      "出土"
+    ],
+    "tautological": false
+  },
+  "ultimateredlunar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "月亮神",
+      "使用",
+      "定期",
+      "尸潮"
+    ],
+    "tautological": false
+  },
+  "ultimateseashroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "主宰",
+      "僵尸",
+      "召唤",
+      "妖菇",
+      "底座"
+    ],
+    "tautological": false
+  },
+  "ultimatesnipergatling": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "狙击枪",
+      "完美",
+      "战神",
+      "机枪",
+      "武装"
+    ],
+    "tautological": false
+  },
+  "ultimatesnowgatlingpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冰锥",
+      "发射",
+      "受伤",
+      "喷菇"
+    ],
+    "tautological": false
+  },
+  "ultimatesnowzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不知",
+      "人造",
+      "再见",
+      "利刃",
+      "塑造"
+    ],
+    "tautological": false
+  },
+  "ultimatespring": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "弹射",
+      "持续",
+      "火海",
+      "火神"
+    ],
+    "tautological": false
+  },
+  "ultimatespruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "盛钢莲",
+      "杉叶",
+      "树上",
+      "聚雪",
+      "寒"
+    ],
+    "tautological": false
+  },
+  "ultimatestar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "力量",
+      "召唤",
+      "地面",
+      "定期",
+      "掌握"
+    ],
+    "tautological": false
+  },
+  "ultimatestartorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "亚种",
+      "包括",
+      "塑成",
+      "子弹",
+      "尖刺"
+    ],
+    "tautological": false
+  },
+  "ultimatesunflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "合目",
+      "子弹",
+      "熔炼",
+      "生产",
+      "睁眼"
+    ],
+    "tautological": false
+  },
+  "ultimatesungatlingpuff": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "熠熠生辉",
+      "亚种",
+      "僵尸",
+      "充盈",
+      "光锥"
+    ],
+    "tautological": false
+  },
+  "ultimatesunmagnet": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用光",
+      "亚种",
+      "伤害",
+      "力量",
+      "加成"
+    ],
+    "tautological": false
+  },
+  "ultimatesunnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保龄",
+      "催生",
+      "帝果",
+      "形态",
+      "榨取"
+    ],
+    "tautological": false
+  },
+  "ultimateswordzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "不化",
+      "卡牌",
+      "形式",
+      "得道",
+      "怪异"
+    ],
+    "tautological": false
+  },
+  "ultimatetallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "黑曜石",
+      "坚果",
+      "坚硬",
+      "高"
+    ],
+    "tautological": false
+  },
+  "ultimatetorch": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "塑成",
+      "子弹",
+      "弹跳",
+      "形状",
+      "整行"
+    ],
+    "tautological": false
+  },
+  "ultimatewintermelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰神瓜",
+      "冰环",
+      "召唤",
+      "大量",
+      "投掷"
+    ],
+    "tautological": false
+  },
+  "ultiwatergargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三叉戟",
+      "防御力",
+      "不同",
+      "互聊",
+      "低沉"
+    ],
+    "tautological": false
+  },
+  "umbrellaleaf": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "僵尸",
+      "叶子",
+      "投掷",
+      "蹦极"
+    ],
+    "tautological": false
+  },
+  "umbrellapot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护伞",
+      "伞类",
+      "叶子",
+      "帮助",
+      "底座"
+    ],
+    "tautological": false
+  },
+  "vectorplant": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "前进",
+      "拥挤",
+      "指示",
+      "方向"
+    ],
+    "tautological": false
+  },
+  "voodoodollzombie": {
+    "antiMotifs": [],
+    "basis": "name",
+    "motifs": [
+      "未命名"
     ],
     "tautological": false
   },
@@ -1181,6 +10583,245 @@
       "坚硬",
       "外壳",
       "植物"
+    ],
+    "tautological": false
+  },
+  "wallnutzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "会动",
+      "僵尸",
+      "可能",
+      "坚果",
+      "头上"
+    ],
+    "tautological": false
+  },
+  "wateraloes": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰块",
+      "冰寒",
+      "喜爱",
+      "寒冷",
+      "投出"
+    ],
+    "tautological": false
+  },
+  "waterballista": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冻结",
+      "发射",
+      "变得",
+      "威势"
+    ],
+    "tautological": false
+  },
+  "waterbamboo": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵尸",
+      "冬笋",
+      "冰寒",
+      "受冻",
+      "善于"
+    ],
+    "tautological": false
+  },
+  "waterfurnace": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "吸收",
+      "小松",
+      "水滴",
+      "芦荟",
+      "炉"
+    ],
+    "tautological": false
+  },
+  "waterjackboxjumpzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "硝化甘油",
+      "丢出",
+      "使用",
+      "做到",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "watershulk": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "叶草",
+      "喜寒",
+      "寒冷",
+      "施加"
+    ],
+    "tautological": false
+  },
+  "waterspruce": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰块",
+      "发射",
+      "寒冷",
+      "攻击",
+      "时则"
+    ],
+    "tautological": false
+  },
+  "wheat": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "变为",
+      "定期",
+      "植物",
+      "融合"
+    ],
+    "tautological": false
+  },
+  "whitefootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "职业生涯",
+      "橄榄球",
+      "不同",
+      "僵尸",
+      "到达"
+    ],
+    "tautological": false
+  },
+  "wintermelon": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "寒冰",
+      "寒冷",
+      "施加",
+      "西瓜",
+      "出"
+    ],
+    "tautological": false
+  },
+  "xxspot": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "动植物",
+      "专属",
+      "极恐",
+      "植物",
+      "模式"
+    ],
+    "tautological": false
+  },
+  "yellowfootball": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "利用自身",
+      "橄榄球",
+      "除草机",
+      "僵尸",
+      "前进"
+    ],
+    "tautological": false
+  },
+  "yellowgargantuar": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "创纪录",
+      "习惯",
+      "僵尸",
+      "准备",
+      "喜欢"
+    ],
+    "tautological": false
+  },
+  "zombie9527": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "爱好者",
+      "专属",
+      "习惯",
+      "人类",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "zombieboss": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "博士学位",
+      "埃德加",
+      "机器人",
+      "乔治",
+      "俯身"
+    ],
+    "tautological": false
+  },
+  "zombieboss2": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "僵王",
+      "击败",
+      "博士",
+      "夺回",
+      "奖杯"
+    ],
+    "tautological": false
+  },
+  "zombieduck": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "救生圈",
+      "不了",
+      "僵尸",
+      "处理",
+      "才能"
+    ],
+    "tautological": false
+  },
+  "zombieendoflame": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一般",
+      "失去",
+      "清除",
+      "红莲",
+      "肥力"
+    ],
+    "tautological": false
+  },
+  "zombieloonnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "坏消息",
+      "传说",
+      "僵尸",
+      "发射",
+      "坚果"
     ],
     "tautological": false
   }

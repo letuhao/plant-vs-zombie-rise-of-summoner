@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "armament-primary",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-018"
         },
         {
           "role": "core-guard",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-011"
         },
         {
           "role": "footing",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-006"
         },
         {
           "role": "girdle",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-soil-b-004"
         }
       ],
       "thresholds": [

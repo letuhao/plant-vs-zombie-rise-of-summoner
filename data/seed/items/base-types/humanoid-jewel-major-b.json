@@ -731,6 +731,291 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-neck-b-021",
+      "nameKey": "base.etched-torque",
+      "name": "Etched Torque",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-torque",
+      "flavorKey": "flavor.base.etched-torque",
+      "flavor": "A rigid band of polished metal designed to sit high against the throat, serving as a focal point for channeled essence.",
+      "tags": [
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-022",
+      "nameKey": "base.polished-torc",
+      "name": "Polished Torc",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-torc",
+      "flavorKey": "flavor.base.polished-torc",
+      "flavor": "A rigid, seamless band of heavy metal designed to rest firmly against the throat. Its weight serves as a constant reminder of the wearer's station.",
+      "tags": [
+        "metal",
+        "heavy",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-023",
+      "nameKey": "base.polished-torc",
+      "name": "Polished Torc",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-torc",
+      "flavorKey": "flavor.base.polished-torc",
+      "flavor": "A rigid, seamless band of precious metal designed to rest heavily against the throat. It serves as a permanent mark of status and unyielding presence.",
+      "tags": [
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-024",
+      "nameKey": "base.etched-torc",
+      "name": "Etched Torc",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-torc",
+      "flavorKey": "flavor.base.etched-torc",
+      "flavor": "A rigid, heavy band of polished metal designed to sit firmly against the throat. Its surface is deeply carved with geometric patterns that catch the light.",
+      "tags": [
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-025",
+      "nameKey": "base.etched-gorget",
+      "name": "Etched Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-gorget",
+      "flavorKey": "flavor.base.etched-gorget",
+      "flavor": "A rigid, polished plate designed to protect the throat and serve as a canvas for ceremonial engravings.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-026",
+      "nameKey": "base.etched-torque",
+      "name": "Etched Torque",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-torque",
+      "flavorKey": "flavor.base.etched-torque",
+      "flavor": "A rigid band of polished metal designed to sit high against the throat, serving as a focal point for concentrated essence.",
+      "tags": [
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-027",
+      "nameKey": "base.polished-torc",
+      "name": "Polished Torc",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-torc",
+      "flavorKey": "flavor.base.polished-torc",
+      "flavor": "A rigid, seamless band of precious metal designed to rest heavily against the throat. It serves as a permanent mark of status and unyielding presence.",
+      "tags": [
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-028",
+      "nameKey": "base.etched-gorget",
+      "name": "Etched Gorget",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gorget",
+      "flavorKey": "flavor.base.etched-gorget",
+      "flavor": "A rigid, protective band designed to shield the throat and collarbone from sudden strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

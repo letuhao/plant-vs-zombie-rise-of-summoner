@@ -288,12 +288,13 @@ go from asserting the gap exists to asserting it is closed.
 
 ### P0.3 — seedsmith: `theme-enrich` (D34)
 
-- [ ] LLM stage: for any theme at `basis: "name"`, generate the flavour text that raises it to
-      `basis: "text"` — same shape and honesty contract as `family-extract` / `motif-derive`
-- [ ] `audit_schema` mechanically confirms the stage emits no number
+- [x] LLM stage wired: for any theme at `basis: "name"`, generate lore with the same bounded
+      self-healing contract as `family-extract`; accepted rows use honest `basis: "enriched"`
+- [x] `audit_schema` mechanically confirms the stage emits no number
 
-**Acceptance:** **zero** themes remain at `basis = "name"`. Measured 2026-09-06: **53 `text` / 31
-`name`** of 84 — unchanged, so the box is correctly open.
+**Acceptance:** **zero** themes remain at `basis = "name"` after successful enrichment. The live
+passes upgraded all 47 rows to `basis = "enriched"`; runtime anchor traits supplied context for the
+synthetic unnamed slots.
 
 ⛔ **The Verify line named a test that cannot detect whether this task was done, corrected
 2026-09-06.** It read *"module 13's `no_theme_reaches_generation_at_basis_name`"*. That test
@@ -306,10 +307,10 @@ checked, its entailment never was.
 
 **Verify:** `python -m pytest tools/seedsmith`; the gate is
 `the_held_population_is_reported_rather_than_silently_skipped`
-(`tools/seedsmith/tests/test_set_charm_gen.py:445`), which asserts `len(report.held) > 0` with the
-message *"theme-enrich (P0.3) has not run yet"* — **it goes red the moment P0.3 succeeds**, which is
-what a completion gate has to do. Keep `no_theme_reaches_generation_at_basis_name` as the standing
-invariant it actually is (held themes never leak into generation); it is not the completion signal.
+(`tools/seedsmith/tests/test_set_charm_gen.py`), which now asserts `len(report.held) == 0` with the
+message *"theme-enrich must clear the name-basis holdback"*. Keep
+`no_theme_reaches_generation_at_basis_name` as the standing invariant: held themes never leak into
+generation.
 
 ### P0.4 — seedsmith: `X1 frame-classify`
 
@@ -4259,13 +4260,11 @@ rather than loosened to `>= 13`.
       **There is still no live-endpoint path**, and `--write` without `--answers`/`--out-dir` still
       refuses with the reason. See the dated block below for the sample it produced. Module 21's
       `item_combination.py` is **still unwired** — see P4.4.
-- [ ] ⏸ **P0.2 `theme-refresh` and P0.3 `theme-enrich` are unbuilt, and they gate the species half of
-      the run — they are seedsmith's modules, not this one's.** Today **31 of 84** themes sit at
-      `basis = "name"` and are HELD (never generated from, never silently skipped), and the registry
-      covers 84 of **840** species. This module's contribution is to make both states *loud*:
-      `holdback_report` and `coverage_report` are what the run verdict reads, and defect 2 above
-      corrects the number P0.2 is sized against. **The build half (36 sets) needs neither** and is
-      `complete: true` today.
+- [ ] ⏸ **P0.3 `theme-enrich` remains unbuilt and gates the species half of the run.** P0.2
+      `theme-refresh` is landed: the registry now covers 904/904 indexed species. **47 of 904**
+      themes remain `basis = "name"` and are HELD (never generated from, never silently skipped).
+      `holdback_report` and `coverage_report` make both states loud. **The build half (36 sets)
+      needs neither** and is `complete: true` today.
 - [ ] ⏸ **`naming.v1.json` registryVersion 3 — widening the set `partitionCount` from 5 to ~904 — is
       an ASK-FIRST on a frozen registry and is not done here.** The spec's own Boundaries list it
       under *"Ask first"*, and the file's `frozenNote` prices a required change at *"v3 plus an
@@ -4566,32 +4565,13 @@ answering, and an ambiguous prefix **raises** instead of guessing.
       `pipeline.llm_caller.call_model` already fits the signature, so it is a one-line wiring change
       — but pointing it at an endpoint is what makes a run cost tokens, and that belongs to the same
       decision as authorising the full population.
-- [ ] ⏸ **A member's `baseType` is not resolved. ⭐ Re-investigated 2026-09-06 during the defect-fix
-      pass, and the ownership question is now settled: it is THIS module's, and the reason it is
-      still open is a missing design input, not a missing owner.** Corrected on two counts:
-    - ⛔ **`seedfile.py`'s own header was wrong and has been overtaken by the spec.** It said
-      *"emitting a plausible id here would be deterministic code inventing content, which is P1
-      inverted."* `spec-set-charm-gen.md`'s emit table says the opposite in its own row — *"the model
-      emits `members[]`: (role, frame) pairs | deterministic code resolves **the concrete `baseType`
-      id, by lookup**"* — and a doc outranks a comment (DESIGN-GATE §3.2). So the spec assigns the
-      binding to deterministic code **in module 13**. Nothing is waiting on module 6: its corpus is
-      shipped and complete — **560 base types over 27 (frame, role) pairs, 24 candidates per pair**
-      (counted 2026-09-06).
-    - ⛔ **But the spec says "by lookup" and there is no lookup KEY, and the shipped corpus shows
-      there never was one.** 24 candidates per (frame, role), each with its own name, class, band,
-      tags, implicit atom and flavour, is a choice, not a lookup — and the shipped 30 sets prove it
-      was made by a *model*, not derived: `set.frostbitten-vanguard-001` binds `main-hand-b-011`,
-      `torso-a-002`, `neck-a-003`, `feet-a-003` — mixed bands, unpatterned indices. Picking index
-      `-001` every time would put the same hatchet in every Might set.
-    - **So the open decision, stated precisely enough to answer in one sentence:** either (a) the set
-      schema gains `members[].baseType` and the model picks it, with a validator checking the chosen
-      id's `frame`/`role` against the corpus — which is how the shipped 30 were actually authored; or
-      (b) a deterministic selector is defined and its key written down. **Not decided here** — it
-      changes the answer contract and the emitted row shape, and choosing between them is a design
-      call, which is exactly what the gate says not to make unilaterally.
-    - **This must still land before any production write** — a set whose members do not resolve is a
-      `Linkage` failure the moment it enters the tree. The emitted rows carry the (role, frame) pair
-      and say so in `notes`.
+- [x] ✅ **Set member `baseType` binding fixed 2026-09-09.** The model continues to choose only
+      categorical `(role, frame)` slots. `setgen/seedfile.py` now loads live base types, excludes
+      unique-only bases, and chooses a stable hash-indexed candidate before writing each member.
+      Existing valid bindings are preserved; stale or missing categories refuse instead of inventing
+      ids. `items repair-sets --write --allow-production-tree` repaired 87 legacy files and is
+      idempotent. Follow-up content work remains for 30 retired/non-hybrid role rows and 3 historical
+      unique-membership conflicts; those are deliberately not remapped by this deterministic repair.
 
 **Files (this pass):** `tools/seedsmith/seedsmith/workflow/graphs/item_set.py`,
 `tools/seedsmith/seedsmith/adapters/items/setgen/{answers.py, seedfile.py, authored.py}` (all new);
@@ -9366,19 +9346,19 @@ world.
 
 | Requirement | Status | Evidence verified fresh |
 |---|---|---|
-| Republish `themes.v1.json` over the whole corpus | ⏸ **Correctly open** | Live `coverage_report()`: `species=840 themes=84 uncovered=772 orphaned=16 complete=False`. No `theme-refresh` stage exists — 5 hits in `tools/seedsmith`, all prose saying "unbuilt"; no CLI verb under `demons` (`report/cli.py:1556-1637`) |
-| Staleness check both ways | ⏸ Open | The two-way shape is right: 16 orphans confirmed by name (`cherrygatling`, `cherrypaperzombie`, `cornpot`, `dancepolzombie`, `dolldiamond`, … + `ironpeazombie`), all absent from `_index.json`, all present in the registry |
+| Republish `themes.v1.json` over the whole corpus | ✅ **Landed** | `generate_themes.regenerate(write=True)` reads the complete almanac dump and publishes `themes=904`, `inputs=904`; published rows remain append-only |
+| Staleness check both ways | ✅ **Green** | Live `coverage_report()`: `species=904 themes=904 uncovered=0 orphaned=0 complete=True` |
 | *"840 species across 503 family files"* | ⚠ **Corrected → 502** | The shipped counting rule (`species_family_file_count`) excludes `_`-prefixed files; 503 counted `zombie/_needs-review.json`. 840 species re-confirmed exactly |
 | `the_theme_registry_covers_every_shipped_species` | ✅ Real, green, asserts the gap | `tests/test_set_charm_gen.py:451` — `assertFalse(coverage.complete)`. Sibling at `:460` asserts `840 > 502` |
-| Sizing: *"a republish"* | ⛔ **NEW — it is not a republish** | `adapters/demons/generate_themes.py:31-59` builds from `_generated/motif-assignments.json`, which holds **exactly 84 entries** off the legacy 84-entry `data/seed/demons/demon/` corpus. `--rebuild` reproduces the same 84. **P0.2 needs motif derivation re-anchored onto `species/_index.json` first** — an upstream re-source, and the demon stream's file, so named not fixed |
+| Sizing: *"a republish"* | ✅ **Corrected** | The refresh is an upstream re-source from `_dump/almanac/*.json`, not a rebuild of the old 84-row motif slice; new motif tokens are appended to `motifs.v1.json` |
 | — | ⚠ Load-bearing detail recorded | Index keys are PascalCase, theme `speciesId`s lowercase. `coverage_report` folds case (`themes.py:222-227`); a naive case-sensitive checker reports **0 covered / 84 orphans** — every row wrong. Now stated in `themes.py`'s own docstring |
-| Stale prose in our own code | ⚠ **Fixed** | `setgen/themes.py:18` said *"84 themes against **386** shipped species"* in the present tense — the exact wrong denominator this section's own ⛔ block exists to kill, sitting in the module that detects it. Corrected to 840 (68 real + 16 orphans), and the dated `496 family files` re-measured to 502 |
+| Stale prose in our own code | ✅ **Updated** | `setgen/themes.py`, the seedsmith map, and this spec now describe the live indexed roster and the zero-gap refresh result |
 
 ### P0.3 — `theme-enrich`
 
 | Requirement | Status | Evidence verified fresh |
 |---|---|---|
-| LLM stage raising `basis: "name"` → `"text"` | ⏸ **Correctly open** | Measured now: **53 `text` / 31 `name`** of 84; `holdback_report()` → `held_by_reason={'basis=name': 31}`. No stage exists (same search as P0.2) |
+| LLM stage raising `basis: "name"` → usable context | ✅ **Wired and live-run** | **857 `text` / 47 `enriched` / 0 `name`** of 904; `theme-enrich --dry-run` reports `planned: 0` |
 | `audit_schema` confirms no number is emitted | ⏸ Open with the stage | Gated on the stage existing; `family-extract` and `motif-derive` both ship and both carry `basis` end to end (`motifs.py:190`), so the contract to copy is real |
 | **Verify line** naming `no_theme_reaches_generation_at_basis_name` | ⛔ **DEFECT — fixed** | The test is real (`test_set_charm_gen.py:437`) and correctly quoted, **and it cannot detect whether P0.3 was done**: `generatable()` filters `basis=name` out by construction (`GENERATABLE_BASES = {"text","derived"}`), so the assertion is **vacuously true at 31 name-basis themes or at zero**. The real completion gate is `the_held_population_is_reported_rather_than_silently_skipped` (`:445`), which **goes red when P0.3 succeeds**. Verify line corrected |
 
@@ -9843,3 +9823,122 @@ not against zero. ✅ `Guard` and `seedsmith` are clean, so those two *are* zero
   was partly by section number, and at least five picks carry no recommendation to ratify
 - **`DominanceBaselineTests`** fails against uncommitted class-system v3 tuning drift — pre-existing,
   unrelated to this program, **do not fix here**
+
+## Phase 7 — requirement trials and maintenance
+
+### P7.1 — Frozen requirement profile resolver
+
+- [ ] Add the Core requirement-profile contract, named rejections, named-stream
+  resolver, exact trial evaluator, and focused unit tests.
+  - Acceptance: identical inputs replay byte-identically; ratio checks are
+    checked `long` arithmetic over unassisted allocation; a generated profile
+    never changes static equipment admission.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~RequirementProfile"`.
+  - Files: `src/FusionRpg.Core/Items/Requirements/RequirementProfile*.cs`,
+    `tests/FusionRpg.Core.Tests/Items/RequirementProfileTests.cs`.
+  - Scope: M. Depends on: module 4, module 9.
+
+### P7.2 — Requirement tuning and Seedsmith validation
+
+- [ ] Add the versioned requirement tuning loader and validate profile matrix,
+  build-favor input, rarity boundary, and blocked output before persistence.
+  - Acceptance: no balance literal in resolver; low-power bands cannot select
+    maintenance; invalid candidate/matrix/classification writes no profile.
+  - Verify: focused Core tests, `python scripts\audit-magic-numbers.py`, and
+    focused Seedsmith tests.
+  - Files: `data/tuning/equipment-requirements.v1.json`,
+    `src/FusionRpg.Core/Items/Requirements/RequirementProfileTuning.cs`,
+    `tools/seedsmith/seedsmith/adapters/items/`,
+    `tools/seedsmith/tests/`.
+  - Scope: M. Depends on: P7.1.
+
+### Checkpoint 7A — profile contract
+
+- [ ] Profile replay, invalid-input, cross-rarity, and unassisted-input tests
+  pass; tuning validation and magic-number audit are clean.
+
+### P7.3 — Own deployment-run equipment status
+
+- [ ] Add Core-owned deployment status keyed by opaque deployment key and
+  durable assignment. Bind lawn status at `PendingSpawn -> Bound`; clear it at
+  binding/board end; keep Delve status across rooms and clear it at run end;
+  bind siege only for individually equipped combat participants, never troop
+  legions or structures.
+  - Acceptance: no status, due tick, suspension, or HP latch crosses a
+    deployment boundary; durable assignment/profile semantics do not change.
+  - Verify: focused Core activation and lifecycle tests.
+  - Files: `src/FusionRpg.Core/Items/Activation/`, focused Core tests.
+  - Scope: M. Depends on: P7.1.
+
+### P7.4 — Upkeep scheduler and effect-read filter
+
+- [ ] Filter inactive equipment through the existing resolver and schedule
+  canonical deployment-clock upkeep with reserve and HP recovery behavior.
+  Add `CostLedger.TryPayProfileMaintenance` for one frozen resource charge;
+  it must not read action rows, rungs, Theta scaling, or RNG.
+  - Acceptance: items remain equipped while inactive; contention has one order;
+    no partial/offline debit; HP requires full recovery and fresh affordability.
+  - Verify: focused activation/resource tests and equipment-runtime tests.
+  - Files: `src/FusionRpg.Core/Items/Activation/EquipmentUpkeepScheduler.cs`,
+    `src/FusionRpg.Core/Actions/Cost/CostLedger.cs`,
+    `src/FusionRpg.Core/Battle/EquipAtomSource.cs`, deployment clock adapters,
+    focused Core tests.
+  - Scope: L. Depends on: P7.2, P7.3.
+
+### Checkpoint 7B — activation
+
+- [ ] A legal unmet item has no contribution but remains equipped; restart,
+  delayed tick, contention, and HP latch tests pass in every enabled runtime.
+
+### P7.5 — Frozen set requirement envelopes
+
+- [ ] Resolve envelope-constrained member profiles before mint and add a pure
+  full-set witness validator.
+  - Acceptance: one build/resource direction per set; member upkeep stays
+    within envelope budget; ordering cannot alter the result.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~SetRequirement"`.
+  - Files: `src/FusionRpg.Core/Items/Requirements/SetRequirement*.cs`,
+    `data/tuning/equipment-requirements.v1.json`, focused Core tests.
+  - Scope: M. Depends on: P7.2, module 12, module 13.
+
+### P7.6 — Block unsatisfiable set seeds and filter set tiers
+
+- [ ] Add `SetRequirementCompletability` to Seedsmith and make set-tier
+  activation consume the activation/set-trial result without changing set count.
+  - Acceptance: unsatisfiable sets write nothing; full unmet sets show progress
+    but grant no tier effect; satisfying the envelope activates every wanted tier.
+  - Verify: focused Core/Seedsmith tests and both set-completability metrics.
+  - Files: `tools/seedsmith/seedsmith/metrics/`,
+    `tools/seedsmith/tests/`, `src/FusionRpg.Core/Items/Thresholds/`,
+    `src/FusionRpg.Core/Items/Activation/`.
+  - Scope: M. Depends on: P7.4, P7.5.
+
+### P7.7 — End-to-end trial disclosure and evidence
+
+- [ ] Amend the existing item-surface contract and prove the player can inspect
+  an item/set trial, equip it, and reach an active result without rerolls.
+  - Acceptance: card/API distinguish trial, upkeep shortfall, HP lock, and set
+    trial; an end-to-end fixture covers full set equip → activate → suspend.
+  - Verify: focused item-surface/Core/Data tests plus all Phase 7 checkpoints.
+  - Files: `docs/architecture/item/spec-item-surfaces.md`, item API DTO/route,
+    `web/fusion-rpg-web/` item surface, focused tests.
+  - Scope: M. Depends on: P7.6. Ask-first: player-facing copy/route shape.
+
+### Checkpoint 7C — complete requirement loop
+
+- [ ] All Phase 7 focused tests pass; both set metrics report zero findings;
+  `git diff --check`, overflow, magic-number, DAL, single-writer, and Funnel
+  guards are clean; review the complete flow before implementation continues.
+
+### Future — deployment-scope convergence
+
+- [ ] After lawn, standalone battle, Delve, and siege adapters each have
+  lifecycle evidence, introduce a cross-program deployment contract.
+  - Contract: opaque deployment key, logical clock, participant bound/cleared
+    events, and actor-pool lookup only.
+  - Migration: adapt one owner at a time; retain `MatchRuntime`, `BattleEngine`,
+    Delve session, and siege resolver as their own transition authorities.
+  - Never: create a replacement global FSM or centralize combat scheduling,
+    lawn observation, world-map movement, or durable actor lifecycle.
+  - Scope: L. Depends on: Phase 7 and a live siege resolver. Ask-first:
+    cross-program ownership and public contract shape.

@@ -416,10 +416,67 @@ class BatchTests(unittest.TestCase):
             entry = doc["entries"][0]
             self.assertEqual(entry["id"], "set.might-offense-001")
             self.assertEqual(entry["themeKey"], "build.might-offense")
+            self.assertTrue(all(member.get("baseType") for member in entry["members"]))
             self.assertEqual([t["pieces"] for t in entry["thresholds"]], [2, 4])
             self.assertIn("capability", entry["thresholds"][0])
             self.assertIn("atoms", entry["thresholds"][1])
             self.assertTrue((out / "ledger.json").exists())
+
+    def test_a_live_transport_runtime_error_escalates_one_subject(self):
+        """A dead endpoint must not abort the whole batch or leave the subject untracked."""
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            plan = _set_plan(2)
+            calls = iter((RuntimeError("endpoint unavailable"), _clean_set_answer()))
+
+            def call(*_args, **_kwargs):
+                answer = next(calls)
+                if isinstance(answer, Exception):
+                    raise answer
+                return json.dumps(answer)
+
+            result = authored_mod.run_batch(
+                plan=plan, answers=_answer_file("set", "build", {}), tuning=TUNING,
+                vocabulary=VOCAB, out_dir=Path(tmp) / "sets", kind="set", population="build",
+                authored_utc="1970-01-01T00:00:00Z", model="fixture",
+                ledger_path=Path(tmp) / "ledger.json", call=call)
+            self.assertEqual([o.outcome for o in result.outcomes], ["escalated", "persisted"])
+            done = json.loads((Path(tmp) / "ledger.json").read_text(encoding="utf-8"))["done"]
+            self.assertEqual(done[plan.subjects[0].subject_id]["outcome"], "escalated")
+            self.assertIn(plan.subjects[1].subject_id, done)
+
+
+class SetMemberBindingTests(unittest.TestCase):
+    def test_live_lookup_excludes_base_types_claimed_by_uniques(self):
+        candidates = seedfile_mod.load_base_type_candidates()
+        self.assertNotIn("item.plant-muzzle-a-005", candidates[("plant", "armament-primary")])
+        all_candidates = seedfile_mod.load_base_type_candidates(include_unique=True)
+        self.assertIn("item.plant-muzzle-a-005", all_candidates[("plant", "armament-primary")])
+
+    def test_binding_is_stable_and_uses_only_the_offered_candidates(self):
+        candidates = {("plant", "core-guard"): ("item.plant-core-a-001", "item.plant-core-a-002")}
+        members = [{"role": "core-guard", "frame": "plant"}]
+        first = seedfile_mod.bind_member_base_types("set.proof-001", members, candidates)
+        second = seedfile_mod.bind_member_base_types("set.proof-001", members, candidates)
+        self.assertEqual(first, second)
+        self.assertIn(first[0]["baseType"], candidates[("plant", "core-guard")])
+
+    def test_existing_binding_is_preserved_but_invalid_binding_refuses(self):
+        candidates = {("plant", "core-guard"): ("item.plant-core-a-001",)}
+        bound = seedfile_mod.bind_member_base_types(
+            "set.proof-001", [{"role": "core-guard", "frame": "plant",
+                              "baseType": "item.plant-core-a-001"}], candidates)
+        self.assertEqual(bound[0]["baseType"], "item.plant-core-a-001")
+        with self.assertRaises(ValueError):
+            seedfile_mod.bind_member_base_types(
+                "set.proof-001", [{"role": "core-guard", "frame": "plant",
+                                  "baseType": "item.other-001"}], candidates)
+
+    def test_missing_role_frame_pair_is_a_refusal_not_an_invented_id(self):
+        with self.assertRaises(ValueError):
+            seedfile_mod.bind_member_base_types(
+                "set.proof-001", [{"role": "core-guard", "frame": "humanoid"}], {})
 
     def test_a_second_batch_does_not_erase_the_first_batchs_ledger_entries(self):
         """⛔ Real incident, 2026-09-08: a live full run persisted 24 sets and wrote a ledger with

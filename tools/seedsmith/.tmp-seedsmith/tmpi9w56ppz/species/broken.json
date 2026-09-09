@@ -1,0 +1,1 @@
+{"entries": [{"id": "action.species.foo.001", "scope": "general", "category": "attack", "rungBand": [1, 10], "targetMode": "single", "relation": "enemy", "atomFamilies": ["atom.searing-strike", "atom.volley"], "pairingRole": "none"}]}

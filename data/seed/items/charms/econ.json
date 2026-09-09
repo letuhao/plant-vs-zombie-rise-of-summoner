@@ -626,6 +626,310 @@
       "tags": [],
       "flavor": "A heavy, petal-shaped coin of solid silver, inlaid with a single, brilliant diamond at its center.",
       "notes": "themeKey: demon.marigold"
+    },
+    {
+      "id": "charm.econ-023",
+      "nameKey": "charm.spore-accumulator",
+      "name": "Spore Accumulator",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A dense, translucent sphere of amber-colored mycelium that pulses with stored sunlight, swelling in size as it absorbs ambient energy.",
+      "notes": "themeKey: demon.bigsunshroom"
+    },
+    {
+      "id": "charm.econ-024",
+      "nameKey": "charm.prismatic-unboxing",
+      "name": "Prismatic Unboxing",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A multifaceted diamond container that holds a hidden treasure within its brilliant, shifting facets.",
+      "notes": "themeKey: demon.diamondrandomzombie"
+    },
+    {
+      "id": "charm.econ-025",
+      "nameKey": "charm.crimson-seedling",
+      "name": "Crimson Seedling",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, calcified lotus bulb that leaks thick, nutrient-rich ichor, turning every fallen foe into a blooming patch of red.",
+      "notes": "themeKey: demon.endoflame"
+    },
+    {
+      "id": "charm.econ-026",
+      "nameKey": "charm.gluttonous-spore-husk",
+      "name": "Gluttonous Spore-Husk",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A pulsating, necrotized fungal mass that pulses with a sickly golden light, offering immense vitality at the cost of stability.",
+      "notes": "themeKey: demon.goldhypnodoom",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.econ-027",
+      "nameKey": "charm.industrial-license",
+      "name": "Industrial License",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.arm-welding",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.arm-riveting",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, notched pickaxe head forged from Netherite, stamped with a glowing permit of ownership.",
+      "notes": "themeKey: demon.pickaxe_a",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.econ-028",
+      "nameKey": "charm.gilded-sprout",
+      "name": "Gilded Sprout",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": null,
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A ceramic vessel overflowing with unnaturally vibrant, oversized petals that seem to pulse with the rhythm of a grand announcement.",
+      "notes": "themeKey: demon.scaredypot"
+    },
+    {
+      "id": "charm.econ-029",
+      "nameKey": "charm.golden-kernel-coin",
+      "name": "Golden Kernel Coin",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.volley",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A heavy, butter-slicked corn kernel encased in a thin layer of gold, shaped like a minted coin.",
+      "notes": "themeKey: demon.silvercorn"
+    },
+    {
+      "id": "charm.econ-030",
+      "nameKey": "charm.solar-sprout",
+      "name": "Solar Sprout",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.tempo-yield",
+          "powerBand": "low"
+        }
+      ],
+      "prefixRolls": 1,
+      "suffixRolls": 1,
+      "tags": [],
+      "flavor": "A rapid-blooming sunflower core encased in a polished golden frame that pulses with warmth.",
+      "notes": "themeKey: demon.silversunflower"
+    },
+    {
+      "id": "charm.econ-031",
+      "nameKey": "charm.gilded-chronometer",
+      "name": "Gilded Chronometer",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.tempo-pulse",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A heavy, ticking sphere of solid gold, suspended by silver wires that pulse with the rhythm of a heartbeat.",
+      "notes": "themeKey: demon.silverumbrella",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.econ-032",
+      "nameKey": "charm.edgar-s-reliquary",
+      "name": "Edgar's Reliquary",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A silver-cast parcel containing the preserved remains of a high-value corpse, wrapped in heavy metal chains.",
+      "notes": "themeKey: demon.silverzombie",
+      "uniqueCarry": true
+    },
+    {
+      "id": "charm.econ-033",
+      "nameKey": "charm.frost-bound-seasonal-bundle",
+      "name": "Frost-Bound Seasonal Bundle",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.death-harvest",
+          "powerBand": "low",
+          "params": {
+            "sign": "negative"
+          }
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "tags": [],
+      "flavor": "A crystalline gift box containing frozen botanical specimens, offered at a steep discount to those who can withstand the chill.",
+      "notes": "themeKey: demon.snowpresent",
+      "uniqueCarry": true
     }
   ]
 }

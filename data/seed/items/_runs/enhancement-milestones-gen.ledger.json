@@ -27,6 +27,14 @@
     "milestone-draw-006": {
       "entryId": "enh.017",
       "runtimeFamily": "atom.enhance-bloom"
+    },
+    "milestone-draw-007": {
+      "entryId": "enh.018",
+      "runtimeFamily": "atom.enhance-zenith"
+    },
+    "milestone-draw-008": {
+      "entryId": "enh.019",
+      "runtimeFamily": "atom.enhance-girth"
     }
   },
   "schemaVersion": 1

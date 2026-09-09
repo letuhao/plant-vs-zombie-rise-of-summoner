@@ -1,0 +1,1 @@
+[{"id": "alpha", "elementPrimary": "fire", "deployMode": "PlantAvatar", "acquisition": ["Summonable"], "variants": ["normal"]}, {"id": "beta", "elementPrimary": "earth", "deployMode": "PlantAvatar", "acquisition": ["CaptureOnly"], "variants": ["normal", "shiny"]}]

@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "core-guard",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-009"
         },
         {
           "role": "footing",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-002"
         },
         {
           "role": "mantle",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-019"
         },
         {
           "role": "jewel-major",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-pollen-b-012"
         }
       ],
       "thresholds": [

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-portalballoonzombie",
+    "partition": "sets/portalballoonzombie",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.portalballoonzombie-001",
+      "nameKey": "set.temporal-void-sphere",
+      "name": "Temporal Void Sphere",
+      "themeKey": "demon.portalballoonzombie",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-b-021"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-002"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-a-005"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-a-007"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.entangling",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "air"
+              }
+            },
+            {
+              "family": "atom.evd-husk",
+              "powerBand": "high",
+              "params": {
+                "element": "air"
+              }
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A swirling mass of distorted air and necrotic essence that exists between seconds.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

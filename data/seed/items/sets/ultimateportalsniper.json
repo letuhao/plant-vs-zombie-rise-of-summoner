@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-ultimateportalsniper",
+    "partition": "sets/ultimateportalsniper",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.ultimateportalsniper-001",
+      "nameKey": "set.temporal-singularity",
+      "name": "Temporal Singularity",
+      "themeKey": "demon.ultimateportalsniper",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-006"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-a-025"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-018"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-012"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.marking",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.tempo-surge",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "omni"
+              }
+            },
+            {
+              "family": "atom.arm-riveting",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A fractured lens that suspends the moment of impact indefinitely.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

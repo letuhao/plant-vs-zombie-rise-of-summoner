@@ -38,6 +38,22 @@ def _kebab_legal(token: str) -> bool:
     return bool(re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", token))
 
 
+def container_species_id(species_id: str) -> str:
+    """Return the stable kebab spelling used in item container ids.
+
+    The demon dump still contains a small legacy variant slice whose ``typeName`` uses
+    underscores (for example ``BlackFootball_a``).  Those names remain the authoritative
+    ``speciesId`` in the theme registry, but ``definitions.md`` permits only kebab-case in a
+    container id.  Normalise that representation at the item boundary instead of rewriting
+    demon identifiers or silently minting an invalid id.
+    """
+    token = species_id.strip().lower().replace("_", "-")
+    if not _kebab_legal(token):
+        raise IdRefused(
+            f"speciesId {species_id!r} cannot be normalised to a kebab-case container token")
+    return token
+
+
 def set_id(species_id: str, seq: int, *, legacy_partitions: "frozenset[str]" = frozenset()) -> str:
     """`set.{speciesId}-{seq:03}` — never the `themeKey`."""
     if species_id.startswith(("demon.", "theme.", "build.")):
@@ -45,9 +61,9 @@ def set_id(species_id: str, seq: int, *, legacy_partitions: "frozenset[str]" = f
             f"{species_id!r} is a themeKey, not a speciesId — substituting it yields "
             f"'set.{species_id}-{seq:03}', two dots, which fails definitions.md §1's container_id "
             f"grammar. Use the theme's speciesId.")
-    if not _kebab_legal(species_id):
-        raise IdRefused(f"speciesId {species_id!r} is not kebab-legal; it cannot enter a container id")
-    if species_id in legacy_partitions:
+    token = container_species_id(species_id)
+    legacy_tokens = {container_species_id(partition) for partition in legacy_partitions}
+    if token in legacy_tokens:
         raise IdRefused(
             f"speciesId {species_id!r} collides with a pinned legacy set partition — "
             f"naming.v1.json's five `themeIds` already own that prefix and ids are never reused")
@@ -55,7 +71,7 @@ def set_id(species_id: str, seq: int, *, legacy_partitions: "frozenset[str]" = f
         raise IdRefused(
             f"seq {seq} is outside 001-899; 900-999 is reserved in every partition for later "
             f"hand-authored corrections (naming.v1.json idPolicy.sequenceRange)")
-    minted = f"set.{species_id}-{seq:03d}"
+    minted = f"set.{token}-{seq:03d}"
     if re.search(r"-\d{2}$", minted):
         # A three-digit seq cannot produce this today, but a two-digit one would, and the id would
         # then be indistinguishable from one of its OWN tier containers.

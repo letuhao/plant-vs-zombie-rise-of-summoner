@@ -181,9 +181,9 @@ class ThemeTests(unittest.TestCase):
         self.assertEqual(DEMONS_REGISTRY_DIR, LIVE_DEMONS_REGISTRY_ROOT)
         self.assertTrue(DEMONS_REGISTRY_DIR.is_dir())
 
-    def test_eighty_four_themes_matching_the_spec_s_own_cited_row_count(self) -> None:
+    def test_themes_match_the_complete_published_roster(self) -> None:
         themes = load_themes()
-        self.assertEqual(len(themes), 84)
+        self.assertEqual(len(themes), 904)
         self.assertEqual(set(themes), set(_raw_demons("themes.v1.json")["themes"]))
 
     def test_every_theme_id_is_demon_prefixed_never_the_legacy_theme_prefix(self) -> None:

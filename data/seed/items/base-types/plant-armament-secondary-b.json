@@ -752,6 +752,294 @@
           "family": "atom.enhance-quicken"
         }
       ]
+    },
+    {
+      "id": "item.plant-thorn-b-021",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A whip-like length of fibrous, thorn-studded vine that lashes out with rhythmic, predatory intent.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-022",
+      "nameKey": "base.splintered-bramble-whip",
+      "name": "Splintered Bramble-Whip",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.splintered-bramble-whip",
+      "flavorKey": "flavor.base.splintered-bramble-whip",
+      "flavor": "A length of tightly wound, calcified vines that lashes out with jagged, uneven edges. It leaves weeping lacerations in anything it catches.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-023",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A whip-like length of dense, vascular vine that lashes out with sudden, predatory intent. It remains tightly wound until the moment of impact.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-024",
+      "nameKey": "base.coiled-bramble-whip",
+      "name": "Coiled Bramble-Whip",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.coiled-bramble-whip",
+      "flavorKey": "flavor.base.coiled-bramble-whip",
+      "flavor": "A length of flexible, thorn-studded vine that lashes out with predatory intent. It remains tightly wound until the moment of impact.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-025",
+      "nameKey": "base.coiled-bramble-whip",
+      "name": "Coiled Bramble-Whip",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-bramble-whip",
+      "flavorKey": "flavor.base.coiled-bramble-whip",
+      "flavor": "A length of flexible, thorn-studded vine that lashes out with predatory intent. Its serrated edges are designed to catch and tear rather than merely puncture.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-026",
+      "nameKey": "base.spined-flail",
+      "name": "Spined Flail",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.spined-flail",
+      "flavorKey": "flavor.base.spined-flail",
+      "flavor": "A heavy, knotted length of bramble woven around a dense core of ironwood. It strikes with the weight of a club and the sting of a thousand needles.",
+      "tags": [
+        "organic",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-027",
+      "nameKey": "base.spiked-pod-whip",
+      "name": "Spiked Pod-Whip",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.spiked-pod-whip",
+      "flavorKey": "flavor.base.spiked-pod-whip",
+      "flavor": "A length of flexible, fibrous vine studded with calcified protrusions. It lashes out with a rhythmic, stinging cadence.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-thorn-b-028",
+      "nameKey": "base.splintered-bramble-whip",
+      "name": "Splintered Bramble-Whip",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "lash",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.splintered-bramble-whip",
+      "flavorKey": "flavor.base.splintered-bramble-whip",
+      "flavor": "A length of tightly wound, razor-edged vines that lashes out with unpredictable, jagged momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     }
   ]
 }

@@ -466,6 +466,25 @@
         "mechanical",
         "offensive"
       ]
+    },
+    {
+      "id": "atom.prec-sync",
+      "nameKey": "affix.precision",
+      "name": "Precision",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.crit.rate.{variant}",
+        "op": "Flag"
+      },
+      "roles": [
+        "armament-primary"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "Precision {word}",
+      "tags": [
+        "mechanical",
+        "offensive"
+      ]
     }
   ]
 }

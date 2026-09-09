@@ -1,0 +1,965 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "AbyssSwordStar:skill.abyssswordstar-off-t1-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node killed-0",
+        "nameKey": "tree.node.test-node-killed-0",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t1-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node killed-1",
+        "nameKey": "tree.node.test-node-killed-1",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t1-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node killed-2",
+        "nameKey": "tree.node.test-node-killed-2",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t1-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node killed-3",
+        "nameKey": "tree.node.test-node-killed-3",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t2-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node killed-4",
+        "nameKey": "tree.node.test-node-killed-4",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t2-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-0",
+        "nameKey": "tree.node.test-node-resumed-0",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t2-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-1",
+        "nameKey": "tree.node.test-node-resumed-1",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t2-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-2",
+        "nameKey": "tree.node.test-node-resumed-2",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t3-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-3",
+        "nameKey": "tree.node.test-node-resumed-3",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t3-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-4",
+        "nameKey": "tree.node.test-node-resumed-4",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t3-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-5",
+        "nameKey": "tree.node.test-node-resumed-5",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t3-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-6",
+        "nameKey": "tree.node.test-node-resumed-6",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t4-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-7",
+        "nameKey": "tree.node.test-node-resumed-7",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t4-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-8",
+        "nameKey": "tree.node.test-node-resumed-8",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t4-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-9",
+        "nameKey": "tree.node.test-node-resumed-9",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t4-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-10",
+        "nameKey": "tree.node.test-node-resumed-10",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t5-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-11",
+        "nameKey": "tree.node.test-node-resumed-11",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t5-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-12",
+        "nameKey": "tree.node.test-node-resumed-12",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t5-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-13",
+        "nameKey": "tree.node.test-node-resumed-13",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t5-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-14",
+        "nameKey": "tree.node.test-node-resumed-14",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t6-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-15",
+        "nameKey": "tree.node.test-node-resumed-15",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t6-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-16",
+        "nameKey": "tree.node.test-node-resumed-16",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t6-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-17",
+        "nameKey": "tree.node.test-node-resumed-17",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t6-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-18",
+        "nameKey": "tree.node.test-node-resumed-18",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t7-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-19",
+        "nameKey": "tree.node.test-node-resumed-19",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t7-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-20",
+        "nameKey": "tree.node.test-node-resumed-20",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t7-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-21",
+        "nameKey": "tree.node.test-node-resumed-21",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t7-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-22",
+        "nameKey": "tree.node.test-node-resumed-22",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t8-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-23",
+        "nameKey": "tree.node.test-node-resumed-23",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t8-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-24",
+        "nameKey": "tree.node.test-node-resumed-24",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t8-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-25",
+        "nameKey": "tree.node.test-node-resumed-25",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t8-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-26",
+        "nameKey": "tree.node.test-node-resumed-26",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t9-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-27",
+        "nameKey": "tree.node.test-node-resumed-27",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t9-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-28",
+        "nameKey": "tree.node.test-node-resumed-28",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t9-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-29",
+        "nameKey": "tree.node.test-node-resumed-29",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t9-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-30",
+        "nameKey": "tree.node.test-node-resumed-30",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t10-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-31",
+        "nameKey": "tree.node.test-node-resumed-31",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-off-t10-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.freezing"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-32",
+        "nameKey": "tree.node.test-node-resumed-32",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t10-n0": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-33",
+        "nameKey": "tree.node.test-node-resumed-33",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "AbyssSwordStar:skill.abyssswordstar-def-t10-n1": {
+      "record": {
+        "id": "skill.abyssswordstar-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.warding"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node resumed-34",
+        "nameKey": "tree.node.test-node-resumed-34",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    }
+  }
+}

@@ -96,9 +96,18 @@ def select_planning_themes(themes: "Mapping[str, dict]", *, per_rarity: int = 2)
     SUBSET exists to avoid. Spreading across the registry's own rarity bands needs no judgment call
     (only counting) and cannot repeat that failure mode by construction.
     """
+    # Theme refresh can carry a source-only fallback rarity (currently ``almanac``) for species
+    # whose anchor has not published a four-band rarity yet.  That value is valid for the demon
+    # registry but is not a dungeon planning band; admitting it silently expanded the fixed
+    # eight-theme subset to 28 when the roster grew from 84 to 904.  Keep the planner on the
+    # dungeon contract's four legal bands and leave unclassified themes available for later
+    # enrichment rather than changing the event budget.
+    legal_rarities = {"common", "rare", "epic", "legendary"}
     by_rarity: "dict[str, list[str]]" = {}
     for theme_id, row in themes.items():
         if row.get("retired"):
+            continue
+        if row.get("rarity") not in legal_rarities:
             continue
         by_rarity.setdefault(row["rarity"], []).append(theme_id)
     chosen: "list[str]" = []

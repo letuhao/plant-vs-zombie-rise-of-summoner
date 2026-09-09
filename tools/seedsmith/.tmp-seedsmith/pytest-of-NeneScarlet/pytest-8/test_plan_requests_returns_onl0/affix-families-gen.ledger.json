@@ -1,0 +1,10 @@
+{
+  "done": {
+    "g.armour:stat.modify:brand-new-a": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.warding"
+    }
+  },
+  "schemaVersion": 1
+}

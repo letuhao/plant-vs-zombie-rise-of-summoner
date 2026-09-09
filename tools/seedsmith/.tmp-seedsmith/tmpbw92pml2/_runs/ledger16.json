@@ -1,0 +1,389 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "t2:skill.t2-off-t1-n0": {
+      "record": {
+        "id": "skill.t2-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n0",
+        "nameKey": "tree.node.test-node-n0",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t1-n1": {
+      "record": {
+        "id": "skill.t2-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n1",
+        "nameKey": "tree.node.test-node-n1",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t2-n2": {
+      "record": {
+        "id": "skill.t2-off-t2-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n2",
+        "nameKey": "tree.node.test-node-n2",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t2-n3": {
+      "record": {
+        "id": "skill.t2-def-t2-n3",
+        "nodeKey": "n3",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n3",
+        "nameKey": "tree.node.test-node-n3",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t3-n4": {
+      "record": {
+        "id": "skill.t2-off-t3-n4",
+        "nodeKey": "n4",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n4",
+        "nameKey": "tree.node.test-node-n4",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t3-n5": {
+      "record": {
+        "id": "skill.t2-def-t3-n5",
+        "nodeKey": "n5",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n5",
+        "nameKey": "tree.node.test-node-n5",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t4-n6": {
+      "record": {
+        "id": "skill.t2-off-t4-n6",
+        "nodeKey": "n6",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n6",
+        "nameKey": "tree.node.test-node-n6",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t4-n7": {
+      "record": {
+        "id": "skill.t2-def-t4-n7",
+        "nodeKey": "n7",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n7",
+        "nameKey": "tree.node.test-node-n7",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t5-n8": {
+      "record": {
+        "id": "skill.t2-off-t5-n8",
+        "nodeKey": "n8",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n8",
+        "nameKey": "tree.node.test-node-n8",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t5-n9": {
+      "record": {
+        "id": "skill.t2-def-t5-n9",
+        "nodeKey": "n9",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n9",
+        "nameKey": "tree.node.test-node-n9",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t6-n10": {
+      "record": {
+        "id": "skill.t2-off-t6-n10",
+        "nodeKey": "n10",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n10",
+        "nameKey": "tree.node.test-node-n10",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t6-n11": {
+      "record": {
+        "id": "skill.t2-def-t6-n11",
+        "nodeKey": "n11",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n11",
+        "nameKey": "tree.node.test-node-n11",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t7-n12": {
+      "record": {
+        "id": "skill.t2-off-t7-n12",
+        "nodeKey": "n12",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n12",
+        "nameKey": "tree.node.test-node-n12",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t7-n13": {
+      "record": {
+        "id": "skill.t2-def-t7-n13",
+        "nodeKey": "n13",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n13",
+        "nameKey": "tree.node.test-node-n13",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-off-t8-n14": {
+      "record": {
+        "id": "skill.t2-off-t8-n14",
+        "nodeKey": "n14",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n14",
+        "nameKey": "tree.node.test-node-n14",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t2:skill.t2-def-t8-n15": {
+      "record": {
+        "id": "skill.t2-def-t8-n15",
+        "nodeKey": "n15",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n15",
+        "nameKey": "tree.node.test-node-n15",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    }
+  }
+}

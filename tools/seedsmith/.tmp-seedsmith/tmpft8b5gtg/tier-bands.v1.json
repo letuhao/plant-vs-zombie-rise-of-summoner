@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "baseSharePermille": 35,
+  "channelWeightPermille": {
+    "x": 1000
+  },
+  "opWeightPermille": {
+    "Flat": 1000,
+    "Increased": 1000,
+    "More": 550
+  }
+}

@@ -349,6 +349,3729 @@
     "set-build-build.ferocity-balance": {
       "entryId": "set.ferocity-balance-001",
       "attempts": 1
+    },
+    "set-species-demon.abyssswordstar": {
+      "entryId": "set.abyssswordstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.acientsunnut": {
+      "entryId": "set.acientsunnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.apple": {
+      "entryId": "set.apple-001",
+      "attempts": 1
+    },
+    "set-species-demon.armedgargantuar": {
+      "entryId": "set.armedgargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.armoredimpzombie": {
+      "entryId": "set.armoredimpzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.balloonzombie": {
+      "entryId": "set.balloonzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.bamboo": {
+      "entryId": "set.bamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.bamboodragon": {
+      "entryId": "set.bamboodragon-001",
+      "attempts": 2
+    },
+    "set-species-demon.bamboofurnace": {
+      "entryId": "set.bamboofurnace-001",
+      "attempts": 1
+    },
+    "set-species-demon.bamboospruce": {
+      "entryId": "set.bamboospruce-001",
+      "attempts": 1
+    },
+    "set-species-demon.bedrocksnowzombie": {
+      "entryId": "set.bedrocksnowzombie-001",
+      "attempts": 3
+    },
+    "set-species-demon.bedrocktallnut": {
+      "entryId": "set.bedrocktallnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.bigchomper": {
+      "entryId": "set.bigchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.biggatling": {
+      "entryId": "set.biggatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.biggloom": {
+      "entryId": "set.biggloom-001",
+      "attempts": 1
+    },
+    "set-species-demon.bigpumpkin": {
+      "entryId": "set.bigpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.bigseashroom": {
+      "entryId": "set.bigseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.bigsunnut": {
+      "entryId": "set.bigsunnut-001",
+      "attempts": 2
+    },
+    "set-species-demon.bigsunshroom": {
+      "entryId": "set.bigsunshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.bigwallnut": {
+      "entryId": "set.bigwallnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackelephantzombie": {
+      "entryId": "set.blackelephantzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackflagfootball": {
+      "entryId": "set.blackflagfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackfootball": {
+      "entryId": "set.blackfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackfootball_a": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.blackfootball-a-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Black Olive Vanguard' within this batch; kept 'set.blackflagfootball-001'"
+      ]
+    },
+    "set-species-demon.blackfootball_b": {
+      "entryId": "set.blackfootball-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackfootball_c": {
+      "entryId": "set.blackfootball-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackfootball_c2": {
+      "entryId": "set.blackfootball-c2-001",
+      "attempts": 2
+    },
+    "set-species-demon.blackhorse": {
+      "entryId": "set.blackhorse-001",
+      "attempts": 1
+    },
+    "set-species-demon.blackjackboxzombie": {
+      "entryId": "set.blackjackboxzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.blacktrainzombie": {
+      "entryId": "set.blacktrainzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.blover": {
+      "entryId": "set.blover-001",
+      "attempts": 1
+    },
+    "set-species-demon.blovermine": {
+      "entryId": "set.blovermine-001",
+      "attempts": 1
+    },
+    "set-species-demon.bloverpot": {
+      "entryId": "set.bloverpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.bloverumbrella": {
+      "entryId": "set.bloverumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.blowerpumpkin": {
+      "entryId": "set.blowerpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.bluegargantuar": {
+      "entryId": "set.bluegargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.boatimp": {
+      "entryId": "set.boatimp-001",
+      "attempts": 1
+    },
+    "set-species-demon.bucketdoom": {
+      "entryId": "set.bucketdoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.bucketpaper": {
+      "entryId": "set.bucketpaper-001",
+      "attempts": 2
+    },
+    "set-species-demon.bucketplant": {
+      "entryId": "set.bucketplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.bucketzombieduck": {
+      "entryId": "set.bucketzombieduck-001",
+      "attempts": 1
+    },
+    "set-species-demon.bungizombie": {
+      "entryId": "set.bungizombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbageblover": {
+      "entryId": "set.cabbageblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbagecaltrop": {
+      "entryId": "set.cabbagecaltrop-001",
+      "attempts": 2
+    },
+    "set-species-demon.cabbagecannon": {
+      "entryId": "set.cabbagecannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbagefume": {
+      "entryId": "set.cabbagefume-001",
+      "attempts": 2
+    },
+    "set-species-demon.cabbagemelon": {
+      "entryId": "set.cabbagemelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbagenut": {
+      "entryId": "set.cabbagenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbagepot": {
+      "entryId": "set.cabbagepot-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbagepuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.cabbagepuff-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Cabbage Launcher' within this batch; kept 'set.cabbagemelon-001'"
+      ]
+    },
+    "set-species-demon.cabbagesquash": {
+      "entryId": "set.cabbagesquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.cabbageumbrella": {
+      "entryId": "set.cabbageumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.cacstusstar": {
+      "entryId": "set.cacstusstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactus": {
+      "entryId": "set.cactus-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactusblover": {
+      "entryId": "set.cactusblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactuscaltrop": {
+      "entryId": "set.cactuscaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactusfume": {
+      "entryId": "set.cactusfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactusnut": {
+      "entryId": "set.cactusnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactuspumpkin": {
+      "entryId": "set.cactuspumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.cactusumbrella": {
+      "entryId": "set.cactusumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.caltropfume": {
+      "entryId": "set.caltropfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.caltropkelp_land": {
+      "entryId": "set.caltropkelp-land-001",
+      "attempts": 1
+    },
+    "set-species-demon.caltropkelp_water": {
+      "entryId": "set.caltropkelp-water-001",
+      "attempts": 1
+    },
+    "set-species-demon.caltroppot": {
+      "entryId": "set.caltroppot-001",
+      "attempts": 1
+    },
+    "set-species-demon.catapultzombie": {
+      "entryId": "set.catapultzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.cattailgirl": {
+      "entryId": "set.cattailgirl-001",
+      "attempts": 1
+    },
+    "set-species-demon.cattaillour": {
+      "entryId": "set.cattaillour-001",
+      "attempts": 1
+    },
+    "set-species-demon.cattailplant": {
+      "entryId": "set.cattailplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryblover": {
+      "entryId": "set.cherryblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrybomb": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.cherrybomb-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.cherrycatapultzombie": {
+      "entryId": "set.cherrycatapultzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrychomper": {
+      "entryId": "set.cherrychomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryfume": {
+      "entryId": "set.cherryfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrygatling": {
+      "entryId": "set.cherrygatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryhypno": {
+      "entryId": "set.cherryhypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryjalapeno": {
+      "entryId": "set.cherryjalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrymagnet": {
+      "entryId": "set.cherrymagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrymine": {
+      "entryId": "set.cherrymine-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrynut": {
+      "entryId": "set.cherrynut-001",
+      "attempts": 2
+    },
+    "set-species-demon.cherrynutzombie": {
+      "entryId": "set.cherrynutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrypaperz95": {
+      "entryId": "set.cherrypaperz95-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrypaperzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.cherrypaperzombie-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.cherrypot": {
+      "entryId": "set.cherrypot-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrypuff": {
+      "entryId": "set.cherrypuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrypumpkin": {
+      "entryId": "set.cherrypumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryscaredy": {
+      "entryId": "set.cherryscaredy-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryshooter": {
+      "entryId": "set.cherryshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryshooterzombie": {
+      "entryId": "set.cherryshooterzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrysplit": {
+      "entryId": "set.cherrysplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrysquash": {
+      "entryId": "set.cherrysquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrysubmarine": {
+      "entryId": "set.cherrysubmarine-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherrytorch": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.cherrytorch-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.cherryultimatepumpkin": {
+      "entryId": "set.cherryultimatepumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.cherryumbrella": {
+      "entryId": "set.cherryumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.chickenimp": {
+      "entryId": "set.chickenimp-001",
+      "attempts": 1
+    },
+    "set-species-demon.chomperpumpkin": {
+      "entryId": "set.chomperpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.chompersquash": {
+      "entryId": "set.chompersquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.chrysantheautumn": {
+      "entryId": "set.chrysantheautumn-001",
+      "attempts": 1
+    },
+    "set-species-demon.coachpaper": {
+      "entryId": "set.coachpaper-001",
+      "attempts": 3
+    },
+    "set-species-demon.cobcannon": {
+      "entryId": "set.cobcannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.conezombieduck": {
+      "entryId": "set.conezombieduck-001",
+      "attempts": 3
+    },
+    "set-species-demon.cornblover": {
+      "entryId": "set.cornblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.corncabbage": {
+      "entryId": "set.corncabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.corncaltrop": {
+      "entryId": "set.corncaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.cornfume": {
+      "entryId": "set.cornfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.cornmelon": {
+      "entryId": "set.cornmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.cornnut": {
+      "entryId": "set.cornnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.cornpuff": {
+      "entryId": "set.cornpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.cornpult": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "set.cornpult-001",
+      "attempts": 1,
+      "blockedReason": "The motif '玉米粒' (corn kernels) and the lore's 'concentrated sunlight' strongly suggest 'atom.sunbloom' or 'atom.sporing', but the provided list of roles for 'atom.sunbloom' (girdle, jewel-major, jewel-minor-a, jewel-minor-b) and 'atom.sporing' (armament-primary, armament-secondary, manipulator, jewel-major, jewel-minor-a, jewel-minor-b) do not allow for a cohesive 4-member set that includes the necessary 'armament-primary' role to express the 'launcher' aspect without violating the 'no role twice' rule or the specific role requirements of the families."
+    },
+    "set-species-demon.cornumbrella": {
+      "entryId": "set.cornumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.dancepolzombie2": {
+      "entryId": "set.dancepolzombie2-001",
+      "attempts": 1
+    },
+    "set-species-demon.deathchomper": {
+      "entryId": "set.deathchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.deathmine": {
+      "entryId": "set.deathmine-001",
+      "attempts": 1
+    },
+    "set-species-demon.diamondimitater": {
+      "entryId": "set.diamondimitater-001",
+      "attempts": 1
+    },
+    "set-species-demon.diamondpotatonut": {
+      "entryId": "set.diamondpotatonut-001",
+      "attempts": 2
+    },
+    "set-species-demon.diamondrandomzombie": {
+      "entryId": "set.diamondrandomzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.dolphingatlingzombie": {
+      "entryId": "set.dolphingatlingzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.dolphinpaper": {
+      "entryId": "set.dolphinpaper-001",
+      "attempts": 2
+    },
+    "set-species-demon.dolphinpeazombie": {
+      "entryId": "set.dolphinpeazombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.dolphinrider": {
+      "entryId": "set.dolphinrider-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomblover": {
+      "entryId": "set.doomblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomcabbage": {
+      "entryId": "set.doomcabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomcherry": {
+      "entryId": "set.doomcherry-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomchomper": {
+      "entryId": "set.doomchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomcorn": {
+      "entryId": "set.doomcorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomfume": {
+      "entryId": "set.doomfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomgarlic": {
+      "entryId": "set.doomgarlic-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomgatling": {
+      "entryId": "set.doomgatling-001",
+      "attempts": 2
+    },
+    "set-species-demon.doomjalapeno": {
+      "entryId": "set.doomjalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomkelp": {
+      "entryId": "set.doomkelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.doommelon": {
+      "entryId": "set.doommelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomnut": {
+      "entryId": "set.doomnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.doompaper": {
+      "entryId": "set.doompaper-001",
+      "attempts": 1
+    },
+    "set-species-demon.doompeashooter": {
+      "entryId": "set.doompeashooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomplantern": {
+      "entryId": "set.doomplantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.doompumpkin": {
+      "entryId": "set.doompumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomseashroom": {
+      "entryId": "set.doomseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomseed": {
+      "entryId": "set.doomseed-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomshroom": {
+      "entryId": "set.doomshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomsniper": {
+      "entryId": "set.doomsniper-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomsquash": {
+      "entryId": "set.doomsquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomstar": {
+      "entryId": "set.doomstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomsunflower": {
+      "entryId": "set.doomsunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomthreepeater": {
+      "entryId": "set.doomthreepeater-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomtorch": {
+      "entryId": "set.doomtorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.doomzombie": {
+      "entryId": "set.doomzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.doublecherry": {
+      "entryId": "set.doublecherry-001",
+      "attempts": 1
+    },
+    "set-species-demon.doublepuff": {
+      "entryId": "set.doublepuff-001",
+      "attempts": 2
+    },
+    "set-species-demon.doubleshooter": {
+      "entryId": "set.doubleshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.doublesnow": {
+      "entryId": "set.doublesnow-001",
+      "attempts": 2
+    },
+    "set-species-demon.driver_a": {
+      "entryId": "set.driver-a-001",
+      "attempts": 2
+    },
+    "set-species-demon.driver_b": {
+      "entryId": "set.driver-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.driver_c": {
+      "entryId": "set.driver-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.drown_a": {
+      "entryId": "set.drown-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.drown_b": {
+      "entryId": "set.drown-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.drown_c": {
+      "entryId": "set.drown-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.drowngargantuar": {
+      "entryId": "set.drowngargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.drownpult_a": {
+      "entryId": "set.drownpult-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.drownpult_b": {
+      "entryId": "set.drownpult-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.drownpult_c": {
+      "entryId": "set.drownpult-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.drownpultzombie": {
+      "entryId": "set.drownpultzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.drownzombie": {
+      "entryId": "set.drownzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.electriconion": {
+      "entryId": "set.electriconion-001",
+      "attempts": 1
+    },
+    "set-species-demon.elephantzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.elephantzombie-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.elephantzombie_a": {
+      "entryId": "set.elephantzombie-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.elephantzombie_b": {
+      "entryId": "set.elephantzombie-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.elephantzombie_c": {
+      "entryId": "set.elephantzombie-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.elitepaperzombie": {
+      "entryId": "set.elitepaperzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.emeraldumbrella": {
+      "entryId": "set.emeraldumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.endoflame": {
+      "entryId": "set.endoflame-001",
+      "attempts": 1
+    },
+    "set-species-demon.endoflamegirl": {
+      "entryId": "set.endoflamegirl-001",
+      "attempts": 1
+    },
+    "set-species-demon.endoflamezombie": {
+      "entryId": "set.endoflamezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.endpumpiner": {
+      "entryId": "set.endpumpiner-001",
+      "attempts": 1
+    },
+    "set-species-demon.enumvalue261": {
+      "entryId": "set.enumvalue261-001",
+      "attempts": 1
+    },
+    "set-species-demon.enumvalue262": {
+      "entryId": "set.enumvalue262-001",
+      "attempts": 3
+    },
+    "set-species-demon.enumvalue263": {
+      "entryId": "set.enumvalue263-001",
+      "attempts": 1
+    },
+    "set-species-demon.enumvalue264": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.enumvalue264-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.enumvalue265": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.enumvalue265-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.enumvalue266": {
+      "entryId": "set.enumvalue266-001",
+      "attempts": 1
+    },
+    "set-species-demon.enumvalue267": {
+      "entryId": "set.enumvalue267-001",
+      "attempts": 2
+    },
+    "set-species-demon.enumvalue268": {
+      "entryId": "set.enumvalue268-001",
+      "attempts": 1
+    },
+    "set-species-demon.eternalzombie_a": {
+      "entryId": "set.eternalzombie-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.eternalzombie_b": {
+      "entryId": "set.eternalzombie-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.eternalzombie_c": {
+      "entryId": "set.eternalzombie-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.extract_single": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.extract-single-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.extract_ten": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.extract-ten-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.firecabbage": {
+      "entryId": "set.firecabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.firecaltrop": {
+      "entryId": "set.firecaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.firecannon": {
+      "entryId": "set.firecannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.firecattail": {
+      "entryId": "set.firecattail-001",
+      "attempts": 1
+    },
+    "set-species-demon.firecracker": {
+      "entryId": "set.firecracker-001",
+      "attempts": 1
+    },
+    "set-species-demon.firefume": {
+      "entryId": "set.firefume-001",
+      "attempts": 1
+    },
+    "set-species-demon.firegloom": {
+      "entryId": "set.firegloom-001",
+      "attempts": 1
+    },
+    "set-species-demon.firekelp": {
+      "entryId": "set.firekelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.firemelon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.firemelon-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.firemine": {
+      "entryId": "set.firemine-001",
+      "attempts": 1
+    },
+    "set-species-demon.firenut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.firenut-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.fireseashroom": {
+      "entryId": "set.fireseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.firesniper": {
+      "entryId": "set.firesniper-001",
+      "attempts": 2
+    },
+    "set-species-demon.firespikerock": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.firespikerock-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.firesquash": {
+      "entryId": "set.firesquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.firesunshroom_a": {
+      "entryId": "set.firesunshroom-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.firesunshroom_b": {
+      "entryId": "set.firesunshroom-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.firesunshroom_c": {
+      "entryId": "set.firesunshroom-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.flagfootball": {
+      "entryId": "set.flagfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.flyingthreepeater": {
+      "entryId": "set.flyingthreepeater-001",
+      "attempts": 1
+    },
+    "set-species-demon.flyingthreepeater_sp": {
+      "entryId": "set.flyingthreepeater-sp-001",
+      "attempts": 1
+    },
+    "set-species-demon.footballboss": {
+      "entryId": "set.footballboss-001",
+      "attempts": 1
+    },
+    "set-species-demon.footballdolphin": {
+      "entryId": "set.footballdolphin-001",
+      "attempts": 1
+    },
+    "set-species-demon.footballdrown": {
+      "entryId": "set.footballdrown-001",
+      "attempts": 1
+    },
+    "set-species-demon.frozenpear": {
+      "entryId": "set.frozenpear-001",
+      "attempts": 1
+    },
+    "set-species-demon.fumepumpkin": {
+      "entryId": "set.fumepumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.gargantuar": {
+      "entryId": "set.gargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicblover": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.garlicblover-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.garliccabbage": {
+      "entryId": "set.garliccabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.garliccorn": {
+      "entryId": "set.garliccorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicfume": {
+      "entryId": "set.garlicfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicgatling": {
+      "entryId": "set.garlicgatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicmelon": {
+      "entryId": "set.garlicmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicnut": {
+      "entryId": "set.garlicnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicpot": {
+      "entryId": "set.garlicpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicpumpkin": {
+      "entryId": "set.garlicpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicrepeater": {
+      "entryId": "set.garlicrepeater-001",
+      "attempts": 2
+    },
+    "set-species-demon.garlicsniper": {
+      "entryId": "set.garlicsniper-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicsplit": {
+      "entryId": "set.garlicsplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlictorch": {
+      "entryId": "set.garlictorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicultimatechomper": {
+      "entryId": "set.garlicultimatechomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.garlicumbrella": {
+      "entryId": "set.garlicumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingblackfootball": {
+      "entryId": "set.gatlingblackfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingdoomscaredy": {
+      "entryId": "set.gatlingdoomscaredy-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingfootballzombie": {
+      "entryId": "set.gatlingfootballzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingpaper_a": {
+      "entryId": "set.gatlingpaper-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingpaper_b": {
+      "entryId": "set.gatlingpaper-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.gatlingpaper_c": {
+      "entryId": "set.gatlingpaper-c-001",
+      "attempts": 2
+    },
+    "set-species-demon.gatlingpeazombie": {
+      "entryId": "set.gatlingpeazombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.gatlingpuff": {
+      "entryId": "set.gatlingpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.gloomshroom": {
+      "entryId": "set.gloomshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldbungizombie": {
+      "entryId": "set.goldbungizombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldcabbage": {
+      "entryId": "set.goldcabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldcorn": {
+      "entryId": "set.goldcorn-001",
+      "attempts": 2
+    },
+    "set-species-demon.golddoom": {
+      "entryId": "set.golddoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldgarlic": {
+      "entryId": "set.goldgarlic-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldhypnodoom": {
+      "entryId": "set.goldhypnodoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldiceshroom": {
+      "entryId": "set.goldiceshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldmagnet": {
+      "entryId": "set.goldmagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldmelon": {
+      "entryId": "set.goldmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldnut": {
+      "entryId": "set.goldnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldpot": {
+      "entryId": "set.goldpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldscarypot": {
+      "entryId": "set.goldscarypot-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldsunflower": {
+      "entryId": "set.goldsunflower-001",
+      "attempts": 2
+    },
+    "set-species-demon.goldthreeplantern": {
+      "entryId": "set.goldthreeplantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldthreetorch": {
+      "entryId": "set.goldthreetorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldumbrella": {
+      "entryId": "set.goldumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.goldzombie": {
+      "entryId": "set.goldzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.gravebuster": {
+      "entryId": "set.gravebuster-001",
+      "attempts": 2
+    },
+    "set-species-demon.greengargantuar": {
+      "entryId": "set.greengargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.hamburger": {
+      "entryId": "set.hamburger-001",
+      "attempts": 1
+    },
+    "set-species-demon.helmetfume": {
+      "entryId": "set.helmetfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.helmetgatling": {
+      "entryId": "set.helmetgatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.helmetplant": {
+      "entryId": "set.helmetplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.holographicplant": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.holographicplant-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.horseboss": {
+      "entryId": "set.horseboss-001",
+      "attempts": 1
+    },
+    "set-species-demon.horsezombie": {
+      "entryId": "set.horsezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.hugewallnut": {
+      "entryId": "set.hugewallnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.hurricaneblover": {
+      "entryId": "set.hurricaneblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnoblover": {
+      "entryId": "set.hypnoblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnocattailgirl": {
+      "entryId": "set.hypnocattailgirl-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnocattailgirl_land": {
+      "entryId": "set.hypnocattailgirl-land-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnodoom": {
+      "entryId": "set.hypnodoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnoemperor": {
+      "entryId": "set.hypnoemperor-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnofume": {
+      "entryId": "set.hypnofume-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnogarlic": {
+      "entryId": "set.hypnogarlic-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnogatling": {
+      "entryId": "set.hypnogatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnojalapeno": {
+      "entryId": "set.hypnojalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnojalapenopickaxezombie": {
+      "entryId": "set.hypnojalapenopickaxezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnojalapenozombie": {
+      "entryId": "set.hypnojalapenozombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnomagnet": {
+      "entryId": "set.hypnomagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnomelon": {
+      "entryId": "set.hypnomelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnomine": {
+      "entryId": "set.hypnomine-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnonut": {
+      "entryId": "set.hypnonut-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnopeashooter": {
+      "entryId": "set.hypnopeashooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnopot": {
+      "entryId": "set.hypnopot-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnopuff": {
+      "entryId": "set.hypnopuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnopumpkin": {
+      "entryId": "set.hypnopumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnoqueen": {
+      "entryId": "set.hypnoqueen-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnorepeater": {
+      "entryId": "set.hypnorepeater-001",
+      "attempts": 2
+    },
+    "set-species-demon.hypnoshroom": {
+      "entryId": "set.hypnoshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnosplit": {
+      "entryId": "set.hypnosplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnosquash": {
+      "entryId": "set.hypnosquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.hypnotorch": {
+      "entryId": "set.hypnotorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.icebean": {
+      "entryId": "set.icebean-001",
+      "attempts": 1
+    },
+    "set-species-demon.iceblover": {
+      "entryId": "set.iceblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecabbage": {
+      "entryId": "set.icecabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecactus": {
+      "entryId": "set.icecactus-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecaltrop": {
+      "entryId": "set.icecaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecannon": {
+      "entryId": "set.icecannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecattail": {
+      "entryId": "set.icecattail-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecherry": {
+      "entryId": "set.icecherry-001",
+      "attempts": 1
+    },
+    "set-species-demon.iceclawzombie": {
+      "entryId": "set.iceclawzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.icecorn": {
+      "entryId": "set.icecorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.icedoom": {
+      "entryId": "set.icedoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.icefumeshroom": {
+      "entryId": "set.icefumeshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.icefurnace": {
+      "entryId": "set.icefurnace-001",
+      "attempts": 1
+    },
+    "set-species-demon.icegloom": {
+      "entryId": "set.icegloom-001",
+      "attempts": 1
+    },
+    "set-species-demon.icehypno": {
+      "entryId": "set.icehypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.icelaserumbrella": {
+      "entryId": "set.icelaserumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.icelotus": {
+      "entryId": "set.icelotus-001",
+      "attempts": 1
+    },
+    "set-species-demon.icemine": {
+      "entryId": "set.icemine-001",
+      "attempts": 1
+    },
+    "set-species-demon.icenut": {
+      "entryId": "set.icenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.icepeach": {
+      "entryId": "set.icepeach-001",
+      "attempts": 1
+    },
+    "set-species-demon.iceplantern": {
+      "entryId": "set.iceplantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.icepot": {
+      "entryId": "set.icepot-001",
+      "attempts": 1
+    },
+    "set-species-demon.icepuff": {
+      "entryId": "set.icepuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.icepumpkin": {
+      "entryId": "set.icepumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.icescaredyshroom": {
+      "entryId": "set.icescaredyshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.iceseashroom": {
+      "entryId": "set.iceseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.iceshroom": {
+      "entryId": "set.iceshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.icespikerock": {
+      "entryId": "set.icespikerock-001",
+      "attempts": 1
+    },
+    "set-species-demon.icesquash": {
+      "entryId": "set.icesquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.icetorch": {
+      "entryId": "set.icetorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.ifvblover": {
+      "entryId": "set.ifvblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.ifvironpuff": {
+      "entryId": "set.ifvironpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ifvpumpkin": {
+      "entryId": "set.ifvpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.ifvstar": {
+      "entryId": "set.ifvstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.imitater": {
+      "entryId": "set.imitater-001",
+      "attempts": 1
+    },
+    "set-species-demon.imitatewheat": {
+      "entryId": "set.imitatewheat-001",
+      "attempts": 1
+    },
+    "set-species-demon.impking": {
+      "entryId": "set.impking-001",
+      "attempts": 1
+    },
+    "set-species-demon.impzombie": {
+      "entryId": "set.impzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironballoonzombie": {
+      "entryId": "set.ironballoonzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironballoonzombie2": {
+      "entryId": "set.ironballoonzombie2-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironconezombie": {
+      "entryId": "set.ironconezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironcorn": {
+      "entryId": "set.ironcorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironfume": {
+      "entryId": "set.ironfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.irongargantuar": {
+      "entryId": "set.irongargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironmelon": {
+      "entryId": "set.ironmelon-001",
+      "attempts": 3
+    },
+    "set-species-demon.ironnut": {
+      "entryId": "set.ironnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironpea": {
+      "entryId": "set.ironpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironpeadoorzombie": {
+      "entryId": "set.ironpeadoorzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironpuff": {
+      "entryId": "set.ironpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironpumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ironpumpkin-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.bonding' is legal on ['armament-primary', 'armament-secondary', 'jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'manipulator', 'sense'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.ironredgargantuar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ironredgargantuar-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.ironsquash": {
+      "entryId": "set.ironsquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.ironstar": {
+      "entryId": "set.ironstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackbox_a": {
+      "entryId": "set.jackbox-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackbox_b": {
+      "entryId": "set.jackbox-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackbox_c": {
+      "entryId": "set.jackbox-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxdoom": {
+      "entryId": "set.jackboxdoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxjumpzombie": {
+      "entryId": "set.jackboxjumpzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxplant": {
+      "entryId": "set.jackboxplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxpumpkin": {
+      "entryId": "set.jackboxpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxstar": {
+      "entryId": "set.jackboxstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackboxzombie": {
+      "entryId": "set.jackboxzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackson_a": {
+      "entryId": "set.jackson-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackson_b": {
+      "entryId": "set.jackson-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.jackson_c": {
+      "entryId": "set.jackson-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.jacksondriver": {
+      "entryId": "set.jacksondriver-001",
+      "attempts": 1
+    },
+    "set-species-demon.jacksondriverboss": {
+      "entryId": "set.jacksondriverboss-001",
+      "attempts": 1
+    },
+    "set-species-demon.jacksonzombie": {
+      "entryId": "set.jacksonzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalacaltrop": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.jalacaltrop-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.earth'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.jalacorn": {
+      "entryId": "set.jalacorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.jaladoubleshooter": {
+      "entryId": "set.jaladoubleshooter-001",
+      "attempts": 2
+    },
+    "set-species-demon.jalagatling": {
+      "entryId": "set.jalagatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalakelp": {
+      "entryId": "set.jalakelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalamine": {
+      "entryId": "set.jalamine-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalapenozombie": {
+      "entryId": "set.jalapenozombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.jalapumpkin": {
+      "entryId": "set.jalapumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalasplit": {
+      "entryId": "set.jalasplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalasquash": {
+      "entryId": "set.jalasquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalasquashzombie": {
+      "entryId": "set.jalasquashzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.jalatorch": {
+      "entryId": "set.jalatorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelpfume": {
+      "entryId": "set.kelpfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelpmine_land": {
+      "entryId": "set.kelpmine-land-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelpmine_water": {
+      "entryId": "set.kelpmine-water-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelpnut": {
+      "entryId": "set.kelpnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelppuff": {
+      "entryId": "set.kelppuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.kelptorch": {
+      "entryId": "set.kelptorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.kirov_a": {
+      "entryId": "set.kirov-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.kirov_b": {
+      "entryId": "set.kirov-b-001",
+      "attempts": 1
+    },
+    "set-species-demon.kirov_c": {
+      "entryId": "set.kirov-c-001",
+      "attempts": 2
+    },
+    "set-species-demon.kirovzombie": {
+      "entryId": "set.kirovzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ladderzombie": {
+      "entryId": "set.ladderzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.landsubmarine": {
+      "entryId": "set.landsubmarine-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternblover": {
+      "entryId": "set.lanternblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternfume": {
+      "entryId": "set.lanternfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanterngatling": {
+      "entryId": "set.lanterngatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternmagnet": {
+      "entryId": "set.lanternmagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternnut": {
+      "entryId": "set.lanternnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternpot": {
+      "entryId": "set.lanternpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternpumpkin": {
+      "entryId": "set.lanternpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternrepeater": {
+      "entryId": "set.lanternrepeater-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternsplit": {
+      "entryId": "set.lanternsplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternstar": {
+      "entryId": "set.lanternstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.lanternumbrella": {
+      "entryId": "set.lanternumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.laserumbrella": {
+      "entryId": "set.laserumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.legionsniperzombie": {
+      "entryId": "set.legionsniperzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.legionzombie": {
+      "entryId": "set.legionzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.levatationzombie": {
+      "entryId": "set.levatationzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.lilypad": {
+      "entryId": "set.lilypad-001",
+      "attempts": 1
+    },
+    "set-species-demon.lotusaloes": {
+      "entryId": "set.lotusaloes-001",
+      "attempts": 1
+    },
+    "set-species-demon.lotusbamboo": {
+      "entryId": "set.lotusbamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.lotusspruce": {
+      "entryId": "set.lotusspruce-001",
+      "attempts": 1
+    },
+    "set-species-demon.luckyblover": {
+      "entryId": "set.luckyblover-001",
+      "attempts": 2
+    },
+    "set-species-demon.machinelevatation": {
+      "entryId": "set.machinelevatation-001",
+      "attempts": 1
+    },
+    "set-species-demon.machinenut": {
+      "entryId": "set.machinenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.machinenutzombie": {
+      "entryId": "set.machinenutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.machineshardplant": {
+      "entryId": "set.machineshardplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.magicsnowpea": {
+      "entryId": "set.magicsnowpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.magicsnowpea2": {
+      "entryId": "set.magicsnowpea2-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetblover": {
+      "entryId": "set.magnetblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetbox": {
+      "entryId": "set.magnetbox-001",
+      "attempts": 3
+    },
+    "set-species-demon.magnetcactus": {
+      "entryId": "set.magnetcactus-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetcorn": {
+      "entryId": "set.magnetcorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetdoom": {
+      "entryId": "set.magnetdoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetfume": {
+      "entryId": "set.magnetfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetinterface": {
+      "entryId": "set.magnetinterface-001",
+      "attempts": 3
+    },
+    "set-species-demon.magnetmelon": {
+      "entryId": "set.magnetmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetnut": {
+      "entryId": "set.magnetnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetpumpkin": {
+      "entryId": "set.magnetpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetshroom": {
+      "entryId": "set.magnetshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.magnetstar": {
+      "entryId": "set.magnetstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonblover": {
+      "entryId": "set.melonblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.meloncaltrop": {
+      "entryId": "set.meloncaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.meloncannon": {
+      "entryId": "set.meloncannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonfume": {
+      "entryId": "set.melonfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonnut": {
+      "entryId": "set.melonnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonpot": {
+      "entryId": "set.melonpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonpuff": {
+      "entryId": "set.melonpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonpumpkin": {
+      "entryId": "set.melonpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.melonumbrella": {
+      "entryId": "set.melonumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.minerzombie": {
+      "entryId": "set.minerzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.minisandmonster": {
+      "entryId": "set.minisandmonster-001",
+      "attempts": 3
+    },
+    "set-species-demon.minisnowmonster": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.minisnowmonster-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.gravemaking' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.mixanim": {
+      "entryId": "set.mixanim-001",
+      "attempts": 1
+    },
+    "set-species-demon.mixbomb": {
+      "entryId": "set.mixbomb-001",
+      "attempts": 1
+    },
+    "set-species-demon.newyearzombie": {
+      "entryId": "set.newyearzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.nucleardoomcherry": {
+      "entryId": "set.nucleardoomcherry-001",
+      "attempts": 1
+    },
+    "set-species-demon.nuclearsquash": {
+      "entryId": "set.nuclearsquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.nutblover": {
+      "entryId": "set.nutblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.nutchomper": {
+      "entryId": "set.nutchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.nutfume": {
+      "entryId": "set.nutfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.nutpot": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.nutpot-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.warded', 'variant': 'atom.warded.earth'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.nutpumpkin": {
+      "entryId": "set.nutpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.nuttorch": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.nuttorch-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.nutumbrella": {
+      "entryId": "set.nutumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidianclawzombie": {
+      "entryId": "set.obsidianclawzombie-001",
+      "attempts": 3
+    },
+    "set-species-demon.obsidianimpzombie": {
+      "entryId": "set.obsidianimpzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidianjalapeno": {
+      "entryId": "set.obsidianjalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidianspike": {
+      "entryId": "set.obsidianspike-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidiantallnutzombie": {
+      "entryId": "set.obsidiantallnutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidianwallnut": {
+      "entryId": "set.obsidianwallnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.obsidianwheat": {
+      "entryId": "set.obsidianwheat-001",
+      "attempts": 1
+    },
+    "set-species-demon.passionfruit": {
+      "entryId": "set.passionfruit-001",
+      "attempts": 1
+    },
+    "set-species-demon.peablover": {
+      "entryId": "set.peablover-001",
+      "attempts": 1
+    },
+    "set-species-demon.peachomper": {
+      "entryId": "set.peachomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.peafume": {
+      "entryId": "set.peafume-001",
+      "attempts": 1
+    },
+    "set-species-demon.peamine": {
+      "entryId": "set.peamine-001",
+      "attempts": 1
+    },
+    "set-species-demon.peanut": {
+      "entryId": "set.peanut-001",
+      "attempts": 2
+    },
+    "set-species-demon.peapot": {
+      "entryId": "set.peapot-001",
+      "attempts": 1
+    },
+    "set-species-demon.peapuff": {
+      "entryId": "set.peapuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.peapumpkin": {
+      "entryId": "set.peapumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.peascaredy": {
+      "entryId": "set.peascaredy-001",
+      "attempts": 1
+    },
+    "set-species-demon.peashooter": {
+      "entryId": "set.peashooter-001",
+      "attempts": 2
+    },
+    "set-species-demon.peashooterzombie": {
+      "entryId": "set.peashooterzombie-001",
+      "attempts": 3
+    },
+    "set-species-demon.peasquash": {
+      "entryId": "set.peasquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.penguinzombie": {
+      "entryId": "set.penguinzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.pickaxe_a": {
+      "entryId": "set.pickaxe-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.pickaxe_b": {
+      "entryId": "set.pickaxe-b-001",
+      "attempts": 2
+    },
+    "set-species-demon.pickaxe_c": {
+      "entryId": "set.pickaxe-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.pickaxeplant": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.pickaxeplant-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.pickaxepumpkin": {
+      "entryId": "set.pickaxepumpkin-001",
+      "attempts": 3
+    },
+    "set-species-demon.pickaxestar": {
+      "entryId": "set.pickaxestar-001",
+      "attempts": 1
+    },
+    "set-species-demon.pickaxezombie": {
+      "entryId": "set.pickaxezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.pinefurnace": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.pinefurnace-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.firelining' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.pinkonion": {
+      "entryId": "set.pinkonion-001",
+      "attempts": 1
+    },
+    "set-species-demon.pit": {
+      "entryId": "set.pit-001",
+      "attempts": 2
+    },
+    "set-species-demon.pogozombie": {
+      "entryId": "set.pogozombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.polfootballzombie": {
+      "entryId": "set.polfootballzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalballoonzombie": {
+      "entryId": "set.portalballoonzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalcorn": {
+      "entryId": "set.portalcorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.portaldoom": {
+      "entryId": "set.portaldoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalmelon": {
+      "entryId": "set.portalmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalnut": {
+      "entryId": "set.portalnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalpea": {
+      "entryId": "set.portalpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalplant": {
+      "entryId": "set.portalplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.portalpolevaulter": {
+      "entryId": "set.portalpolevaulter-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatochomper": {
+      "entryId": "set.potatochomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatodoom": {
+      "entryId": "set.potatodoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatofume": {
+      "entryId": "set.potatofume-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatomine": {
+      "entryId": "set.potatomine-001",
+      "attempts": 2
+    },
+    "set-species-demon.potatonut": {
+      "entryId": "set.potatonut-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatopuff": {
+      "entryId": "set.potatopuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatopumpkin": {
+      "entryId": "set.potatopumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.potatosquash": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.potatosquash-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.potatosquashbody": {
+      "entryId": "set.potatosquashbody-001",
+      "attempts": 1
+    },
+    "set-species-demon.present": {
+      "entryId": "set.present-001",
+      "attempts": 1
+    },
+    "set-species-demon.presentzombie": {
+      "entryId": "set.presentzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.projectilezombie": {
+      "entryId": "set.projectilezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.protalzombie": {
+      "entryId": "set.protalzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.pudding": {
+      "entryId": "set.pudding-001",
+      "attempts": 1
+    },
+    "set-species-demon.puffdoom": {
+      "entryId": "set.puffdoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.puffjalapeno": {
+      "entryId": "set.puffjalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.puffnut": {
+      "entryId": "set.puffnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.puffpumpkin": {
+      "entryId": "set.puffpumpkin-001",
+      "attempts": 2
+    },
+    "set-species-demon.puffseashroom": {
+      "entryId": "set.puffseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.puffsquash": {
+      "entryId": "set.puffsquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.pumpiner": {
+      "entryId": "set.pumpiner-001",
+      "attempts": 1
+    },
+    "set-species-demon.qingzombie": {
+      "entryId": "set.qingzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.quickjacksonzombie": {
+      "entryId": "set.quickjacksonzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.randomgargantuar": {
+      "entryId": "set.randomgargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.randompluszombie": {
+      "entryId": "set.randompluszombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.randomzombie": {
+      "entryId": "set.randomzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.redemeraldumbrella": {
+      "entryId": "set.redemeraldumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.redgargantuar": {
+      "entryId": "set.redgargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.redzombieloonnut": {
+      "entryId": "set.redzombieloonnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.refrash": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "set.refrash-001",
+      "attempts": 1,
+      "blockedReason": "The theme of a shifting, gelatinous mass lacks a specific capability from the provided list that captures its amorphous, undulating, and non-skeletal nature without being a generic elemental or defensive stat."
+    },
+    "set-species-demon.sandjackson": {
+      "entryId": "set.sandjackson-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredfume": {
+      "entryId": "set.scaredfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredsun": {
+      "entryId": "set.scaredsun-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredyblover": {
+      "entryId": "set.scaredyblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredydoom": {
+      "entryId": "set.scaredydoom-001",
+      "attempts": 2
+    },
+    "set-species-demon.scaredyhypno": {
+      "entryId": "set.scaredyhypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredynut": {
+      "entryId": "set.scaredynut-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredypot": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.scaredypot-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Gilded Bloom' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.scaredypotato": {
+      "entryId": "set.scaredypotato-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredypumpkin": {
+      "entryId": "set.scaredypumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.scaredystar": {
+      "entryId": "set.scaredystar-001",
+      "attempts": 1
+    },
+    "set-species-demon.seablover": {
+      "entryId": "set.seablover-001",
+      "attempts": 1
+    },
+    "set-species-demon.seacactus": {
+      "entryId": "set.seacactus-001",
+      "attempts": 1
+    },
+    "set-species-demon.seafume": {
+      "entryId": "set.seafume-001",
+      "attempts": 1
+    },
+    "set-species-demon.seahypno": {
+      "entryId": "set.seahypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.sealantern": {
+      "entryId": "set.sealantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.seamagnet": {
+      "entryId": "set.seamagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.seamine_land": {
+      "entryId": "set.seamine-land-001",
+      "attempts": 1
+    },
+    "set-species-demon.seamine_water": {
+      "entryId": "set.seamine-water-001",
+      "attempts": 1
+    },
+    "set-species-demon.seanut": {
+      "entryId": "set.seanut-001",
+      "attempts": 1
+    },
+    "set-species-demon.seapumpkin": {
+      "entryId": "set.seapumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.seascaredyshroom": {
+      "entryId": "set.seascaredyshroom-001",
+      "attempts": 2
+    },
+    "set-species-demon.seashroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.seashroom-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore Cloud' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.seasquash": {
+      "entryId": "set.seasquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.seastarfruit": {
+      "entryId": "set.seastarfruit-001",
+      "attempts": 1
+    },
+    "set-species-demon.seasunshroom": {
+      "entryId": "set.seasunshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.shulkbamboo": {
+      "entryId": "set.shulkbamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.shulkflower": {
+      "entryId": "set.shulkflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.shulkfurnace": {
+      "entryId": "set.shulkfurnace-001",
+      "attempts": 1
+    },
+    "set-species-demon.shulklotus": {
+      "entryId": "set.shulklotus-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvercabbage": {
+      "entryId": "set.silvercabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvercorn": {
+      "entryId": "set.silvercorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.silverdoom": {
+      "entryId": "set.silverdoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvergarlic": {
+      "entryId": "set.silvergarlic-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvericeshroom": {
+      "entryId": "set.silvericeshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvermelon": {
+      "entryId": "set.silvermelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.silvernut": {
+      "entryId": "set.silvernut-001",
+      "attempts": 1
+    },
+    "set-species-demon.silverpot": {
+      "entryId": "set.silverpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.silversunflower": {
+      "entryId": "set.silversunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.silverumbrella": {
+      "entryId": "set.silverumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.silverzombie": {
+      "entryId": "set.silverzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.smalliceshroom": {
+      "entryId": "set.smalliceshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.smallpuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.smallpuff-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.smallumbrella": {
+      "entryId": "set.smallumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.sniperchomper": {
+      "entryId": "set.sniperchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.sniperpea": {
+      "entryId": "set.sniperpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.sniperpot": {
+      "entryId": "set.sniperpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.sniperpuff": {
+      "entryId": "set.sniperpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.snorklezombie": {
+      "entryId": "set.snorklezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowbucketzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.snowbucketzombie-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.flash-freeze' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.snowconezombie": {
+      "entryId": "set.snowconezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowdolphinrider": {
+      "entryId": "set.snowdolphinrider-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowdrownzombie": {
+      "entryId": "set.snowdrownzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.snowgatlingpeazombie": {
+      "entryId": "set.snowgatlingpeazombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowgatlingpuff": {
+      "entryId": "set.snowgatlingpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowgunzombie": {
+      "entryId": "set.snowgunzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowmonsterrider": {
+      "entryId": "set.snowmonsterrider-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowmonsterzombie": {
+      "entryId": "set.snowmonsterzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snownormalzombie": {
+      "entryId": "set.snownormalzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowpresent": {
+      "entryId": "set.snowpresent-001",
+      "attempts": 1
+    },
+    "set-species-demon.snowshieldzombie": {
+      "entryId": "set.snowshieldzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.snowsplit": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.snowsplit-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.snowzombie": {
+      "entryId": "set.snowzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.solarlily": {
+      "entryId": "set.solarlily-001",
+      "attempts": 1
+    },
+    "set-species-demon.solarpot": {
+      "entryId": "set.solarpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.solarsunflower": {
+      "entryId": "set.solarsunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.spikerock": {
+      "entryId": "set.spikerock-001",
+      "attempts": 1
+    },
+    "set-species-demon.splitpea": {
+      "entryId": "set.splitpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.splitpuff": {
+      "entryId": "set.splitpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.spreadfume": {
+      "entryId": "set.spreadfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.spreadscaredyshroom": {
+      "entryId": "set.spreadscaredyshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.spruceballista": {
+      "entryId": "set.spruceballista-001",
+      "attempts": 1
+    },
+    "set-species-demon.sprucefurnace": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.sprucefurnace-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.spruceshooter": {
+      "entryId": "set.spruceshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.spruceshulk": {
+      "entryId": "set.spruceshulk-001",
+      "attempts": 1
+    },
+    "set-species-demon.squalour": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.squalour-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.squalourzombie": {
+      "entryId": "set.squalourzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashblover": {
+      "entryId": "set.squashblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashcorn": {
+      "entryId": "set.squashcorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashkelp": {
+      "entryId": "set.squashkelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashmelon": {
+      "entryId": "set.squashmelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashnut": {
+      "entryId": "set.squashnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashpumpkin": {
+      "entryId": "set.squashpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashspike": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.squashspike-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spike Volley' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.squashtorch": {
+      "entryId": "set.squashtorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.squashzombie": {
+      "entryId": "set.squashzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.starblover": {
+      "entryId": "set.starblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.starfruit": {
+      "entryId": "set.starfruit-001",
+      "attempts": 1
+    },
+    "set-species-demon.starfume": {
+      "entryId": "set.starfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.starhypno": {
+      "entryId": "set.starhypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.starnut": {
+      "entryId": "set.starnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.starpea": {
+      "entryId": "set.starpea-001",
+      "attempts": 1
+    },
+    "set-species-demon.starpuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.starpuff-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Starry Spore Launcher' within this batch; kept 'set.starhypno-001'"
+      ]
+    },
+    "set-species-demon.starpumpkin": {
+      "entryId": "set.starpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.starsniper": {
+      "entryId": "set.starsniper-001",
+      "attempts": 1
+    },
+    "set-species-demon.starsquash": {
+      "entryId": "set.starsquash-001",
+      "attempts": 2
+    },
+    "set-species-demon.startorch": {
+      "entryId": "set.startorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.stonedancer": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.stonedancer-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.submarine_a": {
+      "entryId": "set.submarine-a-001",
+      "attempts": 1
+    },
+    "set-species-demon.submarine_b": {
+      "entryId": "set.submarine-b-001",
+      "attempts": 2
+    },
+    "set-species-demon.submarine_b2": {
+      "entryId": "set.submarine-b2-001",
+      "attempts": 1
+    },
+    "set-species-demon.submarine_c": {
+      "entryId": "set.submarine-c-001",
+      "attempts": 1
+    },
+    "set-species-demon.submarine_c2": {
+      "entryId": "set.submarine-c2-001",
+      "attempts": 1
+    },
+    "set-species-demon.submarinezombie": {
+      "entryId": "set.submarinezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.summonedhorse": {
+      "entryId": "set.summonedhorse-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunblover": {
+      "entryId": "set.sunblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunbomb": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.sunbomb-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.suncabbage": {
+      "entryId": "set.suncabbage-001",
+      "attempts": 1
+    },
+    "set-species-demon.suncaltrop": {
+      "entryId": "set.suncaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunflower": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.sunflower-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.sungatlingpuff": {
+      "entryId": "set.sungatlingpuff-001",
+      "attempts": 2
+    },
+    "set-species-demon.sunhypno": {
+      "entryId": "set.sunhypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.suniceshroom": {
+      "entryId": "set.suniceshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunjalapeno": {
+      "entryId": "set.sunjalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunmagnet": {
+      "entryId": "set.sunmagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunmine": {
+      "entryId": "set.sunmine-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunnut": {
+      "entryId": "set.sunnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunnutzombie": {
+      "entryId": "set.sunnutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunpot": {
+      "entryId": "set.sunpot-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunpumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.sunpumpkin-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Solar Harvest' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.sunshroom": {
+      "entryId": "set.sunshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunsquash": {
+      "entryId": "set.sunsquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.sunstar": {
+      "entryId": "set.sunstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.superblackfootball": {
+      "entryId": "set.superblackfootball-001",
+      "attempts": 2
+    },
+    "set-species-demon.superblackhorse": {
+      "entryId": "set.superblackhorse-001",
+      "attempts": 1
+    },
+    "set-species-demon.superbombthrower": {
+      "entryId": "set.superbombthrower-001",
+      "attempts": 2
+    },
+    "set-species-demon.supercaltrop": {
+      "entryId": "set.supercaltrop-001",
+      "attempts": 1
+    },
+    "set-species-demon.supercaltroppot": {
+      "entryId": "set.supercaltroppot-001",
+      "attempts": 1
+    },
+    "set-species-demon.supercherrygatling": {
+      "entryId": "set.supercherrygatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.supercherryshooter": {
+      "entryId": "set.supercherryshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.supercherryshooterzombie": {
+      "entryId": "set.supercherryshooterzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superchomper": {
+      "entryId": "set.superchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.superdancepolzombie": {
+      "entryId": "set.superdancepolzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superdriver": {
+      "entryId": "set.superdriver-001",
+      "attempts": 1
+    },
+    "set-species-demon.superfume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.superfume-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.superfurnace": {
+      "entryId": "set.superfurnace-001",
+      "attempts": 1
+    },
+    "set-species-demon.supergargantuar": {
+      "entryId": "set.supergargantuar-001",
+      "attempts": 2
+    },
+    "set-species-demon.supergatling": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.supergatling-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Pea-Shot Volley' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.supergatlingpeamine": {
+      "entryId": "set.supergatlingpeamine-001",
+      "attempts": 1
+    },
+    "set-species-demon.supergatlingpumpkin": {
+      "entryId": "set.supergatlingpumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.superhorse": {
+      "entryId": "set.superhorse-001",
+      "attempts": 1
+    },
+    "set-species-demon.superhurricaneblover": {
+      "entryId": "set.superhurricaneblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.superhypno": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.superhypno-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.superhypnodoom": {
+      "entryId": "set.superhypnodoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.superhypnogatling": {
+      "entryId": "set.superhypnogatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.superjackboxzombie": {
+      "entryId": "set.superjackboxzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superjalanut": {
+      "entryId": "set.superjalanut-001",
+      "attempts": 1
+    },
+    "set-species-demon.superkelp": {
+      "entryId": "set.superkelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.superkirov": {
+      "entryId": "set.superkirov-001",
+      "attempts": 1
+    },
+    "set-species-demon.superladderzombie": {
+      "entryId": "set.superladderzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superlevatation": {
+      "entryId": "set.superlevatation-001",
+      "attempts": 1
+    },
+    "set-species-demon.supermachinenut": {
+      "entryId": "set.supermachinenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.supermachinenutzombie": {
+      "entryId": "set.supermachinenutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.supermachineshardplant": {
+      "entryId": "set.supermachineshardplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.supermelon": {
+      "entryId": "set.supermelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.supernutshooter": {
+      "entryId": "set.supernutshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.superpenguinzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.superpenguinzombie-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.flash-freeze' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.superpogozombie": {
+      "entryId": "set.superpogozombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superpolevaulter": {
+      "entryId": "set.superpolevaulter-001",
+      "attempts": 1
+    },
+    "set-species-demon.superpumpkin": {
+      "entryId": "set.superpumpkin-001",
+      "attempts": 2
+    },
+    "set-species-demon.supersnowgatling": {
+      "entryId": "set.supersnowgatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.supersnowmonsterzombie": {
+      "entryId": "set.supersnowmonsterzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superspruce": {
+      "entryId": "set.superspruce-001",
+      "attempts": 1
+    },
+    "set-species-demon.superstar": {
+      "entryId": "set.superstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.supersubmarine": {
+      "entryId": "set.supersubmarine-001",
+      "attempts": 1
+    },
+    "set-species-demon.supersunnut": {
+      "entryId": "set.supersunnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.supersunnutzombie": {
+      "entryId": "set.supersunnutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.superthreegatling": {
+      "entryId": "set.superthreegatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.superthreepeater": {
+      "entryId": "set.superthreepeater-001",
+      "attempts": 3
+    },
+    "set-species-demon.superthreepeater_sp": {
+      "entryId": "set.superthreepeater-sp-001",
+      "attempts": 1
+    },
+    "set-species-demon.supertorch": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.supertorch-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.superumbrella": {
+      "entryId": "set.superumbrella-001",
+      "attempts": 1
+    },
+    "set-species-demon.swordstar": {
+      "entryId": "set.swordstar-001",
+      "attempts": 1
+    },
+    "set-species-demon.tallfirenut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tallfirenut-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.tallfirenutzombie": {
+      "entryId": "set.tallfirenutzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.tallicenut": {
+      "entryId": "set.tallicenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.tallicenutzombie": {
+      "entryId": "set.tallicenutzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.tallnut": {
+      "entryId": "set.tallnut-001",
+      "attempts": 2
+    },
+    "set-species-demon.tallnutfootball": {
+      "entryId": "set.tallnutfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.tallnutfootballzombie": {
+      "entryId": "set.tallnutfootballzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.tanglekelp": {
+      "entryId": "set.tanglekelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.thorns": {
+      "entryId": "set.thorns-001",
+      "attempts": 1
+    },
+    "set-species-demon.thornsbamboo": {
+      "entryId": "set.thornsbamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.thornslotus": {
+      "entryId": "set.thornslotus-001",
+      "attempts": 1
+    },
+    "set-species-demon.thornsshulk": {
+      "entryId": "set.thornsshulk-001",
+      "attempts": 1
+    },
+    "set-species-demon.thornsspruce": {
+      "entryId": "set.thornsspruce-001",
+      "attempts": 1
+    },
+    "set-species-demon.threecorn": {
+      "entryId": "set.threecorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.threekelp": {
+      "entryId": "set.threekelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.threemelon": {
+      "entryId": "set.threemelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.threemine": {
+      "entryId": "set.threemine-001",
+      "attempts": 1
+    },
+    "set-species-demon.threenut": {
+      "entryId": "set.threenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.threepot": {
+      "entryId": "set.threepot-001",
+      "attempts": 1
+    },
+    "set-species-demon.threepumpkin": {
+      "entryId": "set.threepumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.threespike": {
+      "entryId": "set.threespike-001",
+      "attempts": 1
+    },
+    "set-species-demon.threesquash": {
+      "entryId": "set.threesquash-001",
+      "attempts": 1
+    },
+    "set-species-demon.threetorch": {
+      "entryId": "set.threetorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.thronsaloes": {
+      "entryId": "set.thronsaloes-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchfirenut": {
+      "entryId": "set.torchfirenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchfirepumpkin": {
+      "entryId": "set.torchfirepumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchfume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.torchfume-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.torchmine": {
+      "entryId": "set.torchmine-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchpumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.torchpumpkin-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.firelining' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.torchseashroom": {
+      "entryId": "set.torchseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchspike": {
+      "entryId": "set.torchspike-001",
+      "attempts": 2
+    },
+    "set-species-demon.torchsunflower": {
+      "entryId": "set.torchsunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.torchwood": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.torchwood-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.searing-strike', 'variant': 'atom.searing-strike.fire'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.tower_bigsunshroom": {
+      "entryId": "set.tower-bigsunshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_cherrychomper": {
+      "entryId": "set.tower-cherrychomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_cherryshooter": {
+      "entryId": "set.tower-cherryshooter-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_doomfume": {
+      "entryId": "set.tower-doomfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_doomstar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tower-doomstar-001",
+      "attempts": 3,
+      "defects": [
+        "capability: {'family': 'atom.deathblast', 'variant': 'atom.deathblast.earth'} names no family in the brief's closed capability list — an element-generated family takes `family` plus `variant`",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.tower_electriconion": {
+      "entryId": "set.tower-electriconion-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_gravebuster": {
+      "entryId": "set.tower-gravebuster-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_iceblover": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tower-iceblover-001",
+      "attempts": 3,
+      "defects": [
+        "duplicate name 'Frost Clover' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.tower_icegloom": {
+      "entryId": "set.tower-icegloom-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_lilypad": {
+      "entryId": "set.tower-lilypad-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_peapuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tower-peapuff-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Peashooter Spore' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.tower_peasunflower": {
+      "entryId": "set.tower-peasunflower-001",
+      "attempts": 2
+    },
+    "set-species-demon.tower_scaredyfume": {
+      "entryId": "set.tower-scaredyfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_squashnut": {
+      "entryId": "set.tower-squashnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_starnut": {
+      "entryId": "set.tower-starnut-001",
+      "attempts": 2
+    },
+    "set-species-demon.tower_sunmine": {
+      "entryId": "set.tower-sunmine-001",
+      "attempts": 1
+    },
+    "set-species-demon.tower_sunshroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tower-sunshroom-001",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Solar Spore Bloom' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.tower_threemine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.tower-threemine-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.terraforming' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.tower_watercan": {
+      "entryId": "set.tower-watercan-001",
+      "attempts": 1
+    },
+    "set-species-demon.trainingdummy": {
+      "entryId": "set.trainingdummy-001",
+      "attempts": 2
+    },
+    "set-species-demon.treasuremine": {
+      "entryId": "set.treasuremine-001",
+      "attempts": 1
+    },
+    "set-species-demon.twinmarigold": {
+      "entryId": "set.twinmarigold-001",
+      "attempts": 1
+    },
+    "set-species-demon.twinshulk": {
+      "entryId": "set.twinshulk-001",
+      "attempts": 1
+    },
+    "set-species-demon.ulti_cherrygatling": {
+      "entryId": "set.ulti-cherrygatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatebamboo": {
+      "entryId": "set.ultimatebamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatebigchomper": {
+      "entryId": "set.ultimatebigchomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatebiggatling": {
+      "entryId": "set.ultimatebiggatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatebigsniper": {
+      "entryId": "set.ultimatebigsniper-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateblover": {
+      "entryId": "set.ultimateblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatecabbage": {
+      "entryId": "set.ultimatecabbage-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatecabbagecannon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimatecabbagecannon-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Cabbage Mortar' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.ultimatecactus": {
+      "entryId": "set.ultimatecactus-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatecannon": {
+      "entryId": "set.ultimatecannon-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatecattail": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimatecattail-001",
+      "attempts": 3,
+      "defects": [
+        "the answer declares neither `blocked` nor a complete set: missing ['capability']",
+        "SetCapabilityMissing: every set grants exactly one capability atom, at its LOWEST threshold (ssot-sets §3.2's inversion) — a set with none is stat filler"
+      ]
+    },
+    "set-species-demon.ultimatechomper": {
+      "entryId": "set.ultimatechomper-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatecorn": {
+      "entryId": "set.ultimatecorn-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatecornfume": {
+      "entryId": "set.ultimatecornfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatedolphin": {
+      "entryId": "set.ultimatedolphin-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatedoomgatling": {
+      "entryId": "set.ultimatedoomgatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatedoomscaredy": {
+      "entryId": "set.ultimatedoomscaredy-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateendoflamezombie": {
+      "entryId": "set.ultimateendoflamezombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateexplodecannon": {
+      "entryId": "set.ultimateexplodecannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatefireseashroom": {
+      "entryId": "set.ultimatefireseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatefly": {
+      "entryId": "set.ultimatefly-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatefootballdrown": {
+      "entryId": "set.ultimatefootballdrown-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatefootballzombie": {
+      "entryId": "set.ultimatefootballzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatefume": {
+      "entryId": "set.ultimatefume-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimategargantuar": {
+      "entryId": "set.ultimategargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimategarlicsplit": {
+      "entryId": "set.ultimategarlicsplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimategatling": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimategatling-001",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Cherry Burst Launcher' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.ultimategatlingblover": {
+      "entryId": "set.ultimategatlingblover-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimategloom": {
+      "entryId": "set.ultimategloom-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimategoldgargantuar": {
+      "entryId": "set.ultimategoldgargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehelmetgatling": {
+      "entryId": "set.ultimatehelmetgatling-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehorse": {
+      "entryId": "set.ultimatehorse-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehorse2": {
+      "entryId": "set.ultimatehorse2-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehugenut": {
+      "entryId": "set.ultimatehugenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehypno": {
+      "entryId": "set.ultimatehypno-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehypnodoom": {
+      "entryId": "set.ultimatehypnodoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatehypnopumpkin": {
+      "entryId": "set.ultimatehypnopumpkin-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateicedoom": {
+      "entryId": "set.ultimateicedoom-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateiceshroom": {
+      "entryId": "set.ultimateiceshroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateiceshroom2": {
+      "entryId": "set.ultimateiceshroom2-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateimpking": {
+      "entryId": "set.ultimateimpking-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatejackboxzombie": {
+      "entryId": "set.ultimatejackboxzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatejacksondriver": {
+      "entryId": "set.ultimatejacksondriver-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatejalanut": {
+      "entryId": "set.ultimatejalanut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatejalapeno": {
+      "entryId": "set.ultimatejalapeno-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatejalapuff": {
+      "entryId": "set.ultimatejalapuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatekelp": {
+      "entryId": "set.ultimatekelp-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatekirovzombie": {
+      "entryId": "set.ultimatekirovzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatelanternsplit": {
+      "entryId": "set.ultimatelanternsplit-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatelegionzombie": {
+      "entryId": "set.ultimatelegionzombie-001",
+      "attempts": 3
+    },
+    "set-species-demon.ultimatelunarcabbage": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimatelunarcabbage-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Solar Cabbage Core' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.ultimatemachinenut": {
+      "entryId": "set.ultimatemachinenut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatemachinenutzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimatemachinenutzombie-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Corporate Strike Set' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.ultimatemagnet": {
+      "entryId": "set.ultimatemagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatemelon": {
+      "entryId": "set.ultimatemelon-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatemeloncannon": {
+      "entryId": "set.ultimatemeloncannon-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatemelonpuff": {
+      "entryId": "set.ultimatemelonpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateminigun": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimateminigun-001",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Cherry Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "set-species-demon.ultimatepaperzombie": {
+      "entryId": "set.ultimatepaperzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateplantern": {
+      "entryId": "set.ultimateplantern-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatepoisonfume": {
+      "entryId": "set.ultimatepoisonfume-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateportalnut": {
+      "entryId": "set.ultimateportalnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateportalsniper": {
+      "entryId": "set.ultimateportalsniper-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatepotatonut": {
+      "entryId": "set.ultimatepotatonut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatepumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "set.ultimatepumpkin-001",
+      "attempts": 3,
+      "defects": [
+        "SetCapabilityOffRole: 'atom.gravedigging' is legal on ['jewel-major', 'jewel-minor-a', 'jewel-minor-b', 'retinue'], none of which this set claims — a capability family's own roles narrow the legal pool"
+      ]
+    },
+    "set-species-demon.ultimateredlunar": {
+      "entryId": "set.ultimateredlunar-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateseashroom": {
+      "entryId": "set.ultimateseashroom-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesnipergatling": {
+      "entryId": "set.ultimatesnipergatling-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatesnowgatlingpuff": {
+      "entryId": "set.ultimatesnowgatlingpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesnowzombie": {
+      "entryId": "set.ultimatesnowzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatespring": {
+      "entryId": "set.ultimatespring-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatespruce": {
+      "entryId": "set.ultimatespruce-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatestar": {
+      "entryId": "set.ultimatestar-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatestartorch": {
+      "entryId": "set.ultimatestartorch-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesunflower": {
+      "entryId": "set.ultimatesunflower-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesungatlingpuff": {
+      "entryId": "set.ultimatesungatlingpuff-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesunmagnet": {
+      "entryId": "set.ultimatesunmagnet-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimatesunnut": {
+      "entryId": "set.ultimatesunnut-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultimateswordzombie": {
+      "entryId": "set.ultimateswordzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatetallnut": {
+      "entryId": "set.ultimatetallnut-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatetorch": {
+      "entryId": "set.ultimatetorch-001",
+      "attempts": 2
+    },
+    "set-species-demon.ultimatewintermelon": {
+      "entryId": "set.ultimatewintermelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.ultiwatergargantuar": {
+      "entryId": "set.ultiwatergargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.umbrellaleaf": {
+      "entryId": "set.umbrellaleaf-001",
+      "attempts": 1
+    },
+    "set-species-demon.umbrellapot": {
+      "entryId": "set.umbrellapot-001",
+      "attempts": 1
+    },
+    "set-species-demon.vectorplant": {
+      "entryId": "set.vectorplant-001",
+      "attempts": 1
+    },
+    "set-species-demon.voodoodollzombie": {
+      "entryId": "set.voodoodollzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.wallnutzombie": {
+      "entryId": "set.wallnutzombie-001",
+      "attempts": 2
+    },
+    "set-species-demon.wateraloes": {
+      "entryId": "set.wateraloes-001",
+      "attempts": 1
+    },
+    "set-species-demon.waterballista": {
+      "entryId": "set.waterballista-001",
+      "attempts": 1
+    },
+    "set-species-demon.waterbamboo": {
+      "entryId": "set.waterbamboo-001",
+      "attempts": 1
+    },
+    "set-species-demon.waterfurnace": {
+      "entryId": "set.waterfurnace-001",
+      "attempts": 1
+    },
+    "set-species-demon.waterjackboxjumpzombie": {
+      "entryId": "set.waterjackboxjumpzombie-001",
+      "attempts": 1
+    },
+    "set-species-demon.watershulk": {
+      "entryId": "set.watershulk-001",
+      "attempts": 1
+    },
+    "set-species-demon.waterspruce": {
+      "entryId": "set.waterspruce-001",
+      "attempts": 1
+    },
+    "set-species-demon.wheat": {
+      "entryId": "set.wheat-001",
+      "attempts": 1
+    },
+    "set-species-demon.whitefootball": {
+      "entryId": "set.whitefootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.wintermelon": {
+      "entryId": "set.wintermelon-001",
+      "attempts": 1
+    },
+    "set-species-demon.xxspot": {
+      "entryId": "set.xxspot-001",
+      "attempts": 1
+    },
+    "set-species-demon.yellowfootball": {
+      "entryId": "set.yellowfootball-001",
+      "attempts": 1
+    },
+    "set-species-demon.yellowgargantuar": {
+      "entryId": "set.yellowgargantuar-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombie9527": {
+      "entryId": "set.zombie9527-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombieboss": {
+      "entryId": "set.zombieboss-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombieboss2": {
+      "entryId": "set.zombieboss2-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombieduck": {
+      "entryId": "set.zombieduck-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombieendoflame": {
+      "entryId": "set.zombieendoflame-001",
+      "attempts": 1
+    },
+    "set-species-demon.zombieloonnut": {
+      "entryId": "set.zombieloonnut-001",
+      "attempts": 1
     }
   }
 }

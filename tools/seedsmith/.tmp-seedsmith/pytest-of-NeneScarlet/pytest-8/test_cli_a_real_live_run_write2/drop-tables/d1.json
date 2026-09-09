@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/1",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-1-droptablegen",
+    "model": "unit-test-model",
+    "authoredUtc": "",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9"
+  },
+  "entries": [
+    {
+      "id": "droptable.d1-001",
+      "nameKey": "droptable.live-wired-table",
+      "name": "Live-Wired Table",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "live-wired-table-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "humanoid",
+              "dropBand": "staple"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "plant",
+              "dropBand": "staple"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "live-wired-table-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "catalyst.flux",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.forge",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "live-wired-table-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-001",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "live-wired-table-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-001",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "live-wired-table-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

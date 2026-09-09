@@ -195,6 +195,17 @@ class ItemsFillTests(unittest.TestCase):
         for _group, kid in jobs:
             self.assertIn(kid, legal)
 
+    def test_base_type_discovery_skips_legacy_non_role_filenames(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw)
+            for name in ("humanoid-armament-primary-a.json", "humanoid-back-b.json",
+                         "plant-bract-a.json"):
+                (directory / name).write_text("{}", encoding="utf-8")
+            self.assertEqual(
+                fill_mod.discover_base_type_partitions(directory),
+                [("armament-primary", "humanoid", "a")],
+            )
+
     def test_fill_catches_unexpected_exception(self) -> None:
         def dispatch(argv: list[str]) -> int:
             raise RuntimeError("boom")
@@ -269,6 +280,22 @@ class ItemsFillTests(unittest.TestCase):
         ):
             self.assertFalse(fill_mod._affix_has_free_pairs("g.life", "stat.modify"))
 
+    def test_affix_over_target_partition_is_not_runnable(self) -> None:
+        class Partition:
+            existing_ids = tuple(f"atom.x{i}" for i in range(7))
+
+        with patch(
+            "seedsmith.adapters.items.affixfamgen.brief.load_partition_context",
+            return_value=Partition(),
+        ), patch(
+            "seedsmith.adapters.items.affixfamgen.brief.free_channel_ops",
+            return_value=(("atk", "Flat"),),
+        ), patch(
+            "seedsmith.adapters.items.affixfamgen.brief.load_target_family_count",
+            return_value=7,
+        ):
+            self.assertFalse(fill_mod._affix_has_free_pairs("g.elem-power", "stat.derived"))
+
     def test_gem_empty_slot_planned_as_skipped(self) -> None:
         with patch.object(fill_mod, "discover_gem_slots", return_value=[1]), \
              patch.object(fill_mod, "_gem_slot_has_work", return_value=False):
@@ -307,6 +334,42 @@ class ItemsFillTests(unittest.TestCase):
         for step in sets + [s for s in steps if s.kind == "combination" and s.argv]:
             self.assertNotIn("--limit", step.argv)
 
+    def test_full_plan_honors_an_explicit_limit_as_a_checkpoint(self) -> None:
+        steps, reason = fill_mod.plan_fill_steps(
+            kinds=("set", "charm", "combination"), allow_production=True,
+            limits=fill_mod.FillLimits(full=True, limit=10))
+        self.assertEqual(reason, "")
+        planned = [step for step in steps if step.argv]
+        self.assertTrue(planned)
+        for step in planned:
+            if step.kind in {"set", "charm", "combination"}:
+                self.assertEqual(step.argv[step.argv.index("--limit") + 1], "10")
+
+    def test_full_run_automatically_repeats_set_checkpoints_until_complete(self) -> None:
+        planned = [fill_mod.FillStep(kind="set", argv=["--kind", "set"], note="species", seq=0)]
+        # The runner reconciles both before and after each checkpoint; repeat the intermediate
+        # value for the second loop's pre-dispatch observation.
+        remaining = iter((2, 1, 1, 0))
+        calls: list[list[str]] = []
+
+        def completion(*, kinds):
+            self.assertEqual(kinds, ("set",))
+            n = next(remaining)
+            return {"complete": n == 0,
+                    "checks": [{"kind": "set", "toGenerate": n, "held": 0}]}
+
+        with patch.object(fill_mod, "plan_fill_steps", return_value=(planned, "")), \
+             patch.object(fill_mod, "generation_completion", side_effect=completion):
+            report = fill_mod.run_fill(
+                kinds=("set",), allow_production=True,
+                limits=fill_mod.FillLimits(full=True),
+                dispatch=lambda argv: calls.append(argv) or cli_mod.EXIT_CLEAN)
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[0][-2:], ["--limit", str(fill_mod._FULL_GRID_CHECKPOINT)])
+        self.assertEqual(calls[1][-2:], ["--limit", str(fill_mod._FULL_GRID_CHECKPOINT)])
+        self.assertEqual(len([s for s in report.steps if s.status == "ran"]), 2)
+
     def test_full_with_explicit_count_keeps_operator_value(self) -> None:
         steps, _ = fill_mod.plan_fill_steps(
             kinds=("recipe",), allow_production=True,
@@ -314,16 +377,38 @@ class ItemsFillTests(unittest.TestCase):
         argv = steps[0].argv
         self.assertEqual(argv[argv.index("--count") + 1], "3")
 
-    def test_full_gem_plan_uses_every_discovered_slot_and_remaining_family_count(self) -> None:
+    def test_full_gem_plan_assigns_the_global_family_pool_to_one_slot(self) -> None:
         with patch.object(fill_mod, "discover_gem_slots", return_value=[1, 4]), \
              patch.object(fill_mod, "_gem_remaining", side_effect=lambda slot: {1: 3, 4: 7}[slot]):
             steps, reason = fill_mod.plan_fill_steps(
                 kinds=("gem",), allow_production=True, limits=fill_mod.FillLimits(full=True))
         self.assertEqual(reason, "")
         planned = [step for step in steps if step.argv]
-        self.assertEqual(len(planned), 2)
-        self.assertEqual(
-            [step.argv[step.argv.index("--count") + 1] for step in planned], ["3", "7"])
+        self.assertEqual(len(planned), 1)
+        self.assertEqual(planned[0].argv[planned[0].argv.index("--count") + 1], "3")
+        self.assertTrue(any("global unauthored-family pool" in step.note
+                            for step in steps if not step.argv))
+
+    def test_generation_completion_exposes_held_closed_subjects(self) -> None:
+        class Plan:
+            subjects = ()
+            held = (("demon.alpha", "basis=name"),)
+            complete = False
+
+            @staticmethod
+            def summary():
+                return {"heldByReason": {"basis=name": 1}}
+
+        with patch("seedsmith.adapters.items.setgen.run.plan_run", return_value=Plan()):
+            report = fill_mod.generation_completion(kinds=("set",))
+
+        self.assertFalse(report["complete"])
+        self.assertEqual(report["checks"], [
+            {"kind": "set", "population": "species", "toGenerate": 0, "held": 1,
+             "heldByReason": {"basis=name": 1}, "complete": False},
+            {"kind": "set", "population": "build", "toGenerate": 0, "held": 1,
+             "heldByReason": {"basis=name": 1}, "complete": False},
+        ])
 
     def test_fill_continues_past_gap_when_stop_on_error_false(self) -> None:
         calls: list[str] = []

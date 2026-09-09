@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-ultimatebamboo",
+    "partition": "sets/ultimatebamboo",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.ultimatebamboo-001",
+      "nameKey": "set.spruce-bastion",
+      "name": "Spruce Bastion",
+      "themeKey": "demon.ultimatebamboo",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-b-017"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-026"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-004"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-026"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.sust-grit",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.plating",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.arm-hardening",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.stalwart",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A towering monolith of petrified wood and dense sap that refuses to budge.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

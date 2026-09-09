@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "armament-primary",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-013"
         },
         {
           "role": "core-guard",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-b-017"
         },
         {
           "role": "footing",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-b-007"
         },
         {
           "role": "jewel-minor-a",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-a-001"
         }
       ],
       "thresholds": [

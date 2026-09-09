@@ -33,6 +33,14 @@ Magnitudes come from `seedsmith.numerics.resolve` — bands → channel share �
 `UnsharedChannelError` refusing to guess a channel with no authored weight
 (`tools/seedsmith/seedsmith/numerics/resolve.py:12-19`).
 
+Member binding is the same kind of deterministic lookup as magnitude resolution. After the graph
+accepts a model answer, `setgen.seedfile.bind_member_base_types` reads the live base-type corpus,
+filters by the chosen `(role, frame)`, excludes base types already claimed by a unique, and chooses a
+stable hash-indexed candidate. An existing binding is preserved only when it still belongs to that
+pair; a missing pair or stale id refuses before the partition is written. The model never sees or
+chooses concrete item ids, and `items repair-sets` applies this rule explicitly to legacy
+role/frame-only rows.
+
 | The model emits | Deterministic code resolves |
 |---|---|
 | `capability`: one family id from a closed list | its tier and value, from the threshold's band |
@@ -193,21 +201,21 @@ not an existing check pointed at a new column. `Distribution/Evenness` and `Dist
 (`tools/seedsmith/seedsmith/metrics/distribution.py:100,147`) measure spread over *one* dimension's
 cells and are the right shape to extend, not the right metric to reuse unchanged.
 
-### The theme bridge — one-way, and 31 of 84 need an owner decision
+### The theme bridge — one-way, with explicit name-basis holdback
 
-`data/seed/demons/_registry/themes.v1.json` ships **84 themes** (`schemaVersion 1`, `registryVersion 1`),
+`data/seed/demons/_registry/themes.v1.json` ships **904 themes** (`schemaVersion 1`, `registryVersion 1`),
 each carrying `speciesId`, `displayName`, `rarity`, `motifs`, `antiMotifs`, `expression.item`,
 `expression.action`, `basis`, `retired`. Demons publish; items consume; nothing in the items corpus writes
 a demon (`spec-demon-themes.md` §2.2).
 
 | Fact | Measured |
 |---|---|
-| Published themes | **84**, all `retired: false`, all with ≥1 motif — ⛔ **stale: `data/seed/demons/species/` holds 386** (292 plant + 94 zombie, counted 2026-09-04) |
-| `basis` split | **53 `text` · 31 `name`** |
-| `rarity` split | 42 common · 21 rare · 14 epic · 7 legendary |
+| Published themes | **904**, all `retired: false`, all with ≥1 motif; coverage is 904/904 with no uncovered or orphaned species |
+| `basis` split | **857 `text` · 47 `enriched` · 0 `name`**; every active theme is now eligible |
+| `rarity` split | Snapshot values carried from each species anchor; not a generation input |
 | Motif language | **Chinese** — `displayName` and `motifs` are the species' own zh tokens (`"分配"`, `"火力"`), while set names in the corpus are English (`"Stillmarch"`) |
 
-✅ **RESOLVED 2026-09-04 — D34, and the question was malformed.** The owner: *"84 number is a defect
+✅ **RESOLVED — D34, and the question was malformed.** The owner: *"84 number is a defect
 … why don't you use pipeline to make LLM generate the name? other feature like demon species
 generator, action generator do that."*
 
@@ -215,11 +223,13 @@ generator, action generator do that."*
 ran, and this pipeline generates the missing input.** So there is no Ask-first to answer and no
 53-species wave-1 compromise to make: seedsmith's new **`theme-enrich`** stage raises name-basis themes
 to text-basis before this module runs ([seedsmith-map.md](../seedsmith-map.md) §3c-ter), and
-**`theme-refresh`** republishes the registry over the whole 386-species corpus first.
+**`theme-refresh`** republishes the registry over the whole indexed species corpus first. The refresh
+half is now landed; the 47 name-basis rows remain an explicit generation holdback until enrichment.
 
-> ⚠ **Both numbers in the paragraph this replaces were wrong in the same way.** *"31 of 84 — 37%"* is a
-> proportion of a **stale snapshot of a generated corpus**; the corpus is 386 and grows every run. The
-> rate was never an input to a decision. **Filed as a seedsmith defect, not designed around.**
+> ⚠ **The old 84-row paragraph was a stale snapshot.** *"31 of 84 — 37%"* was a proportion of a
+> generated corpus, not a design input. The refreshed registry is sized from the indexed roster and
+> the remaining name-basis holdback is reported directly by the planner. `theme-enrich` now records
+> accepted model-authored lore as `basis: enriched`; it does not rewrite item-bound snapshots.
 
 **Dependency added:** this module now waits on `theme-refresh` + `theme-enrich` rather than on an owner
 flag per run.

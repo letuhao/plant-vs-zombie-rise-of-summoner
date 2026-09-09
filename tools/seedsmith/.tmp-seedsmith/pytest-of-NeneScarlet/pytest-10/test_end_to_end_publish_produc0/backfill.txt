@@ -1,0 +1,2 @@
+channelWeight.bar=1.75
+channelWeight.foo=0.571

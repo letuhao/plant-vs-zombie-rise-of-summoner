@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "note": "scratch v1"
+  },
+  "baseSharePermille": 35,
+  "channelWeightPermille": {
+    "vitality": 1000,
+    "fortitude": 1000
+  },
+  "opWeightPermille": {
+    "Flat": 1000,
+    "Increased": 1000,
+    "More": 550
+  }
+}

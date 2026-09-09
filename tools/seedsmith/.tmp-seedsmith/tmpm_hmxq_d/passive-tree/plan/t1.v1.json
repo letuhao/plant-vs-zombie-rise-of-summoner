@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "treeId": "t1",
+  "archetype": "broad-and-flat",
+  "propertyVocabulary": {
+    "posture": [
+      "vanguard",
+      "warden"
+    ]
+  },
+  "mechNodesByTier": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "nodes": [
+    {
+      "id": "skill.t1-off-t1-n0",
+      "nodeKey": "n0",
+      "branch": "offensive",
+      "tier": 1,
+      "indexInTier": 0,
+      "nodeClass": "magnitude",
+      "budgetShareMilli": 500,
+      "budgetPoints": 25
+    },
+    {
+      "id": "skill.t1-off-t1-n1",
+      "nodeKey": "n1",
+      "branch": "offensive",
+      "tier": 1,
+      "indexInTier": 1,
+      "nodeClass": "mechanism",
+      "budgetShareMilli": 500,
+      "budgetPoints": 25
+    }
+  ]
+}

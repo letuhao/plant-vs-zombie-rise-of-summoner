@@ -1,0 +1,26 @@
+{
+  "callsMade": 16,
+  "completed": [
+    "peashooter",
+    "sunflower"
+  ],
+  "dumpHash": "hash-A",
+  "failed": [],
+  "pid": 31868,
+  "preflight": {
+    "dumpHash": "hash-A"
+  },
+  "promptVersions": {
+    "element-primary": 1
+  },
+  "runId": "run-1",
+  "selector": {
+    "kind": "all"
+  },
+  "skipped": [
+    "normalzombie"
+  ],
+  "startedUtc": "",
+  "state": "completed",
+  "updatedUtc": ""
+}

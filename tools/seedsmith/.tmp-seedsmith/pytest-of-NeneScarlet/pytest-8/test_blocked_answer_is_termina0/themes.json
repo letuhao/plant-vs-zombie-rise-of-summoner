@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "registryVersion": 1, "themes": {"demon.alpha": {"speciesId": "alpha", "displayName": "Alpha", "rarity": "common", "motifs": ["thorn"], "antiMotifs": ["ice"], "expression": {"item": "material", "action": "tempo"}, "basis": "name", "retired": false}}}

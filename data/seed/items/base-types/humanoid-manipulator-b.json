@@ -739,6 +739,288 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-hands-b-021",
+      "nameKey": "base.serrated-vambrace",
+      "name": "Serrated Vambrace",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-vambrace",
+      "flavorKey": "flavor.base.serrated-vambrace",
+      "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear as it passes.",
+      "tags": [
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-022",
+      "nameKey": "base.serrated-vambrace",
+      "name": "Serrated Vambrace",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.serrated-vambrace",
+      "flavorKey": "flavor.base.serrated-vambrace",
+      "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear at anything within reach.",
+      "tags": [
+        "medium",
+        "offensive",
+        "metal"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-023",
+      "nameKey": "base.serrated-cestus",
+      "name": "Serrated Cestus",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-cestus",
+      "flavorKey": "flavor.base.serrated-cestus",
+      "flavor": "A heavy, reinforced wrap designed to turn a simple strike into a jagged, tearing motion.",
+      "tags": [
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-024",
+      "nameKey": "base.serrated-cestus",
+      "name": "Serrated Cestus",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.serrated-cestus",
+      "flavorKey": "flavor.base.serrated-cestus",
+      "flavor": "A heavy, reinforced wrap designed to turn a simple strike into a jagged, tearing motion.",
+      "tags": [
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-025",
+      "nameKey": "base.serrated-vambrace",
+      "name": "Serrated Vambrace",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-vambrace",
+      "flavorKey": "flavor.base.serrated-vambrace",
+      "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear at anything within reach.",
+      "tags": [
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-026",
+      "nameKey": "base.serrated-vambrace",
+      "name": "Serrated Vambrace",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.serrated-vambrace",
+      "flavorKey": "flavor.base.serrated-vambrace",
+      "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear as it is pulled across a target.",
+      "tags": [
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-027",
+      "nameKey": "base.serrated-cestus",
+      "name": "Serrated Cestus",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-cestus",
+      "flavorKey": "flavor.base.serrated-cestus",
+      "flavor": "A heavy, reinforced wrap designed to turn a simple strike into a jagged, tearing motion.",
+      "tags": [
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-028",
+      "nameKey": "base.taut-wire-wrap",
+      "name": "Taut Wire-Wrap",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.taut-wire-wrap",
+      "flavorKey": "flavor.base.taut-wire-wrap",
+      "flavor": "Thin, high-tension filaments are wound tightly around the fingers to ensure a lethal, snapping grip upon contact.",
+      "tags": [
+        "light",
+        "offensive",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

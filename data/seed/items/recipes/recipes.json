@@ -1334,6 +1334,180 @@
       "soulsCostBand": "steep",
       "tags": [],
       "flavor": "Infuse the fabric with celestial warmth."
+    },
+    {
+      "id": "recipe.060",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "tags": [],
+      "flavor": "Infuse the fabric with solar warmth to harden the weave."
+    },
+    {
+      "id": "recipe.061",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "Infuse the weave with solar warmth."
+    },
+    {
+      "id": "recipe.062",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": [],
+      "flavor": "Infuse the fabric with solar warmth to harden the weave."
+    },
+    {
+      "id": "recipe.063",
+      "nameKey": "recipe.elevate-sunwoven-core",
+      "name": "Elevate: Sunwoven Core",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "shard.sunwoven",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": [],
+      "flavor": "Infuse the weave with celestial warmth."
+    },
+    {
+      "id": "recipe.064",
+      "nameKey": "recipe.temper-sunwoven-weave",
+      "name": "Temper: Sunwoven Weave",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        },
+        {
+          "material": "substrate.plant.fine",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "Infuse the fabric with celestial warmth."
+    },
+    {
+      "id": "recipe.065",
+      "nameKey": "recipe.temper-sunwoven-weave",
+      "name": "Temper: Sunwoven Weave",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        },
+        {
+          "material": "substrate.plant.fine",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": [],
+      "flavor": "Infuse the fabric with celestial warmth."
+    },
+    {
+      "id": "recipe.066",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        },
+        {
+          "material": "substrate.plant.fine",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [],
+      "flavor": "Infuse the fabric with solar warmth to strengthen the weave."
+    },
+    {
+      "id": "recipe.067",
+      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "name": "Temper: Sunwoven Reinforcement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "tags": [],
+      "flavor": "Infuse the fabric with solar warmth to harden the weave."
     }
   ]
 }

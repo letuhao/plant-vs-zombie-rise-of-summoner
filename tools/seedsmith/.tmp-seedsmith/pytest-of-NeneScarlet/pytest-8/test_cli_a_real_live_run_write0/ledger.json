@@ -1,0 +1,10 @@
+{
+  "done": {
+    "g.armour:stat.modify:livewired": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-livewired"
+    }
+  },
+  "schemaVersion": 1
+}

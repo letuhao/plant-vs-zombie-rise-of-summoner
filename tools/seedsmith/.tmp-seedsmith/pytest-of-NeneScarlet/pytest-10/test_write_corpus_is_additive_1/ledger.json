@@ -1,0 +1,13 @@
+{
+  "done": {
+    "droptable-draw-d1-000": {
+      "entryId": "droptable.d1-001",
+      "name": "First"
+    },
+    "droptable-draw-d1-001": {
+      "entryId": "droptable.d1-002",
+      "name": "Second"
+    }
+  },
+  "schemaVersion": 1
+}

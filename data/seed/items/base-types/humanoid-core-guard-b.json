@@ -789,6 +789,292 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-torso-b-022",
+      "nameKey": "base.padded-aegis-vest",
+      "name": "Padded Aegis-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.padded-aegis-vest",
+      "flavorKey": "flavor.base.padded-aegis-vest",
+      "flavor": "A thick, layered garment designed to absorb kinetic impact and stabilize the wearer's core. It provides a dense buffer between the ribs and the external world.",
+      "tags": [
+        "medium",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-023",
+      "nameKey": "base.padded-bastion-vest",
+      "name": "Padded Bastion-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-bastion-vest",
+      "flavorKey": "flavor.base.padded-bastion-vest",
+      "flavor": "Thick layers of quilted linen and heavy leather designed to absorb the impact of blunt force. It provides a soft buffer between the wearer and the crushing weight of heavy armor.",
+      "tags": [
+        "medium",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-024",
+      "nameKey": "base.padded-aegis-vest",
+      "name": "Padded Aegis-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.padded-aegis-vest",
+      "flavorKey": "flavor.base.padded-aegis-vest",
+      "flavor": "A thick, layered garment designed to absorb kinetic impact and stabilize the wearer's core. It provides a dense buffer between the ribs and the external world.",
+      "tags": [
+        "medium",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-025",
+      "nameKey": "base.padded-sternal-plating",
+      "name": "Padded Sternal Plating",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.padded-sternal-plating",
+      "flavorKey": "flavor.base.padded-sternal-plating",
+      "flavor": "Thickened layers of heavy fabric and reinforced padding designed to absorb kinetic impact before it reaches the vitals.",
+      "tags": [
+        "medium",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-026",
+      "nameKey": "base.padded-aegis-vest",
+      "name": "Padded Aegis-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-aegis-vest",
+      "flavorKey": "flavor.base.padded-aegis-vest",
+      "flavor": "Thick layers of quilted fabric reinforced with internal bracing to absorb kinetic impact. It provides a stable foundation for heavy plating.",
+      "tags": [
+        "medium",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-027",
+      "nameKey": "base.padded-aegis-vest",
+      "name": "Padded Aegis-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.padded-aegis-vest",
+      "flavorKey": "flavor.base.padded-aegis-vest",
+      "flavor": "Thick layers of quilted fabric reinforced with internal bracing to absorb heavy impacts. It is designed to distribute the weight of heavy armor across the torso.",
+      "tags": [
+        "medium",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-028",
+      "nameKey": "base.padded-aegis-vest",
+      "name": "Padded Aegis-Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.padded-aegis-vest",
+      "flavorKey": "flavor.base.padded-aegis-vest",
+      "flavor": "A thick, layered garment designed to absorb kinetic impact and stabilize the wearer's core. It provides a sturdy foundation for heavy plating.",
+      "tags": [
+        "medium",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-b-029",
+      "nameKey": "base.padded-pectoral",
+      "name": "Padded Pectoral",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-pectoral",
+      "flavorKey": "flavor.base.padded-pectoral",
+      "flavor": "Thick layers of quilted fabric designed to absorb the impact of blunt strikes. It provides a soft buffer between the wearer and heavy external plating.",
+      "tags": [
+        "light",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

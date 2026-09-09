@@ -1,0 +1,588 @@
+{
+  "_pending": [
+    "demonFamilies"
+  ],
+  "_provenance": {
+    "emittedUtc": "2026-09-09T10:35:03.169683+00:00",
+    "inputs": [
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/aptitudes/roster.json",
+        "sha256": "2f168911d2c9a5d33fb9a3e354742fce24fd7b11a1853d0340b5130c927aedad"
+      },
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/elements/roster.json",
+        "sha256": "88c9e96347cb84157917f852e855e5707b83f5541da2696827912a6b0ee77c13"
+      },
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/statuses/roster.json",
+        "sha256": "de5b9fed078340546ef49bf59dfa8b9b2d8a8e0cd855db2461c819d52b7f1bd3"
+      },
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/passive-tree/vocabulary.json",
+        "sha256": "07b1f8f9f3b278d0a52fed099d7781b2b8417062ae38a6e2945e96397201772a"
+      },
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/derived-stats/catalog.json",
+        "sha256": "07fa43c7ece05ef367396813e47d0813843988ff74eb58122f3c48990936a9a6"
+      },
+      {
+        "path": "tools/seedsmith/.tmp-seedsmith/tmppbmcg5w1/seed/passive-tree/gate-evidence.v1.json",
+        "sha256": "09555e60fec38d7b8fd91c2d9ff3c454747e71b2c826f212b046cd90a4408816"
+      }
+    ],
+    "tuning": [
+      {
+        "domain": "passive-tree",
+        "sha256": "be2df04e79ef6f3556c9f4de8bee3e24ef046007ab0698508abf3e9b971e2083",
+        "version": 1
+      },
+      {
+        "domain": "passive-tree-targets",
+        "sha256": "fb353230ef9087ce15f6045e12bba1d49cf997dec4dbeff0927a701311b1d1e8",
+        "version": 2
+      }
+    ]
+  },
+  "archetypes": [
+    {
+      "id": "broad-and-flat",
+      "maxNodeMilli": 91,
+      "mechNodes": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      "nodeBudgetMilli": [
+        [
+          9,
+          9
+        ],
+        [
+          18,
+          18
+        ],
+        [
+          27,
+          28
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          72,
+          73
+        ],
+        [
+          82,
+          82
+        ],
+        [
+          91,
+          91
+        ]
+      ],
+      "rewardPerPointMilli": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ],
+      "widths": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    {
+      "id": "gated-deep",
+      "maxNodeMilli": 182,
+      "mechNodes": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "nodeBudgetMilli": [
+        [
+          6,
+          6,
+          6
+        ],
+        [
+          12,
+          12,
+          12
+        ],
+        [
+          18,
+          18,
+          19
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          145
+        ],
+        [
+          164
+        ],
+        [
+          182
+        ]
+      ],
+      "rewardPerPointMilli": [
+        533,
+        500,
+        485,
+        559,
+        615,
+        659,
+        693,
+        800,
+        902,
+        1000
+      ],
+      "widths": [
+        3,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "late-crown",
+      "maxNodeMilli": 73,
+      "mechNodes": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        3,
+        3
+      ],
+      "nodeBudgetMilli": [
+        [
+          18
+        ],
+        [
+          36
+        ],
+        [
+          27,
+          28
+        ],
+        [
+          36,
+          37
+        ],
+        [
+          45,
+          46
+        ],
+        [
+          54,
+          55
+        ],
+        [
+          63,
+          64
+        ],
+        [
+          72,
+          73
+        ],
+        [
+          54,
+          54,
+          56
+        ],
+        [
+          60,
+          60,
+          62
+        ]
+      ],
+      "rewardPerPointMilli": [
+        2667,
+        3000,
+        2000,
+        1667,
+        1500,
+        1400,
+        1333,
+        1286,
+        1115,
+        1000
+      ],
+      "widths": [
+        1,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        3
+      ]
+    }
+  ],
+  "ladder": {
+    "branchSplitMilli": 500,
+    "branches": [
+      "off",
+      "def"
+    ],
+    "gateCurrency": "aptitudePoints",
+    "pairingRule": "power-linear-in-tier",
+    "req": [
+      5,
+      15,
+      30,
+      50,
+      75,
+      105,
+      140,
+      180,
+      225,
+      275
+    ],
+    "reqScalePoints": 5,
+    "tierBudgetMilli": [
+      18,
+      36,
+      55,
+      73,
+      91,
+      109,
+      127,
+      145,
+      164,
+      182
+    ],
+    "tierCount": 10
+  },
+  "planHash": "e4816e9825110838ffa7c94cf487e4a42a29e5d9beb5b6c3fef0e7c58c07c172",
+  "plannerVersion": "1.0.0",
+  "potency": {
+    "maxNodeShareMilli": 182,
+    "minTerminalWidth": 1
+  },
+  "propertyVocabulary": {
+    "aptitude": [
+      "Might",
+      "Fortitude",
+      "Vigor",
+      "Onslaught",
+      "Agility",
+      "Composure",
+      "Pierce",
+      "Focus",
+      "Bulwark",
+      "Retribution",
+      "Precision",
+      "Ferocity"
+    ],
+    "atomAttachPoint": [
+      "Board",
+      "Match",
+      "Resource",
+      "Shield",
+      "Stat",
+      "Status",
+      "Ui"
+    ],
+    "atomKind": [
+      "board.action",
+      "box.set",
+      "bullet.modify",
+      "grid.clear",
+      "grid.spawn",
+      "match.modify",
+      "resource.delta",
+      "resource.economy",
+      "shield.grant",
+      "spawn.entity",
+      "stat.derived",
+      "stat.modify",
+      "status.apply",
+      "status.clear",
+      "ui.present",
+      "wave.control"
+    ],
+    "atomTrigger": [
+      "OnActivate",
+      "OnDamageDealt",
+      "OnDamageTaken",
+      "OnDeath",
+      "OnGranted",
+      "OnGridPlace",
+      "OnMatchEnd",
+      "OnMatchStart",
+      "OnRemoved",
+      "OnSpawn",
+      "OnSunCollect",
+      "OnTimer",
+      "OnWave"
+    ],
+    "branch": [
+      "offensive",
+      "defensive"
+    ],
+    "channelFamily": [
+      "ai.aggression",
+      "combat.absorption",
+      "combat.accuracy",
+      "combat.amplification",
+      "combat.block.break",
+      "combat.block.rate",
+      "combat.block.shred",
+      "combat.block.strength",
+      "combat.crit.damage",
+      "combat.crit.rate",
+      "combat.crit.resist",
+      "combat.crit.resist.damage",
+      "combat.defense",
+      "combat.dodge",
+      "combat.heal.power",
+      "combat.parry.break",
+      "combat.parry.rate",
+      "combat.parry.shred",
+      "combat.parry.strength",
+      "combat.penetration",
+      "combat.power",
+      "combat.reduction",
+      "combat.reflect.damage",
+      "combat.reflect.rate",
+      "combat.reflect.resist.damage",
+      "combat.reflect.resist.rate",
+      "combat.shield.capacity",
+      "combat.shield.pen",
+      "combat.shield.regen",
+      "combat.shield.toughness",
+      "loadout.slots",
+      "move.range",
+      "progression.bonus.arm1",
+      "progression.bonus.arm2",
+      "progression.bonus.atk",
+      "progression.bonus.defense",
+      "progression.bonus.maxHp",
+      "progression.breakthroughSuccess",
+      "progression.power",
+      "progression.realm",
+      "progression.xpRate",
+      "resource.efficiency",
+      "resource.max",
+      "resource.regen",
+      "resource.restore",
+      "skill.cooldown",
+      "skill.effectiveness",
+      "status.duration",
+      "status.durationReduction",
+      "status.intensity",
+      "status.intensityReduction",
+      "status.power",
+      "status.resist",
+      "turn.haste",
+      "turn.speed"
+    ],
+    "conversionState": [
+      "converted",
+      "unconverted"
+    ],
+    "element": [
+      "fire",
+      "ice",
+      "air",
+      "earth",
+      "light",
+      "dark",
+      "omni"
+    ],
+    "exclusionForm": [
+      "reroute",
+      "precedence",
+      "nullification"
+    ],
+    "nodeClass": [
+      "mechanism",
+      "magnitude"
+    ],
+    "posture": [
+      "bastion",
+      "finesse",
+      "force"
+    ],
+    "status": [
+      "blight",
+      "bond",
+      "butter",
+      "charm_pulse",
+      "cold",
+      "command",
+      "ember",
+      "expose",
+      "freeze",
+      "hypno",
+      "jala",
+      "kelp",
+      "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
+      "pact_mark",
+      "poison",
+      "rally",
+      "rot",
+      "shatter",
+      "spark",
+      "spore",
+      "wither"
+    ],
+    "tier": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ]
+  },
+  "roster": {
+    "aptitudes": [
+      "Might",
+      "Fortitude",
+      "Vigor",
+      "Onslaught",
+      "Agility",
+      "Composure",
+      "Pierce",
+      "Focus",
+      "Bulwark",
+      "Retribution",
+      "Precision",
+      "Ferocity"
+    ],
+    "counts": {
+      "aptitudes": 12,
+      "demonFamilies": 0,
+      "elements": 6,
+      "statuses": 24,
+      "trees": 1
+    },
+    "demonFamilies": [],
+    "elements": [
+      "fire",
+      "ice",
+      "air",
+      "earth",
+      "light",
+      "dark"
+    ],
+    "statuses": [
+      "blight",
+      "bond",
+      "butter",
+      "charm_pulse",
+      "cold",
+      "command",
+      "ember",
+      "expose",
+      "freeze",
+      "hypno",
+      "jala",
+      "kelp",
+      "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
+      "pact_mark",
+      "poison",
+      "rally",
+      "rot",
+      "shatter",
+      "spark",
+      "spore",
+      "wither"
+    ]
+  },
+  "schemaVersion": 1,
+  "trees": [
+    {
+      "file": "plan/might.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4d2c5f6b803d4a0576f256b443a22472b7f63b8c1b3fd41999bf66192e5f9e9b",
+      "treeId": "might",
+      "treeSlug": "primary-might"
+    }
+  ]
+}

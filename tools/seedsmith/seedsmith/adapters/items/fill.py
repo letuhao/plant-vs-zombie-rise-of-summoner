@@ -3,10 +3,15 @@
 Walks item kinds in item-seedgen-map dependency order. Closed grids (set/charm/combination/
 material) run once with `--write` and rely on RunLedger resume. Partitioned kinds walk
 *discovered* corpus partitions only — never invent a new (role,frame,band) / slot / group.
+Gem slots are destinations for one global unauthored-family pool, so a fill walk schedules that
+pool once rather than duplicating it for every gN file.
 
 Batch controls (`--limit` / `--count` / `--batch-size` / `--max-partitions` / `--full`) exist so a
 first live run can stay small; unbounded set/charm/combination without `--limit` or `--full` is
 refused at plan time.
+
+Under bare `--full`, set/charm are dispatched in bounded internal checkpoints and reconciled until
+their finite plans are exhausted; this is an orchestration detail, not a reduction of full scope.
 """
 from __future__ import annotations
 
@@ -65,6 +70,10 @@ class FillLimits:
 #: Open-ended generators (base-type / milestone / drop / recipe) have no corpus "empty"; under
 #: --full without an explicit --count, one meaningful pass is this many draws per step.
 _FULL_OPEN_PASS = 8
+
+# Full set/charm walks are still finite but can contain hundreds of model calls. Keep each
+# dispatch resumable and observable; an explicit ``--limit`` remains the operator's override.
+_FULL_GRID_CHECKPOINT = 10
 
 #: Upper probe for gem unauthored-family drain under --full (pool is closed and far smaller).
 _GEM_DRAIN_PROBE = 50_000
@@ -144,10 +153,102 @@ class FillReport:
         return max(codes)
 
 
+def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
+    """Reconcile the finite fill populations after a walk.
+
+    Generator exit code only says that the scheduled batch ran without a refusal.  It does not
+    say that a closed population has no held subjects left.  Keep this check deterministic and
+    model-free: read the same production ledgers that the CLI write path uses, then expose the
+    pending/held counts which make a resume genuinely complete (or explain why it is not).
+
+    Open-ended draw kinds are intentionally omitted.  ``--full`` gives those kinds one elevated
+    pass; they have no finite exhaustion condition (see spec-fill-runner.md).
+    """
+    from . import defaults
+    from .combogen import authored as combo_authored
+    from .combogen import run as combo_run
+    from .combogen import supply as combo_supply
+    from .combogen import tuning as combo_tuning
+    from .setgen import run as set_run
+    from .setgen import tuning as set_tuning
+    from .setgen import vocab as set_vocab
+    from ...pipeline.run_ledger import RunLedger
+
+    selected = set(kinds) if kinds is not None else set(defaults.FILL_KIND_ORDER)
+    checks: list[dict] = []
+
+    if selected & {"set", "charm"}:
+        tuning = set_tuning.load()
+        vocabulary = set_vocab.build(tuning)
+        if "set" in selected:
+            for population in ("species", "build"):
+                out = Path(defaults.default_out_dir("set"))
+                plan = set_run.plan_run(
+                    kind="set", population=population, tuning=tuning, vocabulary=vocabulary,
+                    ledger=set_run.read_ledger(out / "set-charm-gen.ledger.json"))
+                checks.append({
+                    "kind": "set", "population": population,
+                    "toGenerate": len(plan.subjects), "held": len(plan.held),
+                    "heldByReason": plan.summary()["heldByReason"],
+                    "complete": plan.complete,
+                })
+        if "charm" in selected:
+            out = Path(defaults.default_out_dir("charm"))
+            plan = set_run.plan_run(
+                kind="charm", population="species", tuning=tuning, vocabulary=vocabulary,
+                ledger=set_run.read_ledger(out / "set-charm-gen.ledger.json"))
+            checks.append({
+                "kind": "charm", "population": "species",
+                "toGenerate": len(plan.subjects), "held": len(plan.held),
+                "heldByReason": plan.summary()["heldByReason"],
+                "complete": plan.complete,
+            })
+
+    if "combination" in selected:
+        tuning = combo_tuning.load()
+        supply = combo_supply.build()
+        out = Path(defaults.default_out_dir("combination"))
+        ledger = RunLedger(out / combo_authored.DEFAULT_LEDGER_NAME)
+        for shape in combo_run.SHAPES:
+            plan = combo_run.plan_run(shape=shape, tuning=tuning, supply=supply)
+            needing = combo_authored.plan_needing_work(plan, ledger)
+            checks.append({
+                "kind": "combination", "shape": shape,
+                "toGenerate": len(needing), "held": 0,
+                "heldByReason": {}, "complete": not needing,
+            })
+
+    if "gem" in selected:
+        slots = discover_gem_slots()
+        remaining = sum(max(_gem_remaining(slot), 0) for slot in slots)
+        checks.append({
+            "kind": "gem", "slots": slots, "toGenerate": remaining, "held": 0,
+            "heldByReason": {}, "complete": bool(slots) and remaining == 0,
+        })
+
+    if "affix-family" in selected:
+        jobs = discover_affix_family_jobs()
+        runnable = [(g, k) for g, k in jobs if _affix_has_free_pairs(g, k)]
+        checks.append({
+            "kind": "affix-family", "partitions": len(jobs), "toGenerate": len(runnable),
+            "held": 0, "heldByReason": {}, "complete": not runnable,
+        })
+
+    return {"complete": all(row["complete"] for row in checks), "checks": checks}
+
+
 def discover_base_type_partitions(
         base_types_dir: Path | None = None) -> "list[tuple[str, str, str]]":
-    """Existing `frame-role-band.json` partition files only."""
+    """Existing canonical `frame-role-band.json` partitions only.
+
+    The corpus still contains legacy filenames such as ``humanoid-back-b.json`` and
+    ``plant-bract-a.json``. Their stems are not `core.v1.json` role ids, so passing them to
+    `basetypegen` only creates deterministic ``UnknownRoleError`` steps and can abort a fill.
+    """
+    from .basetypegen.tuning import load_role_registry
+
     directory = base_types_dir or (ITEM_SEED_ROOT / "base-types")
+    legal_roles = frozenset(load_role_registry())
     found: "list[tuple[str, str, str]]" = []
     if not directory.is_dir():
         return found
@@ -155,7 +256,10 @@ def discover_base_type_partitions(
         m = _BASE_TYPE_STEM.match(path.stem)
         if not m:
             continue
-        found.append((m.group("role"), m.group("frame"), m.group("band")))
+        role = m.group("role")
+        if role not in legal_roles:
+            continue
+        found.append((role, m.group("frame"), m.group("band")))
     return found
 
 
@@ -226,17 +330,27 @@ def _cap_partitions(items: list, limits: FillLimits) -> list:
 
 
 def _affix_has_free_pairs(group_id: str, affix_kind: str) -> bool:
-    """True when the partition still has a free (channel, op) for this kind."""
+    """True when the partition is below its registry target and has a free (channel, op).
+
+    The mechanical free-pair check alone is insufficient: quarantined ``stat.derived`` groups can
+    expose hundreds of registered channels while already exceeding the naming registry's ``~7``
+    family budget.  Scheduling those partitions made ``items fill --full`` spend calls on content
+    the survey had already classified as over-target.
+    """
     from .affixfamgen import brief as affix_brief
     try:
         # Inspect the mechanical slot set directly. Building the model brief also validates the
         # schema and raises for a full partition; that terminal condition must not become a
         # runnable job merely because planning catches the exception.
         partition = affix_brief.load_partition_context(group_id)
-        return bool(affix_brief.free_channel_ops(partition, affix_kind))
     except Exception:
         # Unreadable / illegal kind — let the generate step surface the real refuse.
         return True
+    if not affix_brief.free_channel_ops(partition, affix_kind):
+        return False
+    # Registry sizing is configuration, not model input. Let a malformed target fail the plan
+    # loudly instead of treating it as permission to schedule an unbounded pass.
+    return len(partition.existing_ids) < affix_brief.load_target_family_count()
 
 
 def _gem_slot_has_work(slot: int, batch_size: int) -> bool:
@@ -301,9 +415,15 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
 
     if want("gem"):
         all_slots = discover_gem_slots()
+        # Gem families are a single global vocabulary: ``unauthored_families`` excludes a family
+        # found in *any* gN file, while the requested slot only chooses the destination file. Plan
+        # one destination per fill walk, otherwise a full plan duplicates the same remaining pool
+        # for every slot and later steps reconcile to zero after the first writer consumes it.
         runnable_slots = [s for s in all_slots if _gem_slot_has_work(s, limits.batch_size)]
         empty_count = len(all_slots) - len(runnable_slots)
         slots = _cap_partitions(runnable_slots, limits)
+        if slots:
+            slots = slots[:1]
         if not all_slots:
             add("gem", [], "SKIPPED — no gems/gN.json partitions discovered")
         elif not runnable_slots:
@@ -322,6 +442,10 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
             if empty_count and limits.max_partitions > 0 and not limits.full:
                 add("gem", [],
                     f"SKIPPED — {empty_count} slot(s) alreadyDone (toGenerate=0)")
+            if len(runnable_slots) > 1:
+                add("gem", [],
+                    f"SKIPPED — {len(runnable_slots) - 1} slot(s) share the global unauthored-family pool; "
+                    f"slot {slots[0]} owns this fill pass")
 
     if want("consumable"):
         add("consumable", ["--kind", "consumable"],
@@ -344,7 +468,10 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
     if want("set"):
         for population in ("species", "build"):
             argv = ["--kind", "set", "--population", population, "--write"]
-            if not limits.full:
+            # An explicit --limit remains a deliberate checkpoint even under --full.  This keeps
+            # the full walk resumable in bounded model-call batches; omitting it retains the
+            # unbounded drain semantics.
+            if limits.limit > 0:
                 argv += ["--limit", str(limits.limit)]
             if allow_production:
                 argv.append("--allow-production-tree")
@@ -352,7 +479,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
 
     if want("charm"):
         argv = ["--kind", "charm", "--population", "species", "--write"]
-        if not limits.full:
+        if limits.limit > 0:
             argv += ["--limit", str(limits.limit)]
         if allow_production:
             argv.append("--allow-production-tree")
@@ -368,7 +495,7 @@ def plan_fill_steps(*, kinds: "tuple[str, ...] | None" = None,
     if want("combination"):
         for shape in ("strain", "splice"):  # strain first — never lexicographic note sort
             argv = ["--kind", "combination", "--shape", shape, "--write"]
-            if not limits.full:
+            if limits.limit > 0:
                 argv += ["--limit", str(limits.limit)]
             if allow_production:
                 argv.append("--allow-production-tree")
@@ -399,6 +526,7 @@ def run_fill(*, kinds: "tuple[str, ...] | None" = None, dry_run: bool = False,
     from ...report import cli as cli_mod
 
     report = FillReport(dry_run=dry_run)
+    limits = limits or FillLimits()
     steps, refuse = plan_fill_steps(
         kinds=kinds, allow_production=allow_production, limits=limits)
     if refuse:
@@ -417,46 +545,86 @@ def run_fill(*, kinds: "tuple[str, ...] | None" = None, dry_run: bool = False,
             report.steps.append(FillStepResult(
                 kind=step.kind, argv=[], status="skipped", note=step.note))
             continue
+        checkpointed = limits.full and limits.limit <= 0 and step.kind in {
+            "set", "charm", "combination"
+        }
+        checkpoint_argv = (step.argv + ["--limit", str(_FULL_GRID_CHECKPOINT)]
+                           if checkpointed else step.argv)
         if dry_run:
             report.steps.append(FillStepResult(
-                kind=step.kind, argv=step.argv, status="planned", note=step.note))
+                kind=step.kind, argv=checkpoint_argv, status="planned",
+                note=(step.note + "; " if step.note else "")
+                     + (f"internal checkpoint={_FULL_GRID_CHECKPOINT}" if checkpointed else "")))
             continue
-        try:
-            code = run(step.argv)
-        except SystemExit as exc:
-            # Passthrough mains raise SystemExit(str) — map to refused, keep the report.
-            code = exc.code if isinstance(exc.code, int) else cli_mod.EXIT_REFUSED
-            if code is None:
-                code = cli_mod.EXIT_REFUSED
-            report.steps.append(FillStepResult(
-                kind=step.kind, argv=step.argv, status="refused",
-                exit_code=int(code) if isinstance(code, int) else cli_mod.EXIT_REFUSED,
-                note=step.note or (str(exc) if exc.args else "SystemExit")))
-            if stop_on_error:
+        previous_remaining: "int | None" = None
+        while True:
+            if checkpointed:
+                current = generation_completion(kinds=(step.kind,))
+                shape = None
+                if step.kind == "combination" and "--shape" in step.argv:
+                    shape = step.argv[step.argv.index("--shape") + 1]
+                previous_remaining = sum(
+                    int(row.get("toGenerate", 0)) + int(row.get("held", 0))
+                    for row in current.get("checks", ())
+                    if row.get("kind") == step.kind
+                    and (shape is None or row.get("shape") == shape))
+                if current.get("complete"):
+                    break
+            try:
+                code = run(checkpoint_argv)
+            except SystemExit as exc:
+                # Passthrough mains raise SystemExit(str) — map to refused, keep the report.
+                code = exc.code if isinstance(exc.code, int) else cli_mod.EXIT_REFUSED
+                if code is None:
+                    code = cli_mod.EXIT_REFUSED
+                report.steps.append(FillStepResult(
+                    kind=step.kind, argv=checkpoint_argv, status="refused",
+                    exit_code=int(code) if isinstance(code, int) else cli_mod.EXIT_REFUSED,
+                    note=step.note or (str(exc) if exc.args else "SystemExit")))
+                # A refusal/error cannot make progress in this step.  Leave it recorded and let
+                # continue-on-error advance to the next dependency-ordered step.
                 break
-            continue
-        except Exception as exc:
-            report.steps.append(FillStepResult(
-                kind=step.kind, argv=step.argv, status="error",
-                exit_code=cli_mod.EXIT_CANNOT_RUN,
-                note=f"{step.note + '; ' if step.note else ''}{type(exc).__name__}: {exc}"))
-            if stop_on_error:
+            except Exception as exc:
+                report.steps.append(FillStepResult(
+                    kind=step.kind, argv=checkpoint_argv, status="error",
+                    exit_code=cli_mod.EXIT_CANNOT_RUN,
+                    note=f"{step.note + '; ' if step.note else ''}{type(exc).__name__}: {exc}"))
                 break
-            continue
 
-        if code == cli_mod.EXIT_CLEAN:
-            status = "ran"
-        elif code == cli_mod.EXIT_ESCALATED:
-            status = "escalated"
-        elif code == cli_mod.EXIT_GAP:
-            status = "gap"
-        elif code in (cli_mod.EXIT_REFUSED, cli_mod.EXIT_CANNOT_RUN):
-            status = "refused"
-        else:
-            status = "error"
-        report.steps.append(FillStepResult(
-            kind=step.kind, argv=step.argv, status=status,
-            exit_code=code, note=step.note))
-        if stop_on_error and status in stop_statuses:
-            break
+            if code == cli_mod.EXIT_CLEAN:
+                status = "ran"
+            elif code == cli_mod.EXIT_ESCALATED:
+                status = "escalated"
+            elif code == cli_mod.EXIT_GAP:
+                status = "gap"
+            elif code in (cli_mod.EXIT_REFUSED, cli_mod.EXIT_CANNOT_RUN):
+                status = "refused"
+            else:
+                status = "error"
+            report.steps.append(FillStepResult(
+                kind=step.kind, argv=checkpoint_argv, status=status,
+                exit_code=code, note=step.note))
+            if status in stop_statuses and (stop_on_error or status != "escalated"):
+                break
+            if not checkpointed:
+                break
+            updated = generation_completion(kinds=(step.kind,))
+            remaining = sum(
+                int(row.get("toGenerate", 0)) + int(row.get("held", 0))
+                for row in updated.get("checks", ())
+                if row.get("kind") == step.kind
+                and (shape is None or row.get("shape") == shape))
+            if updated.get("complete") or remaining == 0:
+                break
+            if previous_remaining is not None and remaining >= previous_remaining:
+                # A clean batch that made no deterministic progress would otherwise spin forever.
+                report.steps.append(FillStepResult(
+                    kind=step.kind, argv=checkpoint_argv, status="error",
+                    exit_code=cli_mod.EXIT_CANNOT_RUN,
+                    note=f"{step.note + '; ' if step.note else ''}full checkpoint made no progress"))
+                break
+            previous_remaining = remaining
+        # The loop above owns classification and stop handling for both ordinary and checkpointed
+        # steps. Continue with the next dependency-ordered step after a recorded escalation.
+        continue
     return report

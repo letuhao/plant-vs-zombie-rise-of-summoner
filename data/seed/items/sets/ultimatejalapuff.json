@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-ultimatejalapuff",
+    "partition": "sets/ultimatejalapuff",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.ultimatejalapuff-001",
+      "nameKey": "set.obsidian-spore-guard",
+      "name": "Obsidian Spore Guard",
+      "themeKey": "demon.ultimatejalapuff",
+      "members": [
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-003"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-016"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-005"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-b-008"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.sporing",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.plating",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.carapace",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A dense, protective shell of volcanic glass that pulses with the life of a subterranean fungus.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

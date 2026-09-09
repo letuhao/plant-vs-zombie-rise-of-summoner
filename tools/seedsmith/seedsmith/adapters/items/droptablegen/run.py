@@ -105,6 +105,10 @@ def is_valid(_subject_id: str, entry: dict, *, existing: "dict[str, dict]") -> b
     """The reconcile half `RunLedger.plan` exists for: a ledger row counts as done only if its
     recorded table id still exists in the CURRENT on-disk partition file AND still carries the same
     `name` -- a hand edit that renamed or deleted the table resurfaces the draw as needing work."""
+    # Terminal model outcomes are deliberate checkpoints without corpus content. They must not be
+    # requeued forever by the open-ended draw planner; an explicit retry/overwrite can revisit them.
+    if entry.get("outcome") in {"blocked", "escalated"}:
+        return True
     table_id = entry.get("entryId")
     if not table_id or table_id not in existing:
         return False
@@ -172,12 +176,29 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
     blocked: "dict[str, dict]" = {}
 
     for subject in plan.subjects:
-        answer = call(subject.brief, subject.schema)
-        if answer.get("blocked"):
-            blocked[subject.subject_id] = {"reason": answer["blocked"]}
-            continue
         table_id = emit_mod.mint_table_id(plan.slot, subject.seq)
-        entry = resolve_answer(answer, plan=subject.plan, table_id=table_id)
+        try:
+            answer = call(subject.brief, subject.schema)
+        except ValueError as exc:
+            reason = f"invalid model response: {exc}"
+            ledger.mark_terminal(subject.subject_id, outcome="escalated", entry_id=table_id,
+                                 attempts=1, defects=[reason])
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
+        if answer.get("blocked"):
+            reason = str(answer["blocked"])
+            ledger.mark_terminal(subject.subject_id, outcome="blocked", entry_id=table_id,
+                                 attempts=1, blocked_reason=reason)
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
+        try:
+            entry = resolve_answer(answer, plan=subject.plan, table_id=table_id)
+        except ValueError as exc:
+            reason = f"invalid model response: {exc}"
+            ledger.mark_terminal(subject.subject_id, outcome="escalated", entry_id=table_id,
+                                 attempts=1, defects=[reason])
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue

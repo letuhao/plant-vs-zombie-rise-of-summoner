@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/3",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-3-droptablegen",
+    "model": "seedsmith-droptablegen",
+    "authoredUtc": "",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9"
+  },
+  "entries": [
+    {
+      "id": "droptable.d3-001",
+      "nameKey": "droptable.one",
+      "name": "One",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "one-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "humanoid",
+              "dropBand": "staple"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "plant",
+              "dropBand": "staple"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "one-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "catalyst.flux",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.forge",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "one-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-001",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "one-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-001",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "one-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

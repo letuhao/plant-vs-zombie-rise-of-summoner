@@ -29,10 +29,12 @@ resume logic and dependency checking:
 "container"`/`"material"` entries. Resolution: does `outputRef` exist verbatim in the target corpus?
 Binary, no ambiguity.
 
-**Categorical reference** — an entry names a SELECTOR (role+frame, a family enum) that some entry in
+**Categorical reference** — model input names a SELECTOR (role+frame, a family enum) that some entry in
 another corpus must satisfy, but not a specific id — this is the seed-to-concrete model working exactly
 as intended (module 4's own principle: a set names a slot shape, the runtime binds a specific instance
-per player, per [[seed-to-concrete-generator-principle]]). Resolution: does AT LEAST ONE entry in the
+per player, per [[seed-to-concrete-generator-principle]]). For sets, the writer resolves that category
+to a concrete `baseType` from the live base-type corpus by stable deterministic lookup before it
+persists the row; the model never chooses an opaque id. Resolution: does AT LEAST ONE entry in the
 target corpus satisfy the selector? A set requiring `(role: weapon, frame: plant)` with zero base-types
 matching that combination is a real, silent coverage gap no per-entry validity check would ever surface.
 `combogen/schema.py`'s own file has BOTH kinds four lines apart and they must not be conflated:

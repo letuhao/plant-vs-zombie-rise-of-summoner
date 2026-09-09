@@ -752,6 +752,295 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-torso-a-021",
+      "nameKey": "base.laminated-pectoral",
+      "name": "Laminated Pectoral",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.laminated-pectoral",
+      "flavorKey": "flavor.base.laminated-pectoral",
+      "flavor": "Thick layers of treated hide and hardened resin designed to absorb heavy kinetic impact. It sits snugly against the chest to stabilize the wearer's core.",
+      "tags": [
+        "medium",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-022",
+      "nameKey": "base.plated-carapace",
+      "name": "Plated Carapace",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plated-carapace",
+      "flavorKey": "flavor.base.plated-carapace",
+      "flavor": "A heavy, interlocking shell designed to distribute the impact of heavy blows across the wearer's chest.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-023",
+      "nameKey": "base.laminated-pectoral",
+      "name": "Laminated Pectoral",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-pectoral",
+      "flavorKey": "flavor.base.laminated-pectoral",
+      "flavor": "Thick layers of treated hide and hardened resin designed to absorb heavy impacts to the chest.",
+      "tags": [
+        "medium",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-024",
+      "nameKey": "base.plated-carapace",
+      "name": "Plated Carapace",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.plated-carapace",
+      "flavorKey": "flavor.base.plated-carapace",
+      "flavor": "A heavy, segmented shell designed to distribute impact across the torso. It provides a rigid barrier against crushing blows.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-025",
+      "nameKey": "base.plated-carapace",
+      "name": "Plated Carapace",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plated-carapace",
+      "flavorKey": "flavor.base.plated-carapace",
+      "flavor": "A rigid, segmented shell designed to distribute impact across the torso. It provides a solid foundation for heavy defensive layering.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-026",
+      "nameKey": "base.plated-carapace",
+      "name": "Plated Carapace",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.plated-carapace",
+      "flavorKey": "flavor.base.plated-carapace",
+      "flavor": "A heavy, segmented shell designed to distribute impact across the torso. It provides a rigid barrier against crushing blows.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-027",
+      "nameKey": "base.laminated-pectoral",
+      "name": "Laminated Pectoral",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.laminated-pectoral",
+      "flavorKey": "flavor.base.laminated-pectoral",
+      "flavor": "Thick layers of treated hide and hardened resin designed to absorb the impact of heavy blows. It sits snugly against the chest to distribute weight evenly.",
+      "tags": [
+        "medium",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-torso-a-028",
+      "nameKey": "base.laminated-pectoral",
+      "name": "Laminated Pectoral",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.laminated-pectoral",
+      "flavorKey": "flavor.base.laminated-pectoral",
+      "flavor": "Thick layers of treated leather and hardened resin designed to absorb the impact of blunt strikes. It sits snugly against the chest to provide a stable foundation for heavy armor.",
+      "tags": [
+        "medium",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

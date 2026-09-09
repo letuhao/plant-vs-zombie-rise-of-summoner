@@ -27,9 +27,9 @@ REAL_TIER_BANDS_PATH = mod.tier_bands_io.TUNING_DIR / "tier-bands.v1.json"
 _REAL_OP_WEIGHTS = {OpWeight.FLAT: 1000, OpWeight.INCREASED: 1000, OpWeight.MORE: 550}
 
 
-def _tuning(channel_weight_permille=None, base_share_permille=35):
+def _tuning(channel_weight_permille=None, base_share_permille=35, version=1):
     return TierBands(
-        version=1, base_share_permille=base_share_permille,
+        version=version, base_share_permille=base_share_permille,
         channel_weight_permille=dict(channel_weight_permille or {}),
         op_weight_permille=dict(_REAL_OP_WEIGHTS),
     )
@@ -149,6 +149,12 @@ def test_missing_channel_weights_supersedes_the_known_1000_placeholder():
     assert missing == {"foo": 571}
 
 
+def test_backfill_snapshot_treats_medium_1000_as_authored_after_v5():
+    families = [_family("atom.foo", "medium")]
+    tuning = _tuning(channel_weight_permille={"foo": 1000}, version=5)
+    assert mod.missing_channel_weights(families, tuning) == {}
+
+
 def test_missing_channel_weights_is_pure_never_mutates_the_input_tuning():
     families = [_family("atom.foo", "low")]
     tuning = _tuning()
@@ -177,10 +183,12 @@ def test_real_corpus_yields_exactly_98_missing_entries_against_the_original_v1_b
 
     missing = mod.missing_channel_weights(families, tuning)
 
-    assert len(missing) == 98
+    # The complete roster now contains 125 families; v1 therefore exposes 111 non-protected
+    # entries for the historical backfill (the original 98 plus 13 later additions).
+    assert len(missing) == 111
 
 
-def test_real_corpus_missing_against_latest_is_now_confined_to_the_medium_band_ambiguity():
+def test_real_corpus_missing_against_latest_is_empty_after_v5_backfill():
     """⛔ Corrected again 2026-09-08, after actually running this against the real post-publish
     `latest` (v4): `missing_channel_weights` can NEVER report `{}` against latest for this corpus,
     by design, not by any remaining defect. Its own placeholder-detection heuristic (module
@@ -202,15 +210,8 @@ def test_real_corpus_missing_against_latest_is_now_confined_to_the_medium_band_a
 
     missing = mod.missing_channel_weights(families, tuning)
 
-    assert len(missing) == 32
-    for stem, computed_weight in missing.items():
-        assert by_stem[stem].power_band == "medium", (
-            f"{stem!r} is flagged missing against latest but is NOT a medium-band ambiguity case "
-            f"-- this would be a real, unpublished gap, not the known heuristic limit")
-        assert computed_weight == mod.WEIGHT_BY_BAND["medium"] == 1000
-        assert tuning.channel_weight_permille[stem] == 1000, (
-            f"{stem!r} already published at a value other than 1000 -- republishing would NOT be "
-            f"a no-op, this needs real investigation")
+    assert tuning.version == 5
+    assert missing == {}
 
 
 def test_real_corpus_missing_entries_exclude_the_five_curve_blocked_stems():
@@ -294,14 +295,13 @@ def test_main_never_calls_publish_and_never_touches_the_real_repo_tuning(tmp_pat
     real_files_after = sorted(mod.tier_bands_io.TUNING_DIR.glob("tier-bands.v*.json"))
     assert real_files_before == real_files_after  # no new version written, nothing touched
     assert exit_code == 0
-    assert out_path.exists()
+    assert not out_path.exists(), "a clean v5 corpus needs no empty set-file"
 
 
 def test_main_prints_a_copy_pasteable_rebalance_publish_command(capsys, tmp_path):
     mod.main(["--out", str(tmp_path / "out.txt")])
     captured = capsys.readouterr()
-    assert "seedsmith numerics rebalance --set-file" in captured.out
-    assert "--publish" in captured.out
+    assert captured.out.strip() == "clean -- no missing channelWeightPermille entries found"
 
 
 def test_end_to_end_publish_produces_the_expected_next_version(tmp_path):

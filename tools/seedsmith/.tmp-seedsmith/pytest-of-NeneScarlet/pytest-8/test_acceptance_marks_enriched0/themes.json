@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "themes": {
+    "demon.alpha": {
+      "speciesId": "alpha",
+      "displayName": "Alpha",
+      "rarity": "common",
+      "motifs": [
+        "thorn"
+      ],
+      "antiMotifs": [
+        "ice"
+      ],
+      "expression": {
+        "item": "material",
+        "action": "tempo"
+      },
+      "basis": "enriched",
+      "retired": false,
+      "flavor": "Thorn-wrapped roots guard a patient green shrine.",
+      "flavorProvenance": {
+        "pipeline": "theme-enrich",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "theme-enrich/1",
+        "finding": "theme-enrich:demon.alpha"
+      }
+    }
+  }
+}

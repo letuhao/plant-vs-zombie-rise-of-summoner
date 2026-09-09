@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "armament-primary",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-b-006"
         },
         {
           "role": "manipulator",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-005"
         },
         {
           "role": "jewel-major",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-023"
         },
         {
           "role": "footing",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-008"
         }
       ],
       "thresholds": [

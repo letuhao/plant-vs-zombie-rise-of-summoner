@@ -759,6 +759,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-leaves-b-021",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-loaded length of fibrous vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-022",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-023",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare targets from a distance.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-024",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-025",
+      "nameKey": "base.coiled-tendril-whip",
+      "name": "Coiled Tendril-Whip",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril-whip",
+      "flavorKey": "flavor.base.coiled-tendril-whip",
+      "flavor": "A length of flexible, spring-loaded vine that lashes out with sudden, predatory precision. It remains coiled tightly until the moment of impact.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-026",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-loaded length of fibrous vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-027",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-leaves-b-028",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-loaded length of flexible vine designed to lash out and ensnare a target's momentum.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

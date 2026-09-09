@@ -745,6 +745,286 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-muzzle-a-021",
+      "nameKey": "base.turgid-stamen",
+      "name": "Turgid Stamen",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.turgid-stamen",
+      "flavorKey": "flavor.base.turgid-stamen",
+      "flavor": "A thick, swollen stalk that channels internal pressure toward a singular, bursting tip. It vibrates with a low hum just before discharge.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-022",
+      "nameKey": "base.turgid-stalk",
+      "name": "Turgid Stalk",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.turgid-stalk",
+      "flavorKey": "flavor.base.turgid-stalk",
+      "flavor": "A rigid, swollen stem that channels internal pressure toward the tip. It vibrates with a low hum when fully charged.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-023",
+      "nameKey": "base.turgid-stamen",
+      "name": "Turgid Stamen",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.turgid-stamen",
+      "flavorKey": "flavor.base.turgid-stamen",
+      "flavor": "A swollen, fleshy protrusion that acts as a natural pressure vessel for volatile botanical fluids.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-024",
+      "nameKey": "base.turgid-stamen",
+      "name": "Turgid Stamen",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.turgid-stamen",
+      "flavorKey": "flavor.base.turgid-stamen",
+      "flavor": "A swollen, fleshy protrusion that swells with internal pressure before discharging its contents in a violent burst.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-025",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A rigid, calcified stem tipped with a pressurized bulb that ruptures upon impact. It is designed to deliver concentrated bursts of biological matter at high velocities.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-026",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A rigid, hollowed stem reinforced with calcified bark, designed to eject pressurized fungal matter through a jagged aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-027",
+      "nameKey": "base.taut-tendril",
+      "name": "Taut Tendril",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "lash",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.taut-tendril",
+      "flavorKey": "flavor.base.taut-tendril",
+      "flavor": "A long, whip-like vine that remains under constant internal pressure, ready to snap forward with sudden force.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-a-028",
+      "nameKey": "base.turgid-thistle",
+      "name": "Turgid Thistle",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.turgid-thistle",
+      "flavorKey": "flavor.base.turgid-thistle",
+      "flavor": "A swollen, thorn-studded casing that builds internal pressure until the stem can no longer contain the force within.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

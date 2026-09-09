@@ -747,6 +747,293 @@
           "family": "atom.enhance-evasion"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-face-b-021",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass apertures for adjusting focus.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-022",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass lenses to sharpen the wearer's perception.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-023",
+      "nameKey": "base.gilded-periscope",
+      "name": "Gilded Periscope",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-periscope",
+      "flavorKey": "flavor.base.gilded-periscope",
+      "flavor": "A brass-mounted ocular lens that extends from the brow to provide a heightened perspective of the battlefield.",
+      "tags": [
+        "metal",
+        "utility",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-024",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass prisms to filter light and sharpen focus.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-025",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with various magnifying crystals to sharpen the wearer's perception of the world.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-026",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy hood fitted with a series of rotating crystalline lenses for filtering light and motion.",
+      "tags": [
+        "medium",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-027",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with various magnifying crystals and adjustable shutters to sharpen the wearer's perception.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-028",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass apertures to filter light and focus sight.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
     }
   ]
 }

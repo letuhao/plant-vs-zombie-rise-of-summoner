@@ -333,7 +333,8 @@ class TestHarness:
         assert entry["id"] == "droptable.d2-001"
         assert len(blocked) == 1
         done = ledger.read_done()
-        assert set(done) == {"droptable-draw-d2-000"}
+        assert set(done) == {"droptable-draw-d2-000", "droptable-draw-d2-001"}
+        assert done["droptable-draw-d2-001"]["outcome"] == "blocked"
 
     def test_run_draws_does_not_checkpoint_before_persist_callback(self, tmp_path):
         ledger = RunLedger(tmp_path / "ledger.json")
@@ -346,6 +347,20 @@ class TestHarness:
         with pytest.raises(RuntimeError, match="corpus write failure"):
             run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Retry Me"), persist=persist)
         assert ledger.read_done() == {}
+
+    def test_run_draws_continues_after_an_invalid_model_answer(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        dt_dir = tmp_path / "drop-tables"
+        plan = run_mod.plan_run(slot=2, count=2, ledger=ledger, drop_tables_dir=dt_dir)
+        calls = iter([
+            lambda _brief, _schema: {"name": "Bad", "rowBands": []},
+            _fake_call(name="Recovered"),
+        ])
+        fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=lambda b, s: next(calls)(b, s))
+        assert set(blocked) == {"droptable-draw-d2-000"}
+        assert {entry["name"] for entry in fresh.values()} == {"Recovered"}
+        assert set(ledger.read_done()) == {"droptable-draw-d2-000", "droptable-draw-d2-001"}
+        assert ledger.read_done()["droptable-draw-d2-000"]["outcome"] == "escalated"
 
     def test_resume_never_repeats_a_committed_draw(self, tmp_path):
         ledger = RunLedger(tmp_path / "ledger.json")

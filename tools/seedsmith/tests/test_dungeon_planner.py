@@ -122,6 +122,15 @@ class SelectPlanningThemesTests(unittest.TestCase):
         chosen = select_planning_themes(fixture, per_rarity=2)
         self.assertEqual(chosen, ("demon.b",))
 
+    def test_ignores_source_only_fallback_rarities(self) -> None:
+        fixture = {
+            "demon.common": {"rarity": "common", "retired": False, "motifs": ["x", "y"],
+                             "antiMotifs": []},
+            "demon.fallback": {"rarity": "almanac", "retired": False,
+                               "motifs": ["x", "y"], "antiMotifs": []},
+        }
+        self.assertEqual(select_planning_themes(fixture, per_rarity=2), ("demon.common",))
+
     def test_picks_alphabetically_first_within_a_band_not_by_richness(self) -> None:
         # A theme with a longer combined motif+antiMotif list must NOT win over an
         # alphabetically-earlier one -- the monoculture failure mode this function exists to avoid.

@@ -1,0 +1,22 @@
+{
+  "callsMade": 36,
+  "completed": [
+    "alpha",
+    "beta"
+  ],
+  "dumpHash": "8db6380cb8470df2f1b0f6f4daa4db6bedbe9bb142df49f6319aa96993cb2563",
+  "failed": [],
+  "pid": 31868,
+  "preflight": {
+    "dumpHash": "8db6380cb8470df2f1b0f6f4daa4db6bedbe9bb142df49f6319aa96993cb2563"
+  },
+  "promptVersions": {},
+  "runId": "dead-run",
+  "selector": {
+    "kind": "all"
+  },
+  "skipped": [],
+  "startedUtc": "2020-01-01T00:00:00Z",
+  "state": "completed",
+  "updatedUtc": "2026-09-09T10:50:18Z"
+}

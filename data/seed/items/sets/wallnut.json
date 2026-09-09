@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "core-guard",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-002"
         },
         {
           "role": "mantle",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-006"
         },
         {
           "role": "footing",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-b-012"
         },
         {
           "role": "girdle",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-a-006"
         }
       ],
       "thresholds": [

@@ -1,0 +1,10 @@
+{
+  "done": {
+    "basetype-draw-armament-primary-humanoid-a-000": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-001",
+      "implicitFamily": "atom.might"
+    }
+  },
+  "schemaVersion": 1
+}

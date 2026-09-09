@@ -1,0 +1,9 @@
+{
+  "done": {
+    "recipe-draw-001": {
+      "entryId": "recipe.002",
+      "operation": "bore"
+    }
+  },
+  "schemaVersion": 1
+}

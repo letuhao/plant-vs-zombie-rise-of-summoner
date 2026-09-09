@@ -1,0 +1,34 @@
+{
+  "callsMade": 18,
+  "completed": [
+    "standalone"
+  ],
+  "dumpHash": "b3a3c59bee515db75bf37dcc5873c0652d412f489474abdc27390cc48b80ec72",
+  "failed": [],
+  "pid": 31868,
+  "preflight": {
+    "dumpHash": "b3a3c59bee515db75bf37dcc5873c0652d412f489474abdc27390cc48b80ec72",
+    "lockHash": null,
+    "modelId": "stub",
+    "skipModel": false,
+    "writtenUtc": "2026-09-09T10:50:27Z"
+  },
+  "promptVersions": {
+    "aptitude-primary": 1,
+    "aptitude-secondary": 1,
+    "deployment": 1,
+    "element-primary": 1,
+    "element-secondary": 1,
+    "identity": 1,
+    "kit-shape": 1,
+    "threat-audit": 1
+  },
+  "runId": "20260909T105027.804574-53ZA3V",
+  "selector": {
+    "kind": "all"
+  },
+  "skipped": [],
+  "startedUtc": "2026-09-09T10:50:27Z",
+  "state": "completed",
+  "updatedUtc": "2026-09-09T10:50:27Z"
+}

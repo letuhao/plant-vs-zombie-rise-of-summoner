@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "t1:skill.t1-off-t1-n0": {
+      "record": {
+        "id": "skill.t1-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n0",
+        "nameKey": "tree.node.test-node-n0",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t1:skill.t1-def-t1-n1": {
+      "record": {
+        "id": "skill.t1-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n1",
+        "nameKey": "tree.node.test-node-n1",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t1:skill.t1-off-t2-n2": {
+      "record": {
+        "id": "skill.t1-off-t2-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n2",
+        "nameKey": "tree.node.test-node-n2",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    },
+    "t1:skill.t1-def-t2-n3": {
+      "record": {
+        "id": "skill.t1-def-t2-n3",
+        "nodeKey": "n3",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.a"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Test Node n3",
+        "nameKey": "tree.node.test-node-n3",
+        "flavor": "A steady line.",
+        "rationale": ""
+      }
+    }
+  }
+}

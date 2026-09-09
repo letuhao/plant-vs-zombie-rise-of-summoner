@@ -747,6 +747,294 @@
           "family": "atom.enhance-quicken"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-021",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A heavy, circular plate of reinforced steel designed to catch a blow and redirect the momentum.",
+      "tags": [
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-022",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to release thick clouds of incense or caustic salts.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-023",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, circular shield reinforced with heavy metal bands. It is designed for quick parries and close-quarters protection.",
+      "tags": [
+        "metal",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-024",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, circular shield reinforced with heavy metal bands, designed for quick parries and close-quarters defense.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-025",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, circular plate of reinforced steel designed to catch blows and deflect incoming strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-026",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, circular shield reinforced with heavy metal bands. It is designed for quick parries and keeping an opponent at bay.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-027",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, reinforced disc designed to catch blows and deflect incoming strikes with a heavy, metallic clang.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-b-028",
+      "nameKey": "base.iron-bound-buckler",
+      "name": "Iron-Bound Buckler",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "bulwark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.iron-bound-buckler",
+      "flavorKey": "flavor.base.iron-bound-buckler",
+      "flavor": "A small, circular plate of reinforced steel designed for quick parries and deflecting incoming strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     }
   ]
 }

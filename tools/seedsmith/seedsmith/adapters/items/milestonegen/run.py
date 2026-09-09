@@ -194,7 +194,12 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         if answer.get("blocked"):
             blocked[subject.subject_id] = {"reason": answer["blocked"]}
             continue
-        entry = resolve_answer(answer, existing_ids=existing_ids, existing_families=existing_families)
+        try:
+            entry = resolve_answer(answer, existing_ids=existing_ids,
+                                   existing_families=existing_families)
+        except ValueError as exc:
+            blocked[subject.subject_id] = {"reason": f"invalid model response: {exc}"}
+            continue
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue

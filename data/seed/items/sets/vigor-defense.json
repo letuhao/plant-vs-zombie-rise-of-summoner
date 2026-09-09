@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "core-guard",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-018"
         },
         {
           "role": "mantle",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-001"
         },
         {
           "role": "footing",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-005"
         },
         {
           "role": "girdle",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-soil-b-012"
         }
       ],
       "thresholds": [

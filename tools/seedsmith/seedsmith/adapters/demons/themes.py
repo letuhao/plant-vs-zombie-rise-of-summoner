@@ -41,7 +41,7 @@ class DemonThemeInput:
     rarity: str
     motifs: "tuple[str, ...]"
     anti_motifs: "tuple[str, ...]"
-    basis: str  # "text" | "name" | "blocked" — a demon whose OWN combined basis is "blocked"
+    basis: str  # "text" | "name" | "enriched" | "blocked" — a demon whose OWN combined basis is "blocked"
                 # publishes no theme at all (§2.4); "name" publishes one MARKED as such
     retired: bool = False
 
@@ -58,8 +58,9 @@ class PublishedTheme:
     motifs: "tuple[str, ...]"
     anti_motifs: "tuple[str, ...]"
     expression: "Mapping[str, str]"
-    basis: str  # "text" | "name" — never "blocked": a blocked demon has no PublishedTheme at all
+    basis: str  # "text" | "name" | "enriched" — never "blocked": a blocked demon has no PublishedTheme at all
     retired: bool = False
+    lore: str = ""  # optional model-authored context; preserved across refreshes
 
 
 def build_theme_registry(

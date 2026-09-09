@@ -757,6 +757,293 @@
           "family": "atom.enhance-vigor"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-021",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-022",
+      "nameKey": "base.laminated-mantlet",
+      "name": "Laminated Mantlet",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-mantlet",
+      "flavorKey": "flavor.base.laminated-mantlet",
+      "flavor": "A series of layered plates designed to deflect incoming kinetic energy away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-023",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-024",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-025",
+      "nameKey": "base.laminated-mantlet",
+      "name": "Laminated Mantlet",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-toughness",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-mantlet",
+      "flavorKey": "flavor.base.laminated-mantlet",
+      "flavor": "A series of layered plates designed to deflect incoming kinetic energy away from the neck and collarbone.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-026",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-027",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-shoulders-b-028",
+      "nameKey": "base.padded-mantle",
+      "name": "Padded Mantle",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.padded-mantle",
+      "flavorKey": "flavor.base.padded-mantle",
+      "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
+      "tags": [
+        "light",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

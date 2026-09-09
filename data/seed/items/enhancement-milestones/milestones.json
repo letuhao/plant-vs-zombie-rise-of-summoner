@@ -260,6 +260,54 @@
         "offensive"
       ],
       "notes": "The base essence of the entity swells with raw, unbridled power."
+    },
+    {
+      "id": "enh.017",
+      "nameKey": "enh.enhance-bloom",
+      "name": "Enhancement Bloom",
+      "runtimeFamily": "atom.enhance-bloom",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "plantShield",
+        "op": "Flat"
+      },
+      "powerBand": "high",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "The essence of the plant surges outward, manifesting as a protective layer of energy upon emergence."
+    },
+    {
+      "id": "enh.018",
+      "nameKey": "enh.enhance-zenith",
+      "name": "Enhancement Zenith",
+      "runtimeFamily": "atom.enhance-zenith",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "A sudden surge of peak performance that pushes the unit beyond its natural limits. This milestone marks the moment a plant reaches its absolute potential."
+    },
+    {
+      "id": "enh.019",
+      "nameKey": "enh.enhance-girth",
+      "name": "Enhancement Girth",
+      "runtimeFamily": "atom.enhance-girth",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "The structural integrity of the core thickens, allowing it to withstand greater physical strain."
     }
   ]
 }

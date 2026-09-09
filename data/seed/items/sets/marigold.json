@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "armament-primary",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-b-022"
         },
         {
           "role": "jewel-major",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-007"
         },
         {
           "role": "girdle",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-009"
         },
         {
           "role": "jewel-minor-a",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-b-006"
         }
       ],
       "thresholds": [

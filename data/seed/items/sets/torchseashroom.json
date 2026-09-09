@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-torchseashroom",
+    "partition": "sets/torchseashroom",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.torchseashroom-001",
+      "nameKey": "set.ignited-spore-volley",
+      "name": "Ignited Spore Volley",
+      "themeKey": "demon.torchseashroom",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-007"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-b-016"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-008"
+        },
+        {
+          "role": "infusion",
+          "frame": "plant",
+          "baseType": "item.plant-glands-b-011"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.volley",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.tempo-pulse",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "fire"
+              }
+            },
+            {
+              "family": "atom.elpw-overflow",
+              "powerBand": "high",
+              "params": {
+                "element": "fire"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A rhythmic pulse of burning spores that consumes the air to fuel its next burst.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

@@ -626,6 +626,66 @@
       "tags": [
         "offensive"
       ]
+    },
+    {
+      "family": "atom.evd-shift",
+      "iconKey": "icon.gem.evasion",
+      "id": "gem.g1-054",
+      "name": "Evasion",
+      "nameKey": "gem.evasion",
+      "powerBand": "medium",
+      "tags": [
+        "defensive",
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.prec-sync",
+      "iconKey": "icon.gem.precision",
+      "id": "gem.g1-055",
+      "name": "Precision",
+      "nameKey": "gem.precision",
+      "powerBand": "high",
+      "tags": [
+        "mechanical",
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.shld-toughness-mod",
+      "iconKey": "icon.gem.shield-reinforcement",
+      "id": "gem.g1-056",
+      "name": "Shield Reinforcement",
+      "nameKey": "gem.shield-reinforcement",
+      "powerBand": "low",
+      "tags": [
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.ward-link",
+      "iconKey": "icon.gem.ward-link",
+      "id": "gem.g1-057",
+      "name": "Ward Link",
+      "nameKey": "gem.ward-link",
+      "powerBand": "medium",
+      "tags": [
+        "arcane",
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.ward-ward",
+      "iconKey": "icon.gem.unyielding-essence",
+      "id": "gem.g1-058",
+      "name": "Unyielding Essence",
+      "nameKey": "gem.unyielding-essence",
+      "powerBand": "high",
+      "tags": [
+        "sturdy",
+        "defensive"
+      ]
     }
   ]
 }

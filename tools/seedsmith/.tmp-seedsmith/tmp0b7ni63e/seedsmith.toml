@@ -1,0 +1,3 @@
+[pipeline.llm_caller]
+endpoint = "http://toml-only:1234/v1/chat/completions"
+max_heal = 5

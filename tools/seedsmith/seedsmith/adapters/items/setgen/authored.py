@@ -31,7 +31,7 @@ from .answers import (AnswerExhausted, AnswerFile, AnswerMissing, ReplayTranspor
 from .brief import PROMPT_VERSION
 from .run import RunPlan, Subject, read_ledger, write_ledger
 from .seedfile import (SeedFileMeta, axis_group_map, charm_entry, next_charm_seq, seed_document,
-                       set_entry, write_seed_file)
+                       load_base_type_candidates, set_entry, write_seed_file)
 from .tuning import SetCharmGenTuning
 from .verdict import GATING_METRICS, RunReport, Verdict
 from .vocab import Vocabulary
@@ -129,6 +129,85 @@ def _merged_partition_rows(path: Path, rows: "list[dict]", *, kind: str,
     return [merged[entry_id] for entry_id in sorted(merged)]
 
 
+def _reject_batch_exact_duplicates(result: BatchResult,
+                                   rows_by_partition: "dict[str, list[dict]]",
+                                   done: "dict[str, dict]",
+                                   existing_names: "set[str] | None" = None) -> None:
+    """Drop later rows that repeat a name within this batch and terminally advance their subjects.
+
+    The quality report is intentionally measure-only: discovering a duplicate after writing is too
+    late, but silently accepting both rows is worse. Keep the first answer in deterministic subject
+    order (or the existing corpus row), remove every later duplicate before partition files are
+    written, and record an escalated ledger outcome so a resume does not ask the model for the same
+    subject forever. Existing legacy duplicates are left for the corpus repair workflow; this guard
+    only prevents a new batch from adding another collision.
+    """
+    first_by_name: "dict[str, str]" = {
+        name: "existing corpus" for name in (existing_names or ()) if name
+    }
+    rejected: "set[str]" = set()
+    outcome_by_entry = {o.entry_id: o for o in result.outcomes
+                        if o.outcome == "persisted"}
+    kept: "list[dict]" = []
+    for row in result.entries:
+        name = str(row.get("name") or "").strip().casefold()
+        entry_id = str(row.get("id") or "")
+        first = first_by_name.get(name) if name else None
+        if first is not None:
+            rejected.add(entry_id)
+            outcome = outcome_by_entry.get(entry_id)
+            if outcome is not None:
+                scope = "existing corpus" if first == "existing corpus" else "this batch"
+                defect = f"duplicate name {row.get('name')!r} within {scope}; kept {first!r}"
+                outcome.outcome = "escalated"
+                outcome.defects.append(defect)
+                done[outcome.subject_id] = RunLedger.terminal_row(
+                    outcome="escalated", entry_id=entry_id, attempts=outcome.attempts,
+                    defects=outcome.defects)
+            continue
+        if name:
+            first_by_name[name] = entry_id
+        kept.append(row)
+
+    if not rejected:
+        return
+    result.entries[:] = kept
+    for partition, rows in list(rows_by_partition.items()):
+        rows_by_partition[partition] = [row for row in rows if row.get("id") not in rejected]
+        if not rows_by_partition[partition]:
+            del rows_by_partition[partition]
+
+
+def _existing_identity_names(out_dir: Path) -> "set[str]":
+    """Read names from the set/charm identity corpora before a new batch is accepted.
+
+    Set and charm names share the player-facing namespace.  Checking both directories, including
+    the target directory, closes the same-kind collision hole as well as the cross-kind one while
+    leaving legacy base/gem/drop labels (which have separate namespaces and intentionally repeat)
+    out of this generator's guard.  A normal retry never reaches this guard for an existing row:
+    `plan_run` skips corpus ids already present on disk, so including the target directory cannot
+    break idempotent resume and prevents a new subject from reusing an old name.
+    """
+    names: "set[str]" = set()
+    root = out_dir.parent
+    for directory_name in ("sets", "charms"):
+        directory = root / directory_name
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("*.json"):
+            try:
+                document = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if document.get("kind") not in {"set", "charm"}:
+                continue
+            for row in document.get("entries") or ():
+                name = row.get("name") if isinstance(row, dict) else None
+                if isinstance(name, str) and name.strip() and "{" not in name:
+                    names.add(name.strip().casefold())
+    return names
+
+
 def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
               vocabulary: Vocabulary, out_dir: Path, kind: str, population: str,
               authored_utc: str, model: str,
@@ -163,9 +242,12 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
 
     result = BatchResult(kind=kind, population=population, out_dir=out_dir)
     axis_groups = axis_group_map()
+    base_type_candidates = (load_base_type_candidates(corpus_root=corpus_root)
+                            if kind == "set" else None)
     seq_by_group: "dict[str, int]" = {}
     rows_by_partition: "dict[str, list[dict]]" = {}
     done: "dict[str, dict]" = {}
+    existing_names = _existing_identity_names(out_dir)
 
     for subject in plan.subjects:
         if isinstance(caller, ReplayTransport):
@@ -188,6 +270,20 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
                 subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
                 attempts=attempts, defects=defects))
             # Presence alone advances set/charm resume — escalate must not re-hit forever.
+            done[subject.subject_id] = RunLedger.terminal_row(
+                outcome="escalated", entry_id=subject.entry_id, attempts=attempts,
+                defects=defects)
+            continue
+        except RuntimeError as exc:
+            # The live transport reports endpoint/timeout/HTTP failures as RuntimeError. Keep the
+            # per-subject isolation contract for those transient failures too: one dead request
+            # must not discard every other completed subject in this batch, and the terminal ledger
+            # row makes the failure visible without retrying it forever on the next fill.
+            attempts = len(answers.attempts_for(subject.subject_id))
+            defects = [f"{type(exc).__name__}: {exc}"]
+            result.outcomes.append(SubjectOutcome(
+                subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
+                attempts=attempts, defects=defects))
             done[subject.subject_id] = RunLedger.terminal_row(
                 outcome="escalated", entry_id=subject.entry_id, attempts=attempts,
                 defects=defects)
@@ -218,7 +314,8 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
         entry_id, row = _row_for(
             subject=subject, draft=draft, kind=kind, tuning=tuning, vocabulary=vocabulary,
             jewel_minor=jewel_minor, axis_groups=axis_groups, seq_by_group=seq_by_group,
-            corpus_root=corpus_root, plan_for_set=plan_for_set, plan_for_charm=plan_for_charm)
+            corpus_root=corpus_root, plan_for_set=plan_for_set, plan_for_charm=plan_for_charm,
+            base_type_candidates=base_type_candidates)
 
         rows_by_partition.setdefault(_partition_of(entry_id), []).append(row)
         result.entries.append(row)
@@ -227,6 +324,7 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
             outcome="persisted", attempts=attempts))
         done[subject.subject_id] = {"entryId": entry_id, "attempts": attempts}
 
+    _reject_batch_exact_duplicates(result, rows_by_partition, done, existing_names)
     versions = load_versions()
     for partition, rows in sorted(rows_by_partition.items()):
         meta = SeedFileMeta(
@@ -255,11 +353,13 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
 
 
 def _row_for(*, subject: Subject, draft: dict, kind: str, tuning, vocabulary, jewel_minor,
-             axis_groups, seq_by_group, corpus_root, plan_for_set, plan_for_charm):
+             axis_groups, seq_by_group, corpus_root, plan_for_set, plan_for_charm,
+             base_type_candidates=None):
     if kind == "set":
         priced = plan_for_set(draft, tuning=tuning, vocabulary=vocabulary)
         return subject.entry_id, set_entry(entry_id=subject.entry_id, theme_key=subject.theme_key,
-                                           draft=draft, plan=priced)
+                                           draft=draft, plan=priced,
+                                           base_type_candidates=base_type_candidates)
 
     priced = plan_for_charm(draft, tuning=tuning, vocabulary=vocabulary,
                             jewel_minor_families=jewel_minor)

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-ultimatefly",
+    "partition": "sets/ultimatefly",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.ultimatefly-001",
+      "nameKey": "set.laser-drone-array",
+      "name": "Laser Drone Array",
+      "themeKey": "demon.ultimatefly",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-028"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-013"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-003"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-010"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.deathblast",
+            "powerBand": "low",
+            "params": {
+              "element": "light"
+            }
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.elpw-pierce",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            },
+            {
+              "family": "atom.shield-pen",
+              "powerBand": "high",
+              "params": {
+                "element": "light"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A swarm of high-tech drones that emit concentrated beams of light to pierce through any defense.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

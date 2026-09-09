@@ -923,6 +923,294 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-026",
+      "nameKey": "base.reinforced-spiked-club",
+      "name": "Reinforced Spiked Club",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-spiked-club",
+      "flavorKey": "flavor.base.reinforced-spiked-club",
+      "flavor": "A thick, heavy length of iron-banded wood designed to deliver devastating kinetic impact. Its uneven surface ensures that every strike leaves a jagged, bruising mark.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-027",
+      "nameKey": "base.forged-falx",
+      "name": "Forged Falx",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.forged-falx",
+      "flavorKey": "flavor.base.forged-falx",
+      "flavor": "A curved, heavy-bellied blade designed to hook around shields and find the gaps in armor. Its weight is concentrated at the tip to maximize the momentum of a swing.",
+      "tags": [
+        "metal",
+        "offensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-028",
+      "nameKey": "base.cinder-core-maul",
+      "name": "Cinder-Core Maul",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.cinder-core-maul",
+      "flavorKey": "flavor.base.cinder-core-maul",
+      "flavor": "A heavy, blunt instrument with a hollowed head designed to channel intense thermal energy through its striking face.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-029",
+      "nameKey": "base.tapered-estoc",
+      "name": "Tapered Estoc",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tapered-estoc",
+      "flavorKey": "flavor.base.tapered-estoc",
+      "flavor": "A slender, rigid blade designed for precise thrusting through narrow gaps in plate armor. Its weight is balanced perfectly for rapid, repetitive stabs.",
+      "tags": [
+        "metal",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-030",
+      "nameKey": "base.tapered-estoc",
+      "name": "Tapered Estoc",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.tapered-estoc",
+      "flavorKey": "flavor.base.tapered-estoc",
+      "flavor": "A slender, needle-like blade designed to find the narrowest gaps in heavy plate. Its rigid construction favors precision over sweeping cuts.",
+      "tags": [
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-031",
+      "nameKey": "base.reinforced-spiked-flail",
+      "name": "Reinforced Spiked Flail",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-spiked-flail",
+      "flavorKey": "flavor.base.reinforced-spiked-flail",
+      "flavor": "A heavy, rotating weight attached to a thick-link chain, designed to bypass the defenses of armored foes through sheer kinetic momentum.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-032",
+      "nameKey": "base.reinforced-spiked-flail",
+      "name": "Reinforced Spiked Flail",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.shield-pen",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-spiked-flail",
+      "flavorKey": "flavor.base.reinforced-spiked-flail",
+      "flavor": "A heavy, rotating weight attached to a thick-link chain, designed to bypass shields through sheer kinetic momentum.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-a-033",
+      "nameKey": "base.heavy-falx",
+      "name": "Heavy Falx",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-falx",
+      "flavorKey": "flavor.base.heavy-falx",
+      "flavor": "A curved, inward-facing blade designed to hook around shields and pull enemies into striking range. Its weight is concentrated at the tip to maximize momentum.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

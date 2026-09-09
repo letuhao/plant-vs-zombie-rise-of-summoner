@@ -338,12 +338,12 @@ no framework, and it fixes the input every later generator consumes.
 
 ---
 
-### 3c-ter. Theme registry — two defects filed by the item program (D34, 2026-09-04)
+### 3c-ter. Theme registry — refresh landed; enrichment remains deferred (D34)
 
-⛔ **`data/seed/demons/_registry/themes.v1.json` is stale: 84 themes against 386 shipped species**
-(`data/seed/demons/species/` — 292 plant + 94 zombie, counted 2026-09-04). The registry is a snapshot
-of a corpus this pipeline **generates**, and the corpus grows every run. Any downstream consumer that
-reads it as the species population is reading fiction.
+✅ **`theme-refresh` now publishes the complete roster:** the live registry contains **904 themes for
+904 indexed species**, with zero uncovered or orphaned ids. The stage reads `_dump/almanac/*.json`,
+preserves published snapshots, and appends newly observed species deterministically. It also appends
+new motif tokens to `motifs.v1.json` so registry validation cannot drift behind the themes.
 
 > ⭐ **This is the defect that made an item-program question look like a product decision.** [item-ideal.md](item-ideal.md)
 > §2g #9d read *"31 of 84 themes are `basis = name`, that is 37%, module 13 needs a standing answer"* —
@@ -353,16 +353,21 @@ reads it as the species population is reading fiction.
 | id | Capability | Model? | Depends on |
 |---|---|---|---|
 | `theme-refresh` | Republish `themes.v1.json` over the **whole** species corpus, not a snapshot. Staleness becomes a pipeline check, not something a consumer discovers | no | `adapter-demons` |
-| `theme-enrich` | LLM stage — for any theme at `basis: "name"`, generate the flavour text that raises it to `basis: "text"`. **The same shape `family-extract` and `motif-derive` already are**, with the same honesty contract | **yes** | `theme-refresh`, `pipeline` |
+| `theme-enrich` | LLM stage — for any theme at `basis: "name"`, generate lore recorded as honest `basis: "enriched"` context for item generation; bound snapshots are immutable | **yes** | `theme-refresh`, `pipeline` |
 
 **Why `theme-enrich` and not an "ask first" downstream.** `basis: "name"` is not a property of the
 species — it is a record of what the pipeline had when it ran. **This pipeline generates the missing
 input**, exactly as the species and action generators do. A consumer that designs around name-basis
 themes is designing around absent data instead of asking for it.
 
+**Current measurement:** the refreshed registry is 857 `basis: text` and 47 `basis: enriched`, with
+zero active `basis: name` rows. The runtime anchor traits supplied authoritative context for the
+synthetic enum slots, so the second enrichment pass could author them without inventing motifs.
+`theme-enrich` is wired as a resumable CLI stage; accepted rows become `basis: enriched`.
+
 **Consumer:** [item-map.md](item-map.md) module 13 (`set-charm-gen`), which drops its per-run gate once
-`theme-enrich` lands. Also unblocks [item-ideal.md](item-ideal.md) §2g #9c's `set` `themeKey`
-requirement, which keys on `speciesId` and therefore needs the full corpus published.
+`theme-enrich` lands. The full-corpus publication half of [item-ideal.md](item-ideal.md) §2g #9c is now
+resolved; only the explicit name-basis enrichment gate remains.
 
 ## 4. Build order
 

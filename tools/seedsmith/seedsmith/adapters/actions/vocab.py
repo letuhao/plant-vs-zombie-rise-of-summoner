@@ -109,6 +109,11 @@ def load_pairing_keys() -> "frozenset[str]":
 #: model, not a schema change (the schema's own `enum` still lists ids only, unchanged).
 _GLOSSARY_PLACEHOLDER_SUBS: "tuple[tuple[str, str], ...]" = (
     ("{value}", "X"), ("{element}", "an element"), ("{variant}", "a kind"),
+    # Several later family partitions use the same display-template convention with more
+    # specific tokens.  A glossary is prompt grounding, not a formatter: expose a readable
+    # placeholder while never leaking template syntax to the model.
+    ("{word}", "an effect"), ("{op}", "an operation"),
+    ("{name}", "a name"), ("{tempo}", "tempo"),
 )
 
 

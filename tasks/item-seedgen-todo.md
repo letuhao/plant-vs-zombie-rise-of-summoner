@@ -380,6 +380,14 @@ returned as of this update.
       passing (found and fixed 2 stale gem-count assertions, 40→60 and 34→54, matching sockets-gen's real
       g2 addition, exactly the same drift pattern already fixed in the C# suites).
 
+      **Binding follow-up (2026-09-09):** the original checkpoint measured categorical coverage but did
+      not assert that persisted set rows contained the concrete `baseType` required by Core import.
+      `setgen` now performs that deterministic binding from the live base-type corpus, and
+      `items repair-sets --write --allow-production-tree` repaired 87 legacy files (the dry-run is now
+      idempotent). Thirty legacy rows still use the retired/non-hybrid `head-guard`/`sense` roles and
+      three historical rows intentionally conflict with unique bases; both are explicit content debt,
+      not silently remapped by the generator.
+
 ## Phase 5 — `drop-tables-gen` (alone, last)
 
 ⚠ **Moved here from Phase 4 on the second pass** — real dependencies (found on audit, not the

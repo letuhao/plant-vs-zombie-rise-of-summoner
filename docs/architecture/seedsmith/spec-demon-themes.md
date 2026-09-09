@@ -149,6 +149,15 @@ longer offered for new generation. Additionally, **a theme records the `rarity` 
 against**, so a later reader can see that the demon's tier has since moved rather than silently
 inheriting the new one.
 
+### 2.4b Roster registration is index-plus-tree, not index-only
+
+`species/_index.json` is an acceleration index, not an authority that may hide on-disk anchors.
+The registration/coverage bridge reads both the index and every family file, merges ids
+case-insensitively, and exposes the union to the theme coverage gate. A file-only species therefore
+produces an explicit `uncovered` finding until `theme-refresh` publishes its theme; an index-only
+species produces the same finding in the opposite direction. Neither drift may be treated as a
+complete roster or silently omitted from an item plan.
+
 ### 2.5 Gated by D3, deliberately
 
 `demon-metrics` gates this module. Generating themed content from a family/motif graph that has not
@@ -167,6 +176,12 @@ python -m seedsmith demons themes            # emit the theme registry
 python -m seedsmith report --adapter items   # items now validate themeKey against it
 python -m pytest -q
 ```
+
+`demons themes` is the public refresh entrypoint; `demons theme-refresh` is an equivalent alias.
+It reads the complete almanac roster and is model-free. `--dry-run` reports the input/theme counts
+without replacing the registry. Species set/charm planning refuses a non-zero coverage report
+instead of silently generating a partial population, so a newly shipped species must be registered
+before item generation can proceed.
 
 ---
 

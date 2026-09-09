@@ -760,6 +760,295 @@
           "family": "atom.enhance-hardy"
         }
       ]
+    },
+    {
+      "id": "item.plant-stem-a-021",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-loaded length of reinforced vine designed to lash out and ensnare encroaching threats.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-022",
+      "nameKey": "base.braided-tendril",
+      "name": "Braided Tendril",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.braided-tendril",
+      "flavorKey": "flavor.base.braided-tendril",
+      "flavor": "A dense, woven length of reinforced vine designed to bind and restrain.",
+      "tags": [
+        "organic",
+        "medium",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-023",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-like length of reinforced vine designed to lash around a defender's limb. It tightens instinctively when it senses a sudden impact.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-024",
+      "nameKey": "base.woven-thicket-guard",
+      "name": "Woven Thicket-Guard",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.woven-thicket-guard",
+      "flavorKey": "flavor.base.woven-thicket-guard",
+      "flavor": "A dense, interlaced lattice of living vines designed to absorb kinetic impact. It shifts slightly with the wearer's breath to distribute weight.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-025",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-loaded length of reinforced vine designed to lash out and ensnare encroaching threats.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-026",
+      "nameKey": "base.verdant-bulwark",
+      "name": "Verdant Bulwark",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-bulwark",
+      "flavorKey": "flavor.base.verdant-bulwark",
+      "flavor": "A dense, cross-sectioned segment of a primary stem, reinforced by tightly wound vascular bundles. It serves as a sturdy shield for those standing at the vanguard of the grove.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-027",
+      "nameKey": "base.verdant-bulwark",
+      "name": "Verdant Bulwark",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-bulwark",
+      "flavorKey": "flavor.base.verdant-bulwark",
+      "flavor": "A dense, cross-sectioned segment of a primary stem, reinforced with hardened sap to deflect incoming strikes.",
+      "tags": [
+        "heavy",
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-stem-a-028",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "core-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A spring-like length of toughened vine designed to lash out and ensnare encroaching threats.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

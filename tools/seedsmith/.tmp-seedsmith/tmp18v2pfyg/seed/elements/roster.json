@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "element",
+  "entries": [
+    {
+      "id": "fire",
+      "displayName": "Fire",
+      "ordinal": 0
+    },
+    {
+      "id": "ice",
+      "displayName": "Ice",
+      "ordinal": 1
+    },
+    {
+      "id": "air",
+      "displayName": "Air",
+      "ordinal": 2
+    },
+    {
+      "id": "earth",
+      "displayName": "Earth",
+      "ordinal": 3
+    },
+    {
+      "id": "light",
+      "displayName": "Light",
+      "ordinal": 4
+    },
+    {
+      "id": "dark",
+      "displayName": "Dark",
+      "ordinal": 5
+    }
+  ]
+}

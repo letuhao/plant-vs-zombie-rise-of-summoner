@@ -1,0 +1,73 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "8db6380cb8470df2f1b0f6f4daa4db6bedbe9bb142df49f6319aa96993cb2563",
+      "emittedUtc": "2026-09-09T10:55:09Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Might",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "x"
+    ],
+    "gameTypeId": 1,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "melee",
+    "reason": "x",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "alpha",
+    "targetPreference": "frontline",
+    "traits": [
+      "x"
+    ],
+    "variants": [],
+    "verdict": "agree"
+  }
+]

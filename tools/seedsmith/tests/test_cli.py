@@ -101,10 +101,37 @@ def test_demons_subcommand_is_registered_with_both_verbs():
     from seedsmith.report.cli import build_parser
 
     parser = build_parser()
-    for argv in (["demons", "motifs"], ["demons", "generate", "--kind", "commander-effect"]):
+    for argv in (["demons", "motifs"], ["demons", "themes"],
+                 ["demons", "theme-refresh"],
+                 ["demons", "generate", "--kind", "commander-effect"]):
         args = parser.parse_args(argv)
         assert args.command == "demons"
         assert callable(args.func)
+
+
+def test_theme_refresh_public_command_reads_the_complete_roster(capsys):
+    """A stale theme snapshot must be repairable through the documented CLI, not a private module path."""
+    from seedsmith.report.cli import EXIT_CLEAN, main
+
+    assert main(["demons", "themes", "--dry-run"]) == EXIT_CLEAN
+    report = json.loads(capsys.readouterr().out)
+    assert report["dryRun"] is True
+    assert report["inputs"] == report["themes"] == 904
+
+
+def test_species_item_plan_refuses_when_theme_coverage_is_stale(capsys):
+    """A missing registration must stop the walk instead of looking like a smaller plan."""
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    from seedsmith.adapters.items.setgen import themes as themes_mod
+    from seedsmith.report.cli import EXIT_CANNOT_RUN, main
+
+    stale = SimpleNamespace(species=904, themes=903, uncovered=("new-demon",), orphaned=())
+    with patch.object(themes_mod, "coverage_report", return_value=stale):
+        assert main(["items", "generate", "--kind", "set", "--population", "species",
+                     "--dry-run"]) == EXIT_CANNOT_RUN
+    assert "theme registry is stale" in capsys.readouterr().err
 
 
 def test_demons_requires_a_verb():

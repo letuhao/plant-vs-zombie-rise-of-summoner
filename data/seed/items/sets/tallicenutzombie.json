@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-tallicenutzombie",
+    "partition": "sets/tallicenutzombie",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.tallicenutzombie-001",
+      "nameKey": "set.eternal-frost-debate",
+      "name": "Eternal Frost Debate",
+      "themeKey": "demon.tallicenutzombie",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-b-023"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-014"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-b-012"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-016"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.flash-freeze",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.elemental-power",
+              "powerBand": "high",
+              "params": {
+                "element": "ice"
+              }
+            },
+            {
+              "family": "atom.evd-harden",
+              "powerBand": "high",
+              "params": {
+                "element": "ice"
+              }
+            },
+            {
+              "family": "atom.precision",
+              "powerBand": "high",
+              "params": {
+                "element": "ice"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "A frozen world where whispers of Edgar echo through the biting wind.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

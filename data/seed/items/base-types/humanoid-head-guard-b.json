@@ -729,6 +729,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-head-b-021",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A series of overlapping metal plates designed to deflect downward strikes while maintaining visibility. It provides essential protection for the neck and temples.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-022",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-023",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A reinforced steel cap designed to deflect downward strikes while maintaining a clear line of sight for the sentry.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-024",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-025",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A sleek, overlapping arrangement of metal plates designed to deflect downward strikes while maintaining clear sightlines.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-026",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-027",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A sleek, contoured helm designed to deflect downward strikes away from the neck. Its smooth surface offers little grip for an opponent's blade.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-b-028",
+      "nameKey": "base.laminated-sallet",
+      "name": "Laminated Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laminated-sallet",
+      "flavorKey": "flavor.base.laminated-sallet",
+      "flavor": "A close-fitting steel cap designed to protect the cranium from downward strikes while maintaining a clear field of vision.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

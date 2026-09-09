@@ -1,0 +1,405 @@
+[
+  {
+    "metric": "Coverage/EmptyPartition",
+    "severity": "gap",
+    "subject": "b",
+    "message": "partition 'b' is allocated but holds no entries",
+    "evidence": {
+      "allocated": true,
+      "occupiedEntryCount": 0
+    },
+    "assertion": "len(corpus.by_partition('b')) > 0",
+    "remedy": "planner: schedule generation for this partition",
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Balance/LadderInversion",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "Balance/LadderInversion needs ['numerics'], not available in this run",
+    "evidence": {
+      "missing": [
+        "numerics"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Balance/OutOfEnvelope",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "Balance/OutOfEnvelope needs ['numerics'], not available in this run",
+    "evidence": {
+      "missing": [
+        "numerics"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Distribution/CellDeviation",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "Distribution/CellDeviation needs ['budget'], not available in this run",
+    "evidence": {
+      "missing": [
+        "budget"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Distribution/Evenness",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "Distribution/Evenness needs ['budget'], not available in this run",
+    "evidence": {
+      "missing": [
+        "budget"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Distribution/Inequality",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "Distribution/Inequality needs ['budget'], not available in this run",
+    "evidence": {
+      "missing": [
+        "budget"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Distribution/CellOccupancy",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "no `set` entries in this corpus \u2014 an empty population is NOT a passing distinctness result",
+    "evidence": {
+      "code": "EmptyPopulation"
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "CorpusCoverage/DumpCompleteness",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "CorpusCoverage/DumpCompleteness needs ['demon_dump'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_dump"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "CorpusCoverage/BasisHistogram",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "CorpusCoverage/BasisHistogram needs ['demon_dump'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_dump"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/GridFill",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/GridFill needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/SingleElementShare",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/SingleElementShare needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/AptitudeDistribution",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/AptitudeDistribution needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/ThreatBandOccupancy",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/ThreatBandOccupancy needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/RarityMonotonicity",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/RarityMonotonicity needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/FamilySizeSpread",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/FamilySizeSpread needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/PostureBalance",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/PostureBalance needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "DemonRoster/UnresolvedCount",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "DemonRoster/UnresolvedCount needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PipelineHealth/DisagreementRate",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PipelineHealth/DisagreementRate needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PipelineHealth/RepairRate",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PipelineHealth/RepairRate needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PipelineHealth/BasisMix",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PipelineHealth/BasisMix needs ['demon_anchors'], not available in this run",
+    "evidence": {
+      "missing": [
+        "demon_anchors"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/TreeEqualValue",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/TreeEqualValue needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/QuotaDrift",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/QuotaDrift needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/MechanismRamp",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/MechanismRamp needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/CellOccupancy",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/CellOccupancy needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/ExclusionRate",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/ExclusionRate needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/ExclusionResolvable",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/ExclusionResolvable needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/NearDuplicate",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/NearDuplicate needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/NameCollision",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/NameCollision needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "PassiveTree/UnresolvedCount",
+    "severity": "not_measured",
+    "subject": "(suite)",
+    "message": "PassiveTree/UnresolvedCount needs ['passive_tree_plan'], not available in this run",
+    "evidence": {
+      "missing": [
+        "passive_tree_plan"
+      ]
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  }
+]

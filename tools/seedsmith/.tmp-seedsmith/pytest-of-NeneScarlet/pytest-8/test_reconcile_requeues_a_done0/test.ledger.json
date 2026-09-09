@@ -1,0 +1,11 @@
+{
+  "done": {
+    "a": {
+      "somethingElse": true
+    },
+    "b": {
+      "requiredField": "present"
+    }
+  },
+  "schemaVersion": 1
+}

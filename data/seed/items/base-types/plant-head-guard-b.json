@@ -758,6 +758,294 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-crown-b-021",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A circlet of living vines that pulses with a slow, rhythmic sap. It tightens its grip upon the wearer's brow to ward off sudden shocks.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-022",
+      "nameKey": "base.coiled-tendril-coif",
+      "name": "Coiled Tendril-Coif",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stoicism",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril-coif",
+      "flavorKey": "flavor.base.coiled-tendril-coif",
+      "flavor": "A dense weave of living vines that tightens around the wearer's temples to steady the mind.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-023",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A circlet of woven, living vines that pulse with a slow, rhythmic sap. It feels strangely heavy, as if the plant itself is anchoring the wearer to the earth.",
+      "tags": [
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-024",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A circlet of tightly woven living vines that pulse with a slow, rhythmic sap.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-025",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A circlet of living vines that pulse in rhythm with the wearer's heartbeat. It tightens slightly when the wearer's resolve wavers.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-026",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A circlet of tightly woven living vines that pulse with a slow, rhythmic sap.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-027",
+      "nameKey": "base.verdant-diadem",
+      "name": "Verdant Diadem",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-diadem",
+      "flavorKey": "flavor.base.verdant-diadem",
+      "flavor": "A woven circlet of living vines that pulses with a slow, rhythmic sap. It serves as a living anchor for the wearer's focus.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-b-028",
+      "nameKey": "base.coiled-tendril-coif",
+      "name": "Coiled Tendril-Coif",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril-coif",
+      "flavorKey": "flavor.base.coiled-tendril-coif",
+      "flavor": "A dense weave of living vines that tightens against the brow to steady the wearer's focus.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

@@ -481,6 +481,26 @@
         "defensive",
         "utility"
       ]
+    },
+    {
+      "id": "atom.evd-shift",
+      "nameKey": "affix.evade",
+      "name": "Evade",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.crit.resist.damage.{variant}",
+        "op": "Flat"
+      },
+      "roles": [
+        "core-guard",
+        "ward-array"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "Evade {value}",
+      "tags": [
+        "defensive",
+        "utility"
+      ]
     }
   ]
 }

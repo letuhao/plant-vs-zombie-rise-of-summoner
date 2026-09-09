@@ -1,0 +1,296 @@
+{
+  "done": {
+    "demon.cactus": {
+      "basis": "enriched",
+      "entryId": "demon.cactus",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cactusblover": {
+      "basis": "enriched",
+      "entryId": "demon.cactusblover",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrybomb": {
+      "basis": "enriched",
+      "entryId": "demon.cherrybomb",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrygatling": {
+      "basis": "enriched",
+      "entryId": "demon.cherrygatling",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrynut": {
+      "basis": "enriched",
+      "entryId": "demon.cherrynut",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrynutzombie": {
+      "basis": "enriched",
+      "entryId": "demon.cherrynutzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrypaperzombie": {
+      "basis": "enriched",
+      "entryId": "demon.cherrypaperzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherryshooter": {
+      "basis": "enriched",
+      "entryId": "demon.cherryshooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cherrysplit": {
+      "basis": "enriched",
+      "entryId": "demon.cherrysplit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.cornpult": {
+      "basis": "enriched",
+      "entryId": "demon.cornpult",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.doublecherry": {
+      "basis": "enriched",
+      "entryId": "demon.doublecherry",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.doubleshooter": {
+      "basis": "enriched",
+      "entryId": "demon.doubleshooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.doublesnow": {
+      "basis": "enriched",
+      "entryId": "demon.doublesnow",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue261": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue261",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue262": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue262",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue263": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue263",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue264": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue264",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue265": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue265",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue266": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue266",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue267": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue267",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.enumvalue268": {
+      "basis": "enriched",
+      "entryId": "demon.enumvalue268",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.extract_single": {
+      "basis": "enriched",
+      "entryId": "demon.extract_single",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.extract_ten": {
+      "basis": "enriched",
+      "entryId": "demon.extract_ten",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.hypnojalapeno": {
+      "basis": "enriched",
+      "entryId": "demon.hypnojalapeno",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.hypnopeashooter": {
+      "basis": "enriched",
+      "entryId": "demon.hypnopeashooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.hypnoshroom": {
+      "basis": "enriched",
+      "entryId": "demon.hypnoshroom",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.icecaltrop": {
+      "basis": "enriched",
+      "entryId": "demon.icecaltrop",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.iceshroom": {
+      "basis": "enriched",
+      "entryId": "demon.iceshroom",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.jalacaltrop": {
+      "basis": "enriched",
+      "entryId": "demon.jalacaltrop",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.jalagatling": {
+      "basis": "enriched",
+      "entryId": "demon.jalagatling",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.magnetbox": {
+      "basis": "enriched",
+      "entryId": "demon.magnetbox",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.magnetinterface": {
+      "basis": "enriched",
+      "entryId": "demon.magnetinterface",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.nutchomper": {
+      "basis": "enriched",
+      "entryId": "demon.nutchomper",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.peachomper": {
+      "basis": "enriched",
+      "entryId": "demon.peachomper",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.peanut": {
+      "basis": "enriched",
+      "entryId": "demon.peanut",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.peashooter": {
+      "basis": "enriched",
+      "entryId": "demon.peashooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.peashooterzombie": {
+      "basis": "enriched",
+      "entryId": "demon.peashooterzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.peasquash": {
+      "basis": "enriched",
+      "entryId": "demon.peasquash",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.pit": {
+      "basis": "enriched",
+      "entryId": "demon.pit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.refrash": {
+      "basis": "enriched",
+      "entryId": "demon.refrash",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.seacactus": {
+      "basis": "enriched",
+      "entryId": "demon.seacactus",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.snowsplit": {
+      "basis": "enriched",
+      "entryId": "demon.snowsplit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.splitpea": {
+      "basis": "enriched",
+      "entryId": "demon.splitpea",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.starfruit": {
+      "basis": "enriched",
+      "entryId": "demon.starfruit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.starpea": {
+      "basis": "enriched",
+      "entryId": "demon.starpea",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.sunflower": {
+      "basis": "enriched",
+      "entryId": "demon.sunflower",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "demon.voodoodollzombie": {
+      "basis": "enriched",
+      "entryId": "demon.voodoodollzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    }
+  },
+  "schemaVersion": 1
+}

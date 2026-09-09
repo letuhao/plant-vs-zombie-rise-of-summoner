@@ -100,9 +100,10 @@ def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabul
     identity = (f"the demon species '{theme.display_name}'" if theme.population == "species"
                 else f"the build '{theme.display_name}' ({theme.aptitude} / {theme.archetype})")
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
+    lore = f"\nAdditional authored lore context: {theme.lore}" if theme.lore else ""
     return f"""Author ONE equipment set for {identity}.
 
-Motifs to express: {', '.join(theme.motifs)}.{anti}
+Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
 How this theme expresses itself in an item: {theme.expression_item}
 
 Choose, and nothing else:
@@ -142,11 +143,12 @@ def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocab
     the distributor refuses against, drawn from both buckets, and printed whole.
     """
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
+    lore = f"\nAdditional authored lore context: {theme.lore}" if theme.lore else ""
     classes = ", ".join(c.id for c in tuning.charm_classes)
     pool = charm_pool(tuning, vocabulary.all_picks)
     return f"""Author ONE charm for the demon species '{theme.display_name}'.
 
-Motifs to express: {', '.join(theme.motifs)}.{anti}
+Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
 How this theme expresses itself in an item: {theme.expression_item}
 
 A charm is carried by the commander, not worn by one actor: it is always on, it applies to every

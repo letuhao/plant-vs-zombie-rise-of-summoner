@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "kind": "set", "_meta": {"partition": "set/test"}, "entries": [{"id": "set.test-001", "name": "Testset", "members": [{"role": "core-guard", "frame": "plant", "baseType": "item.plant-stem-a-001"}, {"role": "head-guard", "frame": "plant", "baseType": "item.plant-crown-a-001"}], "thresholds": [{"pieces": 2}, {"pieces": 4}]}]}

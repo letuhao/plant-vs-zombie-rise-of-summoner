@@ -1,0 +1,10 @@
+{
+  "done": {
+    "g.armour:stat.modify:nonexistent-word": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-nonexistent-word"
+    }
+  },
+  "schemaVersion": 1
+}

@@ -36,6 +36,7 @@ from the C# vocabulary, not lift the constraint unconditionally.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
@@ -64,6 +65,21 @@ def load_group_stems(path: "Path | None" = None) -> "dict[str, str]":
     doc = json.loads((path or NAMING_REGISTRY).read_text(encoding="utf-8"))
     groups = doc["idNamespaces"]["affixFamilies"]["groups"]
     return {g["groupId"]: g["stem"] for g in groups}
+
+
+def load_target_family_count(path: "Path | None" = None) -> int:
+    """Read the affix-family sizing target from the naming registry.
+
+    ``agentsEach`` is intentionally a human-readable registry field (currently ``"~7 families"``),
+    so the planner must not duplicate that balance target as a code literal.  A malformed registry
+    is a configuration error, not permission to schedule an unbounded generation pass.
+    """
+    doc = json.loads((path or NAMING_REGISTRY).read_text(encoding="utf-8"))
+    value = doc["idNamespaces"]["affixFamilies"].get("agentsEach")
+    match = re.search(r"(\d+)", value if isinstance(value, str) else "")
+    if not match or int(match.group(1)) < 1:
+        raise ValueError("naming.v1.json affixFamilies.agentsEach has no positive family target")
+    return int(match.group(1))
 
 
 def group_stem(group_id: str, path: "Path | None" = None) -> str:

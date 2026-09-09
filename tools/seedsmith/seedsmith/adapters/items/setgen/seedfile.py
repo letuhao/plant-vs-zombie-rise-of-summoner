@@ -11,27 +11,21 @@ written `{"family": …, "powerBand": …, "params": {"element": …}}` — meas
 `set.frostbitten-vanguard-002` and `charm.off-ctrl-015`, both shipped — never as a `variant` key,
 which is the generator's own internal spelling and appears nowhere in the corpus.
 
-⚠ **A member's `baseType` is NOT emitted, and that is a named gap rather than a guess.** The shipped
-rows bind each member to a concrete base type (`item.humanoid-head-b-007`); nothing in module 13
-chooses one.
+⚠ **Member identity is resolved by lookup, never by the model.** The model chooses a `(role, frame)`
+pair; this module selects one existing base-type id from that pair's closed corpus vocabulary. It
+never invents an item id or copies a unique's base type.
 
-⛔ **Corrected 2026-09-06 — this header used to say emitting one "would be deterministic code
-inventing content, which is P1 inverted," and that is not what the spec says.**
-`spec-set-charm-gen.md`'s emit table assigns it here: *"the model emits `members[]`: (role, frame)
-pairs | deterministic code resolves the concrete `baseType` id, **by lookup**."* Module 6's corpus is
-shipped and complete — 560 base types over 27 (frame, role) pairs. What is missing is the **lookup
-key**: 24 candidates per pair, each with its own name, class, band, tags, implicit atom and flavour,
-and the shipped 30 sets picked among them with no derivable pattern (`set.frostbitten-vanguard-001`
-binds `main-hand-b-011` / `torso-a-002` / `neck-a-003` / `feet-a-003`). So the honest statement is
-**this module owes the binding and the design input for it has not been given** — not that the
-binding belongs somewhere else. Tracked in `tasks/item-todo.md`, P3.3.
+⛔ **Corrected 2026-09-09.** The previous implementation stopped after emitting the pair and left
+the lookup unwired, even though the module's own emit table already assigned that lookup to this
+stage. The resolver below closes that stale-code gap without asking the model to invent identity.
 
-The row carries the (role, frame) pair the model chose and the run report names the binding step as
-unwired.
+The row carries both the pair the model chose and the concrete id selected by the deterministic
+lookup. A missing pair is a hard refusal before the file is written.
 """
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -210,6 +204,96 @@ def next_charm_seq(axis_group_id: str, *, corpus_root: "Path | None" = None) -> 
     return highest + 1
 
 
+def _base_types_dir(corpus_root: "Path | None") -> Path:
+    """Resolve the base-type corpus root used by a set run.
+
+    ``corpus_root`` is primarily a test/sample override. Accept both the item root and the
+    repository's ``data/seed`` root so callers cannot accidentally point the resolver at a sibling
+    kind and get an empty vocabulary.
+    """
+    if corpus_root is None:
+        return ITEM_SEED_ROOT / "base-types"
+    root = Path(corpus_root)
+    for candidate in (root / "base-types", root / "items" / "base-types", root):
+        if candidate.is_dir() and any(candidate.glob("*.json")):
+            return candidate
+    return root / "base-types"
+
+
+def load_base_type_candidates(*, corpus_root: "Path | None" = None,
+                              include_unique: bool = False
+                              ) -> "dict[tuple[str, str], tuple[str, ...]]":
+    """Read the concrete base-type ids available for each ``(frame, role)`` pair.
+
+    The lookup is intentionally built from the live base-type files, not a copied registry list.
+    Unique items are excluded because ``ssot-sets.md §3.8`` forbids paying for one base type as
+    both a unique and a set piece. Malformed files are not swallowed: a production run must stop
+    before writing a set against an unreadable vocabulary.
+    """
+    directory = _base_types_dir(corpus_root)
+    candidates: "dict[tuple[str, str], set[str]]" = {}
+    for path in sorted(directory.rglob("*.json")):
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if document.get("kind") != "base-type":
+            continue
+        for entry in document.get("entries") or ():
+            frame, role, entry_id = entry.get("frame"), entry.get("role"), entry.get("id")
+            if all(isinstance(value, str) and value for value in (frame, role, entry_id)):
+                candidates.setdefault((frame, role), set()).add(entry_id)
+
+    unique_ids: set[str] = set()
+    unique_dir = directory.parent / "uniques"
+    if unique_dir.is_dir():
+        for path in sorted(unique_dir.rglob("*.json")):
+            document = json.loads(path.read_text(encoding="utf-8"))
+            if document.get("kind") != "unique":
+                continue
+            for entry in document.get("entries") or ():
+                base_type = entry.get("baseType")
+                if isinstance(base_type, str) and base_type:
+                    unique_ids.add(base_type)
+
+    return {
+        key: tuple(sorted(ids if include_unique else ids - unique_ids))
+        for key, ids in sorted(candidates.items())
+        if (ids if include_unique else ids - unique_ids)
+    }
+
+
+def bind_member_base_types(entry_id: str, members: "list[dict] | tuple[dict, ...]",
+                           candidates: "dict[tuple[str, str], tuple[str, ...]]",
+                           *, existing_candidates: "dict[tuple[str, str], tuple[str, ...]] | None" = None,
+                           ) -> "list[dict]":
+    """Bind model-selected member pairs to existing base types deterministically.
+
+    A stable hash spreads independent sets over the available ids while remaining byte-identical
+    across runs. Existing bindings are validated and preserved; they are never silently replaced.
+    """
+    bound: "list[dict]" = []
+    for index, member in enumerate(members):
+        if not isinstance(member, dict):
+            raise ValueError(f"{entry_id}: member {index} is not an object")
+        role, frame = member.get("role"), member.get("frame")
+        if not isinstance(role, str) or not isinstance(frame, str):
+            raise ValueError(f"{entry_id}: member {index} needs string role and frame")
+        choices = candidates.get((frame, role), ())
+        if not choices:
+            raise ValueError(f"{entry_id}: no non-unique base type exists for ({role}, {frame})")
+        existing = member.get("baseType")
+        if existing is not None:
+            valid_existing = isinstance(existing, str) and (existing in choices or (
+                existing_candidates is not None and existing in existing_candidates.get((frame, role), ())))
+            if not valid_existing:
+                raise ValueError(f"{entry_id}: member ({role}, {frame}) names unavailable baseType "
+                                 f"{existing!r}")
+            chosen = existing
+        else:
+            digest = hashlib.sha256(f"{entry_id}\0{role}\0{frame}".encode("utf-8")).digest()
+            chosen = choices[int.from_bytes(digest[:8], "big") % len(choices)]
+        bound.append({"role": role, "frame": frame, "baseType": chosen})
+    return bound
+
+
 # --------------------------------------------------------------------------------------------
 # Rows.
 # --------------------------------------------------------------------------------------------
@@ -233,6 +317,7 @@ def _atom_row(pick: FamilyPick, power_band: str, *, negative: bool = False) -> "
 
 
 def set_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: SetPlan,
+              base_type_candidates: "dict[tuple[str, str], tuple[str, ...]] | None" = None,
               ) -> "dict[str, Any]":
     """One `set` row. `kinds.py` requires `id`/`nameKey`/`name` plus `themeKey`/`members`/
     `thresholds`; everything else here is in that kind's optional set."""
@@ -245,18 +330,21 @@ def set_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: S
             row["atoms"] = [_atom_row(p, threshold.power_band) for p in threshold.stats]
         thresholds.append(row)
 
+    candidates = base_type_candidates if base_type_candidates is not None else load_base_type_candidates()
+    members = bind_member_base_types(entry_id, list(draft.get("members") or ()), candidates)
+
     return {
         "id": entry_id,
         "nameKey": derive_name_key("set", draft["name"]),
         "name": draft["name"],
         "themeKey": theme_key,
-        "members": [{"role": m["role"], "frame": m["frame"]} for m in draft.get("members") or ()],
+        "members": members,
         "thresholds": thresholds,
         "flavor": draft.get("flavor", ""),
         "tags": [],
         "notes": ("Generated from an authored answer against promptVersion set-charm-gen/1. "
-                  "Member baseType binding is NOT resolved here — module 13 builds no base-type "
-                  "chooser, and inventing one would be deterministic code writing identity."),
+                  "Member baseType ids are deterministic lookups over the existing base-type "
+                  "corpus; the model supplies only role/frame pairs."),
     }
 
 

@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "kind": "base-type", "_meta": {"partition": "base-type/test"}, "entries": [{"id": "item.plant-stem-a-001", "name": "Stem", "role": "core-guard", "frame": "plant", "enhanceTrack": [{"milestone": 4, "family": "atom.enhance-vigor"}]}]}

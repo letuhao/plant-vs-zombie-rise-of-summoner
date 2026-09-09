@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "enhancement-milestone",
+  "_meta": {
+    "partition": "enhancement-milestones"
+  },
+  "entries": [
+    {
+      "id": "enh.001",
+      "nameKey": "enh.enhance-one",
+      "name": "Enhancement One",
+      "runtimeFamily": "atom.enhance-one",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "A generated milestone family for testing."
+    },
+    {
+      "id": "enh.002",
+      "nameKey": "enh.enhance-two",
+      "name": "Enhancement Two",
+      "runtimeFamily": "atom.enhance-two",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "A generated milestone family for testing."
+    }
+  ]
+}

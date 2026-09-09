@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-scaredsun",
+    "partition": "sets/scaredsun",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.scaredsun-001",
+      "nameKey": "set.sun-dappled-spore-worker",
+      "name": "Sun-Dappled Spore-Worker",
+      "themeKey": "demon.scaredsun",
+      "members": [
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-a-008"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-010"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-011"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-010"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.regeneration",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.mending",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.life-graft",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.life-surge",
+              "powerBand": "high"
+            }
+          ]
+        }
+      ],
+      "flavor": "A soft, trembling cap woven from resilient mycelium that pulses with a nurturing, golden warmth.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
+    }
+  ]
+}

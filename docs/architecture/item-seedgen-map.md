@@ -62,7 +62,7 @@ owner's rule, re-verified against the REAL schemas both audit passes:
 | Recipes (`outputKind: container`) | `outputRef` | **Hard** | `recipes.json:30`: `"outputRef": "item.humanoid-torso-a-001"` | `base-types-gen` |
 | Recipes (`outputKind: material`) | `outputRef` | **Hard** | `recipes.json:126`: `"outputRef": "substrate.humanoid.sound"` | `materials-gen` |
 | Recipes (any kind) | `costLines[].material` | **Hard** | `recipes.json:35`: `"substrate.humanoid.crude"` | `materials-gen` |
-| Sets/charms | `members[].role`+`.frame` | **Categorical** | `setgen/schema.py:104-107`: enums, never a container id | `base-types-gen` |
+| Sets/charms | `members[].role`+`.frame` → persisted `members[].baseType` | **Categorical, then deterministic binding** | `setgen/schema.py:104-107` accepts the category; `setgen/seedfile.py` resolves a concrete live base-type id by stable lookup before write | `base-types-gen` (coverage), `set-charm-live-endpoint` (binding) |
 | Combinations | `ingredients[]` (`supplied_families`) | **Categorical** | `combogen/schema.py:76-87`, enum at line 82 — ⚠ **corrected, 2nd pass: an earlier draft cited lines 92-98, which is actually the `grants` field below, not `ingredients`** | `sockets-gen` |
 | Combinations | `hostRole` | **Categorical** | `combogen/schema.py:100-102` | `base-types-gen` |
 | Combinations | `grants` (`granted_families`) | **External** ✅ resolved | `combogen/schema.py:88-98`; target confirmed below | `atom-family-library.md` |

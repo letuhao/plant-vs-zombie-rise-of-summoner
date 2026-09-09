@@ -1,0 +1,182 @@
+[
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-feet-b-002",
+    "message": "'item.humanoid-feet-b-002' (base-type) sampled for flavour-quality review: 'Rope wrapped tight around a wooden post \u2014 you stand taller on it, slower in it.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "Rope wrapped tight around a wooden post \u2014 you stand taller on it, slower in it."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-main-hand-a-014",
+    "message": "'item.humanoid-main-hand-a-014' (base-type) sampled for flavour-quality review: 'A heavy, pneumatic-assisted hammer designed to deliver devastating kinetic impact through rapid internal compression.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A heavy, pneumatic-assisted hammer designed to deliver devastating kinetic impact through rapid internal compression."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-off-hand-a-011",
+    "message": "'item.humanoid-off-hand-a-011' (base-type) sampled for flavour-quality review: 'A hubcap from a sedan, hammered into an irregular dome. Light enough to hold, heavy enough to matter.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A hubcap from a sedan, hammered into an irregular dome. Light enough to hold, heavy enough to matter."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-off-hand-a-017",
+    "message": "'item.humanoid-off-hand-a-017' (base-type) sampled for flavour-quality review: 'A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-neck-b-006",
+    "message": "'item.humanoid-neck-b-006' (base-type) sampled for flavour-quality review: 'Hammered past the point a smith would call finished. The extra blows are why it still bites.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "Hammered past the point a smith would call finished. The extra blows are why it still bites."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-ring-2-b-011",
+    "message": "'item.humanoid-ring-2-b-011' (base-type) sampled for flavour-quality review: 'A witnessed commitment, sealed beyond dispute or breaking.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A witnessed commitment, sealed beyond dispute or breaking."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "item.humanoid-shoulders-a-020",
+    "message": "'item.humanoid-shoulders-a-020' (base-type) sampled for flavour-quality review: 'A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "base-type",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "charm.econ-020",
+    "message": "'charm.econ-020' (charm) sampled for flavour-quality review: \"Claim the neighbor's yield, and the strength to defend your own thins to pay for it.\"",
+    "evidence": {
+      "needsReview": true,
+      "kind": "charm",
+      "revision": "64f0a7e497005f49",
+      "flavor": "Claim the neighbor's yield, and the strength to defend your own thins to pay for it."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "set.composure-offense-001",
+    "message": "'set.composure-offense-001' (set) sampled for flavour-quality review: 'A single, precise strike is worth more than a thousand clumsy blows.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "set",
+      "revision": "64f0a7e497005f49",
+      "flavor": "A single, precise strike is worth more than a thousand clumsy blows."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "set.retribution-defense-001",
+    "message": "'set.retribution-defense-001' (set) sampled for flavour-quality review: 'The weight of the shield is matched only by the inevitability of the strike.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "set",
+      "revision": "64f0a7e497005f49",
+      "flavor": "The weight of the shield is matched only by the inevitability of the strike."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "unique.sunwoven-almanac-50-005",
+    "message": "'unique.sunwoven-almanac-50-005' (unique) sampled for flavour-quality review: 'It reads by its own glow, one page at a time, and has never once needed to ask what the light outside is doing.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "unique",
+      "revision": "64f0a7e497005f49",
+      "flavor": "It reads by its own glow, one page at a time, and has never once needed to ask what the light outside is doing."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  },
+  {
+    "metric": "Quality/FlavourGeneric",
+    "severity": "note",
+    "subject": "unique.thorned-chassis-30-006",
+    "message": "'unique.thorned-chassis-30-006' (unique) sampled for flavour-quality review: 'It leaves two kinds of tracks: bootprints, and whatever took root three steps behind them.'",
+    "evidence": {
+      "needsReview": true,
+      "kind": "unique",
+      "revision": "64f0a7e497005f49",
+      "flavor": "It leaves two kinds of tracks: bootprints, and whatever took root three steps behind them."
+    },
+    "assertion": null,
+    "remedy": null,
+    "schemaVersion": 1
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "species_id": "aaa",
+    "side": "plant",
+    "computed_rung_id": "pest",
+    "verdict": "too-high",
+    "reason": "weaker than pest"
+  },
+  {
+    "species_id": "zzz",
+    "side": "zombie",
+    "computed_rung_id": "tyrant",
+    "verdict": "too-low",
+    "reason": "seems dangerous"
+  }
+]

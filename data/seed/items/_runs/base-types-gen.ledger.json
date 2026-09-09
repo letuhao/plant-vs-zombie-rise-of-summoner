@@ -60,6 +60,46 @@
       "entryId": "item.humanoid-main-hand-a-025",
       "implicitFamily": "atom.might"
     },
+    "basetype-draw-armament-primary-humanoid-a-012": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-026",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-a-013": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-027",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-humanoid-a-014": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-028",
+      "implicitFamily": "atom.searing-strike"
+    },
+    "basetype-draw-armament-primary-humanoid-a-015": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-029",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-humanoid-a-016": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-030",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-humanoid-a-017": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-031",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-humanoid-a-018": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-a-032",
+      "implicitFamily": "atom.shield-pen"
+    },
+    "basetype-draw-armament-primary-humanoid-a-019": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-a-033",
+      "implicitFamily": "atom.ferocity"
+    },
     "basetype-draw-armament-primary-humanoid-b-000": {
       "class": "blunt",
       "entryId": "item.humanoid-main-hand-b-013",
@@ -99,6 +139,46 @@
       "class": "blunt",
       "entryId": "item.humanoid-main-hand-b-020",
       "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-008": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-b-021",
+      "implicitFamily": "atom.shield-pen"
+    },
+    "basetype-draw-armament-primary-humanoid-b-009": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-b-022",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-010": {
+      "class": "launcher",
+      "entryId": "item.humanoid-main-hand-b-023",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-011": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-b-024",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-012": {
+      "class": "launcher",
+      "entryId": "item.humanoid-main-hand-b-025",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-humanoid-b-013": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-b-026",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-014": {
+      "class": "blunt",
+      "entryId": "item.humanoid-main-hand-b-027",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-primary-humanoid-b-015": {
+      "class": "blade",
+      "entryId": "item.humanoid-main-hand-b-028",
+      "implicitFamily": "atom.ferocity"
     },
     "basetype-draw-armament-primary-plant-a-000": {
       "class": "nozzle",
@@ -140,6 +220,46 @@
       "entryId": "item.plant-muzzle-a-020",
       "implicitFamily": "atom.elemental-power"
     },
+    "basetype-draw-armament-primary-plant-a-008": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-021",
+      "implicitFamily": "atom.searing-strike"
+    },
+    "basetype-draw-armament-primary-plant-a-009": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-022",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-a-010": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-023",
+      "implicitFamily": "atom.searing-strike"
+    },
+    "basetype-draw-armament-primary-plant-a-011": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-024",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-a-012": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-025",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-a-013": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-026",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-a-014": {
+      "class": "lash",
+      "entryId": "item.plant-muzzle-a-027",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-plant-a-015": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-a-028",
+      "implicitFamily": "atom.ferocity"
+    },
     "basetype-draw-armament-primary-plant-b-000": {
       "class": "nozzle",
       "entryId": "item.plant-muzzle-b-013",
@@ -178,6 +298,46 @@
     "basetype-draw-armament-primary-plant-b-007": {
       "class": "nozzle",
       "entryId": "item.plant-muzzle-b-020",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-b-008": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-021",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-b-009": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-022",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-b-010": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-023",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-b-011": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-024",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-plant-b-012": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-025",
+      "implicitFamily": "atom.elemental-power"
+    },
+    "basetype-draw-armament-primary-plant-b-013": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-026",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-plant-b-014": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-027",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-primary-plant-b-015": {
+      "class": "nozzle",
+      "entryId": "item.plant-muzzle-b-028",
       "implicitFamily": "atom.elemental-power"
     },
     "basetype-draw-armament-secondary-humanoid-a-000": {
@@ -220,6 +380,46 @@
       "entryId": "item.humanoid-off-hand-a-020",
       "implicitFamily": "atom.lifesteal"
     },
+    "basetype-draw-armament-secondary-humanoid-a-008": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-021",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-009": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-022",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-010": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-023",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-011": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-024",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-012": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-025",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-013": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-026",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-014": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-027",
+      "implicitFamily": "atom.might"
+    },
+    "basetype-draw-armament-secondary-humanoid-a-015": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-a-028",
+      "implicitFamily": "atom.might"
+    },
     "basetype-draw-armament-secondary-humanoid-b-000": {
       "class": "focus",
       "entryId": "item.humanoid-off-hand-b-013",
@@ -259,6 +459,46 @@
       "class": "blunt",
       "entryId": "item.humanoid-off-hand-b-020",
       "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-008": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-021",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-009": {
+      "class": "blunt",
+      "entryId": "item.humanoid-off-hand-b-022",
+      "implicitFamily": "atom.retribution"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-010": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-023",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-011": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-024",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-012": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-025",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-013": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-026",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-014": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-027",
+      "implicitFamily": "atom.warded"
+    },
+    "basetype-draw-armament-secondary-humanoid-b-015": {
+      "class": "bulwark",
+      "entryId": "item.humanoid-off-hand-b-028",
+      "implicitFamily": "atom.warded"
     },
     "basetype-draw-armament-secondary-plant-a-000": {
       "class": "lash",
@@ -300,6 +540,46 @@
       "entryId": "item.plant-thorn-a-020",
       "implicitFamily": "atom.lifesteal"
     },
+    "basetype-draw-armament-secondary-plant-a-008": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-021",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-009": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-022",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-010": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-023",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-011": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-024",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-012": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-025",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-013": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-026",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-014": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-027",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-a-015": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-a-028",
+      "implicitFamily": "atom.ferocity"
+    },
     "basetype-draw-armament-secondary-plant-b-000": {
       "class": "lash",
       "entryId": "item.plant-thorn-b-013",
@@ -340,6 +620,46 @@
       "entryId": "item.plant-thorn-b-020",
       "implicitFamily": "atom.lifesteal"
     },
+    "basetype-draw-armament-secondary-plant-b-008": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-021",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-009": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-022",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-010": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-023",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-011": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-024",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-012": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-025",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-013": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-026",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-014": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-027",
+      "implicitFamily": "atom.ferocity"
+    },
+    "basetype-draw-armament-secondary-plant-b-015": {
+      "class": "lash",
+      "entryId": "item.plant-thorn-b-028",
+      "implicitFamily": "atom.ferocity"
+    },
     "basetype-draw-core-guard-humanoid-a-000": {
       "class": "plate",
       "entryId": "item.humanoid-torso-a-013",
@@ -378,6 +698,46 @@
     "basetype-draw-core-guard-humanoid-a-007": {
       "class": "plate",
       "entryId": "item.humanoid-torso-a-020",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-008": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-a-021",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-009": {
+      "class": "plate",
+      "entryId": "item.humanoid-torso-a-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-010": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-a-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-011": {
+      "class": "plate",
+      "entryId": "item.humanoid-torso-a-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-012": {
+      "class": "plate",
+      "entryId": "item.humanoid-torso-a-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-013": {
+      "class": "plate",
+      "entryId": "item.humanoid-torso-a-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-014": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-a-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-a-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-a-028",
       "implicitFamily": "atom.fortitude"
     },
     "basetype-draw-core-guard-humanoid-b-000": {
@@ -425,6 +785,46 @@
       "entryId": "item.humanoid-torso-b-021",
       "implicitFamily": "atom.fortitude"
     },
+    "basetype-draw-core-guard-humanoid-b-009": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-010": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-011": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-012": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-025",
+      "implicitFamily": "atom.vitality"
+    },
+    "basetype-draw-core-guard-humanoid-b-013": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-014": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-torso-b-028",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-humanoid-b-016": {
+      "class": "cloth",
+      "entryId": "item.humanoid-torso-b-029",
+      "implicitFamily": "atom.vitality"
+    },
     "basetype-draw-core-guard-plant-a-000": {
       "class": "husk",
       "entryId": "item.plant-stem-a-013",
@@ -463,6 +863,46 @@
     "basetype-draw-core-guard-plant-a-007": {
       "class": "husk",
       "entryId": "item.plant-stem-a-020",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-008": {
+      "class": "fibre",
+      "entryId": "item.plant-stem-a-021",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-009": {
+      "class": "fibre",
+      "entryId": "item.plant-stem-a-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-010": {
+      "class": "fibre",
+      "entryId": "item.plant-stem-a-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-011": {
+      "class": "husk",
+      "entryId": "item.plant-stem-a-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-012": {
+      "class": "fibre",
+      "entryId": "item.plant-stem-a-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-013": {
+      "class": "husk",
+      "entryId": "item.plant-stem-a-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-014": {
+      "class": "husk",
+      "entryId": "item.plant-stem-a-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-core-guard-plant-a-015": {
+      "class": "fibre",
+      "entryId": "item.plant-stem-a-028",
       "implicitFamily": "atom.fortitude"
     },
     "basetype-draw-head-guard-humanoid-a-000": {
@@ -505,6 +945,46 @@
       "entryId": "item.humanoid-head-a-020",
       "implicitFamily": "atom.stalwart"
     },
+    "basetype-draw-head-guard-humanoid-a-008": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-021",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-009": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-022",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-010": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-023",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-011": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-024",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-012": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-025",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-013": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-026",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-014": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-a-027",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-a-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-head-a-028",
+      "implicitFamily": "atom.padding"
+    },
     "basetype-draw-head-guard-humanoid-b-000": {
       "class": "plate",
       "entryId": "item.humanoid-head-b-013",
@@ -543,6 +1023,46 @@
     "basetype-draw-head-guard-humanoid-b-007": {
       "class": "plate",
       "entryId": "item.humanoid-head-b-020",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-008": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-021",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-009": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-022",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-010": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-023",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-011": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-024",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-012": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-025",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-013": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-026",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-014": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-027",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-humanoid-b-015": {
+      "class": "plate",
+      "entryId": "item.humanoid-head-b-028",
       "implicitFamily": "atom.stalwart"
     },
     "basetype-draw-head-guard-plant-a-000": {
@@ -585,6 +1105,46 @@
       "entryId": "item.plant-crown-a-020",
       "implicitFamily": "atom.padding"
     },
+    "basetype-draw-head-guard-plant-a-008": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-021",
+      "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-a-009": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-022",
+      "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-a-010": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-023",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-a-011": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-024",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-a-012": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-025",
+      "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-a-013": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-026",
+      "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-a-014": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-027",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-a-015": {
+      "class": "husk",
+      "entryId": "item.plant-crown-a-028",
+      "implicitFamily": "atom.stalwart"
+    },
     "basetype-draw-head-guard-plant-b-000": {
       "class": "husk",
       "entryId": "item.plant-crown-b-013",
@@ -624,6 +1184,46 @@
       "class": "husk",
       "entryId": "item.plant-crown-b-020",
       "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-b-008": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-021",
+      "implicitFamily": "atom.padding"
+    },
+    "basetype-draw-head-guard-plant-b-009": {
+      "class": "fibre",
+      "entryId": "item.plant-crown-b-022",
+      "implicitFamily": "atom.stoicism"
+    },
+    "basetype-draw-head-guard-plant-b-010": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-023",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-b-011": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-024",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-b-012": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-025",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-b-013": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-026",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-b-014": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-027",
+      "implicitFamily": "atom.stalwart"
+    },
+    "basetype-draw-head-guard-plant-b-015": {
+      "class": "husk",
+      "entryId": "item.plant-crown-b-028",
+      "implicitFamily": "atom.stalwart"
     },
     "basetype-draw-jewel-major-humanoid-a-000": {
       "class": "torc",
@@ -665,6 +1265,46 @@
       "entryId": "item.humanoid-neck-a-020",
       "implicitFamily": "atom.midas"
     },
+    "basetype-draw-jewel-major-humanoid-a-008": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-021",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-009": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-010": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-011": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-012": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-013": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-014": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-a-015": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-a-028",
+      "implicitFamily": "atom.fortitude"
+    },
     "basetype-draw-jewel-major-humanoid-b-000": {
       "class": "torc",
       "entryId": "item.humanoid-neck-b-013",
@@ -704,6 +1344,46 @@
       "class": "torc",
       "entryId": "item.humanoid-neck-b-020",
       "implicitFamily": "atom.midas"
+    },
+    "basetype-draw-jewel-major-humanoid-b-008": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-021",
+      "implicitFamily": "atom.vitality"
+    },
+    "basetype-draw-jewel-major-humanoid-b-009": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-010": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-011": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-012": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-013": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-014": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-jewel-major-humanoid-b-015": {
+      "class": "torc",
+      "entryId": "item.humanoid-neck-b-028",
+      "implicitFamily": "atom.fortitude"
     },
     "basetype-draw-manipulator-humanoid-a-000": {
       "class": "plate",
@@ -745,6 +1425,46 @@
       "entryId": "item.humanoid-hands-a-020",
       "implicitFamily": "atom.bloodletting"
     },
+    "basetype-draw-manipulator-humanoid-a-008": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-021",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-009": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-022",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-010": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-023",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-011": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-024",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-012": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-025",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-013": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-026",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-014": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-027",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-a-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-a-028",
+      "implicitFamily": "atom.cruelty"
+    },
     "basetype-draw-manipulator-humanoid-b-000": {
       "class": "plate",
       "entryId": "item.humanoid-hands-b-013",
@@ -783,6 +1503,46 @@
     "basetype-draw-manipulator-humanoid-b-007": {
       "class": "plate",
       "entryId": "item.humanoid-hands-b-020",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-008": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-021",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-009": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-022",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-010": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-023",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-011": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-024",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-012": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-025",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-humanoid-b-013": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-026",
+      "implicitFamily": "atom.bloodletting"
+    },
+    "basetype-draw-manipulator-humanoid-b-014": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-027",
+      "implicitFamily": "atom.bloodletting"
+    },
+    "basetype-draw-manipulator-humanoid-b-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-hands-b-028",
       "implicitFamily": "atom.cruelty"
     },
     "basetype-draw-manipulator-plant-b-000": {
@@ -825,6 +1585,46 @@
       "entryId": "item.plant-leaves-b-020",
       "implicitFamily": "atom.bloodletting"
     },
+    "basetype-draw-manipulator-plant-b-008": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-021",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-009": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-022",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-010": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-023",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-011": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-024",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-012": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-025",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-013": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-026",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-014": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-027",
+      "implicitFamily": "atom.cruelty"
+    },
+    "basetype-draw-manipulator-plant-b-015": {
+      "class": "fibre",
+      "entryId": "item.plant-leaves-b-028",
+      "implicitFamily": "atom.cruelty"
+    },
     "basetype-draw-mantle-plant-a-000": {
       "class": "husk",
       "entryId": "item.plant-canopy-a-013",
@@ -864,6 +1664,46 @@
       "class": "husk",
       "entryId": "item.plant-canopy-a-020",
       "implicitFamily": "atom.vitality"
+    },
+    "basetype-draw-mantle-plant-a-008": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-021",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-009": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-010": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-011": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-a-024",
+      "implicitFamily": "atom.vitality"
+    },
+    "basetype-draw-mantle-plant-a-012": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-013": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-014": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-a-015": {
+      "class": "husk",
+      "entryId": "item.plant-canopy-a-028",
+      "implicitFamily": "atom.fortitude"
     },
     "basetype-draw-mantle-plant-b-000": {
       "class": "fibre",
@@ -905,6 +1745,46 @@
       "entryId": "item.plant-canopy-b-020",
       "implicitFamily": "atom.vitality"
     },
+    "basetype-draw-mantle-plant-b-008": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-021",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-009": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-022",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-010": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-023",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-011": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-024",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-012": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-025",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-013": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-026",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-014": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-027",
+      "implicitFamily": "atom.fortitude"
+    },
+    "basetype-draw-mantle-plant-b-015": {
+      "class": "fibre",
+      "entryId": "item.plant-canopy-b-028",
+      "implicitFamily": "atom.fortitude"
+    },
     "basetype-draw-sense-humanoid-b-000": {
       "class": "leather",
       "entryId": "item.humanoid-face-b-013",
@@ -943,6 +1823,46 @@
     "basetype-draw-sense-humanoid-b-007": {
       "class": "leather",
       "entryId": "item.humanoid-face-b-020",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-008": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-021",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-009": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-022",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-010": {
+      "class": "plate",
+      "entryId": "item.humanoid-face-b-023",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-011": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-024",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-012": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-025",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-013": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-026",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-014": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-027",
+      "implicitFamily": "atom.precision"
+    },
+    "basetype-draw-sense-humanoid-b-015": {
+      "class": "leather",
+      "entryId": "item.humanoid-face-b-028",
       "implicitFamily": "atom.precision"
     },
     "basetype-draw-ward-array-humanoid-a-000": {
@@ -985,6 +1905,46 @@
       "entryId": "item.humanoid-shoulders-a-020",
       "implicitFamily": "atom.shield-toughness"
     },
+    "basetype-draw-ward-array-humanoid-a-008": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-021",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-009": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-022",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-010": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-023",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-a-011": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-024",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-012": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-025",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-013": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-026",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-014": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-027",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-a-015": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-a-028",
+      "implicitFamily": "atom.shield-toughness"
+    },
     "basetype-draw-ward-array-humanoid-b-000": {
       "class": "plate",
       "entryId": "item.humanoid-shoulders-b-013",
@@ -1024,6 +1984,46 @@
       "class": "plate",
       "entryId": "item.humanoid-shoulders-b-020",
       "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-b-008": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-021",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-b-009": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-b-022",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-b-010": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-023",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-b-011": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-024",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-b-012": {
+      "class": "plate",
+      "entryId": "item.humanoid-shoulders-b-025",
+      "implicitFamily": "atom.shield-toughness"
+    },
+    "basetype-draw-ward-array-humanoid-b-013": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-026",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-b-014": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-027",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-humanoid-b-015": {
+      "class": "cloth",
+      "entryId": "item.humanoid-shoulders-b-028",
+      "implicitFamily": "atom.shield-capacity"
     },
     "basetype-draw-ward-array-plant-a-000": {
       "class": "husk",
@@ -1065,6 +2065,46 @@
       "entryId": "item.plant-sheath-a-020",
       "implicitFamily": "atom.shield-regen"
     },
+    "basetype-draw-ward-array-plant-a-008": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-021",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-009": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-022",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-010": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-023",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-011": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-024",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-012": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-025",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-013": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-026",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-014": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-027",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-a-015": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-a-028",
+      "implicitFamily": "atom.shield-capacity"
+    },
     "basetype-draw-ward-array-plant-b-000": {
       "class": "fibre",
       "entryId": "item.plant-sheath-b-013",
@@ -1103,6 +2143,46 @@
     "basetype-draw-ward-array-plant-b-007": {
       "class": "fibre",
       "entryId": "item.plant-sheath-b-020",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-008": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-021",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-009": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-022",
+      "implicitFamily": "atom.mending"
+    },
+    "basetype-draw-ward-array-plant-b-010": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-023",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-011": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-024",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-012": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-025",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-013": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-026",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-014": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-027",
+      "implicitFamily": "atom.shield-capacity"
+    },
+    "basetype-draw-ward-array-plant-b-015": {
+      "class": "fibre",
+      "entryId": "item.plant-sheath-b-028",
       "implicitFamily": "atom.shield-capacity"
     }
   },

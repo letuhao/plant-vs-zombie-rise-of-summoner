@@ -1,0 +1,12 @@
+{
+  "done": {
+    "demon.alpha": {
+      "basis": "enriched",
+      "entryId": "demon.alpha",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    }
+  },
+  "schemaVersion": 1
+}

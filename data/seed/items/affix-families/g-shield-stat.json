@@ -446,6 +446,26 @@
         "defensive",
         "sturdy"
       ]
+    },
+    {
+      "id": "atom.shld-toughness-mod",
+      "nameKey": "affix.shield-toughness-replacement",
+      "name": "Shield Toughness Replacement",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.shield.toughness.{variant}",
+        "op": "Replace"
+      },
+      "roles": [
+        "core-guard",
+        "mantle"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "Shield Toughness: {value}",
+      "tags": [
+        "sturdy",
+        "defensive"
+      ]
     }
   ]
 }

@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "kind": "action-seed", "entries": [{"id": "action.family.marigold.001", "scope": "family", "category": "attack", "rungBand": [1, 10], "targetMode": "single", "relation": "enemy", "atomFamilies": ["atom.searing-strike", "atom.volley"], "pairingRole": "none", "scopeKey": "marigold"}]}

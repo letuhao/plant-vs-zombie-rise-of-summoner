@@ -533,12 +533,20 @@ def cmd_items(args: argparse.Namespace) -> int:
         return _cmd_items_combogen_migrate(args)
     if args.items_command == "fill":
         return _cmd_items_fill(args)
+    if args.items_command == "repair-sets":
+        return _cmd_items_repair_sets(args)
     if args.items_command != "generate":
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    if args.kind in ("set", "charm", "combination") and (args.write or args.out_dir):
-        _apply_items_write_defaults(args)
+    if args.kind in ("set", "charm", "combination"):
+        if args.write or args.out_dir:
+            _apply_items_write_defaults(args)
+        elif args.dry_run:
+            # A read-only plan must inspect the same production ledger that a write would use.
+            # Do not turn on the production-write permission; only resolve its configured path.
+            from ..adapters.items import defaults as items_defaults
+            args.out_dir = items_defaults.default_out_dir(args.kind)
 
     if args.kind == "combination":
         return _cmd_items_combination(args)
@@ -601,6 +609,19 @@ def cmd_items(args: argparse.Namespace) -> int:
         "gatesMissingAThreshold": missing_thresholds(tuning),
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+    # A stale demon theme registry is an upstream registration defect, not a smaller valid item
+    # population. Without this guard, a newly shipped species absent from themes.v1.json simply
+    # disappeared from the set/charm plan while the command still returned success. Refresh the
+    # registry first (`seedsmith demons themes`); never spend model calls on a partial walk.
+    if args.population == "species" and (coverage.uncovered or coverage.orphaned):
+        print(
+            "seedsmith: species plan refused — demon theme registry is stale "
+            f"(uncovered={len(coverage.uncovered)}, orphaned={len(coverage.orphaned)}); "
+            "run `seedsmith demons themes` and retry",
+            file=sys.stderr,
+        )
+        return EXIT_CANNOT_RUN
 
     if args.sample_brief and plan.subjects:
         print("\n--- sample brief ---")
@@ -689,6 +710,39 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     return _exit_for_graph_batch(result)
+
+
+def _cmd_items_repair_sets(args: argparse.Namespace) -> int:
+    """Bind legacy role/frame-only set members to real base types.
+
+    This is deliberately separate from ``items fill``: it changes existing authored rows, while
+    fill only appends new subjects. The default is a read-only plan; ``--write`` is an explicit
+    production-tree migration.
+    """
+    from ..adapters.items.setgen import repair as repair_mod
+    from ..adapters.items.setgen import seedfile as seedfile_mod
+
+    sets_dir = Path(args.sets_dir) if args.sets_dir else seedfile_mod.ITEM_SEED_ROOT / "sets"
+    base_types_dir = Path(args.base_types_dir) if args.base_types_dir else None
+    if args.write:
+        try:
+            sets_dir.resolve().relative_to(seedfile_mod.ITEM_SEED_ROOT.resolve())
+        except ValueError:
+            pass
+        else:
+            if not args.allow_production_tree:
+                print("seedsmith: repair-sets refused — production data/seed/items is read-only "
+                      "unless --allow-production-tree is passed", file=sys.stderr)
+                return EXIT_REFUSED
+    try:
+        files = repair_mod.repair_set_corpus(sets_dir=sets_dir, base_types_dir=base_types_dir,
+                                             write=bool(args.write))
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"seedsmith: repair-sets failed — {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    print(json.dumps(repair_mod.repair_report(files, write=bool(args.write)),
+                     ensure_ascii=False, indent=2))
+    return EXIT_CLEAN
 
 
 _PASSTHROUGH_MODULE_BY_KIND = {
@@ -1051,7 +1105,30 @@ def _cmd_items_fill(args: argparse.Namespace) -> int:
     if report.refused_reason:
         print(f"seedsmith: {report.refused_reason}", file=sys.stderr)
         return EXIT_REFUSED
-    return report.worst_exit_code
+    code = report.worst_exit_code
+    # A clean dispatch only means every scheduled batch returned clean.  Reconcile the finite
+    # populations separately so held set/charm subjects (or an unconsumed gem pool) cannot be
+    # mistaken for a complete fill.  This is model-free and reads the same ledgers as generation.
+    completion = fill_mod.generation_completion(kinds=kinds)
+    print("\n--- generation completion ---")
+    print(json.dumps(completion, ensure_ascii=False, indent=2))
+    if code == EXIT_CLEAN and getattr(args, "verify", False):
+        completion_gap = not completion["complete"]
+        if completion_gap:
+            print("seedsmith: items fill left finite populations pending or held; the run is not "
+                  "complete", file=sys.stderr)
+        print("\n--- post-fill corpus gate ---")
+        verify_args = argparse.Namespace(
+            family="", corpus_root=str(fill_mod.ITEM_SEED_ROOT), adapter="items",
+            gate=True, json=None, metric=None, plan_root="")
+        verify_code = cmd_check(verify_args)
+        if verify_code != EXIT_CLEAN:
+            print("seedsmith: items fill completed its generation steps, but the corpus gate "
+                  "still reports unresolved gaps; the run is not complete", file=sys.stderr)
+            return verify_code
+        if completion_gap:
+            return EXIT_GAP
+    return code
 
 
 def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
@@ -1094,7 +1171,7 @@ def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
 
 
 def cmd_demons(args: argparse.Namespace) -> int:
-    """`seedsmith demons <motifs|generate>` — the demon generation entrypoints.
+    """`seedsmith demons <motifs|themes|theme-enrich|generate>` — the demon generation entrypoints.
 
     ⛔ Why this exists. Two of the audit's own `Verify` lines named commands that did not exist:
     `python -m seedsmith demons motifs` (G1.3) and
@@ -1126,6 +1203,32 @@ def cmd_demons(args: argparse.Namespace) -> int:
         from ..adapters.demons.generate_motifs import regenerate
         print(_json.dumps(regenerate(), ensure_ascii=False, indent=2))
         return EXIT_CLEAN
+
+    if args.demon_command in ("themes", "theme-refresh"):
+        # Keep the documented theme-refresh stage on the public CLI. Calling the private module
+        # path was the only way to register a newly observed species, so an item fill could read a
+        # stale theme snapshot and quietly plan a partial population. This is deterministic and
+        # model-free; --dry-run exercises the complete-roster read without replacing the registry.
+        import json as _json
+
+        from ..adapters.demons.generate_themes import regenerate
+        summary = regenerate(rebuild=bool(args.rebuild), write=not bool(args.dry_run))
+        print(_json.dumps({**summary, "dryRun": bool(args.dry_run)},
+                          ensure_ascii=False, indent=2))
+        return EXIT_CLEAN
+
+    if args.demon_command == "theme-enrich":
+        from ..adapters.demons import theme_enrich
+        passthrough: list[str] = []
+        if args.dry_run:
+            passthrough.append("--dry-run")
+        if args.write:
+            passthrough.append("--write")
+        for flag in ("endpoint", "model"):
+            value = getattr(args, flag, "")
+            if value:
+                passthrough.extend([f"--{flag}", value])
+        return theme_enrich.main(passthrough)
 
     if args.demon_command == "power-parse":
         return _cmd_demons_power_parse(args)
@@ -2252,6 +2355,19 @@ def build_parser() -> argparse.ArgumentParser:
     demons = sub.add_parser("demons", help="demon corpus generation entrypoints")
     demon_sub = demons.add_subparsers(dest="demon_command", required=True)
     demon_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
+    themes = demon_sub.add_parser(
+        "themes", aliases=("theme-refresh",),
+        help="refresh the published theme registry over the complete species roster")
+    themes.add_argument("--dry-run", action="store_true",
+                        help="read and count the complete roster without writing")
+    themes.add_argument("--rebuild", action="store_true",
+                        help="discard published snapshots and re-derive (reviewed correction only)")
+    enrich = demon_sub.add_parser(
+        "theme-enrich", help="generate lore for name-basis themes (model calls; dry-run by default)")
+    enrich.add_argument("--dry-run", action="store_true")
+    enrich.add_argument("--write", action="store_true")
+    enrich.add_argument("--endpoint", default="")
+    enrich.add_argument("--model", default="")
     power_parse = demon_sub.add_parser(
         "power-parse", help="numeric power seed + basis per species (no model calls)")
     power_parse.add_argument("--dump", required=True, help="corpus-dump tree root")
@@ -2442,7 +2558,7 @@ def build_parser() -> argparse.ArgumentParser:
                        help="comma-separated kind filter (default: all fill kinds in map order)")
     ifill.add_argument("--limit", type=int, default=0,
                        help="set/charm/combination: plan only the first N subjects (required "
-                            "unless --full)")
+                            "unless --full; also bounds each --full checkpoint when supplied")
     ifill.add_argument("--count", type=int, default=None,
                        help="base-type/enhancement-milestone/recipe/drop-table draws per step "
                             "(default 1; under --full without this flag, uses an elevated pass)")
@@ -2463,7 +2579,21 @@ def build_parser() -> argparse.ArgumentParser:
                        help="keep walking after a refused/gap/error step (default: stop)")
     ifill.add_argument("--no-validate-deps", dest="validate_deps", action="store_false",
                        help="skip the combination deps preflight before fill")
+    ifill.add_argument("--verify", action="store_true",
+                       help="after generation, run the full items health gate; non-zero means "
+                            "the corpus still has unresolved gaps")
     ifill.set_defaults(validate_deps=True)
+    irepair = items_sub.add_parser(
+        "repair-sets", help="bind legacy set members to existing base types (dry-run by default)")
+    irepair.add_argument("--write", action="store_true",
+                         help="apply the idempotent member-binding migration")
+    irepair.add_argument("--allow-production-tree", dest="allow_production_tree",
+                         action="store_true",
+                         help="permit writes under data/seed/items/")
+    irepair.add_argument("--sets-dir", default="",
+                         help="set partition directory (default data/seed/items/sets)")
+    irepair.add_argument("--base-types-dir", default="",
+                         help="base-type directory (default data/seed/items/base-types)")
     imigrate = items_sub.add_parser(
         "combogen-migrate",
         help="report combogen.migrate's own socket-word retirement plan (module 21)")

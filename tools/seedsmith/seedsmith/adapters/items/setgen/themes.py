@@ -13,15 +13,11 @@ Three populations of `themeKey`, collision-free by prefix:
 | `demon.` | one per species | `data/seed/demons/_registry/themes.v1.json` (published) |
 | `build.` | 36, aptitude x archetype | `data/seed/items/_registry/build-themes.v1.json` (new, D-ruled 2026-09-04) |
 
-⚠ **Two D34 preconditions are not met today, and this module reports them rather than working around
-them.** `theme-refresh` (P0.2) and `theme-enrich` (P0.3) are both unbuilt: the registry still holds
-**84** themes against **840** shipped species — of which 16 are orphans naming a species the tree no
-longer ships, so real coverage is **68 of 840** — and **31** are still at `basis = "name"`. ⚠ This
-line read *"84 against 386"* until 2026-09-06; **386 was the family-file count, not the species
-count**, and it is the exact wrong denominator `shipped_species_ids` below exists to prevent. Do not
-re-derive either number here — call `coverage_report`. A theme at
-`basis = "name"` is *held*, never generated from — `generatable` excludes it and `holdback_report`
-names the count, so an incomplete run reports `not_measured` instead of a green partial.
+⚠ **D34's enrichment precondition remains visible here.** `theme-refresh` now reads the complete
+almanac dump and appends themes for the full shipped roster. Themes whose source remains
+`basis = "name"` are *held*, never generated from — `generatable` excludes them and
+`holdback_report` names the count, so an incomplete run reports `not_measured` instead of a green
+partial. Coverage counts are always derived by `coverage_report`; never transcribe a roster size.
 
 ⚠ **Nothing here may key on a theme's `rarity`** (§2.4a): `RarityForRank` is proportional in `count`,
 so a species moves tier as the roster grows *without moving rank*. A theme records the rarity it was
@@ -40,9 +36,10 @@ DEMON_SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "species"
 BUILD_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "build-themes.v1.json"
 LEGACY_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "themes.v1.json"
 
-#: The basis a theme must have reached before it may be generated from. `theme-enrich` (P0.3) is the
-#: stage that raises `name` to `text`; until it runs, name-basis themes are HELD.
-GENERATABLE_BASES: "frozenset[str]" = frozenset({"text", "derived"})
+#: The basis a theme must have reached before it may be generated from. `theme-enrich` (P0.3)
+#: records model-authored lore as ``enriched`` rather than pretending it was observed source text.
+#: Name-only themes remain held until that stage succeeds.
+GENERATABLE_BASES: "frozenset[str]" = frozenset({"text", "derived", "enriched"})
 
 
 @dataclass(frozen=True)
@@ -61,6 +58,7 @@ class Theme:
     population: str          # "species" | "build" | "legacy"
     aptitude: "str | None" = None
     archetype: "str | None" = None
+    lore: str = ""          # optional model-authored context from theme-enrich
 
     @property
     def generatable(self) -> bool:
@@ -92,6 +90,7 @@ def load_species_themes(path: "Path | None" = None) -> "list[Theme]":
             rarity=row.get("rarity"),
             retired=bool(row.get("retired")),
             population="species",
+            lore=str(row.get("flavor") or row.get("lore") or ""),
         ))
     return out
 
@@ -162,16 +161,37 @@ def holdback_report(themes: "list[Theme]") -> HoldbackReport:
 
 
 def shipped_species_ids(root: "Path | None" = None) -> "frozenset[str]":
-    """Every species the anchor tree actually ships, from its own `_index.json` when present and
-    from the on-disk files otherwise. Read so the 84-vs-386 staleness cannot recur silently."""
+    """Every species the anchor tree actually ships.
+
+    The index is the fast, canonical lookup, but it is not allowed to hide a freshly emitted
+    family file (or a stale index entry).  Merge both views case-insensitively and keep one
+    representative spelling.  The theme coverage gate then turns any index/tree drift into an
+    explicit uncovered/orphaned result instead of silently planning a partial population.
+    """
     base = root or DEMON_SPECIES_ROOT
     index = base / "_index.json"
+    indexed: "frozenset[str]" = frozenset()
     if index.exists():
         doc = json.loads(index.read_text(encoding="utf-8"))
-        ids = _species_ids_from_index(doc)
-        if ids:
-            return ids
-    return frozenset(p.stem for p in base.glob("*/*.json") if not p.stem.startswith("_"))
+        indexed = _species_ids_from_index(doc)
+
+    # Family files are arrays of many species; filenames are family names, not species ids.
+    on_disk: set[str] = set()
+    for path in base.glob("*/*.json"):
+        if path.name.startswith("_"):
+            continue
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        rows = raw if isinstance(raw, list) else (
+            raw.get("entries", []) if isinstance(raw, dict) else [])
+        on_disk.update(str(row.get("speciesId") or "").strip()
+                       for row in rows if isinstance(row, dict) and row.get("speciesId"))
+
+    # Prefer the index spelling (currently PascalCase) while adding any file-only ids.  The
+    # coverage report folds case, so this also avoids counting `AllPeater` and `allpeater` twice.
+    merged: "dict[str, str]" = {value.lower(): value for value in indexed}
+    for value in on_disk:
+        merged.setdefault(value.lower(), value)
+    return frozenset(merged.values())
 
 
 def _species_ids_from_index(doc) -> "frozenset[str]":

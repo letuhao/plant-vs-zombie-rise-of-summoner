@@ -168,11 +168,13 @@ def test_recipe_schema_offers_output_target_only_when_container_candidates_given
         "item.humanoid-torso-a-005", schema_mod.MINT_NEW_SENTINEL]
 
 
-def test_recipe_material_pool_excludes_issuable_but_unobtainable_materials():
+def test_recipe_material_pool_includes_issuable_materials_with_an_acquisition_path():
     pool = brief_mod.load_material_pool()
 
     assert "shard.sprout" in pool
-    assert "shard.grafted" not in pool
+    # The live corpus now has drop/recipe paths for the grafted band too.  Keep this
+    # assertion tied to the current reachability contract rather than the old 19-id snapshot.
+    assert "shard.grafted" in pool
 
 
 # ---------------------------------------------------------------------------------------------
@@ -188,10 +190,10 @@ def test_load_cost_bands_matches_the_real_frozen_bands_registry():
 
 def test_load_material_pool_is_the_obtainable_issued_vocabulary():
     pool = brief_mod.load_material_pool()
-    assert len(pool) == 19
+    assert len(pool) == 27
     assert "shard.common" not in pool, "a legacy shard id is never issuable"
     assert "substrate.humanoid.crude" in pool
-    assert "shard.grafted" not in pool, "an issued material needs an acquisition path before use"
+    assert "shard.grafted" in pool, "the current drop/recipe corpus makes this id obtainable"
 
 
 def test_build_recipe_brief_excludes_forge_when_no_target_is_scoped():
@@ -201,7 +203,7 @@ def test_build_recipe_brief_excludes_forge_when_no_target_is_scoped():
     assert "temper: catalyst, substrate" in b.render()
     assert "elevate: catalyst, shard, substrate; if using a catalyst, it must be catalyst.temper" in b.render()
     assert "An empty list is always legal" in b.render()
-    assert "19 obtainable, issuable ids" in b.render()
+    assert "27 obtainable, issuable ids" in b.render()
 
 
 def test_build_recipe_brief_with_a_forge_target_offers_forge_and_its_candidates():

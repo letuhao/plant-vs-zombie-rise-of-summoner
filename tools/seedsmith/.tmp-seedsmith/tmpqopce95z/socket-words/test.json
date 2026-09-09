@@ -1,0 +1,1 @@
+{"schemaVersion": 1, "kind": "socket-word", "_meta": {"partition": "socket-word/test"}, "entries": [{"id": "sockword.001", "name": "Dual Strike", "ingredients": [{"position": 0, "family": "atom.nonexistent", "minPowerBand": "high"}]}]}

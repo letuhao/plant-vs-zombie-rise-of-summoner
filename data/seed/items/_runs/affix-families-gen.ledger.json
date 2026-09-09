@@ -25,10 +25,20 @@
       "kindId": "stat.derived",
       "mintedId": "atom.evd-evd"
     },
+    "g.evade:stat.derived:shift": {
+      "groupId": "g.evade",
+      "kindId": "stat.derived",
+      "mintedId": "atom.evd-shift"
+    },
     "g.precision:stat.derived:focus": {
       "groupId": "g.precision",
       "kindId": "stat.derived",
       "mintedId": "atom.prec-focus"
+    },
+    "g.precision:stat.derived:sync": {
+      "groupId": "g.precision",
+      "kindId": "stat.derived",
+      "mintedId": "atom.prec-sync"
     },
     "g.shield-stat:stat.derived:absolute": {
       "groupId": "g.shield-stat",
@@ -39,6 +49,11 @@
       "groupId": "g.shield-stat",
       "kindId": "stat.derived",
       "mintedId": "atom.shld-toughness"
+    },
+    "g.shield-stat:stat.derived:toughness-mod": {
+      "groupId": "g.shield-stat",
+      "kindId": "stat.derived",
+      "mintedId": "atom.shld-toughness-mod"
     },
     "g.tempo:stat.modify:pulse": {
       "groupId": "g.tempo",
@@ -54,6 +69,16 @@
       "groupId": "g.ward",
       "kindId": "stat.derived",
       "mintedId": "atom.ward-flux"
+    },
+    "g.ward:stat.derived:link": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-link"
+    },
+    "g.ward:stat.derived:ward": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-ward"
     }
   },
   "schemaVersion": 1

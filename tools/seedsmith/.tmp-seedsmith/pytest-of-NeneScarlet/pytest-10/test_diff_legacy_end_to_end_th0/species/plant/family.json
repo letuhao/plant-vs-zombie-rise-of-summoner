@@ -1,0 +1,1 @@
+[{"speciesId": "Alpha", "side": "plant", "elementPrimary": "fire", "deployMode": "PlantAvatar", "acquisition": ["Summonable"], "variants": ["normal"]}, {"speciesId": "Beta", "side": "plant", "elementPrimary": "ice", "deployMode": "PlantAvatar", "acquisition": ["Summonable"], "variants": ["normal", "shiny"]}]

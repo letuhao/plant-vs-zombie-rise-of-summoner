@@ -253,7 +253,7 @@ class RunPlanTests(unittest.TestCase):
         self.assertEqual([s.entry_id for s in plan.subjects],
                          ["gem.g2-001", "gem.g2-002", "gem.g2-003"])
         self.assertEqual([s.family_id for s in plan.subjects],
-                         ["atom.affliction", "atom.arm-hardening", "atom.arm-riveting"])
+                         ["atom.affliction", "atom.arm-hardening", "atom.arm-op"])
         self.assertEqual(plan.already_done, [])
         self.assertFalse(plan.complete is True and plan.subjects)  # sanity: complete means no work
 

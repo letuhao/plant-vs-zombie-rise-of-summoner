@@ -1,0 +1,12 @@
+{
+  "done": {
+    "demon.alpha": {
+      "attempts": 1,
+      "blockedReason": "insufficient lore",
+      "entryId": "demon.alpha",
+      "outcome": "blocked",
+      "terminalSchemaVersion": 1
+    }
+  },
+  "schemaVersion": 1
+}

@@ -102,8 +102,12 @@ class RunPlan:
 
     @property
     def complete(self) -> bool:
-        """A plan with a held partition is NOT complete, and the run verdict must reflect that."""
-        return not self.held
+        """True only when there is neither pending work nor a held subject.
+
+        Previously this checked only ``held``. That made a build plan with one or more subjects
+        report ``complete: true`` and obscured interrupted or partially drained runs in the CLI.
+        """
+        return not self.subjects and not self.held
 
     def summary(self) -> dict:
         by_reason: "dict[str, int]" = {}
@@ -162,6 +166,7 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
 
     subjects: "list[Subject]" = []
     already: "list[str]" = []
+    planned_entry_ids: dict[str, str] = {}
     report = themes_mod.holdback_report(pool)
 
     for theme in pool:
@@ -172,6 +177,13 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
             already.append(subject_id)
             continue
         entry_id = _entry_id(kind, population, theme, partitions)
+        if kind == "set" and entry_id in planned_entry_ids:
+            other = planned_entry_ids[entry_id]
+            raise ValueError(
+                f"species ids {other!r} and {theme.species_id!r} normalise to the same set id "
+                f"{entry_id!r}; refusing an ambiguous plan")
+        if kind == "set":
+            planned_entry_ids[entry_id] = theme.species_id or ""
         if kind == "set" and _set_entry_on_disk(entry_id, sets_dir=sets_dir):
             already.append(subject_id)
             continue
