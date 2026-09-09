@@ -31,6 +31,8 @@ export type ActorSurfaceTab = {
   label: string;
   order: number;
   hidden: boolean;
+  /** Optional lucide key for rail icons (CatalogIcon). */
+  icon?: string | null;
 };
 
 export type AptitudeCatalogRow = {

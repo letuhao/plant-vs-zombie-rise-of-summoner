@@ -21,6 +21,7 @@ measured beside every number, and `verdict` still refuses to call a held run a p
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -300,6 +301,14 @@ def run_batch(*, plan: RunPlan, answers: AnswerFile, tuning: SetCharmGenTuning,
                 outcome="escalated", entry_id=subject.entry_id, attempts=attempts,
                 defects=defects)
             continue
+        # Charm axis is a deterministic coverage assignment. The model still supplies the
+        # theme-specific families and wording, but its free-form axis choice must not undo the
+        # planner's balancing decision. The hint is embedded by build_charm_brief and parsed here
+        # so the graph/schema remains shared with replay and set generation.
+        if kind == "charm":
+            match = re.search(r"use axis `([^`]+)`", subject.brief)
+            if match:
+                draft["axis"] = match.group(1)
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
             reason = draft["blocked"].strip()
             result.outcomes.append(SubjectOutcome(

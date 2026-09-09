@@ -76,13 +76,45 @@ export type ActorSheetChannelDto = {
   contributions: ActorContributionDto[];
 };
 
+export type ActorElementTypingDto = {
+  primary: string;
+  secondary?: string;
+};
+
+export type ActorStatusGlyphDto = {
+  statusId: string;
+  remainingPermille?: number | null;
+};
+
+export type ActorResourcePoolDto = {
+  resourceId: string;
+  current?: number | null;
+  max?: number | null;
+};
+
+export type ActorShieldSummaryDto = {
+  elementId?: string | null;
+  current?: number | null;
+  max?: number | null;
+};
+
 export type ActorSheetDto = {
   instanceId: string;
   playerId: number;
   side: string;
   typeId: number;
   displayName: string | null;
+  speciesId?: string | null;
+  speciesName?: string | null;
+  phase?: string | null;
+  roleLabel?: string | null;
   level: number;
+  xp?: number;
+  xpToNext?: number | null;
+  elementTyping?: ActorElementTypingDto | null;
+  liveStatuses?: ActorStatusGlyphDto[];
+  resourcePools?: ActorResourcePoolDto[];
+  shieldSummary?: ActorShieldSummaryDto | null;
   derived: ActorSheetChannelDto[];
   primary: ActorContributionDto[];
 };

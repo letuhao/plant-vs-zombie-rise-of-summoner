@@ -1,7 +1,8 @@
 # Capability map: actor-sheet
 
 **Status:** Draft — pending owner review. **No build authorized until approved.** Ideal:
-[actor-sheet-ideal.md](actor-sheet-ideal.md). Shell visual:
+[actor-sheet-ideal.md](actor-sheet-ideal.md). Shell visual (root rail):
+[actor-sheet-shell-rail.html](../design/actor-sheet-shell-rail.html). Tab inventories:
 [13-actor-sheet.html](../design/13-actor-sheet.html). **Derived pane visual SSOT:**
 [derived-combat-console.html](../design/derived-combat-console.html) (modern-stat-hud bar). Sibling HUD:
 [actor-hud-ideal.md](actor-hud-ideal.md) (glyphs consume the same catalogs). Sibling lawn chrome

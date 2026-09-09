@@ -190,4 +190,87 @@ describe("foldDerivedSurfaceVm", () => {
       butterRow.hudToken
     );
   });
+
+  it("OTHER Shared lists expand:none only; Attack lists action-category only", () => {
+    const surface = actorSurfaceFixture();
+    const cook = derivedSurfaceFromFixture(surface);
+    const shared = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      sheetChannels: [
+        {
+          channelId: "progression.bonus.arm1",
+          displayName: "Bonus arm1",
+          reading: "Flat",
+          composeKind: "FlatSum",
+          value: 691,
+          contributions: [{ sourceId: "aptitude.Might", label: "Aptitude", op: "Flat", value: 691 }]
+        },
+        {
+          channelId: "skill.cooldown.attack",
+          displayName: "Skill cooldown",
+          reading: "Cd",
+          composeKind: "FlatSum",
+          value: 10,
+          contributions: []
+        }
+      ],
+      ui: {
+        tabId: "other",
+        variantId: null,
+        query: "",
+        showUnchanged: true,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    const sharedChipIds = shared.variantRail.chips.map((c) => c.id);
+    expect(sharedChipIds[0]).toBe("shared");
+    expect(sharedChipIds).toContain("attack");
+    const sharedRows = shared.families.flatMap((f) =>
+      (f.rows as { channelId: string }[]).map((r) => r.channelId)
+    );
+    expect(sharedRows).toContain("progression.bonus.arm1");
+    expect(sharedRows.some((id) => id.startsWith("skill."))).toBe(false);
+    expect(shared.families[0]?.hint).toBe("other · shared");
+
+    const attack = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      sheetChannels: [
+        {
+          channelId: "progression.bonus.arm1",
+          displayName: "Bonus arm1",
+          reading: "Flat",
+          composeKind: "FlatSum",
+          value: 691,
+          contributions: []
+        },
+        {
+          channelId: "skill.cooldown.attack",
+          displayName: "Skill cooldown",
+          reading: "Cd",
+          composeKind: "FlatSum",
+          value: 10,
+          contributions: []
+        }
+      ],
+      ui: {
+        tabId: "other",
+        variantId: "attack",
+        query: "",
+        showUnchanged: true,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    const attackRows = attack.families.flatMap((f) =>
+      (f.rows as { channelId: string }[]).map((r) => r.channelId)
+    );
+    expect(attackRows).toContain("skill.cooldown.attack");
+    expect(attackRows).toContain("skill.effectiveness.attack");
+    expect(attackRows).not.toContain("progression.bonus.arm1");
+  });
 });

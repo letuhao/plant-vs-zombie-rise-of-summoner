@@ -33,6 +33,26 @@ from .vocab import Vocabulary
 REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_LEDGER = REPO_ROOT / "data" / "seed" / "items" / "_runs" / "set-charm-gen.ledger.json"
 DEFAULT_SETS_DIR = REPO_ROOT / "data" / "seed" / "items" / "sets"
+DEFAULT_CHARMS_DIR = REPO_ROOT / "data" / "seed" / "items" / "charms"
+
+
+def _existing_charm_axis_counts(directory: Path = DEFAULT_CHARMS_DIR) -> dict[str, int]:
+    """Measure authored charm axes for deterministic least-populated assignment."""
+    counts: dict[str, int] = {}
+    if not directory.is_dir():
+        return counts
+    for path in directory.glob("*.json"):
+        if "ledger" in path.name:
+            continue
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for row in document.get("entries") or ():
+            axis = row.get("axis") if isinstance(row, dict) else None
+            if isinstance(axis, str) and axis:
+                counts[axis] = counts.get(axis, 0) + 1
+    return counts
 
 
 def _set_entry_on_disk(entry_id: str, *, sets_dir: "Path | None" = None) -> bool:
@@ -168,6 +188,11 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
     already: "list[str]" = []
     planned_entry_ids: dict[str, str] = {}
     report = themes_mod.holdback_report(pool)
+    charm_axes = ()
+    if kind == "charm":
+        from ..charmgen.rules import CHARM_AXES
+        charm_axes = tuple(CHARM_AXES)
+    axis_counts = _existing_charm_axis_counts() if kind == "charm" else {}
 
     for theme in pool:
         if theme.hold_reason:
@@ -188,7 +213,15 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
             already.append(subject_id)
             continue
         text = (brief_mod.build_set_brief(theme, tuning, vocabulary) if kind == "set"
-                else brief_mod.build_charm_brief(theme, tuning, vocabulary))
+                else brief_mod.build_charm_brief(
+                    theme, tuning, vocabulary,
+                    axis_hint=(min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
+                                                                  charm_axes.index(axis)))
+                               if charm_axes else None)))
+        if kind == "charm" and charm_axes:
+            assigned_axis = min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
+                                                               charm_axes.index(axis)))
+            axis_counts[assigned_axis] = axis_counts.get(assigned_axis, 0) + 1
         subjects.append(Subject(subject_id=subject_id, kind=kind, population=population,
                                 theme_key=theme.theme_key, entry_id=entry_id, brief=text))
 

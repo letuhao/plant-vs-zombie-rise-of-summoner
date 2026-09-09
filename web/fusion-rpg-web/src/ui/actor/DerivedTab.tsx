@@ -217,15 +217,21 @@ export function DerivedTab({
   // Loading/error full overlay — still wrap so ActorPanel has a root testid if needed
   if (!plan.root && plan.overlay) {
     return (
-      <div
-        className="derived-combat-console console"
-        data-testid="derived-combat-console"
-        data-derived-root="1"
-      >
-        <RecipeMount plan={plan} bus={bus} />
+      <div className="flex h-full min-h-0 flex-1 flex-col" data-testid="derived-tab-host">
+        <div
+          className="derived-combat-console console"
+          data-testid="derived-combat-console"
+          data-derived-root="1"
+        >
+          <RecipeMount plan={plan} bus={bus} />
+        </div>
       </div>
     );
   }
 
-  return <RecipeMount plan={plan} bus={bus} />;
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col" data-testid="derived-tab-host">
+      <RecipeMount plan={plan} bus={bus} />
+    </div>
+  );
 }

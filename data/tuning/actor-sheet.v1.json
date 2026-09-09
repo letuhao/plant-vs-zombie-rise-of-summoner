@@ -1,56 +1,64 @@
 {
   "schemaVersion": 1,
   "kind": "actor-sheet",
-  "version": 1,
+  "version": 2,
   "defaultOpen": "condition",
   "tabs": [
     {
       "kind": "condition",
       "label": "Condition",
       "order": 0,
-      "hidden": false
+      "hidden": false,
+      "icon": "heart-pulse"
     },
     {
       "kind": "aptitudes",
       "label": "Aptitudes",
       "order": 1,
-      "hidden": false
+      "hidden": false,
+      "icon": "sparkles"
     },
     {
       "kind": "derived",
       "label": "Derived",
       "order": 2,
-      "hidden": false
+      "hidden": false,
+      "icon": "sigma"
     },
     {
       "kind": "shield",
       "label": "Shield",
       "order": 3,
-      "hidden": false
+      "hidden": false,
+      "icon": "shield"
     },
     {
       "kind": "status",
       "label": "Status",
       "order": 4,
-      "hidden": false
+      "hidden": false,
+      "icon": "activity"
     },
     {
       "kind": "elements",
       "label": "Elements",
       "order": 5,
-      "hidden": false
+      "hidden": false,
+      "icon": "atom"
     },
     {
       "kind": "kit",
       "label": "Kit",
       "order": 6,
-      "hidden": false
+      "hidden": false,
+      "icon": "backpack"
     },
     {
       "kind": "paths",
       "label": "Paths",
       "order": 7,
-      "hidden": false
+      "hidden": false,
+      "icon": "git-branch"
     }
   ],
   "kitRoles": [

@@ -156,6 +156,25 @@ describe("PanelShell size variant (actor-sheet-shell)", () => {
     expect(el.className).toContain("h-[min(960px,92vh)]");
     expect(el.className).toContain("w-[min(1800px,96vw)]");
   });
+
+  it("headerMode none hides chrome and keeps title sr-only for a11y", () => {
+    render(
+      <PanelShell
+        open
+        onOpenChange={() => {}}
+        title="Crazy Dave"
+        testId="t"
+        size="actorSheet"
+        headerMode="none"
+      >
+        Body
+      </PanelShell>
+    );
+    expect(screen.getByTestId("t-header")).toHaveAttribute("data-header-mode", "none");
+    expect(screen.getByTestId("t-header").className).toContain("sr-only");
+    expect(screen.queryByTestId("t-close")).not.toBeInTheDocument();
+    expect(screen.getByTestId("t-body").className).toContain("flex");
+  });
 });
 
 describe("PanelShell — token ordering for scrim (continued)", () => {

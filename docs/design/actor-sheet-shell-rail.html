@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ActorSheet shell — vertical rail — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<style>
+  /*
+   Visual SSOT for actor-sheet-shell vertical rail (expand / collapse).
+   Spec: docs/architecture/actor-sheet/spec-actor-sheet-shell.md
+   Bound: min(1800px, 96vw) × min(960px, 92vh) — GG-61.
+  */
+  body { margin: 0; background: var(--soil); color: var(--text); font-family: var(--font-ui); }
+  .page { padding: var(--sp-4); max-width: 1200px; margin: 0 auto; }
+  .page h1 { font-family: var(--font-display); font-size: var(--text-2xl); margin: 0 0 var(--sp-2); }
+  .page .lede { color: var(--muted); font-size: var(--text-sm); margin: 0 0 var(--sp-4); max-width: 62ch; }
+  .page .note { font-size: var(--text-2xs); color: var(--faint); margin-bottom: var(--sp-4); }
+
+  .demo-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+    align-items: start;
+  }
+  @media (max-width: 900px) { .demo-row { grid-template-columns: 1fr; } }
+  .demo-label {
+    font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 var(--sp-2);
+  }
+
+  .sheet-floor {
+    position: relative;
+    width: 100%;
+    height: min(480px, 70vh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--border-control);
+    border-radius: var(--r-md);
+  }
+  .sheet-floor > .chrome-hd {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0 var(--sp-2);
+    border-bottom: 1px solid var(--border);
+    background: var(--soil-raised);
+  }
+  .sheet-floor > .chrome-hd .close {
+    background: transparent; border: 0; color: var(--muted); cursor: pointer;
+    font-size: var(--text-sm); padding: var(--sp-1) var(--sp-2);
+  }
+  .sheet-floor > .chrome-hd .close:hover { color: var(--text); }
+
+  .sheet-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* Left rail */
+  .sheet-rail {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    width: 11.5rem;
+    padding: var(--sp-3) var(--sp-2);
+    border-right: 1px solid var(--border);
+    background: var(--soil-raised);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width var(--dur-quick) var(--ease-out);
+  }
+  .sheet-rail.is-collapsed { width: 3rem; padding-left: var(--sp-1); padding-right: var(--sp-1); }
+
+  .rail-toggle {
+    flex: none;
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem; height: 1.75rem;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-control);
+    background: var(--panel-inset);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .rail-toggle:hover { color: var(--text); background: var(--panel); }
+  .sheet-rail.is-collapsed .rail-toggle { align-self: center; }
+
+  .actor-summarize { flex: none; min-width: 0; }
+  .actor-summarize .name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    color: var(--text);
+    line-height: 1.2;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .actor-summarize .meta {
+    margin: 2px 0 0;
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+  .actor-summarize .glyph {
+    display: none;
+    width: 2rem; height: 2rem;
+    margin: 0 auto;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-control);
+    background: var(--panel-inset);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    align-items: center;
+    justify-content: center;
+  }
+  .sheet-rail.is-collapsed .actor-summarize .name,
+  .sheet-rail.is-collapsed .actor-summarize .meta { display: none; }
+  .sheet-rail.is-collapsed .actor-summarize .glyph { display: flex; }
+
+  .rail-tabs {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .rail-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    background: var(--panel-inset);
+    color: var(--muted);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+  }
+  .rail-tab:hover { color: var(--text); background: var(--panel); }
+  .rail-tab.is-active {
+    background: var(--lawn);
+    color: var(--text);
+    border-color: var(--lawn-hot);
+  }
+  .rail-tab .ico {
+    flex: none;
+    width: 1rem; height: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rail-tab .ico svg { width: 1rem; height: 1rem; stroke: currentColor; fill: none; stroke-width: 2; }
+  .rail-tab .lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sheet-rail.is-collapsed .rail-tab {
+    justify-content: center;
+    padding: 8px 0;
+  }
+  .sheet-rail.is-collapsed .rail-tab .lbl { display: none; }
+
+  .sheet-panel {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--sp-3);
+    background: var(--panel);
+  }
+  .sheet-panel .well {
+    border: 1px dashed var(--border-control);
+    border-radius: var(--r-sm);
+    background: var(--panel-inset);
+    color: var(--muted);
+    padding: var(--sp-4);
+    font-size: var(--text-sm);
+    min-height: 12rem;
+  }
+
+  .sheet-foot {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    border-top: 1px solid var(--border);
+    background: var(--soil-raised);
+  }
+  .sheet-foot .btn {
+    padding: 6px 12px; border-radius: var(--r-sm); font-size: var(--text-sm); font-weight: 700; cursor: pointer;
+  }
+  .sheet-foot .btn-ghost { background: transparent; border: 1px solid var(--border-control); color: var(--muted); }
+  .sheet-foot .btn-primary { background: var(--lawn); border: 1px solid var(--lawn-hot); color: var(--text); }
+
+  .icon-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); margin-top: var(--sp-4); }
+  .icon-table th, .icon-table td {
+    text-align: left; padding: var(--sp-2); border-bottom: 1px solid var(--border);
+  }
+  .icon-table th { color: var(--muted); font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .06em; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>ActorSheet shell — vertical rail</h1>
+  <p class="lede">
+    Root container only: left rail (actor summarize + vertical tabs) and right tab panel.
+    Expanded shows name / level / role and labels; collapsed is icon-only. Tab bodies are stubs here.
+  </p>
+  <p class="note">Toggle either demo with the rail-edge control (PanelLeftClose / PanelLeftOpen).</p>
+
+  <div class="demo-row">
+    <div>
+      <p class="demo-label">Expanded (default)</p>
+      <div class="sheet-floor" data-demo="expanded">
+        <header class="chrome-hd"><button type="button" class="close" aria-label="Close">Esc</button></header>
+        <div class="sheet-body">
+          <aside class="sheet-rail" data-rail aria-label="Actor sheet navigation">
+            <button type="button" class="rail-toggle" data-toggle aria-expanded="true" aria-label="Collapse rail" title="Collapse">
+              <!-- PanelLeftClose -->
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg>
+            </button>
+            <div class="actor-summarize" title="Crazy Dave · Lv 42 · Commander">
+              <p class="name">Crazy Dave</p>
+              <p class="meta">Lv 42 · Commander</p>
+              <div class="glyph" aria-hidden="true">C</div>
+            </div>
+            <div class="rail-tabs" role="tablist" aria-orientation="vertical">
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="condition" aria-label="Condition">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span>
+                <span class="lbl">Condition</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="aptitudes" aria-label="Aptitudes">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></span>
+                <span class="lbl">Aptitudes</span>
+              </button>
+              <button type="button" class="rail-tab is-active" role="tab" aria-selected="true" data-tab="derived" aria-label="Derived">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a1 1 0 0 0 0 2H16v.5"/><path d="M6 12h12"/><path d="M6 17h8"/></svg></span>
+                <span class="lbl">Derived</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="shield" aria-label="Shield">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
+                <span class="lbl">Shield</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="status" aria-label="Status">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span>
+                <span class="lbl">Status</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="elements" aria-label="Elements">
+                <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/></svg></span>
+                <span class="lbl">Elements</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="kit" aria-label="Kit">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M4.5 9.5V19a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V9.5"/><path d="M2 7h20"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                <span class="lbl">Kit</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="paths" aria-label="Paths">
+                <span class="ico"><svg viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg></span>
+                <span class="lbl">Paths</span>
+              </button>
+            </div>
+          </aside>
+          <main class="sheet-panel" data-panel>
+            <div class="well">Right panel — active tab body mounts here (unchanged in this stream).</div>
+          </main>
+        </div>
+        <footer class="sheet-foot">
+          <button type="button" class="btn btn-ghost">Release</button>
+          <button type="button" class="btn btn-primary">Deploy</button>
+        </footer>
+      </div>
+    </div>
+
+    <div>
+      <p class="demo-label">Collapsed (icon rail)</p>
+      <div class="sheet-floor" data-demo="collapsed">
+        <header class="chrome-hd"><button type="button" class="close" aria-label="Close">Esc</button></header>
+        <div class="sheet-body">
+          <aside class="sheet-rail is-collapsed" data-rail aria-label="Actor sheet navigation">
+            <button type="button" class="rail-toggle" data-toggle aria-expanded="false" aria-label="Expand rail" title="Expand">
+              <!-- PanelLeftOpen -->
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m14 9 3 3-3 3"/></svg>
+            </button>
+            <div class="actor-summarize" title="Crazy Dave · Lv 42 · Commander">
+              <p class="name">Crazy Dave</p>
+              <p class="meta">Lv 42 · Commander</p>
+              <div class="glyph" aria-hidden="true">C</div>
+            </div>
+            <div class="rail-tabs" role="tablist" aria-orientation="vertical">
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="condition" aria-label="Condition">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span>
+                <span class="lbl">Condition</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="aptitudes" aria-label="Aptitudes">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></span>
+                <span class="lbl">Aptitudes</span>
+              </button>
+              <button type="button" class="rail-tab is-active" role="tab" aria-selected="true" data-tab="derived" aria-label="Derived">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M18 7V5a1 1 0 0 0-1-1H6.5a1 1 0 0 0 0 2H16v.5"/><path d="M6 12h12"/><path d="M6 17h8"/></svg></span>
+                <span class="lbl">Derived</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="shield" aria-label="Shield">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
+                <span class="lbl">Shield</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="status" aria-label="Status">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></span>
+                <span class="lbl">Status</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="elements" aria-label="Elements">
+                <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/></svg></span>
+                <span class="lbl">Elements</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="kit" aria-label="Kit">
+                <span class="ico"><svg viewBox="0 0 24 24"><path d="M4.5 9.5V19a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V9.5"/><path d="M2 7h20"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span>
+                <span class="lbl">Kit</span>
+              </button>
+              <button type="button" class="rail-tab" role="tab" aria-selected="false" data-tab="paths" aria-label="Paths">
+                <span class="ico"><svg viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg></span>
+                <span class="lbl">Paths</span>
+              </button>
+            </div>
+          </aside>
+          <main class="sheet-panel">
+            <div class="well">More horizontal room for the active tab when the rail is collapsed.</div>
+          </main>
+        </div>
+        <footer class="sheet-foot">
+          <button type="button" class="btn btn-ghost">Release</button>
+          <button type="button" class="btn btn-primary">Deploy</button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <table class="icon-table">
+    <thead>
+      <tr><th>Kind</th><th>Catalog icon key</th><th>Lucide</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>condition</td><td>heart-pulse</td><td>HeartPulse</td></tr>
+      <tr><td>aptitudes</td><td>sparkles</td><td>Sparkles</td></tr>
+      <tr><td>derived</td><td>sigma</td><td>Sigma</td></tr>
+      <tr><td>shield</td><td>shield</td><td>Shield</td></tr>
+      <tr><td>status</td><td>activity</td><td>Activity</td></tr>
+      <tr><td>elements</td><td>atom</td><td>Atom</td></tr>
+      <tr><td>kit</td><td>backpack</td><td>Backpack</td></tr>
+      <tr><td>paths</td><td>git-branch</td><td>GitBranch</td></tr>
+      <tr><td>rail collapse</td><td>—</td><td>PanelLeftClose</td></tr>
+      <tr><td>rail expand</td><td>—</td><td>PanelLeftOpen</td></tr>
+    </tbody>
+  </table>
+</div>
+<script>
+  document.querySelectorAll("[data-demo]").forEach((floor) => {
+    const rail = floor.querySelector("[data-rail]");
+    const toggle = floor.querySelector("[data-toggle]");
+    if (!rail || !toggle) return;
+    toggle.addEventListener("click", () => {
+      const collapsed = rail.classList.toggle("is-collapsed");
+      toggle.setAttribute("aria-expanded", String(!collapsed));
+      toggle.setAttribute("aria-label", collapsed ? "Expand rail" : "Collapse rail");
+      toggle.title = collapsed ? "Expand" : "Collapse";
+    });
+    floor.querySelectorAll(".rail-tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        floor.querySelectorAll(".rail-tab").forEach((t) => {
+          t.classList.remove("is-active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tab.classList.add("is-active");
+        tab.setAttribute("aria-selected", "true");
+      });
+    });
+  });
+</script>
+</body>
+</html>

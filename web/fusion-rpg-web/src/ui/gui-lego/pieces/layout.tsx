@@ -7,11 +7,19 @@ import "../derivedConsole.css";
 export const surfaceShellFactory: PieceFactory = ({ payload, slots }) => {
   const style = themeStyle(payload);
   const vfx = vfxClass(payload);
+  const rootClass =
+    payload.rootClass != null && String(payload.rootClass).length > 0
+      ? String(payload.rootClass)
+      : "derived-combat-console";
+  const testId =
+    payload.testId != null && String(payload.testId).length > 0
+      ? String(payload.testId)
+      : "derived-combat-console";
   return (
     <div
-      className={["derived-combat-console", "console", vfx].filter(Boolean).join(" ")}
-      data-testid="derived-combat-console"
-      data-derived-root="1"
+      className={[rootClass, "console", vfx].filter(Boolean).join(" ")}
+      data-testid={testId}
+      data-derived-root={rootClass === "derived-combat-console" ? "1" : undefined}
       data-phase={payload.phase}
       style={style}
     >

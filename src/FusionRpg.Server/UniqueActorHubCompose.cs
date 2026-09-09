@@ -1,7 +1,9 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.ActorSurface;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -64,6 +66,13 @@ public static class UniqueActorHubCompose
         var (hub, ctx) = Build(store, actor);
         var primaryFinal = hub.Stats.Resolve(ctx);
         var (snapshot, contributions) = hub.ResolveDerivedWithContributions(ctx);
+        var profile = store.GetDemonProfile(actor.InstanceId);
+        var speciesName = profile != null && DemonSpeciesCatalog.IsKnown(profile.SpeciesId)
+            ? DemonSpeciesCatalog.Get(profile.SpeciesId).Name
+            : null;
+        var displayName = string.IsNullOrWhiteSpace(profile?.Nickname) ? speciesName : profile!.Nickname;
+        var roleLabel = string.Equals(actor.Side, "zombie", StringComparison.OrdinalIgnoreCase) ? "Zombie" : "Plant";
+        var xpToNext = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level);
 
         IReadOnlyList<DerivedStatSurfaceEntry> surfaceEntries = Array.Empty<DerivedStatSurfaceEntry>();
         try { surfaceEntries = DerivedStatSurfaceCatalogHub.Catalog.Entries; }
@@ -127,8 +136,19 @@ public static class UniqueActorHubCompose
             PlayerId = actor.PlayerId,
             Side = actor.Side,
             TypeId = actor.TypeId,
-            DisplayName = null,
+            DisplayName = displayName,
+            SpeciesId = profile?.SpeciesId,
+            SpeciesName = speciesName,
+            Phase = actor.Phase,
+            RoleLabel = roleLabel,
             Level = actor.Level,
+            Xp = actor.Xp,
+            XpToNext = xpToNext,
+            ElementTyping = profile == null ? null : new ActorElementTypingDto
+            {
+                Primary = profile.ElementPrimary,
+                Secondary = profile.ElementSecondary
+            },
             Derived = derived,
             Primary = primary
         };

@@ -115,6 +115,9 @@ public sealed class ActorSurfaceCatalogTests
         var catalog = ActorSheetSurfaceCatalogLoader.Parse(ReadTuning("actor-sheet.v1.json"));
         Assert.Equal(ActorSheetTabKind.Condition, catalog.DefaultOpen);
         Assert.Equal(8, catalog.Tabs.Count);
+        Assert.Equal(2, catalog.Version);
+        Assert.Contains(catalog.Tabs, t => t.Kind == ActorSheetTabKind.Condition && t.Icon == "heart-pulse");
+        Assert.Contains(catalog.Tabs, t => t.Kind == ActorSheetTabKind.Paths && t.Icon == "git-branch");
         Assert.Contains(catalog.KitRoles, r => r.RoleId == "armament-primary"
             && r.Labels.Humanoid == "Weapon"
             && r.Labels.Plant == "Stem");
@@ -183,7 +186,8 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(24, dto.Statuses.Count);
         Assert.Equal(8, dto.Tabs.Count);
         Assert.Contains("aptitude:1", dto.VersionStamp, StringComparison.Ordinal);
-        Assert.Contains("sheet:1", dto.VersionStamp, StringComparison.Ordinal);
+        Assert.Contains("sheet:2", dto.VersionStamp, StringComparison.Ordinal);
+        Assert.Equal("heart-pulse", Assert.Single(dto.Tabs, t => t.Kind == "condition").Icon);
         Assert.Equal("condition", dto.Tabs[0].Kind);
         Assert.Equal("element", Assert.Single(dto.Families, f => f.Family == "combat.power").Expand);
     }

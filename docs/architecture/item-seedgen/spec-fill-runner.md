@@ -127,6 +127,9 @@ refusals/errors; it is not required merely to get past a recorded escalation.
 6. The dry-run plan and dispatch order are byte/order stable for identical corpus and ledger input.
 7. `--verify` distinguishes a clean generator walk from finite populations that are pending/held
    and from a corpus with remaining promoted health gaps; it never changes corpus data itself.
+8. `items generate --retry-blocked` requeues only terminal blocked/escalated subjects. If the
+   terminal defect is a duplicate name, the next brief explicitly requires a new surface name;
+   authored rows remain untouched.
 
 ## Boundaries
 
@@ -136,7 +139,8 @@ of planning, ledger, and write authority.
 Set and charm identity names share one player-facing namespace. A new batch compares its names with
 both existing sibling corpora before writing; a collision is an `escalated` terminal subject, not an
 overwrite or silently accepted duplicate. Legacy collisions already on disk remain explicit repair
-work and are never renamed implicitly by fill.
+work and are never renamed implicitly by fill. Exact-identical legacy rows may be removed only by
+an explicit, reviewed repair operation; a collision with different content is regenerated.
 
 **Never:** treat an escalation as accepted content, retry it forever, invent a new partition, or claim
 an open-ended generator can be exhausted.

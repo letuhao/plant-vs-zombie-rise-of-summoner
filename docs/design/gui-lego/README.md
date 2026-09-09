@@ -117,15 +117,15 @@ theme packs → chip, channel-row, inspect gauges (css + paint)
 
 | Piece | Derived | Condition | Creatures list |
 |---|---|---|---|
-| `chip` | yes | maybe | filters |
-| `tool-search` | yes | yes | yes |
-| `tool-toggle` | yes | maybe | maybe |
-| `split-inspect` | yes | today InspectSplit | — |
-| `scroll-region` | yes | yes | yes |
+| `chip` | yes | — | filters |
+| `tool-search` | yes | — | yes |
+| `tool-toggle` | yes | — | maybe |
+| `split-inspect` | yes | no | — |
+| `scroll-region` | yes | maybe | yes |
 | `channel-row` | yes | — | — |
 | `gauge-*` | yes | — | — |
 | `phase-*` | yes | yes | yes |
-| `identity-hd` | yes | sheet header overlap | — |
+| `identity-hd` | yes | shell identity sibling | — |
 
 ---
 

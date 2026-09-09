@@ -16,6 +16,7 @@ Two review modes over the same run, not two contradictory truths:
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 import sys
 from pathlib import Path
@@ -520,6 +521,27 @@ def _apply_items_write_defaults(args: argparse.Namespace) -> None:
         args.kind, getattr(args, "out_dir", "") or "", allow_production=allow)
 
 
+def _retry_blocked_ledger(ledger: dict[str, dict]) -> tuple[dict[str, dict], set[str]]:
+    """Return a resume ledger with terminal subjects removed and duplicate-name feedback.
+
+    Authored rows stay in the ledger.  Only rows explicitly terminal (blocked/escalated) are
+    retried; duplicate-name defects are surfaced to the next model brief so repair is a new
+    answer rather than an accidental replay of the rejected name.
+    """
+    feedback = {
+        subject_id for subject_id, row in ledger.items()
+        if isinstance(row, dict) and any(
+            "duplicate name" in str(defect).casefold()
+            for defect in (row.get("defects") or ())
+        )
+    }
+    resumable = {
+        subject_id: row for subject_id, row in ledger.items()
+        if isinstance(row, dict) and row.get("outcome") not in {"blocked", "escalated"}
+    }
+    return resumable, feedback
+
+
 def cmd_items(args: argparse.Namespace) -> int:
     """`seedsmith items generate|validate|combogen-migrate|fill` (item modules 13 + 21 + fill UX).
 
@@ -583,6 +605,12 @@ def cmd_items(args: argparse.Namespace) -> int:
         ledger = run_mod.read_ledger(Path(args.out_dir) / "set-charm-gen.ledger.json")
     else:
         ledger = None
+    # Explicit recovery mode: retry only terminal blocked/escalated subjects while preserving
+    # authored rows and their sequence numbers. This is deliberately separate from
+    # --ignore-ledger, which would re-plan every subject and can mint duplicates.
+    retry_feedback: set[str] = set()
+    if getattr(args, "retry_blocked", False) and ledger:
+        ledger, retry_feedback = _retry_blocked_ledger(ledger)
     try:
         plan = run_mod.plan_run(kind=args.kind, population=args.population,
                                 tuning=tuning, vocabulary=vocabulary, ledger=ledger)
@@ -591,6 +619,14 @@ def cmd_items(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
 
     planned_total = len(plan.subjects)
+    if retry_feedback:
+        plan.subjects = [
+            replace(subject, brief=(subject.brief + "\nPrevious attempt was rejected because its "
+                                    "name duplicated an existing item. Choose a completely new "
+                                    "surface name; do not reuse that name or a close variant."))
+            if subject.subject_id in retry_feedback else subject
+            for subject in plan.subjects
+        ]
     if args.limit and args.limit > 0:
         plan.subjects = plan.subjects[:args.limit]
 
@@ -2498,6 +2534,8 @@ def build_parser() -> argparse.ArgumentParser:
                            "ledger inside --out-dir, so a sample never touches the real one)")
     igen.add_argument("--ignore-ledger", dest="ignore_ledger", action="store_true",
                       help="plan every generatable subject, even ones a previous run recorded")
+    igen.add_argument("--retry-blocked", dest="retry_blocked", action="store_true",
+                      help="re-plan only subjects ledgered as blocked/escalated; never re-run authored rows")
     igen.add_argument("--model", default="unrecorded",
                       help="set/charm/combination --write: with --answers, metadata only — the model id "
                            "stamped into each seed file's _meta. With --endpoint, also the model "

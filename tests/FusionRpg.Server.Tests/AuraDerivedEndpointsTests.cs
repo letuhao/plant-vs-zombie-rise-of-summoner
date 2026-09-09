@@ -41,6 +41,8 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
             AptitudeTuningLoader.Parse(File.ReadAllText(LatestAptitudesPath())));
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
+        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "contracts.v1.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "status.v1.json"))));
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
@@ -162,6 +164,11 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.NotNull(sheet);
         Assert.Equal(actor.InstanceId, sheet!.InstanceId);
         Assert.True(sheet.Derived.Count >= 200, $"expected full registry floor, got {sheet.Derived.Count}");
+        Assert.Equal(actor.Level, sheet.Level);
+        Assert.Equal(actor.Xp, sheet.Xp);
+        Assert.Equal(actor.Phase, sheet.Phase);
+        Assert.Equal("Plant", sheet.RoleLabel);
+        Assert.True(sheet.XpToNext > 0);
 
         var power = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.power");
         Assert.Equal("FlatReplace", power.ComposeKind);
@@ -179,6 +186,37 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.NotNull(sheet.Primary);
         // Primary bag is always projected; when contributions exist they use primary: grammar.
         Assert.All(sheet.Primary, p => Assert.StartsWith("primary:", p.SourceId, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Get_sheet_joins_species_name_nickname_and_element_typing_for_a_real_specimen()
+    {
+        var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.All
+            .First(s => s.ElementSecondary != null && s.Side == "plant");
+        var minted = _store.MintDemon(_playerId, new FusionRpg.Contracts.DemonMintSpec
+        {
+            SpeciesId = species.SpeciesId,
+            Side = species.Side,
+            GameTypeId = species.GameTypeId,
+            Rarity = FusionRpg.Core.Demons.DemonRarityIds.ToId(species.BaseRarity),
+            Variant = "normal",
+            ElementPrimary = species.ElementPrimary.ToElementId(),
+            ElementSecondary = species.ElementSecondary?.ToElementId(),
+            TraitIds = new List<string>(),
+            Origin = "test",
+            Nickname = "Emberling"
+        }).Specimen;
+
+        var resp = await _http.GetAsync($"/api/actors/{minted.Actor.InstanceId}/sheet");
+        if (!resp.IsSuccessStatusCode) throw new Exception(await resp.Content.ReadAsStringAsync());
+        var sheet = await resp.Content.ReadFromJsonAsync<SheetResponseDto>();
+        Assert.NotNull(sheet);
+        Assert.Equal("Emberling", sheet!.DisplayName);
+        Assert.Equal(species.SpeciesId, sheet.SpeciesId);
+        Assert.Equal(species.Name, sheet.SpeciesName);
+        Assert.NotNull(sheet.ElementTyping);
+        Assert.Equal(species.ElementPrimary.ToElementId(), sheet.ElementTyping!.Primary);
+        Assert.Equal(species.ElementSecondary?.ToElementId(), sheet.ElementTyping.Secondary);
     }
 
     [Fact]
@@ -281,8 +319,23 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     sealed class SheetResponseDto
     {
         public string InstanceId { get; set; } = "";
+        public string? DisplayName { get; set; }
+        public string? SpeciesId { get; set; }
+        public string? SpeciesName { get; set; }
+        public string Phase { get; set; } = "";
+        public string? RoleLabel { get; set; }
+        public long Level { get; set; }
+        public long Xp { get; set; }
+        public long? XpToNext { get; set; }
+        public SheetElementTypingDto? ElementTyping { get; set; }
         public List<SheetChannelDto> Derived { get; set; } = new();
         public List<DerivedContributionDto> Primary { get; set; } = new();
+    }
+
+    sealed class SheetElementTypingDto
+    {
+        public string Primary { get; set; } = "";
+        public string? Secondary { get; set; }
     }
 
     sealed class SheetChannelDto

@@ -183,23 +183,36 @@ def generation_completion(*, kinds: "tuple[str, ...] | None" = None) -> dict:
         if "set" in selected:
             for population in ("species", "build"):
                 out = Path(defaults.default_out_dir("set"))
+                ledger = set_run.read_ledger(out / "set-charm-gen.ledger.json")
                 plan = set_run.plan_run(
                     kind="set", population=population, tuning=tuning, vocabulary=vocabulary,
-                    ledger=set_run.read_ledger(out / "set-charm-gen.ledger.json"))
+                    ledger=ledger)
                 checks.append({
                     "kind": "set", "population": population,
                     "toGenerate": len(plan.subjects), "held": len(plan.held),
+                    "ledgered": len(ledger),
                     "heldByReason": plan.summary()["heldByReason"],
                     "complete": plan.complete,
                 })
         if "charm" in selected:
             out = Path(defaults.default_out_dir("charm"))
+            ledger = set_run.read_ledger(out / "set-charm-gen.ledger.json")
             plan = set_run.plan_run(
                 kind="charm", population="species", tuning=tuning, vocabulary=vocabulary,
-                ledger=set_run.read_ledger(out / "set-charm-gen.ledger.json"))
+                ledger=ledger)
+            placeholders = sum(
+                1 for row in ledger.values()
+                if isinstance(row, dict) and "(axis-group)-NNN" in str(row.get("entryId", ""))
+            )
+            terminal = sum(
+                1 for row in ledger.values()
+                if isinstance(row, dict) and row.get("outcome") in {"blocked", "escalated"}
+            )
             checks.append({
                 "kind": "charm", "population": "species",
                 "toGenerate": len(plan.subjects), "held": len(plan.held),
+                "ledgered": len(ledger), "terminalLedgered": terminal,
+                "placeholderLedgered": placeholders,
                 "heldByReason": plan.summary()["heldByReason"],
                 "complete": plan.complete,
             })

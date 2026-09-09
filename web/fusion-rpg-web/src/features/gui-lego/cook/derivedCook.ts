@@ -18,6 +18,12 @@ import { formatDerivedMagnitude } from "./formatDerivedMagnitude";
 /** Primary Derived rail — cook surface tabs only. Never sheetGroups (offense/pools/…). */
 export const COOK_PRIMARY_TAB_IDS = ["elements", "status", "resources", "other"] as const;
 
+/**
+ * OTHER cook tab — FE-only chip for families with expand:"none" (progression/tempo/siege).
+ * Not an action-category id; Attack/Defense/… chips only list expand:"action-category".
+ */
+export const OTHER_SHARED_VARIANT_ID = "shared";
+
 /** Forbidden as primary Derived tablist labels/ids (sheetGroup IA). */
 export const FORBIDDEN_PRIMARY_TAB_IDS = [
   "offense",

@@ -19,7 +19,8 @@ public sealed record ActorSheetTabDto(
     [property: JsonPropertyName("kind")] string Kind,
     string Label,
     int Order,
-    bool Hidden);
+    bool Hidden,
+    string? Icon);
 
 public sealed record AptitudeSurfaceEntryDto(
     string Id,
@@ -125,7 +126,8 @@ public static class ActorSurfaceCatalogHub
                 Kind: TabKindWire(t.Kind),
                 Label: t.Label,
                 Order: t.Order,
-                Hidden: t.Hidden)).ToList(),
+                Hidden: t.Hidden,
+                Icon: t.Icon)).ToList(),
             Aptitudes: aptitudes.Entries.Select(a => new AptitudeSurfaceEntryDto(
                 Id: a.Id,
                 Posture: a.Posture.ToString().ToLowerInvariant(),

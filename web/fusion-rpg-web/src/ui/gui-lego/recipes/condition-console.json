@@ -1,0 +1,66 @@
+{
+  "surfaceId": "condition-console",
+  "host": "actor-panel-tab",
+  "version": 1,
+  "notes": "Condition glance: progression + vitality + standing + live statuses. Identity stays in ActorSummarize on the left rail.",
+  "root": {
+    "piece": "surface-shell",
+    "instanceId": "shell:condition",
+    "bind": "vm",
+    "slots": {
+      "main": [
+        {
+          "piece": "progression-gauge",
+          "instanceId": "condition:progression",
+          "bind": "vm.main.0"
+        },
+        {
+          "piece": "cond-hero",
+          "instanceId": "condition:hero",
+          "bind": "vm.main.1",
+          "slots": {
+            "radial": {
+              "piece": "pool-radial",
+              "instanceId": "condition:pool:hp",
+              "bind": "radial"
+            },
+            "meters": {
+              "$bindArray": "meters",
+              "piece": "pool-meter",
+              "instanceIdTemplate": "condition:resource:{poolId}"
+            }
+          }
+        },
+        {
+          "piece": "stand-row",
+          "instanceId": "condition:standing",
+          "bind": "vm.main.2",
+          "slots": {
+            "radar": {
+              "piece": "standing-radar",
+              "instanceId": "condition:standing:radar",
+              "bind": "radar"
+            },
+            "live": [
+              {
+                "piece": "standing-bars",
+                "instanceId": "condition:standing:bars",
+                "bind": "bars"
+              }
+            ]
+          }
+        },
+        {
+          "piece": "status-glyph-strip",
+          "instanceId": "condition:statuses",
+          "bind": "vm.main.3"
+        }
+      ]
+    }
+  },
+  "lifecycleOverlays": {
+    "loading": { "piece": "phase-loading", "bind": "vm.phasePayload" },
+    "error": { "piece": "phase-error", "bind": "vm.phasePayload" },
+    "pendingField": { "piece": "phase-pending", "bind": "field.phase" }
+  }
+}

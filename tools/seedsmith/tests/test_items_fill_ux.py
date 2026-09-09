@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -405,8 +405,10 @@ class ItemsFillTests(unittest.TestCase):
         self.assertFalse(report["complete"])
         self.assertEqual(report["checks"], [
             {"kind": "set", "population": "species", "toGenerate": 0, "held": 1,
+             "ledgered": ANY,
              "heldByReason": {"basis=name": 1}, "complete": False},
             {"kind": "set", "population": "build", "toGenerate": 0, "held": 1,
+             "ledgered": ANY,
              "heldByReason": {"basis=name": 1}, "complete": False},
         ])
 

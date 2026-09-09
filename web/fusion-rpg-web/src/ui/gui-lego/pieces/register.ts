@@ -1,6 +1,7 @@
 import { registerPiece } from "@/features/gui-lego/pieceRegistry";
 import type { PieceFactory } from "@/features/gui-lego/types";
 import { CHROME_SLOT_MAP, chromeFactories } from "./chrome";
+import { CONDITION_SLOT_MAP, conditionFactories } from "./condition";
 import { DOMAIN_SLOT_MAP, domainFactories } from "./domain";
 import { LAYOUT_SLOT_MAP, layoutFactories } from "./layout";
 import { LIFECYCLE_SLOT_MAP, lifecycleFactories } from "./lifecycle";
@@ -13,6 +14,7 @@ const ALL: {
 }[] = [
   { factories: layoutFactories, slots: LAYOUT_SLOT_MAP },
   { factories: chromeFactories, slots: CHROME_SLOT_MAP },
+  { factories: conditionFactories, slots: CONDITION_SLOT_MAP },
   { factories: domainFactories, slots: DOMAIN_SLOT_MAP },
   { factories: lifecycleFactories, slots: LIFECYCLE_SLOT_MAP }
 ];

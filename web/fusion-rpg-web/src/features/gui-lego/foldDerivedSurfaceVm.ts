@@ -17,6 +17,7 @@ import {
   BUCKET_LABELS,
   COOK_PRIMARY_TAB_IDS,
   COMPOSE_SENTENCE,
+  OTHER_SHARED_VARIANT_ID,
   UNIT_SENTENCE,
   bucketContributions,
   formatDerivedMagnitude,
@@ -208,10 +209,12 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
   const variantChoices = (() => {
     if (!activeTab) return [] as { id: string; displayName: string }[];
     if (activeTab.id === "other") {
-      return (activeTab.actionCategoryVariants ?? []).map((v) => ({
+      const action = (activeTab.actionCategoryVariants ?? []).map((v) => ({
         id: v.id,
         displayName: v.displayName
       }));
+      // Shared first: expand:none families are not scoped to Attack/Defense chips.
+      return [{ id: OTHER_SHARED_VARIANT_ID, displayName: "Shared" }, ...action];
     }
     return activeTab.variants.map((v) => ({
       id: v.id,
@@ -225,7 +228,9 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     variantId =
       activeTab?.id === "elements" && variantChoices.some((v) => v.id === "fire")
         ? "fire"
-        : variantChoices[0]!.id;
+        : activeTab?.id === "other"
+          ? OTHER_SHARED_VARIANT_ID
+          : variantChoices[0]!.id;
   }
 
   const byId = toLiveMap(input.sheetChannels, input.leanChannels as never);
@@ -253,13 +258,22 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
   if (activeTab) {
     for (const cat of activeTab.categories) {
       for (const family of cat.families) {
+        // OTHER: Shared → expand:none only; Attack/… → action-category only.
+        // (Previously expand:none repeated under every action chip — looked like duplicates.)
+        if (activeTab.id === "other") {
+          if (variantId === OTHER_SHARED_VARIANT_ID) {
+            if (family.expand !== "none") continue;
+          } else if (family.expand !== "action-category") {
+            continue;
+          }
+        }
         let channelVariant = variantId;
         let variantLabel =
           variantChoices.find((v) => v.id === variantId)?.displayName ?? variantId ?? "";
         if (family.expand === "none") {
           channelVariant = null;
           variantLabel = family.displayName;
-        } else if (!variantId) {
+        } else if (!variantId || variantId === OTHER_SHARED_VARIANT_ID) {
           continue;
         }
         const channelId = joinDerivedChannelId(family.family, family.expand, channelVariant);
@@ -410,7 +424,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
           ? "Status catalog variants"
           : tabId === "resources"
             ? "Resource variants"
-            : "Action category variants",
+            : "Shared channels and action category variants",
     hidden: variantChoices.length === 0,
     chips: variantChips
   };
@@ -461,7 +475,10 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       phase: "ready" as Phase,
       familyId: catId,
       title: group.label,
-      hint: `${activeTab?.id ?? "—"} · ${variantId || "—"}`,
+      hint:
+        activeTab?.id === "other" && variantId === OTHER_SHARED_VARIANT_ID
+          ? "other · shared"
+          : `${activeTab?.id ?? "—"} · ${variantId || "—"}`,
       rows
     };
   });

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>progression-gauge</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .progression-gauge { width: 420px; border: 1px solid #5b5144; border-radius: 14px; background: #2f261d; color: #f2ead8; padding: 14px 16px; }
+    .hd { display:flex; justify-content:space-between; gap:12px; }
+    .eyebrow { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#a39583; }
+    .track { margin-top:8px; height:10px; border-radius:999px; border:1px solid #5b5144; background:#201a14; overflow:hidden; }
+    .fill { width:62%; height:100%; background:#e0b44b; }
+    .pending { margin-top:8px; font-size:12px; color:#a39583; }
+  </style>
+</head>
+<body>
+  <section class="progression-gauge">
+    <div class="hd"><span class="eyebrow">Current progression</span><strong>Lv 14</strong></div>
+    <div style="margin-top:8px"><b>2,140 / 3,400 XP</b></div>
+    <div class="track"><div class="fill"></div></div>
+    <p class="pending">Pending variant: if `xpToNext` is missing, keep current XP truthfully and replace the fill with pending copy.</p>
+  </section>
+</body>
+</html>

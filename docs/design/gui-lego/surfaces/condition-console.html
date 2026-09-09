@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Condition Console</title>
+  <style>
+    body { margin: 0; padding: 24px; background:#1f1914; color:#f2ead8; font-family: Inter, sans-serif; }
+    .console { display:flex; flex-direction:column; gap:16px; max-width:1100px; margin:0 auto; }
+    .card { border:1px solid #5b5144; border-radius:14px; background:#2f261d; padding:16px; }
+    .progress { height:10px; margin-top:8px; overflow:hidden; border-radius:999px; background:#201a14; border:1px solid #5b5144; }
+    .progress > i { display:block; width:62%; height:100%; background:#e0b44b; }
+    .cond-hero { display:flex; gap:20px; align-items:center; }
+    .radial { width:128px; height:128px; border:1px solid #5b5144; border-radius:16px; display:grid; place-items:center; background:#241d17; }
+    .pools { display:grid; gap:10px; flex:1; }
+    .meter { padding:10px 12px; border:1px solid #5b5144; border-radius:12px; background:#241d17; }
+    .stand { display:grid; grid-template-columns:180px 1fr; gap:20px; }
+    .bars { display:grid; gap:8px; margin-top:8px; }
+    .bar { display:grid; grid-template-columns:120px 1fr 36px; gap:10px; align-items:center; }
+    .bar .t { height:8px; overflow:hidden; border-radius:999px; background:#201a14; border:1px solid #5b5144; }
+    .bar .t i { display:block; height:100%; background:#d98787; }
+    .glyphs { display:flex; gap:8px; margin-top:8px; }
+    .glyphs > * { width:46px; height:46px; border-radius:12px; border:1px solid #5b5144; background:#241d17; display:grid; place-items:center; }
+    .eyebrow { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#a39583; }
+  </style>
+</head>
+<body>
+  <main class="console">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:12px">
+        <span class="eyebrow">Current progression</span>
+        <strong>Lv 14</strong>
+      </div>
+      <div style="margin-top:8px"><b>2,140 / 3,400 XP</b></div>
+      <div class="progress"><i></i></div>
+    </section>
+    <section class="card cond-hero">
+      <div class="radial">HP</div>
+      <div class="pools">
+        <div class="meter">HP 1,240 / 1,800</div>
+        <div class="meter">Stamina 44 / 60</div>
+        <div class="meter">Sun 12 / 40</div>
+        <div class="meter">Spirit 22 / 40</div>
+        <div class="meter">Yang 8 / 24</div>
+        <div class="meter">Poise 18 / 20</div>
+      </div>
+    </section>
+    <section class="card stand">
+      <div class="radial">Radar</div>
+      <div>
+        <p class="eyebrow">Standing · five axes (definitions.md)</p>
+        <div class="bars">
+          <div class="bar"><span>Offense</span><span class="t"><i style="width:64%"></i></span><b>77</b></div>
+          <div class="bar"><span>Survivability</span><span class="t"><i style="width:48%;background:#6dbb63"></i></span><b>58</b></div>
+          <div class="bar"><span>Control</span><span class="t"><i style="width:30%;background:#b48ae6"></i></span><b>36</b></div>
+        </div>
+        <p class="eyebrow" style="margin-top:16px">Live status · tap for Status tab</p>
+        <div class="glyphs"><button>SP</button><button>CO</button><button>EM</button><span>+1</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

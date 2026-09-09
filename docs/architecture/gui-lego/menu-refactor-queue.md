@@ -15,7 +15,7 @@ stream after P0’s piece contracts are accepted for React.
 | Priority | Surface | Host | First pieces to reuse | Notes |
 |---|---|---|---|---|
 | **P0** | ActorSheet Derived | `ActorPanel` tab | Full `derived-console` recipe | **Done** — FE Wave 0 + C (`features/gui-lego`, `ui/gui-lego`, thin `DerivedTab`) |
-| **P1** | ActorSheet Condition | `ActorPanel` tab | `split-inspect`, `phase-*`, gauges | Replaces plate-13 `InspectSplit` usage long-term |
+| **P1** | ActorSheet Condition | `ActorPanel` tab | `phase-*`, condition glance pieces, shell identity | Plate-13 glance grammar (`cond-hero` + `stand-row`); no root `split-inspect` |
 | **P2** | Creatures layer | `PanelShell` | `tool-search`, `chip`, `phase-*` + Actor ERM rows | Filter chrome first; keep `ActorCard`/`ActorRow` |
 | **P3** | Relics · Commanders | `PanelShell` | search, chips, Card/Row rungs | Card via ERM — not a new density |
 | **P4** | Other rail layers + remaining Actor tabs | `PanelShell` / `ActorPanel` | Shared chrome | Fusion, Pacts, Expeditions, Almanac, Chronicle; Aptitudes, Shield, Status, Elements, Kit, Paths — **one surface per stream** |

@@ -20,6 +20,32 @@ public sealed class ActorSheetChannelDto
     public IReadOnlyList<ActorContributionDto> Contributions { get; init; } = Array.Empty<ActorContributionDto>();
 }
 
+public sealed class ActorElementTypingDto
+{
+    public string Primary { get; init; } = "";
+    public string? Secondary { get; init; }
+}
+
+public sealed class ActorStatusGlyphDto
+{
+    public string StatusId { get; init; } = "";
+    public int? RemainingPermille { get; init; }
+}
+
+public sealed class ActorResourcePoolDto
+{
+    public string ResourceId { get; init; } = "";
+    public long? Current { get; init; }
+    public long? Max { get; init; }
+}
+
+public sealed class ActorShieldSummaryDto
+{
+    public string? ElementId { get; init; }
+    public long? Current { get; init; }
+    public long? Max { get; init; }
+}
+
 /// <summary>
 /// Cold UniqueActor identity + Hot Hub resolve with FULL contribution tracing (GG-49).
 /// Hub compose only — never a second private fold.
@@ -31,7 +57,17 @@ public sealed class ActorSheetDto
     public string Side { get; init; } = "";
     public int TypeId { get; init; }
     public string? DisplayName { get; init; }
+    public string? SpeciesId { get; init; }
+    public string? SpeciesName { get; init; }
+    public string Phase { get; init; } = "";
+    public string? RoleLabel { get; init; }
     public long Level { get; init; }
+    public long Xp { get; init; }
+    public long? XpToNext { get; init; }
+    public ActorElementTypingDto? ElementTyping { get; init; }
+    public IReadOnlyList<ActorStatusGlyphDto> LiveStatuses { get; init; } = Array.Empty<ActorStatusGlyphDto>();
+    public IReadOnlyList<ActorResourcePoolDto> ResourcePools { get; init; } = Array.Empty<ActorResourcePoolDto>();
+    public ActorShieldSummaryDto? ShieldSummary { get; init; }
     public IReadOnlyList<ActorSheetChannelDto> Derived { get; init; } = Array.Empty<ActorSheetChannelDto>();
     public IReadOnlyList<ActorContributionDto> Primary { get; init; } = Array.Empty<ActorContributionDto>();
 }

@@ -110,9 +110,7 @@
       "attempts": 1
     },
     "charm-species-demon.cabbagepult": {
-      "outcome": "blocked",
-      "blockedReason": "blocked: The theme of 'pitcher/attack' requires offensive scaling or multipliers to feel impactful, but the brief restricts charms to FLAT effects only, making it impossible to express the 'power' of a pitcher effectively.",
-      "entryId": "charm.(axis-group)-NNN for cabbagepult",
+      "entryId": "charm.off-ctrl-315",
       "attempts": 1
     },
     "charm-species-demon.caltrop": {
@@ -128,15 +126,11 @@
       "attempts": 1
     },
     "charm-species-demon.cornpot": {
-      "outcome": "blocked",
-      "blockedReason": "blocked: The motifs '制成' (made/forged) and '子弹' (bullet) imply high-velocity projectiles or rapid-fire mechanics, which are inherently tied to 'volley' or 'death-salvo' families. However, the prompt's constraints on 'material and form' for a charm (which applies to all actors) create a conflict between the 'bullet' motif and the 'flat effect' requirement. A bullet is a projectile meant to be fired, whereas a charm is a passive aura. To represent a bullet as a charm, it must be a 'salvo' of impact, but the species '玉米花盆' (Corn Pot) is not provided with a specific combat style in the brief to justify a specific family choice without violating the 'no multiplier/percentage' rule for 'breadth with depth' mechanics.",
-      "entryId": "charm.(axis-group)-NNN for cornpot",
+      "entryId": "charm.econ-056",
       "attempts": 1
     },
     "charm-species-demon.dolldiamond": {
-      "outcome": "blocked",
-      "blockedReason": "blocked: The motifs 'world' and 'light' suggest a scale and complexity that exceeds the 'flat effect' constraint of a charm.",
-      "entryId": "charm.(axis-group)-NNN for dolldiamond",
+      "entryId": "charm.econ-062",
       "attempts": 1
     },
     "charm-species-demon.flagzombie": {
@@ -236,11 +230,8 @@
       "attempts": 1
     },
     "charm-species-demon.abyssswordstar": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for abyssswordstar",
-      "attempts": 1,
-      "blockedReason": "The theme of 'summoning' and 'descending' implies a dynamic, high-impact effect that would require a multiplier or a specific trigger-based strength, which violates the 'FLAT effects only' constraint for a charm."
+      "entryId": "charm.off-ctrl-303",
+      "attempts": 1
     },
     "charm-species-demon.acientsunnut": {
       "entryId": "charm.surv-util-035",
@@ -259,18 +250,12 @@
       "attempts": 1
     },
     "charm-species-demon.balloonzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for balloonzombie",
-      "attempts": 1,
-      "blockedReason": "The motifs 'creator' and 'Kirov' imply a specific narrative origin that does not fit the 'always-on' mechanical requirements of a charm without introducing prohibited narrative complexity."
+      "entryId": "charm.off-ctrl-309",
+      "attempts": 1
     },
     "charm-species-demon.bamboo": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bamboo",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'consumption' (消耗) and 'contact' (接触) implies a mechanic of attrition or damage absorption that is difficult to express purely through 'FLAT effects only' without violating the 'no multiplier/percentage' rule or the 'breadth with depth' design philosophy for a single charm."
+      "entryId": "charm.off-ctrl-305",
+      "attempts": 1
     },
     "charm-species-demon.bamboodragon": {
       "entryId": "charm.surv-util-039",
@@ -281,18 +266,12 @@
       "attempts": 2
     },
     "charm-species-demon.bamboospruce": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bamboospruce",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'shooting/bullets' and 'winter bamboo' implies high-frequency or high-velocity projectile mechanics which are inherently multiplicative or scaling in nature, whereas the brief restricts charms to FLAT effects only."
+      "entryId": "charm.off-ctrl-306",
+      "attempts": 1
     },
     "charm-species-demon.bedrocksnowzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bedrocksnowzombie",
-      "attempts": 1,
-      "blockedReason": "The theme of 'walking leisurely' (闲庭信步) and 'unyielding defense' (防御力) suggests a high-survivability/utility profile, but the 'world' (世界) motif implies a scale that exceeds the 'flat effect' constraint of a single charm without becoming a signet or a multiplier."
+      "entryId": "charm.surv-util-229",
+      "attempts": 1
     },
     "charm-species-demon.bedrocktallnut": {
       "entryId": "charm.surv-util-040",
@@ -331,11 +310,8 @@
       "attempts": 3
     },
     "charm-species-demon.blackelephantzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for blackelephantzombie",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs 'Edgar', 'Not enough', 'Decision', 'Doctor', and 'Cemetery' are too narrative and abstract to be mapped to the provided closed list of mechanical families without violating the constraint of using only the provided IDs."
+      "entryId": "charm.off-ctrl-307",
+      "attempts": 1
     },
     "charm-species-demon.blackflagfootball": {
       "entryId": "charm.off-ctrl-055",
@@ -370,11 +346,8 @@
       "attempts": 2
     },
     "charm-species-demon.blacktrainzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for blacktrainzombie",
-      "attempts": 1,
-      "blockedReason": "The motifs 'Master' and 'Buy' imply a hierarchy or transaction that cannot be expressed through the provided 'always-on' family list without violating the 'FLAT effects only' rule or the 'no cost' rule."
+      "entryId": "charm.econ-037",
+      "attempts": 1
     },
     "charm-species-demon.blover": {
       "entryId": "charm.off-ctrl-060",
@@ -389,20 +362,12 @@
       "attempts": 2
     },
     "charm-species-demon.bloverumbrella": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.surv-util-046",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Floating Canopy' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.surv-util-236",
+      "attempts": 1
     },
     "charm-species-demon.blowerpumpkin": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for blowerpumpkin",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'periodic generation' (定期, 生成) implies a mechanic that triggers on a schedule or upon specific intervals, which is inherently a temporal/procedural mechanic rather than a flat stat bonus."
+      "entryId": "charm.surv-util-231",
+      "attempts": 1
     },
     "charm-species-demon.bluegargantuar": {
       "entryId": "charm.surv-util-047",
@@ -413,32 +378,20 @@
       "attempts": 2
     },
     "charm-species-demon.bucketdoom": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bucketdoom",
-      "attempts": 1,
-      "blockedReason": "The theme of 'destruction' and 'ashes' implies a high-impact, high-risk playstyle that often requires a drawback to balance the power, which is only available for 'signet' class charms. However, the prompt asks for a charm that can be 'shipped' (implying a balanced or desirable item), and signets are explicitly defined as having a drawback and rolling nothing, making them inherently less 'desirable' in a standard power-scaling sense. To maintain the integrity of the 'destruction/ash' motif without violating the 'no multipliers/percentages' rule, a standard charm is more appropriate for a balanced design."
+      "entryId": "charm.off-ctrl-308",
+      "attempts": 2
     },
     "charm-species-demon.bucketpaper": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bucketpaper",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs of 'popcorn' and 'newspaper' imply a chaotic or utility-based distraction/resource theme that does not align with the provided closed list of families."
+      "entryId": "charm.surv-util-233",
+      "attempts": 1
     },
     "charm-species-demon.bucketplant": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bucketplant",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs '坚硬' (hard), '植物' (plant), '融合' (fusion), '部分' (part), and '如' (like) require a complex interplay of material and form that cannot be fully expressed within the constraints of a single FLAT effect without violating the 'no multiplier/percentage' rule or the specific family list provided."
+      "entryId": "charm.surv-util-234",
+      "attempts": 1
     },
     "charm-species-demon.bucketzombieduck": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for bucketzombieduck",
-      "attempts": 1,
-      "blockedReason": "The theme 'easy' and 'don't want to' are abstract concepts that do not map to the provided list of physical/mechanical families or the required structural constraints of a charm."
+      "entryId": "charm.surv-util-235",
+      "attempts": 2
     },
     "charm-species-demon.bungizombie": {
       "entryId": "charm.surv-util-049",
@@ -449,20 +402,12 @@
       "attempts": 2
     },
     "charm-species-demon.cabbagecaltrop": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cabbagecaltrop",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'collecting' and 'landing' (gravity/impact) combined with 'zombie' and 'bullets' implies a cycle of resource gathering and heavy impact that is difficult to resolve into a single FLAT effect without violating the 'no multiplier' rule or the 'breadth vs depth' balance for this specific species' identity."
+      "entryId": "charm.off-ctrl-310",
+      "attempts": 1
     },
     "charm-species-demon.cabbagecannon": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-062",
-      "attempts": 1,
-      "defects": [
-        "duplicate name 'Cabbage Volley' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.off-ctrl-314",
+      "attempts": 1
     },
     "charm-species-demon.cabbagefume": {
       "entryId": "charm.off-ctrl-063",
@@ -473,13 +418,8 @@
       "attempts": 1
     },
     "charm-species-demon.cabbagenut": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.surv-util-051",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Cabbage Nut Shell' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.surv-util-237",
+      "attempts": 1
     },
     "charm-species-demon.cabbagepot": {
       "entryId": "charm.surv-util-052",
@@ -494,38 +434,20 @@
       "attempts": 1
     },
     "charm-species-demon.cabbageumbrella": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-066",
-      "attempts": 1,
-      "defects": [
-        "duplicate name 'Cabbage Launcher' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.off-ctrl-313",
+      "attempts": 1
     },
     "charm-species-demon.cacstusstar": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-067",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Star-Spined Starfruit' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.off-ctrl-316",
+      "attempts": 1
     },
     "charm-species-demon.cactus": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cactus",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'launching splintered shards' and 'kinetic energy' requires a multiplier or a strength value to represent the impact of the discharge, which is prohibited by the constraint 'It carries FLAT effects only — never a percentage, never a multiplier.'"
+      "entryId": "charm.surv-util-238",
+      "attempts": 1
     },
     "charm-species-demon.cactusblover": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-068",
-      "attempts": 1,
-      "defects": [
-        "duplicate name 'Emerald Shard Vortex' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-038",
+      "attempts": 1
     },
     "charm-species-demon.cactuscaltrop": {
       "entryId": "charm.off-ctrl-069",
@@ -544,56 +466,36 @@
       "attempts": 3
     },
     "charm-species-demon.cactusumbrella": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cactusumbrella",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme '防空' (anti-air/anti-projectile) implies a defensive utility that is inherently reactive or situational, which conflicts with the requirement that charms must apply 'flat effects' to 'every deployed actor' without being a percentage or multiplier. While 'survivability' is the closest axis, the specific 'anti-air' motif is difficult to express as a constant, non-scaling flat value for all actors without violating the 'breadth with depth' design philosophy or the 'no percentage' rule."
+      "entryId": "charm.econ-039",
+      "attempts": 1
     },
     "charm-species-demon.caltropfume": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-072",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Spore-Cloud Spore-Burst' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.surv-util-239",
+      "attempts": 1
     },
     "charm-species-demon.caltropkelp_land": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for caltropkelp_land",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'giving' (赋予) and 'attack' (攻击) via 'land' (陆地) and 'seaweed' (水草) suggests a complex interplay of life-giving and life-taking that is difficult to resolve into a single FLAT effect without violating the 'no multiplier' rule or the 'no number' rule."
+      "entryId": "charm.off-ctrl-317",
+      "attempts": 1
     },
     "charm-species-demon.caltropkelp_water": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for caltropkelp_water",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme requires 'attack' (offense) and 'giving/imparting' (buffing), but the provided list of families only offers 'offense' through 'precision' or 'deathblast' which are not thematic to 'water/seaweed', or 'utility/control' which lacks the 'attack' motif requested."
+      "entryId": "charm.surv-util-240",
+      "attempts": 1
     },
     "charm-species-demon.caltroppot": {
       "entryId": "charm.surv-util-055",
       "attempts": 2
     },
     "charm-species-demon.catapultzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for catapultzombie",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme requires 'backline' and 'throwing' mechanics which are not represented by the available 'always-on' family list provided."
+      "entryId": "charm.surv-util-241",
+      "attempts": 1
     },
     "charm-species-demon.cattailgirl": {
       "entryId": "charm.off-ctrl-072",
       "attempts": 2
     },
     "charm-species-demon.cattaillour": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cattaillour",
-      "attempts": 1,
-      "blockedReason": "The provided motifs '乌合之众' (rabble), '绒绒的' (fluffy), '僵尸' (zombie), '应对' (respond/cope), and '能够' (can/able) are descriptive themes for a species/unit rather than mechanical properties that fit the strict 'FLAT effects only' constraint of a charm without violating the 'no number/cost/strength' rule in a way that prevents valid generation. However, the prompt asks for a charm that expresses these motifs through material and form. I will attempt to map these to the allowed families."
+      "entryId": "charm.surv-util-242",
+      "attempts": 2
     },
     "charm-species-demon.cattailplant": {
       "entryId": "charm.off-ctrl-073",
@@ -612,20 +514,12 @@
       "attempts": 2
     },
     "charm-species-demon.cherrychomper": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrychomper",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs 'bomb' and 'release' imply a high-risk, high-reward mechanic or a triggered explosion, which conflicts with the 'FLAT effects only' constraint required for a charm."
+      "entryId": "charm.surv-util-243",
+      "attempts": 1
     },
     "charm-species-demon.cherryfume": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-077",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Cherry Burst Spore' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-040",
+      "attempts": 1
     },
     "charm-species-demon.cherrygatling": {
       "entryId": "charm.off-ctrl-078",
@@ -640,104 +534,68 @@
       "attempts": 2
     },
     "charm-species-demon.cherrymagnet": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrymagnet",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme requires 'explosion' and 'absorption' (attack/utility), but the provided list lacks a single family that combines both offensive explosion and resource absorption/conversion into a single flat effect without being a multiplier."
+      "entryId": "charm.surv-util-244",
+      "attempts": 1
     },
     "charm-species-demon.cherrymine": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrymine",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs of 'explosion' and 'utilization' require a high-impact or utility-based mechanic that conflicts with the 'flat effect only' constraint when trying to represent 'acceleration/ripening' (催熟) without using multipliers."
+      "entryId": "charm.econ-041",
+      "attempts": 1
     },
     "charm-species-demon.cherrynut": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrynut",
-      "attempts": 1,
-      "blockedReason": "The theme of 'obsession' and 'consuming everything' implies a high-risk/high-reward mechanic or a drawback that conflicts with the 'flat effects only' constraint for a standard charm, but as a signet, it could work. However, the prompt asks for one charm and the species leans into 'control' via the rhythmic, surging mass, but the 'consume everything' aspect is best represented by a signet."
+      "entryId": "charm.off-ctrl-318",
+      "attempts": 1
     },
     "charm-species-demon.cherrynutzombie": {
       "entryId": "charm.surv-util-056",
       "attempts": 2
     },
     "charm-species-demon.cherrypaperz95": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrypaperz95",
-      "attempts": 1,
-      "blockedReason": "The theme of 'Focus' and 'Do Not Disturb' implies a reduction in reactivity or a penalty to movement/action to represent concentration, which conflicts with the requirement for 'FLAT effects only' and the inability to use 'drawback' families for standard/minor charms."
+      "entryId": "charm.econ-042",
+      "attempts": 1
     },
     "charm-species-demon.cherrypaperzombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrypaperzombie",
-      "attempts": 1,
-      "blockedReason": "The theme of 'performing a silent, tragic monologue' and 'shifting silhouette' implies a character-driven or movement-based mechanic that does not translate to the required FLAT effect constraints for a commander's charm."
+      "entryId": "charm.surv-util-245",
+      "attempts": 1
     },
     "charm-species-demon.cherrypot": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrypot",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme requires '強化' (strengthen/reinforce) and '射手' (archer) which implies offensive precision, but the species' population is judged on spread across all five axes, making a single-axis focus difficult to balance without violating the 'flat effects only' rule for a single charm."
+      "entryId": "charm.econ-043",
+      "attempts": 1
     },
     "charm-species-demon.cherrypuff": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrypuff",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs 'explosion' and 'burst' imply a high-risk, high-reward mechanic that typically requires a multiplier or a damage-scaling effect, which is prohibited by the 'FLAT effects only' constraint."
+      "entryId": "charm.econ-044",
+      "attempts": 1
     },
     "charm-species-demon.cherrypumpkin": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrypumpkin",
-      "attempts": 1,
-      "blockedReason": "The theme requires 'immunity' and 'damage' (explosion) to be expressed in a single charm. In the provided schema, a charm applies flat effects to all actors. A single item cannot simultaneously provide a flat damage boost and a flat immunity/protection value without violating the 'breadth with depth' design philosophy or the 'flat effects only' constraint, as immunity is typically a conditional/reactive mechanic rather than a flat additive value."
+      "entryId": "charm.econ-045",
+      "attempts": 1
     },
     "charm-species-demon.cherryscaredy": {
       "entryId": "charm.off-ctrl-081",
       "attempts": 1
     },
     "charm-species-demon.cherryshooter": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherryshooter",
-      "attempts": 1,
-      "blockedReason": "The theme of 'bursting/expelling' and 'acidic juice' is best represented by 'volley' or 'death-salvo', but the prompt requires the charm to be a physical object (material and form) that applies flat effects. The provided list of families contains no 'acid' or 'projectile' specific families that fit the 'bursting' mechanic without being a multiplier or percentage, and the 'volley' family is a mechanic rather than a material description."
+      "entryId": "charm.econ-046",
+      "attempts": 1
     },
     "charm-species-demon.cherryshooterzombie": {
       "entryId": "charm.off-ctrl-082",
       "attempts": 2
     },
     "charm-species-demon.cherrysplit": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrysplit",
-      "attempts": 1,
-      "blockedReason": "The theme of 'explosive rupture' and 'ejecting shards' is inherently tied to high-impact offensive mechanics that do not map to the provided flat-effect family list without violating the 'no multipliers' or 'no percentage' constraints for a single charm's depth."
+      "entryId": "charm.econ-047",
+      "attempts": 1
     },
     "charm-species-demon.cherrysquash": {
       "entryId": "charm.off-ctrl-083",
       "attempts": 1
     },
     "charm-species-demon.cherrysubmarine": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrysubmarine",
-      "attempts": 1,
-      "blockedReason": "The motifs 'threat', 'nothingness', 'zombie', 'power', and 'discovery' are too contradictory for a single FLAT effect without violating the 'breadth with depth' constraint or the 'no multiplier' rule."
+      "entryId": "charm.econ-048",
+      "attempts": 1
     },
     "charm-species-demon.cherrytorch": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cherrytorch",
-      "attempts": 1,
-      "blockedReason": "The theme requires 'generation' (生成) and 'all field' (全场) effects, but the provided list of families lacks a 'generation' or 'summoning' mechanic that applies to all actors without being a 'summoner' type, and the species' lean toward 'utility' or 'economy' via generation is not represented by a single flat-effect family in the allowed list."
+      "entryId": "charm.econ-049",
+      "attempts": 1
     },
     "charm-species-demon.cherryultimatepumpkin": {
       "entryId": "charm.surv-util-057",
@@ -752,58 +610,36 @@
       "attempts": 2
     },
     "charm-species-demon.chomperpumpkin": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for chomperpumpkin",
-      "attempts": 1,
-      "blockedReason": "blocked: The provided motifs (digestion, helping, providing) are inherently supportive/utility-based, but the species '大嘴南瓜' (Big Mouth Pumpkin) is described as a demon species. In game design, a charm that provides 'help' or 'digestion' to allies is a utility/support item, which fits the 'utility' axis, but the prompt's constraints on 'flat effects only' and the specific theme of 'providing' via 'digestive fluid' makes it difficult to create a high-impact 'signet' without a drawback that contradicts the 'helping' motif. However, a standard utility charm is viable."
+      "entryId": "charm.econ-050",
+      "attempts": 1
     },
     "charm-species-demon.chompersquash": {
       "entryId": "charm.surv-util-059",
       "attempts": 2
     },
     "charm-species-demon.chrysantheautumn": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.(axis-group)-NNN for chrysantheautumn",
-      "attempts": 3,
-      "defects": [
-        "blocked: 'false' is too short to be a real reason — either explain concretely why the brief cannot be satisfied, or answer it instead"
-      ]
+      "entryId": "charm.econ-051",
+      "attempts": 1
     },
     "charm-species-demon.coachpaper": {
       "entryId": "charm.off-ctrl-085",
       "attempts": 2
     },
     "charm-species-demon.cobcannon": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cobcannon",
-      "attempts": 1,
-      "blockedReason": "blocked: The motif 'click' (点击) implies a trigger mechanism or a specific interaction that cannot be expressed through a flat, always-on effect without violating the 'no multiplier/percentage' rule or the 'flat effect only' constraint."
+      "entryId": "charm.econ-052",
+      "attempts": 1
     },
     "charm-species-demon.conezombieduck": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for conezombieduck",
-      "attempts": 1,
-      "blockedReason": "The motifs '不想' (unwillingness) and '差生' (underachiever) imply a lack of agency or a refusal to engage with mechanics, which conflicts with the requirement for a functional charm that applies effects to actors."
+      "entryId": "charm.econ-053",
+      "attempts": 1
     },
     "charm-species-demon.cornblover": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cornblover",
-      "attempts": 1,
-      "blockedReason": "The provided motifs (corn, provide, support, air, butter) imply a utility/support role, but the available 'Always-on families' list contains no specific 'utility' or 'support' tags that match the 'provide/support' concept without being tied to specific elements or combat mechanics (like 'atom.sust-freshgraft' or 'atom.econ-bounty'). However, since 'atom.econ-bounty' and 'atom.sust-freshgraft' are available, I will select the closest thematic fit for 'providing/supporting' via resource/sustenance mechanics."
+      "entryId": "charm.econ-054",
+      "attempts": 1
     },
     "charm-species-demon.corncabbage": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-086",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Golden Kernel Launcher' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-055",
+      "attempts": 1
     },
     "charm-species-demon.corncaltrop": {
       "entryId": "charm.off-ctrl-087",
@@ -822,24 +658,16 @@
       "attempts": 1
     },
     "charm-species-demon.cornpuff": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-091",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Spore-Pod Launcher' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-057",
+      "attempts": 1
     },
     "charm-species-demon.cornpult": {
       "entryId": "charm.off-ctrl-092",
       "attempts": 1
     },
     "charm-species-demon.cornumbrella": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for cornumbrella",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs '击退' (knockback) and '并定' (fixation/immobilization) are mutually exclusive in a single flat effect charm, as one implies movement and the other implies the prevention of movement."
+      "entryId": "charm.econ-058",
+      "attempts": 1
     },
     "charm-species-demon.dancepolzombie2": {
       "entryId": "charm.surv-util-060",
@@ -850,29 +678,16 @@
       "attempts": 2
     },
     "charm-species-demon.deathmine": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.(axis-group)-NNN for deathmine",
-      "attempts": 3,
-      "defects": [
-        "families: 'atom.atom.gravemaking' is not an always-on family in the brief's closed list — copy an id from the list exactly as printed"
-      ]
+      "entryId": "charm.econ-059",
+      "attempts": 1
     },
     "charm-species-demon.diamondimitater": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for diamondimitater",
-      "attempts": 1,
-      "blockedReason": "The motifs '出货' (mass production/output), '惹出' (provocation), and '祸' (calamity) imply a high-risk, high-reward mechanic or a chaotic spread of effects. Since charms are restricted to FLAT effects only and cannot use multipliers or percentages, the thematic weight of 'calamity' and 'mass output' cannot be fully realized without violating the constraint against scaling/percentage-based mechanics."
+      "entryId": "charm.econ-060",
+      "attempts": 1
     },
     "charm-species-demon.diamondpotatonut": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.surv-util-062",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Diamond Nut Shell' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-061",
+      "attempts": 1
     },
     "charm-species-demon.diamondrandomzombie": {
       "entryId": "charm.econ-024",
@@ -887,25 +702,16 @@
       "attempts": 2
     },
     "charm-species-demon.dolphinpeazombie": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for dolphinpeazombie",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs 'white dolphin' and 'launch/fire' imply a projectile or kinetic movement that conflicts with the 'flat effect only' constraint when trying to express 'rotation' and 'answer' through material form without using multipliers or percentages."
+      "entryId": "charm.econ-063",
+      "attempts": 1
     },
     "charm-species-demon.dolphinrider": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for dolphinrider",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs of 'zombie' and 'aquarium' imply a decay or preservation mechanic that does not align with the provided list of families for a single charm."
+      "entryId": "charm.econ-064",
+      "attempts": 1
     },
     "charm-species-demon.doomblover": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomblover",
-      "attempts": 1,
-      "blockedReason": "blocked: The motifs 'damage' and 'release' imply offensive mechanics that cannot be expressed through the 'FLAT effects only' constraint required for a charm."
+      "entryId": "charm.econ-065",
+      "attempts": 1
     },
     "charm-species-demon.doomcabbage": {
       "entryId": "charm.off-ctrl-094",
@@ -924,52 +730,32 @@
       "attempts": 2
     },
     "charm-species-demon.doomfume": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomfume",
-      "attempts": 1,
-      "blockedReason": "The theme of '毁灭' (destruction) and '整行' (full line/row) implies a high-impact, area-of-effect or multi-target mechanic that typically requires a multiplier or percentage-based scaling to be effective in gameplay, which violates the 'FLAT effects only' constraint."
+      "entryId": "charm.econ-066",
+      "attempts": 1
     },
     "charm-species-demon.doomgarlic": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomgarlic",
-      "attempts": 1,
-      "blockedReason": "The motifs '咬者' (biter), '啃' (gnaw), and '爆' (burst) imply a high-impact, reactive, or offensive mechanic that typically requires multipliers or scaling to feel impactful, which contradicts the 'FLAT effects only' constraint for charms."
+      "entryId": "charm.econ-067",
+      "attempts": 1
     },
     "charm-species-demon.doomgatling": {
-      "terminalSchemaVersion": 1,
-      "outcome": "escalated",
-      "entryId": "charm.off-ctrl-098",
-      "attempts": 2,
-      "defects": [
-        "duplicate name 'Spore Volleyer' within existing corpus; kept 'existing corpus'"
-      ]
+      "entryId": "charm.econ-068",
+      "attempts": 1
     },
     "charm-species-demon.doomjalapeno": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomjalapeno",
-      "attempts": 1,
-      "blockedReason": "The brief requires 'explosion' and 'burning' motifs, which inherently favor high-impact offensive or area-denial mechanics. However, the 'closed lists' provided for families and effects are strictly limited to static buffs (flat values) and do not include 'explosion' or 'burst' mechanics, making it impossible to represent the core motif of the brief within the provided schema."
+      "entryId": "charm.econ-069",
+      "attempts": 1
     },
     "charm-species-demon.doomkelp": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomkelp",
-      "attempts": 1,
-      "blockedReason": "The theme of 'destruction' and 'entwining' implies a high-impact, potentially debuff-oriented or high-damage mechanic, but the 'flat effects only' constraint for a commander-wide charm limits the ability to express 'destruction' (which usually implies scaling or reduction) without violating the 'no multipliers' rule or the 'breadth with depth' design philosophy."
+      "entryId": "charm.econ-070",
+      "attempts": 1
     },
     "charm-species-demon.doommelon": {
       "entryId": "charm.off-ctrl-099",
       "attempts": 1
     },
     "charm-species-demon.doomnut": {
-      "terminalSchemaVersion": 1,
-      "outcome": "blocked",
-      "entryId": "charm.(axis-group)-NNN for doomnut",
-      "attempts": 1,
-      "blockedReason": "The theme of 'preventing explosion' (防爆) and 'storing power' (蕴藏) is best expressed through survivability, but the provided list lacks a specific 'explosion-prevention' or 'containment' family that isn't strictly defensive (like plating or warding). However, 'atom.carapace' and 'atom.arm-hardening' can represent the physical shell, and 'atom.sust-grit' represents the endurance of the core."
+      "entryId": "charm.econ-071",
+      "attempts": 1
     },
     "charm-species-demon.doompaper": {
       "entryId": "charm.off-ctrl-100",
@@ -985,10 +771,12 @@
     },
     "charm-species-demon.doompumpkin": {
       "terminalSchemaVersion": 1,
-      "outcome": "blocked",
+      "outcome": "escalated",
       "entryId": "charm.(axis-group)-NNN for doompumpkin",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'destruction' and 'power' implies high-impact effects that often require multipliers or scaling, which contradicts the 'FLAT effects only' constraint for a charm."
+      "attempts": 3,
+      "defects": [
+        "response was not a JSON object"
+      ]
     },
     "charm-species-demon.doomseashroom": {
       "entryId": "charm.off-ctrl-103",
@@ -996,17 +784,21 @@
     },
     "charm-species-demon.doomseed": {
       "terminalSchemaVersion": 1,
-      "outcome": "blocked",
+      "outcome": "escalated",
       "entryId": "charm.(axis-group)-NNN for doomseed",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'growth' and 'explosion' (引爆, 成长) inherently implies a scaling or multiplicative effect in gameplay mechanics, which violates the 'FLAT effects only' constraint for charms."
+      "attempts": 3,
+      "defects": [
+        "response was not a JSON object"
+      ]
     },
     "charm-species-demon.doomshroom": {
       "terminalSchemaVersion": 1,
-      "outcome": "blocked",
+      "outcome": "escalated",
       "entryId": "charm.(axis-group)-NNN for doomshroom",
-      "attempts": 1,
-      "blockedReason": "The theme of 'destruction' and 'annihilation' is inherently offensive/utility-based, but the requirement for 'flat effects only' makes it difficult to represent 'destruction' (which usually implies a reduction or a scaling damage) without violating the 'no multipliers/percentages' rule or the 'breadth with depth' design philosophy."
+      "attempts": 3,
+      "defects": [
+        "response was not a JSON object"
+      ]
     },
     "charm-species-demon.doomsniper": {
       "entryId": "charm.off-ctrl-104",
@@ -1018,10 +810,12 @@
     },
     "charm-species-demon.doomstar": {
       "terminalSchemaVersion": 1,
-      "outcome": "blocked",
+      "outcome": "escalated",
       "entryId": "charm.(axis-group)-NNN for doomstar",
-      "attempts": 1,
-      "blockedReason": "The theme of 'destruction' and 'crashing' implies a high-impact, high-damage profile that conflicts with the 'flat effect' constraint of a charm, as such motifs are traditionally scaled by power or magnitude."
+      "attempts": 3,
+      "defects": [
+        "response was not a JSON object"
+      ]
     },
     "charm-species-demon.doomsunflower": {
       "entryId": "charm.off-ctrl-106",
@@ -1045,10 +839,12 @@
     },
     "charm-species-demon.doublepuff": {
       "terminalSchemaVersion": 1,
-      "outcome": "blocked",
+      "outcome": "escalated",
       "entryId": "charm.(axis-group)-NNN for doublepuff",
-      "attempts": 1,
-      "blockedReason": "blocked: The theme of 'small' and 'pea-like' projectiles is inherently tied to high-frequency, low-impact single-target or small-area effects, which conflicts with the requirement for 'breadth' (applying to every deployed actor) without violating the 'FLAT effects only' rule."
+      "attempts": 3,
+      "defects": [
+        "response was not a JSON object"
+      ]
     },
     "charm-species-demon.doubleshooter": {
       "terminalSchemaVersion": 1,
@@ -4240,6 +4036,788 @@
     "charm-species-demon.threetorch": {
       "entryId": "charm.off-ctrl-260",
       "attempts": 2
+    },
+    "charm-species-demon.thronsaloes": {
+      "entryId": "charm.off-ctrl-261",
+      "attempts": 2
+    },
+    "charm-species-demon.torchfirenut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for torchfirenut",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '区别' (distinction) and '汇聚' (convergence) imply a complex structural duality or a shifting state that cannot be represented by a single 'FLAT' effect without violating the core design principle of depth vs breadth."
+    },
+    "charm-species-demon.torchfirepumpkin": {
+      "entryId": "charm.surv-util-194",
+      "attempts": 2
+    },
+    "charm-species-demon.torchfume": {
+      "entryId": "charm.off-ctrl-262",
+      "attempts": 1
+    },
+    "charm-species-demon.torchmine": {
+      "entryId": "charm.surv-util-195",
+      "attempts": 2
+    },
+    "charm-species-demon.torchpumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for torchpumpkin",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs of 'torch' and 'flame' require an elemental fire component, but the 'pumpkin' and 'stump' motifs imply a biological/growth component that cannot be fully reconciled within the provided 'always-on' family list without violating the 'one charm' constraint or the 'flat effect' rule for a single species theme."
+    },
+    "charm-species-demon.torchseashroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for torchseashroom",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme 'repeatedly' (反复) and 'absorbing' (吸纳) implies a mechanic of accumulation or cycling that cannot be expressed through a single FLAT effect without violating the 'no multiplier/percentage' rule or the 'breadth with depth' design philosophy."
+    },
+    "charm-species-demon.torchspike": {
+      "entryId": "charm.off-ctrl-263",
+      "attempts": 2
+    },
+    "charm-species-demon.torchsunflower": {
+      "entryId": "charm.off-ctrl-264",
+      "attempts": 2
+    },
+    "charm-species-demon.torchwood": {
+      "entryId": "charm.off-ctrl-265",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_bigsunshroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_bigsunshroom",
+      "attempts": 1,
+      "blockedReason": "The theme of 'mass production' and 'accumulation' is best expressed through economy or utility, but the provided list of families focuses heavily on combat stats, defense, or specific elemental buffs, making it difficult to represent 'value increase' or 'batch production' without violating the 'flat effect only' rule or using a non-existent economy family."
+    },
+    "charm-species-demon.tower_cherrychomper": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_cherrychomper",
+      "attempts": 1,
+      "blockedReason": "The theme of 'releasing' and 'explosive' motifs is best represented by a high-impact offensive effect, but the species' core identity as a 'swallower' (吞食) and 'zombie' (僵尸) theme implies a need for high-frequency or death-triggered mechanics. A single flat effect cannot capture the 'release' (释放) of a 'bomb' (炸弹) without violating the 'no multiplier/percentage' rule or the 'flat effect only' constraint, as explosions are inherently scaling or area-of-effect in nature."
+    },
+    "charm-species-demon.tower_cherryshooter": {
+      "entryId": "charm.off-ctrl-266",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_doomfume": {
+      "entryId": "charm.off-ctrl-267",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_doomstar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_doomstar",
+      "attempts": 1,
+      "blockedReason": "The provided motifs (meteor, impact, destruction) are inherently offensive/damage-oriented, but the species '毁灭杨桃[塔防]' (Destruction Starfruit [Tower Defense]) implies a defensive/stationary role. However, the prompt asks for a charm for the species, and the motifs are strictly offensive. I will proceed with an offense-leaning charm as the motifs dictate the item's nature."
+    },
+    "charm-species-demon.tower_electriconion": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-268",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Conductive Bulb' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.tower_gravebuster": {
+      "entryId": "charm.surv-util-196",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_iceblover": {
+      "entryId": "charm.off-ctrl-269",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_icegloom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-270",
+      "attempts": 3,
+      "defects": [
+        "duplicate name 'Frost-Mist Spore' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.tower_lilypad": {
+      "entryId": "charm.surv-util-197",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_peapuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-270",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Sprout-Shot Spore' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.tower_peasunflower": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-271",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Solar Volley' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.tower_scaredyfume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_scaredyfume",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme 'close-range' (近程) and 'smoke/spores' (烟雾/孢子) implies a debuff or area-of-effect mechanic that typically requires percentage-based scaling or complex proximity logic, which conflicts with the 'FLAT effects only' constraint."
+    },
+    "charm-species-demon.tower_squashnut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_squashnut",
+      "attempts": 1,
+      "blockedReason": "The theme of 'learning' (学) and 'defense/nut' (坚果/窝瓜) implies a utility or control function, but the provided list lacks a 'utility' or 'control' family that fits the 'learning/study' motif without being strictly defensive or economic. However, I can map the 'nut/shell' to 'carapace' and 'learning' to 'precision' to create a valid charm."
+    },
+    "charm-species-demon.tower_starnut": {
+      "entryId": "charm.off-ctrl-272",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_sunmine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-273",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Solar Spud Detonator' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.tower_sunshroom": {
+      "entryId": "charm.econ-034",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_threemine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_threemine",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme of 'rest/recovery' (休整) and 'launching' (发射) implies a cycle of cooldowns or timing-based mechanics, which are inherently non-flat or temporal, making it difficult to express purely through the required FLAT effect constraint without losing the essence of the motif."
+    },
+    "charm-species-demon.tower_watercan": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for tower_watercan",
+      "attempts": 1,
+      "blockedReason": "The theme of 'rebound/back-and-forth' (来回) and 'projectile trajectory' (弹射) implies complex movement or multi-hit mechanics which are difficult to express as a single FLAT effect without violating the 'breadth with depth' constraint or requiring a multiplier."
+    },
+    "charm-species-demon.trainingdummy": {
+      "entryId": "charm.off-ctrl-274",
+      "attempts": 2
+    },
+    "charm-species-demon.treasuremine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for treasuremine",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme of 'searching/busy' and 'buried' implies a trade-off between finding value and being distracted/stationary, but the provided list lacks a 'drawback' family that fits a 'busy/distracted' or 'buried/immobile' mechanic for a signet."
+    },
+    "charm-species-demon.twinmarigold": {
+      "entryId": "charm.econ-035",
+      "attempts": 1
+    },
+    "charm-species-demon.twinshulk": {
+      "entryId": "charm.off-ctrl-275",
+      "attempts": 1
+    },
+    "charm-species-demon.ulti_cherrygatling": {
+      "entryId": "charm.surv-util-198",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatebamboo": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-199",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spruce Bastion' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.ultimatebigchomper": {
+      "entryId": "charm.surv-util-200",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatebiggatling": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatebiggatling",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme '越战越勇' (getting stronger as the battle continues) implies a scaling or cumulative effect, which is prohibited by the 'FLAT effects only' rule."
+    },
+    "charm-species-demon.ultimatebigsniper": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatebigsniper",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme '越战越勇' (getting stronger as the battle progresses) implies a scaling or multiplier effect, which is prohibited by the 'FLAT effects only' constraint."
+    },
+    "charm-species-demon.ultimateblover": {
+      "entryId": "charm.surv-util-201",
+      "attempts": 3
+    },
+    "charm-species-demon.ultimatecabbage": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatecabbage",
+      "attempts": 1,
+      "blockedReason": "blocked: The requested motifs (summon, periodic, burn, field-wide) require complex temporal and area-of-effect mechanics that violate the 'FLAT effects only' and 'no multiplier' constraints of the charm system."
+    },
+    "charm-species-demon.ultimatecabbagecannon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatecabbagecannon",
+      "attempts": 1,
+      "blockedReason": "The provided list of families does not contain a specific 'subspecies' or 'vegetable' family to represent the '亚种' (subspecies) and '卷心菜' (cabbage) motifs accurately."
+    },
+    "charm-species-demon.ultimatecactus": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatecactus",
+      "attempts": 1,
+      "blockedReason": "blocked: The motif '铺天盖地' (overwhelming/covering the sky) and '出场' (entrance/arrival) implies a massive, area-of-effect burst or a persistent overwhelming presence. In a system where charms only provide FLAT effects to all deployed actors, a single charm cannot effectively capture the 'overwhelming' scale of a massive eruption without violating the 'no multiplier/no percentage' rule or the 'flat effect' constraint for breadth-based power."
+    },
+    "charm-species-demon.ultimatecannon": {
+      "entryId": "charm.off-ctrl-276",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatecattail": {
+      "entryId": "charm.off-ctrl-277",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatechomper": {
+      "entryId": "charm.surv-util-202",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecorn": {
+      "entryId": "charm.off-ctrl-278",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecornfume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatecornfume",
+      "attempts": 1,
+      "blockedReason": "The theme of 'command' and 'bursting' implies a synergy of movement and force that requires complex scaling or multi-actor triggers, which contradicts the 'FLAT effects only' constraint for a single charm."
+    },
+    "charm-species-demon.ultimatedolphin": {
+      "entryId": "charm.off-ctrl-279",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatedoomgatling": {
+      "entryId": "charm.off-ctrl-280",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatedoomscaredy": {
+      "entryId": "charm.off-ctrl-281",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateendoflamezombie": {
+      "entryId": "charm.surv-util-203",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateexplodecannon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimateexplodecannon",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme of 'drawing out' (引出) and 'power/impact' (威力) implies a mechanism of deployment or recoil management that is best expressed through mechanical interaction or kinetic energy, which is difficult to map to the provided 'flat effect' constraints without violating the 'no multiplier' rule for damage-oriented themes."
+    },
+    "charm-species-demon.ultimatefireseashroom": {
+      "entryId": "charm.off-ctrl-282",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatefly": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatefly",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme of 'penetration' and 'high-tech' is best expressed through 'elpw-pierce' or 'prec-focus' families, but the prompt requires a single charm. A signet would be required to balance the high-tech offensive nature with a drawback, but the prompt asks for a single charm and the species leans into offense. However, the provided list of families does not contain a 'high-tech' or 'laser' specific family that isn't tied to an element or a specific mechanic like 'precision' or 'pierce'. Given the constraints, I will provide a standard offense charm."
+    },
+    "charm-species-demon.ultimatefootballdrown": {
+      "entryId": "charm.off-ctrl-283",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatefootballzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatefootballzombie",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '坐困愁城' (trapped in a besieged city) and '尸山血海' (mountains of corpses and seas of blood) imply a theme of desperate survival and attrition that is best expressed through high-risk/high-reward mechanics or complex scaling, which conflicts with the 'FLAT effects only' restriction for a single charm."
+    },
+    "charm-species-demon.ultimatefume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatefume",
+      "attempts": 1,
+      "blockedReason": "The requested motifs (slow, spray, cold, continuous, whole row) require a combination of 'control' and 'offense' that exceeds the 'flat effect only' constraint for a single charm, as 'continuous' and 'whole row' imply complex area-of-effect or duration mechanics rather than a simple static value."
+    },
+    "charm-species-demon.ultimategargantuar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimategargantuar",
+      "attempts": 1,
+      "blockedReason": "The motifs 'water and fire' (水深火热) and 'zombie' (僵尸) imply a state of suffering or undeath that conflicts with the 'rock-solid' (坚如磐石) and 'center' (中心) stability required for a single cohesive charm without violating the 'flat effect' constraint for a species that leans into survivability."
+    },
+    "charm-species-demon.ultimategarlicsplit": {
+      "entryId": "charm.off-ctrl-284",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimategatling": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimategatling",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme requires 'explosion' and 'four shots' which implies a high-impact offensive mechanic, but the provided list of families lacks a direct 'burst' or 'multi-shot' mechanic that isn't tied to a specific element or a single-use 'death-salvo' effect, making a balanced 'breadth with depth' charm difficult without violating the 'no multipliers' rule."
+    },
+    "charm-species-demon.ultimategatlingblover": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimategatlingblover",
+      "attempts": 1,
+      "blockedReason": "blocked: The motif '提升' (increase) is inherently multiplicative or additive in value, which contradicts the constraint that charms can only carry FLAT effects."
+    },
+    "charm-species-demon.ultimategloom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimategloom",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '体内' (internal/inside) and '封印' (seal) imply a containment or internal mechanism that is difficult to translate into a single flat effect without violating the 'breadth with depth' rule or the 'no multipliers' constraint for a single charm."
+    },
+    "charm-species-demon.ultimategoldgargantuar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimategoldgargantuar",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '震天撼地' (earth-shaking) and '分身' (clones/multiplicity) imply scale and quantity that cannot be expressed through the required 'FLAT effects only' constraint without violating the core design principle of the charm."
+    },
+    "charm-species-demon.ultimatehelmetgatling": {
+      "entryId": "charm.off-ctrl-285",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehorse": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatehorse",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs of 'subordinates' and 'struggle' imply a command structure that requires a specific mechanical interaction with units, which conflicts with the 'FLAT effects only' constraint for a single charm."
+    },
+    "charm-species-demon.ultimatehorse2": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatehorse2",
+      "attempts": 1,
+      "blockedReason": "The theme of 'unyielding dominance' and 'impenetrable defense' requires a signet-class item to properly convey the weight of 'mastery' and 'solemnity' without diluting the impact through standard scaling."
+    },
+    "charm-species-demon.ultimatehugenut": {
+      "entryId": "charm.surv-util-204",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatehypno": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatehypno",
+      "attempts": 1,
+      "blockedReason": "The theme of 'utilization' and 'digestion' implies a cycle of consumption and resource gain that is not represented by the provided family list."
+    },
+    "charm-species-demon.ultimatehypnodoom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-286",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore-Bound Husk' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.ultimatehypnopumpkin": {
+      "entryId": "charm.surv-util-205",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateicedoom": {
+      "entryId": "charm.off-ctrl-286",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateiceshroom": {
+      "entryId": "charm.off-ctrl-287",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateiceshroom2": {
+      "entryId": "charm.off-ctrl-288",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateimpking": {
+      "entryId": "charm.surv-util-206",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejackboxzombie": {
+      "entryId": "charm.surv-util-207",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejacksondriver": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatejacksondriver",
+      "attempts": 1,
+      "blockedReason": "The theme of 'building/scaffolding' and 'zombie/undead' implies a physical presence that is too large for a standard charm, or a mechanical complexity that requires a multiplier to feel impactful, which violates the FLAT effect constraint."
+    },
+    "charm-species-demon.ultimatejalanut": {
+      "entryId": "charm.surv-util-208",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejalapeno": {
+      "entryId": "charm.off-ctrl-289",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejalapuff": {
+      "entryId": "charm.surv-util-209",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatekelp": {
+      "entryId": "charm.econ-036",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatekirovzombie": {
+      "entryId": "charm.surv-util-210",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatelanternsplit": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatelanternsplit",
+      "attempts": 1,
+      "blockedReason": "The brief requires the motif '湮灭' (annihilation) and '目标' (target) to be expressed through material and form. In the provided schema, 'annihilation' implies a destructive effect, while 'target' implies precision/focus. However, the constraints for a charm require 'FLAT effects only' and 'never a multiplier'. In game design logic, 'annihilation' is typically a scaling/multiplier effect (e.g., % damage) or a high-impact single-target effect, which conflicts with the 'breadth with depth' requirement of a charm that applies to 'every deployed actor' via flat values. Furthermore, the provided list of families contains no 'annihilation' or 'target-seeking' mechanics that function as flat buffs to all actors without being multipliers or scaling values."
+    },
+    "charm-species-demon.ultimatelegionzombie": {
+      "entryId": "charm.surv-util-211",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatelunarcabbage": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-212",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Solar Cabbage Core' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.ultimatemachinenut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatemachinenut",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme requires 'all-field' (全场) and 'repayment/feedback' (反哺) effects, but the provided list only contains 'flat' effects for individual actors or specific mechanics, and the species' 'massive' (庞大) and 'damage absorption' (承伤) motifs are best expressed through survivability, which conflicts with the 'breadth vs depth' constraint when trying to implement a global feedback loop within the strict 'flat effect only' rule."
+    },
+    "charm-species-demon.ultimatemachinenutzombie": {
+      "entryId": "charm.surv-util-213",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatemagnet": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatemagnet",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme requires 'attraction' and 'absorption' (control/utility) alongside 'damage' (offense), but the provided list lacks a single family that combines these specific mechanics into a single charm without violating the 'FLAT effects only' rule or the 'one family' constraint for signets."
+    },
+    "charm-species-demon.ultimatemelon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatemelon",
+      "attempts": 1,
+      "blockedReason": "The motifs 'scattering' and 'splitting' are inherently tied to 'volley' or 'salvo' mechanics, which are resolved as strength/numbers, but the prompt requires a FLAT effect for a charm. While 'atom.deathblast.salvo' or 'atom.volley' are the closest thematic matches, they are not listed as 'always-on families' for charms in the provided schema, only as potential effects. However, looking at the provided list, 'atom.volley' is a valid family ID. I will use it to represent the 'scattering/throwing' motif."
+    },
+    "charm-species-demon.ultimatemeloncannon": {
+      "entryId": "charm.off-ctrl-290",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatemelonpuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatemelonpuff",
+      "attempts": 1,
+      "blockedReason": "The theme '投出' (launching/throwing) implies a projectile or kinetic action that is inherently offensive or utility-based, but the provided list of families lacks a 'projectile' or 'launch' mechanic. All available families are either defensive, elemental, or status-based, making it impossible to express the core 'throwing' motif through the allowed 'always-on' family mechanics without violating the brief's constraint to only use provided IDs."
+    },
+    "charm-species-demon.ultimateminigun": {
+      "entryId": "charm.off-ctrl-291",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepaperzombie": {
+      "entryId": "charm.surv-util-214",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateplantern": {
+      "entryId": "charm.surv-util-215",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepoisonfume": {
+      "entryId": "charm.off-ctrl-292",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateportalnut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimateportalnut",
+      "attempts": 1,
+      "blockedReason": "blocked: The motif '化险为夷' (turning danger into safety) implies a reactive or defensive mechanism that is difficult to express with only 'FLAT effects' without violating the 'never a multiplier' rule or the 'breadth with depth' constraint in a way that feels like a simple stat buff."
+    },
+    "charm-species-demon.ultimateportalsniper": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for ultimateportalsniper",
+      "attempts": 3,
+      "defects": [
+        "families: 'atom.atom.flash-freeze' is not an always-on family in the brief's closed list — copy an id from the list exactly as printed",
+        "drawback.family: 'atom.atom.flash-freeze' is not a family in the brief's closed list",
+        "CharmSignetHasNoDrawback: class 'signet' must carry an authored negative atom"
+      ]
+    },
+    "charm-species-demon.ultimatepotatonut": {
+      "entryId": "charm.surv-util-216",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepumpkin": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatepumpkin",
+      "attempts": 1,
+      "blockedReason": "The brief requires a flat effect for 'damage' (伤害) and 'half' (减半). In game design, 'damage' is a variable value, and 'half' is a multiplier. Since the instructions strictly forbid multipliers and require flat effects only, a charm cannot mathematically express 'half damage' or 'damage' as a flat value without violating the core constraints of the schema."
+    },
+    "charm-species-demon.ultimateredlunar": {
+      "entryId": "charm.surv-util-217",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateseashroom": {
+      "entryId": "charm.off-ctrl-293",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesnipergatling": {
+      "entryId": "charm.off-ctrl-294",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesnowgatlingpuff": {
+      "entryId": "charm.off-ctrl-295",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesnowzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatesnowzombie",
+      "attempts": 1,
+      "blockedReason": "The provided motifs (Unknown, Artificial, Goodbye, Sharp Blade, Sculpted) are highly evocative but the constraint to use ONLY the provided closed lists for all values makes it impossible to represent the specific"
+    },
+    "charm-species-demon.ultimatespring": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatespring",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme of 'continuous' (持续) and 'fire sea' (火海) implies area-of-effect or damage-over-time mechanics, which are inherently non-flat or multiplier-based in game design, making it difficult to represent purely through 'flat' effects without violating the constraint of depth vs breadth."
+    },
+    "charm-species-demon.ultimatespruce": {
+      "entryId": "charm.surv-util-218",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatestar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatestar",
+      "attempts": 1,
+      "blockedReason": "blocked: The motif of 'periodic' (定期) and 'control' (掌握) implies a mechanic that is inherently time-based or conditional, which conflicts with the requirement for 'FLAT effects only' and the restriction against complex resolution logic in this specific prompt structure."
+    },
+    "charm-species-demon.ultimatestartorch": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatestartorch",
+      "attempts": 1,
+      "blockedReason": "blocked: The provided motifs (subspecies, include, molded, bullet, spike) describe a physical object/form rather than a mechanical effect, and the species' leanings are not explicitly defined in the brief to select a single axis."
+    },
+    "charm-species-demon.ultimatesunflower": {
+      "entryId": "charm.off-ctrl-296",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesungatlingpuff": {
+      "entryId": "charm.surv-util-219",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesunmagnet": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatesunmagnet",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme requires 'damage' and 'power' (buffs), but the charm must only carry FLAT effects. While 'damage' is a result of power, a charm cannot directly 'add damage' to an actor's base stat without being a multiplier or a specific combat trigger, which violates the 'FLAT effects only' constraint for a breadth-based charm."
+    },
+    "charm-species-demon.ultimatesunnut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimatesunnut",
+      "attempts": 1,
+      "blockedReason": "blocked: The motif of 'extraction' (榨取) and 'accelerated growth' (催生) implies a parasitic or life-draining mechanic that would require a negative effect or a percentage-based drain, which violates the 'FLAT effects only' constraint for a charm."
+    },
+    "charm-species-demon.ultimateswordzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for ultimateswordzombie",
+      "attempts": 1,
+      "blockedReason": "The theme 'Unfading' (不化) and 'Ascended' (得道) implies a state of permanent existence or immortality, which conflicts with the mechanical necessity of 'drawback' in a signet or the 'flat effect' limitation of a charm if it were to represent an infinite scaling of power. However, the prompt asks for a charm, and a standard charm is allowed. I will provide a standard charm that captures the 'strange' and 'card' motifs."
+    },
+    "charm-species-demon.ultimatetallnut": {
+      "entryId": "charm.surv-util-220",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatetorch": {
+      "entryId": "charm.off-ctrl-297",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatewintermelon": {
+      "entryId": "charm.off-ctrl-298",
+      "attempts": 1
+    },
+    "charm-species-demon.ultiwatergargantuar": {
+      "entryId": "charm.surv-util-221",
+      "attempts": 1
+    },
+    "charm-species-demon.umbrellaleaf": {
+      "entryId": "charm.surv-util-222",
+      "attempts": 1
+    },
+    "charm-species-demon.umbrellapot": {
+      "entryId": "charm.surv-util-223",
+      "attempts": 1
+    },
+    "charm-species-demon.vectorplant": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for vectorplant",
+      "attempts": 1,
+      "blockedReason": "The theme of 'crowding' and 'zombies' implies a chaotic or overwhelming presence that conflicts with the 'flat effect' requirement for a single, cohesive charm without a multiplier or percentage."
+    },
+    "charm-species-demon.voodoodollzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for voodoodollzombie",
+      "attempts": 1,
+      "blockedReason": "The theme of 'material and form' (burlap, twine, straw, needles) is inherently structural and physical, making it difficult to map to the provided list of abstract mechanical families without violating the 'flat effects only' and 'no multipliers' constraints while maintaining the thematic essence of a 'macabre art project' made of scrap fabric."
+    },
+    "charm-species-demon.wallnutzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for wallnutzombie",
+      "attempts": 1,
+      "blockedReason": "blocked: The theme 'possible' (可能) is too abstract for a FLAT effect charm without a specific mechanical trigger or state."
+    },
+    "charm-species-demon.wateraloes": {
+      "entryId": "charm.off-ctrl-299",
+      "attempts": 2
+    },
+    "charm-species-demon.waterballista": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for waterballista",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '僵尸' (zombie/undead) and '冻结' (freeze) require specific family tags like 'atom.gravemaking' or 'atom.flash-freeze' which are mutually exclusive in a single charm's thematic depth for this species' specific combat role."
+    },
+    "charm-species-demon.waterbamboo": {
+      "entryId": "charm.off-ctrl-300",
+      "attempts": 2
+    },
+    "charm-species-demon.waterfurnace": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for waterfurnace",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs 'absorption' and 'furnace/stove' imply a cycle of consumption and heat that would require complex scaling or percentage-based mechanics to feel impactful, which violates the FLAT effect constraint."
+    },
+    "charm-species-demon.waterjackboxjumpzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for waterjackboxjumpzombie",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs 'use' and 'do' imply active player agency or complex conditional logic which cannot be expressed through a single flat effect in a charm."
+    },
+    "charm-species-demon.watershulk": {
+      "entryId": "charm.off-ctrl-301",
+      "attempts": 1
+    },
+    "charm-species-demon.waterspruce": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-302",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Glacial Volley' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.wheat": {
+      "entryId": "charm.surv-util-224",
+      "attempts": 1
+    },
+    "charm-species-demon.whitefootball": {
+      "entryId": "charm.surv-util-225",
+      "attempts": 2
+    },
+    "charm-species-demon.wintermelon": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for wintermelon",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '施加' (apply) and '出' (exit/out) imply an active effect or a projectile/burst mechanic, which contradicts the 'FLAT effects only' constraint for a charm."
+    },
+    "charm-species-demon.xxspot": {
+      "entryId": "charm.off-ctrl-302",
+      "attempts": 1
+    },
+    "charm-species-demon.yellowfootball": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for yellowfootball",
+      "attempts": 1,
+      "blockedReason": "The theme of 'using oneself' (利用自身) and 'moving forward' (前进) implies a sacrifice or a momentum-based mechanic that is difficult to express with purely FLAT effects without violating the 'no multiplier' rule or the 'no cost' rule in a way that feels balanced."
+    },
+    "charm-species-demon.yellowgargantuar": {
+      "entryId": "charm.surv-util-226",
+      "attempts": 2
+    },
+    "charm-species-demon.zombie9527": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for zombie9527",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs '爱好者' (hobbyist) and '人类' (human) imply a specific cultural/lifestyle connection that is difficult to express through the provided rigid mechanical families without violating the 'flat effect' or 'species lean' constraints."
+    },
+    "charm-species-demon.zombieboss": {
+      "entryId": "charm.surv-util-227",
+      "attempts": 2
+    },
+    "charm-species-demon.zombieboss2": {
+      "entryId": "charm.surv-util-228",
+      "attempts": 2
+    },
+    "charm-species-demon.zombieduck": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for zombieduck",
+      "attempts": 1,
+      "blockedReason": "The motifs '不了' (cannot/no more) and '才能' (only then) imply conditional logic or negation of state, which conflicts with the requirement for FLAT effects only."
+    },
+    "charm-species-demon.zombieendoflame": {
+      "terminalSchemaVersion": 1,
+      "outcome": "blocked",
+      "entryId": "charm.(axis-group)-NNN for zombieendoflame",
+      "attempts": 1,
+      "blockedReason": "blocked: The motifs 'loss' and 'clearing' imply a reductive or sacrificial mechanic that conflicts with the 'flat effect' requirement for a single charm without a specified drawback/signet structure that fits the provided schema's constraints for a non-signet charm."
+    },
+    "charm-species-demon.zombieloonnut": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-303",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'The Nutty Omen' within existing corpus; kept 'existing corpus'"
+      ]
     }
   }
 }

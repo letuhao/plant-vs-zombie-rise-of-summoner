@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>stand-row</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .stand-row { width: 980px; display:grid; grid-template-columns:180px 1fr; gap:20px; padding:16px; border:1px solid #5b5144; border-radius:14px; background:#2f261d; color:#f2ead8; }
+    .spec-label { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#a39583; }
+    .glyph-wrap { display:flex; gap:8px; margin-top:8px; }
+    .status-glyph,.tag { width:46px; height:46px; border-radius:12px; border:1px solid #5b5144; background:#241d17; color:#f2ead8; display:grid; place-items:center; }
+  </style>
+</head>
+<body>
+  <section class="stand-row">
+    <div>standing-radar slot</div>
+    <div>
+      <p class="spec-label">Standing · five axes (definitions.md)</p>
+      <div>standing-bars slot</div>
+      <p class="spec-label" style="margin-top:16px">Live status · tap for Status tab</p>
+      <div class="glyph-wrap">
+        <button class="status-glyph" type="button">SP</button>
+        <button class="status-glyph" type="button">CO</button>
+        <button class="status-glyph" type="button">EM</button>
+        <span class="tag">+1</span>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

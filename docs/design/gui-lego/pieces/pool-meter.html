@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>pool-meter</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .meter { width: 420px; padding:10px 12px; border:1px solid #5b5144; border-radius:12px; background:#241d17; color:#f2ead8; }
+    .cap { display:flex; justify-content:space-between; gap:10px; font-size:12px; }
+    .track { margin-top:8px; height:8px; overflow:hidden; border:1px solid #5b5144; border-radius:999px; background:#201a14; }
+    .fill { height:100%; width:73%; background:#72c46c; }
+  </style>
+</head>
+<body>
+  <button class="meter" type="button">
+    <span class="cap"><span>Stamina</span><b>44 / 60</b></span>
+    <span class="track"><span class="fill"></span></span>
+  </button>
+</body>
+</html>

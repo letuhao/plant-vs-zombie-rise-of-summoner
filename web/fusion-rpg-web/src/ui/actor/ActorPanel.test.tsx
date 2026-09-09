@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
 import { PLAYER_PENDING, adaptCommanderSheet } from "@/contract/adapt";
@@ -34,6 +34,10 @@ describe("ActorPanel (catalog-era)", () => {
   beforeEach(() => {
     window.__fusionRpgActorSurface = actorSurfaceFixture();
     resetActorSheetObsForTests();
+    const store = globalThis.localStorage as Storage | undefined;
+    if (store && typeof store.removeItem === "function") {
+      store.removeItem("fusionRpg.actorSheet.railCollapsed");
+    }
   });
 
   it("exports ActorSheet as an alias of ActorPanel", () => {
@@ -41,20 +45,20 @@ describe("ActorPanel (catalog-era)", () => {
   });
 
   it("uses the near-fullscreen actorSheet size bound", () => {
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     const panel = screen.getByTestId("actor-panel");
     expect(panel.className).toContain("h-[min(960px,92vh)]");
     expect(panel.className).toContain("w-[min(1800px,96vw)]");
   });
 
   it("still short-circuits non-ready states to RungStateFallback before any tab bar renders", () => {
-    render(<ActorPanel state={{ kind: "loading" }} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={{ kind: "loading" }} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-panel-loading")).toBeInTheDocument();
     expect(screen.queryByTestId("actor-sheet-tabs")).not.toBeInTheDocument();
   });
 
   it("renders eight catalog tabs from actor-sheet.v1.json", () => {
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-sheet-tab-condition")).toBeInTheDocument();
     expect(screen.getByTestId("actor-sheet-tab-aptitudes")).toBeInTheDocument();
     expect(screen.getByTestId("actor-sheet-tab-derived")).toBeInTheDocument();
@@ -66,22 +70,91 @@ describe("ActorPanel (catalog-era)", () => {
     expect(screen.queryByTestId("actor-sheet-tab-overview")).not.toBeInTheDocument();
   });
 
+  it("shows actor summarize with name, level, and role on the left rail", () => {
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    expect(screen.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "false");
+    expect(screen.getByTestId("actor-summarize-name")).toHaveTextContent("Emberling");
+    expect(screen.getByTestId("actor-summarize-meta")).toHaveTextContent("Lv 14 · Plant");
+    expect(screen.getByTestId("actor-panel-header")).toHaveAttribute("data-header-mode", "none");
+    expect(screen.getByTestId("actor-sheet-close")).toBeInTheDocument();
+  });
+
+  it("Esc in the left rail closes the panel", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={onOpenChange} />);
+    await user.click(screen.getByTestId("actor-sheet-close"));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("collapses the rail to icon-only and restores labels on toggle", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+
+    await user.click(screen.getByTestId("actor-sheet-rail-toggle"));
+    expect(screen.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "true");
+    expect(screen.getByTestId("actor-summarize-glyph")).toBeInTheDocument();
+    expect(screen.queryByTestId("actor-summarize-name")).not.toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-condition")).toHaveAttribute("aria-label", "Condition");
+
+    await user.click(screen.getByTestId("actor-sheet-rail-toggle"));
+    expect(screen.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "false");
+    expect(screen.getByTestId("actor-summarize-name")).toBeInTheDocument();
+  });
+
+  it("commander summarize uses Commander role label", () => {
+    const state: ActorRungState = {
+      kind: "ready",
+      data: adaptCommanderSheet(
+        {
+          id: "commander:dave",
+          displayName: "Crazy Dave",
+          isDefault: true,
+          activeAuraId: "Might",
+          activeAuraName: "Might",
+          locationStub: null,
+          legionStub: null
+        },
+        1
+      )
+    };
+    renderWithProviders(
+      <ActorPanel
+        state={state}
+        open
+        onOpenChange={vi.fn()}
+        role="commander"
+        commanderMeta={{
+          isDefault: true,
+          activeAuraName: "Might",
+          locationStub: null,
+          legionStub: null
+        }}
+        onSetDefault={vi.fn()}
+        onDefendLawn={vi.fn()}
+        onOpenCommandersList={vi.fn()}
+      />
+    );
+    expect(screen.getByTestId("actor-summarize-name")).toHaveTextContent("Crazy Dave");
+    expect(screen.getByTestId("actor-summarize-meta")).toHaveTextContent(/Commander/);
+  });
+
   it("defaults to Condition with honest Standing / xpToNext pending (never fabricated)", () => {
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-standing-pending")).toBeInTheDocument();
     expect(screen.getByTestId("condition-xp-pending")).toBeInTheDocument();
     expect(screen.getByTestId("condition-xp-count")).toHaveTextContent(/2[,.]?140|2140/);
   });
 
   it("Condition iterates every resource-catalog row including poise with plant Sun label", () => {
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("condition-resource-poise")).toBeInTheDocument();
     expect(screen.getByTestId("condition-resource-hunger")).toHaveTextContent("Sun");
   });
 
   it("switching tabs shows only the active tab's own content", async () => {
     const user = userEvent.setup();
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
 
     await user.click(screen.getByTestId("actor-sheet-tab-kit"));
     expect(screen.queryByTestId("actor-standing-pending")).not.toBeInTheDocument();
@@ -89,25 +162,25 @@ describe("ActorPanel (catalog-era)", () => {
     expect(screen.getByTestId("kit-equip-pending")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("actor-sheet-tab-condition"));
-    expect(screen.getByTestId("actor-standing-pending")).toBeInTheDocument();
+    expect(await screen.findByTestId("actor-standing-pending")).toBeInTheDocument();
   });
 
   it("Shield tab stays honest pending and never says Ward", async () => {
     const user = userEvent.setup();
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     await user.click(screen.getByTestId("actor-sheet-tab-shield"));
     expect(screen.getByTestId("actor-shield-pending")).toBeInTheDocument();
     expect(screen.getByTestId("shield-tab").textContent).not.toMatch(/Ward/i);
   });
 
   it("emits sheet open observability", () => {
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(window.__fusionRpgActorSheetObs?.[0]?.channel).toBe("actor-sheet.open");
   });
 
   it("Kit tab has no placeholder Strike/Firebolt actions", async () => {
     const user = userEvent.setup();
-    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     await user.click(screen.getByTestId("actor-sheet-tab-kit"));
     expect(screen.getByTestId("kit-tab")).toBeInTheDocument();
     expect(screen.queryByText("Strike")).not.toBeInTheDocument();
@@ -130,7 +203,7 @@ describe("ActorPanel (catalog-era)", () => {
   it("Release and Deploy each close the panel", async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
-    render(<ActorPanel state={readyState()} open onOpenChange={onOpenChange} />);
+    renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={onOpenChange} />);
 
     await user.click(screen.getByTestId("actor-panel-release"));
     expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -156,7 +229,7 @@ describe("ActorPanel (catalog-era)", () => {
         1
       )
     };
-    render(
+    renderWithProviders(
       <ActorPanel
         state={state}
         open
@@ -199,7 +272,7 @@ describe("ActorPanel (catalog-era)", () => {
         1
       )
     };
-    render(
+    renderWithProviders(
       <ActorPanel
         state={state}
         open
@@ -278,7 +351,7 @@ describe("ActorPanel (catalog-era)", () => {
         1
       )
     };
-    render(
+    renderWithProviders(
       <ActorPanel
         state={state}
         open
@@ -316,7 +389,7 @@ describe("ActorPanel (catalog-era)", () => {
         1
       )
     };
-    render(
+    renderWithProviders(
       <ActorPanel
         state={state}
         open

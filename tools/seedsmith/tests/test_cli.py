@@ -19,6 +19,18 @@ from seedsmith.report.cli import (  # noqa: E402
     main,
 )
 
+
+def test_retry_blocked_ledger_preserves_authored_and_marks_duplicate_feedback():
+    from seedsmith.report.cli import _retry_blocked_ledger
+
+    ledger, feedback = _retry_blocked_ledger({
+        "authored": {"attempts": 1},
+        "blocked": {"outcome": "blocked", "defects": ["schema mismatch"]},
+        "duplicate": {"outcome": "escalated", "defects": ["duplicate name 'Ash' "]},
+    })
+    assert set(ledger) == {"authored"}
+    assert feedback == {"duplicate"}
+
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 

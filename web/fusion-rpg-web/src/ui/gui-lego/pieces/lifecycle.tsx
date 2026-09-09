@@ -25,11 +25,12 @@ export const phaseErrorFactory: PieceFactory = ({ payload, bus }) => {
   const message = String(payload.message ?? "Unavailable");
   const retryLabel = String(payload.retryLabel ?? "Retry");
   const canRetry = payload.canRetry !== false;
+  const retryEvent = String(payload.retryEvent ?? "derived.retry");
   return phaseRoot(
     "error",
     message,
     canRetry ? (
-      <button type="button" onClick={() => bus.emit("derived.retry", {})}>
+      <button type="button" onClick={() => bus.emit(retryEvent, {})}>
         {retryLabel}
       </button>
     ) : null
