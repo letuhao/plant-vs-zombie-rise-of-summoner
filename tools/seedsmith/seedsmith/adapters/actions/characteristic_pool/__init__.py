@@ -7,7 +7,8 @@ not separate. No model call anywhere in this package — everything here is a pu
 committed, offline inputs (spec §1's "Model calls: none").
 
 Layout, one concern per file:
-    catalog.py  — the 84-species roster, parsed from the C# code of record (element, rarity, traits)
+    catalog.py  — the live species roster, parsed from data/seed/demons/species/**/*.json
+                  (element, rarity, traits); the generated C# catalog is legacy-only
     anchors.py  — the classified species anchor tree (posture/reach/targetPreference), joined by
                   lowercased id; robust to the tree's own data-quality gaps (an index entry whose
                   file has no matching row, a missing file) rather than raising on them

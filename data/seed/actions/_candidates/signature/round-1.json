@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "briefsCorpusHash": null,
-    "candidateSetHash": "796ecf1b8e8cca2dd896234f4d0eff035593fb38024e8a0f8487f44239042bb6",
+    "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+    "candidateSetHash": "372fa9d9cefd9e008ea62f03434cc540330c46d68ad461d68e7495cef412bf6f",
     "model": "google/gemma-4-26b-a4b-qat",
     "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
     "partition": "signature",
@@ -12,8 +12,8 @@
     {
       "_provenance": {
         "briefHash": "bb6fda8948f376fb1be65e0982ae30988c3200e12d549eb468fce4642a491e21",
-        "briefsCorpusHash": null,
-        "generatedUtc": "2026-09-10T15:48:37+00:00",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
         "healNotes": [
           {},
           {},
@@ -28,7 +28,7 @@
             "atom.elpw-surge"
           ],
           [
-            "atom.elpw-override"
+            "atom.elpw-surge"
           ],
           [
             "atom.elpw-surge"
@@ -38,14 +38,14 @@
       "briefId": "brief.species.abyssswordstar.001",
       "candidateId": "candidate.signature.000",
       "confidence": {
-        "atomFamilies": "split",
+        "atomFamilies": "high",
         "differentiator": "split"
       },
       "draft": {
         "_provenance": {
           "briefHash": "bb6fda8948f376fb1be65e0982ae30988c3200e12d549eb468fce4642a491e21",
-          "briefsCorpusHash": null,
-          "generatedUtc": "2026-09-10T15:48:37+00:00",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T16:52:38+00:00",
           "healNotes": [
             {},
             {},
@@ -60,7 +60,7 @@
               "atom.elpw-surge"
             ],
             [
-              "atom.elpw-override"
+              "atom.elpw-surge"
             ],
             [
               "atom.elpw-surge"
@@ -74,29 +74,27 @@
         "briefId": "brief.species.abyssswordstar.001",
         "candidateId": "candidate.signature.000",
         "differentiator": "resource",
-        "flavor": "The air itself fractures as the blade descends, turning the very atmosphere into a crushing weight.",
+        "flavor": "The air itself fractures as the blade falls, turning the heavens into a crushing weight.",
         "motifsExpressed": [
           "从天而降"
         ],
-        "name": "Sky-Sunderer's Descent",
-        "rationale": "While its siblings might simply strike or summon, this creature utilizes the air element to trigger an elemental power surge through a celestial descent.",
+        "name": "Sky-Splitter Descent",
+        "rationale": "While siblings might focus on the weight of the blade (巨剑) or the summoning of spirits (召唤), this chimeric entity utilizes the air element to trigger an Elemental Power Surge, manifesting its descent as a sudden, overwhelming surge of atmospheric pressure.",
         "scope": "species"
       },
       "outcome": "accepted",
       "pipelineId": "A-P3",
       "scope": "species",
       "voteMinority": {
-        "atomFamilies": [
-          "atom.elpw-override"
-        ],
+        "atomFamilies": [],
         "differentiator": "atoms"
       }
     },
     {
       "_provenance": {
         "briefHash": "8224bf04cdc8a412759634db8c2719584cd8ae98d982cda6a6415c5cdb1bfb33",
-        "briefsCorpusHash": null,
-        "generatedUtc": "2026-09-10T15:48:37+00:00",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
         "healNotes": [
           {},
           {},
@@ -111,189 +109,14 @@
             "atom.shld-toughness"
           ],
           [
-            "atom.ward-flux"
+            "atom.sust-husk"
           ],
           [
-            "atom.evd-shift",
-            "atom.ward-flux"
+            "atom.ward-harden"
           ]
         ]
       },
       "briefId": "brief.species.abyssswordstar.002",
-      "candidateId": "candidate.signature.001",
-      "confidence": {
-        "atomFamilies": "split",
-        "differentiator": "split"
-      },
-      "draft": {
-        "_provenance": {
-          "briefHash": "8224bf04cdc8a412759634db8c2719584cd8ae98d982cda6a6415c5cdb1bfb33",
-          "briefsCorpusHash": null,
-          "generatedUtc": "2026-09-10T15:48:37+00:00",
-          "healNotes": [
-            {},
-            {},
-            {}
-          ],
-          "model": "google/gemma-4-26b-a4b-qat",
-          "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
-          "pipeline": "signature-propose",
-          "promptVersion": "signature-propose/1",
-          "samplePicks": [
-            [
-              "atom.shld-toughness"
-            ],
-            [
-              "atom.ward-flux"
-            ],
-            [
-              "atom.evd-shift",
-              "atom.ward-flux"
-            ]
-          ]
-        },
-        "atomFamilies": [
-          "atom.prec-fixation",
-          "atom.ward-flux"
-        ],
-        "briefId": "brief.species.abyssswordstar.002",
-        "candidateId": "candidate.signature.001",
-        "differentiator": "atoms",
-        "flavor": "The air thickens into a crystalline shell, turning the very atmosphere into a solid, unyielding barrier.",
-        "motifsExpressed": [
-          "形态"
-        ],
-        "name": "Aetheric Bastion",
-        "rationale": "While its kin may strike or summon, this singular entity reshapes its very essence into a defensive vessel, utilizing the air to harden its presence.",
-        "scope": "species"
-      },
-      "outcome": "accepted",
-      "pipelineId": "A-P3",
-      "scope": "species",
-      "voteMinority": {
-        "atomFamilies": [
-          "atom.evd-shift",
-          "atom.shld-toughness"
-        ],
-        "differentiator": "resource"
-      }
-    },
-    {
-      "_provenance": {
-        "briefHash": "79404892ad6d8ebe8ebf27d2a1a947ad7bf665badad9295c68444b69baac8c9c",
-        "briefsCorpusHash": null,
-        "generatedUtc": "2026-09-10T15:48:37+00:00",
-        "healNotes": [
-          {},
-          {},
-          {}
-        ],
-        "model": "google/gemma-4-26b-a4b-qat",
-        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
-        "pipeline": "signature-propose",
-        "promptVersion": "signature-propose/1",
-        "samplePicks": [
-          [
-            "atom.elpw-surfeit",
-            "atom.ward-link"
-          ],
-          [
-            "atom.elpw-surfeit"
-          ],
-          [
-            "atom.elpw-surge",
-            "atom.mending"
-          ]
-        ]
-      },
-      "briefId": "brief.species.abyssswordstar.003",
-      "candidateId": "candidate.signature.002",
-      "confidence": {
-        "atomFamilies": "split",
-        "differentiator": "split"
-      },
-      "draft": {
-        "_provenance": {
-          "briefHash": "79404892ad6d8ebe8ebf27d2a1a947ad7bf665badad9295c68444b69baac8c9c",
-          "briefsCorpusHash": null,
-          "generatedUtc": "2026-09-10T15:48:37+00:00",
-          "healNotes": [
-            {},
-            {},
-            {}
-          ],
-          "model": "google/gemma-4-26b-a4b-qat",
-          "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
-          "pipeline": "signature-propose",
-          "promptVersion": "signature-propose/1",
-          "samplePicks": [
-            [
-              "atom.elpw-surfeit",
-              "atom.ward-link"
-            ],
-            [
-              "atom.elpw-surfeit"
-            ],
-            [
-              "atom.elpw-surge",
-              "atom.mending"
-            ]
-          ]
-        },
-        "atomFamilies": [
-          "atom.elpw-surfeit",
-          "atom.prec-truesight"
-        ],
-        "briefId": "brief.species.abyssswordstar.003",
-        "candidateId": "candidate.signature.002",
-        "differentiator": "atoms",
-        "flavor": "A celestial blade descending through the clouds, weaving currents of air to bolster the vanguard.",
-        "motifsExpressed": [
-          "从天而降"
-        ],
-        "name": "abyssswordstar",
-        "rationale": "While its kin might simply strike or summon, this singular entity descends to weave a web of elemental resonance, amplifying the potency of allies through shared arcane currents.",
-        "scope": "species"
-      },
-      "outcome": "accepted",
-      "pipelineId": "A-P3",
-      "scope": "species",
-      "voteMinority": {
-        "atomFamilies": [
-          "atom.elpw-surge",
-          "atom.mending",
-          "atom.ward-link"
-        ],
-        "differentiator": "resource"
-      }
-    },
-    {
-      "_provenance": {
-        "briefHash": "c2439297314e005f111fec41694318c84de1eb5b22033ae79dea3fd8d04eb5f4",
-        "briefsCorpusHash": null,
-        "generatedUtc": "2026-09-10T15:48:37+00:00",
-        "healNotes": [
-          {},
-          {},
-          {}
-        ],
-        "model": "google/gemma-4-26b-a4b-qat",
-        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
-        "pipeline": "signature-propose",
-        "promptVersion": "signature-propose/1",
-        "samplePicks": [
-          [
-            "atom.elpw-override"
-          ],
-          [
-            "atom.elpw-surge"
-          ],
-          [
-            "atom.evd-shift"
-          ]
-        ]
-      },
-      "briefId": "brief.species.abyssswordstar.004",
       "candidateId": null,
       "confidence": {
         "atomFamilies": "unresolved",
@@ -305,18 +128,63 @@
       "scope": "species",
       "voteMinority": {
         "atomFamilies": [
-          "atom.elpw-override",
-          "atom.elpw-surge",
-          "atom.evd-shift"
+          "atom.shld-toughness",
+          "atom.sust-husk",
+          "atom.ward-harden"
         ],
         "differentiator": "atoms"
       }
     },
     {
       "_provenance": {
-        "briefHash": "1462afd3ef0e826c638e053eb385b5ad275deb1dd71c084d0e82e07bf0fdff2a",
-        "briefsCorpusHash": null,
-        "generatedUtc": "2026-09-10T15:48:37+00:00",
+        "briefHash": "79404892ad6d8ebe8ebf27d2a1a947ad7bf665badad9295c68444b69baac8c9c",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-surfeit"
+          ],
+          [
+            "atom.elpw-attune"
+          ],
+          [
+            "atom.elpw-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.species.abyssswordstar.003",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-attune",
+          "atom.elpw-surfeit",
+          "atom.elpw-surge"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "c2439297314e005f111fec41694318c84de1eb5b22033ae79dea3fd8d04eb5f4",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
         "healNotes": [
           {},
           {},
@@ -334,21 +202,21 @@
             "atom.elpw-surge"
           ],
           [
-            "atom.elpw-override"
+            "atom.elpw-surge"
           ]
         ]
       },
-      "briefId": "brief.species.abyssswordstar.005",
-      "candidateId": "candidate.signature.004",
+      "briefId": "brief.species.abyssswordstar.004",
+      "candidateId": "candidate.signature.003",
       "confidence": {
         "atomFamilies": "split",
-        "differentiator": "high"
+        "differentiator": "split"
       },
       "draft": {
         "_provenance": {
-          "briefHash": "1462afd3ef0e826c638e053eb385b5ad275deb1dd71c084d0e82e07bf0fdff2a",
-          "briefsCorpusHash": null,
-          "generatedUtc": "2026-09-10T15:48:37+00:00",
+          "briefHash": "c2439297314e005f111fec41694318c84de1eb5b22033ae79dea3fd8d04eb5f4",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T16:52:38+00:00",
           "healNotes": [
             {},
             {},
@@ -366,7 +234,90 @@
               "atom.elpw-surge"
             ],
             [
+              "atom.elpw-surge"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-surge",
+          "atom.ward-harden"
+        ],
+        "briefId": "brief.species.abyssswordstar.004",
+        "candidateId": "candidate.signature.003",
+        "differentiator": "resource",
+        "flavor": "The air itself fractures as the creature descends, turning the very atmosphere into a heavy, crushing weight that anchors its celestial blade into the earth.",
+        "motifsExpressed": [
+          "从天而降"
+        ],
+        "name": "Sky-Splitter Descent",
+        "rationale": "While siblings might simply fall or strike, this chimeric entity overrides the fundamental laws of air pressure to ensure its descent is an inescapable gravitational event.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-override"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "1462afd3ef0e826c638e053eb385b5ad275deb1dd71c084d0e82e07bf0fdff2a",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-override"
+          ],
+          [
+            "atom.elpw-override"
+          ],
+          [
+            "atom.elpw-attune"
+          ]
+        ]
+      },
+      "briefId": "brief.species.abyssswordstar.005",
+      "candidateId": "candidate.signature.004",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "1462afd3ef0e826c638e053eb385b5ad275deb1dd71c084d0e82e07bf0fdff2a",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T16:52:38+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
               "atom.elpw-override"
+            ],
+            [
+              "atom.elpw-override"
+            ],
+            [
+              "atom.elpw-attune"
             ]
           ]
         },
@@ -376,8 +327,8 @@
         ],
         "briefId": "brief.species.abyssswordstar.005",
         "candidateId": "candidate.signature.004",
-        "differentiator": "atoms",
-        "flavor": "A celestial blade descending through the vacuum, carving paths of pressurized void.",
+        "differentiator": "resource",
+        "flavor": "A sudden vacuum formed by the descent of a celestial blade, dragging the very air into a localized vortex.",
         "motifsExpressed": [
           "形态",
           "从天而降",
@@ -385,8 +336,8 @@
           "召唤",
           "巨剑"
         ],
-        "name": "Abyssswordstar",
-        "rationale": "As a chimeric entity with no family, the creature's signature action utilizes Elemental Override to redefine the fundamental properties of the air element, ensuring its descent and blade strikes bypass all standard atmospheric resistance.",
+        "name": "Sky-Piercing Gale",
+        "rationale": "While siblings might simply strike or summon, this chimeric entity uses its descent to override the fundamental properties of the atmosphere, turning the air itself into a crushing weight that ignores standard elemental resistances.",
         "scope": "species"
       },
       "outcome": "accepted",
@@ -394,9 +345,9 @@
       "scope": "species",
       "voteMinority": {
         "atomFamilies": [
-          "atom.elpw-surge"
+          "atom.elpw-attune"
         ],
-        "differentiator": null
+        "differentiator": "atoms"
       }
     }
   ],

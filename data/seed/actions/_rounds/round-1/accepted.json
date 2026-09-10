@@ -1,7 +1,7 @@
 {
   "_meta": {
     "assemblyGateRejectCount": 0,
-    "candidateSetHash": "3c1754286daf8c989c2c1d37b234066b66cd316c0356aa8c55915b8f0adc7f31",
+    "candidateSetHash": "f559e12e41c841a5195851375a108099bfab65df046b00591effebad44eb0353",
     "differentiatorNoneRate": 0.0,
     "disagreementRate": {},
     "partition": "rounds",
@@ -626,7 +626,7 @@
       "motifsUsed": [
         "从天而降"
       ],
-      "name": "Sky-Sunderer's Descent",
+      "name": "Sky-Splitter Descent",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "enemy",
@@ -641,42 +641,15 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.elpw-attune",
-        "atom.prec-truesight"
-      ],
-      "category": "support",
-      "id": "action.species.abyssswordstar.002",
-      "motifsUsed": [
-        "形态",
-        "巨剑",
-        "仙剑",
-        "从天而降",
-        "召唤"
-      ],
-      "name": "abyssswordstar",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "ally",
-      "rungBand": [
-        1,
-        10
-      ],
-      "scope": "species",
-      "scopeKey": "abyssswordstar",
-      "targetMode": "multi"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
         "atom.elpw-surge",
         "atom.ward-harden"
       ],
       "category": "movement",
-      "id": "action.species.abyssswordstar.003",
+      "id": "action.species.abyssswordstar.002",
       "motifsUsed": [
         "从天而降"
       ],
-      "name": "Sky-Sunder Descent",
+      "name": "Sky-Splitter Descent",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
@@ -695,7 +668,7 @@
         "atom.elpw-override"
       ],
       "category": "status",
-      "id": "action.species.abyssswordstar.004",
+      "id": "action.species.abyssswordstar.003",
       "motifsUsed": [
         "形态",
         "从天而降",
@@ -703,7 +676,7 @@
         "召唤",
         "巨剑"
       ],
-      "name": "Abyssswordstar",
+      "name": "Sky-Piercing Gale",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "enemy",

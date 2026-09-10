@@ -20,8 +20,10 @@ entirely.
    `--count`; the call budget is a **ceiling, not a plan**, and a full run is an owner decision behind
    a quality gate. This module is where a run's size is chosen, so it is where that rule bites hardest:
    it must refuse to plan a full run without an explicit flag.
-3. **The roster is 84 species, not 904.** Motif anchors 84, family assignments **53**, 19 families.
-   Per-species count is a **tunable**, so growing the roster is config, not a schema change.
+3. **The roster is the live species seed folder.** It currently contains 904 species, 227
+   consolidated families, and 1,183 family memberships. Generated C# and SQLite projections are not
+   planner inputs. Per-species count is a **tunable**, so growing the roster is config, not a schema
+   change.
 4. **C1's family-access widening is gated** on three things that do not exist — a per-rung `powerBudget`
    row, a family-aware non-additive price (needs D2), and a budget check with a production caller.
    **Until all three hold, this module emits structure-gated tiers only**, and every tier's
@@ -210,15 +212,11 @@ nothing real:
    owner decision on the smoke batch's evidence; a config file defaulting to `full` would make that
    decision by omission. The counts are deliberately the smallest that still exercise all three
    scopes — general, family and species — because a batch that skips a scope proves nothing about it.
-2. **Enumerate the plan's subjects, from real data.** Species: the 84 catalog rows. Families: the 19
-   distinct families in `family-assignments.json`, whose sizes are measured, not assumed — `cherry` 7,
-   `fire` 5, `pea` 5, `ice` 4, then three at 3, **eleven** at 2 and `nut` at 1. ⛔ **CORRECTED
-   2026-09-03 (review):** the earlier "ten at 2" summed to 51, not 53; re-counted from the file, the
-   size histogram is `{7:1, 5:2, 4:1, 3:3, 2:11, 1:1}` and sums to exactly 53. Mean family size is **2.8**
-   (53/19), not the 48 an earlier sizing assumed; that number decides how much a family-scoped
-   judgement is worth and it belongs in the report.
+2. **Enumerate the plan's subjects, from real data.** Species: the 904 live seed rows. Families: the
+   227 consolidated families derived from their `family` fields, with 1,183 memberships. Family sizes
+   are measured at planning time, never copied from a generated projection.
 2b. **⛔ Derive each family's motif set — added 2026-09-03 (review F15).** `A-P2` correctly recorded
-   that `motif-assignments.json` is **species**-keyed (84 keys) and that a family's motif set *"has to
+   that motif assignments are **species**-keyed and that a family's motif set *"has to
    be derived … and that derivation is not written anywhere. A-S1 owns it"*
    (`spec-family-propose.md:68-70`). It was not written here, so `A-P2`'s AC5 rejected 100% of this
    module's output. **The derivation, decided and written:**
@@ -572,7 +570,7 @@ constraint, which is binding, and not by a field name, which drifts.
 | **Atom-family namespace** | every `allowedAtomFamilies`, `forbiddenAtomFamilies` and `pairedPayoffFamily` id emitted over a whole round is an `entries[].id` of `data/seed/items/affix-families/*.json`; an id drawn from `data/seed/atoms/` is **refused**, naming the file it came from. The count is asserted as a literal — **98** — so a namespace change fails loudly |
 | **Pairing vocabulary** | every `pairedPayoffFamily` is a key of `pairings.json` and every forced enabler is a member of `EnablersOf` it; a brief carrying a **status id** in that field is refused, naming the field |
 | **Structure axes — union-to-ceiling** | the assignable sets are asserted as literals: general **2**, family **5**, signature **6**; a brief naming `reaction` is **refused**, and one naming `restriction` carries `structureEnforced: false` |
-| **Family motifs derived** | every family-scoped brief carries `familyMotifs`, `familyAntiMotifs` and `familyMotifBasis` as keys; all 19 families resolve `intersection` against today's data, and the intersection for `cherry` is asserted as exactly two motifs |
+| **Family motifs derived** | every family-scoped brief carries `familyMotifs`, `familyAntiMotifs` and `familyMotifBasis` as keys; all current consolidated families resolve deterministically against live data |
 | **Target shape allocation** | `targetMode` counts per subject equal the largest-remainder allocation of A-T1's `targetModeMilli` exactly, and `areaShapeMilli` is consulted only for briefs allocated `area` |
 | **Casing** | every emitted `category`, `targetMode`, `areaShape` and `relation` round-trips through `ActionCategories.TryParse` / `ActionTargetModes.TryParse` / `ActionAreaShapes.TryParse` / `RelationKinds.TryParse`; `"Area"` is refused |
 | **Planted violation — family widening** | a tuning file that narrows `allowedAtomFamilies` per tier while any of constraint 4's three gates is absent is **refused**, naming the missing gate |
@@ -580,7 +578,7 @@ constraint, which is binding, and not by a field name, which drifts.
 | **Full-run refusal** | `mode: "full"` without `--full` and without a passing smoke gate exits non-zero with a message naming the missing evidence; the shipped `action-corpus-run.v1.json` is asserted to carry `mode: "smoke"`, so a default flipped to `full` fails here rather than at run time (§3 step 1) |
 | **Rung window** | every signature `rungBand` is `[1, 10]`; a band with a floor above 1 is **refused**, naming `spec-rung-semantics.md` §3.2. The union-to-ceiling axis counts are unchanged — general 2, family 5, signature 6 — and asserted alongside it |
 | **`--dry-run`** | renders every brief and makes zero calls; the transport stub raises if anything tries |
-| **Roster** | subject counts are asserted as literals: 84 species, 19 families, 53 family-assigned species. Drift toward 904 fails |
+| **Roster** | subject counts are asserted against the live seed folder: 904 species, 227 consolidated families, 1,183 memberships |
 | **Overflow** | quota arithmetic is `long`, widened before multiplying, divided by 1000 once; forced overflow **throws** |
 
 ## 6. Acceptance criteria

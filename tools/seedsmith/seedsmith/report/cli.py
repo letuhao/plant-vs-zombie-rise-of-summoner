@@ -198,6 +198,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
 
     from ..adapters.trees.nodegen import emit as nodegen_emit
     from ..adapters.trees.nodegen import plan_read as nodegen_plan_read
+    from ..adapters.trees.nodegen import quota as nodegen_quota
     from ..adapters.trees.nodegen import run as nodegen_run
     from ..adapters.trees.nodegen import verdict as tree_verdict
     from ..adapters.trees.plan import emit as plan_emit
@@ -205,7 +206,9 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     from ..adapters.trees.plan.archetypes import SHIPPED_ARCHETYPES, TIER_COUNT
     from ..adapters.trees.targets import PassiveTreeTargetsError
     from ..adapters.trees.targets import load as load_tree_targets
-    from ..metrics.passive_tree import HiddenFileCountMetric, PassiveTreePlanCtx
+    from ..metrics.passive_tree import (
+        HiddenFileCountMetric, PassiveTreePlanCtx, SpeciesUniquenessMetric,
+    )
 
     seed_root = (Path(args.plan_root) if getattr(args, "plan_root", None)
                 else plan_emit.REPO_ROOT / "data" / "seed")
@@ -245,6 +248,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     tree_plans: "list[object]" = []
     nodes_by_tree: "dict[str, list]" = {}
     outcomes_by_tree: "dict[str, list]" = {}
+    quota_cells_by_tree: "dict[str, dict]" = {}
     for plan_doc in plans:
         tree_id = plan_doc.get("treeId")
         if not tree_id:
@@ -259,6 +263,43 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         outcomes.extend({"nodeId": subject.node_id, "outcome": "unresolved"}
                         for subject in run_plan.subjects)
         outcomes_by_tree[tree_id] = outcomes
+        # Distribution-audit wiring (2026-09-10): re-derive each tree's six-axis cells from the
+        # committed plan via the SAME `quota_for_plan` the generation CLI calls — so
+        # `PassiveTree/QuotaDrift` and `PassiveTree/CellOccupancy` measure for real instead of
+        # reporting NOT_MEASURED forever (the cells were never persisted on pre-2026-09-10 seed
+        # records; re-derivation is the designed stand-in until a regeneration writes `quotaCell`).
+        # Prefer a node's own persisted `quotaCell` when present (post-persistence generation), so
+        # a future regenerated corpus is measured against what was actually assigned, not a fresh
+        # re-draw that could drift from the generation-time assignment if the quota walk ever
+        # changes. A tree with neither targets nor a resolvable category contributes nothing, never
+        # a crash — QuotaDrift already reports NOT_MEASURED per tree in that case.
+        if tree_targets is not None:
+            try:
+                cells = nodegen_quota.quota_for_plan(
+                    tree_plan, tree_targets, category=str(plan_doc.get("category")),
+                    forced_element=plan_doc.get("forcedElement"),
+                    forced_status=plan_doc.get("forcedStatus"))
+            except (ValueError, KeyError):
+                cells = {}
+            # Overlay any persisted cells from the seed document (additive; absent on old records).
+            for node in nodes_by_tree[tree_id]:
+                raw_cell = node.get("quotaCell")
+                if not raw_cell:
+                    continue
+                try:
+                    from ..adapters.trees.nodegen.emit import quota_cell_from_dict
+                    parsed = quota_cell_from_dict(raw_cell)
+                except (KeyError, TypeError):
+                    continue
+                if parsed is None:
+                    continue
+                cells[node["id"]] = nodegen_quota.QuotaCell(
+                    node_class=parsed["nodeClass"], trigger=parsed["trigger"],
+                    element=parsed["element"], status=parsed["status"],
+                    channel_family=parsed["channelFamily"],
+                    exclusion_form=parsed["exclusionForm"])
+            if cells:
+                quota_cells_by_tree[tree_id] = cells
 
     registry = build_registry()
     # H5's own reason `build_registry()` never carries `HiddenFileCountMetric`/`DeepMechanismValueMetric`
@@ -269,6 +310,12 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     # ("populated somewhere a real run reaches") without touching the shared registry's own documented
     # exclusion for every other caller.
     registry.register(HiddenFileCountMetric())
+    # SpeciesUniqueness (J6) is gates=False and deliberately NOT in ALL_PASSIVE_TREE_METRICS (that
+    # tuple is H4's own eight, frozen by a length assertion). Register it here the same way
+    # HiddenFileCount is — a check-family-only registration that never breaks generation's
+    # assert_exactly_one_hard_gate. ExclusionPresentation stays out (gates=True; would break that
+    # invariant), per metrics/passive_tree.py's own tracked note.
+    registry.register(SpeciesUniquenessMetric())
     passive_tree_ctx = PassiveTreePlanCtx(
         plans=plans, archetypes=SHIPPED_ARCHETYPES, tier_count=TIER_COUNT,
         unlock_first_points=tuning_doc["unlockCost"]["firstPoints"],
@@ -277,6 +324,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         min_terminal_width=tuning_doc["potency"]["minTerminalWidth"],
         targets=tree_targets, tree_plans=tuple(tree_plans),
         nodes_by_tree=nodes_by_tree, outcomes_by_tree=outcomes_by_tree,
+        quota_cells_by_tree=quota_cells_by_tree,
         # H5's own real acceptance gap (spec-tree-review.md §7): `HiddenFileCountMetric` was fully
         # built and tested but had ZERO real call site, `tree_seed_roots` always defaulting to `()`
         # everywhere outside its own test. A single root here already covers every category's own
@@ -1648,12 +1696,14 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
         for tree_id in tree_ids:
             plan, cells = plans_and_cells[tree_id]
 
-            def inputs_for(subject, _plan=plan):
+            def inputs_for(subject, _plan=plan, _cells=cells):
                 # Matches the dry-run's own --sample-brief call above exactly: permitted_properties
                 # is the sorted set of property AXIS NAMES (e.g. "aptitude", "element") a node's
                 # exclusion may reference, never a per-cell-narrowed id list — `permitted_ids_for_cell`
                 # (used above only for the dry run's own resolved_subjects boolean check) is not an
-                # input `NodeGenerationInputs`/`render_brief` takes.
+                # input `NodeGenerationInputs`/`render_brief` takes. `quota_cell` is the SAME cell
+                # this dry-run already resolved into `_cells` — persisted onto the accepted record
+                # so `PassiveTree/QuotaDrift` can measure without a generation-time snapshot.
                 permitted_affixes = affix_vocab.permitted_for_branch(subject.branch)
                 return run_mod.NodeGenerationInputs(
                     tree_display_name=tree_id, tree_reading=tree_id,
@@ -1662,6 +1712,7 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     permitted_properties=sorted(_plan.property_vocabulary),
                     property_vocabulary=_plan.property_vocabulary,
                     affix_vocab=affix_vocab,
+                    quota_cell=_cells.get(subject.node_id),
                 )
 
             # 2026-09-06 real-call finding (`might`, a real generation run): two DIFFERENT accepted

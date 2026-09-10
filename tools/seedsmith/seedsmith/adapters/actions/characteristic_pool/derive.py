@@ -9,12 +9,12 @@ four weight blocks (`traitCategoryMilli` 14x5, `elementCategoryMilli` 6x5,
 species carries for a category". Taken completely literally — a weight applied identically to
 all 5 category columns for every signal a species carries — that produces a mathematical identity:
 every category ends up with the SAME total for every species, which is a permanent five-way tie
-for the whole 84-species roster. That directly contradicts three of the spec's own testable
-claims: step 3's "[the uniform-floor] case is expected to be empty", acceptance #4 ("31 such
-entries... `leanOrder` is a permutation"), and the dedicated test "over the 31 family-less species
+for the whole live roster. That directly contradicts three of the spec's own testable
+claims: step 3's "[the uniform-floor] case is expected to be empty", acceptance #4 ("family-less
+entries... `leanOrder` is a permutation"), and the dedicated test "over the live family-less species
 today, the count whose `leanOrder` is NOT the bare declared order is asserted to be greater than
 zero". A weight table that is flat in every direction cannot produce that outcome by construction,
-regardless of which 84 real species it is run over.
+regardless of which live species roster it is run over.
 
 Resolving this requires *some* closed, non-arbitrary fact that ties a signal to ONE OF THE FIVE
 CATEGORIES structurally, which the weight's per-mille value then scales (exactly the same shape

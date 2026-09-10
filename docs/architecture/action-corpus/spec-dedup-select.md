@@ -21,8 +21,9 @@ unchanged inputs is byte-identical"* stops being definable.
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan.** This module
    must run identically over 12 candidates and over 3,000, and its report is part of the smoke batch's
    evidence.
-3. **The roster is 84 species, not 904.** So the t2 "same anchor" partition has at most 84 species keys
-   and 19 family keys, and the expected corpus is roughly 850 rows, not 3,307. Sizing claims are
+3. **The roster is the live species seed folder.** It currently has 904 species keys and 227 family
+   keys; expected corpus sizing is derived from the current planner counts, never a generated
+   projection. Sizing claims are
    re-derived against the shipped roster, never inherited.
 4. **C1's family-access widening is gated.** So a tier's atom-family set is currently the *same* set
    for every tier, which means **cross-tier near-duplicates are more likely, not less** — this module

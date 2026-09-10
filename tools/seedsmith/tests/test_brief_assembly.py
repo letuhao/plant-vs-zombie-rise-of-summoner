@@ -21,6 +21,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.actions.brief_assembly import derive as ba  # noqa: E402
+from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
+    CATALOG_PATH, derive_live_family_assignments, load_catalog,
+)
 from seedsmith.adapters.actions import generate_brief_assembly as gen_mod  # noqa: E402
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 
@@ -121,14 +124,12 @@ class FamilyLessSpeciesTests(unittest.TestCase):
         briefs = ba.assemble_briefs(plan, accepted, FAMILY_IDS)
         self.assertEqual(briefs[0]["familyActions"], [])
 
-    def test_31_of_84_measured_against_the_live_family_assignments_file(self) -> None:
-        """Re-verified directly against the live file (never trusted from the spec's own prose) --
-        `data/seed/demons/_generated/family-assignments.json` carries a key only for a species WITH
-        a family; 84 - len(that file) is the family-less count spec §3.3 names."""
-        assignments = json.loads((REPO_ROOT / "data" / "seed" / "demons" / "_generated" /
-                                 "family-assignments.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(assignments), 53)
-        self.assertEqual(84 - len(assignments), 31)
+    def test_live_family_assignments_cover_the_live_roster(self) -> None:
+        """Family membership is derived from the live species seed folder, not stale generated
+        demon artifacts."""
+        catalog = load_catalog(CATALOG_PATH)
+        assignments = derive_live_family_assignments(CATALOG_PATH)
+        self.assertEqual(set(assignments), {row.species_id for row in catalog})
 
 
 # ---------------------------------------------------------------------------------------------
@@ -225,14 +226,11 @@ class ByteIdenticalToRealRound1Tests(unittest.TestCase):
         cls.round1_doc = json.loads(ROUND_1_PLAN_PATH.read_text(encoding="utf-8"))
         cls.species_entries = [e for e in cls.round1_doc["entries"] if e["scope"] == "species"]
 
-    def test_round1_has_84_species_entries_31_family_less(self) -> None:
-        # Expanded real smoke batch (2026-09-04): perSpeciesCount bumped 1->2, so the species
-        # scope now carries 168 entries (84 species x 2) and 62 family-less entries (31 x 2) --
-        # the underlying 84-species / 31-family-less roster is unchanged, only the per-species
-        # draw count doubled.
-        self.assertEqual(len(self.species_entries), 168)
+    def test_round1_matches_the_live_roster_and_plan_quota(self) -> None:
+        live_species = load_catalog(CATALOG_PATH)
+        self.assertEqual(len(self.species_entries), len(live_species) * 5)
         family_less = [e for e in self.species_entries if e["anchor"].get("family") is None]
-        self.assertEqual(len(family_less), 62)
+        self.assertEqual(len(family_less), 0)
 
     def test_every_non_family_actions_field_is_byte_identical(self) -> None:
         briefs = ba.assemble_briefs(self.species_entries, accepted_rows=[], family_ids=FAMILY_IDS)

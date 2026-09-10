@@ -71,16 +71,16 @@ One brief per signature action, identical to A-S1's shape plus:
 - **Sorted by `actionId`, ordinal.** A-P3 inlines this into its prompt; **an unsorted list makes the run
   order-dependent** and replay undefinable.
 - **Absent versus empty is preserved.** A missing key is a defect and raises. **An empty list is legal
-  and means "this species has no family"** — true for 31 of the 84 species, so it is the common case,
+  for a family-less species**; a family with no accepted sibling actions is a separate state,
   not an edge case.
 - `fingerprint` is A-S3's, carried through rather than recomputed — one definition, one owner.
 
 ### 3.3 The species with no family
 
-31 of 84 have no family assignment. For those the brief carries `"familyActions": []` **and A-P3 runs
+Any live species without a family assignment gets `"familyActions": []` **and A-P3 runs
 normally**, rendering its explicit no-family sentence. **This module must not skip them** — a signature
 action for a family-less species is exactly as legitimate as any other, and skipping would silently drop
-37% of the roster.
+live content.
 
 ---
 
@@ -101,7 +101,7 @@ action for a family-less species is exactly as legitimate as any other, and skip
 | # | Test | Proves |
 |---|---|---|
 | 1 | Every emitted brief carries a `familyActions` **key** | The defect this module exists for |
-| 2 | A family-less species gets `[]` — **present and empty**, and its brief is still emitted | §3.3, and 31 of 84 depend on it |
+| 2 | A family-less species gets `[]` — **present and empty**, and its brief is still emitted | §3.3 |
 | 3 | `familyActions` is **sorted ordinally by `actionId`**, asserted across two runs | Replay is definable |
 | 4 | The list contains **only accepted, deduped, id-assigned** actions — a rejected A-P2 proposal never appears | §3.1 |
 | 5 | Every non-`familyActions` field is **byte-identical** to what A-S1 produced | No re-derivation |

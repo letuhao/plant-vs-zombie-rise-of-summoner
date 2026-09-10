@@ -27,6 +27,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -52,6 +53,13 @@ OUTPUT_PATH = ACTIONS_ROOT / "_briefs" / "round-1.json"
 
 FAMILY_IDS = load_family_ids()                                  # the 98, read fresh (live tree)
 FIXTURE_ATOM_ID = "atom.fx-passive-atk-flat"                     # data/seed/atoms/fx-core.json (17)
+
+
+def _write_passing_gate(path: Path) -> None:
+    path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+        "round": 1,
+        "verdict": {"verdict": "pass", "notMeasuredMetrics": [], "gapMetrics": []},
+    }}), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------------------------
@@ -745,6 +753,37 @@ class FullRunRefusalTests(unittest.TestCase):
     def test_gate_evidence_is_round_scoped(self) -> None:
         self.assertTrue(gen_mod.SMOKE_GATE_EVIDENCE_PATH.name.startswith("coverage-round-"))
 
+    def test_gate_requires_a_passing_action_coverage_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "coverage-round-1.json"
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "not-clean", "notMeasuredMetrics": [],
+                                          "gapMetrics": ["action.corpus.thinCell"]},
+            }}), encoding="utf-8")
+            self.assertFalse(gen_mod.is_passing_quality_gate(path))
+
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "pass", "notMeasuredMetrics": [],
+                                          "gapMetrics": []},
+            }}), encoding="utf-8")
+            self.assertTrue(gen_mod.is_passing_quality_gate(path))
+
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "smoke-clean", "notMeasuredMetrics": [],
+                                          "gapMetrics": []},
+            }}), encoding="utf-8")
+            self.assertTrue(gen_mod.is_passing_quality_gate(path))
+
+    def test_gate_rejects_wrong_kind_or_round(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "coverage-round-1.json"
+            for kind, round_no in (("action-seed", 1), ("action-coverage", 2)):
+                path.write_text(json.dumps({"kind": kind, "_meta": {
+                    "round": round_no,
+                    "verdict": {"verdict": "pass", "notMeasuredMetrics": [], "gapMetrics": []},
+                }}), encoding="utf-8")
+                self.assertFalse(gen_mod.is_passing_quality_gate(path))
+
 
 class DryRunAndOfflineTests(unittest.TestCase):
     """Spec §5 '--dry-run', acceptance #8 -- zero writes, zero model calls."""
@@ -752,9 +791,13 @@ class DryRunAndOfflineTests(unittest.TestCase):
     def test_dry_run_computes_but_writes_nothing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            summary = gen_mod.regenerate(actions_root=tmp_path / "actions",
-                                        demons_root=REPO_ROOT / "data" / "seed" / "demons",
-                                        full_flag=True, write=False)
+            gate_path = tmp_path / "coverage-round-1.json"
+            _write_passing_gate(gate_path)
+            with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
+                summary = gen_mod.regenerate(
+                    actions_root=tmp_path / "actions",
+                    demons_root=REPO_ROOT / "data" / "seed" / "demons",
+                    full_flag=True, write=False)
             self.assertFalse((tmp_path / "actions" / "_briefs" / "round-1.json").exists())
             self.assertFalse(summary["written"])
 
@@ -863,12 +906,18 @@ class DeterminismTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp1:
             actions_root_1 = Path(tmp1) / "actions"
-            gen_mod.regenerate(actions_root=actions_root_1, full_flag=True, write=True)
+            gate_path = Path(tmp1) / "coverage-round-1.json"
+            _write_passing_gate(gate_path)
+            with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
+                gen_mod.regenerate(actions_root=actions_root_1, full_flag=True, write=True)
             text1 = (actions_root_1 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
 
         with tempfile.TemporaryDirectory() as tmp2:
             actions_root_2 = Path(tmp2) / "actions"
-            gen_mod.regenerate(actions_root=actions_root_2, full_flag=True, write=True)
+            gate_path = Path(tmp2) / "coverage-round-1.json"
+            _write_passing_gate(gate_path)
+            with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
+                gen_mod.regenerate(actions_root=actions_root_2, full_flag=True, write=True)
             text2 = (actions_root_2 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
 
         self.assertEqual(text1, text2)

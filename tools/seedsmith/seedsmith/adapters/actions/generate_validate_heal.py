@@ -4,8 +4,8 @@ Reads:
     <candidates>     one or more JSON envelopes {"entries": [...]} of candidate rows -- each
                       carrying at least candidateId/briefId/pipelineId/scope/draft, matching
                       `validate_heal.derive.validate_round`'s own row shape. The default discovers
-                      all three proposal partitions for the round; A-S4 must see the complete
-                      candidate set so round-level checks are not accidentally partitioned.
+                      all proposal partitions that already exist for the round; A-S4 must see the
+                      complete available candidate set so round-level checks are not partitioned.
     <briefs>          A-S1's own brief envelope for this round (`distribution_planner`'s output) --
                       used to build each candidate's `BriefContext` (allowed/forbidden atom
                       families, motifs, structure-axis ceiling budget).
@@ -47,8 +47,8 @@ from .validate_heal.gates import BriefContext
 from .validate_heal.preflight import run_preflight
 
 __all__ = ["run", "regenerate", "ACTIONS_ROOT", "RUNG_TABLE_PATH", "BRIEFS_PATH",
-           "CANDIDATE_PATHS", "candidate_paths_for_round", "briefs_path_for_round",
-           "build_contexts"]
+           "CANDIDATE_PATHS", "candidate_paths_for_round", "available_candidate_paths_for_round",
+           "briefs_path_for_round", "build_contexts"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
@@ -66,6 +66,11 @@ def candidate_paths_for_round(round_no: int) -> "tuple[Path, Path, Path]":
         ACTIONS_ROOT / "_candidates" / partition / f"round-{round_no}.json"
         for partition in ("general", "family", "signature")
     )
+
+
+def available_candidate_paths_for_round(round_no: int) -> "list[Path]":
+    """Return existing proposal partitions in the canonical pipeline order."""
+    return [path for path in candidate_paths_for_round(round_no) if path.is_file()]
 
 
 def briefs_path_for_round(round_no: int) -> Path:
@@ -250,8 +255,10 @@ def run(argv=None) -> int:
                     help="prove constrained decoding with one real call before running (ignored under --dry-run)")
     args = ap.parse_args(argv)
 
-    paths = [Path(p) for p in args.candidates] if args.candidates \
-        else list(candidate_paths_for_round(args.round_no))
+    paths = ([Path(p) for p in args.candidates] if args.candidates
+             else available_candidate_paths_for_round(args.round_no))
+    if not paths:
+        raise ValueError(f"round-{args.round_no}: no action-candidate partitions found")
     briefs_path = Path(args.briefs) if args.briefs else briefs_path_for_round(args.round_no)
     summary = regenerate(candidates_path=paths, briefs_path=briefs_path,
                          round_no=args.round_no, dry_run=args.dry_run,

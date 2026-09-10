@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
+import { probeAptitudePresetsApi, useAptitudePresetActive } from "@/lib/bus/aptitudePresets";
 import { useAllocationDraft } from "@/hooks/useAllocationDraft";
 import { bindSurface } from "@/features/gui-lego/bindSurface";
 import { asSurfaceBusLike } from "@/features/gui-lego/createSurfaceBus";
 import { createAptitudesSurfaceBus } from "@/features/gui-lego/aptitudesSurfaceBus";
 import { foldAptitudesSurfaceVm } from "@/features/gui-lego/foldAptitudesSurfaceVm";
 import { getRecipe } from "@/features/gui-lego/recipeRegistry";
+import { runAutoAssign } from "@/features/aptitudes/runAutoAssign";
+import { AptitudePresetConsoleHost } from "@/features/aptitudes/AptitudePresetConsoleHost";
 import { Banner, Button, EmptyState } from "@/ui";
 import { RecipeMount } from "@/ui/gui-lego/RecipeMount";
 import { ensureAptitudesGuiLegoRegistered } from "@/ui/gui-lego/registerAptitudes";
+import { useToastStack } from "@/shell/toastStack";
 import { emitAptitudeObs } from "@/ui/actor/aptitudeObs";
 import { useSpeciesBuild } from "./useSpeciesBuild";
 
@@ -19,13 +23,19 @@ import { useSpeciesBuild } from "./useSpeciesBuild";
 export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; speciesId: string }) {
   ensureAptitudesGuiLegoRegistered();
   const surface = actorSurfaceFixture();
+  const pushToast = useToastStack((s) => s.push);
   const { state, price, respec, save } = useSpeciesBuild(playerId, speciesId);
   const [serverShares, setServerShares] = useState<Record<string, number> | undefined>(undefined);
   const [hasOverride, setHasOverride] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(surface.aptitudes[0]?.id ?? null);
+  const [presetOpen, setPresetOpen] = useState(false);
   const revisionRef = useRef(0);
   const typedBus = useMemo(() => createAptitudesSurfaceBus(), []);
   const bus = useMemo(() => asSurfaceBusLike(typedBus), [typedBus]);
+  const activePreset = useAptitudePresetActive(playerId, "species", speciesId);
+  const activePresetName = activePreset.data?.presetId
+    ? activePreset.data.presetId.slice(0, 8)
+    : null;
 
   useEffect(() => {
     setServerShares(undefined);
@@ -84,11 +94,74 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
         void allocationRef.current?.save();
       }),
       typedBus.on("preset.open", () => {
-        emitAptitudeObs("preset.open", { mode: "species", speciesId });
+        void (async () => {
+          emitAptitudeObs("preset.open", { mode: "species", speciesId, playerId });
+          const ok = await probeAptitudePresetsApi(playerId);
+          if (!ok) {
+            emitAptitudeObs("preset.open.unavailable", {
+              mode: "species",
+              reason: "presets.api.missing"
+            });
+            pushToast({
+              tone: "warn",
+              title: "Build presets unavailable",
+              message: "The presets API is not reachable — start the server or retry."
+            });
+            return;
+          }
+          emitAptitudeObs("preset.open.opened", { mode: "species" });
+          setPresetOpen(true);
+        })();
+      }),
+      typedBus.on("aptitude.autoAssign", (p) => {
+        const rule = (p as { rule?: string })?.rule ?? "even";
+        void (async () => {
+          emitAptitudeObs("aptitude.autoAssign", { mode: "species", rule, speciesId });
+          const alloc = allocationRef.current;
+          if (!alloc?.draft) return;
+          const result = await runAutoAssign({
+            rule,
+            budget,
+            mode: "species",
+            playerId,
+            speciesId,
+            scopeKey: speciesId,
+            setValue: (id, next) => alloc.setValue(id, next)
+          });
+          if (!result.ok) {
+            emitAptitudeObs("aptitude.autoAssign.refused", {
+              mode: "species",
+              rule,
+              reason: result.reason
+            });
+            if (
+              result.reason === "autoAssign.favour.empty" ||
+              result.reason === "autoAssign.favour.incomplete"
+            ) {
+              pushToast({
+                tone: "warn",
+                title: "No species favour",
+                message: "Favour seed is empty — try Even instead."
+              });
+            } else {
+              pushToast({
+                tone: "warn",
+                title: "Auto-assign refused",
+                message: result.reason
+              });
+            }
+            return;
+          }
+          emitAptitudeObs("aptitude.autoAssign.applied", {
+            mode: "species",
+            rule,
+            leftover: result.leftover
+          });
+        })();
       })
     ];
     return () => offs.forEach((off) => off());
-  }, [typedBus, speciesId, playerId]);
+  }, [typedBus, speciesId, playerId, budget, pushToast]);
 
   if (state.isError) {
     return (
@@ -133,6 +206,7 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
     saving: respec.isPending,
     selectedAptitudeId: selectedId,
     theta: data.level,
+    activePresetName,
     speciesChrome: {
       hasOverride,
       priceAmount: price.data?.priceAmount ?? 0,
@@ -158,6 +232,13 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
     return <EmptyState title="Aptitudes recipe missing" testId="species-build-loading" />;
   }
 
+  const activatePriceLabel =
+    !isFree && price.data
+      ? `Activate costs ${price.data.priceAmount} ${price.data.priceResource}`
+      : isFree
+        ? "First Activate / Confirm is free"
+        : null;
+
   return (
     <div className="flex flex-col gap-3" data-testid="species-build-panel">
       {allocation.error ? <Banner tone="error">{allocation.error}</Banner> : null}
@@ -179,6 +260,31 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
         </p>
       ) : null}
       <RecipeMount plan={plan} bus={bus} />
+      {presetOpen ? (
+        <AptitudePresetConsoleHost
+          open={presetOpen}
+          onOpenChange={setPresetOpen}
+          mode="species"
+          playerId={playerId}
+          scopeKey={speciesId}
+          speciesId={speciesId}
+          budget={budget}
+          surface={surface}
+          activatePriceLabel={activatePriceLabel}
+          onApplyDraft={(shares) => {
+            const alloc = allocationRef.current;
+            if (!alloc?.draft) return;
+            for (const [id, v] of Object.entries(shares)) {
+              alloc.setValue(id, v);
+            }
+          }}
+          onActivated={(shares) => {
+            setServerShares(shares);
+            setHasOverride(Object.values(shares).some((v) => (Number(v) || 0) !== 0));
+            allocationRef.current?.acceptCommitted(shares);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

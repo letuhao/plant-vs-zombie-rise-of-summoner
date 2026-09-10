@@ -131,7 +131,7 @@
 
 ## Phase 3 — Presets + auto-assign (Wave 3)
 
-- [ ] **AS-3.1** Preset store + CRUD + favour GET + materialize — `aptitude-preset-api` (core)
+- [x] **AS-3.1** Preset store + CRUD + favour GET + materialize — `aptitude-preset-api` (core)
   - Accept: player-scoped library (item-loadout discipline); Save sum ‰==1000 (E5); D13 materialize leftover legal (E2); soft max default **32** (E8); favour GET `sharesPermille` (S1); empty `{}` when no plan
   - Accept (G10): materialize refuses when `lo > hi` with named reason; library survives process restart
   - Verify: Data.Tests + Server.Tests AptitudePreset; `.\scripts\guard-dal.ps1`
@@ -139,7 +139,7 @@
   - Deps: AS-0.3 (SignalR shape for later activate)
   - Scope: M
 
-- [ ] **AS-3.2** Transactional Activate endpoint — `aptitude-preset-api` (activate)
+- [x] **AS-3.2** Transactional Activate endpoint — `aptitude-preset-api` (activate)
   - Accept: `POST /api/aptitude-presets/activate` sets active + Mode A unique / Mode C commander / Mode B **existing** priced respec in one txn; no half-active; scoped broadcast via AS-0.3 helper; no level-up autorespec (E6)
   - Verify: Server.Tests activate success/failure rollback; Mode B price path reused
   - Files: preset endpoints, species-build respec call-in
@@ -154,7 +154,7 @@
   - Deps: AS-3.1, AS-1.4
   - Scope: S
 
-- [ ] **AS-3.4** Preset nested console — `aptitude-preset-console`
+- [x] **AS-3.4** Preset nested console — `aptitude-preset-console`
   - Accept: gallery/editor/donut; New seed favour permille or Even; Apply-to-draft; Activate → activate API only; depth ≤3; Save blocked unless sum 1000
   - Accept (G12): editor exposes dual abs + ‰ constraints per row (D13), not ‰-only
   - Verify: `npm test -- --run aptitude-preset`; HTML surface draft present
@@ -162,7 +162,7 @@
   - Deps: AS-3.1, AS-3.2, AS-1.3
   - Scope: M
 
-- [ ] **AS-3.5** Wire presets + auto-assign into hosts
+- [x] **AS-3.5** Wire presets + auto-assign into hosts
   - Accept (G13a): `preset.open` works on Modes A/B/C
   - Accept (G13b): Activate txn works on Modes A/B/C via activate API only
   - Accept (G13c): Mode B shows price before Activate
@@ -174,8 +174,8 @@
 
 ### Checkpoint 3 — program Done
 
-- [ ] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned)
-- [ ] Guards: DAL, secondary-no-unity green
+- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Bound UniqueDemon lawn wire remains injector
+- [x] Guards: DAL green (this stream); secondary-no-unity N/A for FE-only
 - [ ] Live: Bound unique after Activate/allocate shows UniqueDemon
 - [ ] Menu queue P4 Aptitudes evidence noted on map/queue
 

@@ -46,7 +46,7 @@ from .distribution_planner.tuning import (
 )
 from .vocab import load_family_ids
 
-__all__ = ["run", "regenerate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "DEMONS_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
@@ -57,14 +57,39 @@ TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 BRIEFS_DIR = ACTIONS_ROOT / "_briefs"
 
-# A-S5 writes the round-scoped quality-gate report at this path. Presence is the explicit smoke
-# evidence required by the full-run gate; the report itself remains the source of truth for the
-# measured verdict.
+# A-S5 writes the round-scoped quality-gate report at this path. The full-run gate below checks the
+# report's measured verdict, not mere file presence.
 SMOKE_GATE_EVIDENCE_PATH = ACTIONS_ROOT / "_reports" / "coverage-round-1.json"
 
 
 def _canonical_dump(doc: dict) -> str:
     return json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def is_passing_quality_gate(path: Path, *, round_no: int = 1) -> bool:
+    """Return whether an A-S5 report can authorize a full A-S1 plan.
+
+    A report is evidence only when it is the expected envelope for this round and its closed
+    metrics explicitly passed.  This deliberately fails closed for stale smoke output, malformed
+    JSON, a review/reject envelope, an unevaluated metric, or any remaining gap.
+    """
+    if not path.is_file():
+        return False
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(doc, dict) or doc.get("kind") != "action-coverage":
+        return False
+    meta = doc.get("_meta")
+    verdict = meta.get("verdict") if isinstance(meta, dict) else None
+    if not isinstance(meta, dict) or meta.get("round") != round_no or not isinstance(verdict, dict):
+        return False
+    # A clean smoke report is also a passing quality gate. A full report uses `pass`; a smoke
+    # report uses `smoke-clean` because A-S5 deliberately never labels a partial run `pass`.
+    return (verdict.get("verdict") in {"pass", "smoke-clean"} and
+            verdict.get("notMeasuredMetrics") == [] and
+            verdict.get("gapMetrics") == [])
 
 
 def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
@@ -108,8 +133,8 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     run_tuning = load_run_tuning(run_tuning_path)
     dedup_k, dedup_k_source = load_dedup_k(dedup_tuning_path)
 
-    gate_evidence_present = SMOKE_GATE_EVIDENCE_PATH.is_file()
-    dp.refuse_full_run_if_ungated(run_tuning.mode, full_flag, gate_evidence_present)
+    gate_passed = is_passing_quality_gate(SMOKE_GATE_EVIDENCE_PATH)
+    dp.refuse_full_run_if_ungated(run_tuning.mode, full_flag, gate_passed)
 
     catalog = load_catalog(catalog_path)
     species_ids = [s.species_id for s in catalog]

@@ -386,9 +386,13 @@ def record_superseded(done: "dict[str, dict]", subject_id: str, record: NodeSeed
 class NodeGenerationInputs:
     """Everything one node's generation needs beyond the `Subject` itself. H3's quota stage is what
     RESOLVES a node's own `permitted_affixes`/`permitted_properties`/`anti_motif_tags` from the
-    plan's quota cell (`quota.py`, not yet built) — this module takes them as already-resolved
-    arguments rather than re-deriving them, the same split `Subject.brief`/`Subject.schema` staying
-    `None` in H1 already draws."""
+    plan's quota cell (`quota.py`) — this module takes them as already-resolved arguments rather
+    than re-deriving them, the same split `Subject.brief`/`Subject.schema` staying `None` in H1
+    already draws.
+
+    `quota_cell` is the six-axis cell itself (additive, 2026-09-10): persisted onto the accepted
+    `NodeSeedRecord` so `PassiveTree/QuotaDrift` can measure a committed corpus. Optional so every
+    pre-persistence construction site keeps working unmodified."""
 
     tree_display_name: str
     tree_reading: str
@@ -400,6 +404,7 @@ class NodeGenerationInputs:
     property_vocabulary: "Mapping[str, tuple[str, ...]] | Sequence[str]"
     affix_vocab: AffixVocabulary
     siblings: "Sequence[brief_mod.SiblingSummary]" = ()
+    quota_cell: "Mapping[str, str] | object | None" = None
 
 
 @dataclass(frozen=True)
@@ -703,7 +708,8 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
     final_response["nameKey"] = _derive_unique_name_key(str(final_response["name"]), known_name_keys)
 
     record = build_node_record(subject.node_id, subject.node_key, subject.branch, subject.tier,
-                               subject.node_class, final_response)
+                               subject.node_class, final_response,
+                               quota_cell=inputs.quota_cell)
     return NodeOutcome(subject.subject_id, "accepted", record=record)
 
 
@@ -813,6 +819,10 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                 "affixIds": node["affixIds"], "affinity": node["affinity"],
                 "exclusion": node["exclusion"], "name": node["name"], "nameKey": node["nameKey"],
                 "flavor": node["flavor"], "rationale": node.get("rationale", ""),
+                # Prefer the ledger's own persisted quotaCell when present (a record accepted after
+                # the 2026-09-10 persistence wiring); absent on every older ledger row — build_node_
+                # record then leaves quota_cell=None, matching the additive load path.
+                "quotaCell": node.get("quotaCell"),
             })
         records[subject_id] = record
         tree_siblings.append(brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))

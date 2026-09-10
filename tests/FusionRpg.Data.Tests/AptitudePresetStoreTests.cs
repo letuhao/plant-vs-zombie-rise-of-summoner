@@ -65,7 +65,7 @@ public class AptitudePresetStoreTests : IDisposable
             EvenRows(id), isCreate: true);
         Assert.Equal("", reason);
 
-        _store.Dispose();
+        // Survive process restart = new store on the same DB files (item-loadout discipline).
         var reopened = new RpgStore(_dir);
         reopened.Init();
         var listed = reopened.ListAptitudePresets(_playerId);
@@ -74,7 +74,6 @@ public class AptitudePresetStoreTests : IDisposable
         var entries = reopened.GetAptitudePresetEntries(id);
         Assert.Equal(12, entries.Count);
         Assert.Equal(1000, entries.Sum(e => e.TargetPermille));
-        reopened.Dispose();
     }
 
     [Fact]

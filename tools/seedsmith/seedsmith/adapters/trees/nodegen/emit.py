@@ -58,6 +58,54 @@ def assert_no_duplicate_name_keys(name_keys: "Sequence[str]") -> None:
         seen[key] = i
 
 
+#: The six axes `quota.QuotaCell` / `PassiveTree/QuotaDrift` read. Persisted under `quotaCell` as a
+#: camelCase map so a later `check --family` can fill `quota_cells_by_tree` from the committed
+#: corpus rather than a generation-time snapshot (metrics/passive_tree.py module docstring).
+QUOTA_CELL_KEYS: "tuple[str, ...]" = (
+    "nodeClass", "trigger", "element", "status", "channelFamily", "exclusionForm",
+)
+
+
+def quota_cell_to_dict(cell: "Mapping[str, str] | object") -> "dict[str, str]":
+    """Normalise a `QuotaCell` (or an already-camelCase map) into the seed-file shape. Accepts
+    either: a mapping already keyed by `QUOTA_CELL_KEYS`, or an object with `value_for(axis)` /
+    the six `QuotaCell` attribute names — never invents a missing axis."""
+    if hasattr(cell, "value_for"):
+        return {axis: str(cell.value_for(axis)) for axis in QUOTA_CELL_KEYS}  # type: ignore[attr-defined]
+    if isinstance(cell, Mapping):
+        # Attribute-style QuotaCell spilled via dataclasses.asdict uses snake_case; the seed file
+        # and QUOTA_CELL_KEYS are camelCase. Accept both so a caller never has to remember which.
+        snake = {
+            "nodeClass": "node_class", "trigger": "trigger", "element": "element",
+            "status": "status", "channelFamily": "channel_family",
+            "exclusionForm": "exclusion_form",
+        }
+        out: "dict[str, str]" = {}
+        for key in QUOTA_CELL_KEYS:
+            if key in cell:
+                out[key] = str(cell[key])
+            elif snake[key] in cell:
+                out[key] = str(cell[snake[key]])
+            else:
+                raise KeyError(f"quota_cell_to_dict: missing axis {key!r} in {sorted(cell)}")
+        return out
+    raise TypeError(f"quota_cell_to_dict: unsupported cell type {type(cell)!r}")
+
+
+def quota_cell_from_dict(raw: "Mapping[str, Any] | None") -> "dict[str, str] | None":
+    """Load path for a persisted `quotaCell` — returns None when absent (every pre-persistence
+    committed record), never invents defaults. Refuses a partial map rather than silently filling
+    missing axes, so a truncated write is a loud load error instead of a silent wrong cell."""
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping):
+        raise TypeError(f"quotaCell must be a mapping, got {type(raw)!r}")
+    missing = [k for k in QUOTA_CELL_KEYS if k not in raw]
+    if missing:
+        raise KeyError(f"quotaCell is missing axis/axes {missing!r}")
+    return {k: str(raw[k]) for k in QUOTA_CELL_KEYS}
+
+
 @dataclass(frozen=True)
 class NodeSeedRecord:
     """One accepted node, in the shape §6.4's seed file persists. Mirrors §6.3's response fields
@@ -67,7 +115,13 @@ class NodeSeedRecord:
     `printed_text` is H3's own addition (§2's `printedText` row): template-composed from
     `exclusion.compose_printed_text`, never asked of the model (it is not a §6.3 schema field) and
     never re-derivable from anything BUT the node's own `exclusion_form`/`exclusion_property_keys`
-    — so a rerun over the same accepted response always recomputes the identical string."""
+    — so a rerun over the same accepted response always recomputes the identical string.
+
+    `quota_cell` is additive (2026-09-10 distribution-audit wiring): the six-axis cell H3 assigned
+    at generation time. Absent (`None`) on every record committed before this field landed — the
+    load path keeps those records legal; a new generation writes it so `PassiveTree/QuotaDrift`
+    and `PassiveTree/CellOccupancy` can measure the committed corpus without a generation-time
+    snapshot."""
 
     node_id: str
     node_key: str
@@ -83,9 +137,10 @@ class NodeSeedRecord:
     flavor: str
     rationale: str = ""
     printed_text: str = ""
+    quota_cell: "Mapping[str, str] | None" = None
 
     def to_dict(self) -> dict:
-        return {
+        out = {
             "id": self.node_id, "nodeKey": self.node_key, "branch": self.branch,
             "tier": self.tier, "nodeClass": self.node_class,
             "affixIds": list(self.affix_ids), "affinity": list(self.affinity),
@@ -95,10 +150,14 @@ class NodeSeedRecord:
             "name": self.name, "nameKey": self.name_key, "flavor": self.flavor,
             "rationale": self.rationale,
         }
+        if self.quota_cell is not None:
+            out["quotaCell"] = quota_cell_to_dict(self.quota_cell)
+        return out
 
 
 def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_class: str,
-                      response: "Mapping[str, Any]") -> NodeSeedRecord:
+                      response: "Mapping[str, Any]", *,
+                      quota_cell: "Mapping[str, str] | object | None" = None) -> NodeSeedRecord:
     """One accepted §6.3 response, turned into a `NodeSeedRecord` — refuses (via
     `assert_name_key_grammar`) rather than accepting a malformed `nameKey` the schema's own
     `pattern` should already have blocked; belt and braces, per guardrail 1.
@@ -107,12 +166,23 @@ def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_
     node, per `compose_printed_text`'s own docstring), from the response's OWN `exclusion` object
     alone — never from a value the response itself might supply for it, since `printedText` is not
     part of the §6.3 schema at all (§2's table: AUTHORED/FREE, "template-composed").
+
+    `quota_cell` is optional and keyword-only: every pre-persistence call site (and every ledger
+    replay of a record that never carried one) keeps working unmodified. When supplied — a real
+    `QuotaCell` or an already-camelCase map — it is normalised and stored; when the response itself
+    carries a persisted `quotaCell` (ledger replay) and the caller passed none, that stored value
+    is preferred over inventing nothing.
     """
     name_key = str(response["nameKey"])
     assert_name_key_grammar(name_key)
     exclusion = response.get("exclusion") or {"form": "none", "propertyKeys": []}
     form = str(exclusion.get("form", "none"))
     property_keys = tuple(exclusion.get("propertyKeys") or ())
+    cell: "dict[str, str] | None"
+    if quota_cell is not None:
+        cell = quota_cell_to_dict(quota_cell)
+    else:
+        cell = quota_cell_from_dict(response.get("quotaCell"))
     return NodeSeedRecord(
         node_id=node_id, node_key=node_key, branch=branch, tier=tier, node_class=node_class,
         affix_ids=tuple(response["affixIds"]), affinity=tuple(response["affinity"]),
@@ -120,6 +190,7 @@ def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_
         name=str(response["name"]), name_key=name_key, flavor=str(response["flavor"]),
         rationale=str(response.get("rationale") or ""),
         printed_text=compose_printed_text(form, property_keys, role="loser"),
+        quota_cell=cell,
     )
 
 
@@ -169,6 +240,7 @@ def read_seed_document(tree_id: str, seed_root: "Path | None" = None) -> "dict[s
 
 __all__ = [
     "NodeKeyRefused", "assert_name_key_grammar", "assert_no_duplicate_name_keys",
+    "QUOTA_CELL_KEYS", "quota_cell_to_dict", "quota_cell_from_dict",
     "NodeSeedRecord", "build_node_record", "nodes_path", "build_seed_document",
     "write_seed_document", "read_seed_document", "content_sha256",
 ]

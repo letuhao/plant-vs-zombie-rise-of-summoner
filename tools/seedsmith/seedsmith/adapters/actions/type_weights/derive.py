@@ -87,7 +87,7 @@ class TypeWeightEntry:
 # **AC5 fix, 2026-09-03 (owner decision, post-build review).** Spec §3 step 2's literal text says
 # `separation: null` "takes the same row as 0" — but the shipped v1 default for row 0 is exactly
 # `0` ("collapses the spread to flat", spec §2's own stated reasoning for a genuine tie), and
-# sharing that row made every one of the 31 family-less (`derived-nofloor`) species print a flat
+# sharing that row made every family-less (`derived-nofloor`) species print a flat
 # 200/200/200/200/200 vector under the real shipped defaults — measured directly against the real
 # `type-weights.json`, not a hypothetical. That directly contradicts acceptance #5's own words: "a
 # family-less species still gets a vector shaped by its own leanOrder rather than a flat

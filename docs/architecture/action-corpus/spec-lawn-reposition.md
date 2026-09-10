@@ -40,7 +40,8 @@ the narrowest one in the repo — **ONE guarded entry point, *move actor to cell
    handful of moves before anything else depends on it.
 8. **Tests never call a model** — the transport stub raises. Vacuous here by construction, and **not
    waived**: if tooling for this module ever lands in seedsmith, its transport stub raises.
-9. **The roster is 84 species (53 with family assignments), not 904.**
+9. **The roster is the live species seed folder**: 904 species, 227 consolidated families, and 1,183
+   family memberships at the current measurement.
 
 ## 1. What exists today
 

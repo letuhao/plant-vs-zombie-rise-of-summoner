@@ -720,6 +720,18 @@ class TestModuleBoundary:
 
 
 class TestEntrypointContracts:
+    def test_available_candidate_paths_supports_staged_rounds(self, monkeypatch, tmp_path):
+        candidates_root = tmp_path / "actions" / "_candidates"
+        (candidates_root / "general").mkdir(parents=True)
+        (candidates_root / "family").mkdir(parents=True)
+        (candidates_root / "general" / "round-1.json").write_text("{}", encoding="utf-8")
+        (candidates_root / "family" / "round-1.json").write_text("{}", encoding="utf-8")
+        monkeypatch.setattr(entrypoint, "ACTIONS_ROOT", tmp_path / "actions")
+
+        paths = entrypoint.available_candidate_paths_for_round(1)
+
+        assert [p.parent.name for p in paths] == ["general", "family"]
+
     def test_dry_run_validates_all_candidate_partitions_and_assembles_only_after_validation(self):
         brief_id = "brief.general.general.001"
         brief = {

@@ -100,6 +100,16 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
         return list;
     }
 
+    /// <summary>All 1000‰ on Might — survives low commander budgets where an even split floors to zero.</summary>
+    static List<object> MightOnlyRows()
+    {
+        return AptitudeCatalog.All.Select(apt => (object)new
+        {
+            aptitudeId = apt.Id,
+            targetPermille = apt.Id == "Might" ? 1000L : 0L
+        }).ToList();
+    }
+
     async Task<string> CreateEvenPresetAsync(string name = "Even")
     {
         var resp = await _http.PostAsJsonAsync("/api/aptitude-presets", new
@@ -108,6 +118,21 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
             name,
             kind = "player",
             rows = EvenRows()
+        });
+        var text = await resp.Content.ReadAsStringAsync();
+        Assert.True(resp.IsSuccessStatusCode, text);
+        using var doc = JsonDocument.Parse(text);
+        return doc.RootElement.GetProperty("presetId").GetString()!;
+    }
+
+    async Task<string> CreateMightPresetAsync(string name = "Might")
+    {
+        var resp = await _http.PostAsJsonAsync("/api/aptitude-presets", new
+        {
+            playerId = _playerId,
+            name,
+            kind = "player",
+            rows = MightOnlyRows()
         });
         var text = await resp.Content.ReadAsStringAsync();
         Assert.True(resp.IsSuccessStatusCode, text);
@@ -212,7 +237,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
         empty.EnsureSuccessStatusCode();
         var emptyBody = await empty.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(JsonValueKind.Object, emptyBody.GetProperty("sharesPermille").ValueKind);
-        Assert.Equal(0, emptyBody.GetProperty("sharesPermille").EnumerateObject().Count());
+        Assert.Empty(emptyBody.GetProperty("sharesPermille").EnumerateObject().ToArray());
     }
 
     [Fact]
@@ -242,7 +267,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task Activate_commander_sets_active_and_allocation()
     {
-        var presetId = await CreateEvenPresetAsync();
+        var presetId = await CreateMightPresetAsync();
         var resp = await _http.PostAsJsonAsync("/api/aptitude-presets/activate", new
         {
             playerId = _playerId,
@@ -260,6 +285,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
 
         var apt = await (await _http.GetAsync($"/api/aptitudes/{_playerId}")).Content.ReadFromJsonAsync<JsonElement>();
         Assert.True(apt.GetProperty("spent").GetInt64() > 0);
+        Assert.True(apt.GetProperty("shares").GetProperty("Might").GetInt64() > 0);
     }
 
     [Fact]

@@ -38,6 +38,7 @@ from .signature_propose.derive import (
     propose_signature_action,
 )
 from .signature_propose.prompts import build_brief, build_context
+from .generation_batches import load_resume_entries, merge_entries, select_brief_batch
 from .usage_direction.weights import latest_usage_report_path, weights_from_usage_report
 from .vocab import load_family_glossary
 
@@ -82,7 +83,8 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
               candidates_dir: Path = CANDIDATES_DIR, count: int = 1, dry_run: bool = True,
               round_no: int = 1, endpoint: str = "http://localhost:1234/v1/chat/completions",
               model: str = "google/gemma-4-26b-a4b-qat", write: bool = True,
-              usage_reports_dir: "Path | None" = USAGE_REPORTS_DIR) -> dict:
+              usage_reports_dir: "Path | None" = USAGE_REPORTS_DIR,
+              resume: bool = False) -> dict:
     """Pure-ish computation (`dry_run=True` makes zero model calls and writes nothing regardless
     of `write`) plus, on a real run, up to `count * 3 * (MAX_HEAL + 1)` model calls and one file
     write. Returns a summary dict; never prints itself, matching
@@ -100,7 +102,15 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
             f"briefs, brief_assembly.derive.build_envelope) -- got kind={briefs_doc.get('kind')!r}"
         )
     signature_briefs = _signature_briefs_of(briefs_doc)
-    selected = signature_briefs[:max(0, count)]
+    output_path = candidates_dir / f"round-{round_no}.json"
+    plan_hash = (briefs_doc.get("_meta", {}).get("planCorpusHash") or
+                 briefs_doc.get("_meta", {}).get("corpusHash"))
+    existing_entries = (load_resume_entries(
+        output_path, partition="signature", round_no=round_no, briefs_corpus_hash=plan_hash)
+        if resume else [])
+    selected = (select_brief_batch(signature_briefs, count=count, existing_entries=existing_entries)
+                if resume else signature_briefs[:max(0, count)])
+    brief_index = {brief["briefId"]: i for i, brief in enumerate(signature_briefs)}
 
     pairing_table = load_pairing_table(pairings_path) if pairings_path.is_file() else {}
     #: SMOKE BATCH criterion-2 fix, 2026-09-05: read fresh every call, never cached -- see
@@ -136,7 +146,9 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
     config = LlmCallerConfig(endpoint=endpoint, model=model)
     base_provenance = {
         "pipeline": "signature-propose", "model": model, "promptVersion": PROMPT_VERSION,
-        "briefsCorpusHash": meta.get("corpusHash"),
+        # A-S2 carries A-S1's plan digest under its own explicit key. Keep the old generic key as
+        # a read-only fallback for hand-built/legacy fixtures.
+        "briefsCorpusHash": meta.get("planCorpusHash", meta.get("corpusHash")),
         # Acceptance #10's own EXTRA field relative to A-P1/A-P2: "the P2 candidate-set hash this
         # round differed against". A-S2's own envelope meta (`generate_brief_assembly.regenerate`)
         # carries the accepted P2 round's own `_meta.corpusHash` forward under this key, so this
@@ -149,7 +161,7 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
     rows: "list[dict]" = []
     by_outcome: "dict[str, int]" = {}
     for i, brief in enumerate(selected):
-        candidate_id = f"candidate.signature.{i:03d}"
+        candidate_id = f"candidate.signature.{brief_index[brief['briefId']]:03d}"
         prov = dict(base_provenance)
         prov["briefHash"] = _brief_hash(brief)
         candidate = propose_signature_action(
@@ -162,6 +174,7 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
         by_outcome[candidate.outcome] = by_outcome.get(candidate.outcome, 0) + 1
 
     rows.sort(key=lambda r: r["briefId"])
+    rows = merge_entries(existing_entries, rows) if resume else rows
     set_hash = candidate_set_hash(rows)
 
     out_doc = {
@@ -178,12 +191,17 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
 
     if write:
         candidates_dir.mkdir(parents=True, exist_ok=True)
-        (candidates_dir / f"round-{round_no}.json").write_text(canonical_dump(out_doc), encoding="utf-8")
+        output_path.write_text(canonical_dump(out_doc), encoding="utf-8")
 
     return {
         "dryRun": False,
         "totalSignatureBriefs": len(signature_briefs),
         "selected": len(selected),
+        "resumed": len(existing_entries),
+        "remaining": sum(1 for brief in signature_briefs
+                         if not any(e.get("briefId") == brief["briefId"] and
+                                    e.get("outcome") in {"accepted", "blocked", "escalated"}
+                                    for e in rows)),
         "byOutcome": by_outcome,
         "candidateSetHash": set_hash,
         "written": bool(write),
@@ -198,12 +216,15 @@ def run(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true", help="render briefs, make no model calls")
     ap.add_argument("--count", type=int, default=1, help="how many briefs to draw a candidate for")
     ap.add_argument("--round", type=int, default=1, dest="round_no", help="the round number this run writes")
+    ap.add_argument("--resume", action="store_true",
+                    help="merge this batch into the existing partition and skip terminal rows")
     ap.add_argument("--endpoint", default="http://localhost:1234/v1/chat/completions")
     ap.add_argument("--model", default="google/gemma-4-26b-a4b-qat")
     args = ap.parse_args(argv)
 
     summary = regenerate(briefs_path=Path(args.briefs), count=args.count, dry_run=args.dry_run,
-                         round_no=args.round_no, endpoint=args.endpoint, model=args.model)
+                         round_no=args.round_no, endpoint=args.endpoint, model=args.model,
+                         resume=args.resume)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
 

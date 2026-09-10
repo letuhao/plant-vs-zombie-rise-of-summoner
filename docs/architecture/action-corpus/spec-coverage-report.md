@@ -18,10 +18,9 @@ claimed — no round declares success against a metric it did not evaluate.
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan**; a full run
    is an owner decision behind a quality gate, and **this module's report is that gate's evidence.**
    It must therefore be able to report honestly on 12 rows without pretending they are a corpus.
-3. **The roster is 84 species, not 904.** So the denominators here are 84 species, 19 families and 53
-   family-assigned species — measured, not projected. The research band (1,500-3,500 named abilities
-   for a ~900-unit roster) was derived for a 904 roster and **must be re-derived against the shipped
-   one** before any occupancy verdict cites it.
+3. **The roster is the live species seed folder.** Current denominators are 904 species, 227
+   consolidated families, and 1,183 family memberships — measured, not projected. Every occupancy
+   estimate is derived from those live records; generated C# and SQLite projections are not inputs.
 4. **C1's family-access widening is gated.** Until its three preconditions hold, every tier draws from
    the same atom-family set, so cross-tier similarity is expected. This module reports the rate and
    does not call it a defect.
@@ -93,7 +92,7 @@ and nothing else. Two consequences belong here rather than there:
 | `action.corpus.speciesCollision` | **CLOSED** | no | two species whose signature sets are tier-2 identical — the named re-tune trigger for the per-species count |
 | `action.corpus.singletonShare` | **CLOSED** | no | median rows per mechanical cell and the singleton share, against the research target of median 1 and ~68% singletons |
 | `action.corpus.structureEnforceability` | **CLOSED** | no | how many accepted rows spend **`restriction`**, which `StructureBudgetGuard.cs:30-34` cannot detect, and (separately) that **zero** rows spend `reaction`, which is unspendable rather than undetectable |
-| `action.corpus.rosterReconciliation` | **CLOSED** | no | the corpus size against the **shipped 84**, and it refuses to quote a band derived for 904 |
+| `action.corpus.rosterReconciliation` | **CLOSED** | no | the corpus size against the **live 904-species roster**, with estimates derived from current tuning |
 | `action.corpus.flavourQuality` | **OPEN** | **never** | prose reads generic — a review queue |
 | `action.corpus.semanticNeighbour` | **OPEN** | **never** | A-S3's tier-3 flags — a review queue |
 
@@ -180,7 +179,8 @@ That fixes both metrics above, and it makes one of them worse before it makes it
 3. The report lists, explicitly, which metrics were evaluated and which were `NOT_MEASURED`.
 4. Cell counts and quotas are present for every planned cell, including cells with count 0.
 5. Next-round targets are a pure function of the report — same report in, same targets out, byte-identical.
-6. `rosterReconciliation` states the shipped roster (84 species, 19 families, 53 family-assigned) and
+6. `rosterReconciliation` states the live roster (904 species, 227 consolidated families, 1,183
+   memberships) and
    re-derives any band it quotes against it.
 7. `structureEnforceability` reports the count of accepted rows spending **`restriction`**, with a
    note that `StructureBudgetGuard.cs:30-34` cannot detect it because detection needs the effect-atom

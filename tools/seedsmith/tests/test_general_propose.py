@@ -66,6 +66,9 @@ from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
+REAL_GENERAL_CANDIDATES_PATH = (
+    REPO_ROOT / "data" / "seed" / "actions" / "_candidates" / "general" / "round-1.json"
+)
 
 
 def raising_call(*args, **kwargs):
@@ -398,15 +401,14 @@ class RealWorkedExampleTests(unittest.TestCase):
 
     def test_real_worked_example_carries_the_real_pinned_answer_fields(self):
         text = render_worked_example()
-        # the real accepted answer for brief.general.general.004 (candidate.general.003) --
-        # independently re-read from the real file, 2026-09-05.
-        self.assertIn("Brace", text)
-        self.assertIn("atom.evd-brace", text)
-        self.assertIn("atom.sust-grit", text)
-        self.assertIn(
-            "A fundamental defensive posture that relies on physical resolve and readiness",
-            text,
-        )
+        # Re-read the current live pinned answer instead of freezing a historical model response.
+        doc = json.loads(REAL_GENERAL_CANDIDATES_PATH.read_text(encoding="utf-8"))
+        row = next(e for e in doc["entries"] if e["candidateId"] == "candidate.general.003")
+        answer = row["draft"]
+        for field in ("name", "flavor", "rationale"):
+            self.assertIn(answer[field], text)
+        for atom_family in answer["atomFamilies"]:
+            self.assertIn(atom_family, text)
 
     def test_real_worked_example_never_leaks_a_numeric_magnitude(self):
         # the example is an ANSWER, and this pipeline's own binding constraint (acceptance #10:

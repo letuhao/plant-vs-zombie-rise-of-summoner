@@ -428,6 +428,11 @@ def build_brief(context: Mapping[str, Any]) -> str:
         for action in family_actions:
             fams = ", ".join(sorted(action.get("atomFamilies") or ()))
             lines.append(f"  - {action.get('name')} [{fams}] (fingerprint: {action.get('fingerprint')})")
+    elif context.get("family"):
+        lines.append(
+            "This creature belongs to a family, but that family has no accepted sibling actions "
+            "in this round; do not treat the missing list as proof that it has no family."
+        )
     else:
         lines.append("This creature has no family; there is nothing to differ from.")
 

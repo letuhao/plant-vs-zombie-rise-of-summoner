@@ -27,17 +27,27 @@ const ALL: {
 
 /** Register all Derived v1 piece factories into `pieceRegistry` (idempotent). */
 export function registerDerivedPieces(): void {
-  if (registered) return;
-  for (const group of ALL) {
-    for (const [pieceId, factory] of Object.entries(group.factories)) {
-      registerPiece({
-        pieceId,
-        slots: group.slots[pieceId] ?? [],
-        factory
-      });
+  if (!registered) {
+    for (const group of ALL) {
+      for (const [pieceId, factory] of Object.entries(group.factories)) {
+        registerPiece({
+          pieceId,
+          slots: group.slots[pieceId] ?? [],
+          factory
+        });
+      }
     }
+    registered = true;
+    return;
   }
-  registered = true;
+  // Aptitude factories grow during AS-3.x — re-bind so HMR / long-lived test runners pick up new pieceIds.
+  for (const [pieceId, factory] of Object.entries(aptitudeFactories)) {
+    registerPiece({
+      pieceId,
+      slots: APTITUDE_SLOT_MAP[pieceId] ?? [],
+      factory
+    });
+  }
 }
 
 /** Test helper — allows re-register after `clearPieceRegistryForTests`. */

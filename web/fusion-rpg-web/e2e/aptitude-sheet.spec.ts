@@ -22,8 +22,8 @@ const twelveShares = () => {
     Focus: 0,
     Bulwark: 0,
     Retribution: 0,
-    Resolve: 0,
-    Presence: 0
+    Precision: 0,
+    Ferocity: 0
   };
   return shares;
 };

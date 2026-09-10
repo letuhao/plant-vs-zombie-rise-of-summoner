@@ -40,6 +40,9 @@ from seedsmith.pipeline.model import BLOCKED_FIELD, audit_schema  # noqa: E402
 from seedsmith.adapters.actions.validate_heal.schema_audit import audit_descriptions  # noqa: E402
 from seedsmith.adapters.actions.validate_heal.gates import run_g3  # noqa: E402
 from seedsmith.adapters.actions.brief_assembly import derive as ba  # noqa: E402
+from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
+    CATALOG_PATH, derive_live_family_assignments, load_catalog,
+)
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 from seedsmith.adapters.actions.signature_propose.prompts import (  # noqa: E402
     DIFFERENTIATOR_VALUES,
@@ -76,12 +79,6 @@ from seedsmith.adapters.demons.anchor.vote import VoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_PLAN_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
-REAL_MOTIF_ASSIGNMENTS_PATH = (
-    REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "motif-assignments.json"
-)
-REAL_FAMILY_ASSIGNMENTS_PATH = (
-    REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
-)
 FAMILY_IDS = load_family_ids()
 
 
@@ -305,7 +302,13 @@ class SpeciesAnchorRaiseTests(unittest.TestCase):
         context = build_context(brief, sample_index=0)  # must not raise
         self.assertEqual(context["familyActions"], [])
         text = build_brief(context)
-        self.assertIn("this creature has no family; there is nothing to differ from", text.lower())
+        self.assertIn("this creature belongs to a family", text.lower())
+
+    def test_empty_family_actions_for_family_less_species_renders_no_family_sentence(self):
+        anchor = dict(make_brief()["anchor"], family=None)
+        context = build_context(make_brief(anchor=anchor, familyActions=[]), sample_index=0)
+        self.assertIn("this creature has no family; there is nothing to differ from",
+                      build_brief(context).lower())
 
     def test_family_actions_must_be_a_list(self):
         brief = make_brief(familyActions="not-a-list")
@@ -327,7 +330,10 @@ class RealBriefAssemblyIntegrationTests(unittest.TestCase):
         cls.species_entries = [e for e in cls.plan_doc["entries"] if e["scope"] == "species"]
 
     def test_a_s2_own_output_for_a_family_less_species_runs_and_renders_no_family_sentence(self):
-        family_less = next(e for e in self.species_entries if e["anchor"].get("family") is None)
+        family_less_entries = [e for e in self.species_entries if e["anchor"].get("family") is None]
+        if not family_less_entries:
+            self.skipTest("the current live seed roster assigns every species to a family")
+        family_less = family_less_entries[0]
         [real_brief] = ba.assemble_briefs([family_less], accepted_rows=[], family_ids=FAMILY_IDS)
         self.assertEqual(real_brief["familyActions"], [])          # A-S2's own real empty-list shape
         context = build_context(real_brief, sample_index=0)         # must not raise
@@ -418,7 +424,8 @@ class BuildBriefContentTests(unittest.TestCase):
         self.assertIn("your action must differ from every one of these", text.lower())
 
     def test_no_family_actions_renders_explicit_no_family_sentence(self):
-        context = build_context(make_brief(familyActions=[]), sample_index=0)
+        anchor = dict(make_brief()["anchor"], family=None)
+        context = build_context(make_brief(anchor=anchor, familyActions=[]), sample_index=0)
         text = build_brief(context)
         self.assertIn("this creature has no family; there is nothing to differ from", text.lower())
 
@@ -961,6 +968,7 @@ def _real_p3_briefs_envelope(*, count: int = 5) -> dict:
     briefs = ba.assemble_briefs(species_entries, accepted_rows=[], family_ids=FAMILY_IDS)
     return ba.build_envelope(briefs, meta={
         "partition": "round-1", "round": 1, "planPath": str(REAL_PLAN_PATH),
+        "planCorpusHash": "plan-round-abc123",
         "acceptedRoundPath": "synthetic-empty-round", "acceptedRoundCorpusHash": "p2-round-abc123",
     })
 
@@ -1033,9 +1041,11 @@ class DryRunEntrypointTests(unittest.TestCase):
             self.assertEqual(written["_meta"]["model"], "test-model-x")
             self.assertEqual(written["_meta"]["promptVersion"], gen_mod.PROMPT_VERSION)
             self.assertIn("candidateSetHash", written["_meta"])
+            self.assertEqual(written["_meta"]["briefsCorpusHash"], "plan-round-abc123")
             self.assertEqual(written["_meta"]["p2CandidateSetHash"], "p2-round-abc123")
             row = written["entries"][0]
             self.assertIn("briefHash", row["_provenance"])
+            self.assertEqual(row["_provenance"]["briefsCorpusHash"], "plan-round-abc123")
             self.assertEqual(row["_provenance"]["model"], "test-model-x")
             self.assertEqual(row["_provenance"]["p2CandidateSetHash"], "p2-round-abc123")
 
@@ -1208,12 +1218,12 @@ class ValidateHealG3NeverPenalisesDifferentiatorNoneTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 
 class RosterTests(unittest.TestCase):
-    def test_84_species_53_with_family_31_without(self):
-        motifs = json.loads(REAL_MOTIF_ASSIGNMENTS_PATH.read_text(encoding="utf-8"))
-        families = json.loads(REAL_FAMILY_ASSIGNMENTS_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(len(motifs), 84)
-        self.assertEqual(len(families), 53)
-        self.assertEqual(84 - len(families), 31)
+    def test_live_roster_and_family_memberships(self):
+        species = load_catalog(CATALOG_PATH)
+        families = derive_live_family_assignments(CATALOG_PATH)
+        self.assertEqual(len(species), 904)
+        self.assertEqual(len(families), len(species))
+        self.assertEqual(sum(len(v) for v in families.values()), 1183)
 
 
 if __name__ == "__main__":

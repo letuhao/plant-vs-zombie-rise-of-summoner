@@ -129,7 +129,7 @@ def assemble_briefs(plan_entries: Sequence[Mapping[str, object]],
                     family_ids: "frozenset[str]") -> "list[dict]":
     """§3 end to end: every species-scope (signature) entry in A-S1's plan gets exactly one P3
     brief, **never skipped** (spec §3.3), walked in the plan's own order (A-S1 already ordered the
-    84-species catalog once; this module does not re-sort it). `general`/`family`-scope plan
+    live species catalog once; this module does not re-sort it). `general`/`family`-scope plan
     entries are not signature briefs and are not emitted here — A-P3 has no use for them."""
     by_family = index_accepted_family_actions(accepted_rows, family_ids)
     return [assemble_brief(e, by_family) for e in plan_entries if e.get("scope") == "species"]

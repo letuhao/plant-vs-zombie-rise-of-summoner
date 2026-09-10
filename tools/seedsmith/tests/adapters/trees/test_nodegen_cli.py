@@ -99,6 +99,26 @@ class CheckFamilyExitCodeTests(unittest.TestCase):
         self.assertIn("PassiveTree/HiddenFileCount", out)
         self.assertIn("seed root(s)", out)
 
+    def test_quota_drift_and_cell_occupancy_measure_for_real(self) -> None:
+        """2026-09-10 distribution-audit wiring: `_cmd_check_family` used to leave
+        `quota_cells_by_tree` empty, so `PassiveTree/QuotaDrift` and `PassiveTree/CellOccupancy`
+        always reported NOT_MEASURED over a real committed corpus. Both must now measure — the
+        cells are re-derived from each committed plan via `quota_for_plan` (the same function the
+        generation CLI already calls)."""
+        code, out = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/QuotaDrift", out)
+        self.assertIn("PassiveTree/CellOccupancy", out)
+        self.assertNotIn("[NOT_MEASURED] PassiveTree/QuotaDrift", out)
+        self.assertNotIn("[NOT_MEASURED] PassiveTree/CellOccupancy", out)
+
+    def test_species_uniqueness_runs_under_check_family(self) -> None:
+        """SpeciesUniqueness is gates=False and deliberately outside ALL_PASSIVE_TREE_METRICS;
+        `_cmd_check_family` registers it locally so a real corpus check surfaces U1/U2/U3."""
+        code, out = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/SpeciesUniqueness", out)
+
     def test_without_gate_the_real_committed_plan_reports_and_exits_clean_or_gap(self) -> None:
         """No --gate: every registered PassiveTree finding is reported — this must reach a real
         verdict rather than EXIT_CANNOT_RUN/EXIT_REFUSED, proving the family dispatch actually runs

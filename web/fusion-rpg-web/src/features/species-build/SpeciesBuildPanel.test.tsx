@@ -56,6 +56,18 @@ vi.mock("@/lib/bus/demons", () => ({
   newCorrelationId: () => "corr-fixed"
 }));
 
+vi.mock("@/lib/bus/aptitudePresets", () => ({
+  probeAptitudePresetsApi: vi.fn(async () => true),
+  useAptitudePresetActive: () => ({ data: { presetId: null }, isLoading: false }),
+  useAptitudePresets: () => ({ data: [], isLoading: false }),
+  useSaveAptitudePreset: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateAptitudePreset: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteAptitudePreset: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useActivateAptitudePreset: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  fetchAptitudePresetFavour: vi.fn(async () => ({})),
+  materializeAptitudePreset: vi.fn()
+}));
+
 function freshState(overrides?: Partial<NonNullable<typeof speciesData>>) {
   return {
     speciesId: "fumeshroom",

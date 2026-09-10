@@ -464,14 +464,12 @@ def audit_no_magnitude_smuggling(brief: dict) -> None:
 
 # ---------------------------------------------------------------------------------------------
 # §3 step 1 — the full-run refusal. `mode: "full"` needs `--full` AND passing smoke-gate evidence
-# (A-S5's coverage report); A-S5 is not built, so `gate_evidence_present` is always False today —
-# `--full` alone is necessary but not sufficient, matching the spec's own "refuses... naming the
-# missing evidence" testing-strategy line.
+# (A-S5's coverage report); `--full` alone is necessary but not sufficient, matching the spec's
+# own "refuses... naming the missing evidence" testing-strategy line.
 # ---------------------------------------------------------------------------------------------
 
 SMOKE_GATE_EVIDENCE_NOTE = (
-    "a passing quality-gate report from A-S5 (coverage-report) -- A-S5 is not built yet, so no "
-    "smoke-gate evidence can exist; --full is necessary but not sufficient "
+    "a passing quality-gate report from A-S5 (coverage-report); --full is necessary but not sufficient "
     "(spec-distribution-planner.md SS3 step 1)"
 )
 

@@ -41,6 +41,11 @@ vi.mock("@/lib/bus", () => ({
   useSaveUniqueAptitudes: () => ({ mutateAsync: mutateUnique, isPending: false })
 }));
 
+vi.mock("@/lib/bus/aptitudePresets", () => ({
+  probeAptitudePresetsApi: vi.fn(async () => true),
+  useAptitudePresetActive: () => ({ data: { presetId: null }, isLoading: false })
+}));
+
 function actor(): ActorView {
   return {
     instanceId: "a1",

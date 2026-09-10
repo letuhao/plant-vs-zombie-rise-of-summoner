@@ -81,6 +81,39 @@ class BuildNodeRecordTests(unittest.TestCase):
         self.assertEqual(as_dict["exclusion"]["printedText"], record.printed_text)
         self.assertTrue(as_dict["exclusion"]["printedText"])
 
+    def test_quota_cell_is_absent_by_default(self) -> None:
+        """Additive: every pre-persistence call site (and every old committed record) leaves
+        `quotaCell` off the dict entirely — never a silently-empty map that looks like a real cell."""
+        record = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response=_sample_response(),
+        )
+        self.assertIsNone(record.quota_cell)
+        self.assertNotIn("quotaCell", record.to_dict())
+
+    def test_quota_cell_round_trips_through_to_dict_and_build(self) -> None:
+        cell = {
+            "nodeClass": "mechanism", "trigger": "OnHit", "element": "fire",
+            "status": "none", "channelFamily": "atk", "exclusionForm": "none",
+        }
+        record = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response=_sample_response(), quota_cell=cell,
+        )
+        as_dict = record.to_dict()
+        self.assertEqual(as_dict["quotaCell"], cell)
+        # Load path: a response that already carries quotaCell (ledger replay) reconstructs it
+        # without the caller re-supplying the kwarg.
+        replay = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response={**_sample_response(), "quotaCell": cell},
+        )
+        self.assertEqual(dict(replay.quota_cell or {}), cell)
+
+    def test_quota_cell_from_dict_refuses_a_partial_map(self) -> None:
+        with self.assertRaises(KeyError):
+            emit.quota_cell_from_dict({"nodeClass": "mechanism"})
+
     def test_refuses_a_malformed_name_key_even_from_a_response(self) -> None:
         with self.assertRaises(emit.NodeKeyRefused):
             emit.build_node_record(
