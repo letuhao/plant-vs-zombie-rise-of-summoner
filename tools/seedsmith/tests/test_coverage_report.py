@@ -24,7 +24,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.actions import generate_coverage_report as gen_mod  # noqa: E402
-from seedsmith.adapters.actions.characteristic_pool.catalog import load_catalog  # noqa: E402
+from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
+    derive_live_family_assignments, load_catalog,
+)
 from seedsmith.adapters.actions.coverage_report import derive as cr  # noqa: E402
 from seedsmith.adapters.actions.coverage_report.ctx import (  # noqa: E402
     ActionCoverageCtx, RosterCounts,
@@ -258,7 +260,8 @@ class UnpairedPayoffTests(unittest.TestCase):
         cov = _simple_ctx([], pairing_table={k: tuple(v) for k, v in pairing_table.items()})
         findings = cr.pairing_reach_findings("m", cov)
         self.assertEqual(len(findings), 1)
-        self.assertIn("2/112 authored affix families are reachable payoff keys", findings[0].message)
+        self.assertIn(f"2/{len(FAMILY_IDS)} authored affix families are reachable payoff keys",
+                      findings[0].message)
         self.assertEqual(set(findings[0].evidence["reachablePayoffKeys"]),
                          {"atom.chill-punisher", "atom.rot-punisher"})
 
@@ -328,40 +331,41 @@ class ReactionAcceptedTests(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------------------------
-# Planted violation — roster inflation.
+# Live roster reconciliation.
 # ---------------------------------------------------------------------------------------------
 
-class RosterInflationTests(unittest.TestCase):
-    def test_a_904_species_count_fails_roster_reconciliation(self) -> None:
-        bad_roster = RosterCounts(species_count=904, family_count=200, family_assigned_count=800)
-        findings = cr.roster_reconciliation_findings("m", bad_roster, accepted_corpus_size=0)
+class RosterReconciliationTests(unittest.TestCase):
+    def test_a_904_species_count_is_measured_from_the_live_roster(self) -> None:
+        live_roster = RosterCounts(species_count=904, family_count=227,
+                                   family_assigned_count=1183)
+        findings = cr.roster_reconciliation_findings("m", live_roster, accepted_corpus_size=0,
+                                                     signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
-        self.assertEqual(findings[0].severity, Severity.GAP)
-        self.assertIn("roster-inflated", findings[0].message)
+        self.assertEqual(findings[0].severity, Severity.NOTE)
+        self.assertIn("904 x 5 = 4520", findings[0].message)
 
-    def test_the_real_shipped_roster_re_derives_below_the_band_never_quoting_it_raw(self) -> None:
+    def test_the_live_seed_roster_re_derives_against_the_run_tuning(self) -> None:
         """Acceptance #6 — re-verify the roster numbers directly rather than trusting any prompt."""
         catalog = load_catalog()
-        family_assignments = json.loads(
-            (REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json")
-            .read_text(encoding="utf-8"))
+        family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
         roster = RosterCounts(species_count=len(catalog), family_count=len(members),
                               family_assigned_count=sum(len(v) for v in members.values()))
-        self.assertEqual(roster.species_count, 84)
-        self.assertEqual(roster.family_count, 19)
-        self.assertEqual(roster.family_assigned_count, 53)
+        self.assertEqual(roster.species_count, 904)
+        self.assertEqual(roster.family_count, 227)
+        self.assertEqual(roster.family_assigned_count, 1183)
 
-        findings = cr.roster_reconciliation_findings("m", roster, accepted_corpus_size=0)
+        findings = cr.roster_reconciliation_findings("m", roster, accepted_corpus_size=0,
+                                                     signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, Severity.NOTE)
         evidence = findings[0].evidence
-        self.assertEqual(evidence["signatureTierEstimate"], 84 * 3)
-        self.assertTrue(evidence["belowBand"])
+        self.assertEqual(evidence["signatureTierEstimate"], 904 * 5)
+        self.assertFalse(evidence["belowBand"])
         self.assertEqual(evidence["researchBandRoster"], 904)
         # the message must show the re-derivation arithmetic, never just repeat "1,500-3,500"
-        self.assertIn("84 x 3 = 252", findings[0].message)
-        self.assertIn("below", findings[0].message)
+        self.assertIn("904 x 5 = 4520", findings[0].message)
+        self.assertIn("inside/above", findings[0].message)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -607,7 +611,7 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
 
     def test_a_real_run_reports_the_real_accepted_corpus_and_an_explicit_non_pass_verdict(self) -> None:
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["acceptedCorpusSize"], 24)
+        self.assertEqual(summary["acceptedCorpusSize"], 138)
         self.assertNotEqual(summary["verdict"], "pass")
         # 3 scopes x 5 categories = 15 (scope, category, rungBand) groups; 45 is the exploded
         # per-pairingRole cell ROW count in the written report's `entries` (cell_entries below).
@@ -620,7 +624,7 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
         # The real gaps this expanded batch's own thin corpus actually has -- named explicitly
         # (acceptance #3), never silently absorbed into a green verdict.
         self.assertEqual(sorted(summary["gapMetrics"]),
-                         ["action.corpus.cellOccupancy", "action.corpus.thinCell"])
+                         ["action.corpus.enablerPayoffCoverage", "action.corpus.thinCell"])
 
 
 if __name__ == "__main__":

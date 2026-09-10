@@ -10,7 +10,7 @@
     data/seed/actions/type-weights.json                  A-T1 — categoryMilli, for quota recompute
     data/tuning/action-corpus-run.v1.json                round counts (generalCount/perFamilyCount/
                                                           perSpeciesCount) and mode
-    data/seed/demons/_generated/family-assignments.json  species -> family membership
+    data/seed/demons/species/**/*.json                      live species/family membership
     data/seed/items/affix-families/*.json                the 98-family namespace
     data/seed/actions/pairings.json                      read-only; today's 5 out-of-namespace ids
 
@@ -35,7 +35,9 @@ import hashlib
 import json
 from pathlib import Path
 
-from .characteristic_pool.catalog import CATALOG_PATH, load_catalog
+from .characteristic_pool.catalog import (
+    CATALOG_PATH, derive_live_family_assignments, load_catalog,
+)
 from .coverage_report import derive as cr
 from .coverage_report.ctx import ActionCoverageCtx, RosterCounts
 from .distribution_planner import derive as dp
@@ -54,12 +56,13 @@ ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
 TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
-FAMILY_ASSIGNMENTS_PATH = DEMONS_ROOT / "_generated" / "family-assignments.json"
 
 
 def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
     members: "dict[str, list[str]]" = {}
     for species_id, families in family_assignments.items():
+        if isinstance(families, str):
+            families = [families]
         for fam in families:
             members.setdefault(fam, []).append(species_id)
     return {fam: sorted(v) for fam, v in members.items()}
@@ -67,11 +70,19 @@ def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
 
 def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
               type_weights_path: Path, run_tuning_path: Path,
-              family_assignments_path: Path, pairings_path: Path, round_no: int) -> ActionCoverageCtx:
+              family_assignments_path: "Path | None", pairings_path: Path,
+              round_no: int) -> ActionCoverageCtx:
     catalog = load_catalog(catalog_path)
     species_ids = [s.species_id for s in catalog]
 
-    family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
+    using_live_families = family_assignments_path is None
+    if using_live_families:
+        live_species_root = catalog_path if catalog_path.is_dir() else demons_root / "species"
+        family_assignments = derive_live_family_assignments(live_species_root)
+    else:
+        family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
+    if using_live_families and set(family_assignments) != set(species_ids):
+        raise ValueError("live family assignments do not cover exactly the live species roster")
     family_members = _family_members(family_assignments)
 
     type_weights_doc = json.loads(type_weights_path.read_text(encoding="utf-8"))
@@ -122,7 +133,7 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
         accepted_rows=tuple(accepted_rows), quota_by_scope_category=quota_by_scope_category,
         subject_category_counts=subject_counts, family_ids=family_ids, pairing_table=pairing_table,
         roster=roster, review_rows=review_rows, round_no=round_no, mode=run_tuning.mode,
-        tuning_version=run_tuning.version,
+        tuning_version=run_tuning.version, per_species_count=run_tuning.per_species_count,
     )
 
 
@@ -133,7 +144,6 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     """Pure computation + (optionally) one file write. Returns a summary dict for the caller to
     report — never prints itself, so a test can call this without capturing stdout."""
     type_weights_path = type_weights_path or TYPE_WEIGHTS_PATH
-    family_assignments_path = family_assignments_path or FAMILY_ASSIGNMENTS_PATH
     pairings_path = pairings_path or PAIRINGS_PATH
 
     cov = _build_ctx(

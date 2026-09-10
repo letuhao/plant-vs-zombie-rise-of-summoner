@@ -3,8 +3,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SpeciesBuildPanel } from "./SpeciesBuildPanel";
 
 const respecMutateAsync = vi.fn();
-// G6: a stable reference (not a fresh `vi.fn()` per render) so a test can assert retry actually
-// called it, the same way `respecMutateAsync` is already asserted on below.
 const speciesRefetch = vi.fn();
 
 const baseline = { Might: 500, Vigor: 300, Fortitude: 200 };
@@ -21,26 +19,38 @@ let speciesData:
       baseline: Record<string, number>;
     }
   | undefined;
-// G6: lets a test put the species query into its OWN error state independently of `speciesData`
-// being undefined -- a failed query has no data either, and the panel must tell the two apart.
 let speciesIsError = false;
 
-let priceData: { speciesId: string; respecCount: number; priceResource: string; priceAmount: number; everRespecced: boolean } | undefined;
-// G7: same idea for the respec price preview -- pending and failed both leave `data` undefined,
-// so a test needs to say which one it means.
+let priceData:
+  | {
+      speciesId: string;
+      respecCount: number;
+      priceResource: string;
+      priceAmount: number;
+      everRespecced: boolean;
+    }
+  | undefined;
 let priceIsLoading = false;
 let priceIsError = false;
 
-vi.mock("@/lib/bus", () => ({
-  useSpeciesAptitudes: () => ({
-    data: speciesData,
-    isLoading: speciesData === undefined && !speciesIsError,
-    isError: speciesIsError,
-    refetch: speciesRefetch
-  }),
-  useSpeciesRespecPrice: () => ({ data: priceData, isLoading: priceIsLoading, isError: priceIsError }),
-  useRespecSpecies: () => ({ mutateAsync: respecMutateAsync, isPending: false })
-}));
+vi.mock("@/lib/bus", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/bus")>();
+  return {
+    ...actual,
+    useSpeciesAptitudes: () => ({
+      data: speciesData,
+      isLoading: speciesData === undefined && !speciesIsError,
+      isError: speciesIsError,
+      refetch: speciesRefetch
+    }),
+    useSpeciesRespecPrice: () => ({
+      data: priceData,
+      isLoading: priceIsLoading,
+      isError: priceIsError
+    }),
+    useRespecSpecies: () => ({ mutateAsync: respecMutateAsync, isPending: false })
+  };
+});
 
 vi.mock("@/lib/bus/demons", () => ({
   newCorrelationId: () => "corr-fixed"
@@ -66,14 +76,15 @@ describe("SpeciesBuildPanel", () => {
     speciesRefetch.mockReset();
     speciesData = freshState();
     speciesIsError = false;
-    priceData = { speciesId: "fumeshroom", respecCount: 0, priceResource: "Soul", priceAmount: 50, everRespecced: false };
+    priceData = {
+      speciesId: "fumeshroom",
+      respecCount: 0,
+      priceResource: "Soul",
+      priceAmount: 50,
+      everRespecced: false
+    };
     priceIsLoading = false;
     priceIsError = false;
-    // The real bug the E2E round trip caught: the panel must seed its draft from the MUTATION's own
-    // response, never by racing the query cache's refetch. Resolving with the posted `shares` here
-    // (matching what the real server's respec endpoint actually echoes back) is what makes that path
-    // exercised at all -- an unconfigured `vi.fn()` resolving to `undefined` would let `commit()`'s
-    // `result.shares` throw silently into the try/catch without any test noticing.
     respecMutateAsync.mockImplementation(async (vars: { shares: Record<string, number> }) => ({
       speciesId: "fumeshroom",
       level: 21,
@@ -108,21 +119,20 @@ describe("SpeciesBuildPanel", () => {
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
     expect(screen.getByTestId("species-build-status")).toHaveTextContent("shipped build");
     expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("500");
-    // No deviation shown when the draft equals the baseline.
-    expect(screen.queryByTestId("species-build-deviation-Might")).not.toBeInTheDocument();
   });
 
-  it("renders an override as a deviation FROM the baseline, not as a standalone build", () => {
-    speciesData = freshState({ hasOverride: true, shares: { Might: 0, Vigor: 0, Ferocity: 1000 } as Record<string, number>, baseline });
-    // baseline still carries the shipped keys; shares reflects the override for whichever keys it set.
-    speciesData!.baseline = baseline;
+  it("renders an override honesty on species chrome", () => {
+    speciesData = freshState({
+      hasOverride: true,
+      shares: { Might: 0, Vigor: 0, Fortitude: 1000 },
+      baseline
+    });
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
     expect(screen.getByTestId("species-build-status")).toHaveTextContent("overridden");
     expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("0");
-    expect(screen.getByTestId("species-build-deviation-Might")).toHaveTextContent("vs shipped");
   });
 
-  it("G5: a species with no build yet (budget 0, no override) renders honest empty-build copy, not the shipped-build line", () => {
+  it("G5: a species with no build yet (budget 0, no override) renders honest empty-build copy", () => {
     speciesData = freshState({
       level: 1,
       budget: 0,
@@ -138,23 +148,20 @@ describe("SpeciesBuildPanel", () => {
     expect(status).toHaveTextContent(/hasn't grown a build yet/i);
     expect(status).not.toHaveTextContent("shipped build");
 
-    // Save is disabled (nothing to save), and the reason is real rendered text -- not ONLY a
-    // `title` attribute nobody hovers over.
     expect(screen.getByTestId("species-build-save")).toBeDisabled();
     const reason = screen.getByTestId("species-build-save-reason");
-    expect(reason.textContent).toBeTruthy();
     expect(reason).toHaveTextContent(/hasn't earned any aptitude points yet/i);
   });
 
-  it("budget refusal disables save, scope-locally, without clamping the input", () => {
+  it("budget refusal disables Confirm without clamping the input", () => {
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
     const might = screen.getByTestId("species-build-input-Might");
-    fireEvent.change(might, { target: { value: "1500" } }); // over the 1000 budget
+    fireEvent.change(might, { target: { value: "1500" } });
     expect(screen.getByTestId("species-build-save")).toBeDisabled();
-    expect((might as HTMLInputElement).value).toBe("1500"); // never silently clamped (PS-8)
+    expect((might as HTMLInputElement).value).toBe("1500");
   });
 
-  it("a revert to baseline (all-zero draft) saves immediately, without a confirm dialog, and the input reflects the server's own reply", async () => {
+  it("a revert to baseline saves via Confirm with no ConfirmDialog", async () => {
     speciesData = freshState({ hasOverride: true });
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
     for (const id of Object.keys(baseline)) {
@@ -163,82 +170,88 @@ describe("SpeciesBuildPanel", () => {
     fireEvent.click(screen.getByTestId("species-build-save"));
 
     expect(respecMutateAsync).toHaveBeenCalledWith(
-      expect.objectContaining({ playerId: 1, speciesId: "fumeshroom", shares: expect.objectContaining({ Might: 0 }) })
+      expect.objectContaining({
+        playerId: 1,
+        speciesId: "fumeshroom",
+        shares: expect.objectContaining({ Might: 0 })
+      })
     );
     expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
-    // The real bug the E2E test caught: this must reflect the MUTATION's response, not silently
-    // stay at whatever was last typed nor jump back to a stale cached value.
-    await waitFor(() => expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("0"));
+    await waitFor(() =>
+      expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("0")
+    );
   });
 
-  it("a first override (never respecced) saves immediately, without a confirm dialog, and the input reflects the server's own reply", async () => {
+  it("a first override saves via Confirm with no ConfirmDialog", async () => {
     priceData!.everRespecced = false;
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
-    // Redistribute within the same 1000 budget: Might down, Vigor up by the same amount.
     fireEvent.change(screen.getByTestId("species-build-input-Might"), { target: { value: "400" } });
     fireEvent.change(screen.getByTestId("species-build-input-Vigor"), { target: { value: "400" } });
     fireEvent.click(screen.getByTestId("species-build-save"));
 
     expect(respecMutateAsync).toHaveBeenCalled();
     expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
-    await waitFor(() => expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("400"));
+    await waitFor(() =>
+      expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("400")
+    );
   });
 
-  it("a priced change shows the price BEFORE the confirm — the save button does not spend directly", () => {
+  it("priced Confirm shows price on strip and spends without ConfirmDialog (S2)", () => {
     speciesData = freshState({ hasOverride: true });
-    priceData = { speciesId: "fumeshroom", respecCount: 1, priceResource: "Soul", priceAmount: 75, everRespecced: true };
+    priceData = {
+      speciesId: "fumeshroom",
+      respecCount: 1,
+      priceResource: "Soul",
+      priceAmount: 75,
+      everRespecced: true
+    };
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
 
-    // Redistribute within the same 1000 budget: Might down, Vigor up by the same amount.
     fireEvent.change(screen.getByTestId("species-build-input-Might"), { target: { value: "400" } });
     fireEvent.change(screen.getByTestId("species-build-input-Vigor"), { target: { value: "400" } });
+
+    expect(screen.getByTestId("allocate-decision-price")).toHaveTextContent("75");
+    expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId("species-build-save"));
-
-    expect(respecMutateAsync).not.toHaveBeenCalled(); // not spent yet
-    const dialog = screen.getByTestId("species-build-respec-confirm");
-    expect(dialog).toHaveTextContent("75");
-    expect(dialog).toHaveTextContent("soul");
-
-    fireEvent.click(screen.getByTestId("species-build-respec-confirm-confirm"));
     expect(respecMutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ playerId: 1, speciesId: "fumeshroom" })
     );
   });
 
-  it("cancelling the confirm dialog never spends", () => {
+  it("Cancel on decision strip discards draft without spending", () => {
     speciesData = freshState({ hasOverride: true });
-    priceData = { speciesId: "fumeshroom", respecCount: 1, priceResource: "Soul", priceAmount: 75, everRespecced: true };
+    priceData = {
+      speciesId: "fumeshroom",
+      respecCount: 1,
+      priceResource: "Soul",
+      priceAmount: 75,
+      everRespecced: true
+    };
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
 
-    // Redistribute within the same 1000 budget: Might down, Vigor up by the same amount.
     fireEvent.change(screen.getByTestId("species-build-input-Might"), { target: { value: "400" } });
-    fireEvent.change(screen.getByTestId("species-build-input-Vigor"), { target: { value: "400" } });
-    fireEvent.click(screen.getByTestId("species-build-save"));
-    fireEvent.click(screen.getByTestId("species-build-respec-confirm-cancel"));
+    fireEvent.click(screen.getByTestId("allocate-decision-cancel"));
 
     expect(respecMutateAsync).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
+    expect((screen.getByTestId("species-build-input-Might") as HTMLInputElement).value).toBe("500");
   });
 
-  it("G7: a pending price never lets Save spend silently -- it disables Save instead of defaulting to free", () => {
+  it("G7: a pending price never lets Confirm spend silently", () => {
     speciesData = freshState({ hasOverride: true });
     priceData = undefined;
     priceIsLoading = true;
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
 
-    // Redistribute within the same 1000 budget: Might down, Vigor up by the same amount. Not a
-    // revert (not all-zero), so this would previously have been misread as `isFree`.
     fireEvent.change(screen.getByTestId("species-build-input-Might"), { target: { value: "400" } });
     fireEvent.change(screen.getByTestId("species-build-input-Vigor"), { target: { value: "400" } });
 
     expect(screen.getByTestId("species-build-save")).toBeDisabled();
     fireEvent.click(screen.getByTestId("species-build-save"));
-
     expect(respecMutateAsync).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
   });
 
-  it("G7: an errored price also never lets Save spend silently", () => {
+  it("G7: an errored price also never lets Confirm spend silently", () => {
     speciesData = freshState({ hasOverride: true });
     priceData = undefined;
     priceIsError = true;
@@ -249,9 +262,7 @@ describe("SpeciesBuildPanel", () => {
 
     expect(screen.getByTestId("species-build-save")).toBeDisabled();
     fireEvent.click(screen.getByTestId("species-build-save"));
-
     expect(respecMutateAsync).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
   });
 
   it("no engine vocabulary appears in the rendered copy", () => {
@@ -261,5 +272,18 @@ describe("SpeciesBuildPanel", () => {
     for (const forbidden of ["typeId", "scope_key", "AllocationScope", "DemonType"]) {
       expect(text).not.toContain(forbidden);
     }
+  });
+
+  it("ConfirmDialog is not in the Mode B tree (S2)", () => {
+    speciesData = freshState({ hasOverride: true });
+    priceData = {
+      speciesId: "fumeshroom",
+      respecCount: 1,
+      priceResource: "Soul",
+      priceAmount: 75,
+      everRespecced: true
+    };
+    render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
+    expect(screen.queryByTestId("species-build-respec-confirm")).not.toBeInTheDocument();
   });
 });

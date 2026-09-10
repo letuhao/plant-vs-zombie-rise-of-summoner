@@ -3,7 +3,10 @@ import { displayInitial } from "./shared";
 import type { Pending } from "@/contract/pending";
 import { isKnown } from "@/contract/pending";
 import type { ActorSheetDto } from "@/lib/bus/aura";
+import { resolveTheme } from "@/features/gui-lego/themeRegistry";
+import type { PiecePayload, SurfaceBusLike } from "@/features/gui-lego/types";
 import { TypeIcon } from "@/ui";
+import { roleBadgeFactory } from "@/ui/gui-lego/pieces/badges";
 
 export type ActorSummarizeProps = {
   displayName: Pending<string>;
@@ -16,8 +19,13 @@ export type ActorSummarizeProps = {
   className?: string;
 };
 
+const NOOP_BUS: SurfaceBusLike = {
+  emit: () => undefined,
+  on: () => () => undefined
+};
+
 /**
- * Left-rail identity — name / Lv · role only (+ portrait). Species chips live on Condition.
+ * Left-rail identity — name / Lv + role-badge (+ portrait). Species chips live on Condition.
  */
 export function ActorSummarize({
   displayName,
@@ -30,10 +38,29 @@ export function ActorSummarize({
   className
 }: ActorSummarizeProps) {
   const name = sheet?.displayName || (isKnown(displayName) ? displayName.value : `#${instanceId.slice(0, 6)}`);
-  const effectiveRole = sheet?.roleLabel ?? roleLabel;
-  const meta = [`Lv ${sheet?.level ?? level}`, effectiveRole].join(" · ");
-  const tip = [name, meta].join(" · ");
+  const effectiveLevel = sheet?.level ?? level;
+  const effectiveRole = (sheet?.roleLabel ?? roleLabel).trim();
+  const tipParts = [name, `Lv ${effectiveLevel}`];
+  if (effectiveRole) tipParts.push(effectiveRole);
+  const tip = tipParts.join(" · ");
   const initial = displayInitial(displayName, side);
+
+  const themeRef = { kind: "side" as const, id: side };
+  const roleBadge =
+    effectiveRole.length > 0
+      ? roleBadgeFactory({
+          payload: {
+            piece: "role-badge",
+            instanceId: `rail:role:${instanceId}`,
+            phase: "ready",
+            label: effectiveRole,
+            themeRef,
+            themeResolved: resolveTheme(themeRef)
+          } as PiecePayload,
+          slots: {},
+          bus: NOOP_BUS
+        })
+      : null;
 
   if (collapsed) {
     return (
@@ -81,9 +108,13 @@ export function ActorSummarize({
           <p className="truncate font-display text-lg leading-tight text-text" data-testid="actor-summarize-name">
             {name}
           </p>
-          <p className="mt-0.5 truncate text-xs text-muted" data-testid="actor-summarize-meta">
-            {meta}
-          </p>
+          <div
+            className="mt-0.5 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted"
+            data-testid="actor-summarize-meta"
+          >
+            <span data-testid="actor-summarize-level">Lv {effectiveLevel}</span>
+            {roleBadge}
+          </div>
         </div>
       </div>
     </div>

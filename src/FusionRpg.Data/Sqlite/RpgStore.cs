@@ -794,6 +794,8 @@ public sealed partial class RpgStore : IRpgDb
         EnsureSpeciesRespecSchemaUnlocked(db);
         // rpg_zomboss_state + rpg_zomboss_pattern_log — species-build-todo.md T4.6, spec-zomboss-adaptive.md.
         EnsureZombossAdaptiveSchemaUnlocked(db);
+        // rpg_aptitude_preset / _entry / _active — aptitude-sheet AS-3.1, item-loadout library discipline.
+        EnsureAptitudePresetSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

@@ -63,6 +63,7 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         builder.Logging.ClearProviders();
         builder.Services.AddSignalR();
         builder.Services.AddSingleton(_store);
+        builder.Services.AddSingleton<IActorLiveStateStore, ActorLiveStateStore>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();
@@ -190,13 +191,31 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         });
         Assert.NotNull(sheet.Standing);
         Assert.Null(sheet.ShieldSummary);
+        Assert.NotNull(sheet.ShieldLayers);
+        Assert.Empty(sheet.ShieldLayers!);
 
         var power = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.power");
         Assert.Equal("FlatReplace", power.ComposeKind);
         Assert.Equal("Power index", power.DisplayName);
+        Assert.Equal("LadderIndex", power.UnitClass);
+        Assert.Equal(1.0, power.DefaultValue);
+        Assert.Null(power.Cap);
+        Assert.Equal("stub", power.RenderState);
         var prog = Assert.Single(power.Contributions);
         Assert.Equal("rpg.progression", prog.SourceId);
         Assert.Equal("Progression", prog.Label);
+
+        var resistDot = Assert.Single(sheet.Derived, c => c.ChannelId == "status.resist.dot");
+        Assert.Equal("StatusPotencyPoints", resistDot.UnitClass);
+        Assert.Equal(0.0, resistDot.DefaultValue);
+        Assert.Equal(DerivedStatPolicy.CategoryResistCap, resistDot.Cap);
+        Assert.False(string.IsNullOrEmpty(resistDot.RenderState));
+
+        var resistOmni = Assert.Single(sheet.Derived, c => c.ChannelId == "status.resist.omni");
+        Assert.Null(resistOmni.Cap);
+
+        var arm1 = Assert.Single(sheet.Derived, c => c.ChannelId == "progression.bonus.arm1");
+        Assert.Equal("no-producer", arm1.RenderState);
 
         var firePower = Assert.Single(sheet.Derived, c => c.ChannelId == "combat.power.omni");
         Assert.Equal("Power", firePower.DisplayName);
@@ -259,6 +278,8 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         Assert.Equal(FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds.Count, sheet.ResourcePools!.Count);
         Assert.NotNull(sheet.Standing);
         Assert.Null(sheet.ShieldSummary);
+        Assert.NotNull(sheet.ShieldLayers);
+        Assert.Empty(sheet.ShieldLayers!);
     }
 
     [Fact]
@@ -403,6 +424,7 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         public List<SheetStatusGlyphDto>? LiveStatuses { get; set; }
         public List<SheetResourcePoolDto>? ResourcePools { get; set; }
         public SheetShieldSummaryDto? ShieldSummary { get; set; }
+        public List<SheetShieldLayerDto>? ShieldLayers { get; set; }
     }
 
     sealed class SheetStandingDto
@@ -417,6 +439,7 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     sealed class SheetStatusGlyphDto
     {
         public string StatusId { get; set; } = "";
+        public int? RemainingPermille { get; set; }
     }
 
     sealed class SheetResourcePoolDto
@@ -428,8 +451,23 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
 
     sealed class SheetShieldSummaryDto
     {
+        public string? ElementId { get; set; }
         public long? Current { get; set; }
         public long? Max { get; set; }
+        public int? Stacks { get; set; }
+    }
+
+    sealed class SheetShieldLayerDto
+    {
+        public string ShieldId { get; set; } = "";
+        public string? ElementId { get; set; }
+        public long Current { get; set; }
+        public long Max { get; set; }
+        public int Priority { get; set; }
+        public string SourceId { get; set; } = "";
+        public bool IsInnate { get; set; }
+        public long? RegenPerSecond { get; set; }
+        public bool Broken { get; set; }
     }
 
     sealed class SheetElementTypingDto
@@ -444,6 +482,10 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         public string DisplayName { get; set; } = "";
         public string ComposeKind { get; set; } = "";
         public double Value { get; set; }
+        public string UnitClass { get; set; } = "";
+        public double DefaultValue { get; set; }
+        public double? Cap { get; set; }
+        public string RenderState { get; set; } = "";
         public List<DerivedContributionDto> Contributions { get; set; } = new();
     }
 

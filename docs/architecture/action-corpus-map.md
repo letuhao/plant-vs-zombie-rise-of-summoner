@@ -21,12 +21,22 @@ not part of what was just approved.
 **Program prefix:** `action-corpus`. Module specs → `docs/architecture/action-corpus/spec-<module-id>.md`;
 plan → `tasks/action-corpus-plan.md` + `tasks/action-corpus-todo.md`.
 
+**⛔ LIVE ROSTER SOURCE CORRECTION 2026-09-10.** The executable Seedsmith action pipeline reads the
+live JSON roster under `data/seed/demons/species/` and derives family membership from each seed's
+`family` field. The current source contains **904 species**, **227 consolidated family namespaces**,
+and **1,183 family memberships**. The older 84-species / 53-assignment / 19-family figures that
+remain in historical module prose are not valid inputs for the current pipeline; neither the
+runtime SQLite database nor `DemonSpeciesCatalog.Generated.cs` is an action-pipeline source of truth.
+The generated action plan is therefore **5,680 briefs**: 25 general, 1,135 family, and 4,520
+species, with five category slots per subject across `attack`, `defense`, `movement`, `support`, and
+`status`.
+
 ---
 
 ## 1. What this program is, in one paragraph
 
 **It generates the action seeds a creature can hold**, in three eligibility tiers — general (any
-creature), family (one of 19 demon families), signature (one species) — as **seeds**, never concrete
+creature), family (one of the live consolidated demon families), signature (one species) — as **seeds**, never concrete
 objects. Identity is authored by a model; every magnitude, weight and duration is decided by
 deterministic code and by tables the model never sees. The runtime rolls a seed into a concrete action
 per player (`Instantiator`), which is Law 1 and is already built.
@@ -57,8 +67,9 @@ Restated inline, because a downstream session reads this map and not its links.
 2. **Small-batch proof before any full run.** *"prove LLM pipeline work very well before big batch run…
    i will decide when we fully run."* Every model stage ships `--dry-run` and a small `--count`; **§17's
    call budget is a ceiling, not a plan.**
-3. **The roster is 84, not 904.** Motif anchors exist for 84 species, family assignments for **53**.
-   904 is the almanac row count. Per-species count is a **tunable**, so re-running later is config.
+3. **The live roster is read from the seed folder.** The current run has 904 species, 227
+   consolidated family namespaces, and 1,183 memberships. These counts are measurements, not hard-coded
+   design points; the generators must re-read the folder on every run.
 4. **C1's family-access widening is gated** (`ideal` §21.3) on three things that do not exist: a per-rung
    `powerBudget` row, a family-aware non-additive price (needs D2), and a budget check with a production
    caller. **Until all three hold, the generator emits structure-gated tiers only.**
@@ -162,7 +173,7 @@ picker are all inspectable against real data, and the only unknown left is the j
   its separation**, so §34's deferred question (*how sharply does it separate species?*) is answered with
   data rather than assumed.
 - **✅ Checkpoint 3 — the plan is reviewable with no model.** A-S1 emits quotas, rung windows and
-  family-access sets for the **real 84-species roster**, and A-S5 reports coverage over them.
+  family-access sets for the **live seed-folder roster**, and A-S5 reports coverage over them.
 - **✅ Checkpoint 4 — a smoke batch proves quality.** Small `--count` through A-P1/A-P2/A-P3 → A-S4 →
   A-S3. **Metrics, defects found, defects fixed.** Per §W7.10 the owner decides whether a full run
   happens; this checkpoint is the evidence for that decision and **the program does not schedule past
@@ -177,7 +188,7 @@ picker are all inspectable against real data, and the only unknown left is the j
 | `OnActivate` raised on the lawn | **effect-atom E33** | ⛔ **A-M2 is blocked on it** — the only hard cross-program block. **And E33 is not enough:** it ships the seam with no production caller of its own (`spec-activation-edge.md:13-14`), so A-M2 lands **inert** until a lawn-side producer exists — a named, criteria-stated task that blocks no other module (⛔ decided 2026-09-03) |
 | Channel pools (L2) | **effect-atom E30** | A generated action's atoms reference pools |
 | Binding production | **effect-pipeline module 4** `instance-producer` | `effect_binding` has **zero rows**; without it the corpus is authored into a runtime nothing reaches |
-| Species anchors (motifs, family, theme) | **seedsmith D2/D5** | 84 motif, **53 family**. Rarity for the rest is unspecced |
+| Species anchors (motifs, family, theme) | **live demon seed folder** | 904 species and 1,183 family memberships; descriptive traits remain seed data |
 | Rung window in the caps register | **A-G1** (was: power) | ✅ **Done 2026-09-04.** `ssot-power-scale.md` §11.2 now carries the `powerBudgetMilli` row §5 constraint 2 promised |
 | Real per-family usage counts | **roster-balance** `usage-stats` (FC1, `docs/research/action-corpus/_usage-*.json`) | A-S7 reads the latest report fresh every round — never a persisted rotation cursor, same "recompute from real data, never a snapshot" discipline `set-charm-gen.v1.json`'s own tuning note already states. Degrades to "every family equally due" when no report exists yet |
 | `restriction` axis detection | **effect-atom** (per-atom payload/target data) | ⛔ **Still absent, and not A-G1's to close alone.** `StructureBudgetGuard.SpentAxes` reads only `rpg_action` + `rpg_action_cost` + `rpg_action_effect_scope` — none carry per-atom payload/target data, so `restriction` (action-ideal.md §8.7: a self-debuff, `status.apply` scoped to `caster`) cannot be detected from here. A-G1 (spec-tier-access-gate.md §3.3, AC8) makes this explicit via `StructureBudgetGuard.UndetectableAxes()` rather than reporting `0` |
@@ -187,8 +198,8 @@ picker are all inspectable against real data, and the only unknown left is the j
 - **The action runtime.** Shipped. This program authors content for it.
 - **A second roll.** `Instantiator` is the roll. Law 1.
 - **Magnitudes chosen by a model.** Law 2, enforced by schema audit, never by review.
-- **The 820 unrostered species.** Generate against 84; the per-species count is a tunable, so growth is
-  a re-run.
+- **Roster growth.** Generate against the live seed folder; the per-species count is a tunable, so
+  growth is a re-run.
 - **`RendezvousLane` / link-strikes.** Built, tested, **zero production callers**, gated behind a
   default-off `BattleModeProfile.RendezvousEnabled`. A wiring question owned elsewhere.
 

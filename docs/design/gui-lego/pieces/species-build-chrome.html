@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>species-build-chrome — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>species-build-chrome</code></h1>
+  <p class="lede">Mode B only: baseline vs override honesty; respec <strong>price on strip</strong> before Confirm and Activate; free revert when legal. <strong>No</strong> band-3 ConfirmDialog (S2/GG-63) — price lives here + decision-strip. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <div style="display:grid; gap:8px; font-size:13px">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center">
+            <span class="chip is-on" style="--piece-accent:var(--sun)">Override active</span>
+            <span class="chip" title="Price before Confirm / Activate">12 Soul</span>
+            <button type="button" class="chip">Revert to baseline (free)</button>
+          </div>
+          <div style="color:var(--muted)">Baseline shares: Force 40% · Finesse 35% · Bastion 25%</div>
+          <div style="font-size:11px;color:var(--muted)">Ever respecced · no ConfirmDialog</div>
+        </div>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "species-build-chrome",
+  "instanceId": "aptitudes:species-chrome",
+  "hasOverride": true,
+  "baselineShares": {
+    "force": 400,
+    "finesse": 350,
+    "bastion": 250
+  },
+  "priceAmount": 12,
+  "priceResource": "Soul",
+  "everRespecced": true,
+  "freeRevert": true,
+  "confirmDialog": false,
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

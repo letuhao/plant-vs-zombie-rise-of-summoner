@@ -1,0 +1,2685 @@
+{
+  "_meta": {
+    "briefsPath": "..\\..\\data\\seed\\actions\\_briefs\\round-1.json",
+    "candidatesPaths": [
+      "..\\..\\data\\seed\\actions\\_candidates\\general\\round-909.json",
+      "..\\..\\data\\seed\\actions\\_candidates\\family\\round-909.json",
+      "..\\..\\data\\seed\\actions\\_candidates\\signature\\round-909.json"
+    ],
+    "gateEnabled": true,
+    "partition": "round-909",
+    "round": 909
+  },
+  "entries": [
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.general.0006",
+      "name": "Frostbite",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing",
+        "atom.prec-focus"
+      ],
+      "category": "attack",
+      "id": "action.general.0007",
+      "name": "Frostbite",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-op",
+        "atom.plating",
+        "atom.vitality"
+      ],
+      "category": "defense",
+      "id": "action.general.0008",
+      "name": "Fortify",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-plate",
+        "atom.mending",
+        "atom.warding"
+      ],
+      "category": "support",
+      "id": "action.general.0009",
+      "name": "Resonance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.warding"
+      ],
+      "category": "support",
+      "id": "action.general.0010",
+      "name": "Resonance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bonding",
+        "atom.life-surge"
+      ],
+      "category": "support",
+      "id": "action.general.0011",
+      "name": "Resonance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bulwark",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.general.0012",
+      "name": "Dash",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.buttering",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.general.0013",
+      "name": "Momentum",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.evd-shift",
+        "atom.tempo-haste"
+      ],
+      "category": "movement",
+      "id": "action.general.0014",
+      "name": "Quickstep",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.chilling"
+      ],
+      "category": "status",
+      "id": "action.general.0015",
+      "name": "Blight",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.blighting",
+        "atom.econ-endure"
+      ],
+      "category": "status",
+      "id": "action.general.0016",
+      "name": "Blight",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.econ-muster",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.general.0017",
+      "name": "Blight",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.family.base.001",
+      "motifsUsed": [
+        "植物",
+        "屋顶"
+      ],
+      "name": "Frost-Blighted Overgrowth",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "base",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing"
+      ],
+      "category": "status",
+      "id": "action.family.base.002",
+      "motifsUsed": [
+        "屋顶",
+        "植物"
+      ],
+      "name": "Overgrowth Chill",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "base",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elemental-defense",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.allpeater.002",
+      "motifsUsed": [
+        "分配"
+      ],
+      "name": "Cinder-Sieve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.elpw-surfeit"
+      ],
+      "category": "status",
+      "id": "action.species.ashthreepeater.001",
+      "motifsUsed": [
+        "无法",
+        "彻底",
+        "烧焦"
+      ],
+      "name": "Void-Scorched Singularity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "ashthreepeater",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.species.bucketnutzombie.002",
+      "motifsUsed": [
+        "铁头功"
+      ],
+      "name": "Iron-Skull Impact",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "bucketnutzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-focus",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.cactus.001",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Aero-Spike Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cactus",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.prec-sync"
+      ],
+      "category": "attack",
+      "id": "action.species.cactusblover.002",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Cactusblover",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cactusblover",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.life-graft",
+        "atom.regeneration"
+      ],
+      "category": "support",
+      "id": "action.species.caltrop.001",
+      "motifsUsed": [
+        "刺能"
+      ],
+      "name": "Caltrop",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "caltrop",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.resilience",
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "id": "action.species.caltropnut.001",
+      "motifsUsed": [
+        "尖刺",
+        "坚果",
+        "反伤"
+      ],
+      "name": "Spike-Thrust Retribution",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "caltropnut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution",
+        "atom.rot-punisher"
+      ],
+      "category": "defense",
+      "id": "action.species.caltropnut.002",
+      "motifsUsed": [
+        "尖刺",
+        "反伤"
+      ],
+      "name": "Thorned Recoil",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "caltropnut",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.rotting"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrybomb.001",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸"
+      ],
+      "name": "Frost-Burst Detonation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrybomb",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.shield-capacity"
+      ],
+      "category": "defense",
+      "id": "action.species.cherrybomb.002",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸"
+      ],
+      "name": "cherrybomb",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrybomb",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.shield-pen",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrygatling.001",
+      "motifsUsed": [
+        "樱桃",
+        "发射"
+      ],
+      "name": "Cherrygatling",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrygatling",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.shield-toughness"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrynut.001",
+      "motifsUsed": [
+        "樱桃",
+        "喜爱"
+      ],
+      "name": "cherrynut",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrynut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.hit-mend",
+        "atom.shld-absolute"
+      ],
+      "category": "defense",
+      "id": "action.species.cherrynut.002",
+      "motifsUsed": [
+        "僵尸",
+        "喜爱"
+      ],
+      "name": "Cinder-Grafted Husk",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrynut",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.shld-toughness"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrynutzombie.001",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "一般"
+      ],
+      "name": "Cinder-Bloom Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrynutzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.shld-toughness-mod",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.cherrynutzombie.002",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸"
+      ],
+      "name": "Cinder-Bloom Retort",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrynutzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.sparking"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrypaperzombie.001",
+      "motifsUsed": [
+        "樱桃",
+        "上演",
+        "僵尸"
+      ],
+      "name": "Cherrypaperzombie",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrypaperzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.stalwart",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.cherrypaperzombie.002",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "上演"
+      ],
+      "name": "Cherrypaperzombie",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrypaperzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.stoicism"
+      ],
+      "category": "support",
+      "id": "action.species.cherryshooter.001",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Luminous Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherryshooter",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.sust-freshgraft"
+      ],
+      "category": "movement",
+      "id": "action.species.cherryshooter.002",
+      "motifsUsed": [
+        "樱桃",
+        "发射"
+      ],
+      "name": "Luminous Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherryshooter",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.tempo-pulse"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrysplit.001",
+      "motifsUsed": [
+        "樱桃",
+        "发射",
+        "僵尸"
+      ],
+      "name": "Cherrysplit",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrysplit",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.tempo-wildgrowth"
+      ],
+      "category": "attack",
+      "id": "action.species.cherrythreepeater.001",
+      "motifsUsed": [
+        "成熟",
+        "僵尸"
+      ],
+      "name": "Frost-Bitten Bloom",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cherrythreepeater",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.ward-brace"
+      ],
+      "category": "attack",
+      "id": "action.species.chomper.001",
+      "motifsUsed": [
+        "咀嚼",
+        "吞食"
+      ],
+      "name": "Luminous Mastication",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "chomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.ward-link"
+      ],
+      "category": "status",
+      "id": "action.species.conezombie.001",
+      "motifsUsed": [
+        "冰激凌",
+        "不动"
+      ],
+      "name": "Glacial Stasis",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "conezombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.ward-ward"
+      ],
+      "category": "attack",
+      "id": "action.species.cornpot.001",
+      "motifsUsed": [
+        "制成",
+        "子弹"
+      ],
+      "name": "cornpot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cornpot",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-welding",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.cornpult.001",
+      "motifsUsed": [
+        "玉米粒",
+        "子弹"
+      ],
+      "name": "Darkness Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cornpult",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cleansing",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.dancepolzombie.001",
+      "motifsUsed": [
+        "流行乐",
+        "伴舞"
+      ],
+      "name": "Shadow Rhythm",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dancepolzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-glean",
+        "atom.tempo-pulse"
+      ],
+      "category": "status",
+      "id": "action.species.dancepolzombie.002",
+      "motifsUsed": [
+        "下走",
+        "优秀",
+        "运动员",
+        "伴舞",
+        "流行乐"
+      ],
+      "name": "dancepolzombie",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dancepolzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.econ-bounty"
+      ],
+      "category": "status",
+      "id": "action.species.darkthreepeater.001",
+      "motifsUsed": [
+        "辣椒"
+      ],
+      "name": "Absolute Zero Stasis",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "darkthreepeater",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-graze",
+        "atom.ward-flux"
+      ],
+      "category": "defense",
+      "id": "action.species.dolldiamond.001",
+      "motifsUsed": [
+        "世界",
+        "制成",
+        "光辉"
+      ],
+      "name": "World-Made Radiance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dolldiamond",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.entangling"
+      ],
+      "category": "attack",
+      "id": "action.species.dollgold.001",
+      "motifsUsed": [
+        "套娃",
+        "制成"
+      ],
+      "name": "dollgold",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dollgold",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evasion",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.dollgold.002",
+      "motifsUsed": [
+        "套娃"
+      ],
+      "name": "Matryoshka Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dollgold",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-flinch",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.dollsilver.001",
+      "motifsUsed": [
+        "制成"
+      ],
+      "name": "Sunwoven Dollsilver",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "dollsilver",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.evd-scar"
+      ],
+      "category": "attack",
+      "id": "action.species.doomcactus.001",
+      "motifsUsed": [
+        "发射",
+        "仙人掌",
+        "尖刺",
+        "大量",
+        "概率"
+      ],
+      "name": "Doomcactus",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "doomcactus",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.evd-seal"
+      ],
+      "category": "movement",
+      "id": "action.species.doomcactus.002",
+      "motifsUsed": [
+        "大量",
+        "发射",
+        "仙人掌",
+        "概率"
+      ],
+      "name": "Atmospheric Spore-Drift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "doomcactus",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-plate",
+        "atom.gardener"
+      ],
+      "category": "defense",
+      "id": "action.species.doublecherry.001",
+      "motifsUsed": [
+        "子弹",
+        "发射"
+      ],
+      "name": "doublecherry",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "doublecherry",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.hit-mend"
+      ],
+      "category": "attack",
+      "id": "action.species.doublesnow.001",
+      "motifsUsed": [
+        "发射",
+        "子弹"
+      ],
+      "name": "Thermal Ignition",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "doublesnow",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.padding"
+      ],
+      "category": "defense",
+      "id": "action.species.driverzombie.001",
+      "motifsUsed": [
+        "滑冰场",
+        "冰车",
+        "公司出品",
+        "冰机",
+        "僵尸"
+      ],
+      "name": "driverzombie",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "driverzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.shld-breach"
+      ],
+      "category": "attack",
+      "id": "action.species.flagzombie.001",
+      "motifsUsed": [
+        "私下里",
+        "手中",
+        "喜爱"
+      ],
+      "name": "Private Combustion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "flagzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.shld-cycle"
+      ],
+      "category": "status",
+      "id": "action.species.flagzombie.002",
+      "motifsUsed": [
+        "手中",
+        "一大",
+        "喜爱",
+        "僵尸",
+        "私下里"
+      ],
+      "name": "Flagzombie",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "flagzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.sporing"
+      ],
+      "category": "attack",
+      "id": "action.species.fumeshroom.001",
+      "motifsUsed": [
+        "喷射",
+        "烟雾",
+        "喷菇"
+      ],
+      "name": "Ignition Spore",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "fumeshroom",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-brace",
+        "atom.searing-strike"
+      ],
+      "category": "attack",
+      "id": "action.species.garlic.001",
+      "motifsUsed": [
+        "僵尸",
+        "大蒜"
+      ],
+      "name": "Searing Pungency",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "garlic",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.immunity",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "id": "action.species.garlicpea.001",
+      "motifsUsed": [
+        "体内",
+        "中毒"
+      ],
+      "name": "Internal Toxicity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "garlicpea",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.life-graft"
+      ],
+      "category": "support",
+      "id": "action.species.garlicpea.002",
+      "motifsUsed": [
+        "体内",
+        "中毒"
+      ],
+      "name": "garlicpea",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "garlicpea",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.sunbloom"
+      ],
+      "category": "attack",
+      "id": "action.species.garlicthreepeater.001",
+      "motifsUsed": [
+        "中毒",
+        "体内"
+      ],
+      "name": "Internalized Toxicity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "garlicthreepeater",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.venomous",
+        "atom.warding"
+      ],
+      "category": "defense",
+      "id": "action.species.garlicthreepeater.002",
+      "motifsUsed": [
+        "中毒",
+        "三行",
+        "体内"
+      ],
+      "name": "Internalized Toxin",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "garlicthreepeater",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.quickening",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.gatlingpea.001",
+      "motifsUsed": [
+        "发射",
+        "豌豆"
+      ],
+      "name": "Glacial Hailstorm",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "gatlingpea",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.flash-freeze",
+        "atom.searing-strike"
+      ],
+      "category": "defense",
+      "id": "action.species.gatlingpea.002",
+      "motifsUsed": [
+        "发射",
+        "豌豆"
+      ],
+      "name": "Gatlingpea",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "gatlingpea",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mesmerizing",
+        "atom.shld-surge"
+      ],
+      "category": "attack",
+      "id": "action.species.hypnochomper.001",
+      "motifsUsed": [
+        "魅惑"
+      ],
+      "name": "Searing Mesmerism",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnochomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mesmerizing",
+        "atom.summoner"
+      ],
+      "category": "movement",
+      "id": "action.species.hypnochomper.002",
+      "motifsUsed": [
+        "成分"
+      ],
+      "name": "Cinder-Step",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnochomper",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-riveting",
+        "atom.mesmerizing"
+      ],
+      "category": "attack",
+      "id": "action.species.hypnojalapeno.001",
+      "motifsUsed": [
+        "变心"
+      ],
+      "name": "Hypnojalapeno",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnojalapeno",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.plating",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.hypnojalapeno.002",
+      "motifsUsed": [
+        "变心",
+        "僵尸"
+      ],
+      "name": "Hypnojalapeno",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnojalapeno",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mesmerizing",
+        "atom.tempo-surge"
+      ],
+      "category": "attack",
+      "id": "action.species.hypnopeashooter.001",
+      "motifsUsed": [
+        "变心"
+      ],
+      "name": "Hypnopeashooter",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnopeashooter",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.sust-husk",
+        "atom.vitality"
+      ],
+      "category": "defense",
+      "id": "action.species.hypnopeashooter.002",
+      "motifsUsed": [
+        "变心"
+      ],
+      "name": "hypnopeashooter",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnopeashooter",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-shift",
+        "atom.life-surge",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.hypnoshroom.001",
+      "motifsUsed": [
+        "僵尸",
+        "变心"
+      ],
+      "name": "Fickle Rot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "hypnoshroom",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mesmerizing",
+        "atom.shld-breach"
+      ],
+      "category": "attack",
+      "id": "action.species.icecaltrop.001",
+      "motifsUsed": [
+        "触感",
+        "地刺"
+      ],
+      "name": "Obsidian Spike",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "icecaltrop",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.withering"
+      ],
+      "category": "defense",
+      "id": "action.species.iceshroom.001",
+      "motifsUsed": [
+        "触感"
+      ],
+      "name": "Abyssal Frost-Grip",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "iceshroom",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.death-harvest",
+        "atom.prec-verdict"
+      ],
+      "category": "attack",
+      "id": "action.species.ironpeazombie.001",
+      "motifsUsed": [
+        "塔罗牌",
+        "伤害"
+      ],
+      "name": "Frostbound Tarot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "ironpeazombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-pierce",
+        "atom.prec-verdict"
+      ],
+      "category": "status",
+      "id": "action.species.ironpeazombie.002",
+      "motifsUsed": [
+        "塔罗牌",
+        "僵尸",
+        "伤害"
+      ],
+      "name": "Frostbound Tarot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "ironpeazombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-focus",
+        "atom.terraforming"
+      ],
+      "category": "attack",
+      "id": "action.species.jalacaltrop.001",
+      "motifsUsed": [
+        "触感",
+        "地刺"
+      ],
+      "name": "Spike-Sunder",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "jalacaltrop",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.flash-freeze",
+        "atom.sust-callus"
+      ],
+      "category": "defense",
+      "id": "action.species.jalacaltrop.002",
+      "motifsUsed": [
+        "地刺",
+        "触感"
+      ],
+      "name": "Tactile Thorns",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "jalacaltrop",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.lifesteal",
+        "atom.shld-breach"
+      ],
+      "category": "attack",
+      "id": "action.species.jalagatling.001",
+      "motifsUsed": [
+        "none"
+      ],
+      "name": "Glacial Fracture",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "jalagatling",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution",
+        "atom.savagery"
+      ],
+      "category": "defense",
+      "id": "action.species.jalapeashooter.001",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Thermal Backlash",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "jalapeashooter",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.elpw-surge"
+      ],
+      "category": "attack",
+      "id": "action.species.jalapeno.001",
+      "motifsUsed": [
+        "地刺",
+        "触感"
+      ],
+      "name": "Spike-Burst Contact",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "jalapeno",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.searing-strike",
+        "atom.swiftness"
+      ],
+      "category": "attack",
+      "id": "action.species.lanternchomper.001",
+      "motifsUsed": [
+        "光照",
+        "伤害"
+      ],
+      "name": "Solar Flare Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "lanternchomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.lanternpea.001",
+      "motifsUsed": [
+        "光能",
+        "伤害"
+      ],
+      "name": "Luminescent Spike",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "lanternpea",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.midas"
+      ],
+      "category": "attack",
+      "id": "action.species.marigold.001",
+      "motifsUsed": [
+        "金币"
+      ],
+      "name": "Gilded Gale",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "marigold",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-graze",
+        "atom.sust-husk"
+      ],
+      "category": "movement",
+      "id": "action.species.marigold.002",
+      "motifsUsed": [
+        "金币",
+        "生产"
+      ],
+      "name": "Gilded Zephyr",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "marigold",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "id": "action.species.melonpult.001",
+      "motifsUsed": [
+        "投手",
+        "伤害",
+        "带有",
+        "溅射",
+        "西瓜"
+      ],
+      "name": "Glacial Splinter",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "melonpult",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-op",
+        "atom.summoner"
+      ],
+      "category": "status",
+      "id": "action.species.normalzombie.001",
+      "motifsUsed": [
+        "僵尸",
+        "个体",
+        "做出"
+      ],
+      "name": "name",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "normalzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-plate",
+        "atom.chilling",
+        "atom.lifesteal"
+      ],
+      "category": "attack",
+      "id": "action.species.nutchomper.001",
+      "motifsUsed": [
+        "吞食"
+      ],
+      "name": "Glacial Devour",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "nutchomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bulwark",
+        "atom.prec-focus"
+      ],
+      "category": "status",
+      "id": "action.species.paperzombie.001",
+      "motifsUsed": [
+        "字谜",
+        "完成"
+      ],
+      "name": "Ciphered Headline",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "paperzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.buttering",
+        "atom.elpw-surfeit"
+      ],
+      "category": "attack",
+      "id": "action.species.peachomper.001",
+      "motifsUsed": [
+        "吐出"
+      ],
+      "name": "Infernal Combustion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "peachomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.elpw-pierce"
+      ],
+      "category": "attack",
+      "id": "action.species.peanut.001",
+      "motifsUsed": [
+        "坚果",
+        "穿透"
+      ],
+      "name": "Frost-Piercing Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "peanut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.elpw-surfeit"
+      ],
+      "category": "attack",
+      "id": "action.species.peasquash.001",
+      "motifsUsed": [
+        "大量",
+        "发射",
+        "僵尸"
+      ],
+      "name": "peasquash",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "peasquash",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.gravedigging"
+      ],
+      "category": "attack",
+      "id": "action.species.plantern.001",
+      "motifsUsed": [
+        "光照"
+      ],
+      "name": "Glacial Flare",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "plantern",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.marking",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.species.plantern.002",
+      "motifsUsed": [
+        "none"
+      ],
+      "name": "Glacial Aegis",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "plantern",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-focus",
+        "atom.swiftness"
+      ],
+      "category": "movement",
+      "id": "action.species.polevaulterzombie.001",
+      "motifsUsed": [
+        "借助"
+      ],
+      "name": "Skyward Vault",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "polevaulterzombie",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.prec-reckoning"
+      ],
+      "category": "attack",
+      "id": "action.species.pot.001",
+      "motifsUsed": [
+        "屋顶",
+        "植物"
+      ],
+      "name": "Solar Canopy",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "pot",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.precision",
+        "atom.shld-surge"
+      ],
+      "category": "status",
+      "id": "action.species.pumpkin.001",
+      "motifsUsed": [
+        "屋顶",
+        "保护",
+        "植物"
+      ],
+      "name": "Glacial Permafrost",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "pumpkin",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.regeneration",
+        "atom.sporing"
+      ],
+      "category": "attack",
+      "id": "action.species.scaredyshroom.001",
+      "motifsUsed": [
+        "孢子",
+        "发射",
+        "远距离"
+      ],
+      "name": "Luminous Spore Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "scaredyshroom",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.resilience"
+      ],
+      "category": "support",
+      "id": "action.species.scaredyshroom.002",
+      "motifsUsed": [
+        "发射",
+        "害怕",
+        "远距离",
+        "孢子"
+      ],
+      "name": "scaredyshroom",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "scaredyshroom",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.rot-punisher",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.species.snowgatling.001",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Glacial Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "snowgatling",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.species.snowgatling.002",
+      "motifsUsed": [
+        "发射"
+      ],
+      "name": "Glacial Hailstorm",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "snowgatling",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.shield-capacity",
+        "atom.shld-breach"
+      ],
+      "category": "attack",
+      "id": "action.species.snowpeashooter.001",
+      "motifsUsed": [
+        "触感",
+        "地刺",
+        "发射"
+      ],
+      "name": "Permafrost Spike",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "snowpeashooter",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.shield-regen"
+      ],
+      "category": "attack",
+      "id": "action.species.snowsplit.001",
+      "motifsUsed": [
+        "发射",
+        "僵尸"
+      ],
+      "name": "snowsplit",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "snowsplit",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.sparking"
+      ],
+      "category": "movement",
+      "id": "action.species.squash.001",
+      "motifsUsed": [
+        "压扁"
+      ],
+      "name": "Atmospheric Compression",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "squash",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-focus",
+        "atom.stalwart"
+      ],
+      "category": "attack",
+      "id": "action.species.starfruit.001",
+      "motifsUsed": [
+        "发射",
+        "方向"
+      ],
+      "name": "Solar Flare Trajectory",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "starfruit",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.sust-freshgraft"
+      ],
+      "category": "attack",
+      "id": "action.species.starpea.001",
+      "motifsUsed": [
+        "发射",
+        "方向"
+      ],
+      "name": "starpea",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "starpea",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-shift",
+        "atom.tempo-pulse"
+      ],
+      "category": "defense",
+      "id": "action.species.starpea.002",
+      "motifsUsed": [
+        "方向"
+      ],
+      "name": "Voidward Direction",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "starpea",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.tempo-stampede"
+      ],
+      "category": "attack",
+      "id": "action.species.sunchomper.001",
+      "motifsUsed": [
+        "完成",
+        "嘴花"
+      ],
+      "name": "Sunchomper",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "sunchomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.tempo-yield"
+      ],
+      "category": "attack",
+      "id": "action.species.sunflower.001",
+      "motifsUsed": [
+        "嘴花"
+      ],
+      "name": "Solar Flare Maw",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "sunflower",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution",
+        "atom.ward-brace"
+      ],
+      "category": "defense",
+      "id": "action.species.sunflower.002",
+      "motifsUsed": [
+        "向日葵",
+        "完成",
+        "嘴花"
+      ],
+      "name": "Solar Flare Bloom",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "sunflower",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.ward-link"
+      ],
+      "category": "attack",
+      "id": "action.species.threepeater.001",
+      "motifsUsed": [
+        "三行",
+        "发射"
+      ],
+      "name": "Triple-Line Discharge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "threepeater",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.warded"
+      ],
+      "category": "support",
+      "id": "action.species.threeplantern.001",
+      "motifsUsed": [
+        "光照",
+        "三行",
+        "发射"
+      ],
+      "name": "Trifecta Beam",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "threeplantern",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bloodletting",
+        "atom.sunbloom"
+      ],
+      "category": "attack",
+      "id": "action.species.twinflower.001",
+      "motifsUsed": [
+        "向日葵",
+        "阳光",
+        "产量"
+      ],
+      "name": "Solar Flare Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "twinflower",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cleansing",
+        "atom.tempo-yield"
+      ],
+      "category": "movement",
+      "id": "action.species.twinflower.002",
+      "motifsUsed": [
+        "向日葵",
+        "产量",
+        "阳光"
+      ],
+      "name": "Solar Drift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "twinflower",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.death-glean"
+      ],
+      "category": "support",
+      "id": "action.species.wallnut.001",
+      "motifsUsed": [
+        "坚硬",
+        "外壳",
+        "保护"
+      ],
+      "name": "Aero-Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "wallnut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.dooming",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.wallnut.002",
+      "motifsUsed": [
+        "植物",
+        "坚硬",
+        "外壳",
+        "保护",
+        "坚果"
+      ],
+      "name": "Aero-Shell Drift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "wallnut",
+      "targetMode": "single"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

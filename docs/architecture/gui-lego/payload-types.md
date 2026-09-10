@@ -41,6 +41,8 @@ type ThemeKind =
   | "rarity"
   | "side"
   | "cook-tab"
+  | "bucket"
+  | "posture"
   | "neutral";
 
 interface ThemeRef {

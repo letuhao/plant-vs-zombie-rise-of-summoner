@@ -4,14 +4,15 @@
 **Map:** [../shield-sheet-map.md](../shield-sheet-map.md)  
 **Draft:** `docs/design/gui-lego/pieces/shield-stack-bar.html` — **must author before factory done**  
 **Design SSOT:** [../../design/spec-shield-and-elements.md](../../design/spec-shield-and-elements.md) §3.1  
-**Depends on:** theme-bind, element-paint-ssot, `shield-stack-projection`
+**Depends on:** theme-bind, element-paint-ssot, `shield-stack-projection`  
+**Locks:** **S1** · **D8** regen optional
 
 ---
 
 ## Role
 
 **One** segmented bar for up to three shield layers in **drain order** (left→right = deplete order).
-Primary Shield tab stack chrome — supersedes three equal “Empty layer” radials as SSOT.
+Primary Shield tab stack chrome. **Bans** three permanent “Empty layer” radials as product.
 
 ## Structure
 
@@ -22,22 +23,35 @@ Primary Shield tab stack chrome — supersedes three equal “Empty layer” rad
 | Empty slots | dashed wells only when Hot and N &lt; 3 |
 | Pending | lifecycle piece — not fake empties |
 
-## Segment fields
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"shield-stack-bar"` | yes | |
+| `instanceId` | `string` | yes | |
+| `phase` | `Phase` | yes | ready / pending / … |
+| `segments` | array | yes | see segment fields |
+| `emptySlots` | `0..3` | yes | Hot only |
+| `themeRef` | | per segment | |
+
+### Segment
 
 | Field | Notes |
 |---|---|
+| `shieldId` | |
 | `elementId` / themeRef | typed paint; untyped hatch |
-| `current` / `max` | long; width ∝ max; fill ∝ current/max |
+| `current` / `max` | long; width ∝ max; fill ∝ ratio |
+| `currentText` / `maxText` | fold-formatted |
 | `priorityLabel` | aura / skill / innate fiction |
-| `regenText` | optional rate |
-| `broken` | empty fill but slot remains |
+| `regenText` | optional — only if DTO has regen (**D8**) |
+| `broken` | empty fill, slot remains |
 
 ## Success criteria
 
 - [ ] Draft HTML exists.
 - [ ] Order matches GetShields drain order.
-- [ ] Element paint from paint SSOT; not mute grey.
-- [ ] Pending vs Hot-empty distinguished.
+- [ ] Element paint from paint SSOT.
+- [ ] Pending vs Hot-empty vs N segments distinguished — no three Empty layer labels as “done.”
 
 ## Commands
 

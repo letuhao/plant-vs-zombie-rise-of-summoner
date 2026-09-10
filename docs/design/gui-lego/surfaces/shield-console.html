@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shield Console — stack + inspect + omni</title>
+  <style>
+    body { margin: 0; padding: 24px; background:#1f1914; color:#f2ead8; font-family: Inter, sans-serif; }
+    .shield-console {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas:
+        "stack stack"
+        "inspect omni";
+      gap: 16px;
+      max-width: 960px;
+      margin: 0 auto;
+      min-height: 420px;
+    }
+    .shield-stack-bar { grid-area: stack; }
+    .shield-layer-inspect { grid-area: inspect; }
+    .shield-omni-region { grid-area: omni; min-height: 0; overflow: auto; }
+    .card {
+      border: 1px solid #5b5144;
+      border-radius: 14px;
+      background: #2f261d;
+      padding: 16px;
+    }
+    .eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #a39583; margin: 0 0 8px; }
+    .track { display: flex; gap: 4px; min-height: 44px; }
+    .seg { flex: 1; border-radius: 8px; background: color-mix(in srgb, #7ec8e3 38%, #2a221a); border: 1px solid #5b5144; padding: 8px; font-size: 12px; }
+    .well { flex: 1; border: 1px dashed #5b5144; border-radius: 8px; }
+    .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #3d342a; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>shield-console</h1>
+  <p>Assembled surface draft for owner gate. Recipe: <code>shield-console.json</code>.</p>
+  <div class="shield-console">
+    <section class="card shield-stack-bar">
+      <p class="eyebrow">Shield stack</p>
+      <div class="track">
+        <div class="seg">Aura · Ice<br/>40 / 40</div>
+        <div class="well"></div>
+        <div class="well"></div>
+      </div>
+    </section>
+    <section class="card shield-layer-inspect">
+      <p class="eyebrow">Selected layer</p>
+      <strong>Ice aura shield</strong>
+      <p>40 / 40</p>
+      <p>Priority · Aura · Source · pact</p>
+    </section>
+    <section class="card shield-omni-region">
+      <p class="eyebrow">Shield omni</p>
+      <div class="row"><span>Shield capacity</span><b>120</b></div>
+      <div class="row"><span>Shield toughness</span><b>Pending</b></div>
+    </section>
+  </div>
+</body>
+</html>

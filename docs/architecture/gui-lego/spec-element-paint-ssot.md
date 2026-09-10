@@ -3,7 +3,9 @@
 **Program:** `gui-lego` (shared) · **Consumers:** `condition-glance` (first ship) · `derived-cook` · `shield-sheet`  
 **Map:** [../condition-glance-map.md](../condition-glance-map.md) · [../derived-cook-map.md](../derived-cook-map.md) · [../shield-sheet-map.md](../shield-sheet-map.md)  
 **Depends on:** [spec-theme-packs.md](spec-theme-packs.md), `data/tuning/element-catalog.v{n}.json`  
-**Ideal lock:** Q2 — centralize element UI colors for maximum reuse
+**Ideal lock:** Q2 — centralize element UI colors for maximum reuse  
+**Wave gate:** Condition Wave 1 ships first preferred; Derived/Shield **consume the same module** in
+parallel is OK — **never** fork a second paint table while waiting.
 
 ---
 

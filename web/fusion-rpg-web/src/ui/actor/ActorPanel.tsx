@@ -131,11 +131,11 @@ export function ActorPanel({
             <Button
               variant="ghost"
               size="sm"
-              data-testid="actor-leftover-reset"
+              data-testid="actor-leftover-cancel"
               disabled={!aptitudeDraft.dirty || aptitudeDraft.saving}
               onClick={() => aptitudeDraft.revert()}
             >
-              Reset
+              Cancel
             </Button>
             <Button
               size="sm"
@@ -266,12 +266,24 @@ export function ActorPanel({
           {/* Keep aptitudes mounted while draft is dirty so leftover Confirm stays reachable. */}
           {tab === "aptitudes" || aptitudeDraft?.dirty ? (
             <div hidden={tab !== "aptitudes"} data-testid="aptitudes-mount">
-              <AptitudesTab data={data} surface={surface} onDraftState={setAptitudeDraft} />
+              <AptitudesTab
+                data={data}
+                surface={surface}
+                role={isCommander ? "commander" : "creature"}
+                onDraftState={setAptitudeDraft}
+              />
             </div>
           ) : null}
 
           {tab === "derived" ? <DerivedTab data={data} surface={surface} /> : null}
-          {tab === "shield" ? <ShieldTab data={data} /> : null}
+          {tab === "shield" ? (
+            <ShieldTab
+              data={data}
+              sheet={sheet.data}
+              sheetError={sheet.isError}
+              onRetry={() => void sheet.refetch()}
+            />
+          ) : null}
           {tab === "status" ? <StatusTab surface={surface} /> : null}
           {tab === "elements" ? <ElementsTab data={data} surface={surface} /> : null}
           {tab === "kit" ? <KitTab data={data} surface={surface} /> : null}

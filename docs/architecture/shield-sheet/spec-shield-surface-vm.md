@@ -1,7 +1,8 @@
 # Module: `shield-surface-vm`
 
 **Program:** `shield-sheet` · **Map:** [../shield-sheet-map.md](../shield-sheet-map.md)  
-**Composition:** [../gui-lego/spec-composition.md](../gui-lego/spec-composition.md)
+**Composition:** [../gui-lego/spec-composition.md](../gui-lego/spec-composition.md)  
+**Locks:** **S1** layers on sheet · Q3 does **not** omit whole tab
 
 ---
 
@@ -14,12 +15,13 @@ themeRef, maps Pending/Hot-empty, never invents layers.
 
 | Field | Source |
 |---|---|
-| `layers` | Hot shields API / sheet.shieldLayers |
-| `summary` | sheet.shieldSummary (parity check) |
+| `layers` | `sheet.shieldLayers` |
+| `summary` | `sheet.shieldSummary` (parity check) |
 | `omniChannels` | sheet derived join |
 | `availability` | ready / loading / error / pending |
 | `ui` | selectedShieldId |
 | `locale` | formatter |
+| `themeRegistry` | inject |
 
 ## Outputs
 
@@ -35,9 +37,25 @@ themeRef, maps Pending/Hot-empty, never invents layers.
 
 | Condition | Behavior |
 |---|---|
-| Query pending (API unwired) | `phase-pending` / PendingNote — **not** three Empty layer labels |
-| Hot ready, 0 layers | empty stack chrome + fiction empty copy; dashed wells OK |
-| Hot ready, N layers | mount bar with N segments + (3−N) dashed |
+| Query pending (API unwired) | `phase-pending` — **not** three Empty layer labels |
+| Hot ready, 0 layers | empty stack + fiction empty; dashed wells OK |
+| Hot ready, N layers | bar with N segments + (3−N) dashed |
+
+## Sample VM fragment
+
+```json
+{
+  "phase": "ready",
+  "revision": 3,
+  "stack": {
+    "piece": "shield-stack-bar",
+    "segments": [],
+    "emptySlots": 3
+  },
+  "inspect": { "piece": "phase-empty", "message": "No shield layer selected" },
+  "omni": []
+}
+```
 
 ## Success criteria
 

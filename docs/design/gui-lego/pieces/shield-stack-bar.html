@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>shield-stack-bar — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+<style>
+  .shield-stack-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    color: var(--text);
+  }
+  .shield-stack-bar .eyebrow {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .shield-stack-bar .track {
+    display: flex;
+    align-items: stretch;
+    gap: 3px;
+    min-height: 44px;
+    width: 100%;
+  }
+  .shield-segment {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 48px;
+    border: 1px solid color-mix(in srgb, var(--piece-accent, var(--border-control)) 45%, var(--border-control));
+    border-radius: 8px;
+    background: var(--panel-inset);
+    overflow: hidden;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .shield-segment.is-on {
+    outline: 2px solid var(--piece-accent, var(--sun));
+    outline-offset: 1px;
+  }
+  .shield-segment.is-broken .fill {
+    width: 0 !important;
+  }
+  .shield-segment .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: color-mix(in srgb, var(--piece-accent, #8a8070) 38%, transparent);
+    pointer-events: none;
+  }
+  .shield-segment.is-untyped .fill {
+    background: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--muted) 28%, transparent),
+      color-mix(in srgb, var(--muted) 28%, transparent) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+  .shield-segment .meta {
+    position: relative;
+    z-index: 1;
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .shield-segment .prio {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .shield-segment .hp {
+    font-family: var(--font-mono, ui-monospace);
+    font-weight: 700;
+  }
+  .shield-empty-slot {
+    flex: 1 1 0;
+    min-width: 40px;
+    border: 1px dashed var(--border-control);
+    border-radius: 8px;
+    background: transparent;
+  }
+  .shield-stack-bar.is-pending .track {
+    opacity: 0.55;
+  }
+</style>
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>shield-stack-bar</code></h1>
+  <p class="lede">One segmented bar in <strong>drain order</strong> (left→right). Hot empty slots are dashed wells only — never three permanent “Empty layer” labels. Spec: <code>docs/architecture/gui-lego/spec-shield-stack-bar.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live · 1 segment + 2 dashed)</h2>
+      <div class="piece-stage">
+        <div class="shield-stack-bar" data-testid="shield-stack-bar">
+          <p class="eyebrow">Shield stack</p>
+          <div class="track" role="list">
+            <button type="button" class="shield-segment is-on" style="flex:2 1 0;--piece-accent:var(--el-ice)" role="listitem">
+              <span class="fill" style="width:100%"></span>
+              <span class="meta">
+                <span class="prio">Aura</span>
+                <span class="hp">40 / 40</span>
+              </span>
+            </button>
+            <div class="shield-empty-slot" aria-hidden="true"></div>
+            <div class="shield-empty-slot" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "shield-stack-bar",
+  "instanceId": "shield:stack",
+  "phase": "ready",
+  "segments": [
+    {
+      "shieldId": "aura-1",
+      "elementId": "ice",
+      "current": 40,
+      "max": 40,
+      "priorityLabel": "Aura",
+      "themeRef": { "kind": "element", "id": "ice" }
+    }
+  ],
+  "emptySlots": 2
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

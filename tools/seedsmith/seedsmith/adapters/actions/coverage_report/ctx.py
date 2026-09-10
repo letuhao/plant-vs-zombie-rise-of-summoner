@@ -17,8 +17,7 @@ from typing import Mapping, Sequence
 
 @dataclass(frozen=True)
 class RosterCounts:
-    """The shipped roster, measured — never the pre-power-ladder 904 almanac count (constraint 3,
-    spec-coverage-report.md's own restated map §3 constraint). `family_count` is every family id
+    """The live roster, measured from the demon seed folder. `family_count` is every family id
     with at least one assigned member; `family_assigned_count` is the sum of member counts across
     those families (a species may belong to more than one family, so this can exceed
     `species_count`'s own share that has a family at all — the same distinction
@@ -35,8 +34,8 @@ class ActionCoverageCtx:
     "load once, hand to every metric" shape `DemonDumpCtx` already established for T1.10.
 
     `accepted_rows`: the corpus this report measures — A-S3's survivors plus whatever is already
-    committed under `data/seed/actions/` (A-C1's own load). Genuinely empty in this checkout (A-S4
-    does not exist yet, spec §1 "Real gap") — every metric below must degrade to an honest,
+    committed under `data/seed/actions/` (A-C1's own load). A partial smoke corpus is legal while
+    the model stages are being proven — every metric below must degrade to an honest,
     non-alarming empty report rather than a spurious wall of GAP findings, and the coverage-report
     algorithm's own quota-vs-zero handling (mirroring `metrics/distribution.py:CellDeviation`'s
     "target == 0" branch) is what keeps that true.
@@ -48,7 +47,7 @@ class ActionCoverageCtx:
     the per-subject numbers are what next-round target derivation (spec §3 step 5) needs to name
     which subject is short, not just which scope/category is.
 
-    `family_ids`: the 98-family authored affix namespace (`vocab.load_family_ids`), read fresh.
+    `family_ids`: the live authored atom-family namespace (`vocab.load_family_ids`), read fresh.
     `pairing_table`: `pairings.json`, read-only, never rewritten by this module (spec §4). `None`
     means the file was not available this run — `enablerPayoffCoverage`/`pairingReach` report
     NOT_MEASURED rather than a false "zero reach" (`metrics/model.py:34`'s own discipline: a metric
@@ -67,3 +66,4 @@ class ActionCoverageCtx:
     mode: str = "smoke"
     tuning_version: int = 1               # action-corpus-run.v1.json's own `version` — acceptance
                                           # #8's "provenance recording... the tuning version"
+    per_species_count: int = 3            # compatibility default for pure synthetic fixtures

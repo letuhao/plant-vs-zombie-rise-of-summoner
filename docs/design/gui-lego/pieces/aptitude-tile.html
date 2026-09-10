@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aptitude-tile — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>aptitude-tile</code></h1>
+  <p class="lede">Icon (from catalog) + displayName + value + obvious steppers; selected state. No fetch; paint via themeRef. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <div class="chip is-on" role="button" aria-pressed="true" style="--piece-accent:#e0703c; --piece-rail-edge:#e0703c; --piece-select-glow:rgb(224 112 60 / 0.35); display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center; padding:10px 12px; min-width:180px">
+          <span aria-hidden="true" style="width:28px;height:28px;border-radius:6px;background:#3a2a22;display:grid;place-items:center;color:#e0703c;font-size:14px">⚔</span>
+          <div>
+            <div style="font-weight:700">Might</div>
+            <div style="font-size:18px;font-variant-numeric:tabular-nums">5</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px">
+            <button type="button" class="chip" aria-label="Increase Might" style="padding:2px 8px">+</button>
+            <button type="button" class="chip" aria-label="Decrease Might" style="padding:2px 8px">−</button>
+          </div>
+        </div>
+        <p class="lede" style="margin-top:10px;margin-bottom:0">Icon key from catalog (CatalogIcon / lucide path) — draft shows glyph stand-in.</p>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "aptitude-tile",
+  "instanceId": "aptitudes:tile:might",
+  "aptitudeId": "might",
+  "displayName": "Might",
+  "icon": "sword",
+  "value": 5,
+  "selected": true,
+  "themeRef": { "kind": "posture", "id": "force" },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

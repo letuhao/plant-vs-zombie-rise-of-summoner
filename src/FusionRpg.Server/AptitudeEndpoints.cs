@@ -10,12 +10,9 @@ using Microsoft.AspNetCore.SignalR;
 namespace FusionRpg.Server;
 
 /// <summary>
-/// class-system-todo.md P9.1/P9.2's own named gap, closed here: `spec-aptitude-allocation-surface.md`
-/// — the first player-reachable way to spend aptitude points. Commander scope only (§1's own scope
-/// decision — the other three scopes need a specimen picker or `aspect-scope`, neither of which this
-/// endpoint needs). `PointBudget`/`AptitudeAllocation`/`AllocationStore` (`point-economy`, Phase 6) are
-/// called as-is, never re-derived — this module is a thin, player-facing surface over already-shipped,
-/// already-tested math.
+/// Player aptitude allocate surfaces: commander (Mode C), species GET, UniqueDemon GET/POST (Mode A —
+/// aptitude-sheet <c>unique-allocate</c>). Commander-only scope decision in historical class-system docs is
+/// superseded for UniqueActor sheets; this file owns all three HTTP surfaces.
 /// </summary>
 public static class AptitudeEndpoints
 {
@@ -53,17 +50,49 @@ public static class AptitudeEndpoints
 
             store.SaveAllocation(AllocationScope.Commander, ScopeKey(pid), allocation);
 
-            _ = BroadcastBestEffort(hub, pid);
+            _ = BroadcastBestEffort(hub, new AptitudesUpdatedDto(pid, "commander", null, null));
             return Results.Ok(ProjectState(store, powerIndex, pid));
         });
 
-        // `demon-type-allocation` (module 5, spec-demon-type-allocation.md §"Commands") — the
-        // player-facing surface over EffectiveSpeciesAllocation. GET only: the POST twin
-        // (`/species/allocate`) was RETIRED by species-build-todo.md T4.3/Checkpoint 5's own named
-        // follow-up — it wrote a DemonType override with zero pricing awareness, a live bypass of the
-        // whole `species-respec` economy (owner decision, 2026-09-05: "retire it now"). Every real
-        // write now goes through `SpeciesBuildEndpoints.cs`'s `POST /api/species-build/respec`, which
-        // decides free-vs-priced for itself; this GET keeps serving reads unchanged.
+        g.MapGet("/unique/{instanceId}", (string instanceId, RpgStore store, IPowerIndexProvider powerIndex) =>
+        {
+            var actor = store.GetUniqueActor(instanceId);
+            if (actor is null) return Results.NotFound();
+            return Results.Ok(ProjectUniqueState(store, powerIndex, actor));
+        });
+
+        g.MapPost("/unique/allocate", (AllocateUniqueAptitudesRequest body, RpgStore store, IPowerIndexProvider powerIndex, IHubContext<RpgHub> hub) =>
+        {
+            if (string.IsNullOrWhiteSpace(body.InstanceId))
+                return Results.BadRequest(new { reason = "instanceId.missing" });
+            if (body.Shares is null) return Results.BadRequest(new { reason = "shares.missing" });
+
+            var actor = store.GetUniqueActor(body.InstanceId);
+            if (actor is null) return Results.NotFound();
+
+            AptitudeAllocation allocation;
+            try
+            {
+                allocation = body.Shares.Aggregate(AptitudeAllocation.Empty,
+                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.UniqueDemon, kv.Key, kv.Value));
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { reason = "aptitudes.unknownid", detail = ex.Message });
+            }
+
+            var source = PointBudget.UniqueDemonSourceFromLevel(actor.Level);
+            var check = PointBudget.CheckScope(AllocationScope.UniqueDemon, allocation, source, AptitudeTuningHub.Tuning);
+            if (!check.WithinBudget)
+                return Results.Conflict(new { reason = "aptitudes.overbudget", spent = check.Spent, budget = check.Budget });
+
+            store.SaveAllocation(AllocationScope.UniqueDemon, actor.InstanceId, allocation);
+
+            _ = BroadcastBestEffort(hub, new AptitudesUpdatedDto(actor.PlayerId, "unique", actor.InstanceId, null));
+            return Results.Ok(ProjectUniqueState(store, powerIndex, actor));
+        });
+
+        // species GET — writes go through SpeciesBuildEndpoints respec only.
         g.MapGet("/species/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
@@ -73,24 +102,47 @@ public static class AptitudeEndpoints
         });
     }
 
-    static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
+    /// <summary>Shared AptitudesUpdated emitter (aptitude-sheet live-bus). Sole path for commander /
+    /// unique / species / preset-activate broadcasts.</summary>
+    public static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, AptitudesUpdatedDto dto)
     {
-        // Both groups, matching Program.cs/SimEndpoints.cs's own PvzStatsUpdated pattern: the web
-        // client refetches on this event, and the injector's RpgClient.cs:93 handler (enqueues
-        // "aptitudes.allocation.reload" -> RefreshCommanderAllocationAsync) needs it too -- an
-        // injector connection only ever joins InjectorGroup (RpgHub.cs:27-28), so a WebGroup-only
-        // send here left CheatState.CommanderAllocation stale until the next injector reconnect.
-        // Found 2026-08-30 verifying aura-skill T5/T6's own "wired end-to-end" claim against a real
-        // live game -- confirmed dead via a live probe, not assumed from reading code alone.
-        try { await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("AptitudesUpdated", new { playerId }); }
-        catch { /* best-effort; the allocation is durable and the next GET reflects it */ }
-        try { await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("AptitudesUpdated", new { playerId }); }
-        catch { /* best-effort; the injector re-syncs at its own next session start regardless */ }
+        // camelCase anonymous shape — FE + injector already parse playerId; scope keys additive (S10/live-bus).
+        var payload = new
+        {
+            playerId = dto.PlayerId,
+            scope = dto.Scope,
+            instanceId = dto.InstanceId,
+            speciesId = dto.SpeciesId
+        };
+        try { await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("AptitudesUpdated", payload); }
+        catch { /* best-effort */ }
+        try { await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("AptitudesUpdated", payload); }
+        catch { /* best-effort */ }
     }
 
-    /// <summary>The store is agnostic to key shape (`RpgStore.Aptitudes.cs`'s own contract) — matches
-    /// `AllocationStoreTests.cs`'s own established `"player:{id}"` convention for the commander scope.</summary>
     public static string ScopeKey(long playerId) => $"player:{playerId}";
+
+    static object ProjectUniqueState(RpgStore store, IPowerIndexProvider powerIndex, UniqueActorDto actor)
+    {
+        var allocation = store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId);
+        var source = PointBudget.UniqueDemonSourceFromLevel(actor.Level);
+        var check = PointBudget.CheckScope(AllocationScope.UniqueDemon, allocation, source, AptitudeTuningHub.Tuning);
+        var leftover = check.Budget - check.Spent;
+        if (leftover < 0) leftover = 0;
+
+        return new
+        {
+            instanceId = actor.InstanceId,
+            playerId = actor.PlayerId,
+            specimenLevel = actor.Level,
+            budget = check.Budget,
+            spent = check.Spent,
+            leftover,
+            withinBudget = check.WithinBudget,
+            shares = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => allocation.PointsAt(AllocationScope.UniqueDemon, a.Id), StringComparer.Ordinal)
+        };
+    }
 
     static object ProjectState(RpgStore store, IPowerIndexProvider powerIndex, long playerId)
     {
@@ -98,10 +150,6 @@ public static class AptitudeEndpoints
         var theta = (long)powerIndex.ActorIndex(new StatContext { PlayerId = playerId });
         var check = PointBudget.CheckScope(AllocationScope.Commander, allocation, theta, AptitudeTuningHub.Tuning);
 
-        // species-build T3.1 (module 6, allocation-transport): additive only — `shares` below is
-        // byte-unchanged for a player with no species allocations (spec's own ⛔ callout: RpgClient.cs
-        // hard-requires the literal key "shares", a rename would silently stop every allocation
-        // applying). Only species this player has actually levelled are sent, never the full corpus.
         var species = new Dictionary<string, Dictionary<string, long>>(StringComparer.Ordinal);
         foreach (var speciesId in store.ListLevelledSpeciesIds(playerId))
         {
@@ -129,9 +177,6 @@ public static class AptitudeEndpoints
         var source = PointBudget.DemonTypeSourceFromLevel(level);
         var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
 
-        // species-build-todo.md T5.1 — additive: `spec-allocation-surface.md`'s panel needs the
-        // shipped baseline SEPARATELY from the effective (baseline-or-override) value in `shares`, to
-        // render an override "as a deviation from it" rather than as a standalone build.
         var baseline = store.SpeciesBaselineAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
         return new
         {
@@ -153,4 +198,16 @@ public static class AptitudeEndpoints
         public long? PlayerId { get; set; }
         public Dictionary<string, long>? Shares { get; set; }
     }
+
+    public sealed class AllocateUniqueAptitudesRequest
+    {
+        public string? InstanceId { get; set; }
+        public Dictionary<string, long>? Shares { get; set; }
+    }
+
+    public sealed record AptitudesUpdatedDto(
+        long PlayerId,
+        string Scope,
+        string? InstanceId,
+        string? SpeciesId);
 }

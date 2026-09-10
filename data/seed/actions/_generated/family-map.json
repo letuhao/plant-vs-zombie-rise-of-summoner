@@ -1,55 +1,2993 @@
 {
-  "bucketnutzombie": "bucket",
-  "bucketzombie": "bucket",
-  "cactus": "cactus",
-  "cactusblover": "cactus",
-  "cherrybomb": "cherry",
-  "cherrygatling": "cherry",
-  "cherrynut": "cherry",
-  "cherrynutzombie": "cherry",
-  "cherrypaperzombie": "cherry",
-  "cherryshooter": "cherry",
-  "cherrysplit": "cherry",
-  "cornpot": "corn",
-  "cornpult": "corn",
-  "dollgold": "dolls",
-  "dollsilver": "dolls",
-  "doublecherry": "double",
-  "doubleshooter": "double",
-  "doublesnow": "double",
-  "garlicpea": "garlic",
-  "garlicthreepeater": "garlic",
-  "hypnojalapeno": "hypno",
-  "hypnopeashooter": "hypno",
-  "hypnoshroom": "hypno",
-  "icecaltrop": "ice",
-  "iceshroom": "ice",
-  "jalacaltrop": "fire",
-  "jalagatling": "fire",
-  "jalapeashooter": "fire",
-  "jalapeno": "fire",
-  "jalastar": "fire",
-  "lanterncactus": "light",
-  "lanternchomper": "light",
-  "lanternpea": "light",
-  "nutchomper": "chomper",
-  "peachomper": "chomper",
-  "peanut": "nut",
-  "peashooter": "pea",
-  "peashooterzombie": "pea",
-  "peasquash": "pea",
-  "peasunflower": "sun",
-  "plantern": "sun",
-  "pot": "base",
-  "pumpkin": "base",
-  "snowgatling": "ice",
-  "snowpeashooter": "ice",
-  "snowsplit": "pea",
-  "splitpea": "pea",
-  "starfruit": "fruit",
-  "starpea": "fruit",
-  "sunchomper": "sunflower",
-  "sunflower": "sunflower",
-  "threepeater": "line",
-  "threeplantern": "line"
+  "abyssswordstar": [
+    "flora"
+  ],
+  "acientsunnut": [
+    "flora"
+  ],
+  "allpeater": [
+    "organism"
+  ],
+  "apple": [
+    "flora"
+  ],
+  "armedgargantuar": [
+    "zombies"
+  ],
+  "armoredimpzombie": [
+    "undead",
+    "zombie"
+  ],
+  "ashthreepeater": [
+    "remnant"
+  ],
+  "balloonzombie": [
+    "infantry",
+    "undead"
+  ],
+  "bamboo": [
+    "flora"
+  ],
+  "bamboodragon": [
+    "botanical"
+  ],
+  "bamboofurnace": [
+    "construct"
+  ],
+  "bamboospruce": [
+    "artillery"
+  ],
+  "bedrocksnowzombie": [
+    "undead"
+  ],
+  "bedrocktallnut": [
+    "flora"
+  ],
+  "bigchomper": [
+    "flora"
+  ],
+  "biggatling": [
+    "flora"
+  ],
+  "biggloom": [
+    "artillery"
+  ],
+  "bigpumpkin": [
+    "flora",
+    "gourd"
+  ],
+  "bigseashroom": [
+    "fungi"
+  ],
+  "bigsunnut": [
+    "artillery",
+    "nut"
+  ],
+  "bigsunshroom": [
+    "hybrid"
+  ],
+  "bigwallnut": [
+    "construct"
+  ],
+  "blackelephantzombie": [
+    "behemoth"
+  ],
+  "blackflagfootball": [
+    "warrior"
+  ],
+  "blackfootball": [
+    "undead",
+    "weapon"
+  ],
+  "blackfootball_a": [
+    "athlete",
+    "zombie"
+  ],
+  "blackfootball_b": [
+    "zombie"
+  ],
+  "blackfootball_c": [
+    "construct",
+    "undead"
+  ],
+  "blackfootball_c2": [
+    "commander",
+    "officer"
+  ],
+  "blackhorse": [
+    "cavalry",
+    "riders"
+  ],
+  "blackjackboxzombie": [
+    "bringer",
+    "zombie"
+  ],
+  "blacktrainzombie": [
+    "undead",
+    "vehicle"
+  ],
+  "blover": [
+    "flora"
+  ],
+  "blovermine": [
+    "tuber"
+  ],
+  "bloverpot": [
+    "symbiotic"
+  ],
+  "bloverumbrella": [
+    "flora"
+  ],
+  "blowerpumpkin": [
+    "cucurbit",
+    "hybrid"
+  ],
+  "bluegargantuar": [
+    "zombie"
+  ],
+  "boatimp": [
+    "undead",
+    "vehicles"
+  ],
+  "bucketdoom": [
+    "artillery"
+  ],
+  "bucketnutzombie": [
+    "undead"
+  ],
+  "bucketpaper": [
+    "buckethead",
+    "readers"
+  ],
+  "bucketplant": [
+    "metallophyte"
+  ],
+  "bucketzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "bucketzombieduck": [
+    "construct",
+    "undead"
+  ],
+  "bungizombie": [
+    "raiders",
+    "undead"
+  ],
+  "cabbageblover": [
+    "artillery"
+  ],
+  "cabbagecaltrop": [
+    "flora"
+  ],
+  "cabbagecannon": [
+    "flora"
+  ],
+  "cabbagefume": [
+    "flora"
+  ],
+  "cabbagemelon": [
+    "launcher"
+  ],
+  "cabbagenut": [
+    "sentinel"
+  ],
+  "cabbagepot": [
+    "flora"
+  ],
+  "cabbagepuff": [
+    "launcher"
+  ],
+  "cabbagepult": [
+    "projectile"
+  ],
+  "cabbagesquash": [
+    "projectile"
+  ],
+  "cabbageumbrella": [
+    "cabbage",
+    "flora"
+  ],
+  "cacstusstar": [
+    "drupe"
+  ],
+  "cactus": [
+    "sentinel"
+  ],
+  "cactusblover": [
+    "succulent"
+  ],
+  "cactuscaltrop": [
+    "sentinel"
+  ],
+  "cactusfume": [
+    "hybrid"
+  ],
+  "cactusnut": [
+    "botanical"
+  ],
+  "cactuspumpkin": [
+    "gourd"
+  ],
+  "cactusumbrella": [
+    "flora"
+  ],
+  "caltrop": [
+    "trap"
+  ],
+  "caltropfume": [
+    "trap"
+  ],
+  "caltropkelp_land": [
+    "flora"
+  ],
+  "caltropkelp_water": [
+    "flora"
+  ],
+  "caltropnut": [
+    "nut"
+  ],
+  "caltroppot": [
+    "symbiote"
+  ],
+  "catapultzombie": [
+    "mutant",
+    "undead"
+  ],
+  "cattailgirl": [
+    "construct",
+    "entity"
+  ],
+  "cattaillour": [
+    "flora",
+    "hybrid"
+  ],
+  "cattailplant": [
+    "flora"
+  ],
+  "cherryblover": [
+    "flora",
+    "pome"
+  ],
+  "cherrybomb": [
+    "flora"
+  ],
+  "cherrycatapultzombie": [
+    "engine",
+    "undead"
+  ],
+  "cherrychomper": [
+    "hybrid"
+  ],
+  "cherryfume": [
+    "catalyst"
+  ],
+  "cherrygatling": [
+    "hybrid"
+  ],
+  "cherryhypno": [
+    "fungi"
+  ],
+  "cherryjalapeno": [
+    "botanical"
+  ],
+  "cherrymagnet": [
+    "ordnance"
+  ],
+  "cherrymine": [
+    "flora"
+  ],
+  "cherrynut": [
+    "construct"
+  ],
+  "cherrynutzombie": [
+    "afflicted",
+    "undead"
+  ],
+  "cherrypaperz95": [
+    "wielder",
+    "zombie"
+  ],
+  "cherrypaperzombie": [
+    "spitter",
+    "zombie"
+  ],
+  "cherrypot": [
+    "flora"
+  ],
+  "cherrypuff": [
+    "fungi"
+  ],
+  "cherrypumpkin": [
+    "construct"
+  ],
+  "cherryscaredy": [
+    "explosive"
+  ],
+  "cherryshooter": [
+    "artillery"
+  ],
+  "cherryshooterzombie": [
+    "undead"
+  ],
+  "cherrysplit": [
+    "artillery"
+  ],
+  "cherrysquash": [
+    "vegetable"
+  ],
+  "cherrysubmarine": [
+    "constructs",
+    "zombie"
+  ],
+  "cherrythreepeater": [
+    "botanical"
+  ],
+  "cherrytorch": [
+    "botanical",
+    "flora"
+  ],
+  "cherryultimatepumpkin": [
+    "hybrid"
+  ],
+  "cherryumbrella": [
+    "flora"
+  ],
+  "chickenimp": [
+    "zombies"
+  ],
+  "chomper": [
+    "flora"
+  ],
+  "chomperpumpkin": [
+    "flora"
+  ],
+  "chompersquash": [
+    "gourd"
+  ],
+  "chrysantheautumn": [
+    "bloom",
+    "essence"
+  ],
+  "coachpaper": [
+    "instructor",
+    "undead"
+  ],
+  "cobcannon": [
+    "flora"
+  ],
+  "conezombie": [
+    "reanimated",
+    "undead"
+  ],
+  "conezombieduck": [
+    "obstacle",
+    "undead"
+  ],
+  "cornblover": [
+    "botanical"
+  ],
+  "corncabbage": [
+    "launcher"
+  ],
+  "corncaltrop": [
+    "flora"
+  ],
+  "cornfume": [
+    "artillery"
+  ],
+  "cornmelon": [
+    "botanical",
+    "crop"
+  ],
+  "cornnut": [
+    "flora"
+  ],
+  "cornpot": [
+    "hybrid",
+    "pottery"
+  ],
+  "cornpuff": [
+    "artillery",
+    "projectile"
+  ],
+  "cornpult": [
+    "construct"
+  ],
+  "cornumbrella": [
+    "flora"
+  ],
+  "dancepolzombie": [
+    "undead",
+    "zombie"
+  ],
+  "dancepolzombie2": [
+    "zombies"
+  ],
+  "darkthreepeater": [
+    "flora"
+  ],
+  "deathchomper": [
+    "bloom",
+    "botanical"
+  ],
+  "deathmine": [
+    "flora",
+    "hybrid"
+  ],
+  "diamondimitater": [
+    "catalyst"
+  ],
+  "diamondpotatonut": [
+    "defense"
+  ],
+  "diamondrandomzombie": [
+    "undead"
+  ],
+  "dolldiamond": [
+    "constructs"
+  ],
+  "dollgold": [
+    "construct"
+  ],
+  "dollsilver": [
+    "constructs",
+    "zombies"
+  ],
+  "dolphingatlingzombie": [
+    "cavalry",
+    "rider"
+  ],
+  "dolphinpaper": [
+    "undead",
+    "zombie"
+  ],
+  "dolphinpeazombie": [
+    "rider",
+    "zombies"
+  ],
+  "dolphinrider": [
+    "aquatic"
+  ],
+  "doomblover": [
+    "clover",
+    "flora"
+  ],
+  "doomcabbage": [
+    "flora",
+    "vegetable"
+  ],
+  "doomcactus": [
+    "cactoid",
+    "flora"
+  ],
+  "doomcherry": [
+    "flora"
+  ],
+  "doomchomper": [
+    "hybrid"
+  ],
+  "doomcorn": [
+    "constructs",
+    "flora"
+  ],
+  "doomfume": [
+    "artillery"
+  ],
+  "doomgarlic": [
+    "flora"
+  ],
+  "doomgatling": [
+    "artillery"
+  ],
+  "doomjalapeno": [
+    "flora",
+    "vegetation"
+  ],
+  "doomkelp": [
+    "flora"
+  ],
+  "doommelon": [
+    "botanical"
+  ],
+  "doomnut": [
+    "botanicals"
+  ],
+  "doompaper": [
+    "wielding",
+    "zombie"
+  ],
+  "doompeashooter": [
+    "flora",
+    "vines"
+  ],
+  "doomplantern": [
+    "flora"
+  ],
+  "doompumpkin": [
+    "flora",
+    "vegetation"
+  ],
+  "doomseashroom": [
+    "marine"
+  ],
+  "doomseed": [
+    "ordnance"
+  ],
+  "doomshroom": [
+    "fungi"
+  ],
+  "doomsniper": [
+    "hybrid"
+  ],
+  "doomsquash": [
+    "botanical",
+    "hybrid"
+  ],
+  "doomstar": [
+    "flora"
+  ],
+  "doomsunflower": [
+    "hybrid"
+  ],
+  "doomthreepeater": [
+    "flora"
+  ],
+  "doomtorch": [
+    "hybrid"
+  ],
+  "doomzombie": [
+    "undead"
+  ],
+  "doorzombie": [
+    "bearer",
+    "undead"
+  ],
+  "doublecherry": [
+    "artillery"
+  ],
+  "doublepuff": [
+    "projectile"
+  ],
+  "doubleshooter": [
+    "artillery"
+  ],
+  "doublesnow": [
+    "lineage"
+  ],
+  "driver_a": [
+    "hybrid",
+    "undead"
+  ],
+  "driver_b": [
+    "automaton"
+  ],
+  "driver_c": [
+    "undead"
+  ],
+  "driverzombie": [
+    "undead",
+    "zombie"
+  ],
+  "drown_a": [
+    "raider"
+  ],
+  "drown_b": [
+    "reanimates",
+    "undead"
+  ],
+  "drown_c": [
+    "infantry"
+  ],
+  "drowngargantuar": [
+    "zombie"
+  ],
+  "drownpult_a": [
+    "construct"
+  ],
+  "drownpult_b": [
+    "automaton",
+    "construct"
+  ],
+  "drownpult_c": [
+    "infantry",
+    "zombie"
+  ],
+  "drownpultzombie": [
+    "automaton",
+    "warfare"
+  ],
+  "drownzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "electriconion": [
+    "bulb"
+  ],
+  "elephantzombie": [
+    "behemoth",
+    "zombie"
+  ],
+  "elephantzombie_a": [
+    "beast"
+  ],
+  "elephantzombie_b": [
+    "beast"
+  ],
+  "elephantzombie_c": [
+    "behemoth"
+  ],
+  "elitepaperzombie": [
+    "undead"
+  ],
+  "emeraldumbrella": [
+    "ballistics",
+    "hybrids"
+  ],
+  "endoflame": [
+    "converters",
+    "flora"
+  ],
+  "endoflamegirl": [
+    "flora"
+  ],
+  "endoflamezombie": [
+    "botanical",
+    "flora"
+  ],
+  "endpumpiner": [
+    "construct"
+  ],
+  "enumvalue261": [
+    "unclassified"
+  ],
+  "enumvalue262": [
+    "unclassified"
+  ],
+  "enumvalue263": [
+    "unclassified"
+  ],
+  "enumvalue264": [
+    "unclassified"
+  ],
+  "enumvalue265": [
+    "unclassified"
+  ],
+  "enumvalue266": [
+    "unclassified"
+  ],
+  "enumvalue267": [
+    "unclassified"
+  ],
+  "enumvalue268": [
+    "flora"
+  ],
+  "eternalzombie_a": [
+    "jiangshi",
+    "spirit"
+  ],
+  "eternalzombie_b": [
+    "jiangshi",
+    "spectral",
+    "undead"
+  ],
+  "eternalzombie_c": [
+    "monarch",
+    "sovereign"
+  ],
+  "extract_single": [
+    "unclassified"
+  ],
+  "extract_ten": [
+    "unclassified"
+  ],
+  "firecabbage": [
+    "cabbage",
+    "flora"
+  ],
+  "firecaltrop": [
+    "geoflora"
+  ],
+  "firecannon": [
+    "flora"
+  ],
+  "firecattail": [
+    "flora"
+  ],
+  "firecracker": [
+    "flora"
+  ],
+  "firefume": [
+    "pyro"
+  ],
+  "firegloom": [
+    "combustion"
+  ],
+  "firekelp": [
+    "flora"
+  ],
+  "firemelon": [
+    "botanical",
+    "projectile"
+  ],
+  "firemine": [
+    "explosive"
+  ],
+  "firenut": [
+    "flora"
+  ],
+  "fireseashroom": [
+    "marine"
+  ],
+  "firesniper": [
+    "artillery"
+  ],
+  "firespikerock": [
+    "flora"
+  ],
+  "firesquash": [
+    "construct"
+  ],
+  "firesunshroom_a": [
+    "symbiote"
+  ],
+  "firesunshroom_b": [
+    "symbiote"
+  ],
+  "firesunshroom_c": [
+    "symbiote"
+  ],
+  "flagfootball": [
+    "athlete"
+  ],
+  "flagzombie": [
+    "heralds",
+    "undead"
+  ],
+  "flyingthreepeater": [
+    "botanical"
+  ],
+  "flyingthreepeater_sp": [
+    "botanical",
+    "evolved"
+  ],
+  "footballboss": [
+    "engine",
+    "undead"
+  ],
+  "footballdolphin": [
+    "automaton",
+    "undead"
+  ],
+  "footballdrown": [
+    "zombie"
+  ],
+  "footballzombie": [
+    "undead"
+  ],
+  "frozenpear": [
+    "flora"
+  ],
+  "fumepumpkin": [
+    "gourd",
+    "vegetable"
+  ],
+  "fumeshroom": [
+    "artillery"
+  ],
+  "gargantuar": [
+    "undead"
+  ],
+  "garlic": [
+    "flora"
+  ],
+  "garlicblover": [
+    "botanical"
+  ],
+  "garliccabbage": [
+    "botanical",
+    "hybrid"
+  ],
+  "garliccorn": [
+    "hybrid"
+  ],
+  "garlicfume": [
+    "aromatic"
+  ],
+  "garlicgatling": [
+    "artillery"
+  ],
+  "garlicmelon": [
+    "hybrid"
+  ],
+  "garlicnut": [
+    "botanicals"
+  ],
+  "garlicpea": [
+    "artillery"
+  ],
+  "garlicpot": [
+    "symbiont"
+  ],
+  "garlicpumpkin": [
+    "hybrid"
+  ],
+  "garlicrepeater": [
+    "projectile"
+  ],
+  "garlicsniper": [
+    "sprouter"
+  ],
+  "garlicsplit": [
+    "botanical",
+    "projectile"
+  ],
+  "garlicthreepeater": [
+    "hybrid"
+  ],
+  "garlictorch": [
+    "flora"
+  ],
+  "garlicultimatechomper": [
+    "combatant",
+    "construct"
+  ],
+  "garlicumbrella": [
+    "flora"
+  ],
+  "gatlingblackfootball": [
+    "infantry",
+    "undead"
+  ],
+  "gatlingdoomscaredy": [
+    "artillery"
+  ],
+  "gatlingfootballzombie": [
+    "sports",
+    "undead"
+  ],
+  "gatlingpaper_a": [
+    "reanimates",
+    "undead"
+  ],
+  "gatlingpaper_b": [
+    "academic",
+    "undead"
+  ],
+  "gatlingpaper_c": [
+    "construct",
+    "undead"
+  ],
+  "gatlingpea": [
+    "artillery"
+  ],
+  "gatlingpeazombie": [
+    "zombie"
+  ],
+  "gatlingpuff": [
+    "artillery"
+  ],
+  "gloomshroom": [
+    "hybrid"
+  ],
+  "goldbungizombie": [
+    "bungee",
+    "undead"
+  ],
+  "goldcabbage": [
+    "artillery"
+  ],
+  "goldcorn": [
+    "artillery"
+  ],
+  "golddoom": [
+    "currency"
+  ],
+  "goldgarlic": [
+    "allium",
+    "flora"
+  ],
+  "goldhypnodoom": [
+    "summoner"
+  ],
+  "goldiceshroom": [
+    "alchemical",
+    "metallic"
+  ],
+  "goldmagnet": [
+    "flora"
+  ],
+  "goldmelon": [
+    "caster"
+  ],
+  "goldnut": [
+    "seedling"
+  ],
+  "goldpot": [
+    "flora"
+  ],
+  "goldscarypot": [
+    "reclamation"
+  ],
+  "goldsunflower": [
+    "solar",
+    "sunflower"
+  ],
+  "goldthreeplantern": [
+    "flora",
+    "symbiote"
+  ],
+  "goldthreetorch": [
+    "flora"
+  ],
+  "goldumbrella": [
+    "flora"
+  ],
+  "goldzombie": [
+    "undead"
+  ],
+  "gravebuster": [
+    "consumer",
+    "flora"
+  ],
+  "greengargantuar": [
+    "giant",
+    "summoner"
+  ],
+  "hamburger": [
+    "breed",
+    "construct"
+  ],
+  "helmetfume": [
+    "hybrid"
+  ],
+  "helmetgatling": [
+    "automaton"
+  ],
+  "helmetplant": [
+    "armor"
+  ],
+  "holographicplant": [
+    "construct",
+    "projection"
+  ],
+  "horseboss": [
+    "commander",
+    "machine"
+  ],
+  "horsezombie": [
+    "cavalry",
+    "mounted"
+  ],
+  "hugewallnut": [
+    "flora"
+  ],
+  "hurricaneblover": [
+    "flora"
+  ],
+  "hypnoblover": [
+    "flora"
+  ],
+  "hypnocattailgirl": [
+    "botanical",
+    "mimic"
+  ],
+  "hypnocattailgirl_land": [
+    "beast",
+    "hybrid"
+  ],
+  "hypnochomper": [
+    "flora",
+    "mimic"
+  ],
+  "hypnodoom": [
+    "hybrid"
+  ],
+  "hypnoemperor": [
+    "fungi"
+  ],
+  "hypnofume": [
+    "effector"
+  ],
+  "hypnogarlic": [
+    "hybrid"
+  ],
+  "hypnogatling": [
+    "sentinel"
+  ],
+  "hypnojalapeno": [
+    "hybrid",
+    "pepper"
+  ],
+  "hypnojalapenopickaxezombie": [
+    "mimicry",
+    "undead"
+  ],
+  "hypnojalapenozombie": [
+    "hybrid"
+  ],
+  "hypnomagnet": [
+    "construct"
+  ],
+  "hypnomelon": [
+    "pult"
+  ],
+  "hypnomine": [
+    "tuber"
+  ],
+  "hypnonut": [
+    "nut"
+  ],
+  "hypnopeashooter": [
+    "hybrids",
+    "lineage"
+  ],
+  "hypnopot": [
+    "symbiotic"
+  ],
+  "hypnopuff": [
+    "trap"
+  ],
+  "hypnopumpkin": [
+    "flora"
+  ],
+  "hypnoqueen": [
+    "fungi"
+  ],
+  "hypnorepeater": [
+    "legume"
+  ],
+  "hypnoshroom": [
+    "manipulator"
+  ],
+  "hypnosplit": [
+    "legume"
+  ],
+  "hypnosquash": [
+    "vegetable"
+  ],
+  "hypnotorch": [
+    "flora"
+  ],
+  "icebean": [
+    "flora",
+    "parasite"
+  ],
+  "iceblover": [
+    "clover",
+    "flora"
+  ],
+  "icecabbage": [
+    "projectile"
+  ],
+  "icecactus": [
+    "flora",
+    "succulent"
+  ],
+  "icecaltrop": [
+    "flora"
+  ],
+  "icecannon": [
+    "flora"
+  ],
+  "icecattail": [
+    "flora",
+    "grass"
+  ],
+  "icecherry": [
+    "construct"
+  ],
+  "iceclawzombie": [
+    "undead"
+  ],
+  "icecorn": [
+    "botanical"
+  ],
+  "icedoom": [
+    "ordnance"
+  ],
+  "icefumeshroom": [
+    "caster",
+    "fungal"
+  ],
+  "icefurnace": [
+    "elemental"
+  ],
+  "icegloom": [
+    "fungal",
+    "mycelium"
+  ],
+  "icehypno": [
+    "parasite"
+  ],
+  "icelaserumbrella": [
+    "fungi"
+  ],
+  "icelotus": [
+    "flora"
+  ],
+  "icemine": [
+    "flora"
+  ],
+  "icenut": [
+    "flora"
+  ],
+  "icepeach": [
+    "flora"
+  ],
+  "iceplantern": [
+    "flora"
+  ],
+  "icepot": [
+    "flora"
+  ],
+  "icepuff": [
+    "projectile"
+  ],
+  "icepumpkin": [
+    "botanical",
+    "flora"
+  ],
+  "icescaredyshroom": [
+    "hybrid"
+  ],
+  "iceseashroom": [
+    "aquatic"
+  ],
+  "iceshroom": [
+    "cryo"
+  ],
+  "icespikerock": [
+    "flora",
+    "vegetation"
+  ],
+  "icesquash": [
+    "vegetable"
+  ],
+  "icetorch": [
+    "stump"
+  ],
+  "ifvblover": [
+    "fungi"
+  ],
+  "ifvironpuff": [
+    "fungi",
+    "mycelium"
+  ],
+  "ifvpumpkin": [
+    "botanical",
+    "hybrid"
+  ],
+  "ifvstar": [
+    "botanical",
+    "vegetable"
+  ],
+  "imitater": [
+    "parasite"
+  ],
+  "imitatewheat": [
+    "grain"
+  ],
+  "impking": [
+    "leaders",
+    "royalty"
+  ],
+  "impzombie": [
+    "infestation"
+  ],
+  "ironballoonzombie": [
+    "borne",
+    "zombie"
+  ],
+  "ironballoonzombie2": [
+    "automaton"
+  ],
+  "ironconezombie": [
+    "horde",
+    "undead"
+  ],
+  "ironcorn": [
+    "metallophyte"
+  ],
+  "ironfume": [
+    "construct"
+  ],
+  "irongargantuar": [
+    "construct",
+    "undead"
+  ],
+  "ironmelon": [
+    "flora"
+  ],
+  "ironnut": [
+    "metallophyte"
+  ],
+  "ironpea": [
+    "flora"
+  ],
+  "ironpeadoorzombie": [
+    "undead"
+  ],
+  "ironpeazombie": [
+    "carriers",
+    "undead"
+  ],
+  "ironpuff": [
+    "flora"
+  ],
+  "ironpumpkin": [
+    "botanical"
+  ],
+  "ironredgargantuar": [
+    "constructs",
+    "variants"
+  ],
+  "ironsquash": [
+    "gourd"
+  ],
+  "ironstar": [
+    "metallophyte"
+  ],
+  "jackbox_a": [
+    "construct"
+  ],
+  "jackbox_b": [
+    "hybrids"
+  ],
+  "jackbox_c": [
+    "undead"
+  ],
+  "jackboxdoom": [
+    "fungi"
+  ],
+  "jackboxjumpzombie": [
+    "jester",
+    "zombie"
+  ],
+  "jackboxplant": [
+    "construct"
+  ],
+  "jackboxpumpkin": [
+    "botanical"
+  ],
+  "jackboxstar": [
+    "construct"
+  ],
+  "jackboxzombie": [
+    "performer",
+    "undead"
+  ],
+  "jackson_a": [
+    "undead",
+    "zombie"
+  ],
+  "jackson_b": [
+    "dance",
+    "zombie"
+  ],
+  "jackson_c": [
+    "undead",
+    "zombie"
+  ],
+  "jacksondriver": [
+    "undead",
+    "unit"
+  ],
+  "jacksondriverboss": [
+    "construct"
+  ],
+  "jacksonzombie": [
+    "performer",
+    "undead"
+  ],
+  "jalacaltrop": [
+    "flora"
+  ],
+  "jalacorn": [
+    "launcher"
+  ],
+  "jaladoubleshooter": [
+    "artillery"
+  ],
+  "jalagatling": [
+    "flora",
+    "peashooter"
+  ],
+  "jalakelp": [
+    "hybrid"
+  ],
+  "jalamine": [
+    "botanical"
+  ],
+  "jalapeashooter": [
+    "botanical",
+    "projectile"
+  ],
+  "jalapeno": [
+    "flora"
+  ],
+  "jalapenozombie": [
+    "reanimates",
+    "undead"
+  ],
+  "jalapumpkin": [
+    "hybrid"
+  ],
+  "jalasplit": [
+    "artillery",
+    "projectile"
+  ],
+  "jalasquash": [
+    "construct"
+  ],
+  "jalasquashzombie": [
+    "undead"
+  ],
+  "jalastar": [
+    "fruit"
+  ],
+  "jalatorch": [
+    "flora"
+  ],
+  "kelpfume": [
+    "hybrid"
+  ],
+  "kelpmine_land": [
+    "hybrid"
+  ],
+  "kelpmine_water": [
+    "flora"
+  ],
+  "kelpnut": [
+    "seedling"
+  ],
+  "kelppuff": [
+    "flora"
+  ],
+  "kelptorch": [
+    "flora"
+  ],
+  "kirov_a": [
+    "construct"
+  ],
+  "kirov_b": [
+    "zombie"
+  ],
+  "kirov_c": [
+    "constructs"
+  ],
+  "kirovzombie": [
+    "construct",
+    "undead"
+  ],
+  "ladderzombie": [
+    "undead",
+    "zombie"
+  ],
+  "landsubmarine": [
+    "remnant",
+    "undead"
+  ],
+  "lanternblover": [
+    "clover"
+  ],
+  "lanterncactus": [
+    "succulent"
+  ],
+  "lanternchomper": [
+    "flora",
+    "photovore"
+  ],
+  "lanternfume": [
+    "luminary"
+  ],
+  "lanterngatling": [
+    "botanical"
+  ],
+  "lanternmagnet": [
+    "magnetics",
+    "magnetophyta"
+  ],
+  "lanternnut": [
+    "nut"
+  ],
+  "lanternpea": [
+    "botanicals",
+    "flora"
+  ],
+  "lanternpot": [
+    "flora"
+  ],
+  "lanternpumpkin": [
+    "flora"
+  ],
+  "lanternrepeater": [
+    "flora"
+  ],
+  "lanternsplit": [
+    "hybrid"
+  ],
+  "lanternstar": [
+    "fruit"
+  ],
+  "lanternumbrella": [
+    "flora"
+  ],
+  "laserumbrella": [
+    "fungi"
+  ],
+  "legionsniperzombie": [
+    "specialist",
+    "stalker"
+  ],
+  "legionzombie": [
+    "forces"
+  ],
+  "levatationzombie": [
+    "undead"
+  ],
+  "lilypad": [
+    "host",
+    "platform"
+  ],
+  "lotusaloes": [
+    "healer",
+    "medic"
+  ],
+  "lotusbamboo": [
+    "flora"
+  ],
+  "lotusspruce": [
+    "hybrid"
+  ],
+  "luckyblover": [
+    "clover",
+    "manipulator"
+  ],
+  "machinelevatation": [
+    "constructs"
+  ],
+  "machinenut": [
+    "flora"
+  ],
+  "machinenutzombie": [
+    "ghoul",
+    "undead"
+  ],
+  "machineshardplant": [
+    "symbiote"
+  ],
+  "magicsnowpea": [
+    "projectile"
+  ],
+  "magicsnowpea2": [
+    "botanical",
+    "flora"
+  ],
+  "magnetblover": [
+    "flora"
+  ],
+  "magnetbox": [
+    "unclassified"
+  ],
+  "magnetcactus": [
+    "flora"
+  ],
+  "magnetcorn": [
+    "botanical"
+  ],
+  "magnetdoom": [
+    "fungi"
+  ],
+  "magnetfume": [
+    "magnetics"
+  ],
+  "magnetinterface": [
+    "unclassified"
+  ],
+  "magnetmelon": [
+    "botanical"
+  ],
+  "magnetnut": [
+    "defense",
+    "flora"
+  ],
+  "magnetpumpkin": [
+    "botanical"
+  ],
+  "magnetshroom": [
+    "fungi"
+  ],
+  "magnetstar": [
+    "flora"
+  ],
+  "marigold": [
+    "flora"
+  ],
+  "melonblover": [
+    "ordnance"
+  ],
+  "meloncaltrop": [
+    "flora"
+  ],
+  "meloncannon": [
+    "flora"
+  ],
+  "melonfume": [
+    "hybrid"
+  ],
+  "melonnut": [
+    "nut"
+  ],
+  "melonpot": [
+    "hybrid"
+  ],
+  "melonpuff": [
+    "artillery"
+  ],
+  "melonpult": [
+    "artillery",
+    "projectile"
+  ],
+  "melonpumpkin": [
+    "botanical"
+  ],
+  "melonumbrella": [
+    "botanicals",
+    "flora"
+  ],
+  "minerzombie": [
+    "laborer",
+    "undead"
+  ],
+  "minisandmonster": [
+    "undead"
+  ],
+  "minisnowmonster": [
+    "fauna"
+  ],
+  "mixanim": [
+    "construct"
+  ],
+  "mixbomb": [
+    "flora"
+  ],
+  "newyearzombie": [
+    "undead"
+  ],
+  "normalzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "nucleardoomcherry": [
+    "botanical",
+    "flora"
+  ],
+  "nuclearsquash": [
+    "botanical"
+  ],
+  "nutblover": [
+    "talisman"
+  ],
+  "nutchomper": [
+    "flora"
+  ],
+  "nutfume": [
+    "hybrid"
+  ],
+  "nutpot": [
+    "construct"
+  ],
+  "nutpumpkin": [
+    "bearing",
+    "cucurbit"
+  ],
+  "nuttorch": [
+    "botanical"
+  ],
+  "nutumbrella": [
+    "flora"
+  ],
+  "obsidianclawzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "obsidianimpzombie": [
+    "construct",
+    "undead"
+  ],
+  "obsidianjalapeno": [
+    "hybrid"
+  ],
+  "obsidianspike": [
+    "flora"
+  ],
+  "obsidiantallnutzombie": [
+    "construct",
+    "undead"
+  ],
+  "obsidianwallnut": [
+    "flora"
+  ],
+  "obsidianwheat": [
+    "grain"
+  ],
+  "paperzombie": [
+    "carrier",
+    "undead"
+  ],
+  "passionfruit": [
+    "launcher",
+    "projectile"
+  ],
+  "peablover": [
+    "symbiote"
+  ],
+  "peachomper": [
+    "flora"
+  ],
+  "peafume": [
+    "hybrid"
+  ],
+  "peamine": [
+    "legume"
+  ],
+  "peanut": [
+    "botanicals"
+  ],
+  "peapot": [
+    "flora"
+  ],
+  "peapuff": [
+    "fungi"
+  ],
+  "peapumpkin": [
+    "hybrid"
+  ],
+  "peascaredy": [
+    "hybrid"
+  ],
+  "peashooter": [
+    "flora"
+  ],
+  "peashooterzombie": [
+    "botanical"
+  ],
+  "peasquash": [
+    "artillery"
+  ],
+  "peasunflower": [
+    "hybrid"
+  ],
+  "penguinzombie": [
+    "avian"
+  ],
+  "pickaxe_a": [
+    "miner",
+    "undead"
+  ],
+  "pickaxe_b": [
+    "miner",
+    "undead"
+  ],
+  "pickaxe_c": [
+    "construct",
+    "undead"
+  ],
+  "pickaxeplant": [
+    "flora"
+  ],
+  "pickaxepumpkin": [
+    "botanical"
+  ],
+  "pickaxestar": [
+    "flora"
+  ],
+  "pickaxezombie": [
+    "miner",
+    "undead"
+  ],
+  "pinefurnace": [
+    "flora"
+  ],
+  "pinkonion": [
+    "flora"
+  ],
+  "pit": [
+    "unclassified"
+  ],
+  "plantern": [
+    "flora"
+  ],
+  "pogozombie": [
+    "brawler",
+    "undead"
+  ],
+  "polevaulterzombie": [
+    "undead"
+  ],
+  "polfootballzombie": [
+    "athlete"
+  ],
+  "portalballoonzombie": [
+    "undead"
+  ],
+  "portalcorn": [
+    "botanical"
+  ],
+  "portaldoom": [
+    "anomaly"
+  ],
+  "portalmelon": [
+    "flora"
+  ],
+  "portalnut": [
+    "chronobotanical",
+    "nut"
+  ],
+  "portalpea": [
+    "botanical"
+  ],
+  "portalplant": [
+    "anomaly",
+    "fragment"
+  ],
+  "portalpolevaulter": [
+    "undead"
+  ],
+  "pot": [
+    "flora"
+  ],
+  "potatochomper": [
+    "flora"
+  ],
+  "potatodoom": [
+    "tuber"
+  ],
+  "potatofume": [
+    "explosive"
+  ],
+  "potatomine": [
+    "flora"
+  ],
+  "potatonut": [
+    "botanicals"
+  ],
+  "potatopuff": [
+    "hybrid"
+  ],
+  "potatopumpkin": [
+    "gourd"
+  ],
+  "potatosquash": [
+    "hybrid"
+  ],
+  "potatosquashbody": [
+    "hybrid"
+  ],
+  "present": [
+    "artifact",
+    "catalyst"
+  ],
+  "presentzombie": [
+    "anomaly"
+  ],
+  "projectilezombie": [
+    "ordnance",
+    "projectile"
+  ],
+  "protalzombie": [
+    "entity"
+  ],
+  "pudding": [
+    "construct"
+  ],
+  "puffdoom": [
+    "flora",
+    "fungal"
+  ],
+  "puffjalapeno": [
+    "hybrid"
+  ],
+  "puffnut": [
+    "hybrid"
+  ],
+  "puffpumpkin": [
+    "hybrid"
+  ],
+  "puffseashroom": [
+    "fungi"
+  ],
+  "puffsquash": [
+    "striker"
+  ],
+  "pumpiner": [
+    "flora"
+  ],
+  "pumpkin": [
+    "flora"
+  ],
+  "qingzombie": [
+    "monarch"
+  ],
+  "quickjacksonzombie": [
+    "performer"
+  ],
+  "randomgargantuar": [
+    "construct"
+  ],
+  "randompluszombie": [
+    "construct"
+  ],
+  "randomzombie": [
+    "construct",
+    "undead"
+  ],
+  "redemeraldumbrella": [
+    "flora",
+    "parasite"
+  ],
+  "redgargantuar": [
+    "colossus",
+    "undead"
+  ],
+  "redzombieloonnut": [
+    "projectile"
+  ],
+  "refrash": [
+    "unclassified"
+  ],
+  "sandjackson": [
+    "performer",
+    "undead"
+  ],
+  "scaredfume": [
+    "artillery"
+  ],
+  "scaredsun": [
+    "hybrid",
+    "sun"
+  ],
+  "scaredyblover": [
+    "fungi"
+  ],
+  "scaredydoom": [
+    "support",
+    "symbiote"
+  ],
+  "scaredyhypno": [
+    "support"
+  ],
+  "scaredynut": [
+    "nut"
+  ],
+  "scaredypot": [
+    "symbiote"
+  ],
+  "scaredypotato": [
+    "hybrid"
+  ],
+  "scaredypumpkin": [
+    "gourd"
+  ],
+  "scaredyshroom": [
+    "sentinel"
+  ],
+  "scaredystar": [
+    "hybrid"
+  ],
+  "seablover": [
+    "fungi"
+  ],
+  "seacactus": [
+    "fungi"
+  ],
+  "seafume": [
+    "aquatic"
+  ],
+  "seahypno": [
+    "fungi"
+  ],
+  "sealantern": [
+    "luminary"
+  ],
+  "seamagnet": [
+    "fungi"
+  ],
+  "seamine_land": [
+    "flora"
+  ],
+  "seamine_water": [
+    "bombs"
+  ],
+  "seanut": [
+    "seedling"
+  ],
+  "seapumpkin": [
+    "cucurbit"
+  ],
+  "seascaredyshroom": [
+    "fungi"
+  ],
+  "seashroom": [
+    "flora"
+  ],
+  "seasquash": [
+    "vegetation"
+  ],
+  "seastarfruit": [
+    "fungi"
+  ],
+  "seasunshroom": [
+    "fungi"
+  ],
+  "shulkbamboo": [
+    "flora"
+  ],
+  "shulkflower": [
+    "flora"
+  ],
+  "shulkfurnace": [
+    "hybrid"
+  ],
+  "shulklotus": [
+    "metallophyte"
+  ],
+  "silvercabbage": [
+    "launcher"
+  ],
+  "silvercorn": [
+    "automata",
+    "cereals"
+  ],
+  "silverdoom": [
+    "construct"
+  ],
+  "silvergarlic": [
+    "flora"
+  ],
+  "silvericeshroom": [
+    "fungi"
+  ],
+  "silvermelon": [
+    "artillery",
+    "projectile"
+  ],
+  "silvernut": [
+    "metallophyte"
+  ],
+  "silverpot": [
+    "flora"
+  ],
+  "silversunflower": [
+    "lineage"
+  ],
+  "silverumbrella": [
+    "botanicals",
+    "flora"
+  ],
+  "silverzombie": [
+    "undead"
+  ],
+  "smalliceshroom": [
+    "fungal",
+    "mycelial"
+  ],
+  "smallpuff": [
+    "caster",
+    "projectile"
+  ],
+  "smallumbrella": [
+    "sentinel"
+  ],
+  "sniperchomper": [
+    "flora"
+  ],
+  "sniperpea": [
+    "flora"
+  ],
+  "sniperpot": [
+    "botanicals"
+  ],
+  "sniperpuff": [
+    "artillery"
+  ],
+  "snorklezombie": [
+    "reanimates",
+    "undead"
+  ],
+  "snowbucketzombie": [
+    "bound",
+    "undead"
+  ],
+  "snowconezombie": [
+    "reanimated",
+    "undead"
+  ],
+  "snowdolphinrider": [
+    "cavalry"
+  ],
+  "snowdrownzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "snowgatling": [
+    "flora"
+  ],
+  "snowgatlingpeazombie": [
+    "organic",
+    "undead"
+  ],
+  "snowgatlingpuff": [
+    "artillery"
+  ],
+  "snowgunzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "snowmonsterrider": [
+    "cavalry"
+  ],
+  "snowmonsterzombie": [
+    "beast"
+  ],
+  "snownormalzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "snowpeashooter": [
+    "botanical",
+    "plant"
+  ],
+  "snowpresent": [
+    "botanical"
+  ],
+  "snowshieldzombie": [
+    "soldier",
+    "undead"
+  ],
+  "snowsplit": [
+    "projectile"
+  ],
+  "snowzombie": [
+    "reanimated",
+    "undead"
+  ],
+  "solarlily": [
+    "aquatic",
+    "carrier"
+  ],
+  "solarpot": [
+    "flora",
+    "hybrid"
+  ],
+  "solarsunflower": [
+    "artillery",
+    "sunflower"
+  ],
+  "spikerock": [
+    "sentry"
+  ],
+  "splitpea": [
+    "artillery"
+  ],
+  "splitpuff": [
+    "fungi"
+  ],
+  "spreadfume": [
+    "colony"
+  ],
+  "spreadscaredyshroom": [
+    "colony"
+  ],
+  "spruceballista": [
+    "botanical"
+  ],
+  "sprucefurnace": [
+    "construct"
+  ],
+  "spruceshooter": [
+    "automaton"
+  ],
+  "spruceshulk": [
+    "ballista"
+  ],
+  "squalour": [
+    "hybrid"
+  ],
+  "squalourzombie": [
+    "hybrid",
+    "symbiote"
+  ],
+  "squash": [
+    "flora"
+  ],
+  "squashblover": [
+    "flora",
+    "vegetable"
+  ],
+  "squashcorn": [
+    "launcher"
+  ],
+  "squashkelp": [
+    "predator"
+  ],
+  "squashmelon": [
+    "artillery"
+  ],
+  "squashnut": [
+    "kineticists"
+  ],
+  "squashpumpkin": [
+    "incubator",
+    "symbiotic"
+  ],
+  "squashspike": [
+    "seedling"
+  ],
+  "squashtorch": [
+    "stump"
+  ],
+  "squashzombie": [
+    "mimic",
+    "undead"
+  ],
+  "starblover": [
+    "flora"
+  ],
+  "starfruit": [
+    "flora"
+  ],
+  "starfume": [
+    "starburst"
+  ],
+  "starhypno": [
+    "fungi"
+  ],
+  "starnut": [
+    "hybrid"
+  ],
+  "starpea": [
+    "hybrid"
+  ],
+  "starpuff": [
+    "hybrid"
+  ],
+  "starpumpkin": [
+    "graft"
+  ],
+  "starsniper": [
+    "flora",
+    "hybrid"
+  ],
+  "starsquash": [
+    "hybrid"
+  ],
+  "startorch": [
+    "botanical"
+  ],
+  "stonedancer": [
+    "sculpture"
+  ],
+  "submarine_a": [
+    "construct",
+    "undead"
+  ],
+  "submarine_b": [
+    "constructs",
+    "undead"
+  ],
+  "submarine_b2": [
+    "automaton"
+  ],
+  "submarine_c": [
+    "engine",
+    "undead"
+  ],
+  "submarine_c2": [
+    "submersible"
+  ],
+  "submarinezombie": [
+    "construct",
+    "machine"
+  ],
+  "summonedhorse": [
+    "cavalry"
+  ],
+  "sunblover": [
+    "clover"
+  ],
+  "sunbomb": [
+    "botanicals"
+  ],
+  "suncabbage": [
+    "cabbage",
+    "hybrid"
+  ],
+  "suncaltrop": [
+    "flora"
+  ],
+  "sunchomper": [
+    "hybrid"
+  ],
+  "sunflower": [
+    "sunflower"
+  ],
+  "sungatlingpuff": [
+    "hybrid"
+  ],
+  "sunhypno": [
+    "hybrid"
+  ],
+  "suniceshroom": [
+    "fungi",
+    "hybrids"
+  ],
+  "sunjalapeno": [
+    "botanicals",
+    "flora"
+  ],
+  "sunmagnet": [
+    "flora",
+    "magnetics"
+  ],
+  "sunmine": [
+    "botanicals",
+    "converters"
+  ],
+  "sunnut": [
+    "nut",
+    "sun"
+  ],
+  "sunnutzombie": [
+    "undead"
+  ],
+  "sunpot": [
+    "flora"
+  ],
+  "sunpumpkin": [
+    "gourd"
+  ],
+  "sunshroom": [
+    "solar"
+  ],
+  "sunsquash": [
+    "hybrids",
+    "squash"
+  ],
+  "sunstar": [
+    "hybrids"
+  ],
+  "superblackfootball": [
+    "legionnaire",
+    "warrior"
+  ],
+  "superblackhorse": [
+    "cavalry",
+    "zombie"
+  ],
+  "superbombthrower": [
+    "bomber",
+    "construct"
+  ],
+  "supercaltrop": [
+    "flora",
+    "trap"
+  ],
+  "supercaltroppot": [
+    "hybrid",
+    "support"
+  ],
+  "supercherrygatling": [
+    "artillery"
+  ],
+  "supercherryshooter": [
+    "botanical"
+  ],
+  "supercherryshooterzombie": [
+    "projectile",
+    "undead"
+  ],
+  "superchomper": [
+    "botany",
+    "flora"
+  ],
+  "superdancepolzombie": [
+    "performer",
+    "undead"
+  ],
+  "superdriver": [
+    "vehicle"
+  ],
+  "superfume": [
+    "artillery"
+  ],
+  "superfurnace": [
+    "botanical"
+  ],
+  "supergargantuar": [
+    "colossus",
+    "undead"
+  ],
+  "supergatling": [
+    "flora"
+  ],
+  "supergatlingpeamine": [
+    "artillery"
+  ],
+  "supergatlingpumpkin": [
+    "flora"
+  ],
+  "superhorse": [
+    "sports",
+    "zombie"
+  ],
+  "superhurricaneblover": [
+    "flora"
+  ],
+  "superhypno": [
+    "predator"
+  ],
+  "superhypnodoom": [
+    "parasite",
+    "spore"
+  ],
+  "superhypnogatling": [
+    "artillery"
+  ],
+  "superjackboxzombie": [
+    "performer",
+    "undead"
+  ],
+  "superjalanut": [
+    "hybrid"
+  ],
+  "superkelp": [
+    "flora"
+  ],
+  "superkirov": [
+    "construct",
+    "engine"
+  ],
+  "superladderzombie": [
+    "construct"
+  ],
+  "superlevatation": [
+    "organic",
+    "undead"
+  ],
+  "supermachinenut": [
+    "guardian"
+  ],
+  "supermachinenutzombie": [
+    "construct"
+  ],
+  "supermachineshardplant": [
+    "debris",
+    "scrap"
+  ],
+  "supermelon": [
+    "botanicals",
+    "produce"
+  ],
+  "supernutshooter": [
+    "botanical"
+  ],
+  "superpenguinzombie": [
+    "avian",
+    "zombie"
+  ],
+  "superpogozombie": [
+    "hybrids"
+  ],
+  "superpolevaulter": [
+    "reanimates",
+    "undead"
+  ],
+  "superpumpkin": [
+    "flora"
+  ],
+  "supersnowgatling": [
+    "flora"
+  ],
+  "supersnowmonsterzombie": [
+    "beast"
+  ],
+  "superspruce": [
+    "sentinel"
+  ],
+  "superstar": [
+    "hybrid"
+  ],
+  "supersubmarine": [
+    "undead"
+  ],
+  "supersunnut": [
+    "hybrid",
+    "sun"
+  ],
+  "supersunnutzombie": [
+    "undead"
+  ],
+  "superthreegatling": [
+    "flora"
+  ],
+  "superthreepeater": [
+    "hybrid"
+  ],
+  "superthreepeater_sp": [
+    "hybrid"
+  ],
+  "supertorch": [
+    "stump"
+  ],
+  "superumbrella": [
+    "flora"
+  ],
+  "swordstar": [
+    "flora"
+  ],
+  "tallfirenut": [
+    "flora"
+  ],
+  "tallfirenutzombie": [
+    "shellers",
+    "undead"
+  ],
+  "tallicenut": [
+    "flora"
+  ],
+  "tallicenutzombie": [
+    "experiment",
+    "undead"
+  ],
+  "tallnut": [
+    "fortification"
+  ],
+  "tallnutfootball": [
+    "flora"
+  ],
+  "tallnutfootballzombie": [
+    "hybrid"
+  ],
+  "tanglekelp": [
+    "flora"
+  ],
+  "thorns": [
+    "flora"
+  ],
+  "thornsbamboo": [
+    "flora",
+    "sprouts"
+  ],
+  "thornslotus": [
+    "flora",
+    "hybrids"
+  ],
+  "thornsshulk": [
+    "flora"
+  ],
+  "thornsspruce": [
+    "sentinel"
+  ],
+  "threecabbage": [
+    "artillery",
+    "projectile"
+  ],
+  "threecorn": [
+    "artillery"
+  ],
+  "threekelp": [
+    "vines"
+  ],
+  "threemelon": [
+    "launcher"
+  ],
+  "threemine": [
+    "flora"
+  ],
+  "threenut": [
+    "artillery",
+    "engine"
+  ],
+  "threepeater": [
+    "artillery"
+  ],
+  "threeplantern": [
+    "flora"
+  ],
+  "threepot": [
+    "support"
+  ],
+  "threepumpkin": [
+    "flora"
+  ],
+  "threespike": [
+    "launcher"
+  ],
+  "threesquash": [
+    "launcher"
+  ],
+  "threetorch": [
+    "flora"
+  ],
+  "thronsaloes": [
+    "hybrid"
+  ],
+  "torchfirenut": [
+    "construct"
+  ],
+  "torchfirepumpkin": [
+    "vegetation"
+  ],
+  "torchfume": [
+    "flora",
+    "fungi"
+  ],
+  "torchmine": [
+    "flora"
+  ],
+  "torchpumpkin": [
+    "hybrid"
+  ],
+  "torchseashroom": [
+    "combustion",
+    "mycelium"
+  ],
+  "torchspike": [
+    "flora"
+  ],
+  "torchsunflower": [
+    "converters",
+    "sunflower"
+  ],
+  "torchwood": [
+    "flora"
+  ],
+  "tower_bigsunshroom": [
+    "hybrid"
+  ],
+  "tower_cherrychomper": [
+    "flora"
+  ],
+  "tower_cherryshooter": [
+    "artillery"
+  ],
+  "tower_doomfume": [
+    "artillery"
+  ],
+  "tower_doomstar": [
+    "botanical"
+  ],
+  "tower_electriconion": [
+    "bulb"
+  ],
+  "tower_gravebuster": [
+    "flora"
+  ],
+  "tower_iceblover": [
+    "flora"
+  ],
+  "tower_icegloom": [
+    "sentinel"
+  ],
+  "tower_lilypad": [
+    "flora",
+    "platform"
+  ],
+  "tower_peapuff": [
+    "fungi"
+  ],
+  "tower_peasunflower": [
+    "hybrid"
+  ],
+  "tower_scaredyfume": [
+    "sentinel"
+  ],
+  "tower_squashnut": [
+    "kineticist"
+  ],
+  "tower_starnut": [
+    "nut"
+  ],
+  "tower_sunmine": [
+    "tubers"
+  ],
+  "tower_sunshroom": [
+    "solar"
+  ],
+  "tower_threemine": [
+    "flora"
+  ],
+  "tower_watercan": [
+    "artillery"
+  ],
+  "trainingdummy": [
+    "construct"
+  ],
+  "treasuremine": [
+    "construct",
+    "seeker"
+  ],
+  "twinflower": [
+    "sunflower"
+  ],
+  "twinmarigold": [
+    "flora"
+  ],
+  "twinshulk": [
+    "flora"
+  ],
+  "ulti_cherrygatling": [
+    "unidentified"
+  ],
+  "ultimatebamboo": [
+    "hybrid"
+  ],
+  "ultimatebigchomper": [
+    "flora"
+  ],
+  "ultimatebiggatling": [
+    "botany"
+  ],
+  "ultimatebigsniper": [
+    "hybrid"
+  ],
+  "ultimateblover": [
+    "symbiote"
+  ],
+  "ultimatecabbage": [
+    "botanical",
+    "hybrid"
+  ],
+  "ultimatecabbagecannon": [
+    "flora"
+  ],
+  "ultimatecactus": [
+    "succulent"
+  ],
+  "ultimatecannon": [
+    "flora"
+  ],
+  "ultimatecattail": [
+    "botanical",
+    "seedlings"
+  ],
+  "ultimatechomper": [
+    "carnivore",
+    "warrior"
+  ],
+  "ultimatecorn": [
+    "maize"
+  ],
+  "ultimatecornfume": [
+    "combustion",
+    "mycelium"
+  ],
+  "ultimatedolphin": [
+    "cavalier",
+    "rider"
+  ],
+  "ultimatedoomgatling": [
+    "artillery"
+  ],
+  "ultimatedoomscaredy": [
+    "flora",
+    "sprout"
+  ],
+  "ultimateendoflamezombie": [
+    "flora"
+  ],
+  "ultimateexplodecannon": [
+    "botanicals",
+    "flora"
+  ],
+  "ultimatefireseashroom": [
+    "hybrid"
+  ],
+  "ultimatefly": [
+    "flora"
+  ],
+  "ultimatefootballdrown": [
+    "monarch",
+    "sovereign"
+  ],
+  "ultimatefootballzombie": [
+    "commander",
+    "horde"
+  ],
+  "ultimatefume": [
+    "artillery",
+    "spore"
+  ],
+  "ultimategargantuar": [
+    "colossus",
+    "undead"
+  ],
+  "ultimategarlicsplit": [
+    "flora"
+  ],
+  "ultimategatling": [
+    "botanical",
+    "flora"
+  ],
+  "ultimategatlingblover": [
+    "flora"
+  ],
+  "ultimategloom": [
+    "construct"
+  ],
+  "ultimategoldgargantuar": [
+    "colossus",
+    "titan"
+  ],
+  "ultimatehelmetgatling": [
+    "artillery",
+    "flora"
+  ],
+  "ultimatehorse": [
+    "cavalry",
+    "commanders"
+  ],
+  "ultimatehorse2": [
+    "commander",
+    "engine"
+  ],
+  "ultimatehugenut": [
+    "flora",
+    "hybrid"
+  ],
+  "ultimatehypno": [
+    "hybrid"
+  ],
+  "ultimatehypnodoom": [
+    "summoner",
+    "tactician"
+  ],
+  "ultimatehypnopumpkin": [
+    "flora"
+  ],
+  "ultimateicedoom": [
+    "botanical",
+    "manipulator"
+  ],
+  "ultimateiceshroom": [
+    "fungi"
+  ],
+  "ultimateiceshroom2": [
+    "fungi"
+  ],
+  "ultimateimpking": [
+    "commander",
+    "monarch"
+  ],
+  "ultimatejackboxzombie": [
+    "undead"
+  ],
+  "ultimatejacksondriver": [
+    "construct",
+    "undead"
+  ],
+  "ultimatejalanut": [
+    "hybrid"
+  ],
+  "ultimatejalapeno": [
+    "fungi"
+  ],
+  "ultimatejalapuff": [
+    "hybrid"
+  ],
+  "ultimatekelp": [
+    "predator"
+  ],
+  "ultimatekirovzombie": [
+    "construct"
+  ],
+  "ultimatelanternsplit": [
+    "sentinel"
+  ],
+  "ultimatelegionzombie": [
+    "legion",
+    "revenants"
+  ],
+  "ultimatelunarcabbage": [
+    "hybrid",
+    "vegetable"
+  ],
+  "ultimatemachinenut": [
+    "nut"
+  ],
+  "ultimatemachinenutzombie": [
+    "construct"
+  ],
+  "ultimatemagnet": [
+    "fungi"
+  ],
+  "ultimatemelon": [
+    "flora"
+  ],
+  "ultimatemeloncannon": [
+    "flora"
+  ],
+  "ultimatemelonpuff": [
+    "launcher",
+    "sprout"
+  ],
+  "ultimateminigun": [
+    "flora"
+  ],
+  "ultimatepaperzombie": [
+    "scholar",
+    "zombie"
+  ],
+  "ultimateplantern": [
+    "hybrid"
+  ],
+  "ultimatepoisonfume": [
+    "artillery"
+  ],
+  "ultimateportalnut": [
+    "crop"
+  ],
+  "ultimateportalsniper": [
+    "artillery"
+  ],
+  "ultimatepotatonut": [
+    "hybrid",
+    "tuber"
+  ],
+  "ultimatepumpkin": [
+    "factory",
+    "hybrid"
+  ],
+  "ultimateredlunar": [
+    "hybrid",
+    "mutation"
+  ],
+  "ultimateseashroom": [
+    "hybrid"
+  ],
+  "ultimatesnipergatling": [
+    "flora",
+    "plant"
+  ],
+  "ultimatesnowgatlingpuff": [
+    "artillery"
+  ],
+  "ultimatesnowzombie": [
+    "monarch",
+    "wraith"
+  ],
+  "ultimatespring": [
+    "hybrid"
+  ],
+  "ultimatespruce": [
+    "hybrid"
+  ],
+  "ultimatestar": [
+    "flora"
+  ],
+  "ultimatestartorch": [
+    "botanical",
+    "catalyst"
+  ],
+  "ultimatesunflower": [
+    "engine",
+    "sunflower"
+  ],
+  "ultimatesungatlingpuff": [
+    "hybrid",
+    "spore"
+  ],
+  "ultimatesunmagnet": [
+    "fungi"
+  ],
+  "ultimatesunnut": [
+    "hybrids"
+  ],
+  "ultimateswordzombie": [
+    "construct",
+    "relic"
+  ],
+  "ultimatetallnut": [
+    "shell"
+  ],
+  "ultimatetorch": [
+    "flora"
+  ],
+  "ultimatewintermelon": [
+    "botanical",
+    "seed"
+  ],
+  "ultiwatergargantuar": [
+    "giant",
+    "undead"
+  ],
+  "umbrellaleaf": [
+    "flora"
+  ],
+  "umbrellapot": [
+    "support"
+  ],
+  "vectorplant": [
+    "flora",
+    "organism"
+  ],
+  "voodoodollzombie": [
+    "undead"
+  ],
+  "wallnut": [
+    "flora"
+  ],
+  "wallnutzombie": [
+    "undead"
+  ],
+  "wateraloes": [
+    "flora",
+    "succulent"
+  ],
+  "waterballista": [
+    "engine"
+  ],
+  "waterbamboo": [
+    "flora"
+  ],
+  "waterfurnace": [
+    "constructs"
+  ],
+  "waterjackboxjumpzombie": [
+    "engineer",
+    "specialist"
+  ],
+  "watershulk": [
+    "flora",
+    "vegetation"
+  ],
+  "waterspruce": [
+    "botanical"
+  ],
+  "wheat": [
+    "flora"
+  ],
+  "whitefootball": [
+    "undead",
+    "zombies"
+  ],
+  "wintermelon": [
+    "botanical"
+  ],
+  "xxspot": [
+    "flora"
+  ],
+  "yellowfootball": [
+    "shamblers",
+    "undead"
+  ],
+  "yellowgargantuar": [
+    "colossus"
+  ],
+  "zombie9527": [
+    "reanimates",
+    "undead"
+  ],
+  "zombieboss": [
+    "lich",
+    "technocrat"
+  ],
+  "zombieboss2": [
+    "entity",
+    "undead"
+  ],
+  "zombieduck": [
+    "reanimates",
+    "undead"
+  ],
+  "zombieendoflame": [
+    "botanical",
+    "flora"
+  ],
+  "zombieloonnut": [
+    "botanical",
+    "seedlings"
+  ]
 }

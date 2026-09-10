@@ -23,8 +23,9 @@ public sealed class DerivedAuditCoverageTests
         var registered = registry.AllRegistered.Select(d => d.ChannelId).ToHashSet(StringComparer.Ordinal);
         Assert.Equal(DerivedAuditCoverage.RegistryPin, registered.Count);
         Assert.NotEmpty(cookIds);
-        // Status rail is Omni+24 open-prefix joins — denser than the 269 registered census.
-        Assert.True(cookIds.Count > DerivedAuditCoverage.RegistryPin);
+        // D1: Status rail is Omni+L2b (4) × six dense families — no longer Omni+24 open-prefix.
+        Assert.Contains("status.resist.dot", cookIds);
+        Assert.DoesNotContain("status.resist.butter", cookIds);
         foreach (var id in cookIds)
             Assert.True(registry.TryResolveChannel(id, out _), "cook expand unresolved: " + id);
 
@@ -58,8 +59,8 @@ public sealed class DerivedAuditCoverageTests
                 .ToList()
         };
         var report = DerivedAuditCoverage.Build(cook, registry, sheet, treeAtomsPresent: true);
-        // Dense registry is fully on the sheet; Omni+24 sparse status joins may be MissingCook
-        // (spec §6 defaults when absent) and classify as status-session.
+        // Dense registry is fully on the sheet; cook expand is L2b-closed so MissingCook stays empty
+        // (or only open-prefix leftovers if any remain).
         Assert.Empty(report.MissingRegistry);
         Assert.All(report.MissingCook, id =>
             Assert.True(DerivedAuditCoverage.IsStatusSessionChannel(id), id));

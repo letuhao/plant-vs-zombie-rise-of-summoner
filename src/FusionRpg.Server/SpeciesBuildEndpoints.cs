@@ -60,7 +60,7 @@ public static class SpeciesBuildEndpoints
             if (!outcome.Ok)
                 return Results.Conflict(new { reason = outcome.Reason, priceAmount = outcome.PriceAmount });
 
-            _ = BroadcastBestEffort(hub, pid);
+            _ = BroadcastBestEffort(hub, pid, body.SpeciesId!);
             return Results.Ok(new
             {
                 speciesId = body.SpeciesId,
@@ -100,16 +100,9 @@ public static class SpeciesBuildEndpoints
         });
     }
 
-    static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
-    {
-        // Both groups -- same ⛔ this session already found and fixed once for the Commander/species
-        // allocation endpoints (AptitudeEndpoints.cs): an injector-only connection never joins
-        // WebGroup, so a WebGroup-only send would leave CheatState.SpeciesAllocation stale.
-        try { await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("AptitudesUpdated", new { playerId }); }
-        catch { /* best-effort; the allocation is durable and the next GET reflects it */ }
-        try { await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("AptitudesUpdated", new { playerId }); }
-        catch { /* best-effort; the injector re-syncs at its own next session start regardless */ }
-    }
+    static Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId, string speciesId) =>
+        AptitudeEndpoints.BroadcastBestEffort(
+            hub, new AptitudeEndpoints.AptitudesUpdatedDto(playerId, "species", null, speciesId));
 
     public sealed class RespecSpeciesRequest
     {

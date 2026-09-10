@@ -321,14 +321,14 @@ No new power curve. Standing values remain `PowerVector` ints; fillPct stays rel
 
 | Deferred from **this** program | Why |
 |---|---|
-| Full Shield **tab** stack UI | Sibling program [`shield-sheet`](shield-sheet-map.md) — **in** product scope |
-| Derived cook harden | Sibling program [`derived-cook`](derived-cook-map.md) — **in** product scope (full width) |
+| Full Shield **tab** stack UI | Sibling [`shield-sheet`](shield-sheet-map.md) — **in** product scope (**S1** layers on sheet) |
+| Derived cook harden | Sibling [`derived-cook`](derived-cook-map.md) — **in** (**D1–D7**) |
 | HUD adoption of `element-badge` | Second consumer after Condition (paint SSOT ready) |
 | `role-badge` on Condition body | Rail is first consumer; Condition does not duplicate |
 
-**In program (not deferred):** Hot `/sheet` live statuses + shield **summary** (`sheet-hot-projection`);
-**recharts** Standing radar / animated gauges; Q3 omit-empty; **`role-badge` on rail**.  
-Owner 2026-09-10: **three programs, three plans** (Condition · Derived cook · Shield sheet).
+**In program (not deferred):** Hot `/sheet` live statuses + shield **summary** + live bag (**S3**);
+`shieldLayers` filled same compose for sibling; **recharts**; Q3 omit-empty; **`role-badge` on rail**.  
+Owner: **three programs, three plans** + strengthen locks **S1–S3**.
 
 ---
 

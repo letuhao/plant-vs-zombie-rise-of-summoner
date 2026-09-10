@@ -121,18 +121,22 @@ Shared seams: [element-paint-ssot](../../architecture/gui-lego/spec-element-pain
 
 Map: [../../architecture/derived-cook-map.md](../../architecture/derived-cook-map.md) ·
 Ideal: [../../architecture/derived-cook-ideal.md](../../architecture/derived-cook-ideal.md).  
-Full cook truth (six states, CAP wire, paint SSOT, player copy) — not a CSS pass.
+Locks **D1–D7** (L2b cook, wire renderState, BE Shared, Show-unchanged default-only, themeRegistry inject, Value double exempt, gauge deferred).
 
 ### Shield sheet (P1b)
 
 Map: [../../architecture/shield-sheet-map.md](../../architecture/shield-sheet-map.md) ·
-Ideal: [../../architecture/shield-sheet-ideal.md](../../architecture/shield-sheet-ideal.md).
+Ideal: [../../architecture/shield-sheet-ideal.md](../../architecture/shield-sheet-ideal.md).  
+Locks **S1** `sheet.shieldLayers` · **S2** summary element/stacks · **S3** live bag · **D8** cascade defer.
 
 | piece-id | Kind | Role | Draft | Spec |
 |---|---|---|---|---|
 | `shield-stack-bar` | gauge | Drain-order segmented stack | **draft debt** | [spec](../../architecture/gui-lego/spec-shield-stack-bar.md) |
 | `shield-layer-inspect` | panel-slice | Layer detail | **draft debt** | [spec](../../architecture/gui-lego/spec-shield-layer-inspect.md) |
 | `shield-status` | Card | Glance only (Condition) | **draft debt** | [spec](../../architecture/gui-lego/spec-shield-status.md) |
+
+Recipe slot: `condition-console.json` → `cond-hero.slots.shield` (omit when fold undefined).  
+Shield recipe: `shield-console.json` — **draft debt**.
 
 Shared overlays used by Condition recipe: `surface-shell`, `phase-loading`, `phase-error`, `phase-pending`.
 `phase-empty` is **not** used for zero shield/status on Condition (Q3 omit mounts).

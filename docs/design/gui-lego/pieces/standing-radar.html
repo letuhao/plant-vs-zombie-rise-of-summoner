@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>standing-radar</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .radar-box {
+      width: 160px;
+      min-width: 160px;
+      height: 160px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #5b5144;
+      border-radius: 14px;
+      background: #2f261d;
+      color: #a39583;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <p>Five-axis Standing glance via <strong>recharts</strong> RadarChart (lazy). Outer box ≥ 160px so condition-layout stand column never clips. Absolute ints live on standing-bars.</p>
+  <div class="radar-box" data-testid="condition-standing-radar">
+    <span>recharts RadarChart mount</span>
+  </div>
+</body>
+</html>

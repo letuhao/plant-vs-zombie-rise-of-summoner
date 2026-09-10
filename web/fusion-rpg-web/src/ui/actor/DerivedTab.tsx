@@ -117,9 +117,29 @@ export function DerivedTab({
     return [...cooked].sort((a, b) => a.order - b.order);
   }, [cook.data, surface, data.side]);
 
-  const loading = sheet.isLoading || derived.isLoading;
-  const errored = (sheet.isError || derived.isError) && !loading;
-  const availability = loading ? "loading" : errored ? "error" : "ready";
+  const loading = sheet.isLoading;
+  const hasSheet = (sheet.data?.derived?.length ?? 0) > 0;
+  // DC-9: sheet-only when projection ready — lean only for UniqueDemon Pending honesty.
+  const sheetProjectionReady =
+    hasSheet &&
+    (sheet.data?.derived?.some(
+      (ch) => ch.renderState != null || ch.unitClass != null || ch.cap !== undefined
+    ) ??
+      false);
+  const leanOnly =
+    !hasSheet &&
+    !sheet.isLoading &&
+    (derived.data?.channels?.length ?? 0) > 0 &&
+    !derived.isError;
+  const errored =
+    (sheet.isError || (!sheetProjectionReady && derived.isError)) && !loading && !leanOnly;
+  const availability = loading
+    ? "loading"
+    : errored
+      ? "error"
+      : leanOnly
+        ? "pending"
+        : "ready";
 
   const displayName = isKnown(data.displayName) ? data.displayName.value : data.instanceId;
 
@@ -132,7 +152,7 @@ export function DerivedTab({
     data.side,
     tabs,
     sheet.data,
-    derived.data,
+    sheetProjectionReady ? undefined : derived.data,
     surface.elements,
     tabId,
     variantId,
@@ -153,7 +173,7 @@ export function DerivedTab({
         },
         cookTabs: tabs,
         sheetChannels: sheet.data?.derived,
-        leanChannels: derived.data?.channels,
+        leanChannels: sheetProjectionReady ? undefined : derived.data?.channels,
         elements: surface.elements,
         statuses: surface.statuses,
         ui: {
@@ -172,6 +192,7 @@ export function DerivedTab({
       data.side,
       tabs,
       sheet.data,
+      sheetProjectionReady,
       derived.data,
       surface.elements,
       surface.statuses,

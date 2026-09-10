@@ -14,12 +14,12 @@ stream after P0’s piece contracts are accepted for React.
 
 | Priority | Surface | Host | First pieces to reuse | Notes |
 |---|---|---|---|---|
-| **P0** | ActorSheet Derived | `ActorPanel` tab | Full `derived-console` recipe | **Harden** — structure shipped; truth bugs → program [derived-cook-map.md](../derived-cook-map.md) (specs written; plan later) |
-| **P1** | ActorSheet Condition | `ActorPanel` tab | Full module set per map | **Partial — specs written** · [condition-glance-map.md](../condition-glance-map.md) · implement Waves 1–4 |
-| **P1b** | ActorSheet Shield | `ActorPanel` tab | `shield-console` + stack bar | **Pulled from P4** — program [shield-sheet-map.md](../shield-sheet-map.md) (specs written; shares Hot with P1) |
+| **P0** | ActorSheet Derived | `ActorPanel` tab | Full `derived-console` recipe | **Done** — Waves 1–3 landed ([derived-cook-map.md](../derived-cook-map.md); **D7** gauge deferred) |
+| **P1** | ActorSheet Condition | `ActorPanel` tab | Full module set per map | **Done** — [condition-glance-map.md](../condition-glance-map.md) · Hot **S1–S3** shared with P1b |
+| **P1b** | ActorSheet Shield | `ActorPanel` tab | `shield-console` + stack bar | **Done** — [shield-sheet-map.md](../shield-sheet-map.md) · layers on **`sheet.shieldLayers` (S1)** |
 | **P2** | Creatures layer | `PanelShell` | `tool-search`, `chip`, `phase-*` + Actor ERM rows | Filter chrome first; keep `ActorCard`/`ActorRow` |
 | **P3** | Relics · Commanders | `PanelShell` | search, chips, Card/Row rungs | Card via ERM — not a new density |
-| **P4** | Other rail layers + remaining Actor tabs | `PanelShell` / `ActorPanel` | Shared chrome | Fusion, Pacts, Expeditions, Almanac, Chronicle; Aptitudes, Status, Elements, Kit, Paths — **one surface per stream** (**Shield removed** — see P1b) |
+| **P4** | Other rail layers + remaining Actor tabs | `PanelShell` / `ActorPanel` | Shared chrome | Fusion, Pacts, Expeditions, Almanac, Chronicle; Status, Elements, Kit, Paths — **one surface per stream** (**Shield removed** — see P1b). **Aptitudes claimed** by [`aptitude-sheet-map.md`](../aptitude-sheet-map.md) (not a generic P4 grab-bag) |
 | **Later** | Delve / Siege / World inspectors | Stage hosts | Composition grammar | Not rail v1 |
 
 ---
@@ -50,7 +50,7 @@ stream after P0’s piece contracts are accepted for React.
 
 | Item | Status |
 |---|---|
-| P0 design pack (pieces, recipe, assembled surface, themes) | Hardened 2026-09-09 — React shipped; **cook truth** → `derived-cook` |
-| P1 Condition | Specs written — `condition-glance` |
-| P1b Shield | Specs written — `shield-sheet` |
-| P2+ | Not started |
+| P0 design pack (pieces, recipe, assembled surface, themes) | **Done** 2026-09-10 — Waves 1–3 cook truth landed; **D7** gauge deferred |
+| P1 Condition | **Done** — Waves A–D (Hot bag, paint SSOT, RecipeMount glance) |
+| P1b Shield | **Done** — Waves A–C (`shield-console`, stack bar, RecipeMount tab) |
+| P2+ | Not started (except **Aptitudes** → [aptitude-sheet-map.md](../aptitude-sheet-map.md)) |

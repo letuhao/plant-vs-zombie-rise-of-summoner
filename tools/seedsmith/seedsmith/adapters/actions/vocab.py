@@ -164,4 +164,18 @@ def load_family_map_keys() -> "frozenset[str]":
     if not path.is_file():
         return frozenset()
     doc = _load_json(path)
-    return frozenset(doc.values())
+    family_ids: "set[str]" = set()
+    for value in doc.values():
+        if isinstance(value, str):
+            family_ids.add(value)
+        elif isinstance(value, list):
+            family_ids.update(str(family_id) for family_id in value)
+
+    # Keep previously committed family-scoped action rows loadable while the live
+    # seed roster evolves its family vocabulary. This compatibility registry is
+    # seed data, never a runtime or SQLite projection.
+    registry_path = REPO_ROOT / "data" / "seed" / "demons" / "_registry" / "families.v1.json"
+    if registry_path.is_file():
+        registry = _load_json(registry_path)
+        family_ids.update(str(family_id) for family_id in (registry.get("families") or {}).keys())
+    return frozenset(family_ids)

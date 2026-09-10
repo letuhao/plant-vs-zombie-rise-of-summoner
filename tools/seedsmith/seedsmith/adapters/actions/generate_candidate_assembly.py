@@ -1,4 +1,5 @@
-"""seedsmith.adapters.actions.generate_candidate_assembly — the new stage's entrypoint. Reads:
+"""seedsmith.adapters.actions.generate_candidate_assembly — the post-validation mechanical
+assembly helper. Reads:
 
     <candidates> (one or more)   A-P1/A-P2/A-P3's own round output for this round -- each an A-C1
                                   envelope, `kind: "action-candidate"`, one file per scope partition
@@ -26,8 +27,9 @@ and writes, through the A-C1 envelope:
 
 **Gates by default** (`--no-gate` skips it): every accepted candidate is re-checked against A-S4's
 real per-pipeline schema (`validate_heal.schemas`, fixed 2026-09-04) and brief-conformance rules
-(`validate_heal.gates`) before it is assembled and minted an id -- the S2 -> S4 -> S3 order the
-architecture's own ideal doc names (`action-corpus-ideal.md` SS15), closed for the first time here.
+(`validate_heal.gates`) before it is assembled and minted an id. The canonical round entrypoint
+(`generate_validate_heal.py`) invokes this helper only AFTER A-S4 validation. Do not run this
+helper on raw proposal partitions as a substitute for A-S4.
 A candidate A-S4 rejects is recorded in the summary's own `gateRejects`, never silently dropped nor
 silently assembled anyway.
 
@@ -68,7 +70,12 @@ def _existing_counts(actions_root: Path) -> "dict[tuple[str, str], int]":
     for entry in load_result.corpus.by_kind("action-seed"):
         row = entry.data
         anchor = ca.anchor_key(row.get("scope"), row.get("scopeKey"))
-        counts[anchor] = counts.get(anchor, 0) + 1
+        action_id = row.get("id")
+        try:
+            ordinal = int(str(action_id).rsplit(".", 1)[1])
+        except (AttributeError, IndexError, TypeError, ValueError) as exc:
+            raise ValueError(f"action-seed {action_id!r} has no numeric trailing ordinal") from exc
+        counts[anchor] = max(counts.get(anchor, 0), ordinal)
     return counts
 
 
@@ -120,8 +127,7 @@ def regenerate(*, candidates_paths: Sequence[Path], briefs_path: Path,
 
 def run(argv=None) -> int:
     ap = argparse.ArgumentParser(
-        description="Assemble accepted propose-pipeline candidates into real action-seed rows "
-                    "(the missing S2 -> S4 -> S3 bridge).")
+        description="Assemble A-S4-accepted candidates into real action-seed rows (post-validation).")
     ap.add_argument("--candidates", required=True, nargs="+",
                     help="one or more paths to a round's own action-candidate envelope(s) "
                         "(A-P1/A-P2/A-P3's output, one file per scope partition)")

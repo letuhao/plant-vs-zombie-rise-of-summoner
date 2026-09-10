@@ -37,12 +37,19 @@ glance would freeze a second, incomplete presentation of shield as “done.” O
 ShieldRuntime.GetShields(owner)     ← sole live SSOT (≤3, drain order)
   │
   ├─ Totals() ──► ActorShieldSummaryDto     → condition-glance (shield-status, radial ring)
+  │                 elementId = front drain-order (S2); stacks = count
   │
-  └─ each instance ──► ActorShieldLayerDto[] → shield-sheet tab (segmented bar + inspect)
+  └─ each instance ──► sheet.shieldLayers[]  → shield-sheet tab (segmented bar + inspect)
+                         same ProjectSheet flush (S1) — not GET /shields as tab SSOT
 ```
 
+Hot: Injector → Server `ActorLiveState` bag → `ProjectSheet` (**S3**).  
 HUD `AggregateByElement` and lawn `rpgShield*` are **observe siblings**, not a third sheet SSOT.
 Do not reverse-fold lawn dumps into the sheet.
+
+### Owner locks (strengthen 2026-09-10)
+
+**S1–S3**, **D8** — see [shield-sheet-map.md](shield-sheet-map.md). Transport A rejected for player tab.
 
 ---
 

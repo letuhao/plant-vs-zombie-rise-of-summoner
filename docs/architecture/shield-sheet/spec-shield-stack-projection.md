@@ -1,6 +1,7 @@
 # Module: `shield-stack-projection`
 
 **Program:** `shield-sheet` · **Map:** [../shield-sheet-map.md](../shield-sheet-map.md)  
+**Locks:** **S1** `sheet.shieldLayers` · **S2** summary element/stacks · **S3** live bag · **D8** cascade defer  
 **Runtime SSOT:** `ShieldRuntime.GetShields` / `Totals`  
 **Shared seam:** [../condition-glance/spec-sheet-hot-projection.md](../condition-glance/spec-sheet-hot-projection.md)  
 **Prior art:** `CheatCommandRunner` shield owner snapshot stacks
@@ -9,59 +10,80 @@
 
 ## Objective
 
-Project **ordered shield layers** for the Shield tab from the same Hot RPG runtime that fills
-`ActorShieldSummaryDto`. Cold honesty: empty list / Pending — never FE invent.
+Project **ordered shield layers** onto `/sheet` beside `shieldSummary` from the same Hot RPG
+runtime flush. Cold honesty: empty list — never FE invent. **Reject** player `GET …/shields` as tab SSOT (**S1**).
 
-## DTO (proposed)
+## Entrypoints
 
-```csharp
-ActorShieldLayerDto {
-  string ShieldId;
-  string? ElementId;   // null = untyped
-  long Current;        // Hp
-  long Max;            // MaxHp
-  int Priority;
-  string SourceId;
-  bool IsInnate;
-}
-```
+| Layer | Path | Duty |
+|---|---|---|
+| DTO | `ActorSheetDto.ShieldLayers` | `ActorShieldLayerDto[]` |
+| Compose | `UniqueActorHubCompose.ProjectSheet` | Same call fills summary + layers + liveStatuses from live bag |
+| Runtime | `ShieldRuntime.GetShields` / `Totals` | Order + totals |
+| Live bag | Injector → Server `ActorLiveState` (**S3**) | Prefer extend match/dump ingest; **ask before new HTTP** |
+
+## DTO — `ActorShieldLayerDto`
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `shieldId` | `string` | yes | |
+| `elementId` | `string?` | no | null = untyped |
+| `current` | `long` | yes | Hp |
+| `max` | `long` | yes | MaxHp |
+| `priority` | `int` | yes | drain key |
+| `sourceId` | `string` | yes | fiction label at fold |
+| `isInnate` | `bool` | yes | |
+| `regenPerSecond` | `long?` | no | **omit if runtime not exposed (D8)** |
+| `broken` | `bool` | no | empty fill, slot retained |
 
 Order = drain order (priority DESC, CreatedSeq ASC). Cap = `ShieldPolicy.MaxShieldsPerActor` (3).
 
-## Transport options (pick in plan; both legal)
+## Envelope (on sheet)
 
-| Option | Shape |
+```json
+{
+  "shieldSummary": {
+    "elementId": "ice",
+    "current": 100,
+    "max": 200,
+    "stacks": 2
+  },
+  "shieldLayers": [ /* ≤3 ActorShieldLayerDto */ ],
+  "liveStatuses": []
+}
+```
+
+## Parity invariant
+
+`sum(layers.current) == Totals.Hp == shieldSummary.current` (and max analogously) within same snapshot.
+
+## Summary policy (**S2**)
+
+| Field | Rule |
 |---|---|
-| A | `GET /api/actors/{id}/shields` → `{ layers, totals }` |
-| B | Widen `/sheet` with `shieldLayers: ActorShieldLayerDto[]` |
-
-**Must:** same Hot flush as `shieldSummary` (one snapshot). Do **not** use HUD
-`AggregateByElement` as tab SSOT.
-
-## Summary consistency
-
-`sum(layers.Current)` / `sum(layers.Max)` must match `Totals` / `shieldSummary` within documented
-policy (same runtime call).
+| `elementId` | Front drain-order layer’s element; else null |
+| `stacks` | `layers.Count` when widened |
+| omit glance | null or current≤0 |
 
 ## Success criteria
 
-- [ ] Hot with 1–3 shields: layers match GetShields fields.
-- [ ] Cold: empty/null; FE Pending or omit — no three fake empties as “known empty.”
-- [ ] Server tests + curl proof alongside sheet-hot-projection.
+- [ ] Hot 1–3 shields: layers match GetShields; same ProjectSheet as summary.
+- [ ] Cold: `shieldLayers` empty; summary null.
+- [ ] No player tab dependency on `GET …/shields`.
+- [ ] Curl proof: cold vs Hot sheet includes both fields.
 - [ ] Magnitudes `long`; overflow throws.
 
 ## Commands
 
 ```powershell
-# After wire lands
-curl -s http://127.0.0.1:5088/api/actors/<hotId>/shields
-# or sheet.shieldLayers
+curl -s http://127.0.0.1:5088/api/actors/<hotId>/sheet | ConvertFrom-Json |
+  Select-Object shieldSummary, shieldLayers
 dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Shield
-dotnet test tests\FusionRpg.Server.Tests --filter FullyQualifiedName~Shield
+dotnet test tests\FusionRpg.Server.Tests --filter FullyQualifiedName~AuraDerived
 ```
 
 ## Boundaries
 
-- **Always:** extend shared Hot seam; RPG-layer only.
-- **Ask first:** new Injector→Server channel.
-- **Never:** second ProjectSheet; FE fixtures as product Hot.
+- **Always:** same Hot flush; RPG-layer only.
+- **Ask first:** new Injector→Server HTTP channel (**S3**).
+- **Never:** second ProjectSheet; FE fixtures; HUD AggregateByElement as tab SSOT.

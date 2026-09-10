@@ -16,6 +16,32 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(12, catalog.Entries.Count);
         Assert.Equal("Might", catalog.Entries[0].Id);
         Assert.Equal("Hit harder.", catalog.Entries[0].Reading);
+        Assert.Equal("swords", catalog.Entries[0].Icon);
+        Assert.All(catalog.Entries, e => Assert.False(string.IsNullOrWhiteSpace(e.Icon)));
+    }
+
+    [Fact]
+    public void Parse_aptitude_catalog_missing_icon_does_not_crash()
+    {
+        const string json = """
+            {
+              "schemaVersion": 1,
+              "kind": "aptitude-catalog",
+              "version": 1,
+              "entries": [
+                {
+                  "id": "Might",
+                  "posture": "force",
+                  "ordinal": 0,
+                  "displayName": "Might",
+                  "role": "offence",
+                  "reading": "Hit harder."
+                }
+              ]
+            }
+            """;
+        var catalog = AptitudeSurfaceCatalogLoader.Parse(json);
+        Assert.Null(catalog.Entries[0].Icon);
     }
 
     [Fact]
@@ -26,7 +52,8 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(1, catalog.Version);
         Assert.Equal(54, catalog.Entries.Count);
         Assert.Equal(28, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.Element));
-        Assert.Equal(6, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.StatusId));
+        Assert.Equal(6, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.StatusCategory));
+        Assert.Equal(0, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.StatusId));
         Assert.Equal(4, catalog.Entries.Count(e => e.Expand == DerivedExpandKind.Resource));
         Assert.Contains(catalog.Entries, e => e.Family == "combat.power");
         Assert.Contains(catalog.Entries, e => e.Family == "status.resist" && e.CapRef == "categoryResistCap");
@@ -254,21 +281,24 @@ public sealed class ActorSurfaceCatalogTests
         Assert.Equal(28, elements.Categories.SelectMany(c => c.Families).Count());
 
         var status = Assert.Single(en.Tabs, t => t.Id == "status");
-        Assert.Equal(25, status.Variants.Count);
-        Assert.Equal("omni", status.Variants[0].Id);
+        Assert.Equal(4, status.Variants.Count);
+        Assert.Equal(new[] { "omni", "dot", "cc", "contagion" }, status.Variants.Select(v => v.Id));
         Assert.True(status.Variants[0].PresentationOnly);
-        Assert.Contains(status.Variants, v => v.Id == "butter" && !v.PresentationOnly);
-        Assert.Contains(status.Variants, v => v.Id == "nerve.afflicted");
+        Assert.Contains(status.Variants, v => v.Id == "dot" && !v.PresentationOnly);
         Assert.Equal(6, status.Categories.SelectMany(c => c.Families).Count());
+        Assert.All(status.Categories.SelectMany(c => c.Families), f => Assert.Equal("status-category", f.Expand));
+        Assert.Contains(status.Categories.SelectMany(c => c.Families), f => f.Family == "status.resist");
 
         var resources = Assert.Single(en.Tabs, t => t.Id == "resources");
         Assert.Equal(6, resources.Variants.Count);
         Assert.Equal("Sun", Assert.Single(resources.Variants, v => v.Id == "hunger").DisplayName);
 
         var other = Assert.Single(en.Tabs, t => t.Id == "other");
-        Assert.Empty(other.Variants);
+        Assert.Single(other.Variants, v => v.Id == "shared");
+        Assert.Equal("Shared", other.Variants[0].DisplayName);
         Assert.NotNull(other.ActionCategoryVariants);
         Assert.Equal(5, other.ActionCategoryVariants!.Count);
+        Assert.DoesNotContain(other.ActionCategoryVariants!, v => v.Id == "shared");
         var skillCd = Assert.Single(other.Categories.SelectMany(c => c.Families), f => f.Family == "skill.cooldown");
         Assert.Equal("action-category", skillCd.Expand);
         Assert.Equal("{family}.{variant}", skillCd.ChannelPattern);

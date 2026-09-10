@@ -161,7 +161,9 @@ export const channelRowFactory: PieceFactory = ({ payload, bus }) => {
       {state === "capped" ? (
         <span className="badge">CAP</span>
       ) : (
-        <span className="state-tag">{state}</span>
+        <span className="state-tag">
+          {payload.stateLabel != null ? String(payload.stateLabel) : state}
+        </span>
       )}
     </button>
   );

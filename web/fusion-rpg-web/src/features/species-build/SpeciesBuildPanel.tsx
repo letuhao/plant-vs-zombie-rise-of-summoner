@@ -1,54 +1,95 @@
-import { useEffect, useRef, useState } from "react";
-import { formatMagnitude } from "@/i18n/magnitude";
-import { Banner, Button, ConfirmDialog, EmptyState, Field, NumberInput, Panel, StatBar } from "@/ui";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
+import { useAllocationDraft } from "@/hooks/useAllocationDraft";
+import { bindSurface } from "@/features/gui-lego/bindSurface";
+import { asSurfaceBusLike } from "@/features/gui-lego/createSurfaceBus";
+import { createAptitudesSurfaceBus } from "@/features/gui-lego/aptitudesSurfaceBus";
+import { foldAptitudesSurfaceVm } from "@/features/gui-lego/foldAptitudesSurfaceVm";
+import { getRecipe } from "@/features/gui-lego/recipeRegistry";
+import { Banner, Button, EmptyState } from "@/ui";
+import { RecipeMount } from "@/ui/gui-lego/RecipeMount";
+import { ensureAptitudesGuiLegoRegistered } from "@/ui/gui-lego/registerAptitudes";
+import { emitAptitudeObs } from "@/ui/actor/aptitudeObs";
 import { useSpeciesBuild } from "./useSpeciesBuild";
 
-function points(value: number): string {
-  return formatMagnitude({ unit: "aptitudePoints", value });
-}
-
 /**
- * spec-allocation-surface.md — "a Pokédex entry with an edit button," not a configuration screen.
- * Shows the shipped baseline, the override as a deviation from it, and the remaining budget; saves
- * always through `useSpeciesBuild`'s one respec mutation, which decides free-vs-priced for itself.
- *
- * Mirrors `AptitudesPage.tsx`'s own draft-and-save shape (spec's own "Code style" instruction) rather
- * than inventing a third: a local `draft` seeded from the server response, re-seeded only when the
- * server state changes and the player isn't mid-edit.
+ * Mode B species host — aptitudes-console. ConfirmDialog retired (S2);
+ * price on species-build-chrome + decision strip; Confirm commits draft.
  */
 export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; speciesId: string }) {
+  ensureAptitudesGuiLegoRegistered();
+  const surface = actorSurfaceFixture();
   const { state, price, respec, save } = useSpeciesBuild(playerId, speciesId);
-  const [draft, setDraft] = useState<Record<string, number> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [serverShares, setServerShares] = useState<Record<string, number> | undefined>(undefined);
+  const [hasOverride, setHasOverride] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(surface.aptitudes[0]?.id ?? null);
+  const revisionRef = useRef(0);
+  const typedBus = useMemo(() => createAptitudesSurfaceBus(), []);
+  const bus = useMemo(() => asSurfaceBusLike(typedBus), [typedBus]);
 
-  // Re-seed on initial load (and after switching species, below) -- never while the player is
-  // actively editing an unsaved draft. A SUCCESSFUL SAVE does not go through this path at all (see
-  // `commit`'s own comment) -- it seeds directly from the mutation's own response, which is the only
-  // way to avoid racing the query cache's own invalidation-triggered refetch.
   useEffect(() => {
-    if (state.data && draft === null) setDraft(state.data.shares);
-  }, [state.data, draft]);
-
-  // Switching species (the panel stays mounted, only `speciesId` changes) must drop the OLD
-  // species' draft -- otherwise the new species would render with the previous one's numbers for
-  // one frame, and a save would post the wrong species' shares. Guarded to skip the FIRST render
-  // (`prevSpeciesId` starts equal to `speciesId`): without this, both effects fire on mount in
-  // declaration order, and this one would immediately clobber the seed the effect above just set,
-  // leaving `draft` stuck at `null` forever.
-  const prevSpeciesId = useRef(speciesId);
-  useEffect(() => {
-    if (prevSpeciesId.current === speciesId) return;
-    prevSpeciesId.current = speciesId;
-    setDraft(null);
-    setError(null);
-    setConfirmOpen(false);
+    setServerShares(undefined);
   }, [speciesId]);
 
-  // spec-allocation-surface.md "States" -- Failed must be checked BEFORE the "no data yet" loading
-  // fallback below: a failed query also has `data === undefined`, so if the loading check ran first
-  // it would swallow every error behind a permanent "Loading…" placeholder and this retry button
-  // would be dead, unreachable code.
+  useEffect(() => {
+    if (state.data && serverShares === undefined) {
+      setServerShares(state.data.shares);
+      setHasOverride(state.data.hasOverride);
+    }
+  }, [state.data, serverShares]);
+
+  const budget = state.data?.budget ?? 0;
+  const allocationRef = useRef<ReturnType<typeof useAllocationDraft> | null>(null);
+
+  const allocation = useAllocationDraft({
+    serverValues: serverShares,
+    budget,
+    isSaving: respec.isPending,
+    onSave: async (draft) => {
+      emitAptitudeObs("aptitude.confirm", { mode: "species", speciesId, playerId });
+      const result = await save(draft);
+      setServerShares(result.shares);
+      // All-zero post is a revert (override cleared); non-zero shares become the empire override.
+      setHasOverride(Object.values(draft).some((v) => (Number(v) || 0) !== 0));
+      allocationRef.current?.acceptCommitted(result.shares);
+    }
+  });
+  allocationRef.current = allocation;
+
+  useEffect(() => {
+    const offs = [
+      typedBus.on("aptitude.select", (p) => {
+        const id = (p as { aptitudeId?: string })?.aptitudeId;
+        if (typeof id === "string") setSelectedId(id);
+      }),
+      typedBus.on("aptitude.step", (p) => {
+        const id = (p as { aptitudeId?: string })?.aptitudeId;
+        const delta = (p as { delta?: number })?.delta ?? 0;
+        const alloc = allocationRef.current;
+        if (typeof id !== "string" || !alloc?.draft) return;
+        const cur = alloc.draft[id] ?? 0;
+        alloc.setValue(id, cur + delta);
+      }),
+      typedBus.on("aptitude.set", (p) => {
+        const id = (p as { aptitudeId?: string })?.aptitudeId;
+        const value = (p as { value?: number })?.value;
+        if (typeof id !== "string" || typeof value !== "number") return;
+        allocationRef.current?.setValue(id, value);
+      }),
+      typedBus.on("aptitude.reset", () => {
+        emitAptitudeObs("aptitude.reset", { mode: "species", speciesId });
+        allocationRef.current?.revert();
+      }),
+      typedBus.on("aptitude.confirm", () => {
+        void allocationRef.current?.save();
+      }),
+      typedBus.on("preset.open", () => {
+        emitAptitudeObs("preset.open", { mode: "species", speciesId });
+      })
+    ];
+    return () => offs.forEach((off) => off());
+  }, [typedBus, speciesId, playerId]);
+
   if (state.isError) {
     return (
       <Banner tone="error" data-testid="species-build-error">
@@ -60,160 +101,84 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
     );
   }
 
-  // Genuinely pending (query in flight), OR the query just succeeded and the seed effect above
-  // hasn't derived `draft` from it yet -- both are real, non-error reasons to show the same
-  // placeholder; `state.isError` above has already ruled out the failed case.
-  if (state.isLoading || !state.data || draft === null) {
+  if (state.isLoading || !state.data || allocation.draft === null || serverShares === undefined) {
     return <EmptyState title="Loading species build…" testId="species-build-loading" />;
   }
 
   const data = state.data;
-  // spec-allocation-surface.md "States", "No budget yet": budget is `max(0, level-1) * rate`, so a
-  // species that has never left level 1 has exactly zero to spend. Rendered as its own honest state
-  // below rather than through the same copy a real shipped build uses -- that copy asserts a build
-  // that does not exist yet.
-  const noBudgetYet = data.budget === 0 && !data.hasOverride;
-  const spent = Object.values(draft).reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0);
-  const withinBudget = spent <= data.budget;
-  const dirty = JSON.stringify(draft) !== JSON.stringify(data.shares);
-  const isRevert = dirty && Object.values(draft).every((v) => v === 0);
-  // spec-allocation-surface.md "States", "Price unknown": `price.data` is undefined BOTH while the
-  // query is pending and after it errors, so it must never read as "no charge" by default -- only an
-  // ACTUALLY loaded reply that confirms `everRespecced === false` makes a change free. Predicts what
-  // the server will decide (spec-species-respec.md's free/priced rule) using `everRespecced`, never
-  // `respecCount === 0` (that decays over time; `everRespecced` never resets).
+  const noBudgetYet = data.budget === 0 && !hasOverride;
+  const dirty = allocation.dirty;
+  const isRevert = dirty && Object.values(allocation.draft).every((v) => v === 0);
   const isFree = isRevert || (price.data !== undefined && !price.data.everRespecced);
-  // Not a revert, and the price that would gate a real spend hasn't resolved either way -- Save must
-  // wait rather than guess (below), the same way the overbudget case already refuses rather than
-  // clamping.
-  const priceUnresolved = !isRevert && price.data === undefined;
+  // G7: pending/errored price must not look free — Confirm stays disabled until price resolves.
+  const priceReady = isFree || price.data !== undefined;
+  const confirmEnabled = dirty && allocation.withinBudget && !respec.isPending && priceReady && !(noBudgetYet && !dirty);
 
-  async function commit() {
-    setError(null);
-    try {
-      const result = await save(draft!);
-      // Real bug found and fixed via the E2E round trip: seeding the draft from `state.data` after a
-      // save (e.g. by dropping it to `null` and letting the re-seed effect above pick it back up)
-      // RACES the query cache's own invalidation-triggered refetch -- the effect can fire on a render
-      // where `state.data` hasn't updated yet (a revert then shows stale zeros) OR where it updated
-      // TOO early relative to draft becoming null (a change then reverts to the pre-save baseline).
-      // The mutation's OWN response already carries the authoritative `shares` the server just
-      // computed (whether this was a first override, a revert, or a priced change) -- using it
-      // directly needs no race with anything.
-      setDraft(result.shares);
-      setConfirmOpen(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
-      setConfirmOpen(false);
+  const statusMessage = noBudgetYet
+    ? "This species hasn't grown a build yet — field it in a real match to earn aptitude points."
+    : hasOverride
+      ? "You've overridden the shipped build below."
+      : "You're running the shipped build.";
+
+  revisionRef.current += 1;
+  const vm = foldAptitudesSurfaceVm({
+    mode: "species",
+    surface,
+    draftShares: allocation.draft,
+    budget,
+    spent: allocation.spent,
+    leftover: budget - allocation.spent,
+    dirty,
+    withinBudget: confirmEnabled,
+    saving: respec.isPending,
+    selectedAptitudeId: selectedId,
+    theta: data.level,
+    speciesChrome: {
+      hasOverride,
+      priceAmount: price.data?.priceAmount ?? 0,
+      priceResource: price.data?.priceResource ?? "Soul",
+      everRespecced: Boolean(price.data?.everRespecced)
+    },
+    availability: "ready",
+    revision: revisionRef.current
+  });
+
+  if (vm.speciesChrome) {
+    vm.speciesChrome.statusMessage = statusMessage;
+    if (noBudgetYet) {
+      vm.speciesChrome.priceAmount = null;
+      vm.speciesChrome.priceResource = null;
     }
   }
 
-  function onSaveClick() {
-    if (isFree) {
-      void commit();
-    } else {
-      setConfirmOpen(true); // priced change: the price is shown here, BEFORE the confirm
-    }
-  }
+  const recipe = getRecipe("aptitudes-console");
+  const plan = recipe ? bindSurface(recipe, vm, { preferOverlay: false }) : null;
 
-  const saveLabel = isRevert ? "Reset to default" : isFree ? "Save build" : "Respec…";
-  const saveTitle = noBudgetYet && !dirty
-    ? "This species hasn't earned any aptitude points yet — nothing to save."
-    : !withinBudget
-      ? `Over this species' budget by ${points(spent - data.budget)}`
-      : !dirty
-        ? "No changes to save"
-        : isRevert
-          ? "Reset to the shipped baseline — free"
-          : isFree
-            ? "First override — free"
-            : price.data
-              ? `Costs ${price.data.priceAmount.toLocaleString()} ${price.data.priceResource.toLowerCase()}`
-              : price.isError
-                ? "Couldn't load the respec price — try again shortly"
-                : "Waiting for the respec price…";
-  // Reuses the SAME mechanism the overbudget case already relies on (a boolean folded into the
-  // Button's `disabled`) rather than adding a second way to block Save -- see `priceUnresolved` above.
-  const saveDisabled = !dirty || !withinBudget || respec.isPending || priceUnresolved;
+  if (!plan) {
+    return <EmptyState title="Aptitudes recipe missing" testId="species-build-loading" />;
+  }
 
   return (
-    <div className="flex flex-col gap-4" data-testid="species-build-panel">
-      {error && <Banner tone="error">{error}</Banner>}
-
-      <Panel title="Shipped build" testId="species-build-baseline">
-        <p className="text-sm text-muted" data-testid="species-build-status">
-          {noBudgetYet
-            ? "This species hasn't grown a build yet — field it in a real match to earn aptitude points."
-            : data.hasOverride
-              ? "You've overridden the shipped build below."
-              : "You're running the shipped build."}
-        </p>
-        <StatBar
-          label={`${points(spent)} / ${points(data.budget)} spent`}
-          value={spent}
-          max={Math.max(data.budget, 1)}
-        />
-      </Panel>
-
-      <Panel title="Aptitudes" testId="species-build-grid">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {Object.keys(data.baseline).map((id) => {
-            const baselineValue = data.baseline[id] ?? 0;
-            const draftValue = draft[id] ?? 0;
-            const deviation = draftValue - baselineValue;
-            return (
-              <Field key={id} label={id}>
-                <NumberInput
-                  min={0}
-                  value={draftValue}
-                  data-testid={`species-build-input-${id}`}
-                  onChange={(next) =>
-                    setDraft((d) => ({ ...(d ?? {}), [id]: Math.max(0, Math.trunc(next)) }))
-                  }
-                />
-                {deviation !== 0 ? (
-                  <span className="text-xs text-muted" data-testid={`species-build-deviation-${id}`}>
-                    {deviation > 0 ? "+" : ""}
-                    {points(deviation)} vs shipped
-                  </span>
-                ) : null}
-              </Field>
-            );
-          })}
-        </div>
-      </Panel>
-
-      <Button
-        onClick={onSaveClick}
-        disabled={saveDisabled}
-        title={saveTitle}
-        data-testid="species-build-save"
-      >
-        {respec.isPending ? "Saving…" : saveLabel}
-      </Button>
-      {saveDisabled ? (
-        // spec-allocation-surface.md "States": the disabled-Save reason must be visible text, not
-        // only the `title` tooltip above -- nobody hovers a button to discover why it's inert, and a
-        // degenerate state rendered only in a tooltip is not rendered honestly.
+    <div className="flex flex-col gap-3" data-testid="species-build-panel">
+      {allocation.error ? <Banner tone="error">{allocation.error}</Banner> : null}
+      {noBudgetYet && !dirty ? (
         <p className="text-xs text-muted" data-testid="species-build-save-reason">
-          {saveTitle}
+          This species hasn&apos;t earned any aptitude points yet — nothing to save.
         </p>
       ) : null}
-
-      <ConfirmDialog
-        open={confirmOpen}
-        title="Respec this species?"
-        message={
-          price.data
-            ? `This changes an existing build and costs ${price.data.priceAmount.toLocaleString()} ${price.data.priceResource.toLowerCase()}.`
-            : "Loading the current price…"
-        }
-        confirmLabel="Respec"
-        busy={respec.isPending}
-        onConfirm={() => void commit()}
-        onCancel={() => setConfirmOpen(false)}
-        testId="species-build-respec-confirm"
-      />
+      {!isFree && price.data === undefined ? (
+        <p className="text-xs text-muted" data-testid="species-build-save-reason">
+          {price.isError
+            ? "Couldn't load the respec price — try again shortly"
+            : "Waiting for the respec price…"}
+        </p>
+      ) : null}
+      {!allocation.withinBudget && dirty ? (
+        <p className="text-xs text-muted" data-testid="species-build-save-reason">
+          Over this species&apos; budget — Confirm stays off until spent fits.
+        </p>
+      ) : null}
+      <RecipeMount plan={plan} bus={bus} />
     </div>
   );
 }

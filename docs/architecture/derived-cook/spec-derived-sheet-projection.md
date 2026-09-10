@@ -1,45 +1,83 @@
 # Module: `derived-sheet-projection`
 
 **Program:** `derived-cook` · **Map:** [../derived-cook-map.md](../derived-cook-map.md)  
-**Amends:** sheet channel DTO / `ProjectSheet` derived channels  
-**Contracts:** `ActorSheetDtos.cs` · UniqueActorHubCompose  
-**Depends on:** ActorHub derived snapshot, `DerivedStatRegistry`
+**Locks:** **D2** (renderState authoritative) · **D6** (Value stays `double` for now)  
+**Amends:** `ActorSheetChannelDto` / `ProjectSheet` derived channels · FE `aura.ts` twin  
+**Contracts:** [ActorSheetDtos.cs](../../../src/FusionRpg.Contracts/ActorSheetDtos.cs) · UniqueActorHubCompose  
+**Depends on:** ActorHub derived snapshot, `DerivedStatRegistry`, UnitClass ledger in
+[../../design/spec-magnitude-and-units.md](../../design/spec-magnitude-and-units.md)
 
 ---
 
 ## Objective
 
-Project **registry-truth** fields onto each sheet derived channel so the FE six-state join and CAP
+Project **registry-truth** metadata onto each sheet derived channel so the FE six-state join and CAP
 paint stop guessing. Prefer `/sheet` as the single Derived data path; lean `/derived` stays honest
 Pending when incomplete.
 
-## Wire fields (extend `ActorSheetChannelDto` or sibling)
+## Entrypoints
 
-| Field | Type | Notes |
+| Layer | Path | Duty |
 |---|---|---|
-| `channelId` | string | existing |
-| `value` | number/long as today | existing magnitude |
-| `contributions` | list | existing |
-| `composeKind` | string | existing or confirm always present |
-| `unitClass` | string | nine-class ledger id |
-| `defaultValue` | number | registry default |
-| `cap` | number? | null when uncapped (e.g. resist.omni) |
-| `renderState` | enum string | one of six: active\|default\|capped\|stub\|no-producer\|unregistered — **preferred server-side**; FE may recompute only as golden parity test |
-| `hasProducer` | bool? | optional if renderState authoritative |
+| DTO | `ActorSheetChannelDto` | Widen fields below |
+| Compose | `UniqueActorHubCompose.ProjectSheet` | Fill metadata from registry + snapshot |
+| FE | `aura.ts` / sheet types | Mirror wire; no invent |
+| Lean | `GET /derived` | Pending if baseline merge omitted (UniqueDemon) |
 
-Magnitudes remain `long`-safe on wire where GameUnits; ratios stay as sheet already sends.
+## DTO fields (`ActorSheetChannelDto`)
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `channelId` | `string` | yes | existing |
+| `displayName` | `string` | yes | fiction / catalog |
+| `reading` | `string` | no | catalog reading |
+| `composeKind` | `string` | yes | FlatSum / FlatReplace / … |
+| `value` | `double` | yes | **D6:** keep `double` for now; overflow widen is a separate Core ticket. Comment exempt on DTO |
+| `contributions` | list | yes | existing |
+| `unitClass` | `string` | yes | UnitClass ledger id (cite magnitude SSOT — not “nine-class”) |
+| `defaultValue` | `double` | yes | registry default |
+| `cap` | `double?` | no | **null** when uncapped (e.g. `status.resist.omni`) |
+| `renderState` | enum string | yes | one of six — **D2 authoritative** |
+| `isStub` | `bool` | no | if not folded into renderState |
+| `hasProducer` | `bool` | no | optional; prefer renderState |
+
+Shield HP magnitudes elsewhere stay **`long`** — not this DTO.
 
 ## UniqueDemon / lean path
 
-If baseline merge is omitted on `/derived`, FE must show Pending — **never invent** values
-(`spec-derived-tab` open question → close with Pending honesty in this module).
+If baseline merge is omitted on `/derived`, FE must show **Pending** — never invent values.
+Close [spec-derived-tab](../actor-sheet/spec-derived-tab.md) open question via this signal.
+
+## Cold / Hot matrix
+
+| Session | Derived channel metadata |
+|---|---|
+| Cold UniqueActor | Project from Hub snapshot + registry (same metadata fields) |
+| Hot | Same + live contributions; does not require ActorLiveState bag |
+
+## Sample JSON
+
+```json
+{
+  "channelId": "status.resist.dot",
+  "displayName": "Resist · damage over time",
+  "composeKind": "SumIncreased",
+  "value": 0.95,
+  "unitClass": "StatusPotencyPoints",
+  "defaultValue": 0,
+  "cap": 0.95,
+  "renderState": "capped",
+  "contributions": []
+}
+```
 
 ## Success criteria
 
-- [ ] Sheet JSON includes unitClass + cap + default (or documented Pending) for cook-joined channels.
-- [ ] Cold and Hot sheet both project these metadata fields from registry (not only Hot).
-- [ ] FE can delete `KNOWN_CAPS` / stub regex once consumers migrate (`derived-cap-ssot` / render-states).
-- [ ] Tests: capped resist channel carries cap; omni resist cap null; stub progression flagged.
+- [ ] Sheet JSON includes `unitClass`, `cap`, `defaultValue`, `renderState` for cook-joined channels.
+- [ ] Omni resist: `cap` null; category resist: cap from policy/tuning.
+- [ ] FE can delete `KNOWN_CAPS` / stub regex after consumers migrate.
+- [ ] UniqueDemon lean path: Pending when baseline omitted — test documented.
+- [ ] DTO comments note **D6** double exempt; shield `long` elsewhere.
 
 ## Commands
 
@@ -49,8 +87,13 @@ curl -s http://127.0.0.1:5088/api/actors/<id>/sheet | ConvertFrom-Json |
 dotnet test tests\FusionRpg.Server.Tests --filter FullyQualifiedName~AuraDerived
 ```
 
+## Testing
+
+- Server: capped resist carries cap; omni null; stub progression flagged.
+- FE twin types match Contracts.
+
 ## Boundaries
 
-- **Always:** registry is SSOT for cap/default/unitClass.
-- **Ask first:** changing contribution SourceId grammar.
+- **Always:** registry is SSOT for cap/default/unitClass/renderState.
+- **Ask first:** widening channel `Value` to `long` (separate ticket).
 - **Never:** FE inventing CAP as product truth after this lands.

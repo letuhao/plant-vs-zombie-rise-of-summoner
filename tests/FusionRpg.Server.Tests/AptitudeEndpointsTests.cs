@@ -130,6 +130,92 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.BadRequest, postResp.StatusCode);
     }
 
+    // ---- aptitude-sheet unique-allocate ---------------------------------------------------------
+
+    [Fact]
+    public async Task UniqueGet_missingActor_returns404()
+    {
+        var resp = await _http.GetAsync("/api/aptitudes/unique/does-not-exist");
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task UniqueGet_freshSpecimen_returnsEmptySharesAndLeftoverEqualsBudget()
+    {
+        var actor = _store.EnsureUniqueActorForAudit(_playerId, "ua-apt-empty", "plant", typeId: 1, level: 10);
+        var body = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        Assert.NotNull(body);
+        Assert.Equal(actor.InstanceId, body!.InstanceId);
+        Assert.Equal(_playerId, body.PlayerId);
+        Assert.Equal(10, body.SpecimenLevel);
+        Assert.Equal(12, body.Shares.Count);
+        Assert.All(body.Shares.Values, v => Assert.Equal(0, v));
+        Assert.Equal(0, body.Spent);
+        Assert.Equal(body.Budget, body.Leftover);
+        Assert.True(body.WithinBudget);
+        Assert.True(body.Budget > 0);
+    }
+
+    [Fact]
+    public async Task UniquePost_withinBudget_savesLoadAllocationAndRoundTrips()
+    {
+        var actor = _store.EnsureUniqueActorForAudit(_playerId, "ua-apt-spend", "plant", typeId: 2, level: 10);
+        var before = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        var spend = before!.Budget;
+        Assert.True(spend > 0);
+
+        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/unique/allocate",
+            new { instanceId = actor.InstanceId, shares = new Dictionary<string, long> { ["Might"] = spend } });
+        postResp.EnsureSuccessStatusCode();
+        var postBody = await postResp.Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        Assert.Equal(spend, postBody!.Shares["Might"]);
+        Assert.Equal(0, postBody.Leftover);
+
+        var loaded = _store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId);
+        Assert.Equal(spend, loaded.PointsAt(AllocationScope.UniqueDemon, "Might"));
+        Assert.Equal(0, loaded.PointsAt(AllocationScope.Commander, "Might"));
+
+        var getAfter = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        Assert.Equal(spend, getAfter!.Shares["Might"]);
+    }
+
+    [Fact]
+    public async Task UniquePost_overBudget_409_neverClamps()
+    {
+        var actor = _store.EnsureUniqueActorForAudit(_playerId, "ua-apt-over", "plant", typeId: 3, level: 5);
+        var before = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/unique/allocate",
+            new { instanceId = actor.InstanceId, shares = new Dictionary<string, long> { ["Might"] = before!.Budget + 1 } });
+        Assert.Equal(HttpStatusCode.Conflict, postResp.StatusCode);
+
+        var after = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
+        Assert.Equal(0, after!.Shares["Might"]);
+        Assert.Equal(0, _store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId)
+            .PointsAt(AllocationScope.UniqueDemon, "Might"));
+    }
+
+    [Fact]
+    public async Task UniquePost_doesNotWriteCommanderRows()
+    {
+        var actor = _store.EnsureUniqueActorForAudit(_playerId, "ua-apt-iso", "plant", typeId: 4, level: 8);
+        var beforeCmd = _store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId));
+        var budget = (await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
+            .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>())!.Budget;
+
+        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/unique/allocate",
+            new { instanceId = actor.InstanceId, shares = new Dictionary<string, long> { ["Might"] = budget } });
+        postResp.EnsureSuccessStatusCode();
+
+        var afterCmd = _store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(_playerId));
+        Assert.Equal(beforeCmd.PointsAt(AllocationScope.Commander, "Might"),
+            afterCmd.PointsAt(AllocationScope.Commander, "Might"));
+    }
+
     // ---- species-build T3.1 (allocation-transport): the additive `species` field --------------
 
     [Fact]
@@ -197,6 +283,18 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         public bool WithinBudget { get; set; }
         public Dictionary<string, long> Shares { get; set; } = new();
         public Dictionary<string, Dictionary<string, long>> Species { get; set; } = new();
+    }
+
+    sealed class UniqueAptitudesStateDto
+    {
+        public string InstanceId { get; set; } = "";
+        public long PlayerId { get; set; }
+        public long SpecimenLevel { get; set; }
+        public long Budget { get; set; }
+        public long Spent { get; set; }
+        public long Leftover { get; set; }
+        public bool WithinBudget { get; set; }
+        public Dictionary<string, long> Shares { get; set; } = new();
     }
 
     static string RepoTuningDir() => Path.Combine(FindRepoRoot(), "data", "tuning");

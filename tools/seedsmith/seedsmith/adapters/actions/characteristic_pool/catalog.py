@@ -1,28 +1,25 @@
-"""seedsmith.adapters.actions.characteristic_pool.catalog — the 84-species roster (spec §2's
-first "Reads" row), parsed straight from the C# code of record. No JSON export of this table
-exists, so — same "code, not data" precedent `adapters/demons/registries.py`'s own docstring
-already establishes for this exact file family — this module transcribes the *parser*, never the
-*data*: every run reads the live `.cs` file fresh, so a roster change is picked up automatically
-and this module never drifts from it the way a hand-copied constant would.
+"""Load the live demon seed roster used by action seeding.
 
-Constraint 3 (map §3 / spec's own §1): the roster is the **84** `SpeciesId` rows here, never the
-904-row almanac. `DemonSpeciesCatalog.Generated.cs` line numbers are cited relative to the file
-read at build time (2026-09-03: 84 entries, `:14-97`) — re-verified directly against the live file
-by this module's own tests rather than trusted from the spec's citation, per this repo's own
-design-gate discipline (A-C1's build found two stale citations in this exact file family).
+The species seed folder is the source of truth. The generated C# catalog remains
+available only as an explicit legacy compatibility input for older fixtures.
 """
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from ...demons.family.consolidate import FamilyCandidateInput, consolidate
+
 __all__ = [
-    "SpeciesRow", "RARITY_LADDER", "TRAIT_POOL", "load_catalog", "CATALOG_PATH",
+    "SpeciesRow", "RARITY_LADDER", "TRAIT_POOL", "load_catalog", "load_live_records",
+    "derive_live_family_assignments", "CATALOG_PATH", "LEGACY_CATALOG_PATH",
 ]
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
-CATALOG_PATH = REPO_ROOT / "src" / "FusionRpg.Core" / "Demons" / "DemonSpeciesCatalog.Generated.cs"
+CATALOG_PATH = REPO_ROOT / "data" / "seed" / "demons" / "species"
+LEGACY_CATALOG_PATH = REPO_ROOT / "src" / "FusionRpg.Core" / "Demons" / "DemonSpeciesCatalog.Generated.cs"
 
 # `DemonRarityIds.ToId` — src/FusionRpg.Core/Demons/DemonRarity.cs:16-27 (enum declaration order,
 # which the C# enum makes the ordinal — never re-derive an ordinal by sorting strings). Transcribed
@@ -76,11 +73,8 @@ class SpeciesRow:
     traits: "tuple[str, ...]"           # this species' own TraitPool, catalog order preserved
 
 
-def load_catalog(path: Path = CATALOG_PATH) -> "list[SpeciesRow]":
-    """Parse the live `.cs` roster in file (= catalog) order — step 2's own requirement ("per
-    species, in catalog order"). Raises `ValueError` naming the unparsed fragment rather than
-    silently skipping a malformed row: a roster this module cannot fully read is a build-stopping
-    problem, not a `Finding` (unlike A-C1's corpus content, this file is not player-authored)."""
+def _load_legacy_catalog(path: Path) -> "list[SpeciesRow]":
+    """Parse an explicitly supplied legacy `.cs` roster for compatibility fixtures."""
     text = path.read_text(encoding="utf-8")
     rows: "list[SpeciesRow]" = []
     seen: "set[str]" = set()
@@ -119,3 +113,108 @@ def load_catalog(path: Path = CATALOG_PATH) -> "list[SpeciesRow]":
         raise ValueError(f"{path}: matched zero species rows — the row pattern no longer fits "
                          f"the live file's shape")
     return rows
+
+
+def load_live_records(root: Path = CATALOG_PATH) -> "list[dict[str, object]]":
+    """Read every live species record from the seed folder in stable path order."""
+    if not root.is_dir():
+        raise ValueError(f"{root}: live species seed directory does not exist")
+
+    records: "list[dict[str, object]]" = []
+    seen: "set[str]" = set()
+    for path in sorted(root.rglob("*.json")):
+        if path.name == "_index.json":
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{path}: invalid JSON: {exc}") from exc
+
+        entries = payload if isinstance(payload, list) else [payload]
+        for entry in entries:
+            if not isinstance(entry, dict):
+                raise ValueError(f"{path}: species record must be an object")
+            raw_id = entry.get("speciesId")
+            if not isinstance(raw_id, str) or not raw_id.strip():
+                raise ValueError(f"{path}: species record is missing speciesId")
+            species_id = raw_id.strip().lower()
+            if species_id in seen:
+                raise ValueError(f"{path}: duplicate speciesId {species_id!r}")
+            seen.add(species_id)
+            records.append({**entry, "speciesId": species_id, "_sourcePath": str(path)})
+
+    if not records:
+        raise ValueError(f"{root}: live species seed directory contains no species records")
+    return records
+
+
+def _live_row(record: dict[str, object]) -> SpeciesRow:
+    path = record.get("_sourcePath", "live species seed")
+    species_id = record["speciesId"]
+    if not isinstance(species_id, str):
+        raise ValueError(f"{path}: speciesId must be a string")
+
+    primary = record.get("elementPrimary")
+    secondary = record.get("elementSecondary")
+    valid_elements = {"fire", "ice", "air", "earth", "light", "dark"}
+    primary_id = primary.lower() if isinstance(primary, str) else ""
+    secondary_id = secondary.lower() if isinstance(secondary, str) and secondary.lower() != "none" else None
+    if primary_id not in valid_elements:
+        raise ValueError(f"{path}: species {species_id!r} has unknown elementPrimary {primary!r}")
+    if secondary_id is not None and secondary_id not in valid_elements:
+        raise ValueError(f"{path}: species {species_id!r} has unknown elementSecondary {secondary!r}")
+    if secondary_id == primary_id:
+        secondary_id = None
+
+    rarity = record.get("rarity")
+    rarity_id = rarity.lower() if isinstance(rarity, str) else ""
+    if rarity_id not in RARITY_ORDINAL:
+        raise ValueError(f"{path}: species {species_id!r} has unknown rarity {rarity!r}")
+
+    raw_traits = record.get("traits", [])
+    if not isinstance(raw_traits, list):
+        raise ValueError(f"{path}: species {species_id!r} traits must be a list")
+    traits = tuple(str(trait).strip().lower() for trait in raw_traits if str(trait).strip())
+    return SpeciesRow(
+        species_id=species_id,
+        element_primary=primary_id,
+        element_secondary=secondary_id,
+        rarity=rarity_id,
+        rarity_ordinal=RARITY_ORDINAL[rarity_id],
+        traits=traits,
+    )
+
+
+def normalize_family_key(label: str) -> str:
+    """Turn a live descriptive family label into a stable action namespace key."""
+    key = re.sub(r"[^a-z0-9]+", "-", label.strip().lower()).strip("-")
+    if not key:
+        raise ValueError(f"family label {label!r} normalizes to an empty key")
+    return key
+
+
+def derive_live_family_assignments(root: Path = CATALOG_PATH) -> "dict[str, list[str]]":
+    """Derive species-to-family memberships from the live species records."""
+    candidates: "list[FamilyCandidateInput]" = []
+    for record in load_live_records(root):
+        raw_families = record.get("family", [])
+        if isinstance(raw_families, str):
+            raw_families = [raw_families]
+        if not isinstance(raw_families, list):
+            raise ValueError(f"{record['_sourcePath']}: family must be a list")
+        labels = sorted({str(label).strip() for label in raw_families if str(label).strip()})
+        if not labels:
+            raise ValueError(f"{record['_sourcePath']}: species {record['speciesId']!r} has no family")
+        for label in labels:
+            candidates.append(FamilyCandidateInput(
+                species_id=str(record["speciesId"]), label=label,
+                native_label=label, basis="text",
+            ))
+    return consolidate(candidates).assignments
+
+
+def load_catalog(path: Path = CATALOG_PATH) -> "list[SpeciesRow]":
+    """Load the live seed roster, or parse an explicitly supplied legacy C# file."""
+    if path.is_dir():
+        return [_live_row(record) for record in load_live_records(path)]
+    return _load_legacy_catalog(path)

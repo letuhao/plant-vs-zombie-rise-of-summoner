@@ -88,27 +88,57 @@ describe("foldConditionSurfaceVm", () => {
       availability: "ready",
       revision: 1
     });
-    const prog = vm.main[0] as { fillPct?: number | null; message?: string | null; phase?: string };
+    const prog = vm.main[0] as {
+      fillPct?: number | null;
+      message?: string | null;
+      phase?: string;
+      revision?: number;
+    };
     expect(prog.fillPct).toBeGreaterThan(0);
     expect(prog.message).toBeNull();
     expect(prog.phase).toBe("ready");
+    expect(prog.revision).toBe(1);
 
-    const identity = vm.main[1] as { speciesName?: string; elements?: string[] };
+    const identity = vm.main[1] as {
+      speciesName?: string;
+      phaseBadge?: { piece?: string; label?: string };
+      elementBadges?: { elementId?: string; themeRef?: { kind: string; id: string } }[];
+    };
     expect(identity.speciesName).toBe("Sunflower");
-    expect(identity.elements).toEqual(["fire", "light"]);
+    expect(identity.phaseBadge?.piece).toBe("phase-badge");
+    expect(identity.phaseBadge?.label).toBe("ActiveBound");
+    expect(identity.elementBadges?.map((e) => e.elementId)).toEqual(["fire", "light"]);
+    expect(identity.elementBadges?.[0]?.themeRef).toEqual({ kind: "element", id: "fire" });
 
     const stand = vm.main[3] as {
-      bars?: { phase?: string; axes?: { id: string; value: number; fillPct: number }[] };
-      statusStrip?: { phase?: string };
+      bars?: {
+        phase?: string;
+        title?: string;
+        revision?: number;
+        axes?: { id: string; value: number; fillPct: number; paint: string }[];
+      };
+      radar?: { revision?: number; axes?: { paint: string }[] };
+      statusStrip?: { phase?: string; title?: string };
     };
     expect(stand.bars?.phase).toBe("ready");
+    expect(stand.bars?.title).toBe("Standing");
+    expect(stand.bars?.revision).toBe(1);
+    expect(stand.radar?.revision).toBe(1);
     expect(stand.bars?.axes?.find((a) => a.id === "offense")?.value).toBe(77);
     expect(stand.bars?.axes?.find((a) => a.id === "offense")?.fillPct).toBe(100);
-    expect(stand.statusStrip?.phase).toBe("empty");
+    expect(stand.bars?.axes?.find((a) => a.id === "offense")?.paint).toMatch(/^#/);
+    expect(stand.statusStrip).toBeUndefined();
 
-    const hero = vm.main[2] as { radial?: { hpPct?: number | null }; meters?: { fillPct?: number | null }[] };
+    const hero = vm.main[2] as {
+      radial?: { hpPct?: number | null; revision?: number };
+      meters?: { fillPct?: number | null; icon?: string; themeRef?: unknown; revision?: number }[];
+      shield?: unknown;
+    };
     expect(hero.radial?.hpPct).toBeGreaterThan(0);
+    expect(hero.radial?.revision).toBe(1);
     expect(hero.meters?.every((m) => m.fillPct != null)).toBe(true);
+    expect(hero.meters?.every((m) => m.icon && m.themeRef && m.revision === 1)).toBe(true);
+    expect(hero.shield).toBeUndefined();
   });
 
   it("Standing pending never fabricates zero axes", () => {
@@ -121,16 +151,17 @@ describe("foldConditionSurfaceVm", () => {
       revision: 1
     });
     const standing = vm.main[3] as {
-      radar?: { phase?: string; axes?: unknown[]; message?: string };
+      radar?: { phase?: string; title?: string; axes?: unknown[]; message?: string };
       bars?: { phase?: string; axes?: unknown[] };
     };
     expect(standing.radar?.phase).toBe("pending");
     expect(standing.bars?.phase).toBe("pending");
+    expect(standing.radar?.title).toBe("Standing");
     expect(standing.radar?.axes).toBeUndefined();
     expect(standing.bars?.axes).toBeUndefined();
   });
 
-  it("sheet present with liveStatuses empty is honest empty on nested strip", () => {
+  it("sheet present with liveStatuses empty omits strip (Q3)", () => {
     const vm = foldConditionSurfaceVm({
       data: actor(),
       sheet: { ...baseSheet(), liveStatuses: [] },
@@ -139,12 +170,11 @@ describe("foldConditionSurfaceVm", () => {
       availability: "ready",
       revision: 1
     });
-    const strip = (vm.main[3] as { statusStrip?: { phase?: string; message?: string } }).statusStrip;
-    expect(strip?.phase).toBe("empty");
-    expect(strip?.message).toMatch(/No live effects/i);
+    const strip = (vm.main[3] as { statusStrip?: unknown }).statusStrip;
+    expect(strip).toBeUndefined();
   });
 
-  it("sheet null marks statuses pending/unwired", () => {
+  it("sheet null omits status strip", () => {
     const vm = foldConditionSurfaceVm({
       data: actor(),
       sheet: null,
@@ -153,8 +183,65 @@ describe("foldConditionSurfaceVm", () => {
       availability: "ready",
       revision: 1
     });
-    const strip = (vm.main[3] as { statusStrip?: { phase?: string; message?: string } }).statusStrip;
-    expect(strip?.phase).toBe("pending");
-    expect(strip?.message).toMatch(/not available yet/i);
+    const strip = (vm.main[3] as { statusStrip?: unknown }).statusStrip;
+    expect(strip).toBeUndefined();
+  });
+
+  it("mounts shield-status only when summary current > 0", () => {
+    const cold = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: { ...baseSheet(), shieldSummary: null },
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    expect((cold.main[2] as { shield?: unknown }).shield).toBeUndefined();
+
+    const zero = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: { ...baseSheet(), shieldSummary: { elementId: "ice", current: 0, max: 2000 } },
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    expect((zero.main[2] as { shield?: unknown }).shield).toBeUndefined();
+    expect((zero.main[2] as { radial?: { shieldPct?: number | null } }).radial?.shieldPct).toBeNull();
+
+    const hot = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: {
+        ...baseSheet(),
+        shieldSummary: { elementId: "ice", current: 1200, max: 2000, stacks: 2 }
+      },
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const shield = (hot.main[2] as { shield?: Record<string, unknown> }).shield;
+    expect(shield?.piece).toBe("shield-status");
+    expect(shield?.current).toBe(1200);
+    expect(shield?.elementId).toBe("ice");
+    expect(shield?.themeRef).toEqual({ kind: "element", id: "ice" });
+    expect((hot.main[2] as { radial?: { shieldPct?: number } }).radial?.shieldPct).toBe(60);
+  });
+
+  it("live statuses mount Effects strip without author notes", () => {
+    const surface = actorSurfaceFixture();
+    const statusId = surface.statuses[0]?.id;
+    expect(statusId).toBeTruthy();
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: { ...baseSheet(), liveStatuses: [{ statusId: statusId! }] },
+      surface,
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const strip = (vm.main[3] as { statusStrip?: { title?: string; phase?: string } }).statusStrip;
+    expect(strip?.phase).toBe("ready");
+    expect(strip?.title).toBe("Effects");
   });
 });

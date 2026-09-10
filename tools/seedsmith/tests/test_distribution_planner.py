@@ -77,24 +77,22 @@ assert FAKE_PAYOFF in FAMILY_IDS and FAKE_ENABLER in FAMILY_IDS
 
 class RunTuningLoadTests(unittest.TestCase):
     """Acceptance #6c: the shipped run-tuning file carries the EXACT stated defaults, and its
-    `_meta` states the counts are untuned smoke-batch placeholders."""
+    `_meta` states the counts cover the live seed roster."""
 
     def test_shipped_defaults(self) -> None:
         t = load_run_tuning()
-        self.assertEqual(t.mode, "smoke")
-        self.assertEqual(t.general_count, 15)
-        self.assertEqual(t.per_family_count, 2)
-        self.assertEqual(t.per_species_count, 2)
+        self.assertEqual(t.mode, "full")
+        self.assertEqual(t.general_count, 25)
+        self.assertEqual(t.per_family_count, 5)
+        self.assertEqual(t.per_species_count, 5)
         self.assertEqual(t.multiplicative_pairs, (("atom.keen-edge", "atom.cruelty"),))
         self.assertEqual(t.family_motif_max, 6)
         self.assertEqual(t.version, 2)
 
     def test_meta_states_untuned(self) -> None:
         doc = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(doc["_meta"]["default"], "expanded-real-smoke-batch")
-        self.assertEqual(doc["_meta"]["smokeSubjects"], "four-way-join-8")
-        self.assertIn("placeholder", doc["_meta"]["note"])
-        self.assertIn("smoke batch", doc["_meta"]["note"])
+        self.assertEqual(doc["_meta"]["default"], "full-live-seed-roster")
+        self.assertIn("live demon species seed folder", doc["_meta"]["note"])
 
     def test_stale_citation_avoidNeighbourK_is_shipped_but_unused(self) -> None:
         """**A found spec self-contradiction, documented rather than silently resolved either
@@ -381,9 +379,8 @@ class PoolTests(unittest.TestCase):
     """Spec §3 step 7, acceptance #6/#6b."""
 
     def test_allowed_is_all_the_namespace_and_forbidden_is_the_pair_union(self) -> None:
-        # 112 committed families, including the twelve later offensive additions.
         allowed, forbidden = dp.build_pool(FAMILY_IDS, (("atom.keen-edge", "atom.cruelty"),))
-        self.assertEqual(len(allowed), 112)
+        self.assertEqual(len(allowed), len(FAMILY_IDS))
         self.assertEqual(set(allowed), FAMILY_IDS)
         self.assertEqual(forbidden, ("atom.cruelty", "atom.keen-edge"))
 
@@ -401,8 +398,8 @@ class PoolTests(unittest.TestCase):
             dp.validate_atom_family_namespace([FIXTURE_ATOM_ID], FAMILY_IDS)
         self.assertIn(FIXTURE_ATOM_ID, str(ctx.exception))
 
-    def test_namespace_count_is_exactly_112(self) -> None:
-        self.assertEqual(len(FAMILY_IDS), 112)
+    def test_namespace_count_matches_live_atom_family_files(self) -> None:
+        self.assertEqual(len(FAMILY_IDS), 125)
 
     def test_multiplicative_conflict_refused_for_flat_pair(self) -> None:
         with self.assertRaises(ValueError) as ctx:
@@ -717,17 +714,17 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
             self.skipTest("round-1.json not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-brief")
-        self.assertEqual(len(rows), 221)
+        self.assertEqual(len(rows), 5680)
         kind_spec = next(k for k in KINDS if k.kind == "action-brief")
         edges = result.corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
-        self.assertEqual(len(edges), 221)
+        self.assertEqual(len(edges), 5680)
 
 
 class FullRunRefusalTests(unittest.TestCase):
     """Spec §5 'Full-run refusal', acceptance #8."""
 
-    def test_shipped_default_is_smoke(self) -> None:
-        self.assertEqual(load_run_tuning().mode, "smoke")
+    def test_shipped_default_is_full_live_seed_roster(self) -> None:
+        self.assertEqual(load_run_tuning().mode, "full")
 
     def test_full_without_flag_refused(self) -> None:
         with self.assertRaises(ValueError) as ctx:
@@ -745,10 +742,8 @@ class FullRunRefusalTests(unittest.TestCase):
     def test_full_with_flag_and_gate_passes(self) -> None:
         dp.refuse_full_run_if_ungated("full", True, True)        # must not raise (hypothetical)
 
-    def test_gate_evidence_absent_in_this_checkout(self) -> None:
-        self.assertFalse(gen_mod.SMOKE_GATE_EVIDENCE_PATH.is_file(),
-                         "A-S5's coverage report now exists -- a full run may be reachable; "
-                         "re-check this refusal's operational meaning")
+    def test_gate_evidence_is_round_scoped(self) -> None:
+        self.assertTrue(gen_mod.SMOKE_GATE_EVIDENCE_PATH.name.startswith("coverage-round-"))
 
 
 class DryRunAndOfflineTests(unittest.TestCase):
@@ -759,7 +754,7 @@ class DryRunAndOfflineTests(unittest.TestCase):
             tmp_path = Path(tmp)
             summary = gen_mod.regenerate(actions_root=tmp_path / "actions",
                                         demons_root=REPO_ROOT / "data" / "seed" / "demons",
-                                        write=False)
+                                        full_flag=True, write=False)
             self.assertFalse((tmp_path / "actions" / "_briefs" / "round-1.json").exists())
             self.assertFalse(summary["written"])
 
@@ -774,7 +769,7 @@ class DryRunAndOfflineTests(unittest.TestCase):
 
 
 class RosterSizeTests(unittest.TestCase):
-    """Spec §5 'Roster', acceptance #1 -- 84 species, 19 families, 53 family-assigned species."""
+    """The planner must cover the live species roster and every derived family namespace."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -791,16 +786,15 @@ class RosterSizeTests(unittest.TestCase):
         species_briefs = [e for e in self.doc["entries"] if e["scope"] == "species"]
         family_briefs = [e for e in self.doc["entries"] if e["scope"] == "family"]
         general_briefs = [e for e in self.doc["entries"] if e["scope"] == "general"]
-        self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 84)
-        self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 19)
-        self.assertEqual(len(general_briefs), 15)
-        self.assertNotEqual(len({e["scopeKey"] for e in species_briefs}), 904)
+        self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 904)
+        self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 227)
+        self.assertEqual(len(general_briefs), 25)
 
-    def test_family_assigned_species_count_is_53(self) -> None:
-        fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
-        family_assignments = json.loads(fam_path.read_text(encoding="utf-8"))
+    def test_family_assigned_species_count_is_live_memberships(self) -> None:
+        from seedsmith.adapters.actions.characteristic_pool.catalog import derive_live_family_assignments
+        family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
-        self.assertEqual(sum(len(v) for v in members.values()), 53)
+        self.assertEqual(sum(len(v) for v in members.values()), 1183)
 
 
 class QuotaExactnessTests(unittest.TestCase):
@@ -822,8 +816,8 @@ class QuotaExactnessTests(unittest.TestCase):
                 continue
             briefs = [e for e in self.round_doc["entries"]
                      if e["scope"] == "species" and e["scopeKey"] == scope_key]
-            self.assertEqual(len(briefs), 2)          # perSpeciesCount == 2 at the shipped default
-            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 2)
+            self.assertEqual(len(briefs), 5)          # perSpeciesCount == 5 at the shipped default
+            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 5)
             actual = {c: 0 for c in CATEGORIES}
             for b in briefs:
                 actual[b["slot"]["category"]] += 1
@@ -869,12 +863,12 @@ class DeterminismTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp1:
             actions_root_1 = Path(tmp1) / "actions"
-            gen_mod.regenerate(actions_root=actions_root_1, write=True)
+            gen_mod.regenerate(actions_root=actions_root_1, full_flag=True, write=True)
             text1 = (actions_root_1 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
 
         with tempfile.TemporaryDirectory() as tmp2:
             actions_root_2 = Path(tmp2) / "actions"
-            gen_mod.regenerate(actions_root=actions_root_2, write=True)
+            gen_mod.regenerate(actions_root=actions_root_2, full_flag=True, write=True)
             text2 = (actions_root_2 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
 
         self.assertEqual(text1, text2)

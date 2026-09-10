@@ -14,6 +14,7 @@ import type {
   UniqueActorDto,
   UniqueEquipmentListDto,
   AptitudesState,
+  UniqueAptitudesState,
   SpeciesRespecResult,
   PassiveTreeState,
   PreviewTreeStateRequest
@@ -253,6 +254,19 @@ export function useSaveAptitudes() {
       sendJson<AptitudesState>("/api/aptitudes/allocate", "POST", body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(vars.playerId) });
+    }
+  });
+}
+
+/** aptitude-sheet Mode A — POST UniqueDemon allocate. Not used by Mode C commander path. */
+export function useSaveUniqueAptitudes() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "UniqueAptitudes" },
+    mutationFn: (body: { instanceId: string; shares: Record<string, number> }) =>
+      sendJson<UniqueAptitudesState>("/api/aptitudes/unique/allocate", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.uniqueAptitudes(vars.instanceId) });
     }
   });
 }

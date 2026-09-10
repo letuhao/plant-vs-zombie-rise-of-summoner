@@ -17,6 +17,7 @@ public static class InjectorLoop
     static float _startDelay;
     static float _perf;
     static float _gateCounters;
+    static float _liveState;
     static bool _started;
 
     /// <summary>Reset timers (e.g. after host reload). Normally not needed.</summary>
@@ -29,6 +30,7 @@ public static class InjectorLoop
         _startDelay = 0;
         _perf = 0;
         _gateCounters = 0;
+        _liveState = 0;
         _started = false;
     }
 
@@ -143,6 +145,14 @@ public static class InjectorLoop
         {
             _cheatPush = 0;
             try { _ = client?.PushCheatSnapshotAsync(); } catch { }
+        }
+        // CG-A4b: Hot sheet live bag — same slow cadence as cheat mirror; Bound UniqueActors only.
+        // Path documented on ActorLiveStatePush (no prior dump ingest for GetShields-shaped layers).
+        _liveState += unscaledDeltaTime;
+        if (_liveState >= 3f)
+        {
+            _liveState = 0;
+            try { ActorLiveStatePush.FlushBound(client); } catch { }
         }
         if (client is { SignalROk: false })
         {

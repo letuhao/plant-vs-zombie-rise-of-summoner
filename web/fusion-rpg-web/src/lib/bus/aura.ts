@@ -72,8 +72,15 @@ export type ActorSheetChannelDto = {
   displayName: string;
   reading: string;
   composeKind: string;
+  /** D6: wire twin of Contracts double Value (overflow widen is a separate Core ticket). */
   value: number;
   contributions: ActorContributionDto[];
+  unitClass: string;
+  defaultValue: number;
+  /** Null when uncapped (e.g. status.resist.omni). */
+  cap: number | null;
+  /** D2 authoritative: active|default|capped|stub|no-producer|unregistered. */
+  renderState: string;
 };
 
 export type ActorElementTypingDto = {
@@ -96,6 +103,20 @@ export type ActorShieldSummaryDto = {
   elementId?: string | null;
   current?: number | null;
   max?: number | null;
+  stacks?: number | null;
+};
+
+/** Wire shape for one drain-order shield layer on ActorSheetDto (S1). */
+export type ActorShieldLayerDto = {
+  shieldId: string;
+  elementId?: string | null;
+  current: number;
+  max: number;
+  priority: number;
+  sourceId: string;
+  isInnate: boolean;
+  regenPerSecond?: number | null;
+  broken?: boolean;
 };
 
 export type ActorStandingDto = {
@@ -124,6 +145,7 @@ export type ActorSheetDto = {
   liveStatuses?: ActorStatusGlyphDto[];
   resourcePools?: ActorResourcePoolDto[];
   shieldSummary?: ActorShieldSummaryDto | null;
+  shieldLayers?: ActorShieldLayerDto[];
   derived: ActorSheetChannelDto[];
   primary: ActorContributionDto[];
 };

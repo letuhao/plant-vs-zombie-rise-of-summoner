@@ -17,7 +17,20 @@
         {
           "piece": "actor-identity",
           "instanceId": "condition:identity",
-          "bind": "vm.main.1"
+          "bind": "vm.main.1",
+          "slots": {
+            "phase": {
+              "piece": "phase-badge",
+              "instanceId": "condition:identity:phase",
+              "bind": "phaseBadge",
+              "notes": "Omit mount when fold leaves phaseBadge undefined"
+            },
+            "elements": {
+              "$bindArray": "elementBadges",
+              "piece": "element-badge",
+              "instanceIdTemplate": "condition:identity:element:{elementId}"
+            }
+          }
         },
         {
           "piece": "cond-hero",
@@ -33,6 +46,12 @@
               "$bindArray": "meters",
               "piece": "pool-meter",
               "instanceIdTemplate": "condition:resource:{poolId}"
+            },
+            "shield": {
+              "piece": "shield-status",
+              "instanceId": "condition:shield",
+              "bind": "shield",
+              "notes": "Omit mount when fold leaves shield undefined (Q3)"
             }
           }
         },

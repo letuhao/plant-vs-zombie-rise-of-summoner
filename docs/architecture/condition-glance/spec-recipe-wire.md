@@ -59,7 +59,7 @@ Expanding this list requires map/ideal review.
 
 | Layer | Duty |
 |---|---|
-| Host | SignalR / query invalidation of `["actorSheet", id]` ([sheet-hot-projection](spec-sheet-hot-projection.md)) |
+| Host | SignalR preferred `ActorLiveStateChanged` (**S3** ask-first) → `invalidateQueries(["actorSheet", id])` — refreshes Condition **and** Shield tab (layers on same sheet) |
 | Fold | Pure; bumps `revision` |
 | Pieces | Render payload only — **no** fetch, **no** SignalR |
 | Surface bus | Closed catalog above |

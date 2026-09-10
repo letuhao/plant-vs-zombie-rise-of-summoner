@@ -179,9 +179,9 @@ def build_species_anchor(
     anchor_by_lower: "Mapping[str, AnchorRow]",
 ) -> SpeciesAnchor:
     families = family_assignments.get(species.species_id) or []
-    if len(families) > 1:
-        raise ValueError(f"{species.species_id}: carries {len(families)} families "
-                         f"({families!r}) — spec §1 states no species carries two")
+    if isinstance(families, str):
+        families = [families]
+    families = sorted(set(str(family) for family in families))
     motif_row = motif_assignments.get(species.species_id) or {}
     return SpeciesAnchor(
         species=species,
@@ -217,7 +217,10 @@ def compute_scores(anchor: SpeciesAnchor, weights: RoleLeanWeights) -> "dict[str
     raw: "dict[str, int]" = {c: 0 for c in CATEGORIES}
 
     for trait in anchor.species.traits:
-        cat = _TRAIT_CATEGORY[trait]
+        # Live seed traits are descriptive signals, not a closed action vocabulary.
+        cat = _TRAIT_CATEGORY.get(trait)
+        if cat is None or trait not in weights.trait_category_milli:
+            continue
         raw[cat] += int(weights.trait_category_milli[trait][cat])
 
     primary = anchor.species.element_primary
@@ -311,7 +314,8 @@ def _signals_for(anchor: SpeciesAnchor) -> "tuple[str, ...]":
 def derive_all(
     anchors: "list[SpeciesAnchor]", weights: RoleLeanWeights,
 ) -> "tuple[list[RoleLeanEntry], ResidueReport]":
-    """Runs step 4 for all 84 species regardless of family (F12), then applies step 3's corrected
+    """Runs step 4 for every live seed-folder species regardless of family (F12), then applies the
+    corrected
     rule and step 5's residue measurement. `anchors` must already be in catalog order — this
     function does not re-sort, so a caller that shuffles it is exactly what the tie-determinism
     test needs to exercise."""

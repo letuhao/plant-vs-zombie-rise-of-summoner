@@ -18,6 +18,17 @@ Full stack tab + shared runtime projection. Cheap empty wells / FE fixtures are 
 
 ---
 
+## Owner decisions (locked 2026-09-10 strengthen)
+
+| Id | Decision |
+|---|---|
+| **S1** | Layers on **`sheet.shieldLayers`** beside `shieldSummary` — reject player `GET …/shields` as tab SSOT |
+| **S2** | Summary `elementId` = front drain-order layer; optional `stacks` = layer count |
+| **S3** | Server `ActorLiveState` bag from Injector; `ProjectSheet` reads — ask before new HTTP channel |
+| **D8** | Apply-outcome toast / full cascade inspect = **explicit P3 defer**; segment regen in v1 only if runtime exposes |
+
+---
+
 ## What this program is
 
 Ship ActorSheet **Shield** as GUI Lego: ordered stack from `ShieldRuntime`, segmented drain-order bar,
@@ -30,8 +41,8 @@ condition-glance’s `shieldSummary`.
 
 | Concern | Owner | Must not |
 |---|---|---|
-| Hot `/sheet` `shieldSummary` + `liveStatuses` | **condition-glance** `sheet-hot-projection` | Second ProjectSheet path |
-| Ordered `shieldLayers` / `GET …/shields` | **shield-sheet** `shield-stack-projection` | HUD AggregateByElement as tab SSOT |
+| Hot `/sheet` `shieldSummary` + `liveStatuses` + live bag | **condition-glance** `sheet-hot-projection` | Second ProjectSheet path |
+| Ordered **`sheet.shieldLayers`** (same compose) | **shield-sheet** `shield-stack-projection` | HUD AggregateByElement; player `/shields` as SSOT |
 | Glance card `shield-status` | gui-lego piece; Condition mounts | Mount when null/0 |
 | Tab segmented bar | `shield-stack-bar` | Three fake empty wells as product |
 | Omni shield family rows | `shield-omni-rows` | Duplicate Derived god console |
@@ -82,11 +93,28 @@ Wave 3 — surface
 
 ---
 
+## Coverage-gap register (strengthen 2026-09-10)
+
+| Id | Gap | Disposition |
+|---|---|---|
+| CG-S1 | Transport A vs B | **Closed** — **S1** `sheet.shieldLayers` |
+| CG-S2 | Summary elementId / stacks | **Closed** — **S2** |
+| CG-S3 | Hot live bag | **Closed in spec** — **S3** (shared with condition-glance) |
+| CG-S4 | Three Empty layer wells as product | **Closed in spec** — ban; pending vs Hot-empty |
+| CG-S5 | Omni row Fields / allow-list | **Closed** — `shield-omni-rows` |
+| CG-S6 | Recipe / draft debt | **Closed as gate** — recipe-wire draft-exists checkboxes |
+| CG-S7 | Regen on segment | **Deferred** — only if runtime exposes (**D8**) |
+| CG-S8 | Cascade / apply-outcome inspect | **Deferred P3** — **D8** |
+| CG-S9 | SignalR event | **Closed in spec** — preferred `ActorLiveStateChanged` |
+
+---
+
 ## Explicitly out
 
 | Out | Why |
 |---|---|
-| Absorb cascade trainer / matrix editor | Later |
+| Absorb cascade trainer / matrix editor | Later (**D8** / P3 for inspect) |
+| Player `GET …/shields` as tab SSOT | Rejected (**S1**) |
 | Derived cook defects | `derived-cook` |
 | Condition layout / standing / status strip | `condition-glance` |
 | Lawn mute F9 (HUD-only) | HUD program |

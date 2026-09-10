@@ -70,11 +70,12 @@ describe("ActorPanel (catalog-era)", () => {
     expect(screen.queryByTestId("actor-sheet-tab-overview")).not.toBeInTheDocument();
   });
 
-  it("shows actor summarize with name, level, and role on the left rail", () => {
+  it("shows actor summarize with name, level, and role-badge on the left rail", () => {
     renderWithProviders(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "false");
     expect(screen.getByTestId("actor-summarize-name")).toHaveTextContent("Emberling");
-    expect(screen.getByTestId("actor-summarize-meta")).toHaveTextContent("Lv 14 · Plant");
+    expect(screen.getByTestId("actor-summarize-level")).toHaveTextContent("Lv 14");
+    expect(screen.getByTestId("role-badge")).toHaveTextContent("Plant");
     expect(screen.getByTestId("actor-panel-header")).toHaveAttribute("data-header-mode", "none");
     expect(screen.getByTestId("actor-sheet-close")).toBeInTheDocument();
   });
@@ -136,7 +137,7 @@ describe("ActorPanel (catalog-era)", () => {
       />
     );
     expect(screen.getByTestId("actor-summarize-name")).toHaveTextContent("Crazy Dave");
-    expect(screen.getByTestId("actor-summarize-meta")).toHaveTextContent(/Commander/);
+    expect(screen.getByTestId("role-badge")).toHaveTextContent(/Commander/);
   });
 
   it("defaults to Condition with honest Standing / xpToNext pending (never fabricated)", () => {

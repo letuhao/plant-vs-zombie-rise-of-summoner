@@ -12,10 +12,13 @@ real input.
 from __future__ import annotations
 
 import json
+import tempfile
+from pathlib import Path
 
 import pytest
 
 from seedsmith.adapters.demons.anchor.permute import _seed_int, order_for
+from seedsmith.adapters.actions import generate_validate_heal as entrypoint
 from seedsmith.adapters.actions.validate_heal.derive import (
     VoteSample,
     canonical_set_key,
@@ -714,3 +717,48 @@ class TestModuleBoundary:
                  for r in rows}
         report = validate_round(rows, contexts={BRIEF_ID: ctx}, candidate_kwargs=kwargs)
         assert {v.outcome for v in report.verdicts} == {"accepted"}
+
+
+class TestEntrypointContracts:
+    def test_dry_run_validates_all_candidate_partitions_and_assembles_only_after_validation(self):
+        brief_id = "brief.general.general.001"
+        brief = {
+            "briefId": brief_id, "scope": "general", "scopeKey": None,
+            "anchor": {"motifs": [], "antiMotifs": []},
+            "slot": {"category": "attack", "targetMode": "single", "areaShape": None,
+                     "relation": "enemy", "rungBand": [1, 4],
+                     "structureAxes": ["scopeSplit"]},
+            "pool": {"allowedAtomFamilies": ["g-on-hit"], "forbiddenAtomFamilies": []},
+            "pairing": {"role": "none", "pairedPayoffFamily": None},
+        }
+        accepted = {
+            "candidateId": "candidate.general.001", "briefId": brief_id,
+            "pipelineId": "A-P1", "scope": "general", "outcome": "accepted",
+            "draft": {
+                "candidateId": "candidate.general.001", "briefId": brief_id, "scope": "general",
+                "name": "Test Strike", "flavor": "a clean strike", "atomFamilies": ["g-on-hit"],
+                "rationale": "a role-based strike", "_provenance": {},
+            },
+        }
+        unresolved = {
+            "candidateId": None, "briefId": "brief.general.general.002",
+            "pipelineId": "A-P1", "scope": "general", "outcome": "unresolved", "draft": None,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            briefs = root / "briefs.json"
+            general = root / "general.json"
+            family = root / "family.json"
+            briefs.write_text(json.dumps({"kind": "action-brief", "entries": [brief]}), encoding="utf-8")
+            general.write_text(json.dumps({"kind": "action-candidate", "entries": [accepted]}), encoding="utf-8")
+            family.write_text(json.dumps({"kind": "action-candidate", "entries": [unresolved]}), encoding="utf-8")
+
+            summary = entrypoint.regenerate(
+                candidates_path=[general, family], briefs_path=briefs, dry_run=True, write=False,
+            )
+
+        assert summary["candidateCount"] == 2
+        assert summary["validatedAcceptedCount"] == 1
+        assert summary["acceptedCount"] == 1
+        assert summary["unresolvedCount"] == 1
+        assert summary["escalatedCount"] == 0

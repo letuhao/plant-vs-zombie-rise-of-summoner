@@ -26,8 +26,12 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 **Also true:**
 
-- In this build, commander-scope spend is live and thin; other scopes and a polished sheet are still ahead.
-- Allocation can stack across commander, species, variant, and the unique demon — who you are is the sum.
+- Commander-scope spend is live (Mode C). **UniqueDemon** (UniqueActor sheet) and **species-build**
+  (empire generals) player surfaces are specified under
+  [aptitude-sheet-map.md](../../architecture/aptitude-sheet-map.md) — not “still ahead” as a product
+  excuse.
+- Allocation stacks across commander, species, aspect (blocked), and the unique demon — who you are
+  is the sum.
 
 ---
 

@@ -28,7 +28,8 @@ public sealed record AptitudeSurfaceEntryDto(
     int Ordinal,
     string DisplayName,
     string Role,
-    string Reading);
+    string Reading,
+    string? Icon);
 
 public sealed record DerivedStatSurfaceEntryDto(
     string Family,
@@ -134,7 +135,8 @@ public static class ActorSurfaceCatalogHub
                 Ordinal: a.Ordinal,
                 DisplayName: a.DisplayName,
                 Role: a.Role,
-                Reading: a.Reading)).ToList(),
+                Reading: a.Reading,
+                Icon: a.Icon)).ToList(),
             Families: derived.Entries.Select(f => new DerivedStatSurfaceEntryDto(
                 Family: f.Family,
                 Expand: DerivedStatSurfaceCatalogLoader.ExpandWire(f.Expand),

@@ -129,101 +129,113 @@ public sealed partial class RpgStore
         if (string.IsNullOrWhiteSpace(correlationId))
             throw new ArgumentException("correlationId must not be empty", nameof(correlationId));
 
-        var corr = correlationId.Trim();
-        var scopeKey = Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId);
-        var tuning = SpeciesBuildTuningHub.Tuning;
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            var now = utcNow ?? DateTimeOffset.UtcNow;
-            var nowText = now.ToString("o");
-
-            var (everTouched, storedCount, lastUtc) = ReadSpeciesRespecRowUnlocked(db, playerId, speciesId);
-            var effectiveCount = DecayedRespecCount(storedCount, DateTimeOffset.Parse(lastUtc), now, tuning.RespecDecayDays);
-
-            var isRevert = newOverride.TotalForScope(AllocationScope.DemonType) == 0;
-            // "First override" means this species has NEVER been touched by this economy before --
-            // NOT merely "the override happens to read empty right now." Reading the latter off
-            // LoadAllocation would let revert-then-reoverride bypass every future price forever (revert
-            // clears the override but must never look like "never overridden").
-            var isFirstOverride = !everTouched && !isRevert;
-            var free = isRevert || isFirstOverride;
-
-            if (free)
-            {
-                if (isFirstOverride)
-                {
-                    // Mark this species touched (count 0) so a LATER revert-then-reoverride is priced,
-                    // not free again -- the row's mere existence is the "ever overridden" memory, kept
-                    // even though its count is still zero.
-                    using var mark = db.CreateCommand();
-                    mark.CommandText = """
-                        INSERT INTO rpg_species_respec(player_id, species_id, count, last_respec_utc)
-                        VALUES ($p, $s, 0, $t);
-                        """;
-                    mark.Parameters.AddWithValue("$p", playerId);
-                    mark.Parameters.AddWithValue("$s", speciesId);
-                    mark.Parameters.AddWithValue("$t", nowText);
-                    mark.ExecuteNonQuery();
-                }
-                // No spend, no counter movement -- a free action leaves the churn clock untouched.
-                SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
-                tx.Commit();
-                return new SpeciesRespecOutcome(true, "", false, 0, effectiveCount, ReadSoulBalanceUnlocked(db, playerId));
-            }
-
-            // Replay check FIRST, before pricing off the current (possibly already-advanced) count --
-            // unlike TrySpendSouls's own dedupe (a fixed caller-supplied amount), this price is a
-            // function of the counter the very same call increments, so a stale "recompute and
-            // compare" would reject a legitimate replay the moment the count it was originally priced
-            // at has moved. Any hit under (reason, dedupe_key) is treated as the full original
-            // outcome -- a correlation id is the caller's promise that repeats mean "the same request."
-            using (var check = db.CreateCommand())
-            {
-                check.CommandText = "SELECT delta FROM rpg_soul_ledger WHERE player_id=$p AND reason=$r AND dedupe_key=$dk;";
-                check.Parameters.AddWithValue("$p", playerId);
-                check.Parameters.AddWithValue("$r", SoulEarnPolicy.Reasons.Respec);
-                check.Parameters.AddWithValue("$dk", corr);
-                if (check.ExecuteScalar() is long storedDelta)
-                {
-                    tx.Commit();
-                    return new SpeciesRespecOutcome(true, "replay", true, -storedDelta, effectiveCount, ReadSoulBalanceUnlocked(db, playerId));
-                }
-            }
-
-            var price = RespecPolicy.PriceOf(tuning, effectiveCount);
-            var balance = ReadSoulBalanceUnlocked(db, playerId);
-            if (balance.Balance < price.Amount)
-            {
-                tx.Rollback();
-                return new SpeciesRespecOutcome(false, "souls.insufficient", true, price.Amount, effectiveCount, balance);
-            }
-
-            AppendSoulLedgerUnlocked(db, playerId, 0, -price.Amount, SoulEarnPolicy.Reasons.Respec,
-                "spend", corr, corr, nowText);
-
-            var newCount = effectiveCount + 1;
-            using (var cmd = db.CreateCommand())
-            {
-                cmd.CommandText = """
-                    INSERT INTO rpg_species_respec(player_id, species_id, count, last_respec_utc)
-                    VALUES ($p, $s, $c, $t)
-                    ON CONFLICT(player_id, species_id)
-                    DO UPDATE SET count = $c, last_respec_utc = $t;
-                    """;
-                cmd.Parameters.AddWithValue("$p", playerId);
-                cmd.Parameters.AddWithValue("$s", speciesId);
-                cmd.Parameters.AddWithValue("$c", newCount);
-                cmd.Parameters.AddWithValue("$t", nowText);
-                cmd.ExecuteNonQuery();
-            }
-
-            SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
-
-            tx.Commit();
-            return new SpeciesRespecOutcome(true, "", true, price.Amount, newCount, ReadSoulBalanceUnlocked(db, playerId));
+            var outcome = TryRespecSpeciesUnlocked(db, tx, playerId, speciesId, newOverride, correlationId, utcNow);
+            if (outcome.Ok) tx.Commit();
+            else tx.Rollback();
+            return outcome;
         }
+    }
+
+    /// <summary>Same body as <see cref="TryRespecSpecies"/> on the caller's connection/transaction —
+    /// aptitude-sheet AS-3.2 Activate needs active + priced respec in ONE txn (S3).</summary>
+    internal SpeciesRespecOutcome TryRespecSpeciesUnlocked(
+        SqliteConnection db,
+        SqliteTransaction tx,
+        long playerId,
+        string speciesId,
+        AptitudeAllocation newOverride,
+        string correlationId,
+        DateTimeOffset? utcNow = null)
+    {
+        var corr = correlationId.Trim();
+        var scopeKey = Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId);
+        var tuning = SpeciesBuildTuningHub.Tuning;
+        var now = utcNow ?? DateTimeOffset.UtcNow;
+        var nowText = now.ToString("o");
+
+        var (everTouched, storedCount, lastUtc) = ReadSpeciesRespecRowUnlocked(db, playerId, speciesId);
+        var effectiveCount = DecayedRespecCount(storedCount, DateTimeOffset.Parse(lastUtc), now, tuning.RespecDecayDays);
+
+        var isRevert = newOverride.TotalForScope(AllocationScope.DemonType) == 0;
+        // "First override" means this species has NEVER been touched by this economy before --
+        // NOT merely "the override happens to read empty right now." Reading the latter off
+        // LoadAllocation would let revert-then-reoverride bypass every future price forever (revert
+        // clears the override but must never look like "never overridden").
+        var isFirstOverride = !everTouched && !isRevert;
+        var free = isRevert || isFirstOverride;
+
+        if (free)
+        {
+            if (isFirstOverride)
+            {
+                // Mark this species touched (count 0) so a LATER revert-then-reoverride is priced,
+                // not free again -- the row's mere existence is the "ever overridden" memory, kept
+                // even though its count is still zero.
+                using var mark = db.CreateCommand();
+                mark.Transaction = tx;
+                mark.CommandText = """
+                    INSERT INTO rpg_species_respec(player_id, species_id, count, last_respec_utc)
+                    VALUES ($p, $s, 0, $t);
+                    """;
+                mark.Parameters.AddWithValue("$p", playerId);
+                mark.Parameters.AddWithValue("$s", speciesId);
+                mark.Parameters.AddWithValue("$t", nowText);
+                mark.ExecuteNonQuery();
+            }
+            // No spend, no counter movement -- a free action leaves the churn clock untouched.
+            SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
+            return new SpeciesRespecOutcome(true, "", false, 0, effectiveCount, ReadSoulBalanceUnlocked(db, playerId));
+        }
+
+        // Replay check FIRST, before pricing off the current (possibly already-advanced) count --
+        // unlike TrySpendSouls's own dedupe (a fixed caller-supplied amount), this price is a
+        // function of the counter the very same call increments, so a stale "recompute and
+        // compare" would reject a legitimate replay the moment the count it was originally priced
+        // at has moved. Any hit under (reason, dedupe_key) is treated as the full original
+        // outcome -- a correlation id is the caller's promise that repeats mean "the same request."
+        using (var check = db.CreateCommand())
+        {
+            check.Transaction = tx;
+            check.CommandText = "SELECT delta FROM rpg_soul_ledger WHERE player_id=$p AND reason=$r AND dedupe_key=$dk;";
+            check.Parameters.AddWithValue("$p", playerId);
+            check.Parameters.AddWithValue("$r", SoulEarnPolicy.Reasons.Respec);
+            check.Parameters.AddWithValue("$dk", corr);
+            if (check.ExecuteScalar() is long storedDelta)
+            {
+                return new SpeciesRespecOutcome(true, "replay", true, -storedDelta, effectiveCount, ReadSoulBalanceUnlocked(db, playerId));
+            }
+        }
+
+        var price = RespecPolicy.PriceOf(tuning, effectiveCount);
+        var balance = ReadSoulBalanceUnlocked(db, playerId);
+        if (balance.Balance < price.Amount)
+            return new SpeciesRespecOutcome(false, "souls.insufficient", true, price.Amount, effectiveCount, balance);
+
+        AppendSoulLedgerUnlocked(db, playerId, 0, -price.Amount, SoulEarnPolicy.Reasons.Respec,
+            "spend", corr, corr, nowText);
+
+        var newCount = effectiveCount + 1;
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.Transaction = tx;
+            cmd.CommandText = """
+                INSERT INTO rpg_species_respec(player_id, species_id, count, last_respec_utc)
+                VALUES ($p, $s, $c, $t)
+                ON CONFLICT(player_id, species_id)
+                DO UPDATE SET count = $c, last_respec_utc = $t;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$s", speciesId);
+            cmd.Parameters.AddWithValue("$c", newCount);
+            cmd.Parameters.AddWithValue("$t", nowText);
+            cmd.ExecuteNonQuery();
+        }
+
+        SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
+        return new SpeciesRespecOutcome(true, "", true, price.Amount, newCount, ReadSoulBalanceUnlocked(db, playerId));
     }
 }

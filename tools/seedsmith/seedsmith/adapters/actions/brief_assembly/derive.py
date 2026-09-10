@@ -110,7 +110,8 @@ def assemble_brief(plan_entry: Mapping[str, object],
     `plan_entry` (`id`, `briefId`, `scope`, `scopeKey`, `anchor`, `slot`, `pool`, `pairing`,
     `avoidNeighbours`, `_provenance`) is carried through untouched; `familyActions` is the only
     key this module adds. A family-less species (`anchor.family` is `None` or the key is absent)
-    gets the key present and EMPTY, never omitted (spec §3.3 — 31 of 84, the common case)."""
+    gets the key present and EMPTY, never omitted (spec §3.3 — the common case for species without
+    family membership)."""
     if plan_entry.get("scope") != "species":
         raise ValueError(
             f"assemble_brief: expected a species-scope (signature) brief, got scope="

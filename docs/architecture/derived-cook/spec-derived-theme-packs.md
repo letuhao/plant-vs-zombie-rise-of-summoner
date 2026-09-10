@@ -8,29 +8,43 @@
 
 ## Objective
 
-Author and register theme packs for **action-category** and **cook-tab** kinds so variant/primary
-rails get real paint (ideal taxonomy). Stop fold hardcoding statusId→L2b and glyph maps — use
-status-catalog `category` / `hudToken` / `icon`.
+Author and register theme packs for **action-category** and **cook-tab** kinds. Stop fold hardcoding
+statusId→L2b and glyph maps — use status-catalog `category` / `hudToken` / `icon`.
 
-## Deliverables
+## Pack paths (deliverables)
 
-| Pack kind | Examples |
+| Kind | Pack files (author under packs/) | FE registry |
+|---|---|---|
+| `action-category` | `action-category-attack.json` … movement, status, support, defense | `themeRegistry.ts` |
+| `cook-tab` | `cook-tab-elements.json` … status, resources, other | same |
+| Contribution bucket (optional) | `bucket-aptitude.json` … | optional Wave 2+ |
+
+Schema: same as existing packs — `css` + `paint` hex + optional `vfx`.
+
+## Catalog fields replacing fold maps
+
+| Need | Source |
 |---|---|
-| `action-category` | attack, defense, support, movement, status |
-| `cook-tab` | elements, status, resources, other |
-| Contribution bucket (optional) | aptitude, equip, tree, … → pack ids |
+| Status L2b category | status-catalog `category` / cook statusCategoryVariants |
+| Glyph | `hudToken` / `icon` — never fold RGB hash |
 
 ## Success criteria
 
-- [ ] Pack JSON + FE registry entries exist.
+- [ ] Pack JSON + FE registry entries exist for action-category + cook-tab.
 - [ ] Fold `variantTheme` returns themeRef for OTHER/action chips.
-- [ ] Status glyph/category from catalog — fold maps deleted.
+- [ ] Fold `statusIdToL2b` / `statusGlyph` maps deleted.
 
 ## Commands
 
 ```powershell
 Test-Path docs/design/gui-lego/themes/packs
 rg -n "statusIdToL2b|statusGlyph" web/fusion-rpg-web/src/features/gui-lego
+```
+
+## Sample themeRef
+
+```json
+{ "kind": "action-category", "id": "attack" }
 ```
 
 ## Boundaries

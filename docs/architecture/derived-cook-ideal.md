@@ -81,9 +81,18 @@ audit D1/D2 (separate Core fix unless owner pulls in). Shield **tab** (`shield-s
 |---|---|
 | G1 | Registry-truth six-state machine |
 | G2 | Status L2b category occupancy on cook |
-| G3 | Optional StatRow spark/pips (design §5.2b) — after IA + states |
+| G3 | Optional StatRow spark/pips (design §5.2b) — **D7 deferred** |
 | G5 | Single resolve path for element paint |
+| G6 | Volume fixture ~ Guard 7 (current §1 scale + 500 stress) — `derived-volume-guard` |
 | G8–G10 | Theme packs + catalog copy + BE Shared variant |
+
+**Inventory note:** W2/W3/W7/W8 and D13/D14 were audit-internal ids; not separate modules. W2 UniqueDemon →
+`derived-sheet-projection`; W3 unattributed → `derived-player-copy`; W7 themeRegistry → **D5** /
+`derived-fold-harden`; W8 Pending fields → fold + recipe-wire.
+
+### Owner locks (strengthen 2026-09-10)
+
+**D1–D7** + shared **S1–S3** — see [derived-cook-map.md](derived-cook-map.md). No open A/B Options.
 
 ---
 

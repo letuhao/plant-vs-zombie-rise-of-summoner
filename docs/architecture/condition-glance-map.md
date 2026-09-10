@@ -6,7 +6,7 @@
 **Procedure:** [idea-ui-phase.md](idea-ui-phase.md)  
 **Parent kit:** [gui-lego-map.md](gui-lego-map.md) · [gui-lego-authoring.md](gui-lego-authoring.md)  
 **Existing fold:** [gui-lego/spec-condition-surface-vm.md](gui-lego/spec-condition-surface-vm.md) — **amend**, do not fork  
-**Queue:** [gui-lego/menu-refactor-queue.md](gui-lego/menu-refactor-queue.md) P1 Partial → Done only after Waves land  
+**Queue:** [gui-lego/menu-refactor-queue.md](gui-lego/menu-refactor-queue.md) P1 **Done** (Waves C–D landed)  
 **Plans:** `tasks/condition-glance-plan.md` · `tasks/condition-glance-todo.md` (after specs; `/plan`)  
 **Sibling programs (owner 2026-09-10 — three programs, three plans):**  
 [derived-cook-map.md](derived-cook-map.md) · [shield-sheet-map.md](shield-sheet-map.md)  
@@ -17,8 +17,9 @@ chart/realtime-capable pieces). Cheap FE-only / mute-chip / stub-title passes ar
 acceptance**. Prior Condition sessions that shipped layout-without-modules are treated as defects,
 not baselines to polish.
 
-**Hot shield:** this program owns `sheet-hot-projection` (`shieldSummary` + `liveStatuses`).  
-**Shield tab layers** are owned by `shield-sheet` on the **same** Hot seam — do not fork ProjectSheet.
+**Hot shield:** this program owns `sheet-hot-projection` (`shieldSummary` + `liveStatuses` + live bag).  
+**Shield tab layers** (`sheet.shieldLayers`, **S1**) are filled in the **same** `ProjectSheet` call by sibling
+`shield-stack-projection` — do not fork compose. Wave 1 Hot fixture proof is shared with `shield-sheet`.
 
 **Ideal supersession:** Where [condition-glance-ideal.md](condition-glance-ideal.md) catalog or
 composition still mentioned `phase-empty` for zero shield/status, “recharts only if kit fails,” or
@@ -41,6 +42,9 @@ under `actor-identity`** (keep the block) — not a separate `species-empty` mod
 | **Q7** | **Amend** `spec-condition-surface-vm` / recipe / bindSurface — implement architecture correctly; no parallel god-TSX or second VM |
 | **Q8** | Write **all** module specs now; implement later in Wave build order |
 | **Q9** | **Three programs / three plans:** `condition-glance` · `derived-cook` (full harden) · `shield-sheet` (tab in; shared Hot) |
+| **S1** | Shield layers ride **`sheet.shieldLayers`** beside `shieldSummary` (reject player `GET …/shields` as tab SSOT) |
+| **S2** | Summary `elementId` = **front drain-order** layer (else null); optional `stacks` = layer count |
+| **S3** | Hot path: Server **`ActorLiveState` bag** from Injector (prefer extend match/dump ingest; **ask before new HTTP**). `ProjectSheet` reads bag — never FE fixtures |
 
 ### Overturned prior ideal defaults
 
@@ -110,7 +114,7 @@ Glance still mounts `shield-status` from summary. **`role-badge` is in** — see
 ```text
 Wave 1 — SSOT + seams + BE + copy
   element-paint-ssot → theme-bind
-  sheet-hot-projection          (parallel with theme-bind)
+  sheet-hot-projection + sibling shield-stack-projection  (same Hot fixture)
   fiction-copy                  (parallel)
 
 Wave 2 — shared pieces
@@ -141,6 +145,19 @@ Wave 4 — surface
 
 ---
 
+## Coverage-gap register (strengthen 2026-09-10)
+
+| Id | Gap | Disposition |
+|---|---|---|
+| CG-C1 | Hot layers vs glance summary parity | **Closed** — **S1** same ProjectSheet; hot-projection + stack-projection |
+| CG-C2 | Summary `elementId` / stacks policy | **Closed** — **S2** |
+| CG-C3 | Injector→Server Hot path unnamed | **Closed in spec** as **S3** live bag (ask before new HTTP) |
+| CG-C4 | Recipe missing shield slot | **Closed** — `condition-console.json` + recipe-wire |
+| CG-C5 | SignalR event name | **Closed in spec** — preferred `ActorLiveStateChanged` (implement ask-first) |
+| CG-C6 | Shield tab Empty wells | **Deferred to** `shield-sheet` (not Condition wiring) |
+
+---
+
 ## Explicitly out
 
 | Out | Why |
@@ -152,5 +169,5 @@ Wave 4 — surface
 | Hand-rolled third gauge grammar when recharts fits | Q4 / buy-before-build |
 | Piece-level fetch / SignalR inside a piece | GUI Lego |
 | Implementing Derived cook inside this plan | Sibling `derived-cook` (own plan) |
-| Implementing Shield **tab** stack UI here | Sibling `shield-sheet` (own plan); shared Hot summary only |
+| Implementing Shield **tab** stack UI here | Sibling `shield-sheet` (own plan); shared Hot summary + **S1** layers |
 | `SPEC.md` / bare `tasks/plan.md` | Parallel programs |

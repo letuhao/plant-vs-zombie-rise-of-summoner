@@ -1,23 +1,22 @@
-import type { CSSProperties } from "react";
-import type { PieceFactory } from "@/features/gui-lego/types";
+import { lazy, Suspense, type CSSProperties } from "react";
+import type { PieceFactory, PiecePayload } from "@/features/gui-lego/types";
+import { CatalogIcon } from "@/ui/actor/CatalogIcon";
+import { StatusGlyph } from "@/ui/actor/StatusGlyph";
 import { TypeIcon } from "@/ui";
+import { themeStyle, vfxClass } from "@/ui/gui-lego/RecipeMount";
+import type { StatusCatalogRow } from "@/lib/bus/actorSurface";
 import "../conditionConsole.css";
+
+const StandingRadarChart = lazy(() => import("./StandingRadarChart"));
 
 type Axis = {
   id: string;
   label: string;
   value: number;
+  valueText: string;
   fillPct: number;
   paint: string;
 };
-
-const RADAR_POINTS = [
-  [75, 18],
-  [132, 62],
-  [110, 128],
-  [40, 128],
-  [18, 62]
-] as const;
 
 function axisList(payload: Record<string, unknown>): Axis[] {
   const raw = payload.axes;
@@ -30,49 +29,58 @@ function axisList(payload: Record<string, unknown>): Axis[] {
       id: String(r.id ?? ""),
       label: String(r.label ?? ""),
       value,
+      valueText: String(r.valueText ?? value),
       fillPct,
       paint: String(r.paint ?? "#8a8070")
     };
   });
 }
 
-function radarPolygon(axes: Axis[]) {
-  return axes
-    .map((axis, index) => {
-      const [x, y] = RADAR_POINTS[index] ?? [75, 75];
-      const pct = Math.max(0, Math.min(100, axis.fillPct)) / 100;
-      const dx = x - 75;
-      const dy = y - 75;
-      return `${75 + dx * pct},${75 + dy * pct}`;
-    })
-    .join(" ");
+function revisionOf(payload: PiecePayload): number {
+  return typeof payload.revision === "number" ? payload.revision : 0;
+}
+
+function accentFrom(payload: PiecePayload, fallback: string): string {
+  return payload.themeResolved?.paint?.accent ?? fallback;
 }
 
 export const condHeroFactory: PieceFactory = ({ slots }) => (
   <section className="cond-hero" data-testid="condition-hero" data-grid-area="hero">
-    {slots.radial}
+    <div className="hero-radial-stack">
+      {slots.radial}
+      {slots.shield}
+    </div>
     <div className="pool-col">{slots.meters}</div>
   </section>
 );
 
 export const poolRadialFactory: PieceFactory = ({ payload, bus }) => {
   const hpPending = payload.hpPct == null;
-  const shieldKnown = typeof payload.shieldPct === "number";
+  const shieldKnown = typeof payload.shieldPct === "number" && Number(payload.shieldPct) > 0;
   const hpPct = typeof payload.hpPct === "number" ? payload.hpPct : 0;
   const shieldPct = typeof payload.shieldPct === "number" ? payload.shieldPct : 0;
+  const revision = revisionOf(payload);
+  const hpColor = accentFrom(payload, "#e74c3c");
   const shieldColor =
-    payload.shieldColor != null ? String(payload.shieldColor) : "var(--el-fire, #e7733f)";
+    payload.shieldThemeResolved?.paint?.accent ??
+    (payload.shieldColor != null ? String(payload.shieldColor) : "#e7733f");
+  const vfx = vfxClass(payload);
+  const style = themeStyle(payload);
+
   return (
     <button
       type="button"
-      className={`radial-wrap${hpPending ? " is-pending" : ""}`}
+      className={["radial-wrap", hpPending ? "is-pending" : null, vfx].filter(Boolean).join(" ")}
       data-testid="condition-hp-radial"
       data-pending={hpPending || undefined}
+      data-revision={revision}
+      style={style}
       onClick={() => bus.emit("condition.pool.select", { poolId: "hp" })}
       title={String(payload.valueText ?? "HP")}
     >
       {shieldKnown ? (
         <div
+          key={`shield-${revision}-${shieldPct}`}
           className="radial radial-shield"
           style={
             {
@@ -85,13 +93,14 @@ export const poolRadialFactory: PieceFactory = ({ payload, bus }) => {
         />
       ) : null}
       <div
+        key={`hp-${revision}-${hpPct}`}
         className="radial radial-hp"
         style={
           {
             width: 72,
             height: 72,
             ["--p" as string]: hpPct,
-            ["--c" as string]: "var(--bad, #d98787)"
+            ["--c" as string]: hpColor
           } as CSSProperties
         }
       />
@@ -106,21 +115,48 @@ export const poolMeterFactory: PieceFactory = ({ payload, bus }) => {
   const fillPct = typeof payload.fillPct === "number" ? payload.fillPct : null;
   const selected = Boolean(payload.selected);
   const poolId = String(payload.poolId ?? "");
+  const revision = revisionOf(payload);
+  const icon = payload.icon != null ? String(payload.icon) : null;
+  const accent = accentFrom(payload, "var(--lawn-hot, var(--sun))");
+  const vfx = vfxClass(payload);
+  const style = themeStyle(payload);
+
   return (
     <button
       type="button"
-      className={`meter${selected ? " is-on" : ""}${fillPending ? " is-pending" : ""}`}
+      className={["meter", selected ? "is-on" : null, fillPending ? "is-pending" : null, vfx]
+        .filter(Boolean)
+        .join(" ")}
       data-pool={poolId}
       data-testid={`condition-resource-${poolId}`}
       data-pending={fillPending || undefined}
+      data-revision={revision}
+      style={style}
       onClick={() => bus.emit("condition.pool.select", { poolId })}
     >
       <span className="cap">
-        <span>{label}</span>
+        <span className="cap-label">
+          {icon ? (
+            <CatalogIcon
+              icon={icon}
+              fallbackToken={label.slice(0, 1)}
+              color={accent}
+              className="meter-icon"
+              testId={`condition-resource-icon-${poolId}`}
+            />
+          ) : null}
+          <span>{label}</span>
+        </span>
         <b>{String(payload.valueText ?? "Current / max pending")}</b>
       </span>
       <span className="track">
-        {fillPct != null ? <span className="fill" style={{ width: `${fillPct}%` }} /> : null}
+        {fillPct != null ? (
+          <span
+            key={`fill-${revision}`}
+            className="fill"
+            style={{ width: `${fillPct}%`, background: accent }}
+          />
+        ) : null}
       </span>
     </button>
   );
@@ -129,12 +165,21 @@ export const poolMeterFactory: PieceFactory = ({ payload, bus }) => {
 export const progressionGaugeFactory: PieceFactory = ({ payload }) => {
   const fillPending = payload.fillPct == null;
   const fillPct = typeof payload.fillPct === "number" ? payload.fillPct : null;
+  const revision = revisionOf(payload);
+  const accent = accentFrom(payload, "var(--sun)");
+  const vfx = vfxClass(payload);
+  const style = themeStyle(payload);
+
   return (
     <section
-      className={`progression-gauge${fillPending ? " is-pending" : ""}`}
+      className={["progression-gauge", fillPending ? "is-pending" : null, vfx]
+        .filter(Boolean)
+        .join(" ")}
       data-testid="condition-progression"
       data-grid-area="prog"
       data-pending={fillPending || undefined}
+      data-revision={revision}
+      style={style}
     >
       <div className="hd">
         <span className="eyebrow">Current progression</span>
@@ -144,7 +189,14 @@ export const progressionGaugeFactory: PieceFactory = ({ payload }) => {
         <b data-testid="condition-xp-count">{String(payload.valueText ?? "—")}</b>
       </div>
       <div className="track" data-testid="condition-xp-track">
-        {fillPct != null ? <div className="fill" style={{ width: `${fillPct}%` }} /> : null}
+        {fillPct != null ? (
+          <div
+            key={`xp-${revision}`}
+            className="fill"
+            data-testid="condition-xp-fill"
+            style={{ width: `${Math.max(0, Math.min(100, fillPct))}%`, background: accent }}
+          />
+        ) : null}
       </div>
       {payload.message ? (
         <p className="pending-copy" data-testid="condition-xp-pending">
@@ -163,9 +215,14 @@ export const standRowFactory: PieceFactory = ({ slots }) => (
 );
 
 export const standingRadarFactory: PieceFactory = ({ payload }) => {
+  const revision = revisionOf(payload);
   if (payload.phase === "pending") {
     return (
-      <div className="radar-box" data-testid="condition-standing-radar">
+      <div
+        className="radar-box"
+        data-testid="condition-standing-radar"
+        data-revision={revision}
+      >
         <p className="pending-copy" data-testid="actor-standing-pending">
           {String(payload.message ?? "Standing vector isn't ready yet.")}
         </p>
@@ -174,83 +231,97 @@ export const standingRadarFactory: PieceFactory = ({ payload }) => {
   }
   const axes = axisList(payload as Record<string, unknown>);
   return (
-    <div className="radar-box" data-testid="condition-standing-radar">
-      <svg width="150" height="150" viewBox="0 0 150 150" role="img" aria-label="Standing five axes">
-        <polygon points="75,18 132,62 110,128 40,128 18,62" fill="none" stroke="var(--border-control)" />
-        <polygon points={radarPolygon(axes)} fill="rgb(224 180 75 / 0.28)" stroke="var(--sun)" />
-        {axes.map((axis, index) => {
-          const [cx, cy] = RADAR_POINTS[index] ?? [75, 75];
-          return <circle key={axis.id} cx={cx} cy={cy} r="3" fill={axis.paint} />;
-        })}
-      </svg>
+    <div
+      className="radar-box"
+      data-testid="condition-standing-radar"
+      data-revision={revision}
+    >
+      <Suspense
+        fallback={
+          <div className="radar-fallback" data-testid="standing-radar-fallback" aria-hidden>
+            …
+          </div>
+        }
+      >
+        <StandingRadarChart axes={axes} revision={revision} />
+      </Suspense>
     </div>
   );
 };
 
 export const standingBarsFactory: PieceFactory = ({ payload }) => {
-  const title = String(payload.title ?? "Standing · five axes");
+  const title = String(payload.title ?? "Standing");
+  const revision = revisionOf(payload);
   if (payload.phase === "pending") {
     return (
-      <>
+      <div data-testid="condition-standing-bars" data-revision={revision}>
         <p className="spec-label">{title}</p>
         <p className="pending-copy">{String(payload.message ?? "Standing vector isn't ready yet.")}</p>
-      </>
+      </div>
     );
   }
   const axes = axisList(payload as Record<string, unknown>);
   return (
-    <>
+    <div data-testid="condition-standing-bars" data-revision={revision}>
       <p className="spec-label">{title}</p>
       <div className="pw">
         {axes.map((axis) => (
           <div className="bar" key={axis.id} data-c={axis.id}>
             <span>{axis.label}</span>
             <span className="t">
-              <span className="f" style={{ width: `${axis.fillPct}%`, background: axis.paint }} />
+              <span
+                key={`bar-${axis.id}-${revision}`}
+                className="f"
+                style={{ width: `${axis.fillPct}%`, background: axis.paint }}
+              />
             </span>
-            <b>{axis.value}</b>
+            <b>{axis.valueText}</b>
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
 
 export const statusGlyphStripFactory: PieceFactory = ({ payload, bus }) => {
   const items = Array.isArray(payload.items) ? (payload.items as Record<string, unknown>[]) : [];
   const isPending = payload.phase === "pending";
-  const isEmpty = payload.phase === "empty";
+  // Q3 — omit empty chrome when fold left strip unbound or zero live rows.
+  if (!isPending && items.length === 0) return null;
+  const revision = revisionOf(payload);
+
   return (
-    <div className="status-strip" data-testid="condition-status-strip">
-      <p className="spec-label">{String(payload.title ?? "Live status · tap for Status tab")}</p>
+    <div
+      className="status-strip"
+      data-testid="condition-status-strip"
+      data-revision={revision}
+    >
+      <p className="spec-label">{String(payload.title ?? "Effects")}</p>
       <div className="glyph-wrap" data-testid="condition-live-effects">
-        {items.map((item) => (
-          <button
-            type="button"
-            key={String(item.id ?? "")}
-            className="status-glyph"
-            style={{ ["--glyph-color" as string]: String(item.color ?? "#6dbb63") }}
-            onClick={() => bus.emit("condition.status.open", { statusId: item.id })}
-          >
-            {String(item.hudToken ?? item.id ?? "?")}
-            <span className="ring" />
-          </button>
-        ))}
+        {items.map((item) => {
+          const status: StatusCatalogRow = {
+            id: String(item.id ?? ""),
+            displayName: String(item.label ?? item.id ?? ""),
+            reading: String(item.label ?? item.id ?? ""),
+            hudToken: String(item.hudToken ?? item.id ?? "?"),
+            color: String(item.color ?? "#6dbb63")
+          };
+          return (
+            <StatusGlyph
+              key={status.id}
+              status={status}
+              live
+              testId={`status-glyph-${status.id}`}
+              onSelect={() => bus.emit("condition.status.open", { statusId: status.id })}
+            />
+          );
+        })}
         {typeof payload.overflowCount === "number" && payload.overflowCount > 0 ? (
           <span className="tag">+{payload.overflowCount}</span>
         ) : null}
       </div>
       {payload.message ? (
-        <p
-          className="pending-copy"
-          data-testid={
-            isPending
-              ? "condition-live-effects-pending"
-              : isEmpty
-                ? "condition-live-effects-empty"
-                : undefined
-          }
-        >
+        <p className="pending-copy" data-testid="condition-live-effects-pending">
           {String(payload.message)}
         </p>
       ) : null}
@@ -258,13 +329,18 @@ export const statusGlyphStripFactory: PieceFactory = ({ payload, bus }) => {
   );
 };
 
-export const actorIdentityFactory: PieceFactory = ({ payload }) => {
+export const actorIdentityFactory: PieceFactory = ({ payload, slots }) => {
   const species = payload.speciesName != null ? String(payload.speciesName) : null;
-  const phaseLabel = payload.phaseLabel != null ? String(payload.phaseLabel) : null;
-  const elements = Array.isArray(payload.elements) ? payload.elements.map(String) : [];
   const pending = payload.phase === "pending";
   const side = String(payload.side ?? "plant") as "plant" | "zombie";
   const typeId = typeof payload.typeId === "number" ? payload.typeId : 0;
+  const speciesMessage =
+    payload.speciesMessage != null
+      ? String(payload.speciesMessage)
+      : payload.message != null
+        ? String(payload.message)
+        : null;
+
   return (
     <section
       className={`actor-identity${pending ? " is-pending" : ""}`}
@@ -275,7 +351,7 @@ export const actorIdentityFactory: PieceFactory = ({ payload }) => {
       <TypeIcon
         side={side}
         typeId={typeId}
-        size={48}
+        size={72}
         className="border border-border-control"
         testId="condition-identity-portrait"
       />
@@ -284,26 +360,22 @@ export const actorIdentityFactory: PieceFactory = ({ payload }) => {
         <p className="species-name" data-testid="condition-species-name">
           {species ?? "—"}
         </p>
-        <div className="chips">
-          {phaseLabel ? <span className="chip">{phaseLabel}</span> : null}
-          {elements.map((el) => (
-            <span key={el} className="chip" data-testid={`condition-identity-element-${el}`}>
-              {el}
-            </span>
-          ))}
+        <div className="badges" data-testid="condition-identity-badges">
+          {slots.phase}
+          {slots.elements}
         </div>
-        {payload.message ? <p className="pending-copy">{String(payload.message)}</p> : null}
+        {speciesMessage ? <p className="pending-copy">{speciesMessage}</p> : null}
       </div>
     </section>
   );
 };
 
 export const CONDITION_SLOT_MAP: Record<string, readonly string[]> = {
-  "cond-hero": ["radial", "meters"],
+  "cond-hero": ["radial", "shield", "meters"],
   "pool-radial": [],
   "pool-meter": [],
   "progression-gauge": [],
-  "actor-identity": [],
+  "actor-identity": ["phase", "elements"],
   "stand-row": ["radar", "live"],
   "standing-radar": [],
   "standing-bars": [],

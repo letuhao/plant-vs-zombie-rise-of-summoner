@@ -1,28 +1,15 @@
 {
   "_meta": {
-    "candidateSetHash": "51a084013dd97bf32a06bf5d3d4a3d8934a3f767ad2d245c8b44a7cacd21a365",
-    "corpusHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "candidateSetHash": "07de0efb7b08b220f089415098babf504a271722ced9f0b955ab8448965fa32f",
+    "corpusHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
     "partition": "rounds",
     "round": 1,
-    "semanticEnabled": true,
-    "similarityFunctionId": "token-overlap-jaccard-milli",
-    "similarityFunctionVersion": 1,
+    "semanticEnabled": false,
+    "similarityFunctionId": null,
+    "similarityFunctionVersion": null,
     "tuningVersion": 1
   },
-  "entries": [
-    {
-      "candidateA": "action.family.garlic.001",
-      "candidateB": "action.family.garlic.002",
-      "id": "review.round-1.0001",
-      "similarityMilli": 1000
-    },
-    {
-      "candidateA": "action.general.0004",
-      "candidateB": "action.general.0005",
-      "id": "review.round-1.0002",
-      "similarityMilli": 1000
-    }
-  ],
+  "entries": [],
   "kind": "action-review",
   "schemaVersion": 1
 }

@@ -32,6 +32,7 @@ import type {
   RelicCatalogListDto,
   AptitudesState,
   SpeciesAptitudesState,
+  UniqueAptitudesState,
   SpeciesRespecPrice,
   PassiveTreeState
 } from "./types";
@@ -100,6 +101,17 @@ export function useAptitudes(playerId: number | null | undefined) {
     queryKey: queryKeys.aptitudes(playerId ?? 0),
     queryFn: () => getJson<AptitudesState>(`/api/aptitudes/${playerId}`),
     enabled: playerId != null && playerId > 0,
+    refetchInterval: hubConnected(hub) ? false : 8000
+  });
+}
+
+/** aptitude-sheet Mode A — UniqueDemon by specimen instanceId. Unused by Mode C commander path. */
+export function useUniqueAptitudes(instanceId: string | null | undefined) {
+  const hub = useHubStatus();
+  return useQuery({
+    queryKey: queryKeys.uniqueAptitudes(instanceId ?? ""),
+    queryFn: () => getJson<UniqueAptitudesState>(`/api/aptitudes/unique/${encodeURIComponent(instanceId!)}`),
+    enabled: !!instanceId,
     refetchInterval: hubConnected(hub) ? false : 8000
   });
 }

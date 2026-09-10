@@ -1,10 +1,12 @@
 /**
  * foldDerivedSurfaceVm — Model → DerivedSurfaceVm (pure, no React).
  * Spec: docs/architecture/gui-lego/spec-derived-surface-vm.md
+ * Harden: docs/architecture/derived-cook/spec-derived-fold-harden.md
  */
 import type { DerivedSurfaceTab, ElementCatalogRow } from "@/lib/bus/actorSurface";
 import type { ActorContributionDto } from "@/lib/bus/aura";
-import { resolveTheme } from "./themeRegistry";
+import { resolveElementPaint } from "./themes/elementPaint";
+import { defaultThemeRegistry, type ThemeRegistryHandle } from "./themeRegistry";
 import type {
   DerivedRenderState as LegoDerivedRenderState,
   GlyphRef,
@@ -16,17 +18,18 @@ import type {
 import {
   BUCKET_LABELS,
   COOK_PRIMARY_TAB_IDS,
-  COMPOSE_SENTENCE,
-  OTHER_SHARED_VARIANT_ID,
-  UNIT_SENTENCE,
   bucketContributions,
+  composeFiction,
   formatDerivedMagnitude,
   isUnchangedState,
   joinDerivedChannelId,
-  registryCapFor,
   resolveDerivedRenderState,
   rowKind,
+  SOURCES_TITLE,
+  sourceFictionLabel,
+  stateFiction,
   toLiveMap,
+  unitFiction,
   type LiveChannelView
 } from "./cook";
 
@@ -52,14 +55,30 @@ export type DerivedSurfaceVmInput = {
     reading?: string;
     composeKind?: string;
     contributions: ActorContributionDto[];
+    unitClass?: string;
+    defaultValue?: number;
+    cap?: number | null;
+    renderState?: string;
   }[];
-  leanChannels?: { channelId: string; value: number; contributions: { sourceId: string; op: string; value: number }[] }[];
+  leanChannels?: {
+    channelId: string;
+    value: number;
+    contributions: { sourceId: string; op: string; value: number }[];
+  }[];
   elements: ElementCatalogRow[];
-  /** status-rail C4: catalog color/hudToken for Status variant chips. */
-  statuses?: { id: string; color: string; hudToken: string }[];
+  /** status-rail: catalog color/hudToken/categories for Status variant chips. */
+  statuses?: {
+    id: string;
+    color: string;
+    hudToken: string;
+    categories?: string[];
+    icon?: string | null;
+  }[];
   locale?: string;
   ui: DerivedUiState;
-  availability: "ready" | "loading" | "error";
+  /** D5 — inject theme lookup; defaults to module registry. */
+  themeRegistry?: ThemeRegistryHandle;
+  availability: "ready" | "loading" | "error" | "pending";
   revision?: number;
 };
 
@@ -90,17 +109,6 @@ export type DerivedSurfaceVm = {
   themeResolved?: import("./types").ThemeResolved;
 };
 
-const PAINT_BUCKET: Record<string, string> = {
-  base: "#6b6358",
-  aptitude: "#6fc4d9",
-  equip: "#e0b44b",
-  tree: "#7a9e5a",
-  status: "#e0703c",
-  grant: "#d8c078",
-  other: "#8a8070",
-  neg: "#c05050"
-};
-
 function sideTheme(side: string): ThemeRef {
   const id = side.toLowerCase() === "zombie" ? "zombie" : "plant";
   return { kind: "side", id };
@@ -108,81 +116,18 @@ function sideTheme(side: string): ThemeRef {
 
 function variantTheme(
   tabId: string,
-  variantId: string | null
+  variantId: string | null,
+  actionVariantIds: Set<string>
 ): ThemeRef | undefined {
   if (!variantId) return undefined;
   if (tabId === "elements") return { kind: "element", id: variantId };
-  if (tabId === "status") {
-    // Omni + L2b category chips reuse status-category packs; per-status ids tint via category pack.
-    if (variantId === "omni" || variantId === "dot" || variantId === "cc" || variantId === "contagion") {
-      return { kind: "status-category", id: variantId };
-    }
-    return { kind: "status-category", id: statusIdToL2b(variantId) };
-  }
+  if (tabId === "status") return { kind: "status-category", id: variantId };
   if (tabId === "resources") return { kind: "resource", id: variantId };
+  if (tabId === "other") {
+    if (actionVariantIds.has(variantId)) return { kind: "action-category", id: variantId };
+    return { kind: "cook-tab", id: "other" };
+  }
   return undefined;
-}
-
-/** L2b category for status-catalog ids — mirrors StatusCategoryRegistry. */
-function statusIdToL2b(statusId: string): string {
-  const map: Record<string, string> = {
-    wither: "dot",
-    poison: "dot",
-    leech: "dot",
-    bond: "dot",
-    rally: "dot",
-    expose: "dot",
-    command: "dot",
-    shatter: "dot",
-    "nerve.unsettled": "dot",
-    "nerve.shaken": "dot",
-    "nerve.afflicted": "dot",
-    butter: "cc",
-    freeze: "cc",
-    cold: "cc",
-    hypno: "cc",
-    ember: "cc",
-    jala: "cc",
-    kelp: "cc",
-    charm_pulse: "cc",
-    blight: "contagion",
-    rot: "contagion",
-    spark: "contagion",
-    pact_mark: "contagion",
-    spore: "contagion"
-  };
-  return map[statusId] ?? "dot";
-}
-
-function statusGlyph(statusId: string): string {
-  const map: Record<string, string> = {
-    omni: "hexagon",
-    butter: "ban",
-    freeze: "snowflake",
-    cold: "snowflake",
-    poison: "virus",
-    hypno: "sparkles",
-    ember: "flame",
-    jala: "flame",
-    kelp: "wind",
-    wither: "activity",
-    bond: "hexagon",
-    rally: "shield",
-    leech: "heart",
-    expose: "crosshair",
-    command: "sword",
-    shatter: "zap",
-    charm_pulse: "sparkles",
-    blight: "virus",
-    rot: "virus",
-    spark: "zap",
-    pact_mark: "hexagon",
-    spore: "virus",
-    "nerve.unsettled": "activity",
-    "nerve.shaken": "activity",
-    "nerve.afflicted": "activity"
-  };
-  return map[statusId] ?? "hexagon";
 }
 
 function glyphFromFamily(icon: string | null | undefined, title: string): GlyphRef {
@@ -192,9 +137,34 @@ function glyphFromFamily(icon: string | null | undefined, title: string): GlyphR
   };
 }
 
+function bucketPaint(
+  key: string,
+  registry: ThemeRegistryHandle
+): string {
+  return registry.resolve({ kind: "bucket", id: key }).paint.accent;
+}
+
+function resolveVariantThemeResolved(
+  themeRef: ThemeRef | undefined,
+  registry: ThemeRegistryHandle
+) {
+  if (themeRef?.kind === "element") {
+    const paint = resolveElementPaint(themeRef.id);
+    return {
+      themeId: paint.themeId,
+      css: paint.css,
+      paint: paint.paint,
+      vfx: paint.vfx,
+      glyphDefault: paint.glyphRef.catalogIcon ?? null
+    };
+  }
+  return registry.resolve(themeRef ?? null);
+}
+
 export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfaceVm {
   const locale = input.locale ?? "en";
   const revision = input.revision ?? 1;
+  const registry = input.themeRegistry ?? defaultThemeRegistry;
   // Pin primary rail to COOK_PRIMARY_TAB_IDS order (SSOT); drop unknown cook ids.
   const byCookId = new Map(input.cookTabs.map((t) => [t.id, t]));
   const tabs = COOK_PRIMARY_TAB_IDS.map((id) => byCookId.get(id)).filter(
@@ -205,37 +175,36 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       ? input.ui.tabId
       : (tabs[0]?.id ?? "elements");
   const activeTab = tabs.find((t) => t.id === tabId) ?? tabs[0] ?? null;
-
   const variantChoices = (() => {
     if (!activeTab) return [] as { id: string; displayName: string }[];
     if (activeTab.id === "other") {
-      const action = (activeTab.actionCategoryVariants ?? []).map((v) => ({
-        id: v.id,
-        displayName: v.displayName
-      }));
-      // Shared first: expand:none families are not scoped to Attack/Defense chips.
-      return [{ id: OTHER_SHARED_VARIANT_ID, displayName: "Shared" }, ...action];
+      // D3: Shared + action-category from cook — do not invent Shared.
+      return [
+        ...activeTab.variants.map((v) => ({ id: v.id, displayName: v.displayName })),
+        ...(activeTab.actionCategoryVariants ?? []).map((v) => ({
+          id: v.id,
+          displayName: v.displayName
+        }))
+      ];
     }
     return activeTab.variants.map((v) => ({
       id: v.id,
       displayName: v.displayName
     }));
   })();
-
+  const actionVariantIds = new Set(
+    (activeTab?.actionCategoryVariants ?? []).map((v) => v.id)
+  );
   let variantId = input.ui.variantId;
   if (variantChoices.length === 0) variantId = null;
   else if (!variantId || !variantChoices.some((v) => v.id === variantId)) {
     variantId =
       activeTab?.id === "elements" && variantChoices.some((v) => v.id === "fire")
         ? "fire"
-        : activeTab?.id === "other"
-          ? OTHER_SHARED_VARIANT_ID
-          : variantChoices[0]!.id;
+        : variantChoices[0]!.id;
   }
-
   const byId = toLiveMap(input.sheetChannels, input.leanChannels as never);
-  const themeVar = variantTheme(tabId, variantId);
-
+  const themeVar = variantTheme(tabId, variantId, actionVariantIds);
   type RowBuilt = {
     categoryId: string;
     categoryLabel: string;
@@ -253,15 +222,15 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     state: ReturnType<typeof resolveDerivedRenderState>;
     capRef: string | null;
   };
-
   const familyRows: RowBuilt[] = [];
   if (activeTab) {
     for (const cat of activeTab.categories) {
       for (const family of cat.families) {
-        // OTHER: Shared → expand:none only; Attack/… → action-category only.
-        // (Previously expand:none repeated under every action chip — looked like duplicates.)
+        // OTHER: Shared (cook variants, not action-category) → expand:none only;
+        // Attack/… → action-category only.
         if (activeTab.id === "other") {
-          if (variantId === OTHER_SHARED_VARIANT_ID) {
+          const isActionVariant = variantId != null && actionVariantIds.has(variantId);
+          if (!isActionVariant) {
             if (family.expand !== "none") continue;
           } else if (family.expand !== "action-category") {
             continue;
@@ -273,7 +242,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
         if (family.expand === "none") {
           channelVariant = null;
           variantLabel = family.displayName;
-        } else if (!variantId || variantId === OTHER_SHARED_VARIANT_ID) {
+        } else if (!variantId || (activeTab.id === "other" && !actionVariantIds.has(variantId))) {
           continue;
         }
         const channelId = joinDerivedChannelId(family.family, family.expand, channelVariant);
@@ -290,7 +259,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
           familyId: family.family,
           displayName: family.displayName,
           reading: live?.reading || family.reading,
-          unitClass: family.unitClass,
+          unitClass: live?.unitClass || family.unitClass,
           compose: live?.composeKind || family.compose,
           expand: family.expand,
           icon: family.icon ?? null,
@@ -303,10 +272,8 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       }
     }
   }
-
   const q = input.ui.query.trim().toLowerCase();
   let selectedChannelId = input.ui.selectedChannelId;
-
   const visibleRows = familyRows.filter((row) => {
     if (
       q &&
@@ -326,19 +293,16 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     return true;
   });
   const hiddenCount = familyRows.length - visibleRows.length;
-
   if (!selectedChannelId || !visibleRows.some((r) => r.channelId === selectedChannelId)) {
     const firstActive = visibleRows.find((r) => r.state === "active") ?? visibleRows[0];
     selectedChannelId = firstActive?.channelId ?? null;
   }
-
   let phase: Phase = "ready";
   if (input.availability === "loading") phase = "loading";
   else if (input.availability === "error") phase = "error";
+  else if (input.availability === "pending") phase = "pending";
   else if (visibleRows.length === 0) phase = "empty";
-
   const sideRef = sideTheme(input.identity.side);
-
   const search: PiecePayload = {
     piece: "tool-search",
     instanceId: "tool:search",
@@ -346,7 +310,6 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     query: input.ui.query,
     placeholder: "Search channels…"
   };
-
   const showUnchanged: PiecePayload = {
     piece: "tool-toggle",
     instanceId: "tool:showUnchanged",
@@ -354,18 +317,21 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     value: input.ui.showUnchanged,
     label: "Show unchanged"
   };
-
-  const primaryChips: PiecePayload[] = tabs.map((tab) => ({
-    piece: "chip",
-    instanceId: `chip:primary:${tab.id}`,
-    phase: "ready" as Phase,
-    id: tab.id,
-    label: tab.displayName,
-    count: tab.categories.reduce((n, c) => n + c.families.length, 0),
-    selected: tab.id === tabId,
-    rail: "primary" as const
-  }));
-
+  const primaryChips: PiecePayload[] = tabs.map((tab) => {
+    const themeRef: ThemeRef = { kind: "cook-tab", id: tab.id };
+    return {
+      piece: "chip",
+      instanceId: `chip:primary:${tab.id}`,
+      phase: "ready" as Phase,
+      id: tab.id,
+      label: tab.displayName,
+      count: tab.categories.reduce((n, c) => n + c.families.length, 0),
+      selected: tab.id === tabId,
+      rail: "primary" as const,
+      themeRef,
+      themeResolved: registry.resolve(themeRef)
+    };
+  });
   const primaryRail: PiecePayload & { chips: PiecePayload[] } = {
     piece: "rail-primary",
     instanceId: "rail:primary",
@@ -373,28 +339,30 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     ariaLabel: "Derived surface tabs",
     chips: primaryChips
   };
-
   const statusById = new Map((input.statuses ?? []).map((s) => [s.id, s]));
-
   const variantChips: PiecePayload[] = variantChoices.map((v) => {
-    const themeRef = variantTheme(tabId, v.id);
-    const themeResolved = resolveTheme(themeRef ?? null);
+    const themeRef = variantTheme(tabId, v.id, actionVariantIds);
+    const themeResolved = resolveVariantThemeResolved(themeRef, registry);
     let glyphRef: GlyphRef | undefined;
     if (tabId === "status") {
-      themeResolved.glyphDefault = statusGlyph(v.id);
       const catalog = statusById.get(v.id);
+      if (catalog?.hudToken) {
+        glyphRef = {
+          catalogIcon: catalog.icon ?? themeResolved.glyphDefault ?? undefined,
+          hudToken: catalog.hudToken,
+          fallbackText: catalog.hudToken
+        };
+      } else if (themeResolved.glyphDefault) {
+        glyphRef = {
+          catalogIcon: themeResolved.glyphDefault,
+          fallbackText: v.displayName.slice(0, 1)
+        };
+      }
       if (catalog?.color) {
         themeResolved.paint = {
           ...themeResolved.paint,
           accent: catalog.color,
           accentMuted: catalog.color
-        };
-      }
-      if (catalog?.hudToken) {
-        glyphRef = {
-          catalogIcon: statusGlyph(v.id),
-          hudToken: catalog.hudToken,
-          fallbackText: catalog.hudToken
         };
       }
     }
@@ -412,7 +380,6 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       glyphRef
     };
   });
-
   const variantRail: PiecePayload & { chips: PiecePayload[] } = {
     piece: "rail-variant",
     instanceId: "rail:variant",
@@ -428,18 +395,16 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     hidden: variantChoices.length === 0,
     chips: variantChips
   };
-
   const grouped = new Map<string, { label: string; rows: RowBuilt[] }>();
   for (const row of visibleRows) {
     const bucket = grouped.get(row.categoryId) ?? { label: row.categoryLabel, rows: [] };
     bucket.rows.push(row);
     grouped.set(row.categoryId, bucket);
   }
-
   const families: PiecePayload[] = [...grouped.entries()].map(([catId, group]) => {
     const rows: PiecePayload[] = group.rows.map((row) => {
       const mag: MagnitudeDisplay | null =
-        row.state === "no-producer" || !row.live
+        row.state === "no-producer" || row.state === "unregistered" || !row.live
           ? null
           : formatDerivedMagnitude(row.live.value, row.unitClass, {
               locale,
@@ -448,6 +413,11 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       const rowTheme = row.element
         ? ({ kind: "element", id: row.element.id } as ThemeRef)
         : themeVar;
+      const themeResolved = resolveVariantThemeResolved(rowTheme, registry);
+      const glyphColor =
+        row.element != null
+          ? resolveElementPaint(row.element.id).paint.accent
+          : null;
       return {
         piece: "channel-row",
         instanceId: `row:${row.channelId}`,
@@ -458,15 +428,16 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
         reading: row.reading,
         variantLabel: row.expand !== "none" ? row.variantLabel : null,
         state: row.state as LegoDerivedRenderState,
+        stateLabel: stateFiction(row.state),
         kind: rowKind(row.state),
         selected: row.channelId === selectedChannelId,
         valueText: mag?.valueText ?? "—",
         valueRaw: mag?.valueRaw ?? null,
         formatterId: mag?.formatterId ?? null,
         glyphRef: glyphFromFamily(row.icon, row.displayName),
-        glyphColor: row.element?.color ?? null,
+        glyphColor,
         themeRef: rowTheme,
-        themeResolved: resolveTheme(rowTheme ?? null)
+        themeResolved
       };
     });
     return {
@@ -476,16 +447,14 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
       familyId: catId,
       title: group.label,
       hint:
-        activeTab?.id === "other" && variantId === OTHER_SHARED_VARIANT_ID
+        activeTab?.id === "other" && variantId != null && !actionVariantIds.has(variantId)
           ? "other · shared"
           : `${activeTab?.id ?? "—"} · ${variantId || "—"}`,
       rows
     };
   });
-
   const selected = visibleRows.find((r) => r.channelId === selectedChannelId) ?? null;
-  const inspect = buildInspect(selected, locale, themeVar);
-
+  const inspect = buildInspect(selected, locale, themeVar, registry);
   const foot: PiecePayload = {
     piece: "surface-foot",
     instanceId: "foot:derived",
@@ -494,16 +463,17 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     note: "expand×join · UnitClass closed",
     deferred: "Deferred in FE v1: live build compare · full xyflow calc graph"
   };
-
   const phasePayload: PiecePayload = {
     piece:
       phase === "loading"
         ? "phase-loading"
         : phase === "error"
           ? "phase-error"
-          : phase === "empty"
-            ? "phase-empty"
-            : "phase-loading",
+          : phase === "pending"
+            ? "phase-pending"
+            : phase === "empty"
+              ? "phase-empty"
+              : "phase-loading",
     instanceId: `overlay:${phase}`,
     phase,
     message:
@@ -511,11 +481,12 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
         ? "Loading derived channels…"
         : phase === "error"
           ? "Derived sheet unavailable"
-          : "No channels in this filter.",
+          : phase === "pending"
+            ? "Derived sheet pending — lean path has no projection yet."
+            : "No channels in this filter.",
     canRetry: phase === "error",
     retryLabel: "Retry"
   };
-
   return {
     // No top-level `piece` — children bind to `vm` (e.g. split-inspect) and must not
     // inherit surface-shell's piece id. Root piece comes from the recipe.
@@ -552,7 +523,7 @@ export function foldDerivedSurfaceVm(input: DerivedSurfaceVmInput): DerivedSurfa
     foot,
     phasePayload,
     themeRef: themeVar ?? sideRef,
-    themeResolved: resolveTheme(themeVar ?? sideRef)
+    themeResolved: resolveVariantThemeResolved(themeVar ?? sideRef, registry)
   };
 }
 
@@ -571,7 +542,8 @@ function buildInspect(
     capRef: string | null;
   } | null,
   locale: string,
-  themeVar: ThemeRef | undefined
+  themeVar: ThemeRef | undefined,
+  registry: ThemeRegistryHandle
 ): DerivedSurfaceVm["inspect"] {
   if (!selected) {
     const empty: PiecePayload = {
@@ -595,13 +567,12 @@ function buildInspect(
       sources: { piece: "source-list", instanceId: "inspect:sources", phase: "empty", items: [] }
     };
   }
-
   const title =
     selected.expand !== "none" && selected.variantLabel
       ? `${selected.displayName} · ${selected.variantLabel}`
       : selected.displayName;
   const mag =
-    selected.state === "no-producer" || !selected.live
+    selected.state === "no-producer" || selected.state === "unregistered" || !selected.live
       ? null
       : formatDerivedMagnitude(selected.live.value, selected.unitClass, {
           locale,
@@ -610,8 +581,7 @@ function buildInspect(
   const buckets = bucketContributions(selected.live?.contributions ?? []);
   const totalPos = buckets.filter((b) => b.key !== "neg").reduce((a, b) => a + b.value, 0) || 1;
   const max = Math.max(1, ...buckets.map((b) => b.value));
-  const cap = registryCapFor(selected.channelId, selected.capRef);
-
+  const cap = selected.live?.cap ?? null;
   const hero: PiecePayload = {
     piece: "value-hero",
     instanceId: "inspect:hero",
@@ -621,33 +591,32 @@ function buildInspect(
     valueRaw: mag?.valueRaw ?? null,
     reading:
       selected.state === "no-producer"
-        ? "Nothing grants this yet."
-        : selected.reading,
+        ? stateFiction("no-producer")
+        : selected.state === "unregistered"
+          ? stateFiction("unregistered")
+          : selected.reading,
     state: selected.state,
+    stateLabel: stateFiction(selected.state),
     glyphRef: glyphFromFamily(selected.icon, selected.displayName),
     themeRef: themeVar,
-    themeResolved: resolveTheme(themeVar ?? null)
+    themeResolved: resolveVariantThemeResolved(themeVar, registry)
   };
-
   const sentences: string[] = [];
   if (selected.state === "no-producer") {
-    sentences.push(
-      `${selected.channelId} is registered and readable, but no producer writes it (no-producer).`
-    );
+    sentences.push(stateFiction("no-producer") + ".");
+  } else if (selected.state === "unregistered") {
+    sentences.push(stateFiction("unregistered") + ".");
   } else {
-    sentences.push(`Compose: ${COMPOSE_SENTENCE[selected.compose] ?? selected.compose}`);
-    sentences.push(`Unit: ${UNIT_SENTENCE[selected.unitClass] ?? selected.unitClass}`);
-    sentences.push(`Join: ${selected.channelId}`);
+    sentences.push(composeFiction(selected.compose));
+    sentences.push(unitFiction(selected.unitClass));
     if (selected.state === "stub") sentences.push("Placeholder — the real curve is not built.");
   }
-
   const meta: PiecePayload = {
     piece: "meta-sentences",
     instanceId: "inspect:meta",
     phase: "ready",
     sentences
   };
-
   const capPayload: PiecePayload = {
     piece: "cap-note",
     instanceId: "inspect:cap",
@@ -661,7 +630,6 @@ function buildInspect(
           : `Cap ${cap} — more still counts.`,
     ok: cap == null || selected.state !== "capped"
   };
-
   const slices = buckets
     .filter((b) => b.key !== "neg")
     .map((b) => ({
@@ -669,9 +637,8 @@ function buildInspect(
       label: b.label,
       value: b.value,
       share: Math.round((b.value / totalPos) * 100),
-      paint: PAINT_BUCKET[b.key] ?? PAINT_BUCKET.other!
+      paint: bucketPaint(b.key, registry)
     }));
-
   const donut: PiecePayload = {
     piece: "gauge-donut",
     instanceId: "inspect:donut",
@@ -679,7 +646,6 @@ function buildInspect(
     title: "Why this number",
     slices
   };
-
   const bars = buckets.map((b) => ({
     key: b.key,
     label: BUCKET_LABELS[b.key] ?? b.label,
@@ -690,33 +656,30 @@ function buildInspect(
       locale,
       role: "delta"
     }).valueText,
-    paint: PAINT_BUCKET[b.key] ?? PAINT_BUCKET.other!
+    paint: bucketPaint(b.key, registry)
   }));
-
   const stack: PiecePayload = {
     piece: "gauge-stack",
     instanceId: "inspect:stack",
     phase: "ready",
     bars
   };
-
   const items = (selected.live?.contributions ?? []).map((c, i) => ({
-    id: `${c.sourceId}-${i}`,
-    label: c.label,
+    id: `${c.sourceId || "unattributed"}-${i}`,
+    label: sourceFictionLabel(c.sourceId, c.label),
     valueText: formatDerivedMagnitude(c.value, selected.unitClass, {
       locale,
       role: "delta"
-    }).valueText
+    }).valueText,
+    unattributed: !c.sourceId.trim()
   }));
-
   const sources: PiecePayload = {
     piece: "source-list",
     instanceId: "inspect:sources",
     phase: "ready",
-    title: "Sources (GG-49)",
+    title: SOURCES_TITLE,
     items
   };
-
   return {
     piece: "inspect-pane",
     instanceId: "inspect:derived",
@@ -730,6 +693,6 @@ function buildInspect(
     stack,
     sources,
     themeRef: themeVar,
-    themeResolved: resolveTheme(themeVar ?? null)
+    themeResolved: resolveVariantThemeResolved(themeVar, registry)
   };
 }

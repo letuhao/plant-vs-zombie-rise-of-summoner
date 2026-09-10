@@ -8,7 +8,7 @@
 **Sheet SSOT:** [../actor-sheet/spec-condition-tab.md](../actor-sheet/spec-condition-tab.md),
 [../actor-sheet/spec-actor-sheet-shell.md](../actor-sheet/spec-actor-sheet-shell.md),
 [../../design/13-actor-sheet.html](../../design/13-actor-sheet.html)  
-**Owner locks:** Q3 omit-empty · Q5 revision/realtime · Q7 amend this file body
+**Owner locks:** Q3 omit-empty · Q5 revision/realtime · Q7 amend this file body · **S1–S3** Hot shared with shield-sheet
 
 ---
 
@@ -19,6 +19,9 @@ Condition is a **glance** surface on a **2×2 CSS grid**
 (`progression-gauge` \| `actor-identity` / `cond-hero` \| `stand-row`), not a
 `split-inspect` console. Live status nests under `stand-row` **only when** there are live
 instances — never a fifth `main` sibling, never empty chrome.
+
+Glance uses **`shieldSummary` only** — not `sheet.shieldLayers` (tab owns layers, **S1**). Same
+`["actorSheet", id]` invalidate refreshes Condition and Shield tab together.
 
 **Name:** `foldConditionSurfaceVm(input) -> ConditionSurfaceVm`
 

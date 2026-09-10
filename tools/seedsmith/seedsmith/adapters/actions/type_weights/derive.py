@@ -63,6 +63,7 @@ class RoleLeanRow:
     element_primary: str
     element_secondary: "str | None"
     reach: "str | None"
+    families: "tuple[str, ...]" = ()
 
 
 @dataclass(frozen=True)
@@ -273,9 +274,10 @@ def derive_all(rows: "list[RoleLeanRow]", weights: TypeWeights) -> "list[TypeWei
             area_shape_milli=area_shape_milli, element_bias_milli=element_bias_milli, basis=basis,
         ))
 
-        if row.family:
-            member_raw_by_family.setdefault(row.family, []).append(raw)
-            member_rows_by_family.setdefault(row.family, []).append(row)
+        family_ids = row.families or ((row.family,) if row.family else ())
+        for family_id in family_ids:
+            member_raw_by_family.setdefault(family_id, []).append(raw)
+            member_rows_by_family.setdefault(family_id, []).append(row)
 
     for family_id in sorted(member_raw_by_family):
         total = _family_raw_total(member_raw_by_family[family_id])

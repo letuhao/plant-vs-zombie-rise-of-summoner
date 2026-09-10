@@ -14,15 +14,20 @@ import {
   type DerivedChannelDto
 } from "@/lib/bus/aura";
 import { formatDerivedMagnitude } from "./formatDerivedMagnitude";
+export {
+  COMPOSE_SENTENCE,
+  UNIT_SENTENCE,
+  RENDER_STATE_FICTION,
+  SOURCES_TITLE,
+  UNATTRIBUTED_LABEL,
+  composeFiction,
+  unitFiction,
+  stateFiction,
+  sourceFictionLabel
+} from "./derivedPlayerCopy";
 
 /** Primary Derived rail — cook surface tabs only. Never sheetGroups (offense/pools/…). */
 export const COOK_PRIMARY_TAB_IDS = ["elements", "status", "resources", "other"] as const;
-
-/**
- * OTHER cook tab — FE-only chip for families with expand:"none" (progression/tempo/siege).
- * Not an action-category id; Attack/Defense/… chips only list expand:"action-category".
- */
-export const OTHER_SHARED_VARIANT_ID = "shared";
 
 /** Forbidden as primary Derived tablist labels/ids (sheetGroup IA). */
 export const FORBIDDEN_PRIMARY_TAB_IDS = [
@@ -58,6 +63,11 @@ export type LiveChannelView = {
   composeKind: string;
   contributions: ActorContributionDto[];
   present: boolean;
+  unitClass?: string;
+  defaultValue?: number;
+  /** Wire cap — null means uncapped; undefined means lean/unknown (do not invent). */
+  cap?: number | null;
+  renderState?: DerivedRenderState;
 };
 
 export type DerivedRowModel = {
@@ -70,33 +80,15 @@ export type DerivedRowModel = {
   displayName: string;
 };
 
-const STATUS_CATEGORY_VARIANTS = ["omni", "dot", "cc", "contagion"] as const;
-const ACTION_CATEGORY_VARIANTS = ["attack", "defense", "support", "movement", "status"] as const;
-
-/** Registry soft caps the sheet FE may paint — never invent CAP without a known bound. */
-const KNOWN_CAPS: Record<string, number> = {
-  "status.resist.dot": 0.95,
-  "status.resist.cc": 0.95,
-  "status.resist.contagion": 0.95
+/** Optional cook/catalog variant lists — expand never invents L2b / action-category ids. */
+export type ExpandDerivedVariants = {
+  statusCategoryVariants?: { id: string; displayName?: string }[];
+  actionCategoryVariants?: { id: string; displayName?: string }[];
 };
 
 const STUB_CHANNELS = new Set(["progression.power", "progression.realm"]);
-const NO_PRODUCER_HINT = /^(progression\.bonus\.arm[12]|status\.expose\.)/;
-
-export const COMPOSE_SENTENCE: Record<string, string> = {
-  FlatSum: "Sources add together.",
-  FlatReplace: "The strongest source wins — these do not add.",
-  SumIncreased: "Sources add, up to the cap.",
-  MaxPriorityFlag: "On or off — the strongest source decides."
-};
-
-export const UNIT_SENTENCE: Record<string, string> = {
-  GameUnits: "Game units — uncapped magnitude.",
-  PerMilleRatio: "Per-mille ratio (÷1000).",
-  SigmoidPoints: "Sigmoid points into a chance curve.",
-  UnitInterval: "Unit interval 0…1.",
-  Flag: "On or off flag."
-};
+/** Expand-join ids the registry rejects — FE parity only when wire renderState absent (D2). */
+const UNREGISTERED_CHANNELS = new Set(["turn.moveSpeed"]);
 
 export const BUCKET_COLORS: Record<string, string> = {
   base: "var(--faint)",
@@ -133,7 +125,8 @@ export function expandDerivedFamily(
   family: DerivedFamilyCatalogRow | DerivedSurfaceFamily,
   elements: ElementCatalogRow[],
   resources: { id: string }[] = [],
-  statuses: { id: string; displayName?: string }[] = []
+  statuses: { id: string; displayName?: string }[] = [],
+  variants: ExpandDerivedVariants = {}
 ): ExpandedDerivedChannel[] {
   const expand = family.expand as DerivedExpandKind;
   switch (expand) {
@@ -156,42 +149,44 @@ export function expandDerivedFamily(
             variantLabel: s.displayName ?? s.id
           }))
       ];
-    case "status-category":
-      return STATUS_CATEGORY_VARIANTS.map((id) => ({
-        channelId: `${family.family}.${id}`,
+    case "status-category": {
+      const cats = variants.statusCategoryVariants ?? [];
+      return cats.map((v) => ({
+        channelId: `${family.family}.${v.id}`,
         element: null,
-        variantLabel: id
+        variantLabel: v.displayName ?? v.id
       }));
+    }
     case "resource":
       return resources.map((r) => ({
         channelId: `${family.family}.${r.id}`,
         element: null,
         variantLabel: r.id
       }));
-    case "action-category":
-      return ACTION_CATEGORY_VARIANTS.map((id) => ({
-        channelId: `${family.family}.${id}`,
+    case "action-category": {
+      const acts = variants.actionCategoryVariants ?? [];
+      return acts.map((v) => ({
+        channelId: `${family.family}.${v.id}`,
         element: null,
-        variantLabel: id
+        variantLabel: v.displayName ?? v.id
       }));
+    }
     case "none":
     default:
       return [{ channelId: family.family, element: null, variantLabel: family.displayName }];
   }
 }
 
-export function registryCapFor(channelId: string, familyCapRef: string | null): number | null {
-  if (channelId === "status.resist.omni") return null;
-  if (KNOWN_CAPS[channelId] != null) return KNOWN_CAPS[channelId]!;
-  // Core open-prefix applies categoryResistCap to every status.resist.* except dense omni.
-  if (
-    familyCapRef === "categoryResistCap" &&
-    channelId.startsWith("status.resist.") &&
-    channelId !== "status.resist.omni"
-  ) {
-    return 0.95;
-  }
-  if (channelId.startsWith("status.immune.") || channelId.startsWith("status.immuneReduction.")) return 1;
+/**
+ * Cap from wire only (DC-3). Pass `wireCap` from sheet `channel.cap` (including null for omni).
+ * No FE KNOWN_CAPS / literal 0.95 / immune=1 invent.
+ */
+export function registryCapFor(
+  _channelId: string,
+  _familyCapRef: string | null,
+  wireCap?: number | null
+): number | null {
+  if (wireCap !== undefined) return wireCap;
   return null;
 }
 
@@ -200,21 +195,26 @@ export function resolveDerivedRenderState(
   live: LiveChannelView | undefined,
   familyCapRef: string | null
 ): DerivedRenderState {
+  // D2: prefer wire renderState when present (parity recompute only when absent).
+  if (live?.renderState) return live.renderState;
   if (STUB_CHANNELS.has(channelId)) return "stub";
+  if (UNREGISTERED_CHANNELS.has(channelId)) return "unregistered";
   if (!live?.present) {
-    if (NO_PRODUCER_HINT.test(channelId)) return "no-producer";
+    // Absent from snapshot: registered-but-silent → no-producer (never collapse to default).
     return "no-producer";
   }
-  const cap = registryCapFor(channelId, familyCapRef);
+  const cap = registryCapFor(channelId, familyCapRef, live.cap);
   if (cap != null && live.value >= cap - 1e-9) return "capped";
+  const defaultValue = live.defaultValue ?? 0;
   const touched = live.contributions.some((c) => c.value !== 0);
-  if (!touched && Math.abs(live.value) < 1e-9) return "default";
+  if (!touched && Math.abs(live.value - defaultValue) < 1e-9) return "default";
   if (!touched) return "default";
   return "active";
 }
 
+/** D4: Show-unchanged hides `default` only — never `no-producer`. */
 export function isUnchangedState(state: DerivedRenderState): boolean {
-  return state === "default" || state === "no-producer";
+  return state === "default";
 }
 
 export function bucketContributions(contributions: ActorContributionDto[]): {
@@ -264,6 +264,10 @@ export function toLiveMap(
         reading?: string;
         composeKind?: string;
         contributions: ActorContributionDto[];
+        unitClass?: string;
+        defaultValue?: number;
+        cap?: number | null;
+        renderState?: string;
       }[]
     | undefined,
   lean: DerivedChannelDto[] | undefined
@@ -278,11 +282,16 @@ export function toLiveMap(
         reading: ch.reading ?? "",
         composeKind: ch.composeKind ?? "",
         contributions: ch.contributions,
-        present: true
+        present: true,
+        unitClass: ch.unitClass,
+        defaultValue: ch.defaultValue,
+        cap: ch.cap,
+        renderState: ch.renderState as DerivedRenderState | undefined
       });
     }
     return map;
   }
+  // Lean /derived without sheet projection — no invent of cap/renderState (UniqueDemon Pending honesty).
   for (const ch of lean ?? []) {
     map.set(ch.channelId, {
       channelId: ch.channelId,

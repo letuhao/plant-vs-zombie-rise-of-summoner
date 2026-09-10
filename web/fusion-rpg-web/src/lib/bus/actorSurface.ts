@@ -42,6 +42,8 @@ export type AptitudeCatalogRow = {
   displayName: string;
   role: string;
   reading: string;
+  /** Lucide / CatalogIcon key — optional so a missing icon never crashes the tile. */
+  icon?: string | null;
 };
 
 export type DerivedFamilyCatalogRow = {
@@ -82,6 +84,9 @@ export type StatusCatalogRow = {
   reading: string;
   hudToken: string;
   color: string;
+  /** L2b categories from status-catalog — replaces fold statusId→L2b maps. */
+  categories?: string[];
+  icon?: string | null;
 };
 
 export type KitRoleCatalogRow = {
@@ -273,23 +278,15 @@ export function derivedSurfaceFromFixture(
             presentationOnly: e.presentationOnly
           }));
       } else if (tab.id === "status") {
-        variants = [
-          {
-            id: "omni",
-            displayName: "Omni",
-            ordinal: 0,
-            presentationOnly: true
-          },
-          ...surface.statuses
-            .slice()
-            .sort((a, b) => a.id.localeCompare(b.id))
-            .map((s, i) => ({
-              id: s.id,
-              displayName: s.displayName,
-              ordinal: i + 1,
-              presentationOnly: false
-            }))
-        ];
+        variants = raw.statusCategoryVariants
+          .slice()
+          .sort((a, b) => a.ordinal - b.ordinal)
+          .map((v) => ({
+            id: v.id,
+            displayName: localeEn(v.displayName),
+            ordinal: v.ordinal,
+            presentationOnly: v.id === "omni"
+          }));
       } else if (tab.id === "resources") {
         variants = surface.resources.map((r, i) => ({
           id: r.id,
@@ -298,6 +295,15 @@ export function derivedSurfaceFromFixture(
           presentationOnly: false
         }));
       } else if (tab.id === "other") {
+        // D3: Shared from cook Variants — fixture mirrors DerivedSurfaceCook.
+        variants = [
+          {
+            id: "shared",
+            displayName: "Shared",
+            ordinal: 0,
+            presentationOnly: false
+          }
+        ];
         actionCategoryVariants = raw.actionCategoryVariants
           .slice()
           .sort((a, b) => a.ordinal - b.ordinal)

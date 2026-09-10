@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aptitude-inspect — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>aptitude-inspect</code></h1>
+  <p class="lede">Dossier for the selected aptitude: reading, role, fed family <strong>displayNames</strong> (A3). Reuses inspect-pane / source-list grammar — never channel ids as product chrome. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <aside class="inspect" style="--piece-accent:#e0703c; --piece-rail-edge:#e0703c">
+          <div class="big">Might</div>
+          <div class="reading">Primary strike power</div>
+          <div class="sentence">Role: Offense spine</div>
+          <div class="cap-note">Feeds</div>
+          <ul style="margin:6px 0 0; padding-left:18px; font-size:13px">
+            <li>Strike damage</li>
+            <li>Crit chance</li>
+            <li>Carry weight</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "aptitude-inspect",
+  "instanceId": "aptitudes:inspect",
+  "aptitudeId": "might",
+  "displayName": "Might",
+  "reading": "Primary strike power",
+  "role": "Offense spine",
+  "fedFamilies": [
+    { "displayName": "Strike damage" },
+    { "displayName": "Crit chance" },
+    { "displayName": "Carry weight" }
+  ],
+  "themeRef": { "kind": "posture", "id": "force" },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

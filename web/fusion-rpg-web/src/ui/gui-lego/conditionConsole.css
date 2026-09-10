@@ -94,12 +94,24 @@
 
 .condition-console .progression-gauge .track {
   margin-top: 8px;
-  height: 10px;
+  height: 14px;
+  min-height: 14px;
+  background: var(--panel-inset, #201a14);
+  border: 1px solid var(--border-control);
 }
 
-.condition-console .fill {
+.condition-console .fill,
+.condition-console .bar .f {
   display: block;
   height: 100%;
+  transition: width 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .condition-console .fill,
+  .condition-console .bar .f {
+    transition: none;
+  }
 }
 
 .condition-console .progression-gauge .fill {
@@ -107,8 +119,6 @@
 }
 
 .condition-console .bar .f {
-  display: block;
-  height: 100%;
   /* paint comes from inline style on each axis */
 }
 
@@ -149,36 +159,39 @@
   line-height: 1.1;
 }
 
-.condition-console .actor-identity .chips {
+.condition-console .actor-identity .badges {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
 }
 
-.condition-console .actor-identity .chip {
-  padding: 2px 8px;
-  border: 1px solid var(--border-control);
-  border-radius: 999px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-}
-
 .condition-console .cond-hero {
   display: flex;
   gap: var(--sp-3, 12px);
-  align-items: center;
+  /* Top-align radial + pool meters (same seam as stand-row) — not vertical center */
+  align-items: flex-start;
   padding: 16px;
+}
+
+.condition-console .hero-radial-stack {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: start;
+  gap: 8px;
 }
 
 .condition-console .radial-wrap {
   position: relative;
   display: grid;
-  flex: none;
+  flex: 0 0 128px;
   width: 128px;
   height: 128px;
+  min-width: 128px;
+  min-height: 128px;
   place-items: center;
   border: 1px solid var(--border-control);
   border-radius: 16px;
@@ -223,6 +236,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  align-self: start;
   min-width: 0;
   min-height: 0;
   gap: 4px;
@@ -251,6 +265,18 @@
   align-items: baseline;
   gap: 12px;
   font-size: var(--text-2xs, 12px);
+}
+
+.condition-console .meter .cap-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.condition-console .meter .meter-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .condition-console .meter .cap b {
@@ -302,7 +328,9 @@
 
 .condition-console .stand-row {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  /* CG-D1: radar column hugs 200px chart; bars take remainder — one top-aligned row */
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: 16px;
   padding: 16px;
 }
@@ -311,13 +339,32 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  min-width: 200px;
+  width: max-content;
+  overflow: visible;
+}
+
+.condition-console .standing-radar-chart,
+.condition-console .radar-fallback {
+  width: 200px;
+  height: 200px;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .condition-console .live-col {
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  /* Width bandage forbidden — overflow-x hidden; vertical scroll only when bars+strip exceed height */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.condition-console .bar b {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 2.5ch;
 }
 
 .condition-console .pw {
@@ -328,10 +375,14 @@
 
 .condition-console .bar {
   display: grid;
-  grid-template-columns: 100px minmax(0, 1fr) 40px;
+  grid-template-columns: minmax(7.5rem, max-content) minmax(0, 1fr) minmax(4.5rem, max-content);
   gap: 8px;
   align-items: center;
   font-size: 12px;
+}
+
+.condition-console .bar > span:first-child {
+  white-space: nowrap;
 }
 
 .condition-console .bar .t {

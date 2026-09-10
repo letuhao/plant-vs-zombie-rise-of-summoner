@@ -209,6 +209,10 @@ FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
         // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk. passive-tree D55 (2026-09-06): v6 -> v7, published via tools/tuning/publish.py -- demonType/aspect/uniqueDemon skillPointsPerThetaMilliByScope moved from the borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22} against the already-settled commander=11 (spec-tree-state.md open question 3) -- v6 stays on disk.
         File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v8.json"))));
+// aptitude-sheet AS-3.1: soft max presets (E8) — separate file so aptitudes.v{n} is not republished for a library-size knob.
+FusionRpg.Core.Stats.Aptitudes.AptitudePresetTuningHub.Configure(
+    FusionRpg.Core.Stats.Aptitudes.AptitudePresetTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "aptitude-presets.v1.json"))));
 // Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
 // sees one, so the rung ladder has no reason to load there.
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
@@ -338,6 +342,7 @@ builder.Services.AddSingleton<InjectorCommandInbox>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.EffectGrantSession>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.SimEffectHost>();
 builder.Services.AddSingleton<UniqueActorService>();
+builder.Services.AddSingleton<IActorLiveStateStore, ActorLiveStateStore>();
 builder.Services.AddSingleton<PerfWindowBuffer>();
 builder.Services.AddSingleton<WebMatchService>();
 builder.Services.AddSingleton<ExpeditionService>();
@@ -770,6 +775,7 @@ app.MapDelveBattle();
 app.MapWorld();
 app.MapWorldWarden();
 app.MapAptitudes();
+app.MapAptitudePresets();
 app.MapPassiveTree();
 app.MapGateCounters();
 app.MapSpeciesBuild();

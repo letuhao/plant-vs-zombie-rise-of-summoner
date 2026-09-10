@@ -7,25 +7,31 @@
   <style>
     .identity {
       width: 360px; display:flex; gap:12px; padding:12px;
-      border:1px solid #5b5144; border-radius:14px; background:#2f261d; color:#f2ead8;
+      border: 1px solid #5b5144; border-radius: 14px; background: #2f261d; color: #f2ead8;
     }
     .portrait { width:48px; height:48px; border:1px solid #7fb4ff; border-radius:8px; background:#111; flex:none; }
     .eyebrow { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#a39583; }
-    .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-    .chip { padding:2px 8px; border:1px solid #5b5144; border-radius:999px; font-size:10px; text-transform:uppercase; color:#a39583; }
+    .badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .phase-badge, .element-badge {
+      padding: 2px 8px; border: 1px solid #5b5144; border-radius: 999px; font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .phase-badge { color: #e0b44b; border-color: color-mix(in srgb, #e0b44b 55%, #5b5144); }
+    .element-badge[data-el="fire"] { color: #e7733f; border-color: color-mix(in srgb, #e7733f 55%, #5b5144); }
+    .element-badge[data-el="light"] { color: #d8c9a8; border-color: color-mix(in srgb, #d8c9a8 55%, #5b5144); }
   </style>
 </head>
 <body>
-  <!-- Condition variant: species / phase / elements only — Name + Lv · role stay on the left rail. -->
-  <section class="identity" data-testid="condition-actor-identity">
+  <!-- Condition variant: species / phase-badge / element-badge* — Name + Lv · role stay on the left rail. -->
+  <section class="identity" data-testid="condition-actor-identity" data-grid-area="identity">
     <div class="portrait"></div>
     <div>
       <p class="eyebrow">Species</p>
       <div style="font:700 18px/1.1 ui-serif;margin-top:4px">Sunflower</div>
-      <div class="chips">
-        <span class="chip">ActiveBound</span>
-        <span class="chip">fire</span>
-        <span class="chip">light</span>
+      <div class="badges">
+        <span class="phase-badge">ActiveBound</span>
+        <span class="element-badge" data-el="fire">fire</span>
+        <span class="element-badge" data-el="light">light</span>
       </div>
     </div>
   </section>

@@ -77,6 +77,17 @@ public static class DerivedSurfaceCook
         IReadOnlyList<DerivedSurfaceVariantDto>? actionCategoryVariants = null;
         if (tab.Id == "other")
         {
+            // D3: OTHER Shared is first-class on cook Variants — FE selects, does not invent.
+            variants = new List<DerivedSurfaceVariantDto>
+            {
+                new()
+                {
+                    Id = "shared",
+                    DisplayName = lang.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? "共用" : "Shared",
+                    Ordinal = 0,
+                    PresentationOnly = false
+                }
+            };
             actionCategoryVariants = derived.ActionCategoryVariants
                 .OrderBy(v => v.Ordinal)
                 .Select(v => new DerivedSurfaceVariantDto
@@ -160,28 +171,21 @@ public static class DerivedSurfaceCook
 
     static List<DerivedSurfaceVariantDto> CookStatusVariants(string lang)
     {
-        var statuses = StatusSurfaceCatalogHub.Catalog.Entries
-            .OrderBy(e => e.Id, StringComparer.Ordinal)
+        // D1: Status rail = Omni + statusCategoryVariants (L2b) — not per-status-id chips.
+        var cats = DerivedStatSurfaceCatalogHub.Catalog.StatusCategoryVariants
+            .OrderBy(v => v.Ordinal)
             .ToList();
-        var list = new List<DerivedSurfaceVariantDto>(statuses.Count + 1)
+        var list = new List<DerivedSurfaceVariantDto>(cats.Count);
+        for (var i = 0; i < cats.Count; i++)
         {
-            new()
-            {
-                Id = "omni",
-                DisplayName = lang.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? "全域" : "Omni",
-                Ordinal = 0,
-                PresentationOnly = true
-            }
-        };
-        for (var i = 0; i < statuses.Count; i++)
-        {
-            var e = statuses[i];
+            var v = cats[i];
             list.Add(new DerivedSurfaceVariantDto
             {
-                Id = e.Id,
-                DisplayName = e.DisplayName,
-                Ordinal = i + 1,
-                PresentationOnly = false
+                Id = v.Id,
+                DisplayName = v.DisplayName.Resolve(lang),
+                Ordinal = v.Ordinal,
+                // Omni is the presentation-only dense slot; category chips are joinable.
+                PresentationOnly = string.Equals(v.Id, "omni", StringComparison.Ordinal)
             });
         }
         return list;

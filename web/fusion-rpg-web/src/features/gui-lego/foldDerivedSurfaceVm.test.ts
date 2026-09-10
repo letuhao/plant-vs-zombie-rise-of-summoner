@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { actorSurfaceFixture, derivedSurfaceFromFixture } from "@/lib/bus/actorSurface";
 import { formatDerivedMagnitude } from "./cook/formatDerivedMagnitude";
+import { SOURCES_TITLE, UNATTRIBUTED_LABEL } from "./cook/derivedPlayerCopy";
 import { foldDerivedSurfaceVm } from "./foldDerivedSurfaceVm";
+import { defaultThemeRegistry } from "./themeRegistry";
 
 describe("formatDerivedMagnitude", () => {
   it("formats channel totals without a leading +", () => {
@@ -13,6 +15,13 @@ describe("formatDerivedMagnitude", () => {
   it("keeps signed delta for contribution lines", () => {
     const m = formatDerivedMagnitude(980, "GameUnits", { role: "delta" });
     expect(m.valueText).toMatch(/^\+9,?80$/);
+  });
+
+  it("formats LadderIndex via ladderIndex UnitClass (DC-5)", () => {
+    const m = formatDerivedMagnitude(24, "LadderIndex", { role: "total" });
+    expect(m.formatterId).toBe("ladderIndex");
+    expect(m.valueText).toBe("24");
+    expect(m.valueText.startsWith("+")).toBe(false);
   });
 });
 
@@ -31,6 +40,8 @@ describe("foldDerivedSurfaceVm", () => {
           reading: "Fire power",
           composeKind: "FlatSum",
           value: 2847,
+          unitClass: "GameUnits",
+          renderState: "active",
           contributions: [
             { sourceId: "equip:muzzle:ember", label: "Equip", op: "Flat", value: 980 },
             { sourceId: "aptitude.Might", label: "Might", op: "Flat", value: 185 }
@@ -72,6 +83,154 @@ describe("foldDerivedSurfaceVm", () => {
     expect(vm.inspect.donut.slices).toBeTruthy();
     expect((vm.inspect.donut.slices as { paint: string }[])[0]?.paint).toMatch(/^#/);
     expect(vm.familyList.count).toBeGreaterThan(0);
+    expect(String(vm.inspect.sources.title)).toBe(SOURCES_TITLE);
+    expect(String(vm.inspect.sources.title)).not.toMatch(/GG-49/);
+    const meta = vm.inspect.meta.sentences as string[];
+    expect(meta.some((s) => s.startsWith("Join:"))).toBe(false);
+    expect(meta.some((s) => /Sources add together/.test(s))).toBe(true);
+  });
+
+  it("D4: hides default only; no-producer stays visible", () => {
+    const surface = actorSurfaceFixture();
+    const cook = derivedSurfaceFromFixture(surface);
+    const vm = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      sheetChannels: [
+        {
+          channelId: "combat.power.fire",
+          value: 0,
+          composeKind: "FlatSum",
+          unitClass: "GameUnits",
+          defaultValue: 0,
+          renderState: "default",
+          contributions: []
+        }
+      ],
+      ui: {
+        tabId: "elements",
+        variantId: "fire",
+        query: "",
+        showUnchanged: false,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    const fireRows = vm.families.flatMap((f) =>
+      (f.rows as { channelId: string }[]).map((r) => r.channelId)
+    );
+    expect(fireRows).not.toContain("combat.power.fire");
+
+    const ice = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      sheetChannels: [
+        {
+          channelId: "combat.power.ice",
+          value: 0,
+          composeKind: "FlatSum",
+          unitClass: "GameUnits",
+          renderState: "no-producer",
+          contributions: []
+        }
+      ],
+      ui: {
+        tabId: "elements",
+        variantId: "ice",
+        query: "",
+        showUnchanged: false,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    const iceRows = ice.families.flatMap((f) =>
+      (f.rows as { channelId: string }[]).map((r) => r.channelId)
+    );
+    expect(iceRows).toContain("combat.power.ice");
+  });
+
+  it("shows unattributed contribution when SourceId empty (DC-8)", () => {
+    const surface = actorSurfaceFixture();
+    const cook = derivedSurfaceFromFixture(surface);
+    const vm = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      sheetChannels: [
+        {
+          channelId: "combat.power.fire",
+          value: 50,
+          composeKind: "FlatSum",
+          unitClass: "GameUnits",
+          renderState: "active",
+          contributions: [{ sourceId: "", label: "", op: "Flat", value: 50 }]
+        }
+      ],
+      ui: {
+        tabId: "elements",
+        variantId: "fire",
+        query: "",
+        showUnchanged: true,
+        selectedChannelId: "combat.power.fire"
+      },
+      availability: "ready"
+    });
+    const items = vm.inspect.sources.items as { label: string; unattributed?: boolean }[];
+    expect(items.some((i) => i.label === UNATTRIBUTED_LABEL && i.unattributed)).toBe(true);
+  });
+
+  it("accepts injected themeRegistry (D5)", () => {
+    const surface = actorSurfaceFixture();
+    const cook = derivedSurfaceFromFixture(surface);
+    let hits = 0;
+    const registry = {
+      resolve: (ref: Parameters<typeof defaultThemeRegistry.resolve>[0]) => {
+        hits += 1;
+        return defaultThemeRegistry.resolve(ref);
+      },
+      lookup: defaultThemeRegistry.lookup
+    };
+    foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      themeRegistry: registry,
+      ui: {
+        tabId: "elements",
+        variantId: "fire",
+        query: "",
+        showUnchanged: true,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    expect(hits).toBeGreaterThan(0);
+  });
+
+  it("OTHER action chips use action-category theme packs (DC-7)", () => {
+    const surface = actorSurfaceFixture();
+    const cook = derivedSurfaceFromFixture(surface);
+    const vm = foldDerivedSurfaceVm({
+      identity: { displayName: "X", level: 1, side: "plant" },
+      cookTabs: cook.tabs,
+      elements: surface.elements,
+      ui: {
+        tabId: "other",
+        variantId: "attack",
+        query: "",
+        showUnchanged: true,
+        selectedChannelId: null
+      },
+      availability: "ready"
+    });
+    const attack = vm.variantRail.chips.find((c) => c.id === "attack");
+    expect(attack?.themeRef).toEqual({ kind: "action-category", id: "attack" });
+    expect(attack?.themeResolved?.themeId).toBe("action-category.attack");
+    expect(vm.primaryRail.chips.find((c) => c.id === "elements")?.themeResolved?.themeId).toBe(
+      "cook-tab.elements"
+    );
   });
 
   it("maps loading availability to phase loading", () => {
@@ -159,10 +318,9 @@ describe("foldDerivedSurfaceVm", () => {
     expect(vm.themeResolved?.themeId).toBe("resource.hp");
   });
 
-  it("status rail cooks Omni + every status-catalog chip", () => {
+  it("status rail cooks Omni + L2b category chips (D1)", () => {
     const surface = actorSurfaceFixture();
     const cook = derivedSurfaceFromFixture(surface);
-    const butterRow = surface.statuses.find((s) => s.id === "butter")!;
     const vm = foldDerivedSurfaceVm({
       identity: { displayName: "X", level: 1, side: "plant" },
       cookTabs: cook.tabs,
@@ -170,7 +328,7 @@ describe("foldDerivedSurfaceVm", () => {
       statuses: surface.statuses,
       ui: {
         tabId: "status",
-        variantId: "butter",
+        variantId: "dot",
         query: "",
         showUnchanged: true,
         selectedChannelId: null
@@ -178,17 +336,10 @@ describe("foldDerivedSurfaceVm", () => {
       availability: "ready"
     });
     const ids = vm.variantRail.chips.map((c) => c.id);
-    expect(ids[0]).toBe("omni");
-    expect(ids).toHaveLength(25);
-    expect(ids).toContain("butter");
-    expect(ids).toContain("nerve.afflicted");
+    expect(ids).toEqual(["omni", "dot", "cc", "contagion"]);
     expect(vm.variantRail.ariaLabel).toBe("Status catalog variants");
-    const butter = vm.variantRail.chips.find((c) => c.id === "butter");
-    expect(butter?.themeResolved?.glyphDefault).toBe("ban");
-    expect(butter?.themeResolved?.paint.accent).toBe(butterRow.color);
-    expect((butter as { glyphRef?: { hudToken?: string } })?.glyphRef?.hudToken).toBe(
-      butterRow.hudToken
-    );
+    const dot = vm.variantRail.chips.find((c) => c.id === "dot");
+    expect(dot?.themeResolved?.glyphDefault).toBeTruthy();
   });
 
   it("OTHER Shared lists expand:none only; Attack lists action-category only", () => {

@@ -17,6 +17,21 @@ wire + player copy. Cheap FE-only / hardcoded CAP / mute `data-el` passes are **
 
 ---
 
+## Owner decisions (locked 2026-09-10 strengthen)
+
+| Id | Decision |
+|---|---|
+| **D1** | Status cook L2b: rail = **Omni + `statusCategoryVariants`**; dense families use `expand: status-category` |
+| **D2** | Wire `renderState` **authoritative**; FE may recompute only for parity goldens |
+| **D3** | OTHER **Shared** emitted by BE cook DTO; delete FE invent |
+| **D4** | Show-unchanged hides **`default` only**; `no-producer` stays visible with fiction label |
+| **D5** | Fold accepts injectable `themeRegistry` (amend fold to match surface-vm) |
+| **D6** | Sheet channel `Value` stays **`double` for now** (overflow/exempt note); shield HP stays `long` |
+| **D7** | `derived-statrow-gauge` **deferred** — not Wave 1–2 Done gate |
+| **S1–S3** | Shared with condition-glance / shield-sheet (layers on sheet; live bag) |
+
+---
+
 ## What this program is
 
 Harden the shipped Derived Lego cook so it matches the design SSOT: registry-truth six states and
@@ -52,7 +67,7 @@ player band.
 | `derived-element-paint-wire` | Chip/CSS consume `resolveElementPaint`; remove data-el overrides | element-paint-ssot | [derived-cook/spec-derived-element-paint-wire.md](derived-cook/spec-derived-element-paint-wire.md) |
 | `derived-theme-packs` | action-category + cook-tab packs; catalog glyphs for status | theme packs | [derived-cook/spec-derived-theme-packs.md](derived-cook/spec-derived-theme-packs.md) |
 | `derived-player-copy` | Compose/unit/cap/state fiction; ban engine jargon on band | catalogs/locale | [derived-cook/spec-derived-player-copy.md](derived-cook/spec-derived-player-copy.md) |
-| `derived-statrow-gauge` | Optional spark/pips from catalog gauge after IA+states | fold | [derived-cook/spec-derived-statrow-gauge.md](derived-cook/spec-derived-statrow-gauge.md) |
+| `derived-statrow-gauge` | Spark/pips from catalog gauge — **D7 deferred** (not Done gate) | fold | [derived-cook/spec-derived-statrow-gauge.md](derived-cook/spec-derived-statrow-gauge.md) |
 | `derived-volume-guard` | Stress fixture ~channel count + 500 | fold | [derived-cook/spec-derived-volume-guard.md](derived-cook/spec-derived-volume-guard.md) |
 | `derived-recipe-wire` | Land amend recipe/bind/host; queue P0 Harden → Done | all above | [derived-cook/spec-derived-recipe-wire.md](derived-cook/spec-derived-recipe-wire.md) |
 
@@ -71,7 +86,7 @@ Wave 2 — join + paint
 
 Wave 3 — surface land + guards
   derived-recipe-wire · derived-volume-guard
-  derived-statrow-gauge (optional; after Wave 2 green)
+  derived-statrow-gauge (D7 deferred — optional after Wave 2)
 ```
 
 ---
@@ -80,11 +95,33 @@ Wave 3 — surface land + guards
 
 - Six render states match design §3 with registry/wire truth — `unregistered` reachable; default ≠ no-producer.
 - CAP painted only from wire/registry; zero `KNOWN_CAPS` in FE.
-- Status dense category channels cookable; OTHER Shared from BE cook.
+- Status dense category channels cookable (**D1**); OTHER Shared from BE cook (**D3**).
+- Show-unchanged = **D4**; wire `renderState` = **D2**; themeRegistry inject = **D5**.
 - Element chips use `element-paint-ssot` only — no `data-el` CSS paint SSOT.
 - No player-band `channelId` / `GG-49` / raw state enums as product copy.
 - `LadderIndex` formats correctly; amend surface-vm; no god TSX.
-- Queue P0 Harden cleared only when Waves 1–3 land.
+- Queue P0 Harden cleared when Waves 1–3 land (**without** requiring D7 gauge).
+
+---
+
+## Coverage-gap register (strengthen 2026-09-10)
+
+| Id | Gap | Disposition |
+|---|---|---|
+| CG-D1 | Six-state / unregistered unreachable | **Closed in spec** — `derived-render-states` + **D2** |
+| CG-D2 | FE `KNOWN_CAPS` / immune=1 | **Closed in spec** — `derived-cap-ssot` |
+| CG-D3 | Status L2b not cookable | **Closed** — **D1** |
+| CG-D4 | OTHER Shared FE invent | **Closed** — **D3** |
+| CG-D5 | Show-unchanged hides no-producer | **Closed** — **D4** |
+| CG-D6 | themeRegistry singleton drift | **Closed** — **D5** |
+| CG-D7 | LadderIndex miss | **Closed in spec** — fold-harden / surface-vm |
+| CG-D8 | Player-band GG-49 / channelId | **Closed in spec** — `derived-player-copy` |
+| CG-D9 | Unattributed contributions | **Closed in spec** — owned by `derived-player-copy` |
+| CG-D10 | Volume Guard 7 / G6 undefined | **Closed** — `derived-volume-guard` |
+| CG-D11 | Dual fetch sheet+derived | **Closed in spec** — recipe-wire fetch matrix |
+| CG-D12 | StatRow spark/pips | **Deferred D7** — not Done gate |
+| CG-D13 | Channel Value → long | **Deferred** — **D6** keep double; separate Core ticket |
+| CG-D14 | Design §3 turn.* stale | **Closed** — design errata 2026-09-10 |
 
 ---
 

@@ -9,7 +9,8 @@ public sealed record AptitudeSurfaceEntry(
     int Ordinal,
     string DisplayName,
     string Role,
-    string Reading);
+    string Reading,
+    string? Icon);
 
 public sealed record AptitudeSurfaceCatalog(
     int SchemaVersion,
@@ -42,7 +43,8 @@ public static class AptitudeSurfaceCatalogLoader
                 Ordinal: ActorSurfaceJson.Int(el, "ordinal", path, Catalog),
                 DisplayName: ActorSurfaceJson.Str(el, "displayName", path, Catalog),
                 Role: ActorSurfaceJson.Str(el, "role", path, Catalog),
-                Reading: ActorSurfaceJson.Str(el, "reading", path, Catalog)));
+                Reading: ActorSurfaceJson.Str(el, "reading", path, Catalog),
+                Icon: ActorSurfaceJson.OptionalStr(el, "icon", path, Catalog)));
             i++;
         }
 

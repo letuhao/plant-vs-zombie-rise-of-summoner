@@ -1,14 +1,20 @@
 # Spec: `aptitudes-tab`
 
+> **Superseded for UniqueActor allocate (2026-09-10).** Player Aptitudes delivery is now
+> [aptitude-sheet-map.md](../aptitude-sheet-map.md): UniqueActor → UniqueDemon (Mode A), commander
+> role → Mode C, shared species Mode B. Do **not** implement “v1 = commander only” from this file.
+> Historical actor-sheet shell notes below may still inform GG-63 footer wiring until
+> `host-role-gate` lands.
+
 **Module id:** `aptitudes-tab` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
-**Depends on:** `actor-sheet-shell` · **Status:** Draft — pending owner review.
+**Depends on:** `actor-sheet-shell` · **Status:** **Superseded** by aptitude-sheet (see banner).
 
 ---
 
 ## Assumptions
 
 1. Tiles come from `aptitude-catalog` (today twelve). Posture is a **read** grouping, not storage.
-2. **v1 allocate = commander scope** via existing GET/POST; overspend → 409, never clamp (PS-8).
+2. ~~**v1 allocate = commander scope**~~ **Overturned** — see aptitude-sheet Modes A/B/C.
 3. Reuse `useAllocationDraft`; Confirm is **shell footer** decision control (GG-63), shown **only**
    while this tab is active or the draft is dirty — not a nested dialog.
 4. Aspect-scope reverted — do not ship.
@@ -62,4 +68,5 @@ PointBudget / edges stay in `aptitudes.v7.json`. No new numbers. Copy in `aptitu
 
 ## Open Questions
 
-Ideal Q2: UniqueDemon on this sheet later — out of scope for v1 wiring.
+~~Ideal Q2: UniqueDemon on this sheet later — out of scope for v1 wiring.~~ **Overturned** — UniqueDemon
+is a Done gate under [aptitude-sheet-map.md](../aptitude-sheet-map.md) Mode A.

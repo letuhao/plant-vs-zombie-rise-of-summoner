@@ -20,10 +20,31 @@ import resourceHunger from "./themes/resource-hunger.json";
 import resourceSpirit from "./themes/resource-spirit.json";
 import resourceQi from "./themes/resource-qi.json";
 import resourcePoise from "./themes/resource-poise.json";
+import actionAttack from "./themes/action-category-attack.json";
+import actionDefense from "./themes/action-category-defense.json";
+import actionSupport from "./themes/action-category-support.json";
+import actionMovement from "./themes/action-category-movement.json";
+import actionStatus from "./themes/action-category-status.json";
+import cookElements from "./themes/cook-tab-elements.json";
+import cookStatus from "./themes/cook-tab-status.json";
+import cookResources from "./themes/cook-tab-resources.json";
+import cookOther from "./themes/cook-tab-other.json";
+import bucketBase from "./themes/bucket-base.json";
+import bucketAptitude from "./themes/bucket-aptitude.json";
+import bucketEquip from "./themes/bucket-equip.json";
+import bucketTree from "./themes/bucket-tree.json";
+import bucketStatus from "./themes/bucket-status.json";
+import bucketGrant from "./themes/bucket-grant.json";
+import bucketOther from "./themes/bucket-other.json";
+import bucketNeg from "./themes/bucket-neg.json";
+import postureForce from "./themes/posture-force.json";
+import postureFinesse from "./themes/posture-finesse.json";
+import postureBastion from "./themes/posture-bastion.json";
 
 /**
  * FE copies of docs/design/gui-lego/themes/packs — design pack remains SSOT on conflict.
  * Sync note: re-copy packs when design JSON changes (manual until a sync script exists).
+ * posture.* packs are aptitude-sheet chrome only — bucket.aptitude stays Derived-bucket.
  */
 const PACKS: ThemePack[] = [
   neutral as ThemePack,
@@ -45,11 +66,36 @@ const PACKS: ThemePack[] = [
   resourceHunger as ThemePack,
   resourceSpirit as ThemePack,
   resourceQi as ThemePack,
-  resourcePoise as ThemePack
+  resourcePoise as ThemePack,
+  actionAttack as ThemePack,
+  actionDefense as ThemePack,
+  actionSupport as ThemePack,
+  actionMovement as ThemePack,
+  actionStatus as ThemePack,
+  cookElements as ThemePack,
+  cookStatus as ThemePack,
+  cookResources as ThemePack,
+  cookOther as ThemePack,
+  bucketBase as ThemePack,
+  bucketAptitude as ThemePack,
+  bucketEquip as ThemePack,
+  bucketTree as ThemePack,
+  bucketStatus as ThemePack,
+  bucketGrant as ThemePack,
+  bucketOther as ThemePack,
+  bucketNeg as ThemePack,
+  postureForce as ThemePack,
+  postureFinesse as ThemePack,
+  postureBastion as ThemePack
 ];
 
 const byId = new Map(PACKS.map((p) => [p.themeId, p]));
 const NEUTRAL = byId.get("neutral") ?? (neutral as ThemePack);
+
+export type ThemeRegistryHandle = {
+  resolve: (ref: ThemeRef | undefined | null) => ThemeResolved;
+  lookup: (ref: ThemeRef | undefined | null) => ThemePack;
+};
 
 export function themeIdFor(ref: ThemeRef): string {
   if (ref.kind === "neutral") return "neutral";
@@ -71,6 +117,12 @@ export function resolveTheme(ref: ThemeRef | undefined | null): ThemeResolved {
     glyphDefault: pack.glyphDefault ?? null
   };
 }
+
+/** Default injectable registry (D5) — fold may inject a test double. */
+export const defaultThemeRegistry: ThemeRegistryHandle = {
+  resolve: resolveTheme,
+  lookup: lookupThemePack
+};
 
 export function listThemePacks(): readonly ThemePack[] {
   return PACKS;

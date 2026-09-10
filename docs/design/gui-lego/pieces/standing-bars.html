@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>standing-bars</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .pw { width: 420px; display: grid; gap: 8px; color: #f2ead8; }
+    .spec-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #a39583; }
+    .bar { display: grid; grid-template-columns: 100px minmax(0, 1fr) minmax(40px, max-content); gap: 8px; align-items: center; font-size: 12px; }
+    .t { height: 8px; border-radius: 999px; border: 1px solid #5b5144; background: #201a14; overflow: hidden; }
+    .f { display: block; height: 100%; width: 77%; background: #d98787; }
+    b { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <p class="spec-label">Standing</p>
+  <div class="pw">
+    <div class="bar"><span>Offense</span><span class="t"><span class="f"></span></span><b>77</b></div>
+    <div class="bar"><span>Survivability</span><span class="t"><span class="f" style="width:58%;background:#6dbb63"></span></span><b>58</b></div>
+    <div class="bar"><span>Control</span><span class="t"><span class="f" style="width:36%;background:#b48ae6"></span></span><b>36</b></div>
+    <div class="bar"><span>Utility</span><span class="t"><span class="f" style="width:26%;background:#7fb4ff"></span></span><b>26</b></div>
+    <div class="bar"><span>Economy</span><span class="t"><span class="f" style="width:49%;background:#e0b44b"></span></span><b>49</b></div>
+  </div>
+  <p style="margin-top:12px;font-size:12px;color:#a39583">Large absolute ints (e.g. 523999) stay tabular; layout owns column width — never page-level horizontal scroll.</p>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+  "_meta": {
+    "candidateSetHash": "7d51158ae2c8de89addf7b8a1e8eba5e3f2235d9f65349002d14525c085149eb",
+    "corpusHash": "50b08fb26645582959613f18ec989e63aa754a6093201711928339f3ed2099d6",
+    "partition": "rounds",
+    "round": 909,
+    "semanticEnabled": true,
+    "similarityFunctionId": "token-overlap-jaccard-milli",
+    "similarityFunctionVersion": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateA": "action.general.0006",
+      "candidateB": "action.general.0007",
+      "id": "review.round-909.0001",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0015",
+      "candidateB": "action.general.0017",
+      "id": "review.round-909.0002",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.cherrypaperzombie.001",
+      "candidateB": "action.species.cherrypaperzombie.002",
+      "id": "review.round-909.0003",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.cherryshooter.001",
+      "candidateB": "action.species.cherryshooter.002",
+      "id": "review.round-909.0004",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.gatlingpea.001",
+      "candidateB": "action.species.snowgatling.002",
+      "id": "review.round-909.0005",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.hypnojalapeno.001",
+      "candidateB": "action.species.hypnojalapeno.002",
+      "id": "review.round-909.0006",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.hypnopeashooter.001",
+      "candidateB": "action.species.hypnopeashooter.002",
+      "id": "review.round-909.0007",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.ironpeazombie.001",
+      "candidateB": "action.species.ironpeazombie.002",
+      "id": "review.round-909.0008",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.lanternchomper.001",
+      "candidateB": "action.species.twinflower.001",
+      "id": "review.round-909.0009",
+      "similarityMilli": 1000
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

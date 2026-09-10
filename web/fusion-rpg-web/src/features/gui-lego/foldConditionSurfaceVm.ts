@@ -2,11 +2,13 @@ import type { Phase, PiecePayload, ThemeRef } from "./types";
 import type {
   ActorResourcePoolDto,
   ActorSheetDto,
+  ActorShieldSummaryDto,
   ActorStandingDto,
   ActorStatusGlyphDto
 } from "@/lib/bus/aura";
 import type { ActorSurfaceCatalog, ResourceCatalogRow, StatusCatalogRow } from "@/lib/bus/actorSurface";
 import type { ActorView } from "@/contract/types";
+import { isShieldSummaryMountable } from "./shieldMount";
 
 export type ConditionSurfaceVmInput = {
   data: ActorView;
@@ -27,17 +29,20 @@ export type ConditionSurfaceVm = {
 };
 
 const STANDING_PENDING_MESSAGE = "Standing vector isn't ready yet.";
+const STANDING_TITLE = "Standing";
+const EFFECTS_TITLE = "Effects";
 
+/** Hex paints — recharts cannot consume CSS vars alone (standing-radar spec). */
 const STANDING_AXES: {
   id: keyof ActorStandingDto;
   label: string;
   paint: string;
 }[] = [
-  { id: "offense", label: "Offense", paint: "var(--pw-offense, #d98787)" },
-  { id: "survivability", label: "Survivability", paint: "var(--pw-survivability, #6dbb63)" },
-  { id: "control", label: "Control", paint: "var(--pw-control, #b48ae6)" },
-  { id: "utility", label: "Utility", paint: "var(--pw-utility, #7fb4ff)" },
-  { id: "economy", label: "Economy", paint: "var(--pw-economy, #e0b44b)" }
+  { id: "offense", label: "Offense", paint: "#d98787" },
+  { id: "survivability", label: "Survivability", paint: "#6dbb63" },
+  { id: "control", label: "Control", paint: "#b48ae6" },
+  { id: "utility", label: "Utility", paint: "#7fb4ff" },
+  { id: "economy", label: "Economy", paint: "#e0b44b" }
 ];
 
 function toSurfacePhase(availability: ConditionSurfaceVmInput["availability"]): Phase {
@@ -57,6 +62,24 @@ function glyphByStatus(sheet: ActorSheetDto | null | undefined) {
 function progressFillPct(level: number, xp: number, xpToNext: number | null | undefined): number | null {
   if (!Number.isFinite(xp) || !Number.isFinite(level) || !xpToNext || xpToNext <= 0) return null;
   return Math.max(0, Math.min(100, Math.round((xp / xpToNext) * 100)));
+}
+
+/** Stamp revision on a piece payload and nested piece-shaped children (Q5). */
+function stampRevision(payload: PiecePayload, revision: number): PiecePayload {
+  payload.revision = revision;
+  for (const [key, value] of Object.entries(payload)) {
+    if (key === "revision") continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item && typeof item === "object" && "piece" in (item as object)) {
+          stampRevision(item as PiecePayload, revision);
+        }
+      }
+    } else if (value && typeof value === "object" && "piece" in (value as object)) {
+      stampRevision(value as PiecePayload, revision);
+    }
+  }
+  return payload;
 }
 
 function buildProgression(data: ActorView, sheet: ActorSheetDto | null | undefined): PiecePayload {
@@ -79,10 +102,7 @@ function buildProgression(data: ActorView, sheet: ActorSheetDto | null | undefin
   };
 }
 
-function buildIdentity(
-  data: ActorView,
-  sheet: ActorSheetDto | null | undefined
-): PiecePayload {
+function buildIdentity(data: ActorView, sheet: ActorSheetDto | null | undefined): PiecePayload {
   const base = {
     piece: "actor-identity",
     instanceId: "condition:identity",
@@ -96,9 +116,8 @@ function buildIdentity(
       ...base,
       phase: "pending",
       speciesName: null,
-      phaseLabel: null,
-      elements: [],
-      message: "Species isn't loaded yet."
+      speciesMessage: "Species isn't loaded yet.",
+      elementBadges: []
     };
   }
 
@@ -106,13 +125,53 @@ function buildIdentity(
     ? [sheet.elementTyping.primary, ...(sheet.elementTyping.secondary ? [sheet.elementTyping.secondary] : [])]
     : [];
 
-  return {
+  const identity: PiecePayload = {
     ...base,
     phase: sheet.speciesName || sheet.phase || elements.length ? "ready" : "pending",
     speciesName: sheet.speciesName ?? null,
-    phaseLabel: sheet.phase ?? null,
-    elements,
-    message: sheet.speciesName ? null : "Species isn't on file for this actor."
+    speciesMessage: sheet.speciesName ? null : "Species isn't on file for this actor.",
+    elementBadges: elements.map((elementId) => ({
+      piece: "element-badge",
+      instanceId: `condition:identity:element:${elementId}`,
+      phase: "ready" as const,
+      elementId,
+      label: elementId,
+      themeRef: { kind: "element", id: elementId } satisfies ThemeRef
+    }))
+  };
+
+  if (sheet.phase) {
+    identity.phaseBadge = {
+      piece: "phase-badge",
+      instanceId: "condition:identity:phase",
+      phase: "ready",
+      label: sheet.phase
+    };
+  }
+
+  return identity;
+}
+
+function buildShieldPayload(shield: ActorShieldSummaryDto): PiecePayload {
+  const current = shield.current ?? 0;
+  const max = shield.max ?? 0;
+  const elementId =
+    shield.elementId != null && shield.elementId.length > 0 ? shield.elementId : null;
+  const themeRef: ThemeRef | undefined = elementId
+    ? { kind: "element", id: elementId }
+    : undefined;
+
+  return {
+    piece: "shield-status",
+    instanceId: "condition:shield",
+    phase: "ready",
+    current,
+    max,
+    stacks: shield.stacks ?? null,
+    elementId,
+    themeRef,
+    currentText: current.toLocaleString(),
+    maxText: max.toLocaleString()
   };
 }
 
@@ -130,16 +189,17 @@ function buildHero(
       ? Math.max(0, Math.min(100, Math.round((hp.current / hp.max) * 100)))
       : null;
   const shield = sheet?.shieldSummary ?? null;
+  const shieldMountable = isShieldSummaryMountable(shield);
   const shieldPct =
-    shield?.current != null && shield.max != null && shield.max > 0
-      ? Math.max(0, Math.min(100, Math.round((shield.current / shield.max) * 100)))
+    shieldMountable && shield?.max != null && shield.max > 0
+      ? Math.max(0, Math.min(100, Math.round(((shield.current ?? 0) / shield.max) * 100)))
       : null;
   const shieldTheme: ThemeRef | undefined =
-    shield?.elementId != null && shield.elementId.length > 0
+    shieldMountable && shield?.elementId != null && shield.elementId.length > 0
       ? { kind: "element", id: shield.elementId }
       : undefined;
 
-  return {
+  const hero: PiecePayload = {
     piece: "cond-hero",
     instanceId: "condition:hero",
     phase: "ready",
@@ -164,6 +224,12 @@ function buildHero(
     },
     meters: surface.resources.map((resource) => buildMeter(data, resource, pools.get(resource.id), selectedPoolId))
   };
+
+  if (shieldMountable && shield) {
+    hero.shield = buildShieldPayload(shield);
+  }
+
+  return hero;
 }
 
 function buildMeter(
@@ -203,18 +269,19 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
       instanceId: "condition:standing",
       phase: "ready",
       gridArea: "stand",
+      title: STANDING_TITLE,
       radar: {
         piece: "standing-radar",
         instanceId: "condition:standing:radar",
         phase: "pending" as const,
-        title: "Standing · five axes (definitions.md)",
+        title: STANDING_TITLE,
         message: STANDING_PENDING_MESSAGE
       },
       bars: {
         piece: "standing-bars",
         instanceId: "condition:standing:bars",
         phase: "pending" as const,
-        title: "Standing · five axes (definitions.md)",
+        title: STANDING_TITLE,
         message: STANDING_PENDING_MESSAGE
       }
     };
@@ -229,6 +296,7 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
   const maxAxis = Math.max(1, ...raw.map((a) => a.value));
   const axes = raw.map((a) => ({
     ...a,
+    valueText: a.value.toLocaleString(),
     fillPct: Math.max(0, Math.min(100, Math.round((a.value / maxAxis) * 100)))
   }));
 
@@ -237,18 +305,19 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
     instanceId: "condition:standing",
     phase: "ready",
     gridArea: "stand",
+    title: STANDING_TITLE,
     radar: {
       piece: "standing-radar",
       instanceId: "condition:standing:radar",
       phase: "ready",
-      title: "Standing · five axes (definitions.md)",
+      title: STANDING_TITLE,
       axes
     },
     bars: {
       piece: "standing-bars",
       instanceId: "condition:standing:bars",
       phase: "ready",
-      title: "Standing · five axes (definitions.md)",
+      title: STANDING_TITLE,
       axes
     }
   };
@@ -257,22 +326,9 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
 function buildStatusStrip(
   sheet: ActorSheetDto | null | undefined,
   statuses: StatusCatalogRow[]
-): PiecePayload {
-  const base = {
-    piece: "status-glyph-strip",
-    instanceId: "condition:status-strip",
-    title: "Live status · tap for Status tab",
-    overflowCount: 0
-  };
-
-  if (sheet == null) {
-    return {
-      ...base,
-      phase: "pending",
-      items: [],
-      message: "Live effect instances are not available yet."
-    };
-  }
+): PiecePayload | undefined {
+  // Q3 / fiction-copy — omit entire strip when sheet missing or zero live statuses.
+  if (sheet == null) return undefined;
 
   const liveById = glyphByStatus(sheet);
   const liveRows = statuses
@@ -288,17 +344,13 @@ function buildStatusStrip(
       };
     });
 
-  if (liveRows.length === 0) {
-    return {
-      ...base,
-      phase: "empty",
-      items: [],
-      message: "No live effects applied."
-    };
-  }
+  if (liveRows.length === 0) return undefined;
 
   return {
-    ...base,
+    piece: "status-glyph-strip",
+    instanceId: "condition:status-strip",
+    title: EFFECTS_TITLE,
+    overflowCount: 0,
     phase: "ready",
     items: liveRows,
     message: null
@@ -309,15 +361,17 @@ export function foldConditionSurfaceVm(input: ConditionSurfaceVmInput): Conditio
   const phase = toSurfacePhase(input.availability);
   const revision = input.revision ?? 1;
   const standing = buildStanding(input.sheet);
-  // Nest status under stand-row; also pass catalog statuses into the strip.
-  standing.statusStrip = buildStatusStrip(input.sheet, input.surface.statuses);
+  const statusStrip = buildStatusStrip(input.sheet, input.surface.statuses);
+  if (statusStrip) {
+    standing.statusStrip = statusStrip;
+  }
 
   const main = [
     buildProgression(input.data, input.sheet),
     buildIdentity(input.data, input.sheet),
     buildHero(input.data, input.sheet, input.surface, input.selectedPoolId),
     standing
-  ];
+  ].map((row) => stampRevision(row, revision));
 
   return {
     phase,
@@ -329,6 +383,7 @@ export function foldConditionSurfaceVm(input: ConditionSurfaceVmInput): Conditio
       piece: phase === "loading" ? "phase-loading" : "phase-error",
       instanceId: `condition:phase:${phase}`,
       phase,
+      revision,
       message: phase === "loading" ? "Loading Condition…" : "Condition is unavailable.",
       retryLabel: "Retry",
       retryEvent: "condition.retry"

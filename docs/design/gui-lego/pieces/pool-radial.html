@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>pool-radial</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .radial-wrap {
+      position: relative;
+      display: grid;
+      width: 128px;
+      height: 128px;
+      place-items: center;
+      border: 1px solid #5b5144;
+      border-radius: 16px;
+      background: #241d17;
+      color: #f2ead8;
+      flex: none;
+    }
+    .radial {
+      border-radius: 50%;
+      background: conic-gradient(var(--c, #e74c3c) calc(var(--p, 0) * 1%), #201a14 0);
+      display: grid;
+      place-items: center;
+    }
+    .radial::after {
+      content: "";
+      width: 66%;
+      height: 66%;
+      border-radius: 50%;
+      background: #2f261d;
+      border: 1px solid #5b5144;
+    }
+    .radial-shield { width: 96px; height: 96px; position: absolute; --c: #7fb4ff; --p: 60; }
+    .radial-hp { width: 72px; height: 72px; position: absolute; --c: #e74c3c; --p: 69; }
+    .n { position: absolute; z-index: 1; font-weight: 800; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <p>Fixed 128×128 HP radial; secondary shield ring only when mountable. Paint from themeResolved / shieldThemeResolved.</p>
+  <button class="radial-wrap" type="button" title="1,240 / 1,800">
+    <div class="radial radial-shield"></div>
+    <div class="radial radial-hp"></div>
+    <span class="n">HP</span>
+  </button>
+</body>
+</html>

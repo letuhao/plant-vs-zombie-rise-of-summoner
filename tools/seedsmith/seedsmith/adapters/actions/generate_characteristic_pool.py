@@ -22,7 +22,9 @@ import json
 from pathlib import Path
 
 from .characteristic_pool.anchors import load_anchor_tree, SPECIES_ROOT
-from .characteristic_pool.catalog import CATALOG_PATH, load_catalog
+from .characteristic_pool.catalog import (
+    CATALOG_PATH, derive_live_family_assignments, load_catalog,
+)
 from .characteristic_pool.derive import build_species_anchor, derive_all, load_weights, TUNING_PATH
 from .characteristic_pool.pool import build_pool_entries
 
@@ -32,7 +34,6 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
 MOTIF_ASSIGNMENTS_PATH = DEMONS_ROOT / "_generated" / "motif-assignments.json"
-FAMILY_ASSIGNMENTS_PATH = DEMONS_ROOT / "_generated" / "family-assignments.json"
 
 
 def _canonical_dump(doc: dict) -> str:
@@ -65,7 +66,8 @@ def _corpus_hash(catalog, motif_assignments: dict, family_assignments: dict,
     return hashlib.sha256(blob).hexdigest()
 
 
-def _role_lean_entries(entries, corpus_hash: str, tuning_version: int) -> dict:
+def _role_lean_entries(entries, family_assignments: dict, corpus_hash: str,
+                       tuning_version: int) -> dict:
     rows = []
     for e in entries:
         sp = e.species_anchor
@@ -73,6 +75,7 @@ def _role_lean_entries(entries, corpus_hash: str, tuning_version: int) -> dict:
             "id": f"lean.{sp.species.species_id}",
             "speciesKey": sp.species.species_id,
             "family": sp.family,
+            "families": list(family_assignments.get(sp.species.species_id) or ()),
             "themeKey": sp.theme_key,
             "element": {"primary": sp.species.element_primary,
                        "secondary": sp.species.element_secondary or "none"},
@@ -108,6 +111,7 @@ def _characteristic_pool_entries(corpus_hash: str, tuning_version: int) -> dict:
 
 def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_ROOT,
               catalog_path: Path = CATALOG_PATH, species_root: Path = SPECIES_ROOT,
+              family_assignments_path: "Path | None" = None,
               tuning_path: Path = TUNING_PATH, write: bool = True) -> dict:
     """Pure computation + (optionally) two file writes. Returns a summary dict for the caller to
     report — never prints itself, so a test can call this without capturing stdout."""
@@ -117,8 +121,22 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
 
     motif_assignments = json.loads(
         (demons_root / "_generated" / "motif-assignments.json").read_text(encoding="utf-8"))
-    family_assignments = json.loads(
-        (demons_root / "_generated" / "family-assignments.json").read_text(encoding="utf-8"))
+    using_live_families = family_assignments_path is None
+    if using_live_families:
+        family_assignments = derive_live_family_assignments(species_root)
+    else:
+        family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
+
+    live_ids = {species.species_id for species in catalog}
+    if using_live_families and set(family_assignments) != live_ids:
+        raise ValueError("live family assignments do not cover exactly the live species roster")
+    motif_ids = {str(species_id).lower() for species_id in motif_assignments}
+    if motif_ids != live_ids:
+        raise ValueError(
+            "motif-assignments.json is stale relative to the live species seed folder: "
+            f"missing={sorted(live_ids - motif_ids)[:5]!r}, "
+            f"extra={sorted(motif_ids - live_ids)[:5]!r}"
+        )
 
     anchors = [
         build_species_anchor(
@@ -131,7 +149,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
 
     corpus_hash = _corpus_hash(catalog, motif_assignments, family_assignments,
                                anchor_tree.by_lower_id)
-    role_lean_doc = _role_lean_entries(entries, corpus_hash, weights.version)
+    role_lean_doc = _role_lean_entries(entries, family_assignments, corpus_hash, weights.version)
     pool_doc = _characteristic_pool_entries(corpus_hash, weights.version)
 
     if write:
@@ -139,6 +157,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
         gen.mkdir(parents=True, exist_ok=True)
         (gen / "role-lean.json").write_text(_canonical_dump(role_lean_doc), encoding="utf-8")
         (gen / "characteristic-pool.json").write_text(_canonical_dump(pool_doc), encoding="utf-8")
+        (gen / "family-map.json").write_text(_canonical_dump(family_assignments), encoding="utf-8")
 
     by_source: "dict[str, int]" = {}
     for e in entries:

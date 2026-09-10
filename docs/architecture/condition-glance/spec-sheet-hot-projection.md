@@ -1,12 +1,10 @@
 # Module: `sheet-hot-projection`
 
 **Program:** `condition-glance` · **Map:** [../condition-glance-map.md](../condition-glance-map.md)  
-**Owner mandate:** Q6 — BE in scope; not a cheap FE mock  
+**Locks:** **Q6** · **S1–S3** · **Q9** sibling parity  
 **Related:** [../actor-sheet/spec-condition-tab.md](../actor-sheet/spec-condition-tab.md),
-[../unique-actor-runtime.md](../unique-actor-runtime.md), [../match-runtime.md](../match-runtime.md),
-status / element Hub SSOTs  
-**Sibling (layers, not summary):** [../shield-sheet/spec-shield-stack-projection.md](../shield-sheet/spec-shield-stack-projection.md) —
-same Hot snapshot; this module fills `shieldSummary` + `liveStatuses` only.  
+[../shield-sheet/spec-shield-stack-projection.md](../shield-sheet/spec-shield-stack-projection.md),
+[../unique-actor-runtime.md](../unique-actor-runtime.md), [../match-runtime.md](../match-runtime.md)  
 **Contracts:** [ActorSheetDtos.cs](../../../src/FusionRpg.Contracts/ActorSheetDtos.cs) ·
 [UniqueActorHubCompose.ProjectSheet](../../../src/FusionRpg.Server/UniqueActorHubCompose.cs)
 
@@ -15,25 +13,33 @@ same Hot snapshot; this module fills `shieldSummary` + `liveStatuses` only.
 ## Objective
 
 When the actor is in a **Hot** session, `GET /api/actors/{id}/sheet` projects **real**
-`liveStatuses` and `shieldSummary` from the RPG runtime into the existing DTO fields. Cold
-UniqueActor sheet keeps `[]` / `null`. FE **omits** those modules (Q3) — honest empty, not chrome,
-not fixtures.
+`liveStatuses`, `shieldSummary`, and (via sibling) `shieldLayers` from the RPG live bag into the
+sheet DTO. Cold UniqueActor keeps `[]` / `null` / empty layers. FE **omits** glance modules (Q3).
 
-Today `ProjectSheet` hard-codes empty Hot fields (see compose comment at LiveStatuses/ShieldSummary
-assignment) — this module removes that permanent cold-only path for Hot sessions.
+Today `ProjectSheet` hard-codes empty Hot fields — this module + `shield-stack-projection` remove
+that permanent cold-only path for Hot sessions **in one compose call**.
 
 ---
 
 ## Hot session definition
 
-**Hot** = Injector is connected to a running match/lawn (or documented battle host) **and** the
-UniqueActor is bound to a live entity runtime that owns effect instances and/or shield bags
-(`EffectRuntime` / `ShieldGate` path — RPG layer, not Unity field reads).
+**Hot** = Injector connected to a running match/lawn (or documented battle host) **and** UniqueActor
+bound to live effect/shield runtime (RPG layer).
 
-**Cold** = UniqueActor exists in store only; no live entity binding for statuses/shield.
+**Cold** = store-only UniqueActor; no live binding.
 
-Cite: [match-runtime.md](../match-runtime.md), [unique-actor-runtime.md](../unique-actor-runtime.md),
-effect/shield runtime used by injector FoundationHarness.
+---
+
+## Live bag (**S3**)
+
+| Step | Duty |
+|---|---|
+| Injector | Push statuses + shields into Server **`ActorLiveState`** bag |
+| Transport | Prefer extend existing match/dump ingest; **ask before new HTTP channel** |
+| Server | Store per-instance Hot snapshot |
+| `ProjectSheet` | Read bag → fill `liveStatuses`, `shieldSummary`, `shieldLayers` |
+
+Never FE fixtures as product Hot.
 
 ---
 
@@ -41,103 +47,84 @@ effect/shield runtime used by injector FoundationHarness.
 
 | Layer | Path | Duty |
 |---|---|---|
-| Server compose | `FusionRpg.Server.UniqueActorHubCompose.ProjectSheet` | Stop always assigning `LiveStatuses = []` / `ShieldSummary = null`; fill from Hot snapshot when available |
-| DTO | `ActorStatusGlyphDto`, `ActorShieldSummaryDto`, `ActorSheetDto` | Existing wire shapes; widen only if runtime needs stacks (see below) |
-| Injector | Effect/status runtime + shield bag on bound entity | Own live instances; push or query-serve to Server |
-| Transport | Injector → Server (existing match ingest / Intent path — **ask before new channel**) | Keep Hot snapshot reachable for ProjectSheet |
-| FE | `useActorSheet` queryKey `["actorSheet", instanceId]` | Invalidate on live-state SignalR (or poll only if owner accepts — prefer push) |
-| SignalR | `RpgHub` (or sibling) | Emit sheet-relevant invalidate (e.g. actor live-state changed) → FE `invalidateQueries(["actorSheet", id])` |
+| Server compose | `UniqueActorHubCompose.ProjectSheet` | Stop always emptying Hot fields; fill from live bag |
+| DTO | `ActorStatusGlyphDto`, `ActorShieldSummaryDto`, `shieldLayers` | Summary + layers same flush (**S1**) |
+| FE | `useActorSheet` `["actorSheet", instanceId]` | Invalidate on live-state SignalR |
+| SignalR | Preferred event name: **`ActorLiveStateChanged`** | Ask-first if emitter/channel missing — implement later |
 
-Pieces never fetch; host invalidation → re-fold → `revision` bump ([spec-recipe-wire.md](spec-recipe-wire.md)).
+Pieces never fetch; host invalidation → re-fold → `revision` bump.
 
 ---
 
-## DTO schemas (wire)
+## DTO schemas
 
 ### `ActorStatusGlyphDto` (existing)
 
 | Field | Type | Notes |
 |---|---|---|
-| `statusId` | `string` | Catalog join key |
-| `remainingPermille` | `int?` | Duration/ring; null if N/A |
+| `statusId` | `string` | Catalog join |
+| `remainingPermille` | `int?` | |
 
-Fold joins catalog `hudToken` / `color` for `StatusGlyph`.
-
-### `ActorShieldSummaryDto` (existing)
+### `ActorShieldSummaryDto` (**S2**)
 
 | Field | Type | Notes |
 |---|---|---|
-| `elementId` | `string?` | Paint via element-paint-ssot / theme-bind |
-| `current` | `long?` | Shield HP — **long** magnitude |
-| `max` | `long?` | |
+| `elementId` | `string?` | Front drain-order layer; else null |
+| `current` / `max` | `long?` | From Totals |
+| `stacks` | `int?` | Layer count when widened |
 
-**Stacks:** not on DTO today. If runtime exposes stack count needed by `shield-status` pips, **widen**
-`ActorShieldSummaryDto` with `stacks` (`int`) in the same module — do not invent FE-only stacks.
+### `shieldLayers`
 
-### Mount rules for FE (Q3)
+See [spec-shield-stack-projection.md](../shield-sheet/spec-shield-stack-projection.md) — filled in
+**same** ProjectSheet call. Parity: `sum(layers) == Totals == summary`.
+
+### Mount rules for FE (Q3) — glance only
 
 | Server value | FE |
 |---|---|
-| `liveStatuses` empty / missing | omit `status-glyph-strip` |
-| `shieldSummary` null OR `(current ?? 0) <= 0` | omit `shield-status` + radial ring |
-| Hot with data | mount pieces; paint from catalogs/packs |
+| `liveStatuses` empty | omit `status-glyph-strip` |
+| `shieldSummary` null OR current≤0 | omit `shield-status` + radial ring |
+| Hot with data | mount; paint from catalogs/packs |
+
+Shield **tab** empty wells: Hot + N&lt;3 dashed OK — **not** Q3 omit of the whole tab.
 
 ---
 
 ## ActorHub gate
 
-- **Consume** Hub / effect / shield runtime for projection.
-- Do **not** invent a private FE fold or fake Hot on cold UniqueActor.
-- If a Hub write is required for Hot visibility, contribute via `IActorStatSubsystem` +
-  `ContributionSourceIds` — named in implement plan.
+- Consume Hub / effect / shield runtime via live bag.
 - Magnitudes: **`long`** for shield HP; overflow throws; no float.
 
 ---
 
 ## Success criteria
 
-- [ ] Cold UniqueActor: `liveStatuses = []`, `shieldSummary = null` (unchanged).
-- [ ] Hot with live effects: sheet JSON `liveStatuses` matches runtime instance set (ids + remainingPermille).
-- [ ] Hot with shield: `shieldSummary.current/max/elementId` match runtime; `long`-safe.
-- [ ] `ProjectSheet` no longer unconditionally empties Hot fields when Hot snapshot exists.
-- [ ] FE invalidates `["actorSheet", id]` on documented SignalR (or approved transport) so Condition `revision` advances.
-- [ ] Live curl proof: cold vs Hot actor documented in test notes / e2e artifact.
-- [ ] Standing + `resourcePools` Hub path unchanged (no regression).
-- [ ] Hot flush coordinated with `shield-stack-projection` so glance summary and tab layers agree.
-
----
+- [x] Cold: `liveStatuses=[]`, `shieldSummary=null`, `shieldLayers=[]`.
+- [x] Hot with effects: `liveStatuses` matches runtime. *(proven via bag POST + `ActorSheetHotLiveStateTests`)*
+- [x] Hot with shield: summary + layers match GetShields/Totals; elementId/stacks per **S2**.
+- [x] Same Hot fixture proof shared with `shield-sheet` Wave 1.
+- [x] FE invalidates `["actorSheet", id]` on documented SignalR (or approved transport).
+- [x] Curl cold vs Hot documented — [docs/runbook/actor-sheet-hot-live-state.md](../../runbook/actor-sheet-hot-live-state.md).
+- [x] Standing + `resourcePools` unchanged.
 
 ## Commands
 
 ```powershell
-# Cold sheet
-curl -s http://127.0.0.1:5088/api/actors/<coldInstanceId>/sheet | ConvertFrom-Json |
-  Select-Object liveStatuses, shieldSummary, standing, resourcePools
-
-# Hot sheet (Injector match bound — use live instanceId)
-curl -s http://127.0.0.1:5088/api/actors/<hotInstanceId>/sheet | ConvertFrom-Json |
-  Select-Object liveStatuses, shieldSummary
-
+curl -s http://127.0.0.1:5088/api/actors/<coldId>/sheet | ConvertFrom-Json |
+  Select-Object liveStatuses, shieldSummary, shieldLayers, standing, resourcePools
+curl -s http://127.0.0.1:5088/api/actors/<hotId>/sheet | ConvertFrom-Json |
+  Select-Object liveStatuses, shieldSummary, shieldLayers
 dotnet test tests\FusionRpg.Server.Tests --filter FullyQualifiedName~AuraDerivedEndpoints
-dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~ResourceBaseline
-# Add Hot projection tests under Server.Tests when implement lands
 ```
-
----
 
 ## Testing
 
-- Server: cold sheet empty live fields (existing).
-- Server: Hot fixture/session → projected statuses/shield match runtime snapshot.
-- Guard: FE tests must not ship fixtures as the only product path for Hot fields.
+- Cold empty live fields (existing).
+- Hot fixture → statuses/summary/layers agree.
+- FE tests must not ship fixtures as the only Hot product path.
 
 ## Boundaries
 
-- **Always:** cold honesty; RPG-layer sources only; amend `ProjectSheet`.
-- **Ask first:** new Injector→Server transport channel; widening DTO with `stacks`.
-- **Never:** fabricate statuses on cold UniqueActor; FE-only fake Hot as “done”; piece-level SignalR.
-
-## Tunables
-
-Status colors/tokens: `status-catalog.v{n}.json`. Shield element paint: element catalog + packs.
-No new power curve.
+- **Always:** cold honesty; RPG-layer; amend ProjectSheet once.
+- **Ask first:** new Injector→Server channel; SignalR emitter details.
+- **Never:** fabricate on cold; FE-only fake Hot; piece-level SignalR; fork ProjectSheet for layers.

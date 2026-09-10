@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ActorView } from "@/contract/types";
 import type { ActorSurfaceCatalog } from "@/lib/bus/actorSurface";
 import type { ActorSheetDto } from "@/lib/bus/aura";
@@ -15,6 +15,7 @@ import "@/ui/gui-lego/conditionConsole.css";
  * Condition glance — GUI Lego host. Identity stays in the shell summarize.
  * Progressive enrichment: ActorView fills the glance while /sheet loads; sheet error keeps the glance
  * and shows a compact retry strip (never a full-surface swap).
+ * Glance body is RecipeMount-only (CG-D2) — no hand-built twin path.
  */
 export function ConditionTab({
   data,
@@ -33,6 +34,7 @@ export function ConditionTab({
 }) {
   ensureConditionGuiLegoRegistered();
   const [selectedPoolId, setSelectedPoolId] = useState<string | null>("hp");
+  const revisionRef = useRef(0);
   const typedBus = useMemo(() => createConditionSurfaceBus(), []);
   const bus = useMemo(() => asSurfaceBusLike(typedBus), [typedBus]);
 
@@ -48,6 +50,12 @@ export function ConditionTab({
     return () => offs.forEach((off) => off());
   }, [typedBus, onOpenStatusTab, onRetry]);
 
+  // Q5 — host bumps revision when sheet/selection changes; pieces animate on stamp.
+  const revision = useMemo(() => {
+    revisionRef.current += 1;
+    return revisionRef.current;
+  }, [data, sheet, surface, selectedPoolId]);
+
   const vm = useMemo(
     () =>
       foldConditionSurfaceVm({
@@ -55,9 +63,10 @@ export function ConditionTab({
         sheet,
         surface,
         selectedPoolId,
-        availability: "ready"
+        availability: "ready",
+        revision
       }),
-    [data, sheet, surface, selectedPoolId]
+    [data, sheet, surface, selectedPoolId, revision]
   );
   const recipe = getRecipe("condition-console");
   const plan = useMemo(

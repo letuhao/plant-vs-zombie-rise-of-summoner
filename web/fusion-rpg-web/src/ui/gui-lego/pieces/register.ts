@@ -1,10 +1,13 @@
 import { registerPiece } from "@/features/gui-lego/pieceRegistry";
 import type { PieceFactory } from "@/features/gui-lego/types";
+import { BADGE_SLOT_MAP, badgeFactories } from "./badges";
 import { CHROME_SLOT_MAP, chromeFactories } from "./chrome";
 import { CONDITION_SLOT_MAP, conditionFactories } from "./condition";
 import { DOMAIN_SLOT_MAP, domainFactories } from "./domain";
 import { LAYOUT_SLOT_MAP, layoutFactories } from "./layout";
 import { LIFECYCLE_SLOT_MAP, lifecycleFactories } from "./lifecycle";
+import { SHIELD_SLOT_MAP, shieldFactories } from "./shield";
+import { APTITUDE_SLOT_MAP, aptitudeFactories } from "./aptitude";
 
 let registered = false;
 
@@ -14,9 +17,12 @@ const ALL: {
 }[] = [
   { factories: layoutFactories, slots: LAYOUT_SLOT_MAP },
   { factories: chromeFactories, slots: CHROME_SLOT_MAP },
+  { factories: badgeFactories, slots: BADGE_SLOT_MAP },
   { factories: conditionFactories, slots: CONDITION_SLOT_MAP },
   { factories: domainFactories, slots: DOMAIN_SLOT_MAP },
-  { factories: lifecycleFactories, slots: LIFECYCLE_SLOT_MAP }
+  { factories: lifecycleFactories, slots: LIFECYCLE_SLOT_MAP },
+  { factories: shieldFactories, slots: SHIELD_SLOT_MAP },
+  { factories: aptitudeFactories, slots: APTITUDE_SLOT_MAP }
 ];
 
 /** Register all Derived v1 piece factories into `pieceRegistry` (idempotent). */

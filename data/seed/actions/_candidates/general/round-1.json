@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-    "candidateSetHash": "2e9c948c40ef3752816cd907563f63ab92b5a3243f17f9bb6baf414650c51049",
+    "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+    "candidateSetHash": "6b62c730d1709f20687fc21f4f5cc21d7f427173560baf4528069af4280d7073",
     "model": "google/gemma-4-26b-a4b-qat",
     "partition": "general",
     "promptVersion": "general-propose/1",
@@ -10,9 +10,9 @@
   "entries": [
     {
       "_provenance": {
-        "briefHash": "511ae2dce91a1766eba49f65469a64980faae06961d8efedcb1d89af6d94e343",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "e3e661fe300d3a5a4d4b58744a16205e4c126b95312b6a0cf75fc3889688239b",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -20,22 +20,72 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.chill-punisher",
+            "atom.freezing"
+          ],
+          [
+            "atom.freezing"
+          ],
+          [
+            "atom.chill-punisher",
+            "atom.freezing"
+          ]
+        ]
       },
       "briefId": "brief.general.general.001",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.000",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "e3e661fe300d3a5a4d4b58744a16205e4c126b95312b6a0cf75fc3889688239b",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.chill-punisher",
+              "atom.freezing"
+            ],
+            [
+              "atom.freezing"
+            ],
+            [
+              "atom.chill-punisher",
+              "atom.freezing"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.chill-punisher",
+          "atom.freezing"
+        ],
+        "briefId": "brief.general.general.001",
+        "candidateId": "candidate.general.000",
+        "flavor": "A sudden, biting chill that shatters the resolve of the frozen.",
+        "name": "Frostbite Impact",
+        "rationale": "The action applies a freezing status (freezing) to the target, which directly enables the bonus damage from the chill-punisher effect.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
       "voteMinority": null
     },
     {
       "_provenance": {
-        "briefHash": "8d9ef95b4f67ffb915cb7ad7925238c49f36b69a69b1bfa39cead0da6d2cda7b",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "43b7bff86621c7b51dd2ce643dcd3b5241481f960163f591f5bec840df1dae34",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -43,22 +93,74 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.chilling",
+            "atom.marking"
+          ]
+        ]
       },
       "briefId": "brief.general.general.002",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.001",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "43b7bff86621c7b51dd2ce643dcd3b5241481f960163f591f5bec840df1dae34",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.chilling",
+              "atom.freezing"
+            ],
+            [
+              "atom.chilling",
+              "atom.freezing"
+            ],
+            [
+              "atom.chilling",
+              "atom.marking"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.chilling",
+          "atom.freezing"
+        ],
+        "briefId": "brief.general.general.002",
+        "candidateId": "candidate.general.001",
+        "flavor": "A sudden, biting chill that leaves the target shivering and vulnerable.",
+        "name": "Frostbite Touch",
+        "rationale": "The action applies a chilling effect and a freezing status, which directly enables the bonus damage from the chill-punisher effect.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.marking"
     },
     {
       "_provenance": {
-        "briefHash": "86d26345a36c998cbb88295dbed8090a695fbe82bc101de85fb3f169c079864c",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "628a40fe767e35a5891f9b776ce97766b5bc57f4c427c4c597d8864c90038323",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -66,22 +168,85 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.bloodletting",
+            "atom.sporing",
+            "atom.venomous",
+            "atom.withering"
+          ],
+          [
+            "atom.bloodletting",
+            "atom.sporing",
+            "atom.venomous",
+            "atom.withering"
+          ],
+          [
+            "atom.rot-punisher",
+            "atom.withering"
+          ]
+        ]
       },
       "briefId": "brief.general.general.003",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.002",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "628a40fe767e35a5891f9b776ce97766b5bc57f4c427c4c597d8864c90038323",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.bloodletting",
+              "atom.sporing",
+              "atom.venomous",
+              "atom.withering"
+            ],
+            [
+              "atom.bloodletting",
+              "atom.sporing",
+              "atom.venomous",
+              "atom.withering"
+            ],
+            [
+              "atom.rot-punisher",
+              "atom.withering"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.bloodletting",
+          "atom.rot-punisher",
+          "atom.sporing",
+          "atom.venomous",
+          "atom.withering"
+        ],
+        "briefId": "brief.general.general.003",
+        "candidateId": "candidate.general.002",
+        "flavor": "A spreading sickness that turns the target's own vitality against them.",
+        "name": "Vile Contagion",
+        "rationale": "The action applies multiple status-inflicting effects (bloodletting, spores, poison, or withering) to ensure the target is afflicted, thereby triggering the bonus damage from the rot-punisher payoff.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.rot-punisher"
     },
     {
       "_provenance": {
-        "briefHash": "a7170f7d6ae53daa36f5b5a613b307fe828148f1549065d000698e97074d7177",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "bcfff848cf1a19cdc131d53c27fcf2c8437b4f5ac2fe5574e469539dbc66a8f8",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -89,16 +254,30 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.marking",
+            "atom.rotting"
+          ],
+          [
+            "atom.marking",
+            "atom.rotting"
+          ],
+          [
+            "atom.marking",
+            "atom.rotting"
+          ]
+        ]
       },
       "briefId": "brief.general.general.004",
       "candidateId": "candidate.general.003",
       "confidence": "high",
       "draft": {
         "_provenance": {
-          "briefHash": "a7170f7d6ae53daa36f5b5a613b307fe828148f1549065d000698e97074d7177",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "bcfff848cf1a19cdc131d53c27fcf2c8437b4f5ac2fe5574e469539dbc66a8f8",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -106,17 +285,32 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.marking",
+              "atom.rotting"
+            ],
+            [
+              "atom.marking",
+              "atom.rotting"
+            ],
+            [
+              "atom.marking",
+              "atom.rotting"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.evd-brace",
-          "atom.sust-grit"
+          "atom.marking",
+          "atom.rotting",
+          "atom.venomous"
         ],
         "briefId": "brief.general.general.004",
         "candidateId": "candidate.general.003",
-        "flavor": "A sudden tightening of posture to meet the coming impact.",
-        "name": "Brace",
-        "rationale": "A fundamental defensive posture that relies on physical resolve and readiness, applicable to any entity regardless of origin.",
+        "flavor": "A lingering corruption that marks the target for inevitable decay.",
+        "name": "Blighted Mark",
+        "rationale": "The action applies a mark (marking) and a rotting status (rotting) to the target, which directly enables the bonus damage from the rot-punisher effect.",
         "scope": "general"
       },
       "outcome": "accepted",
@@ -126,9 +320,9 @@
     },
     {
       "_provenance": {
-        "briefHash": "d9b24e04d8ee2fad9bad4232730a97088fe9999e8edde0649cafccaca597b266",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "8ef6489ec08e3d72b48070230f2d28574873d1d261454081b63213499802250b",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -136,22 +330,75 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.fortitude",
+            "atom.vitality"
+          ],
+          [
+            "atom.might",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.fortitude",
+            "atom.vitality"
+          ]
+        ]
       },
       "briefId": "brief.general.general.005",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.004",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "8ef6489ec08e3d72b48070230f2d28574873d1d261454081b63213499802250b",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.fortitude",
+              "atom.vitality"
+            ],
+            [
+              "atom.might",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.fortitude",
+              "atom.vitality"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.fortitude",
+          "atom.savagery",
+          "atom.vitality"
+        ],
+        "briefId": "brief.general.general.005",
+        "candidateId": "candidate.general.004",
+        "flavor": "A surge of inner strength that fortifies the spirit before the clash.",
+        "name": "Vanguard's Resolve",
+        "rationale": "The action provides a self-buff to maximum health and general fortitude, serving as a foundational defensive boost for any creature entering combat.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.might|atom.tempo-surge"
     },
     {
       "_provenance": {
-        "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "4579dfec38a3a261459b379f7ebba2e32b027f7c033b744822f55756e376e83b",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -159,16 +406,30 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.fortitude",
+            "atom.plating"
+          ],
+          [
+            "atom.arm-plate",
+            "atom.carapace"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.plating"
+          ]
+        ]
       },
       "briefId": "brief.general.general.006",
       "candidateId": "candidate.general.005",
       "confidence": "split",
       "draft": {
         "_provenance": {
-          "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "4579dfec38a3a261459b379f7ebba2e32b027f7c033b744822f55756e376e83b",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -176,29 +437,43 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.fortitude",
+              "atom.plating"
+            ],
+            [
+              "atom.arm-plate",
+              "atom.carapace"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.plating"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.evd-brace",
-          "atom.fortitude"
+          "atom.fortitude",
+          "atom.plating"
         ],
         "briefId": "brief.general.general.006",
         "candidateId": "candidate.general.005",
-        "flavor": "A sudden tightening of form to meet the coming impact.",
-        "name": "Brace",
-        "rationale": "The action focuses on self-preservation through physical or mental readiness, utilizing the core concepts of bracing and fortitude to provide a foundational defense.",
+        "flavor": "A steadfast posture that hardens the spirit and the skin against incoming blows.",
+        "name": "Ironclad Resolve",
+        "rationale": "The action provides both armor plating and increased maximum health, serving as a robust defensive self-buff.",
         "scope": "general"
       },
       "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": "atom.evd-brace|atom.sust-grit"
+      "voteMinority": "atom.arm-hardening|atom.arm-plate|atom.carapace|atom.fortitude"
     },
     {
       "_provenance": {
-        "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "60d48a2dd4136effa7446ce719cf70437ff11e3707ef31746dd816442defb3b5",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -206,16 +481,67 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-plate",
+            "atom.stalwart"
+          ],
+          [
+            "atom.plating",
+            "atom.sust-callus"
+          ],
+          [
+            "atom.fortitude",
+            "atom.immunity"
+          ]
+        ]
       },
       "briefId": "brief.general.general.007",
-      "candidateId": "candidate.general.006",
-      "confidence": "high",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.arm-plate|atom.fortitude|atom.immunity|atom.plating|atom.stalwart|atom.sust-callus"
+    },
+    {
+      "_provenance": {
+        "briefHash": "ebd2da455700bb812a5b59b80561cccd8f65d7ef98b15b290c2c70e5780e44dd",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.fortitude",
+            "atom.stalwart"
+          ],
+          [
+            "atom.plating",
+            "atom.vitality"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.fortitude"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.008",
+      "candidateId": "candidate.general.007",
+      "confidence": "split",
       "draft": {
         "_provenance": {
-          "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "ebd2da455700bb812a5b59b80561cccd8f65d7ef98b15b290c2c70e5780e44dd",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -223,29 +549,43 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.fortitude",
+              "atom.stalwart"
+            ],
+            [
+              "atom.plating",
+              "atom.vitality"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.fortitude"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.tempo-surge",
-          "atom.vitality"
+          "atom.fortitude",
+          "atom.might"
         ],
-        "briefId": "brief.general.general.007",
-        "candidateId": "candidate.general.006",
-        "flavor": "A rhythmic cadence that synchronizes the breathing of those standing together.",
-        "name": "Shared Pulse",
-        "rationale": "The action provides a rhythmic boost to allies, focusing on the core essence of life and the momentum of action without being tied to a specific element or species.",
+        "briefId": "brief.general.general.008",
+        "candidateId": "candidate.general.007",
+        "flavor": "A steadfast posture that hardens the spirit against incoming blows.",
+        "name": "Ironclad Resolve",
+        "rationale": "The action provides a defensive boost to the creature's maximum health and increases its resistance to negative status effects, fulfilling the self-targeted defense role.",
         "scope": "general"
       },
       "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.arm-hardening|atom.plating|atom.stalwart|atom.vitality"
     },
     {
       "_provenance": {
-        "briefHash": "b187248fcb074e6f8d71ed5eec0e815fab9809c3a22245f7a5eb3503bcc78f32",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "bc2ccd4c87670d7969e3606a4907108bacfeeee209ad23da41377d69b6a7306f",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -253,45 +593,75 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
-      },
-      "briefId": "brief.general.general.008",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
-      "pipelineId": "A-P1",
-      "scope": "general",
-      "voteMinority": null
-    },
-    {
-      "_provenance": {
-        "briefHash": "95b77ca194c200e0e8cfa4f5ccd993efca1a78f8ac700980b04ff5f0c136320a",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
-        "healNotes": [
-          {},
-          {},
-          {}
-        ],
-        "model": "google/gemma-4-26b-a4b-qat",
-        "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-hardening",
+            "atom.plating"
+          ],
+          [
+            "atom.stalwart",
+            "atom.vitality"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.plating"
+          ]
+        ]
       },
       "briefId": "brief.general.general.009",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.008",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "bc2ccd4c87670d7969e3606a4907108bacfeeee209ad23da41377d69b6a7306f",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-hardening",
+              "atom.plating"
+            ],
+            [
+              "atom.stalwart",
+              "atom.vitality"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.plating"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening",
+          "atom.plating",
+          "atom.venomous"
+        ],
+        "briefId": "brief.general.general.009",
+        "candidateId": "candidate.general.008",
+        "flavor": "A sudden hardening of the exterior that absorbs the brunt of incoming strikes.",
+        "name": "Ironclad Shell",
+        "rationale": "The action provides both immediate armor plating and a general increase to the army's defense, fulfilling the defensive, single-target, self-oriented requirement for an early-tier role.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.stalwart|atom.vitality"
     },
     {
       "_provenance": {
-        "briefHash": "43e2fab60881f2807ad80431f4e5b77ce816dc82d526859b1dab3ed481003f71",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "e3f6fa8d01c1e8a9094f3ef7e214cc1729337222faec09e94aa44980414fd0fc",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -299,22 +669,77 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-hardening",
+            "atom.warding"
+          ],
+          [
+            "atom.carapace",
+            "atom.plating"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.vitality",
+            "atom.warding"
+          ]
+        ]
       },
       "briefId": "brief.general.general.010",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.009",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "e3f6fa8d01c1e8a9094f3ef7e214cc1729337222faec09e94aa44980414fd0fc",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-hardening",
+              "atom.warding"
+            ],
+            [
+              "atom.carapace",
+              "atom.plating"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.vitality",
+              "atom.warding"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening",
+          "atom.sporing",
+          "atom.warding"
+        ],
+        "briefId": "brief.general.general.010",
+        "candidateId": "candidate.general.009",
+        "flavor": "A sudden surge of fortitude that hardens the collective resolve.",
+        "name": "Resilient Bastion",
+        "rationale": "The action provides a defensive boost to the entire army (arm-hardening and warding), fitting the multi-target, self-relation, defensive category.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.carapace|atom.plating|atom.vitality"
     },
     {
       "_provenance": {
-        "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "227086660e87547573c49a4473af3488ef85e90313e3aa655027018e29a08a61",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -322,16 +747,30 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.life-surge",
+            "atom.vitality"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.vitality"
+          ],
+          [
+            "atom.fortitude",
+            "atom.warding"
+          ]
+        ]
       },
       "briefId": "brief.general.general.011",
       "candidateId": "candidate.general.010",
       "confidence": "split",
       "draft": {
         "_provenance": {
-          "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "227086660e87547573c49a4473af3488ef85e90313e3aa655027018e29a08a61",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -339,29 +778,43 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.life-surge",
+              "atom.vitality"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.vitality"
+            ],
+            [
+              "atom.fortitude",
+              "atom.warding"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.swiftness",
-          "atom.tempo-surge"
+          "atom.chilling",
+          "atom.vitality"
         ],
         "briefId": "brief.general.general.011",
         "candidateId": "candidate.general.010",
-        "flavor": "A sudden change in momentum that leaves the previous position behind.",
-        "name": "Shift",
-        "rationale": "The action focuses on the self and movement, utilizing swiftness for the physical displacement and tempo-surge to represent the sudden burst of speed required for a rolled target movement.",
+        "flavor": "A sudden influx of life-force that bolsters the spirit of those nearby.",
+        "name": "Vitality Surge",
+        "rationale": "The action provides a multi-target support role by increasing the maximum health of allies and enhancing the amount of health restored when they receive healing.",
         "scope": "general"
       },
       "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": "atom.evasion|atom.quickening"
+      "voteMinority": "atom.arm-hardening|atom.fortitude|atom.life-surge|atom.warding"
     },
     {
       "_provenance": {
-        "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "4cfd2419ef17183b8667fe06bea9d0b5f8582cab575818db852b4b35d12efbb6",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -369,16 +822,30 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.mending",
+            "atom.resilience"
+          ],
+          [
+            "atom.life-surge",
+            "atom.vitality"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.resilience"
+          ]
+        ]
       },
       "briefId": "brief.general.general.012",
       "candidateId": "candidate.general.011",
       "confidence": "split",
       "draft": {
         "_provenance": {
-          "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "4cfd2419ef17183b8667fe06bea9d0b5f8582cab575818db852b4b35d12efbb6",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -386,29 +853,43 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.mending",
+              "atom.resilience"
+            ],
+            [
+              "atom.life-surge",
+              "atom.vitality"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.resilience"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.evasion",
-          "atom.swiftness"
+          "atom.death-salvo",
+          "atom.resilience"
         ],
         "briefId": "brief.general.general.012",
         "candidateId": "candidate.general.011",
-        "flavor": "A sudden redistribution of weight to find a new center.",
-        "name": "Shift",
-        "rationale": "The action is a fundamental movement of self, utilizing swiftness for the displacement and evasion to define the nature of the repositioning.",
+        "flavor": "A rhythmic pulse of vitality that reinforces the resolve of those nearby.",
+        "name": "Resilient Echo",
+        "rationale": "The action provides a multi-target support role by applying a healing effect (mending) and a general defensive buff (resilience) to allies.",
         "scope": "general"
       },
       "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": "atom.swiftness|atom.tempo-surge"
+      "voteMinority": "atom.arm-hardening|atom.life-surge|atom.mending|atom.vitality"
     },
     {
       "_provenance": {
-        "briefHash": "f1911e4b274320fe53d41d4c5de0b6cecb14add2d24de43cf45a152df1de6563",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "c96fc4293ce941bad80c58365e3b268e4719e56d65195fe2cbce83f12be51a83",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -416,22 +897,74 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.mending",
+            "atom.warding"
+          ],
+          [
+            "atom.fortitude",
+            "atom.mending"
+          ],
+          [
+            "atom.life-surge",
+            "atom.mending"
+          ]
+        ]
       },
       "briefId": "brief.general.general.013",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.012",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "c96fc4293ce941bad80c58365e3b268e4719e56d65195fe2cbce83f12be51a83",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.mending",
+              "atom.warding"
+            ],
+            [
+              "atom.fortitude",
+              "atom.mending"
+            ],
+            [
+              "atom.life-surge",
+              "atom.mending"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-override",
+          "atom.mending"
+        ],
+        "briefId": "brief.general.general.013",
+        "candidateId": "candidate.general.012",
+        "flavor": "A harmonious surge of vitality that bolsters the resolve of those nearby.",
+        "name": "Resilient Chorus",
+        "rationale": "The action provides a defensive boost to the entire army (warding) and restores health to allies (mending), fulfilling the multi-target support role.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": null
+      "voteMinority": "atom.fortitude|atom.life-surge|atom.warding"
     },
     {
       "_provenance": {
-        "briefHash": "86c67a25de08b3c3513f1158dbfc879bf76ca791039e9fcdcd2bcf58d9dc74d5",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "ada23edd1f74ebced553eed9b5ab40593823c3ae574a3bec31cf935ef1801e66",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -439,16 +972,30 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.mending",
+            "atom.vitality"
+          ],
+          [
+            "atom.life-surge",
+            "atom.vitality"
+          ],
+          [
+            "atom.life-surge",
+            "atom.mending"
+          ]
+        ]
       },
       "briefId": "brief.general.general.014",
       "candidateId": "candidate.general.013",
       "confidence": "split",
       "draft": {
         "_provenance": {
-          "briefHash": "86c67a25de08b3c3513f1158dbfc879bf76ca791039e9fcdcd2bcf58d9dc74d5",
-          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "briefHash": "ada23edd1f74ebced553eed9b5ab40593823c3ae574a3bec31cf935ef1801e66",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
           "healNotes": [
             {},
             {},
@@ -456,29 +1003,44 @@
           ],
           "model": "google/gemma-4-26b-a4b-qat",
           "pipeline": "general-propose",
-          "promptVersion": "general-propose/1"
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.mending",
+              "atom.vitality"
+            ],
+            [
+              "atom.life-surge",
+              "atom.vitality"
+            ],
+            [
+              "atom.life-surge",
+              "atom.mending"
+            ]
+          ]
         },
         "atomFamilies": [
-          "atom.dooming",
-          "atom.withering"
+          "atom.life-surge",
+          "atom.mending",
+          "atom.vitality"
         ],
         "briefId": "brief.general.general.014",
         "candidateId": "candidate.general.013",
-        "flavor": "The very air vibrates with the weight of a recent impact, unsettling those caught in its wake.",
-        "name": "Lingering Tremor",
-        "rationale": "As a status effect applied to a row of enemies, this represents the kinetic aftermath of a strike that disrupts the rhythm of those standing nearby.",
+        "flavor": "A sudden rush of life that mends the spirit and fortifies the flesh.",
+        "name": "Vitality Surge",
+        "rationale": "The action provides a burst of healing (mending) and increases the target's maximum health (vitality), serving as a strong early-tier support role for an ally.",
         "scope": "general"
       },
       "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": "atom.hit-followthrough|atom.tempo-surge"
+      "voteMinority": null
     },
     {
       "_provenance": {
-        "briefHash": "e0cddbd2fee85c6e2b5779f475cf0d7a1c18128e207c0f6d5680b32a345c946f",
-        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
-        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "briefHash": "f441bc9b29d99ec6d2b523faefb91dec70ed793fc6fbf1f11f57849fbe24aa9f",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -486,16 +1048,825 @@
         ],
         "model": "google/gemma-4-26b-a4b-qat",
         "pipeline": "general-propose",
-        "promptVersion": "general-propose/1"
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.life-surge",
+            "atom.mending"
+          ],
+          [
+            "atom.life-surge",
+            "atom.mending"
+          ],
+          [
+            "atom.life-surge",
+            "atom.mending"
+          ]
+        ]
       },
       "briefId": "brief.general.general.015",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.014",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "f441bc9b29d99ec6d2b523faefb91dec70ed793fc6fbf1f11f57849fbe24aa9f",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.life-surge",
+              "atom.mending"
+            ],
+            [
+              "atom.life-surge",
+              "atom.mending"
+            ],
+            [
+              "atom.life-surge",
+              "atom.mending"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.life-surge",
+          "atom.mending",
+          "atom.swiftness"
+        ],
+        "briefId": "brief.general.general.015",
+        "candidateId": "candidate.general.014",
+        "flavor": "A sudden rush of restorative energy that mends wounds and bolsters the spirit.",
+        "name": "Vitality Surge",
+        "rationale": "The action combines mending (healing on grant) and life-surge (increased health restored on grant) to provide a potent support effect for allies.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
       "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "7a18e841c2944b73c29b774b8efe42fe2065a56988cddca82f586d5e07c5af0c",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.evd-shift",
+            "atom.quickening"
+          ],
+          [
+            "atom.evd-shift",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.evd-shift",
+            "atom.quickening"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.016",
+      "candidateId": "candidate.general.015",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "7a18e841c2944b73c29b774b8efe42fe2065a56988cddca82f586d5e07c5af0c",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.evd-shift",
+              "atom.quickening"
+            ],
+            [
+              "atom.evd-shift",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.evd-shift",
+              "atom.quickening"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-surge",
+          "atom.evd-shift",
+          "atom.quickening"
+        ],
+        "briefId": "brief.general.general.016",
+        "candidateId": "candidate.general.015",
+        "flavor": "A momentary lapse in physical presence, leaving only a blur behind.",
+        "name": "Sudden Displacement",
+        "rationale": "The action provides a self-targeted movement effect that combines evasion (evd-shift) with an increase in speed/attack rate (quickening), allowing the creature to reposition rapidly.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.tempo-surge"
+    },
+    {
+      "_provenance": {
+        "briefHash": "5bf1beedbf57d258c126146ded315cae69fd336047426ff198c30fa752993eb5",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.swiftness",
+            "atom.tempo-haste"
+          ],
+          [
+            "atom.swiftness",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.swiftness",
+            "atom.tempo-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.017",
+      "candidateId": "candidate.general.016",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "5bf1beedbf57d258c126146ded315cae69fd336047426ff198c30fa752993eb5",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.swiftness",
+              "atom.tempo-haste"
+            ],
+            [
+              "atom.swiftness",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.swiftness",
+              "atom.tempo-surge"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening",
+          "atom.swiftness",
+          "atom.tempo-surge"
+        ],
+        "briefId": "brief.general.general.017",
+        "candidateId": "candidate.general.016",
+        "flavor": "A burst of momentum that propels the user forward.",
+        "name": "Sudden Surge",
+        "rationale": "The action combines a boost to attack rate (tempo-haste) with an increase in advance speed (swiftness), fitting the movement category and the self-target mode.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.tempo-haste"
+    },
+    {
+      "_provenance": {
+        "briefHash": "f4e2eea688006b800d77a254b576067a5e714817dc554f5c4b298faf6cb10bba",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.tempo-stampede",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.swiftness",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.swiftness",
+            "atom.tempo-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.018",
+      "candidateId": "candidate.general.017",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "f4e2eea688006b800d77a254b576067a5e714817dc554f5c4b298faf6cb10bba",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.tempo-stampede",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.swiftness",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.swiftness",
+              "atom.tempo-surge"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.freezing",
+          "atom.swiftness",
+          "atom.tempo-surge"
+        ],
+        "briefId": "brief.general.general.018",
+        "candidateId": "candidate.general.017",
+        "flavor": "A sudden, coordinated surge that pushes the front line forward.",
+        "name": "Vanguard Advance",
+        "rationale": "The action targets all creatures to increase their movement speed via tempo-surge and tempo-stampede, facilitating a rapid advance across the battlefield.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.tempo-stampede"
+    },
+    {
+      "_provenance": {
+        "briefHash": "912803ee9fc8901fd1881ee034ac969e52b3cdb47a9fd59a4d7fce17739fcdd5",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.tempo-haste",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.tempo-haste",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.tempo-haste",
+            "atom.tempo-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.019",
+      "candidateId": "candidate.general.018",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "912803ee9fc8901fd1881ee034ac969e52b3cdb47a9fd59a4d7fce17739fcdd5",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.tempo-haste",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.tempo-haste",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.tempo-haste",
+              "atom.tempo-surge"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.tempo-haste",
+          "atom.tempo-surge",
+          "atom.volley"
+        ],
+        "briefId": "brief.general.general.019",
+        "candidateId": "candidate.general.018",
+        "flavor": "A rapid, rhythmic acceleration that propels the entire formation forward.",
+        "name": "Sudden Surge",
+        "rationale": "The action targets all creatures and applies both a surge in zombie advance and a faster attack rate, fulfilling the movement category for the whole army.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "77fcd69e58976cc031b7be04645bc5f64169065c17c41bf8f61554a70648e9bb",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.swiftness",
+            "atom.tempo-haste"
+          ],
+          [
+            "atom.swiftness",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.tempo-haste",
+            "atom.tempo-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.020",
+      "candidateId": "candidate.general.019",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "77fcd69e58976cc031b7be04645bc5f64169065c17c41bf8f61554a70648e9bb",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.swiftness",
+              "atom.tempo-haste"
+            ],
+            [
+              "atom.swiftness",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.tempo-haste",
+              "atom.tempo-surge"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.deathblast",
+          "atom.swiftness",
+          "atom.tempo-haste",
+          "atom.tempo-surge"
+        ],
+        "briefId": "brief.general.general.020",
+        "candidateId": "candidate.general.019",
+        "flavor": "A burst of kinetic energy that propels the user forward.",
+        "name": "Sudden Surge",
+        "rationale": "The action provides a movement-based boost to speed, utilizing both swiftness and tempo haste to increase the rate of advance/attack.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "1ae18477b56d91aeef652d738f24c2802c7a44402d7d826da34c4debb377ac56",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.affliction",
+            "atom.blighting"
+          ],
+          [
+            "atom.blighting",
+            "atom.sporing"
+          ],
+          [
+            "atom.blighting",
+            "atom.withering"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.021",
+      "candidateId": "candidate.general.020",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "1ae18477b56d91aeef652d738f24c2802c7a44402d7d826da34c4debb377ac56",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.affliction",
+              "atom.blighting"
+            ],
+            [
+              "atom.blighting",
+              "atom.sporing"
+            ],
+            [
+              "atom.blighting",
+              "atom.withering"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.blighting",
+          "atom.sust-husk"
+        ],
+        "briefId": "brief.general.general.021",
+        "candidateId": "candidate.general.020",
+        "flavor": "A pervasive miasma that weakens the resolve and vitality of all nearby foes.",
+        "name": "Lingering Blight",
+        "rationale": "The action applies the blighting status to all enemies in the area and uses affliction to increase the potency of any statuses currently or subsequently applied.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.affliction|atom.sporing|atom.withering"
+    },
+    {
+      "_provenance": {
+        "briefHash": "9c2c07c616f8b3e764d8683d29ae6b23fde3e66cdbcde21ad1312cf4274bb051",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.firelining",
+            "atom.terraforming"
+          ],
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.firelining"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.022",
+      "candidateId": "candidate.general.021",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "9c2c07c616f8b3e764d8683d29ae6b23fde3e66cdbcde21ad1312cf4274bb051",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.firelining",
+              "atom.terraforming"
+            ],
+            [
+              "atom.chilling",
+              "atom.freezing"
+            ],
+            [
+              "atom.firelining"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.firelining",
+          "atom.retribution"
+        ],
+        "briefId": "brief.general.general.022",
+        "candidateId": "candidate.general.021",
+        "flavor": "A searing fissure that leaves the ground molten and treacherous.",
+        "name": "Lava Vein",
+        "rationale": "The action targets a row of enemies, using terraforming to scorch the ground with lava and firelining to lay a line of fire, creating a hazardous area effect.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.chilling|atom.freezing|atom.terraforming"
+    },
+    {
+      "_provenance": {
+        "briefHash": "2e55e6436acc5d88879fb6ca38b99193ccaa1c438234e3a31476eb45608ab19a",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.blighting",
+            "atom.terraforming"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.023",
+      "candidateId": "candidate.general.022",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2e55e6436acc5d88879fb6ca38b99193ccaa1c438234e3a31476eb45608ab19a",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.chilling",
+              "atom.freezing"
+            ],
+            [
+              "atom.chilling",
+              "atom.freezing"
+            ],
+            [
+              "atom.blighting",
+              "atom.terraforming"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.chilling",
+          "atom.elpw-overflow",
+          "atom.freezing"
+        ],
+        "briefId": "brief.general.general.023",
+        "candidateId": "candidate.general.022",
+        "flavor": "A freezing pillar of air that leaves the ground brittle and the enemies sluggish.",
+        "name": "Frostbound Column",
+        "rationale": "The action targets an area in a column shape, applying both a chill effect and a freeze effect to enemies within that space.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.blighting|atom.terraforming"
+    },
+    {
+      "_provenance": {
+        "briefHash": "29837dec19d1c922d755667b730e4963c4e5c3ddd262a84c7f4332106b3452c4",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.gardener",
+            "atom.sporing"
+          ],
+          [
+            "atom.entangling",
+            "atom.sporing"
+          ],
+          [
+            "atom.affliction",
+            "atom.blighting"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.024",
+      "candidateId": "candidate.general.023",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "29837dec19d1c922d755667b730e4963c4e5c3ddd262a84c7f4332106b3452c4",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.gardener",
+              "atom.sporing"
+            ],
+            [
+              "atom.entangling",
+              "atom.sporing"
+            ],
+            [
+              "atom.affliction",
+              "atom.blighting"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.econ-toll",
+          "atom.sporing"
+        ],
+        "briefId": "brief.general.general.024",
+        "candidateId": "candidate.general.023",
+        "flavor": "A sudden, violent eruption of life that chokes the very ground.",
+        "name": "Verdant Overgrowth",
+        "rationale": "The action covers a square area to apply a utility effect (spawning plants) and an offensive status (infesting with spores), fulfilling the area-of-effect requirement for a status-type action.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.affliction|atom.blighting|atom.entangling|atom.gardener"
+    },
+    {
+      "_provenance": {
+        "briefHash": "ac6c45560bb9a6229799f43f87ea69c52904a65c3627271eee1ad4a54a046189",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.sporing",
+            "atom.withering"
+          ],
+          [
+            "atom.blighting",
+            "atom.chilling"
+          ],
+          [
+            "atom.blighting",
+            "atom.sporing"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.025",
+      "candidateId": "candidate.general.024",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "ac6c45560bb9a6229799f43f87ea69c52904a65c3627271eee1ad4a54a046189",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "generatedUtc": "2026-09-10T15:14:45+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.sporing",
+              "atom.withering"
+            ],
+            [
+              "atom.blighting",
+              "atom.chilling"
+            ],
+            [
+              "atom.blighting",
+              "atom.sporing"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.blighting",
+          "atom.elemental-power",
+          "atom.sporing"
+        ],
+        "briefId": "brief.general.general.025",
+        "candidateId": "candidate.general.024",
+        "flavor": "A thick, emerald mist that chokes the air and takes root in the lungs of the unwary.",
+        "name": "Overgrowth Spore",
+        "rationale": "The action covers a rectangular area to apply a status that infests targets with spores and simultaneously applies a withering effect, fulfilling the status/area/enemy requirements.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.chilling|atom.withering"
     }
   ],
   "kind": "action-candidate",

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>preset-entry — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>preset-entry</code></h1>
+  <p class="lede">Opens the build-preset console; shows active preset name when bound. Bus: <code>preset.open</code>. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <button type="button" class="chip is-on" style="--piece-accent:var(--sun); display:inline-flex; flex-direction:column; align-items:flex-start; gap:2px; padding:8px 12px">
+          <span>Build presets…</span>
+          <span style="font-size:11px;color:var(--muted)">Active: Glass Cannon</span>
+        </button>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "preset-entry",
+  "instanceId": "aptitudes:preset-entry",
+  "label": "Build presets…",
+  "activePresetName": "Glass Cannon",
+  "bus": "preset.open",
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

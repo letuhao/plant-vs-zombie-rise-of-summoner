@@ -64,7 +64,8 @@ public static class UniqueActorHubCompose
         return (hub, ctx);
     }
 
-    public static ActorSheetDto ProjectSheet(RpgStore store, UniqueActorDto actor)
+    public static ActorSheetDto ProjectSheet(
+        RpgStore store, UniqueActorDto actor, IActorLiveStateStore? liveState = null)
     {
         var (hub, ctx) = Build(store, actor);
         var primaryFinal = hub.Stats.Resolve(ctx);
@@ -81,6 +82,7 @@ public static class UniqueActorHubCompose
         var xpToNext = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level);
         var standing = ProjectStanding(store, actor, powerIndex);
         var resourcePools = ProjectResourcePools(store, actor, snapshot, ctx, powerIndex);
+        var (liveStatuses, shieldLayers, shieldSummary) = ProjectHotLive(liveState, actor.InstanceId);
 
         IReadOnlyList<DerivedStatSurfaceEntry> surfaceEntries = Array.Empty<DerivedStatSurfaceEntry>();
         try { surfaceEntries = DerivedStatSurfaceCatalogHub.Catalog.Entries; }
@@ -95,14 +97,21 @@ public static class UniqueActorHubCompose
                 var compose = def?.Compose.ToString() ?? "";
                 var display = kv.Key;
                 var reading = "";
+                string? surfaceUnit = null;
                 var surface = FindSurface(surfaceEntries, kv.Key);
                 if (surface is not null)
                 {
                     display = surface.DisplayName.Resolve("en");
                     reading = surface.Reading.Resolve("en");
+                    surfaceUnit = surface.UnitClass.ToString();
                     if (string.IsNullOrEmpty(compose))
                         compose = surface.Compose.ToString();
                 }
+
+                var contribRows = contributions.ContributionsFor(kv.Key).ToList();
+                var contribPairs = contribRows
+                    .Select(c => (c.SourceId, c.Value))
+                    .ToList();
 
                 return new ActorSheetChannelDto
                 {
@@ -110,8 +119,14 @@ public static class UniqueActorHubCompose
                     DisplayName = display,
                     Reading = reading,
                     ComposeKind = compose,
+                    // D6: Value stays double (exempt); shield long elsewhere.
                     Value = kv.Value,
-                    Contributions = contributions.ContributionsFor(kv.Key)
+                    UnitClass = DerivedSheetChannelMeta.ResolveUnitClass(def, surfaceUnit),
+                    DefaultValue = def?.DefaultValue ?? 0,
+                    Cap = def?.Cap,
+                    RenderState = DerivedSheetChannelMeta.ResolveRenderState(
+                        kv.Key, def, kv.Value, contribPairs),
+                    Contributions = contribRows
                         .Select(c => new ActorContributionDto
                         {
                             SourceId = c.SourceId,
@@ -160,11 +175,59 @@ public static class UniqueActorHubCompose
             Standing = standing,
             Derived = derived,
             Primary = primary,
-            // Hot current-state: statuses/shield stay Injector/battle session — honest empty on cold sheet.
-            LiveStatuses = Array.Empty<ActorStatusGlyphDto>(),
+            LiveStatuses = liveStatuses,
             ResourcePools = resourcePools,
-            ShieldSummary = null
+            ShieldSummary = shieldSummary,
+            ShieldLayers = shieldLayers
         };
+    }
+
+    /// <summary>
+    /// Hot bag → liveStatuses + shieldLayers + shieldSummary (S1/S2). No bag entry = cold honesty.
+    /// Summary elementId = front drain-order layer; stacks = layer count; null when no layers.
+    /// </summary>
+    static (
+        IReadOnlyList<ActorStatusGlyphDto> LiveStatuses,
+        IReadOnlyList<ActorShieldLayerDto> ShieldLayers,
+        ActorShieldSummaryDto? ShieldSummary)
+        ProjectHotLive(IActorLiveStateStore? liveState, string instanceId)
+    {
+        var bag = liveState?.Get(instanceId);
+        if (bag is null)
+        {
+            return (
+                Array.Empty<ActorStatusGlyphDto>(),
+                Array.Empty<ActorShieldLayerDto>(),
+                null);
+        }
+
+        var statuses = bag.LiveStatuses ?? Array.Empty<ActorStatusGlyphDto>();
+        var layers = bag.ShieldLayers ?? Array.Empty<ActorShieldLayerDto>();
+        if (layers.Count == 0)
+            return (statuses, Array.Empty<ActorShieldLayerDto>(), null);
+
+        long sumCurrent = 0, sumMax = 0;
+        for (var i = 0; i < layers.Count; i++)
+        {
+            sumCurrent += layers[i].Current;
+            sumMax += layers[i].Max;
+        }
+
+        // Q3 / S2: omit glance when empty layers or totals ≤ 0.
+        if (sumCurrent <= 0)
+            return (statuses, layers, null);
+
+        var front = layers[0];
+        return (
+            statuses,
+            layers,
+            new ActorShieldSummaryDto
+            {
+                ElementId = front.ElementId,
+                Current = sumCurrent,
+                Max = sumMax,
+                Stacks = layers.Count
+            });
     }
 
     /// <summary>

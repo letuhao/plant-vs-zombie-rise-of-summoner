@@ -98,13 +98,26 @@ function minimalActor(): ActorView {
 describe("joinDerivedChannelId", () => {
   it("joins variant axes and leaves expand:none bare", () => {
     expect(joinDerivedChannelId("combat.power", "element", "fire")).toBe("combat.power.fire");
-    expect(joinDerivedChannelId("status.resist", "status-id", "butter")).toBe("status.resist.butter");
+    expect(joinDerivedChannelId("status.resist", "status-category", "dot")).toBe("status.resist.dot");
     expect(joinDerivedChannelId("progression.power", "none", "attack")).toBe("progression.power");
   });
 });
 
 describe("expandDerivedFamily", () => {
   const surface = actorSurfaceFixture();
+  const statusCategoryVariants = [
+    { id: "omni", displayName: "Omni" },
+    { id: "dot", displayName: "DoT" },
+    { id: "cc", displayName: "CC" },
+    { id: "contagion", displayName: "Contagion" }
+  ];
+  const actionCategoryVariants = [
+    { id: "attack", displayName: "Attack" },
+    { id: "defense", displayName: "Defense" },
+    { id: "support", displayName: "Support" },
+    { id: "movement", displayName: "Movement" },
+    { id: "status", displayName: "Status" }
+  ];
 
   it("expands element families over omni + every concrete element", () => {
     const family = surface.families.find((row) => row.family === "combat.power")!;
@@ -121,19 +134,33 @@ describe("expandDerivedFamily", () => {
     ]);
   });
 
-  it("expands status-id families over Omni + status-catalog ids", () => {
+  it("expands status-category families over Omni + L2b from cook/catalog only", () => {
     const family = surface.families.find((row) => row.family === "status.resist")!;
-    expect(family.expand).toBe("status-id");
-    const expanded = expandDerivedFamily(
-      family,
-      surface.elements,
-      surface.resources,
-      surface.statuses
-    );
-    expect(expanded[0]?.channelId).toBe("status.resist.omni");
-    expect(expanded).toHaveLength(1 + surface.statuses.length);
-    expect(expanded.map((row) => row.channelId)).toContain("status.resist.butter");
-    expect(expanded.map((row) => row.channelId)).toContain("status.resist.nerve.afflicted");
+    expect(family.expand).toBe("status-category");
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources, [], {
+      statusCategoryVariants
+    });
+    expect(expanded.map((row) => row.channelId)).toEqual([
+      "status.resist.omni",
+      "status.resist.dot",
+      "status.resist.cc",
+      "status.resist.contagion"
+    ]);
+  });
+
+  it("does not invent status-category rows when cook variants are omitted", () => {
+    const family = surface.families.find((row) => row.family === "status.resist")!;
+    expect(expandDerivedFamily(family, surface.elements, surface.resources)).toEqual([]);
+  });
+
+  it("expands action-category from cook variants only (negative: no hardcoded invent)", () => {
+    const family = surface.families.find((row) => row.family === "skill.cooldown")!;
+    expect(family.expand).toBe("action-category");
+    expect(expandDerivedFamily(family, surface.elements, surface.resources)).toEqual([]);
+    const expanded = expandDerivedFamily(family, surface.elements, surface.resources, [], {
+      actionCategoryVariants
+    });
+    expect(expanded.map((r) => r.channelId)).toContain("skill.cooldown.attack");
   });
 
   it("expands resource families over resource-catalog ids", () => {
@@ -164,34 +191,41 @@ describe("resolveDerivedRenderState", () => {
     );
   });
 
-  it("marks capped resist.dot while omni sibling stays uncapped", () => {
+  it("marks capped resist.dot from wire cap; omni stays uncapped", () => {
     expect(
       resolveDerivedRenderState(
         "status.resist.dot",
-        live("status.resist.dot", 0.95, [
-          { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.95 }
-        ]),
-        "categoryResistCap"
-      )
-    ).toBe("capped");
-    expect(
-      resolveDerivedRenderState(
-        "status.resist.butter",
-        live("status.resist.butter", 0.95, [
-          { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.95 }
-        ]),
+        {
+          ...live("status.resist.dot", 0.95, [
+            { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.95 }
+          ]),
+          cap: 0.95
+        },
         "categoryResistCap"
       )
     ).toBe("capped");
     expect(
       resolveDerivedRenderState(
         "status.resist.omni",
-        live("status.resist.omni", 0.99, [
-          { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.99 }
-        ]),
+        {
+          ...live("status.resist.omni", 0.99, [
+            { sourceId: "tree.x", label: "Tree", op: "Increased", value: 0.99 }
+          ]),
+          cap: null
+        },
         "categoryResistCap"
       )
     ).toBe("active");
+  });
+
+  it("prefers wire renderState when present", () => {
+    expect(
+      resolveDerivedRenderState(
+        "status.resist.dot",
+        { ...live("status.resist.dot", 0.1), renderState: "capped", cap: 0.95 },
+        null
+      )
+    ).toBe("capped");
   });
 
   it("marks zero untouched as default", () => {
@@ -227,9 +261,9 @@ describe("bucketContributions", () => {
 });
 
 describe("isUnchangedState", () => {
-  it("treats default and no-producer as suppressible", () => {
+  it("treats default only as suppressible (D4)", () => {
     expect(isUnchangedState("default")).toBe(true);
-    expect(isUnchangedState("no-producer")).toBe(true);
+    expect(isUnchangedState("no-producer")).toBe(false);
     expect(isUnchangedState("active")).toBe(false);
   });
 });
@@ -259,6 +293,10 @@ describe("DerivedTab UI", () => {
             reading: "Fire power",
             composeKind: "FlatSum",
             value: 2847,
+            unitClass: "GameUnits",
+            defaultValue: 0,
+            cap: null,
+            renderState: "active",
             contributions: [
               {
                 sourceId: "equip:muzzle:ember",
@@ -275,15 +313,19 @@ describe("DerivedTab UI", () => {
             ]
           },
           {
-            channelId: "status.resist.butter",
+            channelId: "status.resist.dot",
             displayName: "Resist",
-            reading: "Butter",
+            reading: "DoT",
             composeKind: "SumIncreased",
             value: 0.95,
+            unitClass: "StatusPotencyPoints",
+            defaultValue: 0,
+            cap: 0.95,
+            renderState: "capped",
             contributions: [
               {
-                sourceId: "tree.ward.butter",
-                label: "Tree · ward/butter",
+                sourceId: "tree.ward.dot",
+                label: "Tree · ward/dot",
                 op: "Increased",
                 value: 0.95
               }
@@ -295,6 +337,10 @@ describe("DerivedTab UI", () => {
             reading: "Omni",
             composeKind: "SumIncreased",
             value: 0.22,
+            unitClass: "StatusPotencyPoints",
+            defaultValue: 0,
+            cap: null,
+            renderState: "active",
             contributions: [
               {
                 sourceId: "tree.ward.omni",
@@ -310,6 +356,10 @@ describe("DerivedTab UI", () => {
             reading: "stub",
             composeKind: "FlatReplace",
             value: 1,
+            unitClass: "LadderIndex",
+            defaultValue: 1,
+            cap: null,
+            renderState: "stub",
             contributions: [
               { sourceId: "rpg.progression", label: "Progression", op: "Replace", value: 1 }
             ]
@@ -345,12 +395,10 @@ describe("DerivedTab UI", () => {
 
     fireEvent.click(screen.getByTestId("derived-tab-status"));
     const statusVariants = screen.getByTestId("derived-variant-rail");
-    // Omni + 24 status-catalog chips (not L2b category rail).
-    expect(statusVariants.querySelectorAll('[data-testid^="derived-variant-"]').length).toBe(
-      1 + actorSurfaceFixture().statuses.length
-    );
-    fireEvent.click(screen.getByTestId("derived-variant-butter"));
-    expect(screen.getByTestId("derived-channel-status.resist.butter")).toHaveAttribute(
+    // D1: Omni + L2b category chips (not per-status-id rail).
+    expect(statusVariants.querySelectorAll('[data-testid^="derived-variant-"]').length).toBe(4);
+    fireEvent.click(screen.getByTestId("derived-variant-dot"));
+    expect(screen.getByTestId("derived-channel-status.resist.dot")).toHaveAttribute(
       "data-state",
       "capped"
     );
@@ -360,8 +408,8 @@ describe("DerivedTab UI", () => {
       "active"
     );
     fireEvent.click(screen.getByTestId("derived-show-unchanged"));
-    fireEvent.click(screen.getByTestId("derived-variant-nerve.afflicted"));
-    expect(screen.getByTestId("derived-channel-status.resist.nerve.afflicted")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("derived-variant-cc"));
+    expect(screen.getByTestId("derived-channel-status.resist.cc")).toBeInTheDocument();
   });
 
   it("join hole expands to no-producer when show unchanged", () => {

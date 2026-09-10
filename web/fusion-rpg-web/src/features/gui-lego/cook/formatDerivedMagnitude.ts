@@ -11,11 +11,21 @@ const COOK_TO_UNIT: Record<string, UnitClass | "unitInterval"> = {
   StatusPotencyPoints: "statusPotencyPoints",
   UnitInterval: "unitInterval",
   Flag: "flag",
+  LadderIndex: "ladderIndex",
+  AptitudePoints: "aptitudePoints",
+  ReciprocalPoints: "reciprocalPoints",
+  GameUnitsPerSecond: "gameUnitsPerSecond",
+  Milliseconds: "milliseconds",
+  Count: "count",
+  LoamUnits: "loamUnits",
   gameUnits: "gameUnits",
   perMilleRatio: "perMilleRatio",
   sigmoidPoints: "sigmoidPoints",
   unitInterval: "unitInterval",
-  flag: "flag"
+  flag: "flag",
+  ladderIndex: "ladderIndex",
+  aptitudePoints: "aptitudePoints",
+  reciprocalPoints: "reciprocalPoints"
 };
 
 /** Units where formatMagnitude adds a signed prefix — strip for composed channel totals. */

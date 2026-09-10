@@ -95,7 +95,7 @@ describe("ConditionTab", () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
-  it("honest empty status strip when sheet has no live effects", () => {
+  it("omits status strip entirely when sheet has no live effects (Q3)", () => {
     render(
       <ConditionTab
         data={actor()}
@@ -115,8 +115,38 @@ describe("ConditionTab", () => {
         }}
       />
     );
-    expect(screen.getByTestId("condition-live-effects-empty")).toBeInTheDocument();
-    expect(screen.queryByTestId("condition-live-effects-pending")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("condition-status-strip")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("condition-live-effects")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("condition-live-effects-empty")).not.toBeInTheDocument();
+  });
+
+  it("is RecipeMount-only — no mute chip twin path for identity", () => {
+    render(
+      <ConditionTab
+        data={actor()}
+        surface={actorSurfaceFixture()}
+        sheet={{
+          instanceId: "a1",
+          playerId: 1,
+          side: "plant",
+          typeId: 3,
+          displayName: "Emberling",
+          speciesName: "Sunflower",
+          phase: "ActiveBound",
+          level: 14,
+          xp: 2140,
+          xpToNext: 3400,
+          elementTyping: { primary: "fire", secondary: "light" },
+          derived: [],
+          primary: [],
+          liveStatuses: []
+        }}
+      />
+    );
+    expect(screen.getByTestId("condition-tab-host").querySelector(".chip")).toBeNull();
+    expect(screen.getByTestId("phase-badge")).toHaveTextContent("ActiveBound");
+    expect(screen.getByTestId("element-badge-fire")).toBeInTheDocument();
+    expect(screen.getByTestId("element-badge-light")).toBeInTheDocument();
   });
 
   it("sheet standing + pools light meters and bars; species on identity piece", () => {

@@ -22,6 +22,8 @@ export type ThemeKind =
   | "rarity"
   | "side"
   | "cook-tab"
+  | "bucket"
+  | "posture"
   | "neutral";
 
 export type ThemeRef = {
@@ -71,6 +73,8 @@ export type PieceEnvelope = {
   phase: Phase;
   themeRef?: ThemeRef;
   themeResolved?: ThemeResolved;
+  shieldThemeRef?: ThemeRef;
+  shieldThemeResolved?: ThemeResolved;
 };
 
 export type PiecePayload = PieceEnvelope & Record<string, unknown>;

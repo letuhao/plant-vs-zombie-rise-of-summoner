@@ -1,20 +1,30 @@
 # Module: `derived-volume-guard`
 
 **Program:** `derived-cook` · **Map:** [../derived-cook-map.md](../derived-cook-map.md)  
-**Design Guard 7:** volume fixture (~current channel count / 500 stress)
+**Ideal gap:** **G6**  
+**Design Guard 7:** [../../design/spec-derived-stat-sheet.md](../../design/spec-derived-stat-sheet.md) §7
 
 ---
 
 ## Objective
 
-Prove fold + RecipeMount remain correct and usable under full cook expansion — no silent drops,
-no O(n²) UI freezes in unit/contract scope.
+Prove fold + RecipeMount remain correct under full cook expansion — no silent drops, no O(n²) freezes
+in unit/contract scope.
+
+## Fixture shape (G6)
+
+| Fixture | Scale |
+|---|---|
+| `volume:current` | Current §1 scale — ~269 registered + open-prefix expand (~385 when status sparse dims expand) |
+| `volume:stress500` | 500 synthetic channel rows |
+
+Pin counts to design Guard 7 / §1 — do not hand-recompute a third number.
 
 ## Success criteria
 
-- [ ] Fixture expands to current registered/cook scale without throw.
-- [ ] Stress ~500 synthetic rows: fold completes; selection/inspect still defined.
-- [ ] Documented runtime budget note (not a hard FPS claim without probe).
+- [ ] `volume:current` expands without throw; omni not dropped.
+- [ ] `volume:stress500`: fold completes; selection/inspect defined.
+- [ ] Documented note: not a live FPS claim without probe.
 
 ## Commands
 

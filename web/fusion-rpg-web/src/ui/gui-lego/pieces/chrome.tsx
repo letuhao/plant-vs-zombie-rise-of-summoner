@@ -1,5 +1,6 @@
 import type { PieceFactory } from "@/features/gui-lego/types";
 import { SHOW_UNCHANGED_KEY } from "@/features/gui-lego/cook";
+import { resolveElementPaint } from "@/features/gui-lego/themes/elementPaint";
 import { CatalogIcon } from "@/ui/actor/CatalogIcon";
 import { themeStyle, vfxClass } from "@/ui/gui-lego/RecipeMount";
 
@@ -90,19 +91,27 @@ export const chipFactory: PieceFactory = ({ payload, bus }) => {
   const selected = Boolean(payload.selected);
   const label = String(payload.label ?? id);
   const count = typeof payload.count === "number" ? payload.count : null;
-  const style = themeStyle(payload);
-  const vfx = vfxClass(payload);
   const elementId =
     payload.elementId != null && String(payload.elementId).length > 0
       ? String(payload.elementId)
       : undefined;
+  // DC-6: element chips bind paint via resolveElementPaint (same module as CG-A1).
+  const elementPaint = elementId ? resolveElementPaint(elementId) : null;
+  const style = {
+    ...themeStyle(payload),
+    ...(elementPaint?.css ?? {})
+  };
+  const vfx = vfxClass(payload) ?? (elementPaint?.vfx.select ? elementPaint.vfx.select.replace(/\./g, "-") : undefined);
   const glyphKey =
-    payload.themeResolved?.glyphDefault != null && String(payload.themeResolved.glyphDefault).length > 0
+    (elementPaint?.glyphRef.catalogIcon && elementPaint.glyphRef.catalogIcon.length > 0
+      ? elementPaint.glyphRef.catalogIcon
+      : null) ??
+    (payload.themeResolved?.glyphDefault != null && String(payload.themeResolved.glyphDefault).length > 0
       ? String(payload.themeResolved.glyphDefault)
-      : null;
-  const glyphColor = payload.themeResolved?.paint?.accent
-    ? String(payload.themeResolved.paint.accent)
-    : null;
+      : null);
+  const glyphColor =
+    elementPaint?.paint.accent ??
+    (payload.themeResolved?.paint?.accent ? String(payload.themeResolved.paint.accent) : null);
 
   return (
     <button
@@ -112,7 +121,7 @@ export const chipFactory: PieceFactory = ({ payload, bus }) => {
       aria-selected={selected}
       data-tab={rail === "primary" ? id : undefined}
       data-v={rail === "variant" ? id : undefined}
-      data-el={elementId}
+      data-el={elementPaint?.dataEl ?? elementId}
       data-testid={rail === "variant" ? `derived-variant-${id}` : `derived-tab-${id}`}
       style={style}
       onClick={() => {

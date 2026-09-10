@@ -183,5 +183,8 @@ describe("DerivedCombatConsole DOM contract", () => {
     expect(screen.getByTestId("derived-contribution-chart").querySelector(".share-donut")).toBeTruthy();
     expect(screen.getByTestId("derived-contribution-chart").querySelector(".stack")).toBeTruthy();
     expect(screen.getByTestId("derived-stack").querySelector(".stack-row")).toBeTruthy();
+    // DC-8: player band — no GG-49 / Join channelId
+    expect(screen.getByTestId("derived-sources").textContent ?? "").not.toMatch(/GG-49/);
+    expect(screen.getByTestId("derived-inspector").textContent ?? "").not.toMatch(/Join:\s*combat\.power/);
   });
 });

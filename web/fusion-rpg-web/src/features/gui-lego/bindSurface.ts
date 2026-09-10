@@ -58,13 +58,50 @@ function asPayload(
   base.instanceId = instanceId;
   if (!base.phase) base.phase = "ready";
 
-  if (base.themeRef) {
-    base.themeResolved = resolveTheme(base.themeRef as ThemeRef);
-  } else if (!base.themeResolved) {
-    base.themeResolved = resolveTheme(null);
-  }
+  resolveThemeFields(base);
 
   return base;
+}
+
+/** Resolve themeRef / shieldThemeRef (and nested array children) → *Resolved paint. */
+function resolveThemeFields(payload: PiecePayload): void {
+  if (payload.themeRef) {
+    payload.themeResolved = resolveTheme(payload.themeRef as ThemeRef);
+  } else if (!payload.themeResolved) {
+    payload.themeResolved = resolveTheme(null);
+  }
+
+  if (payload.shieldThemeRef) {
+    payload.shieldThemeResolved = resolveTheme(payload.shieldThemeRef as ThemeRef);
+  }
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (key === "themeRef" || key === "themeResolved" || key === "shieldThemeRef" || key === "shieldThemeResolved") {
+      continue;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item && typeof item === "object" && !Array.isArray(item)) {
+          resolveThemeFields(item as PiecePayload);
+        }
+      }
+    }
+  }
+}
+
+/** Pack `vfx.select` class id, or null when absent. */
+export function vfxClass(themeResolved: { vfx?: { select?: string | null } } | null | undefined): string | null {
+  const select = themeResolved?.vfx?.select;
+  return select && select.length > 0 ? select : null;
+}
+
+/** CSS var map for inline style from themeResolved.css. */
+export function themeStyle(
+  themeResolved: { css?: Record<string, string> } | null | undefined
+): Record<string, string> | undefined {
+  const css = themeResolved?.css;
+  if (!css || Object.keys(css).length === 0) return undefined;
+  return { ...css };
 }
 
 function validatePieceMatch(pieceId: string, payload: PiecePayload): void {
@@ -78,14 +115,20 @@ function validatePieceMatch(pieceId: string, payload: PiecePayload): void {
 function mountRef(
   ref: RecipePieceRef,
   vm: unknown,
-  parentPayload: PiecePayload | null
-): MountNode {
+  parentPayload: PiecePayload | null,
+  opts?: { optionalOmit?: boolean }
+): MountNode | null {
   const bindPath = ref.bind;
   let resolved: unknown;
   if (bindPath && !bindPath.startsWith("vm") && parentPayload) {
     resolved = getByPath(parentPayload, bindPath);
   } else {
     resolved = getByPath(vm, bindPath);
+  }
+
+  // Q3 — optional slot missing → omit mount (relative OR vm.* path).
+  if (opts?.optionalOmit && resolved === undefined) {
+    return null;
   }
 
   const instanceId =
@@ -105,7 +148,13 @@ function mountRef(
   const slots: MountNode["slots"] = {};
   if (ref.slots) {
     for (const [slotName, fill] of Object.entries(ref.slots)) {
-      slots[slotName] = mountSlotFill(fill, vm, payload);
+      const mounted = mountSlotFill(fill, vm, payload);
+      if (mounted == null) continue;
+      if (Array.isArray(mounted)) {
+        slots[slotName] = mounted.filter((n): n is MountNode => n != null);
+      } else {
+        slots[slotName] = mounted;
+      }
     }
   }
 
@@ -116,15 +165,17 @@ function mountSlotFill(
   fill: RecipeSlotFill,
   vm: unknown,
   parentPayload: PiecePayload
-): MountNode | MountNode[] {
+): MountNode | MountNode[] | null {
   if (isBindArray(fill)) {
     return mountBindArray(fill, vm, parentPayload);
   }
   if (Array.isArray(fill)) {
-    return fill.map((r) => mountRef(r, vm, parentPayload));
+    return fill
+      .map((r) => mountRef(r, vm, parentPayload, { optionalOmit: true }))
+      .filter((n): n is MountNode => n != null);
   }
   if (isPieceRef(fill)) {
-    return mountRef(fill, vm, parentPayload);
+    return mountRef(fill, vm, parentPayload, { optionalOmit: true });
   }
   throw new Error("gui-lego bindSurface: invalid slot fill");
 }
@@ -155,7 +206,13 @@ function mountBindArray(
     const slots: MountNode["slots"] = {};
     if (spec.slots) {
       for (const [slotName, fill] of Object.entries(spec.slots)) {
-        slots[slotName] = mountSlotFill(fill, vm, payload);
+        const mounted = mountSlotFill(fill, vm, payload);
+        if (mounted == null) continue;
+        if (Array.isArray(mounted)) {
+          slots[slotName] = mounted.filter((n): n is MountNode => n != null);
+        } else {
+          slots[slotName] = mounted;
+        }
       }
     }
     return { instanceId, pieceId: spec.piece, payload, slots };
@@ -209,6 +266,9 @@ export function bindSurface(
   }
 
   const root = mountRef(recipe.root, vm, null);
+  if (!root) {
+    return { root: null, overlay: null, revision };
+  }
   // Empty lives in dock (family-list / phase-empty) — do not attach unused surface overlay.
   return { root, overlay: null, revision };
 }

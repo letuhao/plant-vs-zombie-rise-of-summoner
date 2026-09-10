@@ -5,10 +5,16 @@
 export {
   COOK_PRIMARY_TAB_IDS,
   FORBIDDEN_PRIMARY_TAB_IDS,
-  OTHER_SHARED_VARIANT_ID,
   SHOW_UNCHANGED_KEY,
   COMPOSE_SENTENCE,
   UNIT_SENTENCE,
+  RENDER_STATE_FICTION,
+  SOURCES_TITLE,
+  UNATTRIBUTED_LABEL,
+  composeFiction,
+  unitFiction,
+  stateFiction,
+  sourceFictionLabel,
   BUCKET_COLORS,
   BUCKET_LABELS,
   joinDerivedChannelId,
@@ -24,7 +30,8 @@ export {
   type ExpandedDerivedChannel,
   type DerivedRenderState,
   type LiveChannelView,
-  type DerivedRowModel
+  type DerivedRowModel,
+  type ExpandDerivedVariants
 } from "./derivedCook";
 
 export { formatDerivedMagnitude } from "./formatDerivedMagnitude";

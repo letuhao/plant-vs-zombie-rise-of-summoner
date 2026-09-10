@@ -1,8 +1,15 @@
 # Spec: `aptitude-allocation-surface` — the first player-reachable way to spend aptitude points
 
+> **Partially superseded (2026-09-10).** Commander GET/POST remains Mode C. UniqueDemon + species
+> player surfaces + lawn UniqueDemon wire are owned by [aptitude-sheet-map.md](../aptitude-sheet-map.md).
+> ~~“specimen picker missing / commander only forever”~~ is **historical** — ActorSheet is the
+> specimen picker (`?sel=` = `instanceId`). Do **not** treat §1 “commander scope only” as current
+> product law for UniqueActor Aptitudes.
+
 **Module id:** `aptitude-allocation-surface` · **Program:** [class-system-map.md](../class-system-map.md) ·
 **Status: AUTHORIZED 2026-08-27 — owner directive ("you should complete the plan") after reviewing the
 audit that found `point-economy`'s own persistence (P6.1-P6.4) has zero production callers.**
+**Follow-on:** aptitude-sheet program (2026-09-10) — Modes A/B/C.
 
 **Depends on:** `point-economy` (`PointBudget`/`RespecPolicy`/`AllocationStore`, all built and tested) ·
 **Blocks:** P9.2-P9.4 (real aptitude-signal-carrying battle outcomes need this to exist first).
@@ -12,18 +19,14 @@ audit that found `point-economy`'s own persistence (P6.1-P6.4) has zero producti
 ## 1. Objective and scope decision
 
 `point-economy` (Phase 6) built the budget math and the persistence — nobody can reach either.
-`WebMatchService.AptitudeChannelMods` hardcodes `AptitudeAllocation.Empty`. This module is the
-narrowest slice that changes that: **commander scope only**, reachable from an already-shipped,
-already-player-reachable flow (Expeditions), not a new "fight now" feature.
+`WebMatchService.AptitudeChannelMods` hardcodes `AptitudeAllocation.Empty`. This module shipped the
+first player-reachable slice: **commander scope** (Mode C), reachable from already-shipped flows.
 
-**Why commander scope only, not all four:** `DemonType`/`UniqueDemon` scopes need a specimen-selection
-UI (nested inside `CreaturesLayer`, per the map-review agent's own finding — no doc decides this yet)
-and `Aspect` is externally blocked on the demon program's `element_mastery` (decision 10). Commander
-scope needs neither: its source is `Θ_player` (already computed server-side via the already-registered
-`IPowerIndexProvider`/`ServerPowerIndexProvider`), its key is just the player id, and it already applies
-to "every demon you field" — the widest-impact, simplest-to-reach scope, matching this whole program's
-own "ship what's unblocked, light up the rest later" pattern (decision 10's own 3-of-4 shape for
-`point-economy` itself).
+~~**Why commander scope only, not all four:**~~ **Superseded by aptitude-sheet.** UniqueDemon and
+DemonType player allocate are Done gates under [aptitude-sheet-map.md](../aptitude-sheet-map.md)
+(ActorSheet is the specimen picker). Aspect remains externally blocked. Historical rationale for
+shipping commander first (widest impact, simplest key) remains valid as *delivery order*, not as a
+permanent UniqueActor product limit.
 
 **Why this closes real ground, not a demo:** `ExpeditionService.DispatchAsync`/`CollectAsync`
 (`src/FusionRpg.Server/ExpeditionEndpoints.cs`) already call `WebMatchService.BuildSquad` →

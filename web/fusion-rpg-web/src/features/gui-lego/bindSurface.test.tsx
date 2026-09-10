@@ -175,4 +175,16 @@ describe("bindSurface", () => {
     expect(chips[0]!.payload.themeResolved?.themeId).toBe("element.fire");
     expect(chips[0]!.payload.themeResolved?.paint.accent).toMatch(/^#/);
   });
+
+  it("resolves shieldThemeRef to ice paint, not fire default", () => {
+    const vm = {
+      ...readyVm(),
+      piece: "surface-shell",
+      instanceId: "shell:fx",
+      shieldThemeRef: { kind: "element", id: "ice" }
+    };
+    const plan = bindSurface(fixtureRecipe, vm);
+    expect(plan.root!.payload.shieldThemeResolved?.themeId).toBe("element.ice");
+    expect(plan.root!.payload.shieldThemeResolved?.paint.accent).not.toMatch(/e0703c/i);
+  });
 });

@@ -141,14 +141,6 @@
     background: color-mix(in srgb, var(--piece-accent, var(--sun)) 16%, transparent);
     box-shadow: 0 0 0 1px var(--piece-select-glow, transparent);
   }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="fire"] { border-left-color: var(--el-fire); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="ice"] { border-left-color: var(--el-ice); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="air"] { border-left-color: var(--el-air); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="earth"] { border-left-color: var(--el-earth); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="light"] { border-left-color: var(--el-light); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="dark"] { border-left-color: var(--el-dark); }
-  .derived-combat-console .cat-bar.variant-bar .chip[data-el="omni"] { border-left-color: var(--el-omni); }
-
   /* Select VFX — class names from theme vfx.select (dots → hyphens) */
   .derived-combat-console .chip.is-on.vfx-ember-pulse,
   .derived-combat-console .chip.is-on.vfx-frost-pulse,
@@ -166,7 +158,16 @@
   .derived-combat-console .chip.is-on.vfx-resource-hunger-pulse,
   .derived-combat-console .chip.is-on.vfx-resource-spirit-pulse,
   .derived-combat-console .chip.is-on.vfx-resource-qi-pulse,
-  .derived-combat-console .chip.is-on.vfx-resource-poise-pulse {
+  .derived-combat-console .chip.is-on.vfx-resource-poise-pulse,
+  .derived-combat-console .chip.is-on.vfx-action-attack-pulse,
+  .derived-combat-console .chip.is-on.vfx-action-defense-pulse,
+  .derived-combat-console .chip.is-on.vfx-action-support-pulse,
+  .derived-combat-console .chip.is-on.vfx-action-movement-pulse,
+  .derived-combat-console .chip.is-on.vfx-action-status-pulse,
+  .derived-combat-console .chip.is-on.vfx-cook-elements-pulse,
+  .derived-combat-console .chip.is-on.vfx-cook-status-pulse,
+  .derived-combat-console .chip.is-on.vfx-cook-resources-pulse,
+  .derived-combat-console .chip.is-on.vfx-cook-other-pulse {
     animation: piece-select-pulse 1.1s ease-out infinite alternate;
   }
   .derived-combat-console .chip.is-on.vfx-ember-pulse {
@@ -316,13 +317,11 @@
     opacity: 0.35;
   }
   .derived-combat-console .pip.on { opacity: 1; box-shadow: 0 0 6px currentColor; }
-  .derived-combat-console .pip[data-el="omni"] { background: var(--el-omni); color: var(--el-omni); }
-  .derived-combat-console .pip[data-el="fire"] { background: var(--el-fire); color: var(--el-fire); }
-  .derived-combat-console .pip[data-el="ice"] { background: var(--el-ice); color: var(--el-ice); }
-  .derived-combat-console .pip[data-el="air"] { background: var(--el-air); color: var(--el-air); }
-  .derived-combat-console .pip[data-el="earth"] { background: var(--el-earth); color: var(--el-earth); }
-  .derived-combat-console .pip[data-el="light"] { background: var(--el-light); color: var(--el-light); }
-  .derived-combat-console .pip[data-el="dark"] { background: var(--el-dark); color: var(--el-dark); }
+  /* Pip fill: inline accent from resolveElementPaint / themeResolved — not data-el CSS SSOT. */
+  .derived-combat-console .pip {
+    background: var(--piece-accent, var(--muted));
+    color: var(--piece-accent, var(--muted));
+  }
   .derived-combat-console .val {
     font-family: var(--font-mono);
     font-weight: 800;
@@ -440,8 +439,9 @@
   .derived-combat-console .stack-row[data-src="aptitude"] .fill { background: var(--info); }
   .derived-combat-console .stack-row[data-src="equip"] .fill { background: var(--sun); }
   .derived-combat-console .stack-row[data-src="tree"] .fill { background: var(--lawn-hot); }
-  .derived-combat-console .stack-row[data-src="status"] .fill { background: var(--el-fire); }
-  .derived-combat-console .stack-row[data-src="grant"] .fill { background: var(--el-light); }
+  /* Bucket fills prefer inline theme pack paint; CSS is fallback only (not element paint SSOT). */
+  .derived-combat-console .stack-row[data-src="status"] .fill { background: var(--warn); }
+  .derived-combat-console .stack-row[data-src="grant"] .fill { background: var(--sun); }
   .derived-combat-console .stack-row[data-src="neg"] .fill { background: var(--bad); }
 
   .derived-combat-console .share-donut {

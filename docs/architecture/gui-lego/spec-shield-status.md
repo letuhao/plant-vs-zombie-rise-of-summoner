@@ -5,9 +5,12 @@
 **Draft:** `docs/design/gui-lego/pieces/shield-status.html` — **must author before factory done**  
 **Depends on:** [spec-theme-bind.md](spec-theme-bind.md),
 [../condition-glance/spec-sheet-hot-projection.md](../condition-glance/spec-sheet-hot-projection.md)  
-**DTO align:** `ActorShieldSummaryDto` (`elementId`, `current`, `max`; optional `stacks` if widened)  
+**DTO align:** `ActorShieldSummaryDto` (`elementId`, `current`, `max`, optional `stacks`) — **S2**:
+`elementId` = front drain-order; `stacks` = layer count when widened  
 **Home:** under `cond-hero`  
-**Not a substitute for:** Shield tab `shield-stack-bar` (instance layers) — same runtime, different projection.
+**Not a substitute for:** Shield tab `shield-stack-bar` (`sheet.shieldLayers`, **S1**) — same runtime,
+different projection. Host invalidate on `ActorLiveStateChanged` refreshes both tabs via
+`["actorSheet", id]`.
 
 ---
 
@@ -51,7 +54,9 @@ omitted, radial has **no** shield ring. Card is the primary glance; ring is seco
 - [ ] Draft HTML exists.
 - [ ] Cold sheet: no DOM node.
 - [ ] Hot with shield: HP + element paint from paint SSOT / theme-bind.
-- [ ] DTO fields align with sheet-hot-projection.
+- [ ] DTO fields align with sheet-hot-projection (**S2** elementId/stacks).
+- [ ] Recipe `cond-hero` has conditional `shield` slot (`condition-console.json`).
+- [ ] Not used as Shield tab stack UI.
 
 ## Commands
 

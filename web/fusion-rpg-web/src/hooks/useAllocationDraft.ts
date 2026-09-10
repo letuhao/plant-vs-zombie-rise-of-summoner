@@ -49,6 +49,8 @@ export interface UseAllocationDraftResult {
   setValue: (id: string, next: number) => void;
   /** Restores the draft to the last-known server values, discarding any unsaved edit. */
   revert: () => void;
+  /** After a successful commit, replace draft with the server's reply (species revert → baseline). */
+  acceptCommitted: (values: Record<string, number>) => void;
   spent: number;
   withinBudget: boolean;
   dirty: boolean;
@@ -91,6 +93,11 @@ export function useAllocationDraft({
     if (serverValues) setDraft(serverValues);
   }
 
+  function acceptCommitted(values: Record<string, number>) {
+    setDraft(values);
+    setError(null);
+  }
+
   async function save() {
     if (draft === null || isSaving) return;
     setError(null);
@@ -101,5 +108,5 @@ export function useAllocationDraft({
     }
   }
 
-  return { draft, setValue, revert, spent, withinBudget, dirty, error, save };
+  return { draft, setValue, revert, acceptCommitted, spent, withinBudget, dirty, error, save };
 }
