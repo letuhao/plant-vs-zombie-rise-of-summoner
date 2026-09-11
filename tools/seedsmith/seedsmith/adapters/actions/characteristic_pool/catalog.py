@@ -12,6 +12,7 @@ from pathlib import Path
 
 from ...demons.family.consolidate import FamilyCandidateInput, consolidate
 from .curation import curated_traits
+from .ladders import RARITY_LADDER, RARITY_ORDINAL, TRAIT_POOL
 
 __all__ = [
     "SpeciesRow", "RARITY_LADDER", "TRAIT_POOL", "load_catalog", "load_live_records",
@@ -22,25 +23,9 @@ REPO_ROOT = Path(__file__).resolve().parents[6]
 CATALOG_PATH = REPO_ROOT / "data" / "seed" / "demons" / "species"
 LEGACY_CATALOG_PATH = REPO_ROOT / "src" / "FusionRpg.Core" / "Demons" / "DemonSpeciesCatalog.Generated.cs"
 
-# `DemonRarityIds.ToId` — src/FusionRpg.Core/Demons/DemonRarity.cs:16-27 (enum declaration order,
-# which the C# enum makes the ordinal — never re-derive an ordinal by sorting strings). Transcribed
-# because there is no JSON export of the enum; a guard test pins the exact ids and count so a real
-# enum change fails loudly rather than silently drifting (same discipline as
-# `adapters/demons/registries.py`'s own header comment).
-RARITY_LADDER: "tuple[str, ...]" = (
-    "chaff", "sprout", "grafted", "cultivated", "fused",
-    "chimeric", "heirloom", "firstseed", "sunwoven", "almanac",
-)
-RARITY_ORDINAL = {rid: i for i, rid in enumerate(RARITY_LADDER)}
-
-# `DemonTraitCatalog.All` — src/FusionRpg.Core/Demons/DemonTraitCatalog.cs:11-30. The closed
-# 14-member trait pool (spec §3 step 4's own citation), transcribed for the same "code, not data"
-# reason as RARITY_LADDER above — never re-derived from a species scan, so a species whose
-# `TraitPool` happens to omit one this run does not silently shrink the vocabulary.
-TRAIT_POOL: "tuple[str, ...]" = (
-    "berserker", "regenerator", "soul-eater", "critical-hunter", "guardian", "swift", "immortal",
-    "loyal", "greedy", "bloodthirsty", "coward", "genius", "void-touched", "chaos-marked",
-)
+# `RARITY_LADDER` / `TRAIT_POOL` now live in `ladders.py` (a leaf both this module and `curation.py`
+# import from — see that module's docstring for why the shared copy fixes the drift risk). They are
+# re-exported above so every existing importer of `catalog.RARITY_LADDER` keeps working unchanged.
 
 _ELEMENT_ID = {
     "Fire": "fire", "Ice": "ice", "Air": "air", "Earth": "earth", "Light": "light", "Dark": "dark",
@@ -72,8 +57,6 @@ class SpeciesRow:
     rarity: str                         # the LADDER id — never the legacy band (spec §3 step 2)
     rarity_ordinal: int                 # DemonRarity.cs declaration order, 0..9
     traits: "tuple[str, ...]"           # the CLOSED 14-trait pool (curated, `curation.py`)
-    raw_traits: "tuple[str, ...]" = ()  # the seed's own open flavor text, before curation — kept
-                                        # for provenance only, never scored (see `curation.py`)
 
 
 def _load_legacy_catalog(path: Path) -> "list[SpeciesRow]":
@@ -174,15 +157,16 @@ def _live_row(record: dict[str, object]) -> SpeciesRow:
     if rarity_id not in RARITY_ORDINAL:
         raise ValueError(f"{path}: species {species_id!r} has unknown rarity {rarity!r}")
 
-    raw_traits = record.get("traits", [])
-    if not isinstance(raw_traits, list):
+    # Shape guard on the seed's OWN open flavor `traits` field. It is NOT scored — the closed pool
+    # below is (see `curation.py` for the full defect account) — but a malformed seed should still
+    # fail loudly here rather than be silently ignored.
+    if not isinstance(record.get("traits", []), list):
         raise ValueError(f"{path}: species {species_id!r} traits must be a list")
-    raw = tuple(str(trait).strip().lower() for trait in raw_traits if str(trait).strip())
 
     # The live seed's `traits` field is open flavor text (measured 2026-09-11: 2,312 distinct
     # tokens, one of which is a closed-pool member). Score the CLOSED pool the game actually gives
-    # this species — `DemonTraitPoolCuration.PickFor`'s own bridge, mirrored in `curation.py` — and
-    # keep the raw text only for provenance. See `curation.py` for the full defect account.
+    # this species — `DemonTraitPoolCuration.PickFor`'s own bridge, mirrored in `curation.py`. See
+    # `curation.py` for the full defect account.
     game_type_id = record.get("gameTypeId")
     traits = curated_traits(
         species_id, rarity_id,
@@ -193,7 +177,7 @@ def _live_row(record: dict[str, object]) -> SpeciesRow:
         element_secondary=secondary_id,
         rarity=rarity_id,
         rarity_ordinal=RARITY_ORDINAL[rarity_id],
-        traits=traits, raw_traits=raw,
+        traits=traits,
     )
 
 

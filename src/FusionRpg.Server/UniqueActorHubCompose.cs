@@ -54,12 +54,21 @@ public static class UniqueActorHubCompose
             return list;
         }
 
+        // channelmods-hub: star/loyalty reach the sheet through the SAME producer battle uses
+        // (StarLoyaltyBonus), so the two cannot drift. Read once — a specimen's star and its
+        // contract loyalty are durable per-actor values, and Build runs per sheet/derived read.
+        var profile = store.GetDemonProfile(specimenId);
+        var loyalty = store.GetContract(specimenId)?.Loyalty ?? 0;
+        StarLoyaltyContribution StarLoyalty(StatContext _) =>
+            new(profile?.Star ?? 0, loyalty, level);
+
         var hub = ActorHubBootstrap.CreateDefault(
             powerIndex: powerIndex,
             aptitudeTuning: AptitudeTuningHub.Tuning,
             aptitudeAllocation: _ => commanderAllocation + uniqueAllocation,
             boundDerivedAtoms: BoundAtoms,
-            seedResourceBaseline: true);
+            seedResourceBaseline: true,
+            starLoyalty: StarLoyalty);
 
         return (hub, ctx);
     }

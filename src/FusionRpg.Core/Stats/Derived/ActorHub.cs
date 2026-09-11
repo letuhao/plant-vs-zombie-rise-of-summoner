@@ -144,13 +144,18 @@ public static class ActorHubBootstrap
         Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null,
         Func<StatContext, IReadOnlyList<Subsystems.BoundDerivedAtom>>? boundDerivedAtoms = null,
         Func<StatContext, IReadOnlyList<Subsystems.StatusDerivedMod>>? statusDerivedMods = null,
-        bool seedResourceBaseline = false)
+        bool seedResourceBaseline = false,
+        Func<StatContext, Subsystems.StarLoyaltyContribution>? starLoyalty = null)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
         if (seedResourceBaseline)
             hub.Register(new Subsystems.ResourceBaselineSubsystem(powerIndex));
         hub.Register(new Subsystems.RpgProgressionSubsystem(powerIndex));
+        // channelmods-hub: same per-context delegate seam as aptitude/bound atoms. Opt-in, so bare
+        // CreateDefault callers are unaffected; a contributor returning IsEmpty contributes nothing.
+        if (starLoyalty is not null)
+            hub.Register(new Subsystems.StarLoyaltySubsystem(starLoyalty));
         if (aptitudeTuning is not null)
         {
             hub.Register(new Subsystems.AptitudeSubsystem(

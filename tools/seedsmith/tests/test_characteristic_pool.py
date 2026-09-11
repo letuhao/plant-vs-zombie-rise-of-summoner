@@ -21,6 +21,7 @@ deliberately:
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -31,12 +32,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from seedsmith.adapters.actions.characteristic_pool import anchors as anchors_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import catalog as catalog_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import derive as derive_mod  # noqa: E402
+from seedsmith.adapters.actions.characteristic_pool import ladders as ladders_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import pool as pool_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.anchors import AnchorRow, AnchorTree  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
     LEGACY_CATALOG_PATH, RARITY_LADDER, SpeciesRow, TRAIT_POOL,
     derive_live_family_assignments, load_catalog,
 )
+from seedsmith.adapters.actions.characteristic_pool.curation import curated_traits  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.derive import (  # noqa: E402
     CATEGORIES, RoleLeanWeights, SpeciesAnchor, build_species_anchor, compute_scores, derive_all,
     family_floor_order, load_weights, rank_categories,
@@ -627,6 +630,80 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
         result = load_committed(ACTIONS_ROOT)
         self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 904)
         self.assertEqual(len(result.corpus.by_kind("action-characteristic-pool")), 6)
+
+
+class CurationParityTests(unittest.TestCase):
+    """Guards the transcription `curation.py` performs of the C# SSOT `DemonTraitPoolCuration`.
+
+    The 2026-09-11 review's finding: `curated_traits` re-implements
+    `DemonTraitPoolCuration.PickFor` constant-for-constant (sub-pools, FNV salts, the Heirloom
+    threshold, the Almanac top rung) with nothing binding the two. No committed artifact carries the
+    curated closed pool (`data/generated/demons/*.json` holds the OPEN flavor text), so a value
+    oracle does not exist. These tests instead parse the C# source that owns each fact and assert the
+    Python side agrees — so editing the C# arrays, salts, or ladder fails here rather than silently
+    changing the trait pool the game grants while the corpus keeps scoring the old bridge.
+    """
+
+    CS_ROOT = REPO_ROOT / "src" / "FusionRpg.Core" / "Demons"
+
+    @staticmethod
+    def _cs(path: Path) -> str:
+        if not path.is_file():
+            raise unittest.SkipTest(f"C# source not present: {path}")
+        return path.read_text(encoding="utf-8")
+
+    def test_combat_and_personality_pools_match_the_csharp_arrays(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "DemonTraitPoolCuration.cs")
+        combat = re.search(r"Combat\s*=\s*\{([^}]*)\}", text)
+        personality = re.search(r"Personality\s*=\s*\{([^}]*)\}", text)
+        self.assertIsNotNone(combat, "Combat array not found in DemonTraitPoolCuration.cs")
+        self.assertIsNotNone(personality, "Personality array not found")
+        cs_combat = tuple(re.findall(r'"([a-z-]+)"', combat.group(1)))
+        cs_personality = tuple(re.findall(r'"([a-z-]+)"', personality.group(1)))
+        self.assertEqual(ladders_mod.COMBAT_TRAITS, cs_combat)
+        self.assertEqual(ladders_mod.PERSONALITY_TRAITS, cs_personality)
+
+    def test_rarity_ladder_matches_the_csharp_enum_declaration_order(self) -> None:
+        text = self._cs(self.CS_ROOT / "DemonRarity.cs")
+        enum_block = re.search(r"enum DemonRarity\s*\{(?P<body>[^}]*)\}", text)
+        self.assertIsNotNone(enum_block, "DemonRarity enum not found")
+        members = re.findall(r"\b([A-Z][A-Za-z0-9]*)\b", enum_block.group("body"))
+        cs_ladder = tuple(m.lower() for m in members)
+        self.assertEqual(ladders_mod.RARITY_LADDER, cs_ladder,
+                         "the shared rarity ladder must match DemonRarity's declaration order — "
+                         "a widened enum here silently shifts the Heirloom/essence threshold")
+
+    def test_trait_pool_matches_the_csharp_catalog_ids(self) -> None:
+        text = self._cs(self.CS_ROOT / "DemonTraitCatalog.cs")
+        ids = tuple(re.findall(r'new\("([a-z-]+)"', text))
+        self.assertEqual(ladders_mod.TRAIT_POOL, ids)
+
+    def test_fnv_salts_match_the_csharp_call_sites(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "DemonTraitPoolCuration.cs")
+        cs_salts = tuple(re.findall(r'Hash\(gameTypeId,\s*"([a-z0-9-]+)"\)', text))
+        self.assertEqual(cs_salts, ("curate-t1", "curate-t2", "curate-t3", "curate-essence"))
+
+    def test_essence_and_top_rung_thresholds_match_the_ladder(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "DemonTraitPoolCuration.cs")
+        self.assertIn("AtLeast(rarity, DemonRarity.Heirloom)", text)
+        self.assertIn("IsTopRung(rarity)", text)
+        # The C# `AtLeast(..., Heirloom)` is ordinal >= the Heirloom index; `IsTopRung` is the last
+        # ladder rung. Both are derived in `curation.py` from the shared ladder, not re-typed.
+        self.assertEqual(ladders_mod.RARITY_ORDINAL["heirloom"],
+                         ladders_mod.RARITY_LADDER.index("heirloom"))
+        top = ladders_mod.RARITY_LADDER[-1]
+        self.assertEqual(top, "almanac")
+        # Almanac (top) must be >= Heirloom, or the top-rung essence branch would never fire.
+        self.assertGreaterEqual(ladders_mod.RARITY_ORDINAL[top],
+                                ladders_mod.RARITY_ORDINAL["heirloom"])
+
+    def test_curated_traits_is_deterministic_and_in_the_closed_pool(self) -> None:
+        for sid, rarity, gid in (("x", "chaff", 7), ("y", "heirloom", 7), ("z", "almanac", 7)):
+            first = curated_traits(sid, rarity, gid)
+            self.assertEqual(first, curated_traits(sid, rarity, gid))
+            self.assertTrue(set(first) <= set(TRAIT_POOL), first)
+            if rarity == "almanac":
+                self.assertIn("immortal", first)
 
 
 if __name__ == "__main__":

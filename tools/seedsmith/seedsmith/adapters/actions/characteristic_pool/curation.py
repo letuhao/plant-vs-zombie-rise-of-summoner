@@ -40,6 +40,8 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
+from .ladders import COMBAT_TRAITS, PERSONALITY_TRAITS, RARITY_LADDER, RARITY_ORDINAL
+
 __all__ = ["curated_traits", "LEGACY_TRAIT_OVERLAP_PATH"]
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
@@ -48,22 +50,14 @@ LEGACY_TRAIT_OVERLAP_PATH = (
     / "DemonSpeciesLegacyTraitPoolOverlap.Generated.cs"
 )
 
-# `DemonTraitPoolCuration.Combat` / `.Personality` — the two closed sub-pools the FNV fallback
-# picks from, in their declared order (`DemonTraitPoolCuration.cs:28-31`). Transcribed because the
-# fallback's `% Length` picks depend on this exact order.
-_COMBAT: "tuple[str, ...]" = ("berserker", "regenerator", "soul-eater", "critical-hunter",
-                              "guardian", "swift")
-_PERSONALITY: "tuple[str, ...]" = ("loyal", "greedy", "bloodthirsty", "coward", "genius")
-
-# `DemonRarity` declaration order (`DemonRarity.cs:16-27`); `AtLeast(Heirloom)` is ordinal >= 6 and
-# `IsTopRung` is ordinal 9. Rarity ids are the ladder ids `catalog.RARITY_LADDER` already carries,
-# but indexed here by the same ordinals so the two stay aligned.
-_RARITY_ORDER: "tuple[str, ...]" = (
-    "chaff", "sprout", "grafted", "cultivated", "fused",
-    "chimeric", "heirloom", "firstseed", "sunwoven", "almanac",
-)
-_HEIRLOOM_ORDINAL = _RARITY_ORDER.index("heirloom")
-_TOP_RUNG = "almanac"
+# `DemonTraitPoolCuration.Combat` / `.Personality` and the rarity ladder are read from `ladders.py`
+# — the one shared transcription — rather than re-declared here. The 2026-09-11 review found the
+# ladder duplicated in this file with no guard; a second copy that drifts silently shifts the
+# `Heirloom` threshold below and changes which species get an essence trait.
+_COMBAT = COMBAT_TRAITS
+_PERSONALITY = PERSONALITY_TRAITS
+_HEIRLOOM_ORDINAL = RARITY_ORDINAL["heirloom"]      # `DemonRarityLadder.AtLeast(rarity, Heirloom)`
+_TOP_RUNG = RARITY_LADDER[-1]                       # `DemonRarityLadder.IsTopRung` -> Almanac
 
 _ENTRY_RE = re.compile(r'\["(?P<id>[a-z0-9]+)"\]\s*=\s*new\[\]\s*\{\s*(?P<body>[^}]*)\}')
 _TRAIT_RE = re.compile(r'"([a-z-]+)"')
@@ -115,10 +109,7 @@ def curated_traits(species_id: str, rarity: str, game_type_id: int) -> "tuple[st
     if third not in pool:
         pool.append(third)
 
-    try:
-        ordinal = _RARITY_ORDER.index(rarity)
-    except ValueError:
-        ordinal = 0
+    ordinal = RARITY_ORDINAL.get(rarity, 0)
     if ordinal >= _HEIRLOOM_ORDINAL:
         pool.append("void-touched" if _fnv1a(game_type_id, "curate-essence") % 2 == 0
                     else "chaos-marked")

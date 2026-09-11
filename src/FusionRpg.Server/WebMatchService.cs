@@ -8,6 +8,7 @@ using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -575,17 +576,14 @@ public sealed class WebMatchService
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> StarChannelMods(int star, int level)
     {
-        if (star <= 0) return Array.Empty<BattleChannelMod>();
-        // The per-mille bonus is now a CURVE indexed on the triangular sacrifice cost, not `star`
-        // times a flat rate (StarPolicy.StarPowerMilli) -- so `star` must not be multiplied in again.
-        var power = Math.Max(star,
-            BattleRuleset.BaseAtk(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarPowerMilli(star) / 1000);
-        var defense = Math.Max(star,
-            BattleRuleset.BaseDefense(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarDefenseMilli(star) / 1000);
+        // channelmods-hub: formula re-homed to the shared StarLoyaltyBonus (Core), which the Hub
+        // StarLoyaltySubsystem also uses — so sheet and battle cannot drift. This method stays a
+        // BattleChannelMod adapter until battle-hub-fuse retires the battle-side consumption.
+        if (StarLoyaltyBonus.Star(star, level) is not { } s) return Array.Empty<BattleChannelMod>();
         return new[]
         {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, s.Power),
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, s.Defense)
         };
     }
 
@@ -596,18 +594,11 @@ public sealed class WebMatchService
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
     {
-        var rank = ContractPolicy.RankFor(loyalty);
-        var milli = ContractPolicy.RankBonusMilli(rank);
-        if (milli <= 0) return Array.Empty<BattleChannelMod>();
-        // Floored at the rank step (Sworn 1 / Trusted 2 / Devoted 3) exactly like stars: at low
-        // levels a per-mille share truncates to nothing, and every rank would look identical.
-        var floor = (int)rank - 1;
-        var power = Math.Max(floor, BattleRuleset.BaseAtk(level) * milli / 1000);
-        var defense = Math.Max(floor, BattleRuleset.BaseDefense(level) * milli / 1000);
+        if (StarLoyaltyBonus.Loyalty(loyalty, level) is not { } l) return Array.Empty<BattleChannelMod>();
         return new[]
         {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, l.Power),
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, l.Defense)
         };
     }
 

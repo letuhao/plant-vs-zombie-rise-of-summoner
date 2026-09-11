@@ -356,6 +356,36 @@ class TwoLevelAllocationTests(unittest.TestCase):
         alloc = dp.apportion_categories(self._rows(4), 0)
         self.assertTrue(all(v == {c: 0 for c in CATEGORIES} for v in alloc.values()))
 
+    def test_large_per_subject_count_does_not_trip_the_guard(self) -> None:
+        """The repair bound must be the provable `count * n` swaps (each swap cuts the L1 drift by
+        2), not a heuristic smaller than it. The old bound `4*n*len(order)+len(order)` was below the
+        real worst case once `count > 2*len(order)`, i.e. a latent false `did not converge` throw at
+        a large per-subject count. Exercise a count well past that threshold with a lopsided roster
+        that forces many repairs."""
+        rows = []
+        for i in range(120):
+            milli = {c: 50 for c in CATEGORIES}
+            milli["attack" if i % 2 == 0 else "defense"] += 750
+            rows.append((f"s{i:03d}", milli))
+        for count in (40, 120, 200):
+            alloc = dp.apportion_categories(rows, count)
+            for key, counts in alloc.items():
+                self.assertEqual(sum(counts.values()), count, key)
+            col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
+            aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
+            self.assertEqual(col, dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows)))
+
+    def test_one_implementation_backs_both_apportioners(self) -> None:
+        """`largest_remainder_count` and `largest_remainder_apportion` must round and tie-break
+        identically — the review's duplication finding was that a second copy could disagree with the
+        per-subject split the quota must match. At base 1000 they are the same function."""
+        weights = {c: 200 for c in CATEGORIES}
+        weights["attack"] = 260
+        weights["status"] = 140
+        for total in (0, 1, 3, 5, 97):
+            self.assertEqual(dp.largest_remainder_count(weights, CATEGORIES, total),
+                             dp.largest_remainder_apportion(weights, CATEGORIES, total))
+
 
 class OverflowTests(unittest.TestCase):
     """Spec §5 'Overflow' -- `long` throughout, widened before multiplying, forced overflow throws."""

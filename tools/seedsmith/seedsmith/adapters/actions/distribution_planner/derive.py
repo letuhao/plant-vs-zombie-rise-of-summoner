@@ -77,13 +77,33 @@ def largest_remainder_count(weights_milli: "Mapping[str, int]", order: "Sequence
     loader for real rows, `_flat_milli` below for the general-scope fallback). Distributes `total`
     whole units across `order` by largest remainder: `long`, widened before multiplying, divided
     by 1000 last, exactly once. Ties break on `order`'s own declared position — a total function,
-    never dependent on `weights_milli`'s own dict iteration order."""
+    never dependent on `weights_milli`'s own dict iteration order.
+
+    This is the ONE largest-remainder implementation in this adapter. The scope-level quota in
+    `apportion_categories` needs the same math at a different scale (its weights are a SUM of many
+    per-subject vectors, so they do not sum to 1000); rather than a second copy that could round or
+    tie-break differently from the per-subject split it must agree with, `largest_remainder_raw`
+    below is the general form and this is its fixed-base caller. A tie-break or overflow fix here
+    therefore reaches both levels — the point of collapsing the 2026-09-11 review's duplication
+    finding."""
+    return largest_remainder_raw(weights_milli, order, total, base=1000)
+
+
+def largest_remainder_raw(weights: "Mapping[str, int]", order: "Sequence[str]", total: int,
+                          *, base: int) -> "dict[str, int]":
+    """Largest-remainder apportionment of `total` units over `order` for weights of ANY scale,
+    normalised by `base` (`sum(weights)` for an arbitrary-scale vector, `1000` for per-mille).
+    `long`, widened before multiplying, one division per key, remainder units to the largest
+    fractional parts with ties on `order`. Raises if `total` is negative; returns all zeros when
+    the weights sum to nothing (nothing to be proportional to)."""
     if total < 0:
-        raise ValueError("largest_remainder_count: total must be non-negative")
-    scaled = {k: _widen_mul(int(weights_milli[k]), total) for k in order}
-    floor = {k: scaled[k] // 1000 for k in order}
+        raise ValueError("largest_remainder_raw: total must be non-negative")
+    if base <= 0:
+        return {k: 0 for k in order}
+    scaled = {k: _widen_mul(int(weights[k]), total) for k in order}
+    floor = {k: scaled[k] // base for k in order}
     remainder = total - sum(floor.values())
-    fracs = sorted(order, key=lambda k: (-(scaled[k] % 1000), order.index(k)))
+    fracs = sorted(order, key=lambda k: (-(scaled[k] % base), order.index(k)))
     out = dict(floor)
     for k in fracs[:remainder]:
         out[k] += 1
@@ -106,23 +126,17 @@ def expand_counts(counts: "Mapping[str, int]", order: "Sequence[str]") -> "list[
 def largest_remainder_apportion(raw_weights: "Mapping[str, int]", order: "Sequence[str]",
                                 total: int) -> "dict[str, int]":
     """Largest-remainder apportionment of `total` units over `order` for raw weights of ANY scale
-    (the caller's weights need not sum to 1000, unlike `largest_remainder_count`). `long`,
-    widened before multiplying, one division per key, remainder units to the largest fractional
-    parts with ties on `order`. Used for the SCOPE-level category quota, whose weights are the
-    SUM of many per-subject vectors and therefore carry no fixed scale."""
-    if total < 0:
-        raise ValueError("largest_remainder_apportion: total must be non-negative")
-    base = sum(int(raw_weights[k]) for k in order)
-    if base <= 0:
-        return {k: 0 for k in order}
-    scaled = {k: _widen_mul(int(raw_weights[k]), total) for k in order}
-    floor = {k: scaled[k] // base for k in order}
-    remainder = total - sum(floor.values())
-    fracs = sorted(order, key=lambda k: (-(scaled[k] % base), order.index(k)))
-    out = dict(floor)
-    for k in fracs[:remainder]:
-        out[k] += 1
-    return out
+    (the caller's weights need not sum to 1000, unlike `largest_remainder_count`). Used for the
+    SCOPE-level category quota, whose weights are the SUM of many per-subject vectors and therefore
+    carry no fixed scale.
+
+    Kept as a named wrapper (not deleted) because it is the exported name `coverage_report` and the
+    tests call, and because it documents the arbitrary-scale case at the call site. It delegates to
+    `largest_remainder_raw`, the single implementation, so it cannot drift from
+    `largest_remainder_count`'s rounding or tie-break — collapsing the 2026-09-11 review's finding
+    that this function duplicated and could disagree with the per-subject split it must match."""
+    return largest_remainder_raw(raw_weights, order, total,
+                                 base=sum(int(raw_weights[k]) for k in order))
 
 
 def apportion_categories(
@@ -168,7 +182,13 @@ def apportion_categories(
             col[c] += by_cat[c]
 
     guard = 0
-    limit = 4 * n * len(order) + len(order)
+    # Provable termination bound, not a heuristic. Each swap moves one unit from a category over its
+    # quota to one under it, so `sum(|col[c] - Q[c]|)` falls by exactly 2. The initial L1 drift is at
+    # most `2 * count * n` (every unit in one category), so at most `count * n` swaps are ever needed.
+    # The previous bound `4*n*len(order)+len(order)` was SMALLER than that once `count > 2*len(order)`
+    # (i.e. above count 10) and was a latent false `did not converge` throw at a large per-subject
+    # count; the real path is far below either bound, but the guard should not be able to lie.
+    limit = count * n + len(order)
     while True:
         over = [c for c in order if col[c] > quota[c]]
         under = [c for c in order if col[c] < quota[c]]
@@ -662,6 +682,12 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     id_key = scope_key if scope_key is not None else "general"
     briefs: "list[dict]" = []
     area_cursor = 0
+    # Render the accepted-neighbour fingerprints ONCE, not once per brief. `accepted_neighbours` is
+    # identical for every ordinal of this subject, so re-rendering and re-sorting it inside the loop
+    # was `count x group_size` work per subject — quadratic as the accepted corpus accumulates rounds
+    # (the 2026-09-11 review's finding). `render_fingerprint` returns a plain tuple, so this is a
+    # pure hoist with identical output.
+    rendered_neighbours = [(aid, render_fingerprint(fp)) for aid, fp in accepted_neighbours]
     for i in range(count):
         ordinal = i + 1
         category = category_seq[i]
@@ -687,8 +713,7 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
             pairing_role=pa.role,
         )
         target_fp = render_fingerprint(fp_components)
-        neighbours = k_nearest(target_fp, [(aid, render_fingerprint(fp)) for aid, fp
-                                          in accepted_neighbours], avoid_neighbour_k)
+        neighbours = k_nearest(target_fp, rendered_neighbours, avoid_neighbour_k)
         avoid_neighbours = [{"actionId": aid, "fingerprint": render_fingerprint_string(fp_components)}
                            for aid, _dist in neighbours]
 
