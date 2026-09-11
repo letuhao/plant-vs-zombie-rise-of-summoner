@@ -40,7 +40,21 @@ __all__ = [
     "render_brief",
 ]
 
-PROMPT_VERSION = "tree-language/2"
+# tree-language/2 (2026-09-07): item 3's "Prefer reroute" opening clause became the measured
+# defect — 1638/1677 committed nodes at `reroute` with the identical propertyKeys. Reworded so
+# "MOST NODES HAVE NONE" governs; provenance-split for the committed corpus (see render_brief's
+# own comment).
+# tree-language/3 (2026-09-11, A2): item 3 is now per-cell — the schema's `exclusion.form` enum
+# is narrowed to the node's own quota-cell allocation (§4.2 step 6), the gate enforces the same
+# set per response, and the brief states the allocation ("Your quota cell ..."). A `none` cell
+# offers only `none`; a designated cell offers its rung plus the honest `none` default.
+# 2026-09-11 (A2): item 3 became per-cell — the brief now names the node's own quota-cell
+# exclusionForm allocation (three-way: legacy-no-cell / none-cell / designated), matching the
+# schema enum's per-call narrowing (`schema_for_call(exclusion_forms=...)`) and the gate's own
+# per-response check (`build_response_gate(permitted_exclusion_forms=...)`). All three now say what
+# §4.2 step 6 says: the cell IS the enum. The `tree-language/2` corpus (1638/1677 at `reroute`) is
+# distinguishable from this vintage by this stamp alone.
+PROMPT_VERSION = "tree-language/3"
 
 #: §6.2's SYSTEM block, verbatim — every negative clause here also lives in the schema (§7 gate 2 /
 #: `schema.py`'s own field descriptions), per `family_propose/prompts.py:40-44`'s rule that a
@@ -101,9 +115,17 @@ def render_brief(*, node_id: str, sample_index: int, tree_display_name: str, tre
                  branch: str, tier: int, node_class: str, motifs: "Sequence[str]",
                  anti_motifs: "Sequence[str]", permitted_affixes: "Sequence[AffixOption]",
                  permitted_properties: "Sequence[str]",
-                 siblings: "Sequence[SiblingSummary]" = (), tier_count: int = TIER_COUNT) -> str:
+                 siblings: "Sequence[SiblingSummary]" = (), tier_count: int = TIER_COUNT,
+                 exclusion_form: "str | None" = None) -> str:
     """The full §6.2 USER block for one node. Every list argument is ALREADY the permitted subset
-    (H3's job to narrow); this function only orders and renders it."""
+    (H3's job to narrow); this function only orders and renders it.
+
+    `exclusion_form` (2026-09-11, A2) is the node's OWN quota-cell allocation for the exclusion
+    axis — `None` when the caller did not resolve a cell (a legacy record, or a caller that does
+    not resolve cells), `"none"` for a none-allocated cell, or the designated rung. It renders a
+    per-node "Your quota cell" line rather than a generic exhortation, so the brief, the schema
+    enum and the gate all say the same thing the cell says (§4.2 step 6).
+    """
     if branch not in ("offensive", "defensive"):
         raise ValueError(f"branch must be 'offensive' or 'defensive', got {branch!r}")
     if node_class not in ("mechanism", "magnitude"):
@@ -157,6 +179,33 @@ def render_brief(*, node_id: str, sample_index: int, tree_display_name: str, tre
         "from the list IS naming the existing thing; nothing else needs to exist first."
     )
 
+    # 2026-09-11 (A2): item 3's text is now per-cell (the three-way split below) instead of a
+    # generic exhortation — the brief, the schema enum and the gate all say what the cell says.
+    if exclusion_form is None:
+        exclusion_line = (
+            "  3. `exclusion` — MOST NODES HAVE NONE. Only set a form at all if this node's effect\n"
+            "                   genuinely, concretely conflicts with one of the properties below — not\n"
+            "                   because a property happens to be available to name. If (and only if) a\n"
+            "                   real conflict exists, prefer `reroute` over `nullification`; the latter\n"
+            "                   is the last resort, for when the pair can be neither rerouted nor\n"
+            "                   ordered. If you use it, say plainly which side wins in `rationale` —\n"
+            "                   never in `blocked`, which is reserved for declining to answer this brief\n"
+            "                   at all.")
+    elif exclusion_form == "none":
+        exclusion_line = (
+            "  3. `exclusion` — Your quota cell allocates `none` for this node: no exclusion. Fill\n"
+            "                   `form` with `none` and `propertyKeys` with an empty list. This is the\n"
+            "                   normal case — most nodes never leave it.")
+    else:
+        exclusion_line = (
+            "  3. `exclusion` — Your quota cell designates THIS node for a real exclusion: the\n"
+            f"                   only non-none form your enum offers is {exclusion_form!r}. If (and only\n"
+            "                   if) a genuine, concrete conflict with one of the properties below actually\n"
+            "                   exists, take that rung and name the properties in `propertyKeys`; if none\n"
+            "                   does, stay at `none` — the cell narrows your choice, it never forces you\n"
+            "                   to invent a conflict. Say plainly which side wins in `rationale` — never\n"
+            "                   in `blocked`, which is reserved for declining to answer this brief at all.")
+
     return f"""Tree: {tree_display_name}{f" — {tree_reading}" if tree_reading != tree_display_name else ""}
 Branch: {branch}.  Depth: {depth}.
 This node must be a {node_class} node.
@@ -167,14 +216,7 @@ Motifs to express: {motif_line}.{anti_line}
 Choose, and nothing else:
   1. `affixIds`  — 1 to 3 from the list below. They are this node's whole effect.
   2. `affinity`  — how central each is: core | likely | occasional.
-  3. `exclusion` — MOST NODES HAVE NONE. Only set a form at all if this node's effect
-                   genuinely, concretely conflicts with one of the properties below — not
-                   because a property happens to be available to name. If (and only if) a
-                   real conflict exists, prefer `reroute` over `nullification`; the latter
-                   is the last resort, for when the pair can be neither rerouted nor
-                   ordered. If you use it, say plainly which side wins in `rationale` —
-                   never in `blocked`, which is reserved for declining to answer this brief
-                   at all.
+{exclusion_line}
   4. `name`, `nameKey`, `flavor`.
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.

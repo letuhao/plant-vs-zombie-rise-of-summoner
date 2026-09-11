@@ -1,7 +1,7 @@
 {
   "_meta": {
     "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
-    "candidateSetHash": "6b62c730d1709f20687fc21f4f5cc21d7f427173560baf4528069af4280d7073",
+    "candidateSetHash": "2d9220a7661b407933a04372578ea2f28994df3a4a736541fafee3454eaf1bfa",
     "model": "google/gemma-4-26b-a4b-qat",
     "partition": "general",
     "promptVersion": "general-propose/1",
@@ -473,7 +473,6 @@
       "_provenance": {
         "briefHash": "60d48a2dd4136effa7446ce719cf70437ff11e3707ef31746dd816442defb3b5",
         "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
-        "generatedUtc": "2026-09-10T15:14:45+00:00",
         "healNotes": [
           {},
           {},
@@ -484,12 +483,14 @@
         "promptVersion": "general-propose/1",
         "samplePicks": [
           [
-            "atom.arm-plate",
+            "atom.evd-harden",
+            "atom.plating",
             "atom.stalwart"
           ],
           [
+            "atom.immunity",
             "atom.plating",
-            "atom.sust-callus"
+            "atom.sust-husk"
           ],
           [
             "atom.fortitude",
@@ -498,13 +499,53 @@
         ]
       },
       "briefId": "brief.general.general.007",
-      "candidateId": null,
-      "confidence": "unresolved",
-      "draft": null,
-      "outcome": "unresolved",
+      "candidateId": "candidate.general.006",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "60d48a2dd4136effa7446ce719cf70437ff11e3707ef31746dd816442defb3b5",
+          "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1",
+          "samplePicks": [
+            [
+              "atom.evd-harden",
+              "atom.plating",
+              "atom.stalwart"
+            ],
+            [
+              "atom.immunity",
+              "atom.plating",
+              "atom.sust-husk"
+            ],
+            [
+              "atom.fortitude",
+              "atom.immunity"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.immunity",
+          "atom.mesmerizing",
+          "atom.plating"
+        ],
+        "briefId": "brief.general.general.007",
+        "candidateId": "candidate.general.006",
+        "flavor": "A sudden hardening of the spirit that turns incoming blows into mere echoes.",
+        "name": "Ironclad Resolve",
+        "rationale": "This defensive action provides a multi-layered protection for the self, combining status resistance (stalwart), critical hit mitigation (evd-harden), and physical armor plating (plating).",
+        "scope": "general"
+      },
+      "outcome": "accepted",
       "pipelineId": "A-P1",
       "scope": "general",
-      "voteMinority": "atom.arm-plate|atom.fortitude|atom.immunity|atom.plating|atom.stalwart|atom.sust-callus"
+      "voteMinority": "atom.evd-harden|atom.fortitude|atom.stalwart|atom.sust-husk"
     },
     {
       "_provenance": {

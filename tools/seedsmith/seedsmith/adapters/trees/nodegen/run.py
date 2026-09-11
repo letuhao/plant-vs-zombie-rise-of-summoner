@@ -55,7 +55,7 @@ from ...actions.validate_heal.preflight import PreflightResult
 from ...actions.validate_heal.preflight import run_preflight as _shared_run_preflight
 from ...actions.validate_heal.schema_audit import audit_descriptions
 from ...demons.anchor.permute import order_for
-from ....workflow.validators.field_echo import field_echo, subject_name_echo
+from ....workflow.validators.field_echo import field_echo, name_collision, subject_name_echo
 from ....workflow.validators.language import language_consistency
 from . import brief as brief_mod
 from . import plan_read
@@ -157,11 +157,41 @@ def build_response_gate(*, schema: "Mapping[str, Any]", permitted_affix_ids: "Se
                         affix_vocab: AffixVocabulary,
                         property_vocabulary: "Mapping[str, tuple[str, ...]] | Sequence[str]",
                         tree_display_name: str,
-                        motifs: "Sequence[str]") -> "Callable[[Mapping[str, Any]], list[str]]":
+                        motifs: "Sequence[str]",
+                        taken_names: "Sequence[str] | Collection[str]" = (),
+                        permitted_exclusion_forms: "Sequence[str] | None" = None,
+                        ) -> "Callable[[Mapping[str, Any]], list[str]]":
     """The one `gate` callable §6.3's response is checked against, composed from gates 7, 9, 10 and
     the per-response half of 18 (exclusion) — never five separate call sites, so a caller
     (`generate_node`, or a future H4 harness) has exactly one function to run twice (verify-time,
-    then persist-time re-gate, gate 13)."""
+    then persist-time re-gate, gate 13).
+
+    **`taken_names` — gate 21's generation-time half, closed 2026-09-11.** Spec-tree-language.md §7
+    gate 21 and spec-species-tree.md §5.1 both name `name_collision` against `takenNames` as a
+    GENERATION-TIME check, but this gate used to call `field_echo` only and leave
+    `name_collision` (the shared primitive `workflow.validators.field_echo.name_collision`)
+    unreachable from node generation at all — the corpus metric
+    (`PassiveTree/NameCollision`, metrics/passive_tree.py) kept finding 646 real cross-tree
+    collisions post-hoc that no per-item check ever rejected. The name is checked against every
+    OTHER subject's committed name, corpus-wide (the same shape the validator's own docstring
+    measures from the commander-effect corpus), never just this tree's — a same-name draft from a
+    different tree is exactly the measured defect. Every draft is re-checked at persist time (gate
+    13) against the set INCLUDING any name accepted since the base call, so a name that collides
+    only after the vote is still refused there.
+
+    **`permitted_exclusion_forms` (2026-09-11, A2)** is the quota cell's own `exclusionForm`
+    allocation as a form list — `("none",)` for a `none` cell, `(form, "none")` for a designated
+    one — checked here so the NARROWED enum is enforced even where the schema enum cannot reach:
+    the persist-time re-gate (gate 13) validates the VOTED composite through this same callable, so
+    the cell's allocation holds at both ends. `None` keeps the full ladder, matching
+    `schema_for_call`'s additive contract; a cell-bearing caller that forgets the argument widens
+    its own gate — `generate_node` always passes it.
+    """
+
+    taken_names_set = frozenset(taken_names)
+    # A2 (2026-09-11): the cell's allocation as a set, for the per-response check below. An
+    # unknown non-none form in a designated cell is a caller defect — it is checked, not widened.
+    form_set = frozenset(permitted_exclusion_forms) if permitted_exclusion_forms is not None else None
 
     def gate(response: "Mapping[str, Any]") -> "list[str]":
         problems: "list[str]" = []
@@ -202,8 +232,20 @@ def build_response_gate(*, schema: "Mapping[str, Any]", permitted_affix_ids: "Se
             if isinstance(exclusion, dict):
                 claim = ExclusionClaim.from_response(exclusion)
                 problems.extend(str(d) for d in validate_exclusion(claim, property_vocabulary))
-
+                # A2 (2026-09-11): the cell's own allocation, enforced per response — a `none` cell
+                # accepts only `none`, a designated cell accepts only its own rung (plus `none`,
+                # the honest default the §6.3 field description already describes). Beyond the
+                # schema enum (which already says the same thing) because gate 13's persist-time
+                # re-gate runs the VOTED composite through this callable too.
+                if form_set is not None and claim.form not in form_set:
+                    problems.append(
+                        f"exclusion.form: {claim.form!r} is not what this node's quota cell "
+                        f"allocated {sorted(form_set)} — §4.2 step 6: the cell is what the "
+                        f"schema's enum says, and the gate holds the response to it")
         problems.extend(field_echo(response, {}))
+        # Gate 21's generation-time half: the draft's name against every other subject's committed
+        # name, corpus-wide — the check the spec names and the metric measures, wired at last.
+        problems.extend(name_collision(response, {"takenNames": taken_names_set}))
         problems.extend(subject_name_echo(response, {"displayName": tree_display_name}))
         problems.extend(language_consistency(response, {"motifs": motifs}))
         return problems
@@ -245,6 +287,11 @@ class RunPlan:
     subjects: "list[Subject]"
     held: "list[tuple[str, str]]"
     already_done: "list[str]"
+    #: Subjects whose ledger row is being INTENTIONALLY re-rolled this run (§8's
+    #: provenance-supersede pass, J4): they are planned for generation like `subjects`, but their
+    #: acceptance goes through `record_superseded` (the prior row preserved), never
+    #: `record_accepted`'s raise-on-duplicate. Empty unless the caller asked for supersede.
+    superseded: "list[Subject]" = field(default_factory=list)
 
     @property
     def complete(self) -> bool:
@@ -287,7 +334,9 @@ def write_ledger(done: "dict[str, dict]", path: "Path | None" = None) -> Path:
     return ledger_path
 
 
-def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None" = None) -> RunPlan:
+def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None" = None,
+             supersede_stale: bool = False,
+             prompt_version: str = "") -> RunPlan:
     """Enumerates one `Subject` per node in the plan, skipping any already in the ledger.
 
     Nothing is `held` at this stage today: a hold this module could name would be a quota cell it
@@ -308,13 +357,35 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
     empty" gap the 2026-09-06 smoke test surfaced. This does not change what the FINAL seed document's
     own node order is — `run_language_stage`'s own `sorted_records = sorted(..., key=... node_id)`
     already re-sorts by `node_id` at emit time, so generation order is a pure scheduling detail.
+
+    **`supersede_stale` (2026-09-11, §8's provenance-supersede pass).** With it, a ledger row whose
+    per-record `promptVersion` is ABSENT (pre-provenance, i.e. generated under an older brief) or
+    DIFFERENT from `prompt_version` (the caller's current brief vintage, `brief.PROMPT_VERSION`) is
+    planned for generation AND listed in `superseded`, so the runner replaces its row through
+    `record_superseded` — the prior entry preserved under `supersededRecord`, never silently
+    discarded. A row that already carries the current vintage is left alone. This is what makes a
+    prompt-version re-roll expressible through the real CLI at all (until now the only caller of
+    `record_superseded` was a unit test — a §8-mandated pass with no production path).
     """
     done = ledger if ledger is not None else read_ledger()
     subjects: "list[Subject]" = []
     already: "list[str]" = []
+    superseded: "list[Subject]" = []
+
+    def _stale(entry: "dict") -> bool:
+        stored = str((entry.get("record") or {}).get("promptVersion") or "")
+        return not stored or stored != prompt_version
+
     for node in tree_plan.nodes:
         subject_id = f"{tree_plan.tree_id}:{node.node_id}"
         if subject_id in done:
+            if supersede_stale and _stale(done[subject_id]):
+                superseded.append(Subject(
+                    subject_id=subject_id, tree_id=tree_plan.tree_id, node_id=node.node_id,
+                    node_key=node.node_key, branch=node.branch, tier=node.tier,
+                    node_class=node.node_class,
+                ))
+                continue
             already.append(subject_id)
             continue
         subjects.append(Subject(
@@ -323,7 +394,13 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
             node_class=node.node_class,
         ))
     subjects.sort(key=lambda s: (s.tier, 0 if s.node_class == "mechanism" else 1))
-    return RunPlan(subjects=subjects, held=[], already_done=already)
+    superseded.sort(key=lambda s: (s.tier, 0 if s.node_class == "mechanism" else 1))
+    # A superseded subject is a subject being GENERATED this run (that is the whole re-roll), so it
+    # rides the normal `subjects` scheduling path — the generation loop, batch ordering and
+    # `outcomes` below all key off `plan.subjects` — while ALSO being listed in `superseded` as the
+    # routing tag `_record_outcome` needs to write via `record_superseded`, never `record_accepted`'s
+    # raise-on-duplicate.
+    return RunPlan(subjects=subjects + superseded, held=[], already_done=already, superseded=superseded)
 
 
 def record_accepted(done: "dict[str, dict]", subject_id: str, record: NodeSeedRecord) -> "dict[str, dict]":
@@ -599,7 +676,8 @@ def _resolve_affinity_for_members(members: "Sequence[str]",
 
 def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
                   config: LlmCallerConfig = DEFAULT_CONFIG,
-                  known_name_keys: "Collection[str]" = ()) -> NodeOutcome:
+                  known_name_keys: "Collection[str]" = (),
+                  taken_names: "Collection[str]" = ()) -> NodeOutcome:
     """One node, start to finish: gate 2 (schema description audit, before any call), the base
     call, the two `affixIds` vote calls (§6.1), gate 11's vote resolution, and gate 13's
     persist-time re-gate over the base response with the VOTED `affixIds` substituted in.
@@ -609,9 +687,30 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
     (majority-per-member, `resolve_set_vote_field` — a member two of three samples picked is not
     necessarily the exact set any ONE of them returned), so that composite is checked here for the
     first time.
+
+    `taken_names` (2026-09-11) is gate 21's generation-time half: every OTHER subject's committed
+    name, corpus-wide. The gate checks the base call's draft against it on every heal attempt and
+    the persist-time re-gate against the same set — so a draft named identically to any already-
+    committed node anywhere in the corpus is re-prompted, never persisted.
+
+    The node's own quota cell (2026-09-11, A2) is the exclusion contract for THIS call, per §4.2
+    step 6 ("THIS is what goes into the schema's enum. Not the whole vocabulary"): a `none`-cell
+    offers the form enum `("none",)` — "most nodes have none" becomes the schema's own word, not a
+    brief exhortation — while a designated cell offers `(form, "none")`, the real rung plus the
+    honest default the §6.3 field description already describes. `None` (a legacy record without a
+    persisted cell, or a caller that does not resolve cells) keeps the full four-form ladder, never
+    a fabricated allocation.
     """
     permitted_affix_ids = [o.affix_id for o in inputs.permitted_affixes]
-    schema = schema_for_call(permitted_affix_ids, list(inputs.permitted_properties))
+    # §4.2 step 6 for the exclusion axis, resolved HERE (where the cell lives) rather than in
+    # `schema_for_call`: `cell_forms` is the pair the brief's "Your quota cell:" line and the
+    # schema enum both name. A missing cell keeps the full ladder — additive, never widening a
+    # cell that exists.
+    cell_exclusion_form = getattr(inputs.quota_cell, "exclusion_form", None)
+    cell_forms = ((str(cell_exclusion_form), "none")
+                  if cell_exclusion_form and cell_exclusion_form != "none" else ("none",))
+    schema = schema_for_call(permitted_affix_ids, list(inputs.permitted_properties),
+                             exclusion_forms=cell_forms)
 
     schema_defects = audit_descriptions(schema)
     if schema_defects:
@@ -624,7 +723,8 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
         permitted_property_keys=list(inputs.permitted_properties),
         anti_motif_tags=inputs.anti_motif_tags, affix_vocab=inputs.affix_vocab,
         property_vocabulary=inputs.property_vocabulary,
-        tree_display_name=inputs.tree_display_name, motifs=inputs.motifs)
+        tree_display_name=inputs.tree_display_name, motifs=inputs.motifs,
+        taken_names=taken_names, permitted_exclusion_forms=cell_forms)
 
     picks_by_sample: "dict[int, tuple[str, ...]]" = {}
     affinity_by_sample: "dict[int, tuple[str, ...]]" = {}
@@ -637,7 +737,8 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
             branch=subject.branch, tier=subject.tier, node_class=subject.node_class,
             motifs=inputs.motifs, anti_motifs=inputs.anti_motifs,
             permitted_affixes=inputs.permitted_affixes,
-            permitted_properties=inputs.permitted_properties, siblings=inputs.siblings)
+            permitted_properties=inputs.permitted_properties, siblings=inputs.siblings,
+            exclusion_form=cell_exclusion_form)
         out, soft = call_one_node_sample(
             node_id=subject.node_id, sample_index=sample_index, brief_text=sample_brief,
             schema=schema, gate=gate, config=config)
@@ -709,7 +810,8 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
 
     record = build_node_record(subject.node_id, subject.node_key, subject.branch, subject.tier,
                                subject.node_class, final_response,
-                               quota_cell=inputs.quota_cell)
+                               quota_cell=inputs.quota_cell,
+                               prompt_version=brief_mod.PROMPT_VERSION)
     return NodeOutcome(subject.subject_id, "accepted", record=record)
 
 
@@ -729,12 +831,21 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                        ledger_path: "Path | None" = None, seed_root: "Path | None" = None,
                        config: LlmCallerConfig = DEFAULT_CONFIG,
                        unresolved_max_share_permille: "int | None" = None,
-                       max_workers: int = 1) -> LanguageStageResult:
+                       max_workers: int = 1,
+                       supersede_stale: bool = False) -> LanguageStageResult:
     """One tree, start to finish, idempotent. §7 gate 14: a subject already in the ledger is never
     regenerated — its ALREADY-ACCEPTED record is read back from the ledger and reused, so a forced
     rerun over unchanged inputs makes zero model calls and re-emits byte-identical bytes (the
     historical defect this whole task exists to catch: "the commander-effect generator rewrote all
     84 entries every run").
+
+    **`supersede_stale` (2026-09-11, §8's provenance-supersede pass, J4's production path).** With
+    it, a ledger row whose per-record `promptVersion` is absent (pre-provenance vintage) or
+    different from the current `brief.PROMPT_VERSION` is planned for generation AND listed in
+    `RunPlan.superseded`; its acceptance goes through `record_superseded` (prior row preserved
+    under `supersededRecord`), never `record_accepted`'s raise-on-duplicate. A row already carrying
+    the current vintage is left alone. This is what makes a prompt-version re-roll expressible
+    through the real CLI at all — until now `record_superseded`'s only caller was a unit test.
 
     **Tree-wide sibling tracking (§6.2, closed 2026-09-06, widened same day).** This function, not
     `inputs_for`, owns "already-accepted siblings" — populating it needs `records`/`done`, data only
@@ -771,7 +882,14 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                             # re-export of A2's `targets` module, which nothing here otherwise needs
 
     done = read_ledger(ledger_path)
-    plan = plan_run(tree_plan, ledger=done)
+    plan = plan_run(tree_plan, ledger=done, supersede_stale=supersede_stale,
+                    prompt_version=brief_mod.PROMPT_VERSION)
+
+    # A superseded subject's PRIOR row still matters: the runner seeds siblings/known keys/taken
+    # names from the whole ledger regardless, and its own name stays excluded from its own
+    # taken-names gate (a re-roll may keep its own prior name). These ids are NOT replayed as
+    # already-done records — they are re-generated through the supersede path below.
+    superseded_ids = {s.subject_id for s in plan.superseded}
 
     records: "dict[str, NodeSeedRecord]" = {}
     # 2026-09-06 real-call finding: TIER-scoped siblings (the original §6.2 shape) proved insufficient
@@ -807,13 +925,27 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     # separate mechanism serving a separate purpose (giving the model local "don't repeat yourself"
     # context, spec's own §6.2), not the hard corpus-wide uniqueness constraint this set enforces.
     known_name_keys: "set[str]" = set()
+    taken_names: "set[str]" = set()
+    prior_names: "dict[str, str]" = {}
     for entry in done.values():
         existing_name_key = entry.get("record", {}).get("nameKey")
         if existing_name_key:
             known_name_keys.add(existing_name_key)
+        existing_name = entry.get("record", {}).get("name")
+        if existing_name:
+            # Gate 21's generation-time half (2026-09-11): every subject's committed name, corpus-
+            # wide, feeds `generate_node`'s own taken-names gate — the same whole-ledger seeding
+            # rule the `known_name_keys` fix above already established (a per-tree set never saw
+            # the cross-tree collisions the metric measures). A subject's OWN prior name is kept
+            # aside (below), never treated as somebody else's claim: the metric counts a name
+            # colliding with a DIFFERENT node, so a superseded subject may keep its old name.
+            taken_names.add(str(existing_name))
     for subject_id in plan.already_done:
         entry = done[subject_id]
         node = entry["record"]
+        prior_names[subject_id] = str(node.get("name") or "")
+        if subject_id in superseded_ids:
+            continue
         record = build_node_record(
             node["id"], node["nodeKey"], node["branch"], node["tier"], node["nodeClass"], {
                 "affixIds": node["affixIds"], "affinity": node["affinity"],
@@ -823,10 +955,25 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                 # the 2026-09-10 persistence wiring); absent on every older ledger row — build_node_
                 # record then leaves quota_cell=None, matching the additive load path.
                 "quotaCell": node.get("quotaCell"),
+                # Same additive contract for provenance (2026-09-11): a ledger row that carries
+                # its own vintage keeps it; older rows leave it empty, and the document-stamp
+                # logic in `build_seed_document` reads an all-empty set as the legacy shape.
+                "promptVersion": node.get("promptVersion", ""),
             })
         records[subject_id] = record
         tree_siblings.append(brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))
         known_name_keys.add(record.name_key)
+        taken_names.add(record.name)
+
+    # §8's provenance-supersede replay: a superseded subject's PRIOR record is re-read for the
+    # cross-cutting sets above (whole-ledger seeding), but its record is NOT reused — it is
+    # re-generated below like any other subject, with the prior row preserved on acceptance. The
+    # only differences from a fresh subject: its own prior name is excluded from its own
+    # taken-names gate (`prior_names`, used in `_generate_one`), and acceptance records via
+    # `record_superseded` rather than `record_accepted`.
+    for subject in plan.superseded:
+        prior_node = done[subject.subject_id]["record"]
+        prior_names.setdefault(subject.subject_id, str(prior_node.get("name") or ""))
 
     outcomes_by_subject: "dict[str, NodeOutcome]" = {}
     unresolved_count = 0
@@ -834,8 +981,13 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     def _generate_one(subject: Subject, siblings_here: "tuple[brief_mod.SiblingSummary, ...]",
                       known_keys_here: "frozenset[str]") -> NodeOutcome:
         base_inputs = inputs_for(subject)
+        # A superseded subject re-generating against its own prior name: the metric counts a name
+        # colliding with a DIFFERENT node, so the subject's own old name is never somebody else's
+        # claim. Removing it here keeps the re-roll free to keep (or change) its own prior name.
+        others_taken = taken_names - ({prior_names[subject.subject_id]}
+                                      if subject.subject_id in prior_names else set())
         return generate_node(subject, replace(base_inputs, siblings=siblings_here), config=config,
-                             known_name_keys=known_keys_here)
+                             known_name_keys=known_keys_here, taken_names=others_taken)
 
     def _record_outcome(subject: Subject, outcome: NodeOutcome) -> None:
         nonlocal done, unresolved_count
@@ -846,7 +998,15 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
             tree_siblings.append(brief_mod.SiblingSummary(
                 outcome.record.node_id, outcome.record.name, outcome.record.affix_ids))
             known_name_keys.add(outcome.record.name_key)
-            done = record_accepted(done, subject.subject_id, outcome.record)
+            taken_names.add(outcome.record.name)
+            if subject.subject_id in superseded_ids:
+                # §8's deliberate path: this subject was PLANNED for re-roll this run, so the
+                # raise-on-duplicate default must not fire — the prior row is preserved under
+                # `supersededRecord`, never silently discarded. Everything else (sibling list,
+                # known keys, taken names, the records map) updates exactly as a fresh accept.
+                done = record_superseded(done, subject.subject_id, outcome.record)
+            else:
+                done = record_accepted(done, subject.subject_id, outcome.record)
             records[subject.subject_id] = outcome.record
 
     for _key, group_iter in itertools.groupby(plan.subjects, key=lambda s: (s.tier, s.node_class)):

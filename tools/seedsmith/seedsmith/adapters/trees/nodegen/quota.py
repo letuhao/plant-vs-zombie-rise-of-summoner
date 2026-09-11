@@ -46,6 +46,10 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 from ...actions.distribution_planner.derive import expand_counts, largest_remainder_count
+# The `none` member's own canonical name lives in one place (this is the same constant the schema
+# enum and the corpus metric read) — quota needs it to lead the exclusionForm axis's hand-out
+# order inside `quota_for_plan`.
+from . import exclusion as nodegen_exclusion
 
 __all__ = [
     "AXES",
@@ -430,13 +434,45 @@ def quota_for_plan(plan: object, targets: object, *, category: str,
     ]
     forced_tally = tally_forced(slots)
 
+    # 2026-09-11, the exclusionForm axis's own DOMAIN defect (found by re-reading the whole chain
+    # against spec-tree-language.md §4.2 + §5 while closing the audit's A2/C todos): the axis's
+    # 450/450/100 weights were apportioned over ALL N slots, so ~100% of cells carried a non-none
+    # form — while `exclusion.targetShareMilli` (§5's own "~2% of nodes", D14) targets the
+    # exclusion RATE and the brief tells the model "most nodes have none". The quota, the brief and
+    # the gate disagreed BY CONSTRUCTION, and `PassiveTree/QuotaDrift` could not see it (it compares
+    # emitted vs re-derived cells — the same wrong domain both sides, tautologically equal). The
+    # corrected domain: `none` vs non-none is apportioned over the WHOLE tree by the target share
+    # (spec §4.2 step 2's own arithmetic, applied to the two-valued first split), then the non-none
+    # residual is split by the declared 450/450/100 form weights. A cell now says what §5 actually
+    # intends: ~98% `none`, a designated ~2% carrying a real rung — which is what makes the cell's
+    # own `exclusionForm` enum-narrowing (§4.2 step 6, `schema_for_call`) and the brief's allocation
+    # line truthful, and turns QuotaDrift's exclusionForm axis into a REAL check of emitted forms.
+    none_member = nodegen_exclusion.NONE_FORM
+    exclusion_share_permille = targets.exclusion_target_share_milli
+    excluded_total = largest_remainder_count(
+        {none_member: 1000 - exclusion_share_permille, "excluded": exclusion_share_permille},
+        (none_member, "excluded"), total)["excluded"]
+
     quota: "dict[str, dict[str, int]]" = {}
     order: "dict[str, tuple[str, ...]]" = {}
     for axis in AXES:
         members = axis_members(axis, plan.property_vocabulary)
         axis_ord = axis_order(axis, targets, members)
-        order[axis] = axis_ord
         axis_forced = forced_tally.get(axis, {})
+        if axis == "exclusionForm":
+            # Two-stage apportionment (see the block comment above): the excluded subset's own size
+            # first, then the declared rung weights over THAT subset — with `none` holding the rest
+            # exactly. `largest_remainder_count` at each stage keeps both splits exact integers
+            # summing to their own totals. `none` is NOT in the targets file's `_order` (that
+            # array splits the EXCLUDED subset only): it is prepended HERE, once, for the hand-out
+            # order, so `expand_counts` hands every `none` cell out BEFORE any rung cell in the
+            # canonical slot walk and never meets a quota key its order does not name.
+            form_weights = axis_weights_milli(axis, targets, members)
+            form_quota = axis_marginals(form_weights, axis_ord, excluded_total)
+            quota[axis] = {none_member: total - excluded_total, **form_quota}
+            order[axis] = (none_member, *axis_ord)
+            continue
+        order[axis] = axis_ord
         if sum(axis_forced.values()) == total:
             quota[axis] = {value: axis_forced.get(value, 0) for value in axis_ord}
             continue
@@ -453,9 +489,21 @@ def permitted_ids_for_cell(cell: QuotaCell, property_vocabulary: "Mapping[str, S
     "the ids whose tag equals the cell's value" collapses to "the cell's own value, alone" for all
     but the degenerate case of an id that is not even in the vocabulary (`permitted` still raises
     `UnsatisfiableCell` for that, exactly as it does for any other axis).
+
+    2026-09-11 (A2): `exclusionForm` now also allocates `none` (the two-stage apportionment's
+    ~98% majority), and `none` is deliberately NOT a `propertyVocabulary.exclusionForm` member —
+    that roster splits the EXCLUDED subset only. A `none` cell therefore short-circuits to
+    `[NONE_FORM]` rather than being handed to `permitted`, whose "no id satisfies this cell" hold
+    exists for ids a real roster could name; `none` is the schema enum's own default, defined once
+    in `nodegen.exclusion`, and a designated cell is returned untouched (the rung itself).
     """
     result: "dict[str, list[str]]" = {}
     for axis in AXES:
+        if axis == "exclusionForm":
+            cell_form = cell.value_for(axis)
+            if cell_form == nodegen_exclusion.NONE_FORM:
+                result[axis] = [nodegen_exclusion.NONE_FORM]
+                continue
         members = axis_members(axis, property_vocabulary)
         vocab_ids = {axis: members}
         tag_of = {axis: {m: m for m in members}}

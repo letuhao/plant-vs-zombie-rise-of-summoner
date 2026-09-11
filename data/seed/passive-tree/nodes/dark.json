@@ -4,15 +4,114 @@
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
     "planHash": "",
-    "promptVersion": "tree-language/1"
+    "promptVersion": "tree-language/3"
   },
   "nodes": [
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-grit",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The darkness thickens within the bone, turning life into a fortress of shadow.",
+      "id": "skill.dark-def-t1-n0",
+      "name": "Obsidian Marrow",
+      "nameKey": "tree.node.obsidian-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.power",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 1
+    },
     {
       "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.vitality"
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The earth claims what the flesh cannot hold.",
+      "id": "skill.dark-def-t10-n0",
+      "name": "Silt-Bound Graft",
+      "nameKey": "tree.node.silt-bound-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spark",
+        "trigger": "OnWave"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-riveting",
+        "atom.shld-toughness-mod"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A shell that holds nothing but the strength to remain unbroken.",
+      "id": "skill.dark-def-t10-n1",
+      "name": "Hollowed Bastion",
+      "nameKey": "tree.node.hollowed-bastion",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spore",
+        "trigger": "OnWave"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
@@ -22,14 +121,23 @@
           "atomKind"
         ]
       },
-      "flavor": "The soil remembers what the flesh forgets, feeding the pulse with the essence of the fallen.",
-      "id": "skill.dark-def-t1-n0",
-      "name": "Grave-Fed Vitality",
-      "nameKey": "tree.node.grave-fed-vitality",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
+      "flavor": "The skin hardens not through strength, but through the sheer refusal to yield to the rot.",
+      "id": "skill.dark-def-t10-n2",
+      "name": "Calloused Resolve",
+      "nameKey": "tree.node.calloused-resolve",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "dark",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "wither",
+        "trigger": "OnWave"
+      },
+      "rationale": "The node provides Grit and Callusing; it reroutes the nodeClass property to ensure these defensive sustainments are prioritized over offensive utility.",
+      "tier": 10
     },
     {
       "affinity": [
@@ -37,75 +145,96 @@
         "likely"
       ],
       "affixIds": [
-        "atom.sust-husk",
-        "atom.ward-harden"
+        "atom.fortitude",
+        "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin knits not with flesh, but with the memory of what was lost.",
-      "id": "skill.dark-def-t10-n0",
-      "name": "Hollowed Suture",
-      "nameKey": "tree.node.hollowed-suture",
-      "nodeClass": "mechanism",
+      "flavor": "The weight of the earth provides a foundation that even death cannot unsettle.",
+      "id": "skill.dark-def-t2-n0",
+      "name": "Grave-Bound Resilience",
+      "nameKey": "tree.node.grave-bound-resilience",
+      "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
-      "tier": 10
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.mending",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very structure of the bone seeks to mend the flesh it supports.",
+      "id": "skill.dark-def-t3-n0",
+      "name": "Marrow-Sown Vitality",
+      "nameKey": "tree.node.marrow-sown-vitality",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 3
     },
     {
       "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle"
+        "atom.shield-capacity"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The blood does not merely flow; it builds a wall of crimson pressure.",
-      "id": "skill.dark-def-t10-n1",
-      "name": "Sanguine Reservoir",
-      "nameKey": "tree.node.sanguine-reservoir",
-      "nodeClass": "mechanism",
+      "flavor": "The marrow hardens into a secondary skeleton, turning every impact into a lesson in endurance.",
+      "id": "skill.dark-def-t3-n1",
+      "name": "Ossified Resolve",
+      "nameKey": "tree.node.ossified-resolve",
+      "nodeClass": "magnitude",
       "nodeKey": "n1",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.carapace",
-        "atom.plating"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
       },
-      "flavor": "Layers of calcified waste knit together into a second, unyielding skin.",
-      "id": "skill.dark-def-t10-n2",
-      "name": "Chitinous Graft",
-      "nameKey": "tree.node.chitinous-graft",
-      "nodeClass": "mechanism",
-      "nodeKey": "n2",
       "rationale": "",
-      "tier": 10
+      "tier": 3
     },
     {
       "affinity": [
@@ -116,362 +245,512 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The more you suffer, the thicker the skin grows.",
-      "id": "skill.dark-def-t2-n0",
-      "name": "Layered Despair",
-      "nameKey": "tree.node.layered-despair",
+      "flavor": "Layers of sediment and ancient bone form a heavy, unyielding barrier.",
+      "id": "skill.dark-def-t4-n1",
+      "name": "Silt-Crusted Shell",
+      "nameKey": "tree.node.silt-crusted-shell",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-flux",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The spirit refuses to drift, anchoring itself to the very essence of the ward.",
+      "id": "skill.dark-def-t5-n0",
+      "name": "Soul-Bound Tether",
+      "nameKey": "tree.node.soul-bound-tether",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The earth claims what is lost, and what is lost becomes unyielding.",
+      "id": "skill.dark-def-t5-n1",
+      "name": "Grave-Rooted Constitution",
+      "nameKey": "tree.node.grave-rooted-constitution",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of impact becomes the pulse of restoration.",
+      "id": "skill.dark-def-t6-n0",
+      "name": "Echoing Aegis",
+      "nameKey": "tree.node.echoing-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.regen",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.carapace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very marrow hardens into a shell that refuses to crack.",
+      "id": "skill.dark-def-t6-n1",
+      "name": "Ossified Bastion",
+      "nameKey": "tree.node.ossified-bastion",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-welding",
+        "atom.sust-callus",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the earth is forged into a second skin.",
+      "id": "skill.dark-def-t7-n0",
+      "name": "Iron-Sown Shroud",
+      "nameKey": "tree.node.iron-sown-shroud",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.unsettled",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the earth becomes a second skin, hardening the spirit against the inevitable.",
+      "id": "skill.dark-def-t7-n1",
+      "name": "Grave-Bound Endurance",
+      "nameKey": "tree.node.grave-bound-endurance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.unsettled",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The shadows do not merely fall; they bind.",
+      "id": "skill.dark-def-t8-n0",
+      "name": "Umbral Weave",
+      "nameKey": "tree.node.umbral-weave",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "pact_mark",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the grave beats within the marrow.",
+      "id": "skill.dark-def-t8-n1",
+      "name": "Ossuary Pulse",
+      "nameKey": "tree.node.ossuary-pulse",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "poison",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-brace",
+        "atom.ward-flux"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The darkness does not merely protect; it binds the spirit to the shell.",
+      "id": "skill.dark-def-t9-n0",
+      "name": "Void-Stitched Aegis",
+      "nameKey": "tree.node.void-stitched-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rally",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the grave beats within the marrow.",
+      "id": "skill.dark-def-t9-n2",
+      "name": "Pulse of the Ossuary",
+      "nameKey": "tree.node.pulse-of-the-ossuary",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "shatter",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.cruelty"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The scent of iron heralds the end.",
+      "id": "skill.dark-off-t1-n0",
+      "name": "Sanguine Malice",
+      "nameKey": "tree.node.sanguine-malice",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The dead leave more than just memories; they leave a debt to be collected.",
+      "id": "skill.dark-off-t10-n0",
+      "name": "Carrion Scavenger's Toll",
+      "nameKey": "tree.node.carrion-scavenger-s-toll",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The dead do not merely fall; they ripple through the veil.",
+      "id": "skill.dark-off-t10-n2",
+      "name": "Ossuary Echo",
+      "nameKey": "tree.node.ossuary-echo",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.econ-toll"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The hunger of the void is never satisfied, only momentarily stilled by the scent of fresh carnage.",
+      "id": "skill.dark-off-t2-n0",
+      "name": "Vile Intentions",
+      "nameKey": "tree.node.vile-intentions",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.resilience",
-        "atom.vitality"
+        "atom.bloodletting",
+        "atom.deathblast"
       ],
-      "branch": "defensive",
+      "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A heavy, suffocating weight that settles over the skin, turning every impact into a dull, muffled thud.",
-      "id": "skill.dark-def-t3-n0",
-      "name": "Dreadnought's Pall",
-      "nameKey": "tree.node.dreadnought-s-pall",
+      "flavor": "The very essence of the void hungers for the life spilled in its wake.",
+      "id": "skill.dark-off-t3-n0",
+      "name": "Sanguine Rupture",
+      "nameKey": "tree.node.sanguine-rupture",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.arm-hardening"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
-      },
-      "flavor": "The darkness thickens into a physical shell, turning every impact into a mere vibration against the void.",
-      "id": "skill.dark-def-t3-n1",
-      "name": "Ossified Aegis",
-      "nameKey": "tree.node.ossified-aegis",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.sust-callus"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The weight of the fallen provides a foundation that no blow can shift.",
-      "id": "skill.dark-def-t4-n1",
-      "name": "Grave-Bound Shell",
-      "nameKey": "tree.node.grave-bound-shell",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-capacity"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The wound is not closed, merely bound by the thickening resin of the fallen.",
-      "id": "skill.dark-def-t5-n0",
-      "name": "Sap-Stained Suture",
-      "nameKey": "tree.node.sap-stained-suture",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-capacity"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
-      },
-      "flavor": "The more the rot takes hold, the harder it becomes to uproot.",
-      "id": "skill.dark-def-t5-n1",
-      "name": "Deep-Rooted Decay",
-      "nameKey": "tree.node.deep-rooted-decay",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.death-harvest"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The dead provide the foundation for the living.",
-      "id": "skill.dark-def-t6-n0",
-      "name": "Carrion Graft",
-      "nameKey": "tree.node.carrion-graft",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.arm-hardening",
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
-      },
-      "flavor": "The more the flesh fails, the harder the bone compensates.",
-      "id": "skill.dark-def-t6-n1",
-      "name": "Layered Necrosis",
-      "nameKey": "tree.node.layered-necrosis",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.sust-husk",
-        "atom.ward-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
-      },
-      "flavor": "The shell remains long after the spirit has been hollowed out.",
-      "id": "skill.dark-def-t7-n0",
-      "name": "Hollowed Bastion",
-      "nameKey": "tree.node.hollowed-bastion",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.fortitude"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
-      },
-      "flavor": "The weight of the void settles into the marrow, turning every wound into a foundation of stone.",
-      "id": "skill.dark-def-t7-n1",
-      "name": "Abyssal Fortification",
-      "nameKey": "tree.node.abyssal-fortification",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.ward-brace"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The darkness does not merely absorb the blow; it drinks the intent behind it.",
-      "id": "skill.dark-def-t8-n0",
-      "name": "Sanguine Siphon",
-      "nameKey": "tree.node.sanguine-siphon",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shield-regen"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The very earth rises to mend the cracks in your resolve.",
-      "id": "skill.dark-def-t8-n1",
-      "name": "Silt-Choked Siphon",
-      "nameKey": "tree.node.silt-choked-siphon",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.mending"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While status holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "status"
-        ]
-      },
-      "flavor": "The wound is not merely closed; it is rewritten into the flesh.",
-      "id": "skill.dark-def-t9-n0",
-      "name": "Sealed Suture",
-      "nameKey": "tree.node.sealed-suture",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.sust-grit"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The pulse of the void beats in time with the hardening of the shell.",
-      "id": "skill.dark-def-t9-n1",
-      "name": "Ossified Rhythm",
-      "nameKey": "tree.node.ossified-rhythm",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.warding"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "A hollowed shell that drinks the void to hold the light.",
-      "id": "skill.dark-def-t9-n2",
-      "name": "Vessel of the Unspoken",
-      "nameKey": "tree.node.vessel-of-the-unspoken",
-      "nodeClass": "mechanism",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 9
     },
     {
       "affinity": [
@@ -484,168 +763,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The darkness does not merely strike; it hungers for the essence of the wound.",
-      "id": "skill.dark-off-t1-n0",
-      "name": "Vile Intent",
-      "nameKey": "tree.node.vile-intent",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.death-glean",
-        "atom.death-salvo"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The soil drinks deeply from the fallen, turning loss into a sudden, violent reaping.",
-      "id": "skill.dark-off-t10-n0",
-      "name": "Carrion Harvest",
-      "nameKey": "tree.node.carrion-harvest-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.death-salvo"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The weight of the fallen fuels the momentum of the living.",
-      "id": "skill.dark-off-t10-n1",
-      "name": "Ossuary Cascade",
-      "nameKey": "tree.node.ossuary-cascade",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-pierce"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The veil between essences thins, allowing one force to bleed into the next.",
-      "id": "skill.dark-off-t10-n2",
-      "name": "Prismatic Rupture",
-      "nameKey": "tree.node.prismatic-rupture",
-      "nodeClass": "mechanism",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "likely",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.death-glean",
-        "atom.death-salvo"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "The end is not a sudden strike, but a rhythmic harvesting of what remains.",
-      "id": "skill.dark-off-t2-n0",
-      "name": "Finality's Toll",
-      "nameKey": "tree.node.finality-s-toll",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 2
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.bloodletting",
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The darkness does not merely strike; it hungers for the essence of the fallen.",
-      "id": "skill.dark-off-t3-n0",
-      "name": "Malice Unbound",
-      "nameKey": "tree.node.malice-unbound",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.savagery"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
-      },
-      "flavor": "The primal urge to strike before the thought even forms.",
+      "flavor": "The scent of iron heralds the coming slaughter.",
       "id": "skill.dark-off-t3-n1",
-      "name": "Savage Instinct",
-      "nameKey": "tree.node.savage-instinct-2",
+      "name": "Crimson Malice",
+      "nameKey": "tree.node.crimson-malice",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -658,44 +794,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The harvest is sweetest when the rot is fresh.",
-      "id": "skill.dark-off-t4-n0",
-      "name": "Carrion's Dividend",
-      "nameKey": "tree.node.carrion-s-dividend",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.death-salvo",
-        "atom.deathblast"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The void echoes with the rhythm of the fallen.",
+      "flavor": "The hunger of the void is never sated, only sharpened by the scent of the kill.",
       "id": "skill.dark-off-t4-n1",
-      "name": "Abyssal Resonance",
-      "nameKey": "tree.node.abyssal-resonance",
+      "name": "Feral Predation",
+      "nameKey": "tree.node.feral-predation",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -708,44 +825,58 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The scent of rot precedes the storm of bone.",
+      "flavor": "The rhythm of the end is never a single beat.",
       "id": "skill.dark-off-t5-n0",
-      "name": "Carrion Volley",
-      "nameKey": "tree.node.carrion-volley",
+      "name": "Echoing Dirge",
+      "nameKey": "tree.node.echoing-dirge",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 5
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely",
+        "likely"
       ],
       "affixIds": [
-        "atom.cruelty",
+        "atom.ferocity",
         "atom.savagery"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The darkness does not merely strike; it hungers for the sensation of the wound.",
+      "flavor": "The scent of iron fuels a primal, unyielding hunger.",
       "id": "skill.dark-off-t5-n1",
-      "name": "Malice Infusion",
-      "nameKey": "tree.node.malice-infusion",
+      "name": "Carnage Instinct",
+      "nameKey": "tree.node.carnage-instinct",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -753,6 +884,169 @@
       "affinity": [
         "likely",
         "core"
+      ],
+      "affixIds": [
+        "atom.death-glean",
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The dead do not rest; they merely wait to be gathered.",
+      "id": "skill.dark-off-t6-n0",
+      "name": "Sepulcher's Harvest",
+      "nameKey": "tree.node.sepulcher-s-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The hunger of the hunt becomes a rhythmic pulse in the veins.",
+      "id": "skill.dark-off-t6-n1",
+      "name": "Primal Malice",
+      "nameKey": "tree.node.primal-malice",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Every debt paid in blood is collected in spirit.",
+      "id": "skill.dark-off-t7-n0",
+      "name": "Toll of the Departed",
+      "nameKey": "tree.node.toll-of-the-departed",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.cruelty",
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The darkness does not merely strike; it hungers, tearing through flesh with a primal, unyielding malice.",
+      "id": "skill.dark-off-t7-n1",
+      "name": "Vile Onslaught",
+      "nameKey": "tree.node.vile-onslaught",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The darkness does not merely strike; it overflows, consuming the very essence of the elements it touches.",
+      "id": "skill.dark-off-t8-n0",
+      "name": "Abyssal Overload",
+      "nameKey": "tree.node.abyssal-overload",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
       ],
       "affixIds": [
         "atom.elpw-attune",
@@ -760,220 +1054,122 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The silence following the strike is louder than the impact itself.",
-      "id": "skill.dark-off-t6-n0",
-      "name": "Finality's Echo",
-      "nameKey": "tree.node.finality-s-echo-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.savagery"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The hunger of the dark is never satisfied, only sharpened.",
-      "id": "skill.dark-off-t6-n1",
-      "name": "Savage Intent",
-      "nameKey": "tree.node.savage-intent",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.death-salvo"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "Once the mark is set, the outcome is no longer a possibility, but a debt being collected.",
-      "id": "skill.dark-off-t7-n0",
-      "name": "The Inevitable Verdict",
-      "nameKey": "tree.node.the-inevitable-verdict",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.cruelty",
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The hunger of the void is never sated, only fed with more violent intent.",
-      "id": "skill.dark-off-t7-n1",
-      "name": "Vile Predation",
-      "nameKey": "tree.node.vile-predation",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.death-salvo"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The dead do not merely rest; they provide the momentum for the next strike.",
-      "id": "skill.dark-off-t8-n0",
-      "name": "Grave-Toll Salvo",
-      "nameKey": "tree.node.grave-toll-salvo",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.death-glean",
-        "atom.econ-bounty"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The soil drinks deeply from the fallen, turning loss into a bountiful rot.",
+      "flavor": "The vacuum between stars hums with a hunger that cannot be satiated.",
       "id": "skill.dark-off-t8-n1",
-      "name": "Carrion Harvest",
-      "nameKey": "tree.node.carrion-harvest-4",
+      "name": "Resonant Void",
+      "nameKey": "tree.node.resonant-void",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.death-glean",
-        "atom.death-salvo"
+        "atom.deathblast"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The harvest is measured in the weight of the fallen.",
+      "flavor": "The cost of the harvest is paid in essence, returned as a grim tribute.",
       "id": "skill.dark-off-t9-n0",
-      "name": "Grave-Toll Yield",
-      "nameKey": "tree.node.grave-toll-yield",
+      "name": "Sanguine Tithe",
+      "nameKey": "tree.node.sanguine-tithe",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
         "core",
+        "core",
         "core"
       ],
       "affixIds": [
+        "atom.death-glean",
         "atom.death-salvo",
         "atom.deathblast"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The final breath of the fallen becomes the first strike of the void.",
+      "flavor": "The soil hungers for what the blade leaves behind.",
       "id": "skill.dark-off-t9-n1",
-      "name": "Calamity's Echo",
-      "nameKey": "tree.node.calamity-s-echo",
+      "name": "Grave-Tiller's Malice",
+      "nameKey": "tree.node.grave-tiller-s-malice",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.death-glean",
-        "atom.death-salvo"
+        "atom.death-glean"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The dead do not merely rest; they provide the momentum for the living to strike again.",
+      "flavor": "The soil hungers for what the dying leave behind.",
       "id": "skill.dark-off-t9-n2",
-      "name": "Sepulcher's Resonance",
-      "nameKey": "tree.node.sepulcher-s-resonance",
+      "name": "Cinerary Harvest",
+      "nameKey": "tree.node.cinerary-harvest",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

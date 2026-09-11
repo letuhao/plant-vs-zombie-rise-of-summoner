@@ -18183,6 +18183,37 @@
         "tier": 1,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.cruelty"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Sanguine Malice",
+        "nameKey": "tree.node.sanguine-malice",
+        "flavor": "The scent of iron heralds the end.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnActivate",
+          "element": "dark",
+          "status": "blight",
+          "channelFamily": "ai.aggression",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.cruelty",
           "atom.savagery"
         ],
@@ -18205,6 +18236,37 @@
     },
     "dark:skill.dark-off-t2-n0": {
       "record": {
+        "id": "skill.dark-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.econ-toll"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Vile Intentions",
+        "nameKey": "tree.node.vile-intentions",
+        "flavor": "The hunger of the void is never satisfied, only momentarily stilled by the scent of fresh carnage.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnActivate",
+          "element": "dark",
+          "status": "blight",
+          "channelFamily": "combat.absorption",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t2-n0",
         "nodeKey": "n0",
         "branch": "offensive",
@@ -18239,6 +18301,39 @@
         "tier": 2,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.fortitude",
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Grave-Bound Resilience",
+        "nameKey": "tree.node.grave-bound-resilience",
+        "flavor": "The weight of the earth provides a foundation that even death cannot unsettle.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchEnd",
+          "element": "dark",
+          "status": "jala",
+          "channelFamily": "combat.reduction",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.sust-grit"
         ],
         "affinity": [
@@ -18259,6 +18354,39 @@
     },
     "dark:skill.dark-off-t3-n0": {
       "record": {
+        "id": "skill.dark-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.bloodletting",
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Sanguine Rupture",
+        "nameKey": "tree.node.sanguine-rupture",
+        "flavor": "The very essence of the void hungers for the life spilled in its wake.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnActivate",
+          "element": "dark",
+          "status": "bond",
+          "channelFamily": "combat.accuracy",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t3-n0",
         "nodeKey": "n0",
         "branch": "offensive",
@@ -18287,6 +18415,37 @@
     },
     "dark:skill.dark-def-t3-n1": {
       "record": {
+        "id": "skill.dark-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Ossified Resolve",
+        "nameKey": "tree.node.ossified-resolve",
+        "flavor": "The marrow hardens into a secondary skeleton, turning every impact into a lesson in endurance.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchEnd",
+          "element": "dark",
+          "status": "kelp",
+          "channelFamily": "combat.reflect.rate",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t3-n1",
         "nodeKey": "n1",
         "branch": "defensive",
@@ -18345,6 +18504,37 @@
         "tier": 4,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.death-glean"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Feral Predation",
+        "nameKey": "tree.node.feral-predation",
+        "flavor": "The hunger of the void is never sated, only sharpened by the scent of the kill.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnDamageDealt",
+          "element": "dark",
+          "status": "butter",
+          "channelFamily": "combat.block.rate",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.death-salvo",
           "atom.deathblast"
         ],
@@ -18367,6 +18557,37 @@
     },
     "dark:skill.dark-def-t4-n1": {
       "record": {
+        "id": "skill.dark-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Silt-Crusted Shell",
+        "nameKey": "tree.node.silt-crusted-shell",
+        "flavor": "Layers of sediment and ancient bone form a heavy, unyielding barrier.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchStart",
+          "element": "dark",
+          "status": "leech",
+          "channelFamily": "combat.reflect.resist.rate",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t4-n1",
         "nodeKey": "n1",
         "branch": "defensive",
@@ -18399,6 +18620,37 @@
         "tier": 5,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Grave-Rooted Constitution",
+        "nameKey": "tree.node.grave-rooted-constitution",
+        "flavor": "The earth claims what is lost, and what is lost becomes unyielding.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchStart",
+          "element": "dark",
+          "status": "nerve.afflicted",
+          "channelFamily": "combat.shield.pen",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.shield-capacity"
         ],
         "affinity": [
@@ -18419,6 +18671,39 @@
     },
     "dark:skill.dark-off-t6-n0": {
       "record": {
+        "id": "skill.dark-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Sepulcher's Harvest",
+        "nameKey": "tree.node.sepulcher-s-harvest",
+        "flavor": "The dead do not rest; they merely wait to be gathered.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDamageTaken",
+          "element": "dark",
+          "status": "cold",
+          "channelFamily": "combat.crit.damage",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t6-n0",
         "nodeKey": "n0",
         "branch": "offensive",
@@ -18447,6 +18732,39 @@
     },
     "dark:skill.dark-off-t6-n1": {
       "record": {
+        "id": "skill.dark-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Primal Malice",
+        "nameKey": "tree.node.primal-malice",
+        "flavor": "The hunger of the hunt becomes a rhythmic pulse in the veins.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnDamageTaken",
+          "element": "dark",
+          "status": "cold",
+          "channelFamily": "combat.crit.rate",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t6-n1",
         "nodeKey": "n1",
         "branch": "offensive",
@@ -18482,6 +18800,37 @@
           "atom.death-salvo"
         ],
         "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Toll of the Departed",
+        "nameKey": "tree.node.toll-of-the-departed",
+        "flavor": "Every debt paid in blood is collected in spirit.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDamageTaken",
+          "element": "dark",
+          "status": "command",
+          "channelFamily": "combat.crit.resist",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo"
+        ],
+        "affinity": [
           "core"
         ],
         "exclusion": {
@@ -18499,6 +18848,41 @@
     },
     "dark:skill.dark-def-t7-n0": {
       "record": {
+        "id": "skill.dark-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-welding",
+          "atom.sust-callus",
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "likely",
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Iron-Sown Shroud",
+        "nameKey": "tree.node.iron-sown-shroud",
+        "flavor": "The weight of the earth is forged into a second skin.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnSpawn",
+          "element": "dark",
+          "status": "nerve.unsettled",
+          "channelFamily": "loadout.slots",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t7-n0",
         "nodeKey": "n0",
         "branch": "defensive",
@@ -18534,6 +18918,41 @@
         "nodeClass": "magnitude",
         "affixIds": [
           "atom.cruelty",
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Vile Onslaught",
+        "nameKey": "tree.node.vile-onslaught",
+        "flavor": "The darkness does not merely strike; it hungers, tearing through flesh with a primal, unyielding malice.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnDamageTaken",
+          "element": "dark",
+          "status": "command",
+          "channelFamily": "combat.crit.resist.damage",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.cruelty",
           "atom.ferocity"
         ],
         "affinity": [
@@ -18555,6 +18974,39 @@
     },
     "dark:skill.dark-def-t7-n1": {
       "record": {
+        "id": "skill.dark-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Grave-Bound Endurance",
+        "nameKey": "tree.node.grave-bound-endurance",
+        "flavor": "The weight of the earth becomes a second skin, hardening the spirit against the inevitable.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnSunCollect",
+          "element": "dark",
+          "status": "nerve.unsettled",
+          "channelFamily": "move.range",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t7-n1",
         "nodeKey": "n1",
         "branch": "defensive",
@@ -18587,6 +19039,37 @@
         "tier": 8,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.ward-link"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Umbral Weave",
+        "nameKey": "tree.node.umbral-weave",
+        "flavor": "The shadows do not merely fall; they bind.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnSunCollect",
+          "element": "dark",
+          "status": "pact_mark",
+          "channelFamily": "progression.bonus.arm1",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.ward-brace"
         ],
         "affinity": [
@@ -18613,6 +19096,37 @@
         "tier": 8,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Ossuary Pulse",
+        "nameKey": "tree.node.ossuary-pulse",
+        "flavor": "The rhythm of the grave beats within the marrow.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnSunCollect",
+          "element": "dark",
+          "status": "poison",
+          "channelFamily": "progression.bonus.arm2",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.shield-regen"
         ],
         "affinity": [
@@ -18633,6 +19147,39 @@
     },
     "dark:skill.dark-def-t9-n0": {
       "record": {
+        "id": "skill.dark-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-brace",
+          "atom.ward-flux"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Void-Stitched Aegis",
+        "nameKey": "tree.node.void-stitched-aegis",
+        "flavor": "The darkness does not merely protect; it binds the spirit to the shell.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnTimer",
+          "element": "dark",
+          "status": "rally",
+          "channelFamily": "progression.bonus.atk",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t9-n0",
         "nodeKey": "n0",
         "branch": "defensive",
@@ -18691,6 +19238,37 @@
         "tier": 10,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Carrion Scavenger's Toll",
+        "nameKey": "tree.node.carrion-scavenger-s-toll",
+        "flavor": "The dead leave more than just memories; they leave a debt to be collected.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnGridPlace",
+          "element": "dark",
+          "status": "freeze",
+          "channelFamily": "combat.parry.shred",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.death-glean",
           "atom.death-salvo"
         ],
@@ -18719,6 +19297,39 @@
         "tier": 10,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Ossuary Echo",
+        "nameKey": "tree.node.ossuary-echo",
+        "flavor": "The dead do not merely fall; they ripple through the veil.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnGridPlace",
+          "element": "dark",
+          "status": "hypno",
+          "channelFamily": "combat.penetration",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t10-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.elpw-pierce"
         ],
         "affinity": [
@@ -18739,6 +19350,41 @@
     },
     "dark:skill.dark-def-t10-n2": {
       "record": {
+        "id": "skill.dark-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calloused Resolve",
+        "nameKey": "tree.node.calloused-resolve",
+        "flavor": "The skin hardens not through strength, but through the sheer refusal to yield to the rot.",
+        "rationale": "The node provides Grit and Callusing; it reroutes the nodeClass property to ensure these defensive sustainments are prioritized over offensive utility.",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnWave",
+          "element": "dark",
+          "status": "wither",
+          "channelFamily": "progression.realm",
+          "exclusionForm": "reroute"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t10-n2",
         "nodeKey": "n2",
         "branch": "defensive",
@@ -36209,6 +36855,39 @@
         "tier": 3,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.cruelty",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Crimson Malice",
+        "nameKey": "tree.node.crimson-malice",
+        "flavor": "The scent of iron heralds the coming slaughter.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnActivate",
+          "element": "dark",
+          "status": "bond",
+          "channelFamily": "combat.amplification",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.savagery"
         ],
         "affinity": [
@@ -36229,6 +36908,39 @@
     },
     "dark:skill.dark-def-t3-n0": {
       "record": {
+        "id": "skill.dark-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.mending",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Marrow-Sown Vitality",
+        "nameKey": "tree.node.marrow-sown-vitality",
+        "flavor": "The very structure of the bone seeks to mend the flesh it supports.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchEnd",
+          "element": "dark",
+          "status": "kelp",
+          "channelFamily": "combat.reflect.damage",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t3-n0",
         "nodeKey": "n0",
         "branch": "defensive",
@@ -36269,6 +36981,37 @@
           "core"
         ],
         "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Echoing Dirge",
+        "nameKey": "tree.node.echoing-dirge",
+        "flavor": "The rhythm of the end is never a single beat.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDamageDealt",
+          "element": "dark",
+          "status": "charm_pulse",
+          "channelFamily": "combat.block.shred",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
           "form": "reroute",
           "propertyKeys": [
             "atomAttachPoint"
@@ -36283,6 +37026,39 @@
     },
     "dark:skill.dark-def-t6-n1": {
       "record": {
+        "id": "skill.dark-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.carapace"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Ossified Bastion",
+        "nameKey": "tree.node.ossified-bastion",
+        "flavor": "The very marrow hardens into a shell that refuses to crack.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnSpawn",
+          "element": "dark",
+          "status": "nerve.shaken",
+          "channelFamily": "combat.shield.toughness",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t6-n1",
         "nodeKey": "n1",
         "branch": "defensive",
@@ -36317,6 +37093,39 @@
         "tier": 8,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Resonant Void",
+        "nameKey": "tree.node.resonant-void",
+        "flavor": "The vacuum between stars hums with a hunger that cannot be satiated.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDeath",
+          "element": "dark",
+          "status": "ember",
+          "channelFamily": "combat.dodge",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.death-glean",
           "atom.econ-bounty"
         ],
@@ -36339,6 +37148,37 @@
     },
     "dark:skill.dark-off-t9-n0": {
       "record": {
+        "id": "skill.dark-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Sanguine Tithe",
+        "nameKey": "tree.node.sanguine-tithe",
+        "flavor": "The cost of the harvest is paid in essence, returned as a grim tribute.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDeath",
+          "element": "dark",
+          "status": "expose",
+          "channelFamily": "combat.heal.power",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t9-n0",
         "nodeKey": "n0",
         "branch": "offensive",
@@ -36373,6 +37213,41 @@
         "tier": 9,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo",
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Grave-Tiller's Malice",
+        "nameKey": "tree.node.grave-tiller-s-malice",
+        "flavor": "The soil hungers for what the blade leaves behind.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDeath",
+          "element": "dark",
+          "status": "expose",
+          "channelFamily": "combat.parry.break",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.death-salvo",
           "atom.deathblast"
         ],
@@ -36401,6 +37276,37 @@
         "tier": 9,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.death-glean"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Cinerary Harvest",
+        "nameKey": "tree.node.cinerary-harvest",
+        "flavor": "The soil hungers for what the dying leave behind.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnGridPlace",
+          "element": "dark",
+          "status": "freeze",
+          "channelFamily": "combat.parry.rate",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-off-t9-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.death-glean",
           "atom.death-salvo"
         ],
@@ -36423,6 +37329,39 @@
     },
     "dark:skill.dark-def-t9-n2": {
       "record": {
+        "id": "skill.dark-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Pulse of the Ossuary",
+        "nameKey": "tree.node.pulse-of-the-ossuary",
+        "flavor": "The rhythm of the grave beats within the marrow.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnTimer",
+          "element": "dark",
+          "status": "shatter",
+          "channelFamily": "progression.bonus.maxHp",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t9-n2",
         "nodeKey": "n2",
         "branch": "defensive",
@@ -36481,6 +37420,37 @@
         "tier": 10,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Silt-Bound Graft",
+        "nameKey": "tree.node.silt-bound-graft",
+        "flavor": "The earth claims what the flesh cannot hold.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnWave",
+          "element": "dark",
+          "status": "spark",
+          "channelFamily": "progression.breakthroughSuccess",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.sust-husk",
           "atom.ward-harden"
         ],
@@ -36503,6 +37473,39 @@
     },
     "dark:skill.dark-def-t10-n1": {
       "record": {
+        "id": "skill.dark-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-riveting",
+          "atom.shld-toughness-mod"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Hollowed Bastion",
+        "nameKey": "tree.node.hollowed-bastion",
+        "flavor": "A shell that holds nothing but the strength to remain unbroken.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnWave",
+          "element": "dark",
+          "status": "spore",
+          "channelFamily": "progression.power",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t10-n1",
         "nodeKey": "n1",
         "branch": "defensive",
@@ -41007,6 +42010,39 @@
         "tier": 1,
         "nodeClass": "magnitude",
         "affixIds": [
+          "atom.sust-grit",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Obsidian Marrow",
+        "nameKey": "tree.node.obsidian-marrow",
+        "flavor": "The darkness thickens within the bone, turning life into a fortress of shadow.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnMatchEnd",
+          "element": "dark",
+          "status": "jala",
+          "channelFamily": "combat.power",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
           "atom.vitality"
         ],
         "affinity": [
@@ -41027,6 +42063,39 @@
     },
     "dark:skill.dark-off-t5-n1": {
       "record": {
+        "id": "skill.dark-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Carnage Instinct",
+        "nameKey": "tree.node.carnage-instinct",
+        "flavor": "The scent of iron fuels a primal, unyielding hunger.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "magnitude",
+          "trigger": "OnDamageDealt",
+          "element": "dark",
+          "status": "charm_pulse",
+          "channelFamily": "combat.block.strength",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t5-n1",
         "nodeKey": "n1",
         "branch": "offensive",
@@ -41061,6 +42130,39 @@
         "tier": 6,
         "nodeClass": "mechanism",
         "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Echoing Aegis",
+        "nameKey": "tree.node.echoing-aegis",
+        "flavor": "The rhythm of impact becomes the pulse of restoration.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnSpawn",
+          "element": "dark",
+          "status": "nerve.shaken",
+          "channelFamily": "combat.shield.regen",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
+        "id": "skill.dark-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
           "atom.death-harvest"
         ],
         "affinity": [
@@ -41081,6 +42183,37 @@
     },
     "dark:skill.dark-off-t8-n0": {
       "record": {
+        "id": "skill.dark-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Abyssal Overload",
+        "nameKey": "tree.node.abyssal-overload",
+        "flavor": "The darkness does not merely strike; it overflows, consuming the very essence of the elements it touches.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnDeath",
+          "element": "dark",
+          "status": "ember",
+          "channelFamily": "combat.defense",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-off-t8-n0",
         "nodeKey": "n0",
         "branch": "offensive",
@@ -45185,6 +46318,39 @@
     },
     "dark:skill.dark-def-t5-n0": {
       "record": {
+        "id": "skill.dark-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-flux",
+          "atom.ward-link"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Soul-Bound Tether",
+        "nameKey": "tree.node.soul-bound-tether",
+        "flavor": "The spirit refuses to drift, anchoring itself to the very essence of the ward.",
+        "rationale": "",
+        "quotaCell": {
+          "nodeClass": "mechanism",
+          "trigger": "OnMatchStart",
+          "element": "dark",
+          "status": "nerve.afflicted",
+          "channelFamily": "combat.shield.capacity",
+          "exclusionForm": "none"
+        },
+        "promptVersion": "tree-language/3"
+      },
+      "supersededRecord": {
         "id": "skill.dark-def-t5-n0",
         "nodeKey": "n0",
         "branch": "defensive",

@@ -26,7 +26,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
 from ...pipeline.llm_caller import LlmCallerConfig
@@ -155,7 +154,6 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
         # stage never has to re-open the accepted-round file itself just to record which P2 round
         # it read `familyActions` from.
         "p2CandidateSetHash": meta.get("acceptedRoundCorpusHash"),
-        "generatedUtc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
     rows: "list[dict]" = []

@@ -22,7 +22,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
 from ...pipeline.llm_caller import LlmCallerConfig
@@ -113,7 +112,6 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
     base_provenance = {
         "pipeline": "general-propose", "model": model, "promptVersion": PROMPT_VERSION,
         "briefsCorpusHash": briefs_doc.get("_meta", {}).get("corpusHash"),
-        "generatedUtc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
     rows: "list[dict]" = []

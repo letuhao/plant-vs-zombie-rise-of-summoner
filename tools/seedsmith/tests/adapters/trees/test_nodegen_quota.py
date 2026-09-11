@@ -347,12 +347,18 @@ class QuotaForRealMightPlanTests(unittest.TestCase):
         self.assertEqual(counts["magnitude"], 20)
 
     def test_free_axis_marginals_match_an_independent_re_derivation(self) -> None:
-        """Nothing forces trigger/status/channelFamily/exclusionForm for a PRIMARY tree, so their
-        marginals across the emitted cells must equal `axis_marginals` computed independently over
-        the same members/weights/order/total -- proving the walk did not silently drop or duplicate
-        a draw anywhere."""
+        """Nothing forces trigger/status/channelFamily for a PRIMARY tree, so their marginals
+        across the emitted cells must equal `axis_marginals` computed independently over the same
+        members/weights/order/total -- proving the walk did not silently drop or duplicate a draw
+        anywhere.
+
+        `exclusionForm` is asserted separately (the two-stage test below): 2026-09-11's domain fix
+        makes its marginals a two-stage split -- `none` vs the excluded subset by
+        `exclusion.targetShareMilli`, then the 450/450/100 rung weights over the excluded subset --
+        which a flat re-derivation over all 40 slots can never reproduce by design.
+        """
         total = len(self.plan.nodes)
-        for axis in ("trigger", "status", "channelFamily", "exclusionForm"):
+        for axis in ("trigger", "status", "channelFamily"):
             members = quota.axis_members(axis, self.plan.property_vocabulary)
             weights = quota.axis_weights_milli(axis, self.targets, members)
             order = quota.axis_order(axis, self.targets, members)
@@ -363,6 +369,29 @@ class QuotaForRealMightPlanTests(unittest.TestCase):
             # same key set, never dropping a "this member got zero, and that's correct" fact.
             actual_full = {m: actual.get(m, 0) for m in expected}
             self.assertEqual(actual_full, expected, f"axis {axis!r} marginal drifted from target")
+
+    def test_exclusion_form_follows_the_two_stage_apportionment(self) -> None:
+        """2026-09-11's A2 quota-domain fix: `none` holds the non-designated share of cells
+        (`exclusion.targetShareMilli` names the designated subset's size), and the 450/450/100
+        rung weights split the EXCLUDED subset, never the whole tree. Reproduced here against the
+        real `might` plan: 40 slots x 20 per mille -> ~1 designated slot; its rung is the first
+        of the declared 450/450/100 order."""
+        targets = self.targets
+        total = len(self.plan.nodes)
+        designated = quota.largest_remainder_count(
+            {"kept": 1000 - targets.exclusion_target_share_milli,
+             "excluded": targets.exclusion_target_share_milli},
+            ("kept", "excluded"), total)["excluded"]
+        counts = collections.Counter(cell.exclusion_form for cell in self.cells.values())
+        self.assertEqual(counts["none"], total - designated)
+        # The rung split over the designated subset, by the declared weights/order:
+        members = quota.axis_members("exclusionForm", self.plan.property_vocabulary)
+        weights = quota.axis_weights_milli("exclusionForm", targets, members)
+        order = quota.axis_order("exclusionForm", targets, members)
+        rungs = {m: counts.get(m, 0) for m in members}
+        self.assertEqual(rungs, quota.axis_marginals(weights, order, designated))
+        # And the whole axis still sums to the tree's own node count:
+        self.assertEqual(sum(counts.values()), total)
 
     def test_every_free_axis_value_sums_to_the_real_node_count(self) -> None:
         total = len(self.plan.nodes)

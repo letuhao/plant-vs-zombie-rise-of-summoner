@@ -167,11 +167,18 @@ NODE_RESPONSE_SCHEMA: "dict[str, Any]" = {
 
 
 def schema_for_call(permitted_affix_ids: "Sequence[str]",
-                    permitted_property_keys: "Sequence[str]") -> "dict[str, Any]":
-    """A per-call COPY of `NODE_RESPONSE_SCHEMA` with both enums filled from one node's own
+                    permitted_property_keys: "Sequence[str]",
+                    exclusion_forms: "Sequence[str] | None" = None) -> "dict[str, Any]":
+    """A per-call COPY of `NODE_RESPONSE_SCHEMA` with all three enums filled from one node's own
     (already permuted) quota cell — never mutates the shared constant. `deepcopy`d so two calls in
     the same process never alias each other's enum (`family_propose/prompts.py:150-160`'s own
     rule, reused verbatim).
+
+    `exclusion_forms` (2026-09-11) is the `exclusionForm` axis's §4.2 step-6 narrowing: the ONE
+    value the node's own quota cell allocated (or that value plus `none` — a `none`-allocated cell
+    passes `("none",)` and a designated cell passes `(form, "none")`), narrowed here so the schema
+    enum says what the cell says. Optional-with-default so every existing caller keeps compiling;
+    the real caller (`run.py`) passes it per cell.
 
     Neither argument is validated for non-emptiness here: an empty `permitted_affix_ids` is
     `UnsatisfiableCell` territory (`quota.py`'s job, held rather than widened), and forcing that
@@ -181,6 +188,8 @@ def schema_for_call(permitted_affix_ids: "Sequence[str]",
     schema["properties"]["affixIds"]["items"]["enum"] = list(permitted_affix_ids)
     schema["properties"]["exclusion"]["properties"]["propertyKeys"]["items"]["enum"] = \
         list(permitted_property_keys)
+    if exclusion_forms is not None:
+        schema["properties"]["exclusion"]["properties"]["form"]["enum"] = list(exclusion_forms)
     return schema
 
 

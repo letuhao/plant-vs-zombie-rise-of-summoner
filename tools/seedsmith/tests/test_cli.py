@@ -94,6 +94,14 @@ class MetricFilterTests(unittest.TestCase):
         self.assertEqual(code, EXIT_CLEAN)  # nothing ran, so nothing found a GAP
 
 
+def test_actions_check_uses_domain_loader_and_excludes_round_scratch(capsys):
+    """The actions loader excludes `_rounds/`, whose ids intentionally overlap committed seeds."""
+    live_actions = Path(__file__).resolve().parents[3] / "data" / "seed" / "actions"
+    assert main(["check", "--adapter", "actions", "--metric", "Actions/Loader",
+                 str(live_actions)]) == EXIT_CLEAN
+    assert "could not load corpus" not in capsys.readouterr().err
+
+
 if __name__ == "__main__":
     unittest.main()
 

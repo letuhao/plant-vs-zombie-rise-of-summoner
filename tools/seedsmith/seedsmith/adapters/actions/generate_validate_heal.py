@@ -28,8 +28,7 @@ stage.
 **Zero model calls under `--dry-run`** (acceptance #9): gates a recorded candidate set, `--preflight`
 is skipped, `preflight: "skipped"` is written into the round report's own provenance either way
 unless `--preflight` was also passed and a real call ran. The live heal path (no `--dry-run`) is
-wired here but exercised by NO test in this build (SS4's own "tests never call a model" rule) --
-A-P1/A-P2/A-P3 do not exist yet to produce a live brief to heal against.
+wired here and consumes the resumable proposal envelopes produced by A-P1/A-P2/A-P3.
 """
 from __future__ import annotations
 

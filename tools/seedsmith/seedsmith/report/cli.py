@@ -366,7 +366,20 @@ def cmd_check(args: argparse.Namespace) -> int:
               f"(known: {', '.join(known_adapter_names())})", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    if args.adapter == "dungeon":
+    loader_findings = []
+    if args.adapter == "actions":
+        # Actions has a domain loader because `_rounds/` is scratch output and must not be
+        # loaded beside the committed root corpus. Raw `Corpus.load` would see both copies of
+        # the same action id and fail before any metric can run.
+        from ..adapters.actions import load_committed
+        try:
+            load_result = load_committed(Path(args.corpus_root))
+        except CorpusLoadError as e:
+            print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        corpus = load_result.corpus
+        loader_findings = load_result.findings
+    elif args.adapter == "dungeon":
         # `Corpus.load()` requires a top-level `kind`/`entries` wrapper (`corpus/model.py:183-186`)
         # -- dungeon's own real content is one bare object per file (`emit.py`'s own docstring), so
         # the generic loader silently sees zero entries for this adapter. `load_dungeon_corpus`
@@ -404,6 +417,17 @@ def cmd_check(args: argparse.Namespace) -> int:
     ctx = Ctx(corpus=corpus, adapter=adapter, numerics=numerics_ctx, budget=budget_rows)
     registry = build_registry()
     findings = run_all(registry, ctx, metric_ids=args.metric or None)
+    if loader_findings and (not args.metric or "Actions/Loader" in args.metric):
+        from ..metrics import Finding
+        findings.extend(
+            Finding(
+                metric="Actions/Loader", severity=Severity.GAP,
+                subject=f.entry_id or f.path,
+                message=f.message,
+                evidence={"code": f.code, "path": f.path, "entryId": f.entry_id},
+            )
+            for f in loader_findings
+        )
 
     if args.json:
         Path(args.json).write_text(
@@ -1648,7 +1672,8 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     tree_reading=tree_id, branch=node.branch, tier=node.tier,
                     node_class=node.node_class, motifs=(), anti_motifs=(),
                     permitted_affixes=permitted_affixes,
-                    permitted_properties=sorted(plan.property_vocabulary))
+                    permitted_properties=sorted(plan.property_vocabulary),
+                    exclusion_form=cell.exclusion_form)
 
     # §6.1's own cost arithmetic (D29's corpus table), COMPUTED from `total_subjects` — never a
     # hardcoded literal. At the generic corpus's real size (1,560 subjects: 39 trees x 40 nodes)
@@ -1732,7 +1757,8 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     ledger_path=Path(args.ledger_path) if getattr(args, "ledger_path", "") else None,
                     seed_root=seed_root,
                     unresolved_max_share_permille=targets.unresolved_count_max_share_permille,
-                    max_workers=max(1, getattr(args, "workers", 1)))
+                    max_workers=max(1, getattr(args, "workers", 1)),
+                    supersede_stale=bool(getattr(args, "supersede", False)))
             except emit_mod.NodeKeyRefused as ex:
                 per_tree_reports.append({
                     "tree": tree_id, "seedPath": None,
@@ -2844,6 +2870,13 @@ def build_parser() -> argparse.ArgumentParser:
                                      "rationale for a local model queue, but cannot reuse that helper "
                                      "directly (it is built around a LangGraph app.invoke() interface "
                                      "this pipeline never adopted)")
+    trees_generate.add_argument(
+        "--supersede", action="store_true",
+        help="--write companion: re-generate ledger rows whose per-record promptVersion is absent "
+             "or differs from the current brief vintage (brief.PROMPT_VERSION), preserving the "
+             "prior row under supersededRecord (spec-tree-review.md §8's provenance-supersede "
+             "pass). Without it, already-done subjects are replayed from the ledger, never "
+             "re-rolled")
     trees_review = trees_sub.add_parser(
         "review", help="tree-review entrypoints (task H7, spec-tree-review.md §5.5, §Commands)")
     trees_review.add_argument("--lot", required=True, help="the review lot id")

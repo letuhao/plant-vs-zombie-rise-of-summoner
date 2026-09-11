@@ -1,91 +1,76 @@
-"""Mission inventory: full per-tree/per-node coverage for PassiveTree."""
-import json, sys, collections
+"""Mission inventory (v3): ledger-true coverage."""
+import json, collections, sys
 from pathlib import Path
 
-ROOT = Path(r"d:\Works\source\plant-vs-zombie-rise-of-summoner\data\seed\passive-tree")
+REPO = Path(r"d:\Works\source\plant-vs-zombie-rise-of-summoner")
+sys.path.insert(0, str(REPO / "tools" / "seedsmith"))
 
-def load(p):
-    with open(p, encoding="utf-8") as f:
-        return json.load(f)
+from seedsmith.adapters.trees.nodegen import plan_read, run as nodegen_run, emit as nodegen_emit
 
-plans = {}
-for p in sorted((ROOT / "plan").glob("*.json")):
-    if ".bak" in p.name: continue
-    j = load(p)
-    plans[p.stem] = j
+seed_root = REPO / "data" / "seed"
+ledger_path = seed_root / "passive-tree" / "_runs" / "tree-language.ledger.json"
+ledger_done = nodegen_run.read_ledger(ledger_path)  # returns doc["done"] as dict
+ledger_by_tree = collections.defaultdict(set)
+for k in ledger_done:
+    tree, _, nid = k.partition(":")
+    ledger_by_tree[tree].add(nid)
 
-# expected node count per plan: count nodes in plan structure
-def plan_node_ids(plan):
-    ids = []
-    # discover shape: look for tiers/branches arrays
-    def walk(o, path=""):
-        if isinstance(o, dict):
-            if "nodeIds" in o and isinstance(o["nodeIds"], list):
-                ids.extend(o["nodeIds"])
-            for k, v in o.items():
-                walk(v, path + "/" + k)
-        elif isinstance(o, list):
-            for i, v in enumerate(o):
-                walk(v, path + f"[{i}]")
-    walk(plan)
-    return ids
+plan_dir = seed_root / "passive-tree" / "plan"
+plans = sorted(plan_dir.glob("*.v1.json"))
 
-nodes_files = {}
-for p in sorted((ROOT / "nodes").glob("*.json")):
-    if ".bak" in p.name: continue
-    j = load(p)
-    nodes_files[p.stem] = j
+print(f"plans={len(plans)} ledgerDone={len(ledger_done)} ledgerTrees={len(ledger_by_tree)}")
 
-ledger = load(ROOT / "_runs" / "tree-language.ledger.json")
-ledger_keys = list(ledger.get("done", {}).keys())
-ledger_by_tree = collections.Counter(k.split(":", 1)[0] if ":" in k else "?" for k in ledger_keys)
+rows = []
+for p in plans:
+    tree_id = p.stem.rsplit(".v1", 1)[0]
+    doc = json.loads(p.read_text(encoding="utf-8"))
+    tree_plan = plan_read.load_from_dict(doc, source_label=f"plan:{tree_id}")
+    expected = {n.node_id for n in tree_plan.nodes}
+    seed_doc = nodegen_emit.read_seed_document(tree_id, seed_root=seed_root)
+    committed = {n["id"] for n in seed_doc["nodes"]} if seed_doc else set()
+    led = ledger_by_tree.get(tree_id, set())
+    rows.append({
+        "tree": tree_id,
+        "expected": len(expected),
+        "committed": len(committed),
+        "ledgerInPlan": len(led & expected),
+        "ledgerNotInPlan": sorted(led - expected),
+        "missing": sorted(expected - committed),
+        "committedNotInPlan": sorted(committed - expected),
+        "pv": (json.loads((seed_root / "passive-tree" / "nodes" / f"{tree_id}.json").read_text(
+            encoding="utf-8")).get("_provenance", {}).get("promptVersion")
+            if (seed_root / "passive-tree" / "nodes" / f"{tree_id}.json").exists() else None),
+    })
 
-identities = {p.stem for p in (ROOT / "identity").glob("*.json") if ".bak" not in p.name}
-species_records = {p.stem for p in (ROOT / "species").glob("*.json")}
-
-print("=== PLANS ===", len(plans))
-plan_summary = {}
-for name, j in plans.items():
-    ids = plan_node_ids(j)
-    plan_summary[name] = ids
-    print(f"{name:24s} expectedNodes={len(ids):4d} keys={sorted(j.keys())[:8]}")
-
-print()
-print("=== NODE FILES ===", len(nodes_files))
-for name, j in nodes_files.items():
-    prov = j.get("_provenance", {})
-    nds = j.get("nodes", [])
-    qc = sum(1 for n in nds if "quotaCell" in n)
-    treeid = j.get("treeId", "?")
-    print(f"{name:24s} treeId={treeid:20s} nodes={len(nds):3d} quotaCell={qc:3d} pv={prov.get('promptVersion')} model={prov.get('model')} planHash={prov.get('planHash','')!r}")
-
-print()
-print("=== LEDGER === total done:", len(ledger_keys))
-for tree, c in sorted(ledger_by_tree.items()):
-    print(f"{tree:24s} {c:4d}")
-
-print()
-print("=== CROSS-CHECK per tree (plan vs nodes vs ledger) ===")
-all_trees = sorted(set(plan_summary) | set(nodes_files) | set(ledger_by_tree))
-for t in all_trees:
-    pid = set(plan_summary.get(t, []))
-    nf = nodes_files.get(t)
-    nid = {n.get("id") for n in nf.get("nodes", [])} if nf else set()
-    led = {k.split(":", 1)[1] for k in ledger_keys if k.split(":", 1)[0] == t} if t in ledger_by_tree else set()
-    missing_committed = pid - nid
-    extra_committed = nid - pid
-    missing_ledger = pid - led
-    ledger_only = led - pid - nid
+total_exp = total_com = total_led_ok = 0
+problems = 0
+for r in sorted(rows, key=lambda x: x["tree"]):
+    total_exp += r["expected"]; total_com += r["committed"]; total_led_ok += r["ledgerInPlan"]
     flag = ""
-    if missing_committed: flag += f" MISSING_IN_NODES={len(missing_committed)}{sorted(missing_committed)[:4]}"
-    if extra_committed: flag += f" EXTRA_IN_NODES={len(extra_committed)}{sorted(extra_committed)[:4]}"
-    if missing_ledger: flag += f" NOT_IN_LEDGER={len(missing_ledger)}{sorted(missing_ledger)[:3]}"
-    if ledger_only: flag += f" LEDGER_ONLY={len(ledger_only)}{sorted(ledger_only)[:3]}"
-    is_species = t[0].isupper()
-    tag = "SPECIES" if is_species else "shared"
-    print(f"{t:24s} [{tag:7s}] plan={len(pid):3d} nodes={len(nid):3d} ledger={len(led):3d}{flag}")
+    if r["missing"]: flag += f" MISSING={r['missing']}"
+    if r["ledgerNotInPlan"]: flag += f" LEDGER_STRAY={len(r['ledgerNotInPlan'])}:{r['ledgerNotInPlan'][:3]}"
+    if r["committedNotInPlan"]: flag += f" COMMITTED_STRAY={r['committedNotInPlan'][:3]}"
+    if flag: problems += 1
+    print(f"{r['tree']:22s} exp={r['expected']:3d} com={r['committed']:3d} led_ok={r['ledgerInPlan']:3d} pv={r['pv']}{flag}")
 
-print()
-print("=== IDENTITY vs PLANS ===")
-print("identities:", len(identities), " plans:", set(plans) - identities, " identityless plans above")
-print("=== SPECIES records ===", species_records)
+print(f"\nTOTAL expected={total_exp} committed={total_com} ledgerInPlan={total_led_ok} problemTrees={problems}")
+
+plan_trees = {r["tree"] for r in rows}
+print("\nledger trees not matching any plan tree:")
+for t in sorted(set(ledger_by_tree) - plan_trees):
+    ids = sorted(ledger_by_tree[t])
+    print(f"  {t}: {len(ids)} entries, sample={ids[:5]}")
+    # record shape
+    first_key = next(k for k in ledger_done if k.split(':',1)[0] == t)
+    print(f"    record: {json.dumps(ledger_done[first_key])[:400]}")
+
+# species node files
+nodes_dir = seed_root / "passive-tree" / "nodes"
+node_files = {p.stem for p in nodes_dir.glob("*.json") if ".bak" not in p.name}
+species_files = sorted(n for n in node_files if n[0].isupper())
+print(f"\nspecies node files (capitalised, no plan): {species_files}")
+for sf in species_files:
+    led = ledger_by_tree.get(sf, set())
+    doc = json.loads((nodes_dir / f"{sf}.json").read_text(encoding="utf-8"))
+    ids = {n["id"] for n in doc["nodes"]}
+    print(f"  {sf}: fileNodes={len(ids)} ledger={len(led)} ledgerNotInFile={len(led - ids)} fileNotInLedger={len(ids - led)}")

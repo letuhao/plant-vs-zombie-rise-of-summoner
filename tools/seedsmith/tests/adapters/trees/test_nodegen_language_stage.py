@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _nodegen_fixtures import raising_call, write_plan  # noqa: E402
 
 from seedsmith.adapters.trees.nodegen import plan_read, run  # noqa: E402
+from seedsmith.adapters.trees.nodegen.verdict import UNRESOLVED_COUNT_METRIC  # noqa: E402
 from seedsmith.adapters.trees.nodegen.vocab import AffixOption, AffixVocabulary  # noqa: E402
 from seedsmith.pipeline.llm_caller import LlmCallerConfig  # noqa: E402
 
@@ -574,7 +575,7 @@ class CrossTreeNameKeyDedupTests(unittest.TestCase):
         self.plan_b = plan_read.load("tree-b", self.seed_root)
         self.ledger_path = self.seed_root / "_runs" / "ledger.json"
 
-    def test_a_second_tree_naming_the_same_thing_gets_a_suffixed_key_not_a_collision(self) -> None:
+    def test_a_second_tree_naming_the_same_thing_is_refused_at_generation_time(self) -> None:
         same_name_payload = json.dumps(_named_response("Primal Surge"))
         with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
             first = run.run_language_stage(self.plan_a, _inputs_for, ledger_path=self.ledger_path,
@@ -584,19 +585,45 @@ class CrossTreeNameKeyDedupTests(unittest.TestCase):
         with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
             second = run.run_language_stage(self.plan_b, _inputs_for, ledger_path=self.ledger_path,
                                             seed_root=self.seed_root, config=TEST_CONFIG)
-        # The bug: before the fix, tree-b never saw tree-a's key at all (different tree's own
-        # `plan.already_done`), so it would have persisted the SAME bare `tree.node.primal-surge` --
-        # a real, silent corpus-wide collision. The fix: tree-b's key is suffixed instead.
-        self.assertEqual(second.outcomes[0].record.name_key, "tree.node.primal-surge-2")
-        self.assertNotEqual(second.outcomes[0].record.name_key, first.outcomes[0].record.name_key)
+        # 2026-09-11 contract change (gate 21's generation-time half): the second tree naming the
+        # EXACT same thing is now REFUSED, not suffixed — the corpus metric counts a same-name draft
+        # from a different tree as the collision defect, so no per-item check that saw only this
+        # tree's own ledger could have distinguished "suffixed key, same name" from a real one.
+        # Before this half was wired, tree-b persisted the SAME bare name under `-2`'s key and
+        # `PassiveTree/NameCollision` flagged 46 real cross-tree collisions post-hoc.
+        self.assertEqual(second.outcomes[0].outcome, "escalated")
+        self.assertIn("already used by another", second.outcomes[0].detail)
+        # Nothing leaked into the ledger or the seed document either.
+        ledger = run.read_ledger(self.ledger_path)
+        self.assertEqual(len(ledger), 1)
+        self.assertNotIn("tree-b:t1-n0", ledger)
 
-    def test_a_third_tree_still_finds_a_free_suffix_after_two_others_already_took_the_name(self) -> None:
-        same_name_payload = json.dumps(_named_response("Primal Surge"))
+    def test_a_second_tree_with_a_distinct_name_gets_a_free_key_not_a_collision(self) -> None:
+        # The ORIGINAL suffix contract survives under the new gate, narrowed to its only remaining
+        # legitimate shape: the model picks a DISTINCT name that slugs identically (casing), so gate
+        # 21 (exact-name) passes while `_derive_unique_name_key` still must suffix the KEY.
+        first_payload = json.dumps(_named_response("Primal Surge"))
+        second_payload = json.dumps(_named_response("PRIMAL SURGE"))
+        with patch("seedsmith.pipeline.llm_caller.call_model", return_value=first_payload):
+            first = run.run_language_stage(self.plan_a, _inputs_for, ledger_path=self.ledger_path,
+                                           seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(first.outcomes[0].record.name_key, "tree.node.primal-surge")
+        with patch("seedsmith.pipeline.llm_caller.call_model", return_value=second_payload):
+            second = run.run_language_stage(self.plan_b, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(second.outcomes[0].outcome, "accepted")
+        self.assertEqual(second.outcomes[0].record.name_key, "tree.node.primal-surge-2")
+
+    def test_a_third_tree_still_finds_a_free_suffix_after_two_others_already_took_the_key(self) -> None:
+        first_payload = json.dumps(_named_response("Primal Surge"))
+        second_payload = json.dumps(_named_response("PRIMAL SURGE"))
+        third_payload = json.dumps(_named_response("Primal surge"))
         write_plan(self.seed_root, "tree-c", node_count=1)
         plan_c = plan_read.load("tree-c", self.seed_root)
 
-        for plan in (self.plan_a, self.plan_b, plan_c):
-            with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
+        for plan, payload in ((self.plan_a, first_payload), (self.plan_b, second_payload),
+                              (plan_c, third_payload)):
+            with patch("seedsmith.pipeline.llm_caller.call_model", return_value=payload):
                 run.run_language_stage(plan, _inputs_for, ledger_path=self.ledger_path,
                                        seed_root=self.seed_root, config=TEST_CONFIG)
 
@@ -751,6 +778,142 @@ class SpeciesCategoryTreeResumabilityTests(unittest.TestCase):
         distinct_statuses = {cell.value_for("status") for cell in self.cells.values()}
         self.assertEqual({"air"}, distinct_elements)
         self.assertEqual({"spark"}, distinct_statuses)
+
+class ProvenanceSupersedeTests(unittest.TestCase):
+    """spec-tree-review.md §8's provenance-supersede pass, end to end at stage level (2026-09-11).
+
+    `record_superseded` (the ledger primitive) was always unit-tested; what never existed was the
+    PRODUCTION path: a caller that asks the runner to re-roll every ledger row whose per-record
+    `promptVersion` is absent or differs from the current brief vintage, preserving the prior row
+    under `supersededRecord`. `plan_run(supersede_stale=True)` finds stale rows and schedules them
+    (they ride `plan.subjects`); `_record_outcome` routes their acceptance through
+    `record_superseded`. Proven here at each seam, against a real synthetic plan.
+    """
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        write_plan(self.seed_root, "t1", node_count=2)
+        self.plan = plan_read.load("t1", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    @staticmethod
+    def _payload_stub(node_keys):
+        """3 calls per node (base + 2 vote samples, §7.1's cost shape), strictly consecutive under
+        max_workers=1, so `(call_index // 3)` keys which node a call belongs to — the same
+        call-order trick `SpeciesCategoryTreeResumabilityTests` proven-uses above. Distinct names
+        per node also keep gate 21 (the taken-names gate) from refusing the second subject."""
+        calls = {"n": 0}
+        payloads = [json.dumps(_accepted_response(k)) for k in node_keys]
+
+        def _call(*args, **kwargs):
+            payload = payloads[min(calls["n"] // 3, len(payloads) - 1)]
+            calls["n"] += 1
+            return payload
+
+        return _call
+
+    def _age_off_vintage(self) -> None:
+        """Rewrite the ledger WITHOUT per-record promptVersion — the exact shape of every row
+        committed before 2026-09-11 (the vintage `supersede_stale` exists to re-roll)."""
+        ledger = run.read_ledger(self.ledger_path)
+        for entry in ledger.values():
+            entry["record"].pop("promptVersion", None)
+        run.write_ledger(ledger, self.ledger_path)
+
+    def _flagged(self, stub):
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=stub):
+            return run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                          seed_root=self.seed_root, config=TEST_CONFIG,
+                                          supersede_stale=True)
+
+    def test_a_pre_provenance_row_is_re_rolled_and_the_prior_row_is_preserved(self) -> None:
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            first = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                           seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(2, len(first.outcomes))
+        self.assertTrue(all(o.outcome == "accepted" for o in first.outcomes))
+
+        self._age_off_vintage()
+
+        # Flagged pass: both rows are stale (no vintage), so both re-roll; the new rows carry the
+        # current brief vintage while the prior rows survive under supersededRecord.
+        second = self._flagged(self._payload_stub(["n0", "n1"]))
+        self.assertEqual(2, len(second.outcomes))
+        self.assertTrue(all(o.outcome == "accepted" for o in second.outcomes))
+        ledger = run.read_ledger(self.ledger_path)
+        self.assertEqual(2, len(ledger))
+        for entry in ledger.values():
+            self.assertEqual(run.brief_mod.PROMPT_VERSION, entry["record"]["promptVersion"])
+            self.assertIn("supersededRecord", entry)
+            self.assertNotIn("promptVersion", entry["supersededRecord"])
+
+        # A third flagged pass is a no-op: every row now carries the current vintage.
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=raising_call) as mocked:
+            third = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                           seed_root=self.seed_root, config=TEST_CONFIG,
+                                           supersede_stale=True)
+        mocked.assert_not_called()
+        self.assertEqual(0, len(third.outcomes), "nothing stale left — zero model calls")
+        self.assertEqual(2, len(run.read_ledger(self.ledger_path)))
+
+    def test_a_current_vintage_row_is_never_superseded(self) -> None:
+        # First pass stamps the CURRENT vintage (generate_node's own per-record provenance); a
+        # second flagged pass must replay from the ledger — zero model calls, no supersededRecord.
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                   seed_root=self.seed_root, config=TEST_CONFIG)
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=raising_call) as mocked:
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG,
+                                            supersede_stale=True)
+        mocked.assert_not_called()
+        ledger = run.read_ledger(self.ledger_path)
+        self.assertEqual(2, len(ledger))
+        self.assertTrue(all("supersededRecord" not in e for e in ledger.values()))
+        self.assertEqual(0, len(result.outcomes), "a fully-replayed run returns no outcomes")
+
+    def test_supersede_routes_through_record_superseded_not_record_accepted(self) -> None:
+        # The routing contract at the seam that matters: a second accept of the same subject would
+        # raise under record_accepted's duplicate guard, so a flagged run COMPLETING with the prior
+        # row preserved under supersededRecord IS the routing proof.
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                   seed_root=self.seed_root, config=TEST_CONFIG)
+        self._age_off_vintage()
+        second = self._flagged(self._payload_stub(["n0", "n1"]))
+        self.assertTrue(all(o.outcome == "accepted" for o in second.outcomes))
+        ledger = run.read_ledger(self.ledger_path)
+        self.assertTrue(all("supersededRecord" in e for e in ledger.values()))
+
+    def test_a_stale_row_is_not_double_counted_in_the_run_report_denominator(self) -> None:
+        # Gate 23's denominator counts `len(plan.subjects) + len(plan.already_done)`. A superseded
+        # subject rides `subjects` and must stay OUT of `already_done`, so a 2-node tree reports
+        # 0/2 unresolved — never the 2+2=4 double-count.
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                   seed_root=self.seed_root, config=TEST_CONFIG)
+        self._age_off_vintage()
+        second = self._flagged(self._payload_stub(["n0", "n1"]))
+        # The plan-shape contract itself: a stale subject rides `subjects`, never `already_done`.
+        plan = run.plan_run(self.plan, ledger=run.read_ledger(self.ledger_path),
+                            supersede_stale=True, prompt_version="v-current")
+        self.assertEqual(2, len(plan.subjects))
+        self.assertEqual(0, len(plan.already_done))
+        # And the gate-23 denominator follows the same shape: 0 unresolved over 2 total, no /4.
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=raising_call):
+            replay = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG,
+                                            supersede_stale=True,
+                                            unresolved_max_share_permille=500)
+        detail = next(r.detail for r in replay.report.outcomes
+                      if r.metric == UNRESOLVED_COUNT_METRIC and r.detail)
+        self.assertIn("0/2 unresolved", detail)
+        self.assertNotIn("/4", detail)
 
 
 if __name__ == "__main__":

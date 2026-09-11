@@ -138,6 +138,10 @@ class NodeSeedRecord:
     rationale: str = ""
     printed_text: str = ""
     quota_cell: "Mapping[str, str] | None" = None
+    #: Per-record generation provenance (2026-09-11): the prompt vintage this node's CONTENT was
+    #: produced under. Additive, like `quota_cell`: empty on every pre-provenance record, which the
+    #: document-stamp logic in `build_seed_document` reads as "one vintage, the current one".
+    prompt_version: str = ""
 
     def to_dict(self) -> dict:
         out = {
@@ -152,12 +156,15 @@ class NodeSeedRecord:
         }
         if self.quota_cell is not None:
             out["quotaCell"] = quota_cell_to_dict(self.quota_cell)
+        if self.prompt_version:
+            out["promptVersion"] = self.prompt_version
         return out
 
 
 def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_class: str,
                       response: "Mapping[str, Any]", *,
-                      quota_cell: "Mapping[str, str] | object | None" = None) -> NodeSeedRecord:
+                      quota_cell: "Mapping[str, str] | object | None" = None,
+                      prompt_version: str = "") -> NodeSeedRecord:
     """One accepted §6.3 response, turned into a `NodeSeedRecord` — refuses (via
     `assert_name_key_grammar`) rather than accepting a malformed `nameKey` the schema's own
     `pattern` should already have blocked; belt and braces, per guardrail 1.
@@ -172,6 +179,11 @@ def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_
     `QuotaCell` or an already-camelCase map — it is normalised and stored; when the response itself
     carries a persisted `quotaCell` (ledger replay) and the caller passed none, that stored value
     is preferred over inventing nothing.
+
+    `prompt_version` (2026-09-11) rides the same additive contract: the caller's value is what a
+    FRESH generation stamps; a persisted `promptVersion` in the response itself (ledger replay of
+    a record accepted after this field landed) wins, so a replayed record keeps its own vintage —
+    the exact per-record provenance the document-stamp logic in `build_seed_document` needs.
     """
     name_key = str(response["nameKey"])
     assert_name_key_grammar(name_key)
@@ -183,6 +195,10 @@ def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_
         cell = quota_cell_to_dict(quota_cell)
     else:
         cell = quota_cell_from_dict(response.get("quotaCell"))
+    #: Per-record provenance (2026-09-11): a FRESH generation stamps the caller's vintage; a
+    #: ledger-replayed record that already carries its own `promptVersion` keeps it (the stored
+    #: value wins), so re-reading a record never re-vintages its content.
+    record_vintage = str(response.get("promptVersion") or prompt_version)
     return NodeSeedRecord(
         node_id=node_id, node_key=node_key, branch=branch, tier=tier, node_class=node_class,
         affix_ids=tuple(response["affixIds"]), affinity=tuple(response["affinity"]),
@@ -191,6 +207,7 @@ def build_node_record(node_id: str, node_key: str, branch: str, tier: int, node_
         rationale=str(response.get("rationale") or ""),
         printed_text=compose_printed_text(form, property_keys, role="loser"),
         quota_cell=cell,
+        prompt_version=record_vintage,
     )
 
 
@@ -206,19 +223,38 @@ def build_seed_document(tree_id: str, records: "Sequence[NodeSeedRecord]", *,
     """§6.4's `data/seed/passive-tree/nodes/<treeId>.json` shape: the seed's nodes plus its
     `_provenance` block (`planHash, promptVersion, model, confidence, minorityValues` — named
     verbatim in the spec's own §6.4 diagram). Refuses a duplicate `nameKey` within this tree
-    BEFORE writing, per `assert_no_duplicate_name_keys`."""
+    BEFORE writing, per `assert_no_duplicate_name_keys`.
+
+    **The stamp is derived from the records, not blindly the current brief (2026-09-11).** A tree
+    that mixed vintages (e.g. a resumed run replaying pre-provenance v1 records alongside newly
+    generated v2 records) used to be stamped with the CURRENT `prompt_version` alone — a lie in
+    the document that hid exactly which nodes were stale. With per-record vintages persisted, the
+    document stamp reports the SINGLE vintage when every record agrees (today's normal case), and
+    `mixed` when they do not, with the per-record split carried in `promptVersionByNode`. The
+    caller's `prompt_version` argument remains the stamp for a tree whose records predate the
+    per-record field entirely (all empty) — exactly the legacy shape.
+    """
     assert_no_duplicate_name_keys([r.name_key for r in records])
+    vintages = {r.prompt_version for r in records if r.prompt_version}
+    if vintages:
+        doc_stamp = next(iter(vintages)) if len(vintages) == 1 else "mixed"
+    else:
+        doc_stamp = prompt_version
+    provenance: "dict[str, Any]" = {
+        "planHash": plan_hash,
+        "promptVersion": doc_stamp,
+        "model": model,
+        "confidence": dict(confidence),
+        "minorityValues": dict(minority_values),
+    }
+    if len(vintages) > 1:
+        provenance["promptVersionByNode"] = {
+            r.node_id: r.prompt_version for r in records if r.prompt_version}
     return {
         "schemaVersion": 1,
         "treeId": tree_id,
         "nodes": [r.to_dict() for r in records],
-        "_provenance": {
-            "planHash": plan_hash,
-            "promptVersion": prompt_version,
-            "model": model,
-            "confidence": dict(confidence),
-            "minorityValues": dict(minority_values),
-        },
+        "_provenance": provenance,
     }
 
 

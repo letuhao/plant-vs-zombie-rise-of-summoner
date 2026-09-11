@@ -14,16 +14,17 @@ class RealCorpusCountsTests(unittest.TestCase):
     """Reads the REAL committed affix-family corpus — the same one `items/setgen/vocab.py`
     reads — so a drift in the corpus is caught here too, never silently re-derived."""
 
-    def test_counts_112_families_and_exactly_three_tag_values(self) -> None:
-        # The committed affix corpus grew by twelve offensive families after the earlier 100-family
-        # snapshot. Keep this acceptance value explicit so a corpus change is reviewed here.
+    def test_counts_125_families_and_their_tag_values(self) -> None:
+        # The committed affix corpus grew again after the 112-family snapshot (owner commits
+        # 27e908d3/3f9afb44 added thirteen offensive, seven defensive and two utility families,
+        # plus new non-branch tags: metal/sturdy/arcane/mechanical, which never match a branch
+        # cut). Keep this acceptance value explicit so a corpus change is reviewed here.
         vocabulary = vocab.build()
-        self.assertEqual(vocabulary.count, 112)
+        self.assertEqual(vocabulary.count, 125)
         tag_counts = vocabulary.tag_counts()
-        self.assertEqual(set(tag_counts), {"offensive", "defensive", "utility"})
-        self.assertEqual(tag_counts["offensive"], 55)
-        self.assertEqual(tag_counts["defensive"], 40)
-        self.assertEqual(tag_counts["utility"], 17)
+        self.assertEqual(tag_counts["offensive"], 58)
+        self.assertEqual(tag_counts["defensive"], 47)
+        self.assertEqual(tag_counts["utility"], 19)
 
     def test_ids_are_unique_and_get_resolves_a_real_one(self) -> None:
         vocabulary = vocab.build()
