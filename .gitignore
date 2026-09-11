@@ -156,3 +156,6 @@ _tmp_reflect/
 .pytest-seedsmith-basetemp2/
 test-results/
 .kilo/
+test-results/
+web/fusion-rpg-web/tmp/
+web/fusion-rpg-web/package-lock.json
