@@ -1,7 +1,7 @@
 {
   "_pending": [],
   "_provenance": {
-    "emittedUtc": "2026-09-05T21:28:26.188729+00:00",
+    "emittedUtc": "2026-09-11T11:02:28.201137+00:00",
     "inputs": [
       {
         "path": "data/seed/aptitudes/roster.json",
@@ -13,7 +13,7 @@
       },
       {
         "path": "data/seed/statuses/roster.json",
-        "sha256": "f711bc21f33a3a8ad2a283d0798410ef675e843bdee7266cc72233292d9bbdb1"
+        "sha256": "de5b9fed078340546ef49bf59dfa8b9b2d8a8e0cd855db2461c819d52b7f1bd3"
       },
       {
         "path": "data/seed/passive-tree/vocabulary.json",
@@ -21,7 +21,7 @@
       },
       {
         "path": "data/seed/derived-stats/catalog.json",
-        "sha256": "dbf4bf1b87a55feecad803c0e2fd740150efddccc683355d3c57e08111ce2d13"
+        "sha256": "07fa43c7ece05ef367396813e47d0813843988ff74eb58122f3c48990936a9a6"
       },
       {
         "path": "data/seed/demons/_registry/families.v1.json",
@@ -29,19 +29,19 @@
       },
       {
         "path": "data/seed/passive-tree/gate-evidence.v1.json",
-        "sha256": "07d2e0d25cfccd5ed844b02e96a1e080eca6854068c7982d2e877f05ab2758ac"
+        "sha256": "09555e60fec38d7b8fd91c2d9ff3c454747e71b2c826f212b046cd90a4408816"
       }
     ],
     "tuning": [
       {
         "domain": "passive-tree",
-        "sha256": "74a4416313e741ae1733bd886e85a7ad9206de1439760a0bf5c1cbad1108d2cf",
+        "sha256": "be2df04e79ef6f3556c9f4de8bee3e24ef046007ab0698508abf3e9b971e2083",
         "version": 1
       },
       {
         "domain": "passive-tree-targets",
-        "sha256": "dba046fb0ada001baa4b06ee32fabe159443f7da98cc643dba44eab4e64a9562",
-        "version": 1
+        "sha256": "fb353230ef9087ce15f6045e12bba1d49cf997dec4dbeff0927a701311b1d1e8",
+        "version": 2
       }
     ]
   },
@@ -328,7 +328,7 @@
     ],
     "tierCount": 10
   },
-  "planHash": "28347b9c1d20ddad0200ce84e800869b6800f8813bb770a7c363134c6aa6e35c",
+  "planHash": "b452756f8b39a21f71248fa48bda23ce33fa061ed0e6443f1b8fe9a15d59b09b",
   "plannerVersion": "1.0.0",
   "potency": {
     "maxNodeShareMilli": 182,
@@ -396,6 +396,7 @@
       "defensive"
     ],
     "channelFamily": [
+      "ai.aggression",
       "combat.absorption",
       "combat.accuracy",
       "combat.amplification",
@@ -425,6 +426,7 @@
       "combat.shield.pen",
       "combat.shield.regen",
       "combat.shield.toughness",
+      "loadout.slots",
       "move.range",
       "progression.bonus.arm1",
       "progression.bonus.arm2",
@@ -491,6 +493,9 @@
       "jala",
       "kelp",
       "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
       "pact_mark",
       "poison",
       "rally",
@@ -532,8 +537,8 @@
       "aptitudes": 12,
       "demonFamilies": 19,
       "elements": 6,
-      "statuses": 21,
-      "trees": 1
+      "statuses": 24,
+      "trees": 42
     },
     "demonFamilies": [
       "base",
@@ -578,6 +583,9 @@
       "jala",
       "kelp",
       "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
       "pact_mark",
       "poison",
       "rally",
@@ -594,9 +602,337 @@
       "file": "plan/might.v1.json",
       "gateState": "carrier",
       "generationWave": 0,
-      "sha256": "04a393b5fa29df574f43e06814e6296d4ff224fbe65f84d4f553ed9806e6cb54",
+      "sha256": "393dd48395bf8c6bcdc6c54212fb387696cef0240bdebf5bd7e611709f928575",
       "treeId": "might",
       "treeSlug": "primary-might"
+    },
+    {
+      "file": "plan/fire.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "557254fd4526a1e6c76c0bd9e7195a740ec714f1ec1b1613cb3ed6521643da21",
+      "treeId": "fire",
+      "treeSlug": "elemental-fire"
+    },
+    {
+      "file": "plan/blight.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4385786d61d063bdea498c006c588f5253d952bd5e9bf7b5e878883e74dd8516",
+      "treeId": "blight",
+      "treeSlug": "status-blight"
+    },
+    {
+      "file": "plan/fortitude.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4dfe2ead1b30fa7f272da21d2fc0d3038cc995bd1fd9bc745bd95dbe763bf560",
+      "treeId": "fortitude",
+      "treeSlug": "primary-fortitude"
+    },
+    {
+      "file": "plan/ice.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "83658c3348f1e388430575bfde3982c10470f094cc53f4bc693c1f0f219a03e6",
+      "treeId": "ice",
+      "treeSlug": "elemental-ice"
+    },
+    {
+      "file": "plan/bond.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "8f00addf4c4acdee18e6526a900bf00a8c06fa36d983487e277186fa26ff3695",
+      "treeId": "bond",
+      "treeSlug": "status-bond"
+    },
+    {
+      "file": "plan/vigor.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "14c591d6cc38d975e5f1c22a53e9393b02f8906db44673237313fa0a98a8b450",
+      "treeId": "vigor",
+      "treeSlug": "primary-vigor"
+    },
+    {
+      "file": "plan/air.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "200477b55e3ecac775fc732bf650d1a0e320fc1753ba67408828012cba5b5f0f",
+      "treeId": "air",
+      "treeSlug": "elemental-air"
+    },
+    {
+      "file": "plan/butter.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4af000e37fbe6b0b5e3052a69581ea5e76244f00d407ea95c583f67342b0c79f",
+      "treeId": "butter",
+      "treeSlug": "status-butter"
+    },
+    {
+      "file": "plan/onslaught.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "97b45bc3755afa7f9cc9a05c680e432c8d78661cc04e5829c5f577a17670ce12",
+      "treeId": "onslaught",
+      "treeSlug": "primary-onslaught"
+    },
+    {
+      "file": "plan/earth.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "3ec32125969060df19e986aab57d5d91ceffb1e0462fd8516b39f32584a815f0",
+      "treeId": "earth",
+      "treeSlug": "elemental-earth"
+    },
+    {
+      "file": "plan/charm_pulse.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "bcf3dc1a90c06ef89300166c25499c63d9debf862d1a77942f4a6c25b2fa6e56",
+      "treeId": "charm_pulse",
+      "treeSlug": "status-charm_pulse"
+    },
+    {
+      "file": "plan/agility.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "785e0b17131b45169552b25de57610b7cae1eff7d07444db36b1454d82256da1",
+      "treeId": "agility",
+      "treeSlug": "primary-agility"
+    },
+    {
+      "file": "plan/light.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "bab61518618290616ba41b6f1939b507d6b4f7fb098d2a3444d1c5b2abc3156e",
+      "treeId": "light",
+      "treeSlug": "elemental-light"
+    },
+    {
+      "file": "plan/cold.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "e8dc29e53612494782ec5e56cbb1edabe6203309c06f64476ce91862355c01e7",
+      "treeId": "cold",
+      "treeSlug": "status-cold"
+    },
+    {
+      "file": "plan/composure.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "d46345221c0034b0cea9e8d331596376e4d310a8f45b360095da95ef44c758c4",
+      "treeId": "composure",
+      "treeSlug": "primary-composure"
+    },
+    {
+      "file": "plan/dark.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "47fa1e4a2715b2b662a3c21647c3bcb1c78902626779d3db8bde7fed6d2b1fb9",
+      "treeId": "dark",
+      "treeSlug": "elemental-dark"
+    },
+    {
+      "file": "plan/command.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "9f1fbf9251b9df0473c9eba243d808eab66d318548b02964583e4fcb76074c59",
+      "treeId": "command",
+      "treeSlug": "status-command"
+    },
+    {
+      "file": "plan/pierce.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "351115e3f3111471bc467fef35ab4e32b49922a665fc8b9b656aae52352c8183",
+      "treeId": "pierce",
+      "treeSlug": "primary-pierce"
+    },
+    {
+      "file": "plan/ember.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "611e70b8afd4ba2264035ed333c4b296654d15b4a75116484232659f1a265503",
+      "treeId": "ember",
+      "treeSlug": "status-ember"
+    },
+    {
+      "file": "plan/focus.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "a149193647b81813cdddfc3985e4b5ffb6600bd94ccc9ad2eeaa93acf365dd78",
+      "treeId": "focus",
+      "treeSlug": "primary-focus"
+    },
+    {
+      "file": "plan/expose.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "f65da5a81b56c58b6f58d8dd6ee6376063b67d5d56619f7d62032647ec883547",
+      "treeId": "expose",
+      "treeSlug": "status-expose"
+    },
+    {
+      "file": "plan/bulwark.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "f005db2210a7e30556c194ba655c13abfdd911197aeaeceb66334c929d859933",
+      "treeId": "bulwark",
+      "treeSlug": "primary-bulwark"
+    },
+    {
+      "file": "plan/freeze.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "2a9198bcb1b41d3951908943ed3f973dc9e54f02f8666b202aeab55df3a870c1",
+      "treeId": "freeze",
+      "treeSlug": "status-freeze"
+    },
+    {
+      "file": "plan/retribution.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "1255db924641af957d270a359b7bfed6a1d854c7b61a4a14bd540b37ba041c9b",
+      "treeId": "retribution",
+      "treeSlug": "primary-retribution"
+    },
+    {
+      "file": "plan/hypno.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "a458034a3038f722e5841f636123bdc5c1d1886450800a6ddcf9bdad8fb7a535",
+      "treeId": "hypno",
+      "treeSlug": "status-hypno"
+    },
+    {
+      "file": "plan/precision.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4f7effb453cda51ef27958f13033b9d3b7c5946c2f2bbbc027d0928727b143c0",
+      "treeId": "precision",
+      "treeSlug": "primary-precision"
+    },
+    {
+      "file": "plan/jala.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "546e42d00107e51e3a49671e0c4b9740269c3bda8e80df5dfa7a981a4c9a5988",
+      "treeId": "jala",
+      "treeSlug": "status-jala"
+    },
+    {
+      "file": "plan/ferocity.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "87346bcef14abe90b650795b895d5b3701ef908efb036d1bc71598c8490e66e9",
+      "treeId": "ferocity",
+      "treeSlug": "primary-ferocity"
+    },
+    {
+      "file": "plan/kelp.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "cc25460f3a081b79faf01d51a309e049b38a4bad5dc87f1ab663c31857943425",
+      "treeId": "kelp",
+      "treeSlug": "status-kelp"
+    },
+    {
+      "file": "plan/leech.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "097ab15d1d5b027e77e70ff0d0dc56924b5949cc59272ab2b464318a03aa70f7",
+      "treeId": "leech",
+      "treeSlug": "status-leech"
+    },
+    {
+      "file": "plan/nerve.afflicted.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "a3a9ffd96c8c24549212ecc15bfbd9bdf794982048081710a1ea19b7874801eb",
+      "treeId": "nerve.afflicted",
+      "treeSlug": "status-nerve.afflicted"
+    },
+    {
+      "file": "plan/nerve.shaken.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "d7076b050cc6736de7eb1020de5bf4418c6e356b3f68b60cd5a914b721023baa",
+      "treeId": "nerve.shaken",
+      "treeSlug": "status-nerve.shaken"
+    },
+    {
+      "file": "plan/nerve.unsettled.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "77b5603544134c22d2e3a12b61565859767ffa1a8beb135d2318432738c44221",
+      "treeId": "nerve.unsettled",
+      "treeSlug": "status-nerve.unsettled"
+    },
+    {
+      "file": "plan/pact_mark.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "00e62724309f9a100d19238010afeadddd32631635c9ad8afebffbd76dbd6935",
+      "treeId": "pact_mark",
+      "treeSlug": "status-pact_mark"
+    },
+    {
+      "file": "plan/poison.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "d0a4a3d78a0cae5f3564d601530fca16ffc56ef409c9e92dd19e285a4057160d",
+      "treeId": "poison",
+      "treeSlug": "status-poison"
+    },
+    {
+      "file": "plan/rally.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "14a6d2690e3c167409bcb30a69a5aa2f24606e5e27f80cc81fb695fc61b2c1cf",
+      "treeId": "rally",
+      "treeSlug": "status-rally"
+    },
+    {
+      "file": "plan/rot.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "044ddf67bc993e3a4ce13a92a02fc082d92f3edc7975ff4a721a995e9cfdd269",
+      "treeId": "rot",
+      "treeSlug": "status-rot"
+    },
+    {
+      "file": "plan/shatter.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "dabdaa9d2ba2218276a0f58ca32707b916b08fb57d6ee439dfa301b36fb14025",
+      "treeId": "shatter",
+      "treeSlug": "status-shatter"
+    },
+    {
+      "file": "plan/spark.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "4919d1f1a58e87287b9535974ec27e3ea810782ad753b6d08b0aa478a00d0175",
+      "treeId": "spark",
+      "treeSlug": "status-spark"
+    },
+    {
+      "file": "plan/spore.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "b7905d9ac3ae8b0725e226d506b0640e2fe5eed3fa4cf96d7daf267bfb8b5eb9",
+      "treeId": "spore",
+      "treeSlug": "status-spore"
+    },
+    {
+      "file": "plan/wither.v1.json",
+      "gateState": "carrier",
+      "generationWave": 0,
+      "sha256": "86edd23ac3e582ae34b6308f31e282ff3338a0684e5daa018dec6a4f71d35784",
+      "treeId": "wither",
+      "treeSlug": "status-wither"
     }
   ]
 }

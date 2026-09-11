@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "kind": "action-seed", "entries": [{"id": "action.general.0001", "scope": "general", "category": "attack", "rungBand": [1, 10], "targetMode": "single", "relation": "enemy", "atomFamilies": ["atom.searing-strike", "atom.volley"], "pairingRole": "enabler", "pairedPayoffFamily": "rot"}]}

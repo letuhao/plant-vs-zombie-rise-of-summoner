@@ -92,6 +92,24 @@ class RunLanguageStageIdempotenceTests(unittest.TestCase):
         self.assertEqual(doc["nodes"][0]["affixIds"], ["atom.a"])
         self.assertEqual(result.report.verdict.value, "pass")
 
+    def test_seed_document_plan_hash_is_the_plans_own_content_hash(self) -> None:
+        """The seed's `_provenance.planHash` names the plan it was generated from — the SAME value
+        the manifest indexes as `trees[].sha256` (`plan.emit.tree_content_hash`), never the empty
+        string a `raw.get("sha256", "")` read off a plan document that has no such key used to
+        stamp (2026-09-11 fix). Proven against the plan the run actually read, not a fixture string.
+        """
+        from seedsmith.adapters.trees.plan.emit import tree_content_hash
+
+        payload = json.dumps(_accepted_response())
+        with patch("seedsmith.pipeline.llm_caller.call_model", return_value=payload):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG,
+                                            unresolved_max_share_permille=500)
+        doc = json.loads(result.seed_path.read_text(encoding="utf-8"))
+        expected = tree_content_hash(self.plan.raw)
+        self.assertNotEqual("", doc["_provenance"]["planHash"])
+        self.assertEqual(expected, doc["_provenance"]["planHash"])
+
     def test_a_forced_rerun_over_unchanged_inputs_makes_zero_calls_and_is_byte_identical(self) -> None:
         payload = json.dumps(_accepted_response())
         with patch("seedsmith.pipeline.llm_caller.call_model", return_value=payload):
@@ -530,6 +548,44 @@ class BatchedParallelExecutionTests(unittest.TestCase):
             "t1:skill.t1-off-t1-n0", "t1:skill.t1-off-t1-n1", "t1:skill.t1-off-t1-n2",
         ], "outcomes must follow plan order, never worker-completion order")
 
+    def test_two_same_batch_subjects_picking_one_name_never_lose_the_tree(self) -> None:
+        """2026-09-11 real-call finding, `might` with `--workers 4`. The generation-time gates run
+        against a snapshot taken BEFORE a parallel batch starts, so two subjects in ONE batch can
+        independently pick the identical name/nameKey. Before this fix the collision surfaced only at
+        emit time, where `build_seed_document`'s `assert_no_duplicate_name_keys` refused the WHOLE
+        tree (a real run lost all accepted nodes to one such pair). The sequential path already
+        self-healed via `known_name_keys`; this pins the parallel path to the same guarantee.
+        """
+        import time
+        import threading
+
+        # Both subjects in the one batch answer with the IDENTICAL name and nameKey on every sample.
+        twin = {"affixIds": ["atom.a"], "affinity": ["core"],
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": "Twin Node", "nameKey": "tree.node.twin-node",
+                "flavor": "A steady line.", "rationale": "", "blocked": ""}
+
+        def colliding_call(_system, user, *, config=None, temperature=0.2, schema=None):
+            time.sleep(0.02)  # force the two submitted tasks to genuinely overlap
+            return json.dumps(twin)
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=colliding_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG, max_workers=2)
+
+        # No whole-tree refusal: a seed document exists and holds at least the first subject.
+        self.assertIsNotNone(result.seed_path)
+        doc = json.loads(result.seed_path.read_text(encoding="utf-8"))
+        keys = [n["nameKey"] for n in doc["nodes"]]
+        names = [n["name"] for n in doc["nodes"]]
+        self.assertEqual(len(keys), len(set(keys)), "no duplicate nameKey may be persisted")
+        self.assertEqual(len(names), len(set(names)), "no duplicate name may be persisted")
+        # The colliding twin is an honest `unresolved` (gate 21: re-prompted, never persisted), not
+        # a crash and not a silent rename.
+        self.assertTrue(any(o.outcome == "unresolved" and "already taken" in o.detail
+                            for o in result.outcomes),
+                        [(o.subject_id, o.outcome, o.detail) for o in result.outcomes])
+
 
 class RunLanguageStageMultiNodeTests(unittest.TestCase):
     """A tree with more than one node: only the UNRESOLVED ones are ever regenerated on a rerun,
@@ -593,10 +649,17 @@ class CrossTreeNameKeyDedupTests(unittest.TestCase):
         # `PassiveTree/NameCollision` flagged 46 real cross-tree collisions post-hoc.
         self.assertEqual(second.outcomes[0].outcome, "escalated")
         self.assertIn("already used by another", second.outcomes[0].detail)
-        # Nothing leaked into the ledger or the seed document either.
+        # The ledger now HONESTLY records the failed attempt (2026-09-11): tree-b's row exists, but
+        # with `record: null`, so the node is still owed a generation on the next pass — never a
+        # phantom "accepted" and never invisible. No accepted content leaked into the seed document.
         ledger = run.read_ledger(self.ledger_path)
-        self.assertEqual(len(ledger), 1)
-        self.assertNotIn("tree-b:t1-n0", ledger)
+        self.assertEqual(len(ledger), 2)
+        attempt = ledger["tree-b:skill.tree-b-off-t1-n0"]
+        self.assertIsNone(attempt["record"])
+        self.assertEqual(attempt["outcome"], "escalated")
+        self.assertEqual(1, attempt["attempts"])
+        self.assertFalse(
+            (self.seed_root / "passive-tree" / "nodes" / "tree-b.json").exists())
 
     def test_a_second_tree_with_a_distinct_name_gets_a_free_key_not_a_collision(self) -> None:
         # The ORIGINAL suffix contract survives under the new gate, narrowed to its only remaining
@@ -914,6 +977,118 @@ class ProvenanceSupersedeTests(unittest.TestCase):
                       if r.metric == UNRESOLVED_COUNT_METRIC and r.detail)
         self.assertIn("0/2 unresolved", detail)
         self.assertNotIn("/4", detail)
+
+
+class FailedSupersedeKeepsPriorNodeTests(unittest.TestCase):
+    """A superseded subject whose re-roll FAILS (gate 11's unresolved vote) must not delete the
+    already-accepted node it was re-rolling — the seed document stays complete at the plan's own
+    node count, with the prior record's content untouched. Before this fix a superseded subject rode
+    `plan.subjects` and was only written on ACCEPT, so a failed re-roll left it absent from the seed
+    document entirely: a real MechanismRamp shortfall (the tree shrank below its plan) rather than a
+    metric artefact.
+    """
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        write_plan(self.seed_root, "t1", node_count=2)
+        self.plan = plan_read.load("t1", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    @staticmethod
+    def _payload_stub(node_keys):
+        calls = {"n": 0}
+        payloads = [json.dumps(_accepted_response(k)) for k in node_keys]
+
+        def _call(*args, **kwargs):
+            payload = payloads[min(calls["n"] // 3, len(payloads) - 1)]
+            calls["n"] += 1
+            return payload
+
+        return _call
+
+    def test_a_failed_re_roll_keeps_the_prior_record_in_the_seed_document(self) -> None:
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                   seed_root=self.seed_root, config=TEST_CONFIG)
+        # Age the vintage off so both rows are scheduled for re-roll.
+        ledger = run.read_ledger(self.ledger_path)
+        for entry in ledger.values():
+            entry["record"].pop("promptVersion", None)
+        run.write_ledger(ledger, self.ledger_path)
+
+        before = json.loads(
+            (self.seed_root / "passive-tree" / "nodes" / "t1.json").read_text(encoding="utf-8"))
+        before_by_id = {n["id"]: n for n in before["nodes"]}
+        self.assertEqual(2, len(before_by_id))
+
+        # The re-roll answers with a DIFFERENT affix on every call: the vote is 1-1-1 (no majority),
+        # so both subjects come back `unresolved` and neither prior row is replaced.
+        def _unresolved_call(*args, **kwargs):
+            return json.dumps({
+                "affixIds": ["atom.a"], "affinity": ["core"],
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": "Changed Name", "nameKey": "tree.node.changed",
+                "flavor": "A changed line.", "rationale": "", "blocked": "",
+            })
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=_unresolved_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG,
+                                            supersede_stale=True)
+        # Whether or not the vote resolves, the tree is never smaller than its plan.
+        after = json.loads(
+            (self.seed_root / "passive-tree" / "nodes" / "t1.json").read_text(encoding="utf-8"))
+        after_ids = {n["id"] for n in after["nodes"]}
+        self.assertEqual(2, len(after_ids), "a superseded node must never vanish from the seed doc")
+        self.assertEqual(set(before_by_id), after_ids)
+        # Every unresolved subject kept its prior content byte-for-byte.
+        unresolved_ids = {o.subject_id.split(":", 1)[1] for o in result.outcomes
+                          if o.outcome == "unresolved"}
+        for node_id in unresolved_ids:
+            prior = before_by_id[node_id]
+            current = next(n for n in after["nodes"] if n["id"] == node_id)
+            self.assertEqual(prior["name"], current["name"])
+            self.assertEqual(prior["affixIds"], current["affixIds"])
+            self.assertEqual(prior["nameKey"], current["nameKey"])
+
+    def test_a_successful_re_roll_replaces_the_prior_record(self) -> None:
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                   side_effect=self._payload_stub(["n0", "n1"])):
+            run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                   seed_root=self.seed_root, config=TEST_CONFIG)
+        ledger = run.read_ledger(self.ledger_path)
+        for entry in ledger.values():
+            entry["record"].pop("promptVersion", None)
+        run.write_ledger(ledger, self.ledger_path)
+
+        def _renamed_call(*args, **kwargs):
+            # Same affix on all three samples -> a clean 3-0 accept; a fresh name proves replacement.
+            # Distinct names per node (call index // 3) keep the within-tree nameKey rule from
+            # refusing the second subject's identical slug.
+            calls = _renamed_call.calls
+            name = "Fresh Name" if calls // 3 == 0 else "Fresh Name Two"
+            _renamed_call.calls += 1
+            return json.dumps({
+                "affixIds": ["atom.a"], "affinity": ["core"],
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": name, "nameKey": "tree.node.fresh",
+                "flavor": "A fresh line.", "rationale": "", "blocked": "",
+            })
+        _renamed_call.calls = 0
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=_renamed_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG,
+                                            supersede_stale=True)
+        self.assertTrue(any(o.outcome == "accepted" for o in result.outcomes))
+        after = json.loads(
+            (self.seed_root / "passive-tree" / "nodes" / "t1.json").read_text(encoding="utf-8"))
+        self.assertEqual(2, len(after["nodes"]))
+        self.assertTrue(all(n["name"].startswith("Fresh Name") for n in after["nodes"]))
+        # The prior rows survive under supersededRecord in the ledger.
+        final_ledger = run.read_ledger(self.ledger_path)
+        self.assertTrue(all("supersededRecord" in e for e in final_ledger.values()))
 
 
 if __name__ == "__main__":

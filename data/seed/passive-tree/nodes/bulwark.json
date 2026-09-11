@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "f005db2210a7e30556c194ba655c13abfdd911197aeaeceb66334c929d859933",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.bulwark-def-t1-n0": "",
+      "skill.bulwark-def-t10-n0": "tree-language/3",
+      "skill.bulwark-def-t10-n1": "tree-language/3",
+      "skill.bulwark-def-t10-n2": "tree-language/3",
+      "skill.bulwark-def-t2-n0": "tree-language/3",
+      "skill.bulwark-def-t3-n0": "tree-language/3",
+      "skill.bulwark-def-t3-n1": "tree-language/3",
+      "skill.bulwark-def-t4-n0": "tree-language/3",
+      "skill.bulwark-def-t4-n1": "tree-language/3",
+      "skill.bulwark-def-t5-n0": "tree-language/3",
+      "skill.bulwark-def-t5-n1": "",
+      "skill.bulwark-def-t6-n0": "tree-language/3",
+      "skill.bulwark-def-t6-n1": "",
+      "skill.bulwark-def-t7-n0": "tree-language/3",
+      "skill.bulwark-def-t7-n1": "",
+      "skill.bulwark-def-t8-n0": "tree-language/3",
+      "skill.bulwark-def-t8-n1": "tree-language/3",
+      "skill.bulwark-def-t9-n0": "tree-language/3",
+      "skill.bulwark-def-t9-n1": "tree-language/3",
+      "skill.bulwark-def-t9-n2": "tree-language/3",
+      "skill.bulwark-off-t1-n0": "tree-language/3",
+      "skill.bulwark-off-t10-n0": "tree-language/3",
+      "skill.bulwark-off-t10-n1": "tree-language/3",
+      "skill.bulwark-off-t10-n2": "tree-language/3",
+      "skill.bulwark-off-t2-n0": "",
+      "skill.bulwark-off-t3-n0": "tree-language/3",
+      "skill.bulwark-off-t3-n1": "",
+      "skill.bulwark-off-t4-n0": "tree-language/3",
+      "skill.bulwark-off-t4-n1": "tree-language/3",
+      "skill.bulwark-off-t5-n0": "tree-language/3",
+      "skill.bulwark-off-t5-n1": "tree-language/3",
+      "skill.bulwark-off-t6-n0": "tree-language/3",
+      "skill.bulwark-off-t6-n1": "tree-language/3",
+      "skill.bulwark-off-t7-n0": "tree-language/3",
+      "skill.bulwark-off-t7-n1": "tree-language/3",
+      "skill.bulwark-off-t8-n0": "tree-language/3",
+      "skill.bulwark-off-t8-n1": "tree-language/3",
+      "skill.bulwark-off-t9-n0": "tree-language/3",
+      "skill.bulwark-off-t9-n1": "tree-language/3",
+      "skill.bulwark-off-t9-n2": ""
+    }
   },
   "nodes": [
     {
@@ -34,7 +76,7 @@
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
         "atom.shld-cycle",
@@ -42,42 +84,25 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but converted into a rhythmic pulse of defensive energy.",
+      "flavor": "The rhythm of the shield becomes the heartbeat of the defender.",
       "id": "skill.bulwark-def-t10-n0",
-      "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation-8",
+      "name": "Reciprocal Bastion",
+      "nameKey": "tree.node.reciprocal-bastion",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.sust-grit"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spark",
+        "trigger": "OnWave"
       },
-      "flavor": "The weight of the earth meets the density of the forge.",
-      "id": "skill.bulwark-def-t10-n1",
-      "name": "Iron-Silt Foundation",
-      "nameKey": "tree.node.iron-silt-foundation",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
       "rationale": "",
       "tier": 10
     },
@@ -87,73 +112,127 @@
         "likely"
       ],
       "affixIds": [
-        "atom.ward-brace",
-        "atom.warding"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shell becomes a second skin, drawing strength from the very impact it withstands.",
-      "id": "skill.bulwark-def-t10-n2",
-      "name": "Graftplate Bastion",
-      "nameKey": "tree.node.graftplate-bastion-2",
+      "flavor": "The rhythm of the shield becomes the heartbeat of the defender.",
+      "id": "skill.bulwark-def-t10-n1",
+      "name": "Resonance Plate",
+      "nameKey": "tree.node.resonance-plate",
       "nodeClass": "mechanism",
-      "nodeKey": "n2",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spore",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.plating"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The more layers applied, the harder the shell becomes.",
+      "flavor": "The rhythm of the shield becomes a heartbeat of its own.",
+      "id": "skill.bulwark-def-t10-n2",
+      "name": "Harmonic Aegis",
+      "nameKey": "tree.node.harmonic-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "wither",
+        "trigger": "OnWave"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.shield-capacity"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning bone to stone and spirit to granite.",
       "id": "skill.bulwark-def-t2-n0",
-      "name": "Layered Bastion",
-      "nameKey": "tree.node.layered-bastion-3",
+      "name": "Ironroot Bastion",
+      "nameKey": "tree.node.ironroot-bastion",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes the strength of the soul.",
+      "flavor": "Layers of iron and grit fused into a singular, unyielding wall.",
       "id": "skill.bulwark-def-t3-n0",
-      "name": "Bulwark's Foundation",
-      "nameKey": "tree.node.bulwark-s-foundation",
+      "name": "Reinforced Bulwark",
+      "nameKey": "tree.node.reinforced-bulwark",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -162,100 +241,122 @@
         "core"
       ],
       "affixIds": [
-        "atom.shield-toughness"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shell becomes the strength of the soul.",
+      "flavor": "Layers of reinforced metal fused with unyielding intent.",
       "id": "skill.bulwark-def-t3-n1",
-      "name": "Layered Carapace",
-      "nameKey": "tree.node.layered-carapace-2",
+      "name": "Bulwark Plating",
+      "nameKey": "tree.node.bulwark-plating",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.shld-cycle"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the shield.",
+      "flavor": "The rhythm of the shield dictates the rhythm of survival.",
       "id": "skill.bulwark-def-t4-n0",
-      "name": "Kinetic Recoil",
-      "nameKey": "tree.node.kinetic-recoil-5",
+      "name": "Resilient Rotation",
+      "nameKey": "tree.node.resilient-rotation",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes an immovable mountain.",
+      "flavor": "A foundation that refuses to buckle under the weight of the world.",
       "id": "skill.bulwark-def-t4-n1",
-      "name": "Ironclad Bastion",
-      "nameKey": "tree.node.ironclad-bastion",
+      "name": "Ironclad Stance",
+      "nameKey": "tree.node.ironclad-stance",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
         "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but redirected into the next defensive posture.",
+      "flavor": "Energy harvested from the impact flows directly into the protective veil.",
       "id": "skill.bulwark-def-t5-n0",
-      "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation-7",
+      "name": "Siphon Protocol",
+      "nameKey": "tree.node.siphon-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -287,27 +388,32 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-cycle",
         "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but redirected into the rhythm of the defense.",
+      "flavor": "Energy diverted from impact is fed back into the containment field.",
       "id": "skill.bulwark-def-t6-n0",
-      "name": "Kinetic Recoil",
-      "nameKey": "tree.node.kinetic-recoil-2",
+      "name": "Kinetic Recirculation Loop",
+      "nameKey": "tree.node.kinetic-recirculation-loop",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.regen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -337,25 +443,34 @@
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.evd-brace"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the earth settles into the marrow, making every stance an immovable monument.",
+      "flavor": "The rhythm of the shield dictates the flow of the next impact.",
       "id": "skill.bulwark-def-t7-n0",
-      "name": "Rooted Bastion",
-      "nameKey": "tree.node.rooted-bastion",
+      "name": "Cyclical Surge",
+      "nameKey": "tree.node.cyclical-surge",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.unsettled",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -387,27 +502,34 @@
     },
     {
       "affinity": [
-        "core",
+        "occasional",
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.shld-surge",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A crystalline lattice that hardens the spirit as it expands the shell.",
+      "flavor": "The rhythm of the shield becomes a heartbeat for the defender.",
       "id": "skill.bulwark-def-t8-n0",
-      "name": "Vitreous Bulwark",
-      "nameKey": "tree.node.vitreous-bulwark",
+      "name": "Oscillating Aegis",
+      "nameKey": "tree.node.oscillating-aegis",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "pact_mark",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -416,100 +538,31 @@
         "core"
       ],
       "affixIds": [
-        "atom.shield-regen"
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The wound is not a failure, but a seam to be tightened.",
+      "flavor": "The weight of the shield becomes a tether, drawing strength from the very air it displaces.",
       "id": "skill.bulwark-def-t8-n1",
-      "name": "Sanguine Suture",
-      "nameKey": "tree.node.sanguine-suture",
+      "name": "Conduit of the Bastion",
+      "nameKey": "tree.node.conduit-of-the-bastion",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "poison",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 8
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.arm-riveting"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The seams of the shell are fused with molten grit, turning a mere covering into an unbreakable casing.",
-      "id": "skill.bulwark-def-t9-n0",
-      "name": "Structural Reinforcement",
-      "nameKey": "tree.node.structural-reinforcement",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The momentum of a deflected blow is not lost, but redirected into the next defensive posture.",
-      "id": "skill.bulwark-def-t9-n1",
-      "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation-5",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The rhythm of the impact dictates the rhythm of the recovery.",
-      "id": "skill.bulwark-def-t9-n2",
-      "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 9
     },
     {
       "affinity": [
@@ -517,97 +570,226 @@
         "likely"
       ],
       "affixIds": [
-        "atom.ferocity",
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythmic impact of blows fuels the next defensive surge.",
+      "id": "skill.bulwark-def-t9-n0",
+      "name": "Pulsating Aegis Rhythm",
+      "nameKey": "tree.node.pulsating-aegis-rhythm",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rally",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A structural web that binds the spirit to the shell.",
+      "id": "skill.bulwark-def-t9-n1",
+      "name": "Lattice of the Unyielding",
+      "nameKey": "tree.node.lattice-of-the-unyielding",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rot",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of impact becomes the thread that binds the spirit to the shell.",
+      "id": "skill.bulwark-def-t9-n2",
+      "name": "Kinetic Suture",
+      "nameKey": "tree.node.kinetic-suture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "shatter",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes the momentum of the strike.",
+      "flavor": "The weight of the shield is nothing compared to the momentum of the strike.",
       "id": "skill.bulwark-off-t1-n0",
-      "name": "Vanguard's Onslaught",
-      "nameKey": "tree.node.vanguard-s-onslaught",
+      "name": "Onslaught",
+      "nameKey": "tree.node.onslaught",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.prec-verdict",
-        "atom.shld-breach"
+        "atom.shld-breach",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The moment the shield cracks is the moment the judgment falls.",
+      "flavor": "The weight of the shield becomes the force of the strike.",
       "id": "skill.bulwark-off-t10-n0",
-      "name": "Breach-Point Verdict",
-      "nameKey": "tree.node.breach-point-verdict",
+      "name": "Impactful Momentum",
+      "nameKey": "tree.node.impactful-momentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
+        "occasional",
         "core"
       ],
       "affixIds": [
+        "atom.elpw-overflow",
         "atom.shld-breach"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield is nothing compared to the force behind the strike.",
+      "flavor": "To see the crack is to know where the blow must land.",
       "id": "skill.bulwark-off-t10-n1",
-      "name": "Pressure Point",
-      "nameKey": "tree.node.pressure-point",
+      "name": "Sunder-Sight",
+      "nameKey": "tree.node.sunder-sight",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-breach"
+        "atom.shld-breach",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the blow is felt long after the shield has shattered.",
+      "flavor": "The rhythm of the impact dictates the fury of the response.",
       "id": "skill.bulwark-off-t10-n2",
-      "name": "Impactful Breach",
-      "nameKey": "tree.node.impactful-breach",
+      "name": "Breach-Point Resonance",
+      "nameKey": "tree.node.breach-point-resonance",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -637,27 +819,32 @@
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes the force of the strike.",
+      "flavor": "The weight of the shield fuels the strength of the strike.",
       "id": "skill.bulwark-off-t3-n0",
-      "name": "Sunderer's Momentum",
-      "nameKey": "tree.node.sunderer-s-momentum",
+      "name": "Bulwark's Might",
+      "nameKey": "tree.node.bulwark-s-might",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -690,22 +877,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.hit-followthrough"
+        "atom.shld-breach"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of the shield vibrates through the air, turning elemental energy into a piercing force.",
+      "flavor": "Every strike that shatters a defense fuels the next surge of power.",
       "id": "skill.bulwark-off-t4-n0",
-      "name": "Resonant Breach",
-      "nameKey": "tree.node.resonant-breach",
+      "name": "Breaching Momentum",
+      "nameKey": "tree.node.breaching-momentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -714,24 +908,95 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-breach"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes a weapon of pure kinetic force.",
+      "flavor": "Every impact met with a wall is returned with a sting.",
       "id": "skill.bulwark-off-t4-n1",
-      "name": "Crushing Momentum",
-      "nameKey": "tree.node.crushing-momentum",
+      "name": "Vanguard's Rebuttal",
+      "nameKey": "tree.node.vanguard-s-rebuttal",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
+    },
+    {
+      "affinity": [
+        "occasional",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.prec-focus",
+        "atom.shld-breach"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A calculated strike against the structural integrity of the foe.",
+      "id": "skill.bulwark-off-t5-n0",
+      "name": "Breach-Point Precision",
+      "nameKey": "tree.node.breach-point-precision",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the shield becomes the engine of the charge.",
+      "id": "skill.bulwark-off-t5-n1",
+      "name": "Bulwark's Driving Force",
+      "nameKey": "tree.node.bulwark-s-driving-force",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 5
     },
     {
       "affinity": [
@@ -742,20 +1007,89 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield is not merely for defense, but a catalyst for the strike that follows.",
-      "id": "skill.bulwark-off-t5-n0",
-      "name": "Counter-Breach",
-      "nameKey": "tree.node.counter-breach",
+      "flavor": "The impact of the shield vibrates through the soul, tuning the spirit to the elements.",
+      "id": "skill.bulwark-off-t6-n0",
+      "name": "Resonant Aegis",
+      "nameKey": "tree.node.resonant-aegis",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
-      "tier": 5
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the shield becomes the momentum of the strike.",
+      "id": "skill.bulwark-off-t6-n1",
+      "name": "Bulwark's Onslaught",
+      "nameKey": "tree.node.bulwark-s-onslaught",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-breach"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the shield is not a barrier, but a catalyst for the strike that follows.",
+      "id": "skill.bulwark-off-t7-n0",
+      "name": "Breach-Point Momentum",
+      "nameKey": "tree.node.breach-point-momentum",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 7
     },
     {
       "affinity": [
@@ -763,149 +1097,63 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.might"
+        "atom.might",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes a hammer's strike.",
-      "id": "skill.bulwark-off-t5-n1",
-      "name": "Shattering Impact",
-      "nameKey": "tree.node.shattering-impact",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-breach"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The precise moment a shield's impact meets the structural weakness of the enemy.",
-      "id": "skill.bulwark-off-t6-n0",
-      "name": "Breach-Point Calibration",
-      "nameKey": "tree.node.breach-point-calibration",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.precision",
-        "atom.shld-breach"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The weight of the shield forces the cracks to widen.",
-      "id": "skill.bulwark-off-t6-n1",
-      "name": "Breach-Point Pressure",
-      "nameKey": "tree.node.breach-point-pressure",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow",
-        "atom.shld-breach"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The shield vibrates with raw, uncontained energy, bleeding power through the cracks.",
-      "id": "skill.bulwark-off-t7-n0",
-      "name": "Elemental Overload",
-      "nameKey": "tree.node.elemental-overload-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity",
-        "atom.might"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The weight of the shield becomes the momentum of the strike.",
+      "flavor": "Every strike carries the weight of the next.",
       "id": "skill.bulwark-off-t7-n1",
-      "name": "Vanguard's Onslaught",
-      "nameKey": "tree.node.vanguard-s-onslaught-2",
+      "name": "Relentless Advance",
+      "nameKey": "tree.node.relentless-advance",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-breach"
+        "atom.shld-breach",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the bulwark is no longer a burden, but a projectile.",
+      "flavor": "The momentum of a shattered defense becomes the catalyst for the next strike.",
       "id": "skill.bulwark-off-t8-n0",
-      "name": "Siege Engine",
-      "nameKey": "tree.node.siege-engine",
+      "name": "Breach-Point Velocity",
+      "nameKey": "tree.node.breach-point-velocity",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -918,18 +1166,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield becomes the edge of the blade.",
+      "flavor": "The weight of the shield is no longer a barrier, but a catalyst for the storm within.",
       "id": "skill.bulwark-off-t8-n1",
-      "name": "Siege Breaker",
-      "nameKey": "tree.node.siege-breaker",
+      "name": "Breach-Point Overload",
+      "nameKey": "tree.node.breach-point-overload",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -942,18 +1197,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shield is nothing compared to the momentum of its impact.",
+      "flavor": "The structural integrity of the enemy falters where the bulwark strikes hardest.",
       "id": "skill.bulwark-off-t9-n0",
-      "name": "Breach Protocol",
-      "nameKey": "tree.node.breach-protocol",
+      "name": "Fracture Vector",
+      "nameKey": "tree.node.fracture-vector",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -962,22 +1224,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-breach"
+        "atom.shld-absolute"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A calculated strike against the structural integrity of the enemy's defenses.",
+      "flavor": "The weight of the shield is not a barrier, but a hammer waiting to fall.",
       "id": "skill.bulwark-off-t9-n1",
-      "name": "Breach Point",
-      "nameKey": "tree.node.breach-point",
+      "name": "Vanguard's Rupture",
+      "nameKey": "tree.node.vanguard-s-rupture",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },

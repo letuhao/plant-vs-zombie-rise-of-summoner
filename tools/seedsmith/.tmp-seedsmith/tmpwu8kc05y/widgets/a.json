@@ -1,1 +1,0 @@
-{"kind": "widget", "_meta": {"partition": "a"}, "entries": [{"id": "widget.a-001", "parts": [{"ref": "widget.a-002"}]}, {"id": "widget.a-002", "upgradesTo": "widget.a-999-typo"}]}

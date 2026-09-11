@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "kind": "set", "_meta": {"partition": "set/test"}, "entries": [{"id": "set.test-001", "name": "Testset", "members": [{"role": "core-guard"}, {"role": "head-guard"}], "thresholds": [{"pieces": 2, "atoms": []}]}]}

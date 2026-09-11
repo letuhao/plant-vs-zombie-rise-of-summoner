@@ -1,2 +1,0 @@
-[pipeline.llm_caller]
-max_tokens = 2048

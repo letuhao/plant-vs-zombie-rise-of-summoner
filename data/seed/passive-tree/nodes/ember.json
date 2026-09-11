@@ -3,57 +3,111 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "611e70b8afd4ba2264035ed333c4b296654d15b4a75116484232659f1a265503",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.ember-def-t1-n0": "tree-language/3",
+      "skill.ember-def-t1-n1": "tree-language/3",
+      "skill.ember-def-t10-n0": "tree-language/3",
+      "skill.ember-def-t10-n1": "tree-language/3",
+      "skill.ember-def-t2-n0": "tree-language/3",
+      "skill.ember-def-t2-n1": "tree-language/3",
+      "skill.ember-def-t3-n0": "tree-language/3",
+      "skill.ember-def-t3-n1": "tree-language/3",
+      "skill.ember-def-t4-n0": "tree-language/3",
+      "skill.ember-def-t4-n1": "tree-language/3",
+      "skill.ember-def-t5-n0": "tree-language/3",
+      "skill.ember-def-t5-n1": "",
+      "skill.ember-def-t6-n0": "tree-language/3",
+      "skill.ember-def-t6-n1": "tree-language/3",
+      "skill.ember-def-t7-n0": "tree-language/3",
+      "skill.ember-def-t7-n1": "tree-language/3",
+      "skill.ember-def-t8-n0": "tree-language/3",
+      "skill.ember-def-t8-n1": "tree-language/3",
+      "skill.ember-def-t9-n0": "tree-language/3",
+      "skill.ember-def-t9-n1": "tree-language/3",
+      "skill.ember-off-t1-n0": "tree-language/3",
+      "skill.ember-off-t1-n1": "tree-language/3",
+      "skill.ember-off-t10-n0": "tree-language/3",
+      "skill.ember-off-t10-n1": "tree-language/3",
+      "skill.ember-off-t2-n0": "tree-language/3",
+      "skill.ember-off-t2-n1": "tree-language/3",
+      "skill.ember-off-t3-n0": "tree-language/3",
+      "skill.ember-off-t3-n1": "tree-language/3",
+      "skill.ember-off-t4-n0": "tree-language/3",
+      "skill.ember-off-t4-n1": "tree-language/3",
+      "skill.ember-off-t5-n0": "tree-language/3",
+      "skill.ember-off-t5-n1": "tree-language/3",
+      "skill.ember-off-t6-n0": "tree-language/3",
+      "skill.ember-off-t6-n1": "tree-language/3",
+      "skill.ember-off-t7-n0": "tree-language/3",
+      "skill.ember-off-t7-n1": "tree-language/3",
+      "skill.ember-off-t8-n0": "tree-language/3",
+      "skill.ember-off-t8-n1": "tree-language/3",
+      "skill.ember-off-t9-n0": "tree-language/3",
+      "skill.ember-off-t9-n1": "tree-language/3"
+    }
   },
   "nodes": [
     {
       "affinity": [
-        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The roots reach for the core, anchoring the spirit against the storm.",
+      "id": "skill.ember-def-t1-n0",
+      "name": "Deeply Anchored",
+      "nameKey": "tree.node.deeply-anchored",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.power",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while tier is active — tier wins.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The embers settle deep within the soil, anchoring the spirit to the earth.",
-      "id": "skill.ember-def-t1-n0",
-      "name": "Deep Rooting",
-      "nameKey": "tree.node.deep-rooting-6",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-capacity"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "Molten sap fills the gaps in the shell, turning every impact into a structural reinforcement.",
+      "flavor": "The warmth of the ember feeds the marrow, thickening the blood with life.",
       "id": "skill.ember-def-t1-n1",
-      "name": "Lava-Sealed Plating",
-      "nameKey": "tree.node.lava-sealed-plating",
+      "name": "Verdant Constitution",
+      "nameKey": "tree.node.verdant-constitution",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -63,227 +117,286 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.shield-regen",
+        "atom.shld-cycle"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat within the core begins to pulse, cycling energy through the protective layers.",
+      "flavor": "Heat flows through the cracks, mending the shell as it burns.",
       "id": "skill.ember-def-t10-n0",
-      "name": "Molten Flux",
-      "nameKey": "tree.node.molten-flux",
+      "name": "Molten Recirculation",
+      "nameKey": "tree.node.molten-recirculation",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Heat trapped within the shell is repurposed to drive the next defensive surge.",
+      "flavor": "Heat draws the essence inward, sealing wounds with molten light.",
       "id": "skill.ember-def-t10-n1",
-      "name": "Thermal Recirculation",
-      "nameKey": "tree.node.thermal-recirculation",
+      "name": "Ashen Osmosis",
+      "nameKey": "tree.node.ashen-osmosis",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
-      "rationale": "",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnWave"
+      },
+      "rationale": "none",
       "tier": 10
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.shield-capacity"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat of the ember fuses organic fibers into a dense, protective rind.",
+      "flavor": "Layers of hardened resin provide a foundation against the coming heat.",
       "id": "skill.ember-def-t2-n0",
-      "name": "Layered Bark",
-      "nameKey": "tree.node.layered-bark-6",
+      "name": "Bastion Bark",
+      "nameKey": "tree.node.bastion-bark",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.shld-toughness"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens into a layered defense of calcified sap and reinforced plating.",
+      "flavor": "The heat hardens the surface into an unbreakable shell.",
       "id": "skill.ember-def-t2-n1",
-      "name": "Barkskin Bastion",
-      "nameKey": "tree.node.barkskin-bastion",
+      "name": "Cinderous Bulwark",
+      "nameKey": "tree.node.cinderous-bulwark",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
-      },
-      "flavor": "A thick, amber-like coating that reinforces the structural integrity of protective layers.",
-      "id": "skill.ember-def-t3-n0",
-      "name": "Hardened Resin",
-      "nameKey": "tree.node.hardened-resin",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
+        "likely",
         "core"
       ],
       "affixIds": [
+        "atom.arm-hardening",
         "atom.arm-welding"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A thick, viscous layer of resin that holds its shape even under heavy impact.",
-      "id": "skill.ember-def-t3-n1",
-      "name": "Amber Reservoir",
-      "nameKey": "tree.node.amber-reservoir",
+      "flavor": "Layers of hardened ash form a protective shell around the core.",
+      "id": "skill.ember-def-t3-n0",
+      "name": "Cinderous Carapace",
+      "nameKey": "tree.node.cinderous-carapace",
       "nodeClass": "magnitude",
-      "nodeKey": "n1",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.evd-seal",
-        "atom.sust-husk"
+        "atom.shld-toughness"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A thick, viscous layer that hardens upon impact, trapping vitality within the shell.",
+      "flavor": "Layers of slag-soaked iron fuse with the skin, turning every impact into a shower of sparks.",
+      "id": "skill.ember-def-t3-n1",
+      "name": "Molten Plating",
+      "nameKey": "tree.node.molten-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "occasional",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat binds the spirit to the shell, turning every impact into a surge of protective light.",
       "id": "skill.ember-def-t4-n0",
-      "name": "Amber Sealing",
-      "nameKey": "tree.node.amber-sealing",
+      "name": "Cinder-Link",
+      "nameKey": "tree.node.cinder-link",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
+        "atom.fortitude",
         "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat of the ember petrifies the spirit, turning soft tissue into unyielding resin.",
+      "flavor": "The heat of the ember settles deep within the marrow, turning movement into a foundation of unyielding stone.",
       "id": "skill.ember-def-t4-n1",
-      "name": "Amber Hardening",
-      "nameKey": "tree.node.amber-hardening",
+      "name": "Stalwart Rooting",
+      "nameKey": "tree.node.stalwart-rooting",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core",
-        "core",
-        "likely"
+        "likely",
+        "occasional"
       ],
       "affixIds": [
-        "atom.shield-regen",
         "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A viscous, glowing sap that pulses in rhythm with the heartbeat, mending gaps in the spirit as quickly as they appear.",
+      "flavor": "The heat flows through the cracks, mending the shell as it burns.",
       "id": "skill.ember-def-t5-n0",
-      "name": "Resinous Flux",
-      "nameKey": "tree.node.resinous-flux",
+      "name": "Ashen Circulatory",
+      "nameKey": "tree.node.ashen-circulatory",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.regen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -320,70 +433,91 @@
         "core"
       ],
       "affixIds": [
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the shield becomes the pulse of the ward.",
+      "id": "skill.ember-def-t6-n0",
+      "name": "Flux-Grafted Aegis",
+      "nameKey": "tree.node.flux-grafted-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The warmth of the core sustains the spirit even as the shell cracks.",
+      "id": "skill.ember-def-t6-n1",
+      "name": "Emberheart Vitality",
+      "nameKey": "tree.node.emberheart-vitality",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
         "atom.ward-brace"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Layers of molten resin fuse with heavy plating to create an unyielding shell.",
-      "id": "skill.ember-def-t6-n0",
-      "name": "Sintered Graft",
-      "nameKey": "tree.node.sintered-graft",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.resilience"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The heat of the core hardens the outer layer into a protective husk.",
-      "id": "skill.ember-def-t6-n1",
-      "name": "Embershell",
-      "nameKey": "tree.node.embershell",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.plating"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "Layers of ash and slag fused into a singular, unyielding skin.",
+      "flavor": "The heat of the core hardens the shell, turning every impact into a rhythmic pulse of protection.",
       "id": "skill.ember-def-t7-n0",
-      "name": "Sintered Plate",
-      "nameKey": "tree.node.sintered-plate",
+      "name": "Cinder-Grafted Aegis",
+      "nameKey": "tree.node.cinder-grafted-aegis",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -393,49 +527,131 @@
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
-        "atom.vitality"
+        "atom.arm-hardening",
+        "atom.arm-welding"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The embers sink into the soil, anchoring the spirit to the very core of the earth.",
+      "flavor": "Layers of cooling slag bind the spirit to the shell.",
       "id": "skill.ember-def-t7-n1",
-      "name": "Deep Rooted",
-      "nameKey": "tree.node.deep-rooted-5",
+      "name": "Obsidian Suture",
+      "nameKey": "tree.node.obsidian-suture",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
+        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle"
+        "atom.shld-surge",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the sap dictates the rhythm of the shield.",
+      "flavor": "The heat of the core binds the protective layer to the spirit itself.",
       "id": "skill.ember-def-t8-n0",
-      "name": "Resinous Pulse",
-      "nameKey": "tree.node.resinous-pulse",
+      "name": "Embershell Linkage",
+      "nameKey": "tree.node.embershell-linkage",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the core pulses through the ward, binding soul to shell.",
+      "id": "skill.ember-def-t8-n1",
+      "name": "Embershield Resonance",
+      "nameKey": "tree.node.embershield-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat within the plating drives a rhythmic pulse of restorative energy.",
+      "id": "skill.ember-def-t9-n0",
+      "name": "Thermal Kineticism",
+      "nameKey": "tree.node.thermal-kineticism",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
     },
     {
       "affinity": [
@@ -446,68 +662,25 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Layers of ash and resin fuse into a permanent, unyielding shell.",
-      "id": "skill.ember-def-t8-n1",
-      "name": "Sintered Husk",
-      "nameKey": "tree.node.sintered-husk",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.warding"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "A translucent layer that catches the heat, turning impact into a reservoir of potential.",
-      "id": "skill.ember-def-t9-n0",
-      "name": "Amber Sieve",
-      "nameKey": "tree.node.amber-sieve",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The embers do not merely burn; they knit the flesh back into the shape of the flame.",
+      "flavor": "Molten slag settles into the cracks of the armor, hardening with every impact.",
       "id": "skill.ember-def-t9-n1",
-      "name": "Cinder-Sown Graft",
-      "nameKey": "tree.node.cinder-sown-graft",
+      "name": "Igneous Layering",
+      "nameKey": "tree.node.igneous-layering",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -516,452 +689,549 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity"
+        "atom.searing-strike"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat of the ember feeds the flow of the elements.",
+      "flavor": "The heat of the ember leaves a trail of molten ruin.",
       "id": "skill.ember-off-t1-n0",
-      "name": "Thermal Resonance",
-      "nameKey": "tree.node.thermal-resonance-2",
+      "name": "Searing Scorch",
+      "nameKey": "tree.node.searing-scorch",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
+        "likely",
         "core"
-      ],
-      "affixIds": [
-        "atom.firelining"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat of the ember sharpens the intent of the flame.",
-      "id": "skill.ember-off-t1-n1",
-      "name": "Ignited Focus",
-      "nameKey": "tree.node.ignited-focus",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core",
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow",
-        "atom.elpw-pierce",
-        "atom.elpw-surfeit"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat becomes so intense it ceases to be a state and becomes a direction.",
-      "id": "skill.ember-off-t10-n0",
-      "name": "Superheated Aperture",
-      "nameKey": "tree.node.superheated-aperture",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat does not merely pass through; it expands, seeking every crack in the resistance.",
-      "id": "skill.ember-off-t10-n1",
-      "name": "Thermal Cascade",
-      "nameKey": "tree.node.thermal-cascade",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The heat of the ember fuels the hunger of the strike.",
-      "id": "skill.ember-off-t2-n0",
-      "name": "Searing Ferocity",
-      "nameKey": "tree.node.searing-ferocity",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 2
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
       ],
       "affixIds": [
         "atom.ferocity",
-        "atom.savagery"
+        "atom.searing-strike"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat of the ember fuels the fury of the strike.",
-      "id": "skill.ember-off-t2-n1",
-      "name": "Searing Onslaught",
-      "nameKey": "tree.node.searing-onslaught",
+      "flavor": "The heat of the ember fuels the hunger of the strike.",
+      "id": "skill.ember-off-t1-n1",
+      "name": "Cinderous Might",
+      "nameKey": "tree.node.cinderous-might",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 1
     },
     {
       "affinity": [
         "likely"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat does not merely strike; it spills over the edges of the wound.",
-      "id": "skill.ember-off-t3-n0",
-      "name": "Cinder Surge",
-      "nameKey": "tree.node.cinder-surge",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.firelining",
-        "atom.searing-strike"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat of the ember finds its rhythm in the flow of power.",
-      "id": "skill.ember-off-t3-n1",
-      "name": "Ignited Resonance",
-      "nameKey": "tree.node.ignited-resonance",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-attune",
-        "atom.elpw-focus"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat does not merely burn; it seeks the path of least resistance.",
-      "id": "skill.ember-off-t4-n0",
-      "name": "Thermal Conductor",
-      "nameKey": "tree.node.thermal-conductor",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.firelining",
-        "atom.searing-strike"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat of the ember sharpens the strike and leaves a trail of flame.",
-      "id": "skill.ember-off-t4-n1",
-      "name": "Cinderous Edge",
-      "nameKey": "tree.node.cinderous-edge",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow",
-        "atom.firelining"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat does not merely burn; it spills, turning every spark into a torrential flood.",
-      "id": "skill.ember-off-t5-n0",
-      "name": "Ignition Overflow",
-      "nameKey": "tree.node.ignition-overflow-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.elpw-attune",
-        "atom.elpw-overflow"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat becomes too intense for the vessel to contain, spilling outward in a violent surge.",
-      "id": "skill.ember-off-t5-n1",
-      "name": "Thermal Overload",
-      "nameKey": "tree.node.thermal-overload-4",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-pierce",
-        "atom.searing-strike"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The heat of the ember clarifies the path through the thickest smoke.",
-      "id": "skill.ember-off-t6-n0",
-      "name": "Cinder-Sight",
-      "nameKey": "tree.node.cinder-sight",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "Channels the raw heat of the core to sharpen elemental intent.",
-      "id": "skill.ember-off-t6-n1",
-      "name": "Thermal Conduit",
-      "nameKey": "tree.node.thermal-conduit",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-override"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat becomes so intense it ceases to be a tool and becomes the master.",
-      "id": "skill.ember-off-t7-n0",
-      "name": "Thermal Overload",
-      "nameKey": "tree.node.thermal-overload",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-attune",
-        "atom.elpw-focus"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat of the ember flows through the spirit, harmonizing disparate energies into a single, devastating strike.",
-      "id": "skill.ember-off-t7-n1",
-      "name": "Prismatic Conduction",
-      "nameKey": "tree.node.prismatic-conduction",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-attune",
-        "atom.elpw-overflow"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The heat does not merely pass through; it becomes the blood.",
-      "id": "skill.ember-off-t8-n0",
-      "name": "Kindling Vein",
-      "nameKey": "tree.node.kindling-vein",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "core"
       ],
       "affixIds": [
         "atom.elpw-pierce"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat does not merely pass through; it seeks a path to the core.",
-      "id": "skill.ember-off-t8-n1",
-      "name": "Thermal Siphon",
-      "nameKey": "tree.node.thermal-siphon",
+      "flavor": "Focusing the heat into a singular, piercing point.",
+      "id": "skill.ember-off-t10-n0",
+      "name": "Thermal Aperture",
+      "nameKey": "tree.node.thermal-aperture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat does not merely surround the user; it becomes the user's very intent.",
+      "id": "skill.ember-off-t10-n1",
+      "name": "Thermal Attunement",
+      "nameKey": "tree.node.thermal-attunement",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.might",
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat within fuels the strike, and the strike fuels the heat.",
+      "id": "skill.ember-off-t2-n0",
+      "name": "Kindle-Hearted",
+      "nameKey": "tree.node.kindle-hearted",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.might",
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the ember fuels the strength of the blow.",
+      "id": "skill.ember-off-t2-n1",
+      "name": "Ignited Fury",
+      "nameKey": "tree.node.ignited-fury",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-surge",
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the spark feeds the hunger of the flame.",
+      "id": "skill.ember-off-t3-n0",
+      "name": "Embersurge",
+      "nameKey": "tree.node.embersurge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.might",
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the spark feeds the strength of the blow.",
+      "id": "skill.ember-off-t3-n1",
+      "name": "Embershard",
+      "nameKey": "tree.node.embershard",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.firelining"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat becomes too great for the vessel to contain, spilling outward in a violent surge.",
+      "id": "skill.ember-off-t4-n0",
+      "name": "Incandescent Overflow",
+      "nameKey": "tree.node.incandescent-overflow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the strike fuels the next surge of power.",
+      "id": "skill.ember-off-t4-n1",
+      "name": "Scorched Momentum",
+      "nameKey": "tree.node.scorched-momentum",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.firelining"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Drawing heat from the friction of battle to fuel the next strike.",
+      "id": "skill.ember-off-t5-n0",
+      "name": "Thermal Siphonage",
+      "nameKey": "tree.node.thermal-siphonage",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the strike feeds the hunger of the soul.",
+      "id": "skill.ember-off-t5-n1",
+      "name": "Ignited Ferocity",
+      "nameKey": "tree.node.ignited-ferocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-focus",
+        "atom.elpw-pierce"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat distorts the air, turning every strike into a focused beam of molten light.",
+      "id": "skill.ember-off-t6-n0",
+      "name": "Searing Aperture",
+      "nameKey": "tree.node.searing-aperture",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.searing-strike"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat of the ember feeds the muscle and the blade alike.",
+      "id": "skill.ember-off-t6-n1",
+      "name": "Cinder-Grafted Might",
+      "nameKey": "tree.node.cinder-grafted-might",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat does not merely pass through; it builds until the vessel itself becomes a furnace.",
+      "id": "skill.ember-off-t7-n0",
+      "name": "Pyre-Grafted Conduit",
+      "nameKey": "tree.node.pyre-grafted-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat becomes a torrent, spilling beyond the vessel's capacity.",
+      "id": "skill.ember-off-t7-n1",
+      "name": "Superheated Overflow",
+      "nameKey": "tree.node.superheated-overflow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat becomes a deluge, drowning the senses in molten light.",
+      "id": "skill.ember-off-t8-n0",
+      "name": "Magma Saturation",
+      "nameKey": "tree.node.magma-saturation",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -974,42 +1244,91 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat does not merely pass through; it becomes the blood itself.",
+      "flavor": "The heat becomes a command, forcing the elements to obey the rhythm of the strike.",
+      "id": "skill.ember-off-t8-n1",
+      "name": "Ignition Protocol",
+      "nameKey": "tree.node.ignition-protocol",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The heat becomes a rhythmic pulse, driving the flow beyond its natural limits.",
       "id": "skill.ember-off-t9-n0",
-      "name": "Pyre-Stitched Veins",
-      "nameKey": "tree.node.pyre-stitched-veins",
+      "name": "Thermal Overdrive",
+      "nameKey": "tree.node.thermal-overdrive",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.firelining"
+        "atom.elpw-attune",
+        "atom.elpw-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat does not merely burn; it spills, consuming the air to fuel the next strike.",
+      "flavor": "Heat rises, pulling the essence of the flame into a singular, driving force.",
       "id": "skill.ember-off-t9-n1",
-      "name": "Pyre-Graft",
-      "nameKey": "tree.node.pyre-graft",
+      "name": "Convection Siphon",
+      "nameKey": "tree.node.convection-siphon",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

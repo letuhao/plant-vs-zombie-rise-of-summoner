@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "kind": "recipe", "_meta": {"partition": "recipe/test"}, "entries": [{"id": "recipe.001", "name": "Forge: Thing", "operation": "forge", "outputKind": "mutation", "costLines": [{"material": "essence.void", "costBand": "modest"}]}]}

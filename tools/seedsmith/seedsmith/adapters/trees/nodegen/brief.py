@@ -215,7 +215,8 @@ Motifs to express: {motif_line}.{anti_line}
 
 Choose, and nothing else:
   1. `affixIds`  — 1 to 3 from the list below. They are this node's whole effect.
-  2. `affinity`  — how central each is: core | likely | occasional.
+  2. `affinity`  — one entry PER chosen effect, in the same order as `affixIds` and the same
+                   length: core | likely | occasional.
 {exclusion_line}
   4. `name`, `nameKey`, `flavor`.
 

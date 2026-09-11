@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/3"
+    "planHash": "47fa1e4a2715b2b662a3c21647c3bcb1c78902626779d3db8bde7fed6d2b1fb9",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.dark-def-t1-n0": "tree-language/3",
+      "skill.dark-def-t10-n0": "tree-language/3",
+      "skill.dark-def-t10-n1": "tree-language/3",
+      "skill.dark-def-t10-n2": "tree-language/3",
+      "skill.dark-def-t2-n0": "tree-language/3",
+      "skill.dark-def-t3-n0": "tree-language/3",
+      "skill.dark-def-t3-n1": "tree-language/3",
+      "skill.dark-def-t4-n0": "tree-language/3",
+      "skill.dark-def-t4-n1": "tree-language/3",
+      "skill.dark-def-t5-n0": "tree-language/3",
+      "skill.dark-def-t5-n1": "tree-language/3",
+      "skill.dark-def-t6-n0": "tree-language/3",
+      "skill.dark-def-t6-n1": "tree-language/3",
+      "skill.dark-def-t7-n0": "tree-language/3",
+      "skill.dark-def-t7-n1": "tree-language/3",
+      "skill.dark-def-t8-n0": "tree-language/3",
+      "skill.dark-def-t8-n1": "tree-language/3",
+      "skill.dark-def-t9-n0": "tree-language/3",
+      "skill.dark-def-t9-n1": "tree-language/3",
+      "skill.dark-def-t9-n2": "tree-language/3",
+      "skill.dark-off-t1-n0": "tree-language/3",
+      "skill.dark-off-t10-n0": "tree-language/3",
+      "skill.dark-off-t10-n1": "",
+      "skill.dark-off-t10-n2": "tree-language/3",
+      "skill.dark-off-t2-n0": "tree-language/3",
+      "skill.dark-off-t3-n0": "tree-language/3",
+      "skill.dark-off-t3-n1": "tree-language/3",
+      "skill.dark-off-t4-n0": "tree-language/3",
+      "skill.dark-off-t4-n1": "tree-language/3",
+      "skill.dark-off-t5-n0": "tree-language/3",
+      "skill.dark-off-t5-n1": "tree-language/3",
+      "skill.dark-off-t6-n0": "tree-language/3",
+      "skill.dark-off-t6-n1": "tree-language/3",
+      "skill.dark-off-t7-n0": "tree-language/3",
+      "skill.dark-off-t7-n1": "tree-language/3",
+      "skill.dark-off-t8-n0": "tree-language/3",
+      "skill.dark-off-t8-n1": "tree-language/3",
+      "skill.dark-off-t9-n0": "tree-language/3",
+      "skill.dark-off-t9-n1": "tree-language/3",
+      "skill.dark-off-t9-n2": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -235,6 +277,37 @@
       },
       "rationale": "",
       "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very marrow of the earth rises to fill the gaps in broken bone.",
+      "id": "skill.dark-def-t4-n0",
+      "name": "Silt-Choked Marrow",
+      "nameKey": "tree.node.silt-choked-marrow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [
@@ -562,6 +635,37 @@
     },
     {
       "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.mending"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the earth settles into the gaps of the spirit, filling every void with heavy, unyielding silt.",
+      "id": "skill.dark-def-t9-n1",
+      "name": "Silt-Choked Reservoir",
+      "nameKey": "tree.node.silt-choked-reservoir",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rot",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
         "core",
         "likely"
       ],
@@ -652,6 +756,30 @@
         "status": "freeze",
         "trigger": "OnGridPlace"
       },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.death-salvo"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The weight of the fallen fuels the momentum of the living.",
+      "id": "skill.dark-off-t10-n1",
+      "name": "Ossuary Cascade",
+      "nameKey": "tree.node.ossuary-cascade",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 10
     },
@@ -784,6 +912,37 @@
       },
       "rationale": "",
       "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.death-glean"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Every fallen foe leaves a debt that the soil must collect.",
+      "id": "skill.dark-off-t4-n0",
+      "name": "Reaping Tithe",
+      "nameKey": "tree.node.reaping-tithe",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [

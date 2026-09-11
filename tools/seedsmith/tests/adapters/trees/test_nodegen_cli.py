@@ -355,5 +355,39 @@ class TreesGenerateDryRunTests(unittest.TestCase):
         self.assertEqual(code, EXIT_GAP)
 
 
+class ManifestRosterCoverageTests(unittest.TestCase):
+    """`trees plan --manifest` must index the WHOLE roster, not the `--tree` default (2026-09-11).
+
+    Before this fix the `--manifest` branch built `[spec]` from `--tree`'s own default ("might"), so
+    a bare `--emit` rewrote `plan.v1.json` with a `trees[]` of length 1 while 41 committed per-tree
+    plans sat unindexed, and the `roster` block mirrored a stale status count. These tests pin the
+    two observable halves: the full roster is built when `--tree` is omitted, and an explicit
+    `--tree` still narrows it.
+    """
+
+    def test_manifest_without_tree_builds_every_roster_tree(self) -> None:
+        from seedsmith.adapters.trees.plan.vocabulary import load_roster
+        from seedsmith.report.cli import _all_roster_specs
+
+        roster = load_roster()
+        specs = _all_roster_specs()
+        expected = len(roster.aptitudes) + len(roster.elements) + len(roster.statuses)
+        self.assertEqual(expected, len(specs))
+        # Aptitude roster entries are PascalCase; their tree ids are the lower-cased form the CLI
+        # accepts (`primary_tree_spec` lower-cases internally). Elements/statuses are already lower.
+        expected_ids = ({a.lower() for a in roster.aptitudes}
+                        | set(roster.elements) | set(roster.statuses))
+        self.assertEqual(expected_ids, {s.tree_id for s in specs})
+
+    def test_parser_distinguishes_an_omitted_tree_from_an_explicit_one(self) -> None:
+        from seedsmith.report.cli import build_parser
+
+        parser = build_parser()
+        omitted = parser.parse_args(["trees", "plan", "--emit", "--manifest"])
+        explicit = parser.parse_args(["trees", "plan", "--emit", "--manifest", "--tree", "fire"])
+        self.assertIsNone(omitted.tree)
+        self.assertEqual("fire", explicit.tree)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from ..plan.emit import canonical_json_bytes, content_sha256
+from ..plan.emit import canonical_json_bytes, content_sha256, tree_content_hash
 from .exclusion import compose_printed_text
 from .schema import NAME_KEY_PATTERN
 
@@ -233,10 +233,19 @@ def build_seed_document(tree_id: str, records: "Sequence[NodeSeedRecord]", *,
     `mixed` when they do not, with the per-record split carried in `promptVersionByNode`. The
     caller's `prompt_version` argument remains the stamp for a tree whose records predate the
     per-record field entirely (all empty) — exactly the legacy shape.
+
+    **An EMPTY per-record vintage is itself a vintage (2026-09-11, D2).** A failed re-roll under
+    `--supersede` keeps its prior, pre-provenance record (so the tree stays complete rather than
+    shrinking below its plan), which means a partially-superseded tree holds BOTH current-vintage
+    records and empty-vintage ones. Filtering empties out of `vintages` before counting would then
+    see a single value and stamp the whole document with the current vintage — the exact lie this
+    docstring exists to prevent, now reachable through the real CLI. Empty is therefore kept as its
+    own sentinel: `{v3}` stamps `v3`, `{"", v3}` stamps `mixed`, and only an all-empty set falls
+    back to the caller's legacy stamp.
     """
     assert_no_duplicate_name_keys([r.name_key for r in records])
-    vintages = {r.prompt_version for r in records if r.prompt_version}
-    if vintages:
+    vintages = {r.prompt_version for r in records}
+    if any(vintages):
         doc_stamp = next(iter(vintages)) if len(vintages) == 1 else "mixed"
     else:
         doc_stamp = prompt_version
@@ -248,8 +257,7 @@ def build_seed_document(tree_id: str, records: "Sequence[NodeSeedRecord]", *,
         "minorityValues": dict(minority_values),
     }
     if len(vintages) > 1:
-        provenance["promptVersionByNode"] = {
-            r.node_id: r.prompt_version for r in records if r.prompt_version}
+        provenance["promptVersionByNode"] = {r.node_id: r.prompt_version for r in records}
     return {
         "schemaVersion": 1,
         "treeId": tree_id,

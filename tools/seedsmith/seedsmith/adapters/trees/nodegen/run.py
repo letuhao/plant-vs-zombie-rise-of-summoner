@@ -59,7 +59,8 @@ from ....workflow.validators.field_echo import field_echo, name_collision, subje
 from ....workflow.validators.language import language_consistency
 from . import brief as brief_mod
 from . import plan_read
-from .emit import NodeSeedRecord, build_node_record, build_seed_document, write_seed_document
+from .emit import (NodeSeedRecord, build_node_record, build_seed_document, tree_content_hash,
+                   write_seed_document)
 from .exclusion import ExclusionClaim, validate_exclusion
 from .schema import NODE_RESPONSE_SCHEMA, schema_for_call
 from .vocab import AffixOption, AffixVocabulary, AffixVocabularyError
@@ -378,8 +379,9 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
 
     for node in tree_plan.nodes:
         subject_id = f"{tree_plan.tree_id}:{node.node_id}"
-        if subject_id in done:
-            if supersede_stale and _stale(done[subject_id]):
+        entry = done.get(subject_id)
+        if entry is not None and entry.get("record"):
+            if supersede_stale and _stale(entry):
                 superseded.append(Subject(
                     subject_id=subject_id, tree_id=tree_plan.tree_id, node_id=node.node_id,
                     node_key=node.node_key, branch=node.branch, tier=node.tier,
@@ -388,6 +390,9 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
                 continue
             already.append(subject_id)
             continue
+        # No row, or a row from a prior FAILED attempt (`record: null`, written by `record_attempt`).
+        # Either way the node is still owed a real generation, so it is scheduled like a fresh
+        # subject — the attempt row is bookkeeping, never "done".
         subjects.append(Subject(
             subject_id=subject_id, tree_id=tree_plan.tree_id, node_id=node.node_id,
             node_key=node.node_key, branch=node.branch, tier=node.tier,
@@ -411,12 +416,47 @@ def record_accepted(done: "dict[str, dict]", subject_id: str, record: NodeSeedRe
     defect idempotence exists to prevent, so recording over an existing row raises rather than
     silently overwriting it. Returns a NEW dict — the caller's own `done` mapping is never mutated
     in place, so a caller mid-loop still holds the pre-record snapshot if it needs to roll back.
+
+    **A row from a prior FAILED attempt is not a duplicate (2026-09-11).** `record_attempt` below
+    persists non-accepted outcomes (unresolved/escalated/blocked) with `record: null`, so the ledger
+    is an honest record of what happened AND `plan_run` can schedule the subject again. Accepting on
+    a later pass is therefore the designed replacement of that attempt row, not idempotence failing:
+    the raise fires only when the prior row holds a real accepted `record`.
     """
-    if subject_id in done:
+    prior = done.get(subject_id)
+    if prior is not None and prior.get("record"):
         raise ValueError(
             f"subject {subject_id!r} already has a ledger row — a second `record_accepted` call "
             f"means idempotence failed (two runs both believed they generated it)")
     return {**done, subject_id: {"record": record.to_dict()}}
+
+
+def record_attempt(done: "dict[str, dict]", subject_id: str, outcome: str, detail: str = "",
+                   ) -> "dict[str, dict]":
+    """Persist a NON-accepted outcome — `unresolved`, `escalated` or `blocked` — so the ledger
+    records every real attempt, not only the ones that succeeded (owner request, 2026-09-11).
+
+    **Why this matters, measured.** `run_language_stage` writes the ledger before emitting, so a
+    subject that never resolves has historically left NO ledger trace at all. Three real costs
+    followed: (1) a corpus could not distinguish "this node was never attempted" from "this node was
+    attempted and the model could not resolve it", so a proof of corpus health could not name which
+    nodes were still owed; (2) the resume loop had to re-derive the outstanding set purely from
+    plan-minus-ledger, with no count of how many times a node had already failed; (3) a failed
+    re-roll under `--supersede` looked identical to a node that had never run. An attempt row closes
+    all three: `record` stays `null` (so `plan_run` treats it as still-to-generate, never
+    "already done"), `outcome`/`detail` say what happened, and `attempts` counts consecutive
+    failures so a permanently stuck node is visible rather than silently retried forever.
+
+    Never clobbers an accepted row: a superseded subject whose re-roll fails keeps its prior
+    accepted `record` (the D2 contract above), so an attempt is only ever written where no accepted
+    record exists.
+    """
+    prior = done.get(subject_id)
+    if prior is not None and prior.get("record"):
+        return done
+    attempts = int((prior or {}).get("attempts") or 0) + 1
+    return {**done, subject_id: {
+        "record": None, "outcome": outcome, "detail": detail, "attempts": attempts}}
 
 
 def record_superseded(done: "dict[str, dict]", subject_id: str, record: NodeSeedRecord) -> "dict[str, dict]":
@@ -565,10 +605,25 @@ def _node_verify_fn(gate: "Callable[[Mapping[str, Any]], list[str]]") -> "Callab
 def _node_heal_user(brief_text: str, _out: "Mapping[str, Any]", hard: "Mapping[str, str]") -> str:
     """Names the exact defect, then re-sends the ORIGINAL brief — never the model's own prior
     (wrong) draft — mirroring `actions.validate_heal.derive.build_heal_user`'s own shape and its
-    own reasoning: a generation stage's "source" is what it was asked to build from."""
+    own reasoning: a generation stage's "source" is what it was asked to build from.
+
+    ⭐ **"Fix ONLY the named field(s)" — the shared convention, restored 2026-09-11 (real-call
+    finding).** This text used to say "Return the COMPLETE corrected JSON object (every required
+    key)", which a real local model read as "answer the whole brief again": on a draft whose only
+    defect was `affinity`'s length (e.g. one entry for a two-member `affixIds`), it re-chose
+    `affixIds` too, producing a genuinely different set on the repair. That made the three §6.1 vote
+    samples disagree by construction — a `might` node's three samples returned
+    `[plating, carapace]`, `[vitality, fortitude]`, `[shield-capacity, shield-toughness]` — so the
+    vote resolved to gate 11's `1-1-1 unresolved` on ~25% of nodes where v1's committed corpus
+    recorded ~1‰. The shared `build_heal_user` (this repo's own established wording) already says
+    "Fix ONLY the named field(s)", which keeps the model on the defective field and leaves the
+    already-valid `affixIds` untouched; the three samples then agree on the affix set, which is the
+    whole premise of voting on it. Still returns a complete object (the schema requires every key),
+    so the wording names both halves: fix the defect, keep the rest."""
     defects = "\n".join(f"- {reason}" for reason in hard.values())
     return (f"Your previous answer had these problems:\n{defects}\n\n"
-            f"Fix them. Return the COMPLETE corrected JSON object (every required key).\n\n"
+            f"Fix ONLY the named field(s). Keep every other field exactly as you had it. Return the "
+            f"COMPLETE corrected JSON object (every required key).\n\n"
             f"The brief you are answering:\n{brief_text}")
 
 
@@ -928,10 +983,12 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     taken_names: "set[str]" = set()
     prior_names: "dict[str, str]" = {}
     for entry in done.values():
-        existing_name_key = entry.get("record", {}).get("nameKey")
+        # Attempt rows (`record: null`, written by `record_attempt`) carry no content to seed from.
+        record = entry.get("record") or {}
+        existing_name_key = record.get("nameKey")
         if existing_name_key:
             known_name_keys.add(existing_name_key)
-        existing_name = entry.get("record", {}).get("name")
+        existing_name = record.get("name")
         if existing_name:
             # Gate 21's generation-time half (2026-09-11): every subject's committed name, corpus-
             # wide, feeds `generate_node`'s own taken-names gate — the same whole-ledger seeding
@@ -940,40 +997,62 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
             # aside (below), never treated as somebody else's claim: the metric counts a name
             # colliding with a DIFFERENT node, so a superseded subject may keep its old name.
             taken_names.add(str(existing_name))
+    def _replay_record(subject_id: str) -> NodeSeedRecord:
+        """Rebuild one committed ledger row into a `NodeSeedRecord` — the additive replay path.
+
+        Used for `plan.already_done` (this run's no-op subjects) AND for a superseded subject's
+        PRIOR row. The prior row is kept in `records` until a replacement is accepted, so a FAILED
+        re-roll leaves the tree complete rather than silently deleting an already-accepted node.
+
+        Prefer the ledger's own persisted `quotaCell` when present (a record accepted after the
+        2026-09-10 persistence wiring); absent on every older ledger row — `build_node_record` then
+        leaves `quota_cell=None`, matching the additive load path. Same additive contract for
+        provenance (2026-09-11): a ledger row that carries its own vintage keeps it; older rows leave
+        it empty, and `build_seed_document`'s document-stamp logic reads an all-empty set as the
+        legacy shape.
+        """
+        node = done[subject_id]["record"]
+        return build_node_record(
+            node["id"], node["nodeKey"], node["branch"], node["tier"], node["nodeClass"], {
+                "affixIds": node["affixIds"], "affinity": node["affinity"],
+                "exclusion": node["exclusion"], "name": node["name"], "nameKey": node["nameKey"],
+                "flavor": node["flavor"], "rationale": node.get("rationale", ""),
+                "quotaCell": node.get("quotaCell"),
+                "promptVersion": node.get("promptVersion", ""),
+            })
+
     for subject_id in plan.already_done:
         entry = done[subject_id]
         node = entry["record"]
         prior_names[subject_id] = str(node.get("name") or "")
         if subject_id in superseded_ids:
             continue
-        record = build_node_record(
-            node["id"], node["nodeKey"], node["branch"], node["tier"], node["nodeClass"], {
-                "affixIds": node["affixIds"], "affinity": node["affinity"],
-                "exclusion": node["exclusion"], "name": node["name"], "nameKey": node["nameKey"],
-                "flavor": node["flavor"], "rationale": node.get("rationale", ""),
-                # Prefer the ledger's own persisted quotaCell when present (a record accepted after
-                # the 2026-09-10 persistence wiring); absent on every older ledger row — build_node_
-                # record then leaves quota_cell=None, matching the additive load path.
-                "quotaCell": node.get("quotaCell"),
-                # Same additive contract for provenance (2026-09-11): a ledger row that carries
-                # its own vintage keeps it; older rows leave it empty, and the document-stamp
-                # logic in `build_seed_document` reads an all-empty set as the legacy shape.
-                "promptVersion": node.get("promptVersion", ""),
-            })
+        record = _replay_record(subject_id)
         records[subject_id] = record
         tree_siblings.append(brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))
         known_name_keys.add(record.name_key)
         taken_names.add(record.name)
 
     # §8's provenance-supersede replay: a superseded subject's PRIOR record is re-read for the
-    # cross-cutting sets above (whole-ledger seeding), but its record is NOT reused — it is
+    # cross-cutting sets above (whole-ledger seeding), but its record is NOT reused as-is — it is
     # re-generated below like any other subject, with the prior row preserved on acceptance. The
     # only differences from a fresh subject: its own prior name is excluded from its own
     # taken-names gate (`prior_names`, used in `_generate_one`), and acceptance records via
     # `record_superseded` rather than `record_accepted`.
+    #
+    # The prior record is ALSO seeded into `records` here, deliberately: a superseded subject rides
+    # `plan.subjects`, not `already_done`, so without this a re-roll that fails to resolve (gate 11's
+    # "1-1-1 vote, no majority") would leave the subject absent from `records` — silently deleting an
+    # already-accepted node from the seed document and shrinking the tree below its plan (a real
+    # MechanismRamp shortfall, not a metric artefact). Seeding the prior keeps the tree complete; a
+    # successful accept overwrites it in `_record_outcome`. Its name/nameKey are already in the
+    # corpus-wide `taken_names`/`known_name_keys` (whole-ledger seeding above), so nothing is
+    # re-added to those sets, and `tree_siblings` is intentionally NOT seeded from it — the re-roll's
+    # own "don't repeat yourself" context stays exactly what it was before this fix.
     for subject in plan.superseded:
         prior_node = done[subject.subject_id]["record"]
         prior_names.setdefault(subject.subject_id, str(prior_node.get("name") or ""))
+        records[subject.subject_id] = _replay_record(subject.subject_id)
 
     outcomes_by_subject: "dict[str, NodeOutcome]" = {}
     unresolved_count = 0
@@ -994,20 +1073,66 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
         outcomes_by_subject[subject.subject_id] = outcome
         if outcome.outcome == "unresolved":
             unresolved_count += 1
-        if outcome.outcome == "accepted" and outcome.record is not None:
+        if outcome.outcome != "accepted":
+            # Persist the attempt (owner request, 2026-09-11): an unresolved/escalated/blocked
+            # subject leaves a real ledger row (`record: null`) so the corpus can name which nodes
+            # are still owed and how many times each has failed. `record_attempt` never overwrites
+            # an accepted row, so a superseded subject's failed re-roll keeps its prior record.
+            done = record_attempt(done, subject.subject_id, outcome.outcome, outcome.detail or "")
+            return
+        if outcome.record is not None:
+            record = outcome.record
+            # Same-batch race closure (2026-09-11 real-call finding, `might` with `--workers 4`).
+            # The generation-time gates (`_derive_unique_name_key`, gate 21's `name_collision`) run
+            # against a snapshot taken BEFORE a parallel batch starts, so two subjects in the SAME
+            # batch can independently pick the identical name/nameKey and only collide here, at
+            # record time — where `build_seed_document`'s own `assert_no_duplicate_name_keys` used to
+            # refuse the WHOLE tree (a real run lost all 35 accepted nodes to one such pair). These
+            # sets are the live, authoritative corpus state at this point (every accept above, plus
+            # whole-ledger seeding), so resolving here is collision-free by construction regardless
+            # of worker count — the guarantee the sequential path already got by retaking the
+            # snapshot per subject.
+            #
+            # A superseded subject's OWN prior key/name is excluded from the collision check, exactly
+            # as `_generate_one` excludes its own prior name from the taken-names gate: re-rolling
+            # and KEEPING one's own identity is legal, and must not be treated as somebody else's
+            # claim (nor silently suffixed into a different key).
+            prior_entry = (done.get(subject.subject_id) or {}).get("record") or {}
+            own_prior_key = str(prior_entry.get("nameKey") or "")
+            own_prior_name = str(prior_entry.get("name") or "")
+            other_keys = known_name_keys - ({own_prior_key} if own_prior_key else set())
+            other_names = taken_names - ({own_prior_name} if own_prior_name else set())
+            if record.name_key in other_keys:
+                record = replace(record, name_key=_derive_unique_name_key(record.name, other_keys))
+                outcome = replace(outcome, record=record)
+                outcomes_by_subject[subject.subject_id] = outcome
+            # Gate 21's contract is "re-prompted, never persisted": an exact name another node
+            # already holds is NOT renamed out from under the model's answer. The sequential path
+            # re-prompts via the generation-time gate; here the re-prompt already happened and the
+            # race still lost, so the honest, resumable outcome is `unresolved` — the subject stays
+            # out of the seed document this run and a later pass re-rolls it (never a persisted
+            # collision, never a whole-tree refusal).
+            if record.name in other_names:
+                unresolved_count += 1
+                outcomes_by_subject[subject.subject_id] = NodeOutcome(
+                    subject.subject_id, "unresolved",
+                    detail=f"{subject.node_id}: name {record.name!r} is already taken by a "
+                           f"different node in this same parallel batch — re-roll on the next pass "
+                           f"(gate 21: a colliding name is re-prompted, never persisted)")
+                return
             tree_siblings.append(brief_mod.SiblingSummary(
-                outcome.record.node_id, outcome.record.name, outcome.record.affix_ids))
-            known_name_keys.add(outcome.record.name_key)
-            taken_names.add(outcome.record.name)
+                record.node_id, record.name, record.affix_ids))
+            known_name_keys.add(record.name_key)
+            taken_names.add(record.name)
             if subject.subject_id in superseded_ids:
                 # §8's deliberate path: this subject was PLANNED for re-roll this run, so the
                 # raise-on-duplicate default must not fire — the prior row is preserved under
                 # `supersededRecord`, never silently discarded. Everything else (sibling list,
                 # known keys, taken names, the records map) updates exactly as a fresh accept.
-                done = record_superseded(done, subject.subject_id, outcome.record)
+                done = record_superseded(done, subject.subject_id, record)
             else:
-                done = record_accepted(done, subject.subject_id, outcome.record)
-            records[subject.subject_id] = outcome.record
+                done = record_accepted(done, subject.subject_id, record)
+            records[subject.subject_id] = record
 
     for _key, group_iter in itertools.groupby(plan.subjects, key=lambda s: (s.tier, s.node_class)):
         run = list(group_iter)
@@ -1056,8 +1181,15 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     seed_path = None
     if records:
         sorted_records = sorted(records.values(), key=lambda r: r.node_id)
+        # `planHash` is the per-tree plan's own content hash — the SAME value the manifest names in
+        # `trees[].sha256` (`plan.emit.tree_content_hash`, sha256 over that plan's canonical bytes).
+        # The B1 plan document itself carries no `sha256` key (it lives only in the manifest's index
+        # row), so the earlier `tree_plan.raw.get("sha256", "")` read stamped EVERY seed document
+        # with an empty string — a provenance field that named nothing. Deriving it here from the
+        # plan the run actually read is the one value that is both always present and verifiable
+        # against the committed manifest.
         doc = build_seed_document(
-            tree_plan.tree_id, sorted_records, plan_hash=tree_plan.raw.get("sha256", ""),
+            tree_plan.tree_id, sorted_records, plan_hash=tree_content_hash(tree_plan.raw),
             prompt_version=brief_mod.PROMPT_VERSION, model=config.model)
         seed_path = write_seed_document(doc, seed_root)
 

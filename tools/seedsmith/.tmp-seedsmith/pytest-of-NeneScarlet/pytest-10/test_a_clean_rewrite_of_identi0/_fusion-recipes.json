@@ -1,8 +1,0 @@
-{
-  "recipe.x": {
-    "crossRungGapFill": false,
-    "inputSpeciesIdA": "a",
-    "inputSpeciesIdB": "b",
-    "outputSpeciesId": "x"
-  }
-}

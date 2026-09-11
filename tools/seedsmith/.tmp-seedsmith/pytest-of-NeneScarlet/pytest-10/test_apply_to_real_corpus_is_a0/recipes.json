@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "kind": "recipe", "_meta": {"batch": "b", "partition": "recipes", "contractVersion": 1, "authoredUtc": "2026-01-01T00:00:00Z", "sourceRef": "x"}, "entries": [{"id": "recipe.a", "operation": "elevate", "costLines": [{"material": "shard.sprout", "costBand": "standard"}]}]}

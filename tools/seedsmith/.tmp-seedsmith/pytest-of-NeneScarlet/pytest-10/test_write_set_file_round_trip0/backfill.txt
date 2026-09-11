@@ -1,5 +1,0 @@
-channelWeight.bar=0.571
-channelWeight.baz=1
-channelWeight.foo=0.326
-channelWeight.qux=1.75
-channelWeight.zap=3.062

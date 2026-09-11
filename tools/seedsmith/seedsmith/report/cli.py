@@ -260,8 +260,14 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         nodes_by_tree[tree_id] = list(seed_doc["nodes"]) if seed_doc else []
         outcomes = [{"nodeId": subject_id.split(":", 1)[1], "outcome": "accepted"}
                    for subject_id in run_plan.already_done]
-        outcomes.extend({"nodeId": subject.node_id, "outcome": "unresolved"}
-                        for subject in run_plan.subjects)
+        # A scheduled subject either has no ledger row (never attempted) or a prior FAILED attempt
+        # row (`record: null` from `record_attempt`, 2026-09-11). Prefer the recorded outcome so the
+        # metric reflects what actually happened (escalated/blocked/unresolved), falling back to
+        # `unresolved` for a never-attempted node — the same "not accepted" bucket the metric gates.
+        for subject in run_plan.subjects:
+            entry = ledger.get(subject.subject_id) or {}
+            outcomes.append({"nodeId": subject.node_id,
+                             "outcome": entry.get("outcome") or "unresolved"})
         outcomes_by_tree[tree_id] = outcomes
         # Distribution-audit wiring (2026-09-10): re-derive each tree's six-axis cells from the
         # committed plan via the SAME `quota_for_plan` the generation CLI calls — so
@@ -1579,6 +1585,27 @@ def _every_planned_tree_id(seed_root: "Path | None" = None) -> "list[str]":
     return sorted(p.name[: -len(".v1.json")] for p in plan_dir.glob("*.v1.json"))
 
 
+def _all_roster_specs() -> "list":
+    """Every tree spec the roster names — 12 aptitudes, 6 elements, 24 statuses — built through the
+    SAME named spec functions `--tree <id>` already uses (`primary_tree_spec`/`elemental_tree_spec`/
+    `status_tree_spec`), so the manifest and a single-tree emit can never disagree about one tree's
+    plan. Demon families are deliberately absent: they have no committed plan under
+    `plan/*.v1.json` and ride the manifest's `_pending` list (spec-tree-plan.md's own `roster`
+    block), never `trees[]`."""
+    from ..adapters.trees.plan import emit as plan_emit
+    from ..adapters.trees.plan.vocabulary import load_roster
+
+    roster = load_roster()
+    specs: "list" = []
+    for aptitude in roster.aptitudes:
+        specs.append(plan_emit.primary_tree_spec(aptitude))
+    for element in roster.elements:
+        specs.append(plan_emit.elemental_tree_spec(element))
+    for status in roster.statuses:
+        specs.append(plan_emit.status_tree_spec(status))
+    return specs
+
+
 def _cmd_trees_generate(args: argparse.Namespace) -> int:
     """`seedsmith trees generate --tree <id>|--all [--dry-run|--write] [--sample-brief]`
     (task H2/H3, spec-tree-language.md §Commands).
@@ -1894,7 +1921,11 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
     # roster/gate-evidence files `might_tree_spec` always read, never a new content decision. "might"
     # keeps calling the original named function verbatim — zero behavior change for the one tree
     # every existing test already exercises.
-    if args.tree == "might":
+    #
+    # `--tree` omitted (`None`): a single-tree emit still needs a spec, and "might" is B1's own named
+    # default. `--manifest` without `--tree` ignores `spec` entirely and builds the full roster.
+    tree_id = args.tree if args.tree is not None else "might"
+    if tree_id == "might":
         try:
             spec = plan_emit.might_tree_spec()
         except Exception as ex:  # gates.GateEvidenceError, etc. — never resolved silently
@@ -1904,7 +1935,7 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         from ..adapters.trees.plan.vocabulary import load_roster
         roster = load_roster()
         aptitude_by_lower = {a.lower(): a for a in roster.aptitudes}
-        aptitude_id = aptitude_by_lower.get(args.tree)
+        aptitude_id = aptitude_by_lower.get(tree_id)
         # J1 (spec-tree-plan.md §7 table): elemental_tree_spec/status_tree_spec, the two remaining
         # mechanical extensions of primary_tree_spec's own generalization pattern. Checked after
         # aptitudes (the pre-existing, most-exercised path stays first and unchanged) — roster.elements
@@ -1917,20 +1948,20 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
             except Exception as ex:  # ValueError, gates.GateEvidenceError, etc. — never resolved silently
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
-        elif args.tree in roster.elements:
+        elif tree_id in roster.elements:
             try:
-                spec = plan_emit.elemental_tree_spec(args.tree)
+                spec = plan_emit.elemental_tree_spec(tree_id)
             except Exception as ex:
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
-        elif args.tree in roster.statuses:
+        elif tree_id in roster.statuses:
             try:
-                spec = plan_emit.status_tree_spec(args.tree)
+                spec = plan_emit.status_tree_spec(tree_id)
             except Exception as ex:
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
         else:
-            print(f"seedsmith: {args.tree!r} is not one of the {len(roster.aptitudes)} primary trees "
+            print(f"seedsmith: {tree_id!r} is not one of the {len(roster.aptitudes)} primary trees "
                  f"{sorted(aptitude_by_lower)!r}, the {len(roster.elements)} elemental trees "
                  f"{sorted(roster.elements)!r}, or the {len(roster.statuses)} status trees "
                  f"{sorted(roster.statuses)!r}", file=sys.stderr)
@@ -1947,7 +1978,21 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         return EXIT_CLEAN
 
     if args.manifest:
-        specs = [spec]
+        # `--manifest` operates on the TOP-LEVEL manifest and the full `trees[]` index it carries
+        # (spec-tree-plan.md Commands: `trees plan --emit` writes the whole manifest). Before this
+        # fix the branch built a one-element `[spec]` list from `--tree`'s default ("might"), so a
+        # bare `--emit` rewrote `plan.v1.json` indexing ONE tree while 41 committed per-tree plans
+        # sat unindexed — the roster block claimed 21 statuses against the roster's real 24, and the
+        # manifest's own `planHash` described a 1-tree corpus. A manifest is a corpus-level object;
+        # only an explicit `--tree` narrows it (the single-tree case the old tests exercised).
+        if args.tree is not None:
+            specs = [spec]
+        else:
+            try:
+                specs = _all_roster_specs()
+            except Exception as ex:  # GateEvidenceError, EmitError, a missing roster mirror, ...
+                print(f"EXIT_CANNOT_RUN: {ex}")
+                return EXIT_CANNOT_RUN
         if args.check:
             try:
                 diffs = plan_emit.check_manifest(specs, tuning_doc)
@@ -1967,7 +2012,7 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         except (plan_emit.EmitError, plan_invariants.PlanInvariantError) as ex:
             print(f"EXIT_REFUSED: {ex}")
             return EXIT_REFUSED
-        print(f"wrote {path}")
+        print(f"wrote {path} ({len(specs)} tree(s) indexed)")
         return EXIT_CLEAN
 
     if args.check:
@@ -2821,10 +2866,11 @@ def build_parser() -> argparse.ArgumentParser:
     trees_plan.add_argument("--emit", action="store_true", help="write the plan (default if no flag given)")
     trees_plan.add_argument("--check", action="store_true",
                             help="regenerate in memory and diff against the committed plan")
-    trees_plan.add_argument("--tree", default="might",
+    trees_plan.add_argument("--tree", default=None,
                             help="tree id to plan — any of the 12 primary trees named by the roster, "
                                  "or (J1) any of the roster's elemental or status tree ids "
-                                 "(default: might, B1's own named tree)")
+                                 "(default: might for a single-tree emit; omitted entirely means "
+                                 "every roster tree for --manifest)")
     trees_plan.add_argument("--manifest", action="store_true",
                             help="operate on the top-level manifest (plan.v1.json) + its trees[], "
                                  "not just --tree alone (task C2)")

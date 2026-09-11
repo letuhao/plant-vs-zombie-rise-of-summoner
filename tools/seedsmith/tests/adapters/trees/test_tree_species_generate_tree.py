@@ -142,24 +142,20 @@ class RunSpeciesTreeTests(unittest.TestCase):
         nodes_doc = json.loads(result.nodes_seed_path.read_text(encoding="utf-8"))
         self.assertEqual(40, len(nodes_doc["nodes"]))
 
-    def test_a_real_name_key_collision_is_reported_not_raised(self) -> None:
+    def test_a_real_name_key_collision_within_a_parallel_batch_is_deduped_not_raised(self) -> None:
         # The exact regression this test guards against: AbyssSwordStar's own first real
         # proof-of-concept run against the live local model crashed the whole orchestrator with an
         # uncaught NodeKeyRefused the first time this function was ever run for real (two nodes,
-        # both independently named "Abyssal Shell"). Fixed to mirror `_cmd_trees_generate`'s own
-        # already-shipped try/except -- a collision is a real, reportable outcome (this tree needs
-        # another pass), never a crash.
+        # both independently named "Abyssal Shell"). The first fix reported the refusal instead of
+        # crashing, but still lost the whole tree; the durable fix (2026-09-11, matching
+        # `_derive_unique_name_key`'s own documented contract) deterministically suffixes the second
+        # colliding key at record time, so the tree completes exactly as it does on the sequential
+        # path -- never renamed "out from under the model's answer", only its key made unique.
         #
-        # `workers=4` here is load-bearing, not cosmetic: `run_language_stage`'s own sequential path
-        # (`workers=1`) already self-heals a repeated name via `known_name_keys`' own suffixing
-        # (confirmed directly -- the identical stub under `workers=1` produces ZERO collisions,
-        # since each node sees every earlier one's already-committed key before it generates). The
-        # real crash only reproduces within ONE concurrent batch: subjects sharing a `(tier,
-        # nodeClass)` run are generated in parallel specifically because `run_language_stage`'s own
-        # docstring states they are safe to (no sibling dependency) -- but name-key uniqueness IS a
-        # cross-subject dependency, and two concurrent picks cannot see each other in time to
-        # disambiguate. This is the real, narrow condition `AbyssSwordStar`'s own PoC hit, not a
-        # symptom of `workers=1` at all.
+        # `workers=4` here is load-bearing, not cosmetic: two subjects in ONE concurrent batch
+        # cannot see each other's pick in time to disambiguate, which is the real, narrow condition
+        # `AbyssSwordStar`'s own PoC hit. The sequential path (`workers=1`) already self-healed via
+        # `known_name_keys`; this proves the parallel path now does too.
         with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=_colliding_node_call_stub()):
             result = run_species_tree(
                 "AbyssSwordStar", self.anchor, 0, self.offered, self.alternates,
@@ -167,19 +163,22 @@ class RunSpeciesTreeTests(unittest.TestCase):
                 seed_root=self.seed_root, call=_stage_call, config=TEST_CONFIG, workers=4)
 
         self.assertIsNotNone(result.resolved_cell, "the favour lock still resolved cleanly")
-        self.assertIsNotNone(result.node_key_refused_reason)
-        self.assertIn("abyssal-shell", result.node_key_refused_reason)
-        self.assertIsNone(result.nodes_seed_path)
-        self.assertEqual({}, result.outcome_counts)
-        self.assertEqual(frozenset(), result.marked_node_ids)
-        self.assertIsNone(result.codex_summary, "never runs the codex stage over a refused tree")
-        self.assertIsNone(result.metadata_path)
+        self.assertIsNone(result.node_key_refused_reason,
+                          "a within-batch collision is resolved, never surfaced as a refusal")
+        self.assertIsNotNone(result.nodes_seed_path, "the tree completes rather than being lost")
+        self.assertGreater(result.outcome_counts.get("accepted", 0), 0)
 
-        # The already-accepted nodes from the failed attempt are NOT lost -- `run_language_stage`
-        # writes the ledger before ever building the (refused) seed document.
-        from seedsmith.adapters.trees.nodegen import run as run_mod
-        ledger = run_mod.read_ledger(self.ledger_path)
-        self.assertGreater(len(ledger), 0, "the ledger still records what WAS accepted before the refusal")
+        # Every persisted nameKey is unique within the tree. The stub is adversarial (EVERY node
+        # answers "Abyssal Shell"), so the generation-time taken-names gate legitimately routes
+        # later identical drafts to `unresolved` -- gate 21's own contract, "re-prompted, never
+        # persisted". What matters here is that a same-batch collision no longer aborts the whole
+        # tree (the old bug) and never lands a duplicate in the seed document.
+        from seedsmith.adapters.trees.nodegen import emit as emit_mod
+        nodes_doc = json.loads(result.nodes_seed_path.read_text(encoding="utf-8"))
+        keys = [n["nameKey"] for n in nodes_doc["nodes"]]
+        self.assertEqual(len(keys), len(set(keys)), "within-tree nameKeys must all differ")
+        self.assertIn("tree.node.abyssal-shell", keys)
+        emit_mod.assert_no_duplicate_name_keys(keys)
 
     def test_an_unresolved_favour_never_reaches_node_generation_at_all(self) -> None:
         def _always_none(system, user, *, config=None, schema=None):

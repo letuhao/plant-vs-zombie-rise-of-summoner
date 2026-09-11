@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "kind": "drop-table", "_meta": {"partition": "drop-table/test"}, "entries": [{"id": "droptable.d1-001", "name": "Cache", "groups": [{"groupKey": "g", "entries": [{"entryKind": "insert", "ref": "gem.g1-001", "dropBand": "seldom"}]}]}]}

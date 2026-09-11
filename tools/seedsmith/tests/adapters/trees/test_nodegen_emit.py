@@ -177,6 +177,58 @@ class SeedDocumentRoundTripTests(unittest.TestCase):
         path_b = emit.write_seed_document(doc, seed_root_b)
         self.assertEqual(path_a.read_bytes(), path_b.read_bytes())
 
+    def test_an_all_current_vintage_document_is_stamped_with_it(self) -> None:
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version="tree-language/3"),
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n1", node_key="n1", branch="offensive", tier=1,
+                node_class="magnitude", response=_sample_response(name_key="tree.node.b"),
+                prompt_version="tree-language/3"),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("tree-language/3", doc["_provenance"]["promptVersion"])
+        self.assertNotIn("promptVersionByNode", doc["_provenance"])
+
+    def test_a_partially_superseded_document_is_stamped_mixed_not_current(self) -> None:
+        """2026-09-11, D2's own exposed lie. Under `--supersede`, a failed re-roll KEEPS its prior,
+        pre-provenance record (so the tree stays complete). Filtering empties out of the vintage set
+        would then see only the current vintage and stamp the WHOLE document with it — hiding the
+        exact stale nodes the stamp exists to name. An empty per-record vintage is its own sentinel.
+        """
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version="tree-language/3"),
+            # A re-roll that failed: prior record kept, no per-record vintage (the legacy shape).
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n1", node_key="n1", branch="offensive", tier=1,
+                node_class="magnitude", response=_sample_response(name_key="tree.node.b"),
+                prompt_version=""),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("mixed", doc["_provenance"]["promptVersion"])
+        self.assertEqual({"skill.might-off-t1-n0": "tree-language/3",
+                          "skill.might-off-t1-n1": ""},
+                         doc["_provenance"]["promptVersionByNode"])
+
+    def test_an_all_empty_vintage_document_keeps_the_legacy_caller_stamp(self) -> None:
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version=""),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("tree-language/3", doc["_provenance"]["promptVersion"])
+        self.assertNotIn("promptVersionByNode", doc["_provenance"])
+
 
 if __name__ == "__main__":
     unittest.main()

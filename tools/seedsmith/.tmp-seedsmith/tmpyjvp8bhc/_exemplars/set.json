@@ -1,1 +1,0 @@
-{"kind": "set", "_meta": {"partition": "p"}, "entries": [{"id": "set.exemplar-001", "nameKey": "s.ex1", "name": "Exemplar Set", "themeKey": "ex", "members": [{"role": "core-guard"}, {"role": "head-guard"}], "thresholds": [{"pieces": 2}]}]}
