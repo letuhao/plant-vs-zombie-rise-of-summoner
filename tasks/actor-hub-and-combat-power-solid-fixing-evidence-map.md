@@ -85,7 +85,8 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 ### T6 — Delete BattleStatComposer + RulesetVersion bump · spec `battle-hub-fuse`
 
-> **Owner sign-off required before this task runs** (only irreversible step).
+> Bump and golden re-bless are **already locked by the approved plan** (T6 runs them; no fresh
+> approval step).
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|

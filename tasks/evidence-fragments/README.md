@@ -5,6 +5,9 @@ the shared ledger, so concurrent branches cannot conflict. At integration the ro
 [tasks/actor-hub-and-combat-power-solid-fixing-evidence-map.md](../actor-hub-and-combat-power-solid-fixing-evidence-map.md)
 and the fragment is marked consumed.
 
+Only `/solid-run fanout` uses this directory. AUTO mode edits the ledger directly on the current
+branch, so it writes no fragments.
+
 Format (one row per acceptance criterion):
 
 ```

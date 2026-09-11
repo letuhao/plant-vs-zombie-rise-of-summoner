@@ -14,10 +14,12 @@ plan owns *what* to build; this file owns *how the work is sequenced and proven*
 
 - **Git is hands-off.** No agent runs `git commit`/`add`/`merge`/`push`. Worktrees are integrated by
   the owner (Apply or merge). Each wave checkpoint hands the owner a one-line message + paths.
-- **No pre-work hard gate.** Waves start when the previous wave's evidence rows are executed. The
-  one exception is **T6** (RulesetVersion bump + golden re-bless): explicit owner sign-off first.
-- **One irreversible step, one owner decision.** The single `RulesetVersion` bump (`= 4` → `= 5`)
-  is the program's only hard gate. Everything else ships behind the Ask-first defaults in the todo.
+- **No pre-work hard gate.** Waves start when the previous wave's evidence rows are executed.
+- **The `RulesetVersion` bump is already approved.** The single bump (`= 4` → `= 5`) and golden
+  re-bless are locked by the plan (T6); the run executes them without a fresh approval.
+- **AUTO is the default path.** `/solid-run` runs all five waves on the current branch with no
+  per-task stops; wave checkpoints verify and continue. `/solid-run fanout` opts into worktrees,
+  which need the owner to merge between waves — that is the only mode that is not unattended.
 - **Do not fork a second implementation** while a task is in fan-out. `unique-lawn-wire` stays in the
   aptitude-sheet stream; T12 only proves its Done criteria.
 
@@ -49,7 +51,7 @@ worktree branched from `main`.
 |---|---|---|---|---|
 | 1a | T1, T2 (`channelmods-hub`) | **WT-A** | — | one file seam (`WebMatchService`), serial inside |
 | 1a | T3, T4 (`cold-equip-one`) | **WT-B** | — | independent of T1/T2, parallel |
-| 1b | T5, T6, T7 (`battle-hub-fuse`, ops) | **main, serial** | WT-A + WT-B merged | fuse touches shared compose + goldens; T6 is the gate |
+| 1b | T5, T6, T7 (`battle-hub-fuse`, ops) | **main, serial** | WT-A + WT-B merged | fuse touches shared compose + goldens; one bump |
 | 2 | T8, T9 | **main** | T6 | membership unlocks Standing; keep on main |
 | 2 | T10 + T17 (chip + theta) | **WT-C** | T9 | FE fold + wire, one reviewer surface |
 | 2 | T11 (copy) | **WT-D** | T9 | independent FE fold |
@@ -68,9 +70,10 @@ worktree mode branches from the current `main`, not from a sibling worktree.
 
 ---
 
-## 4. Launching fan-out sessions
+## 4. Launching fan-out sessions (optional — `/solid-run fanout`)
 
-Use Agent Manager, one task-group per worktree, each with the standard prompt:
+AUTO runs on the current branch; fan-out is the only mode that needs the owner. Use Agent Manager,
+one task-group per worktree, each with the standard prompt:
 
 ```
 /solid-run Tn
@@ -112,18 +115,20 @@ The fragment file format is the ledger row format:
 
 ## 6. Wave checkpoints
 
-At each `## Checkpoint` in the todo, on `main`:
+At each `## Checkpoint` in the todo, on the current branch:
 
 1. Fold all fragments for the wave into the ledger; confirm every row is `PASS` or justified `N/A`.
-2. Run the wave's guards + focused suites once on integrated `main` (proves the merge, not just each
-   worktree).
-3. Hand the owner: one-line commit message (imperative, ~72 chars), the changed paths, and the
-   quick test command. Stop for the wave glance.
+2. Run the wave's guards + focused suites once on the integrated tree (proves the merge, not just
+   each worktree).
+3. In AUTO, continue straight into the next wave. In `/solid-run fanout`, hand the owner the
+   one-line commit message (imperative, ~72 chars), the changed paths, and the quick test command so
+   they can merge the wave's worktrees before the next wave opens.
 
 ---
 
 ## 7. Definition of program done
 
 The todo's **Program Done when** list plus the map's **Done when** list, each backed by an executed
-ledger row. `prove-hub-combat` green is the program's own end-to-end proof; T6's golden re-bless is
-the one owner-signed step. `world-actor-combat` is tracked only — no Done claim here.
+ledger row. `prove-hub-combat` green is the program's own end-to-end proof; the T6 golden re-bless
+is executed under the plan's already-approved `RulesetVersion` bump. `world-actor-combat` is tracked
+only — no Done claim here.
