@@ -808,6 +808,16 @@ Empty / whitespace SourceId is a **defect**: **every** Hot derived subsystem mus
 
 Compose honesty: `FlatReplace` channels ship `composeKind` on the sheet **and** `/derived` so a contribution list that does not sum to the total is explained. Contributions are **ephemeral per resolve** — never a SQLite ledger.
 
+### 8.2 Bound UniqueActor Hot aptitude input (2026-09-12)
+
+**Bound UniqueActor** Hot aptitude allocation is **UniqueDemon-keyed** (`commander + UniqueDemon(instanceId)`), matching Server `UniqueActorHubCompose`. **Empire DemonType / species** allocation is for **empire generals** only. A Bound unique that falls through to species on the injector while the sheet uses UniqueDemon is an **out-of-order sole Hot compose** failure — dual resolve is a defect, not an optional lawn gap. See [combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn) and [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md). Spawn ownership: `decisions.md` Demon progression source and spawn ownership (2026-09-08).
+
+### 8.3 One compose / dual-engine debt (2026-09-12)
+
+**End state:** ActorHub is the **only** compose gate for actor combat derived / AppliedCombat in every place (lawn, sheet, battle, delve, siege, sim). Contribute via `IActorStatSubsystem` / registered atom readers; read Hub only.
+
+**Debt:** `BattleStatComposer` + private `BattleChannelMod` producers (Star/Loyalty/etc.) are **grandfathered architectural debt** — the 2026-09-07 “stays separate” ADR exception was **overturned** as a SOLID/DRY defect, not intentional SSOT. Fusion into Hub is **mandatory** (program `/spec` owed). Until then: do not copy; new `*Composer*` / ChannelMods combat writers / new `BattleStatComposer.Compose` call sites under `src/` fail `scripts/guard-actor-hub.ps1`. Ideal: [combat-power-number-ideal.md](combat-power-number-ideal.md). ADR: `decisions.md` ActorHub sole Hot compose gate.
+
 ---
 
 ## 9. Migration from flat StatSystem

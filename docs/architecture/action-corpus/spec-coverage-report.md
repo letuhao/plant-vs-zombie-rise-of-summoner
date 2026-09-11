@@ -149,6 +149,9 @@ That fixes both metrics above, and it makes one of them worse before it makes it
   derived for ~900 units; at 84 species and 3 signature actions each the signature tier is **252**, and
   the whole corpus is roughly **850** — below the band rather than inside it. The derivation is correct
   in method and was applied to the wrong roster, and repeating that here would re-ship the same error.
+  ⛔ **RE-MEASURED 2026-09-11:** the live roster is **904 species / 227 families**, and the shipped
+  round-1 plan is **6,655 briefs** (1,000 general / 1,135 family / 4,520 species), so the 84-species
+  arithmetic above is a historical note, not the current target.
 - **Never schedule past the smoke batch.** The report is the evidence for the owner's decision; it does
   not make the decision and it does not plan the full run.
 - Never call a model. Not to summarise, not to judge prose, not to "explain" a thin cell.

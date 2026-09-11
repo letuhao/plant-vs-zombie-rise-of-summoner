@@ -39,8 +39,8 @@ It forces the ordering **P1 ∥ P2 → P3**.
 
 | Thing | Evidence |
 |---|---|
-| Species motif anchors — **84 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (84 keys, measured 2026-09-03) |
-| Family assignments — 53 species, 19 families | `data/seed/demons/_generated/family-assignments.json` |
+| Species motif anchors — **904 live species**, each with `motifs`, `antiMotifs`, `basis` | `data/seed/demons/_generated/motif-assignments.json` (⛔ **RE-MEASURED 2026-09-11:** 904 live keys; the 84-key figure was the legacy `DemonSpeciesCatalog.Generated.cs` projection) |
+| Family assignments — **904 species, 1,183 memberships, 227 consolidated families** | `data/seed/actions/_generated/family-map.json` (⛔ **RE-MEASURED 2026-09-11:** the old `family-assignments.json` 53/19 figure was the legacy projection) |
 | `SpeciesBasics.InnateActionId` — per species, nullable, validated, assembled, persisted | `Actions/ActionRow.cs:87` · `Actions/ActionValidator.cs:107-115` · `Actions/Grants/ActionSetAssembler.cs:60-61` · `FusionRpg.Data/Sqlite/RpgStore.Actions.cs:546-549` |
 | Closed action vocabularies | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
 | Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
@@ -314,7 +314,7 @@ taken by default.
 | **The assembled P3 brief**, carrying `familyActions` | **A-S2** `brief-assembly` | does not exist — this is the hard in-program ordering |
 | The plan behind it — species anchor and slot | **A-S1** `distribution-planner` (via A-S2) | does not exist |
 | The accepted family round A-S2 reads | **A-P2** `family-propose` | does not exist |
-| Species motifs / anti-motifs / element / rarity | **seedsmith D2/D5** | 84 species on disk; rarity for the unrostered remainder is unspecced |
+| Species motifs / anti-motifs / element / rarity | **seedsmith D2/D5** | 904 live species on disk (⛔ re-measured 2026-09-11; the 84 figure was the legacy catalog projection) |
 | Quality gates, bounded repair | **A-S4** `validate-heal` | does not exist |
 | Innate promotion | **A-S6** `innate-picker` | model-free, downstream, not this stage's business |
 | Channel pools · binding production | **effect-atom E30** · **effect-pipeline module 4** | outside this program; `effect_binding` has zero rows |

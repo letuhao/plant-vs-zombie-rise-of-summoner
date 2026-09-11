@@ -41,7 +41,9 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 from ..characteristic_pool.derive import CATEGORIES
-from ..distribution_planner.derive import GENERAL_WEIGHTS, RUN_WINDOW, largest_remainder_count
+from ..distribution_planner.derive import (
+    GENERAL_WEIGHTS, RUN_WINDOW, apportion_categories, largest_remainder_count,
+)
 from ..vocab import PAIRING_ROLES, SCOPES, STATUSES
 from ....metrics.model import Finding, Severity
 from .ctx import ActionCoverageCtx, RosterCounts
@@ -75,25 +77,30 @@ def recompute_subject_category_counts(
     """Returns `{(scope, subjectKey): {category: count}}` — `subjectKey` is the literal
     `'general'` for the single general pseudo-subject (never `None`: a dict key needs to be
     hashable and comparable alongside real species/family ids, and `'general'` can never collide
-    with a real one). Re-derives EXACTLY the way `distribution_planner.derive.plan_subject` does:
-    largest remainder over each subject's own `categoryMilli` row and its own per-round count —
-    never trusting a stored brief's own counts."""
+    with a real one). Re-derives EXACTLY the way `distribution_planner.derive.plan_round` does:
+    the SCOPE-level two-level allocation (`apportion_categories`), never trusting a stored brief's
+    own counts. The general scope has one subject, so its own per-subject split IS the scope
+    allocation and `largest_remainder_count` is correct there."""
     out: "dict[tuple[str, str], dict[str, int]]" = {}
     if general_count:
         out[("general", _GENERAL_SUBJECT_KEY)] = largest_remainder_count(
             GENERAL_WEIGHTS.category_milli, CATEGORIES, general_count)
-    for species_id in species_ids:
-        weights = weights_by_key.get(("species", species_id))
-        if weights is None or per_species_count == 0:
-            continue
-        out[("species", species_id)] = largest_remainder_count(
-            weights.category_milli, CATEGORIES, per_species_count)
-    for family_id in sorted(family_members):
-        weights = weights_by_key.get(("family", family_id))
-        if weights is None or per_family_count == 0:
-            continue
-        out[("family", family_id)] = largest_remainder_count(
-            weights.category_milli, CATEGORIES, per_family_count)
+
+    species_subjects = [
+        (species_id, weights_by_key[("species", species_id)].category_milli)
+        for species_id in species_ids
+        if weights_by_key.get(("species", species_id)) is not None and per_species_count
+    ]
+    for species_id, counts in apportion_categories(species_subjects, per_species_count).items():
+        out[("species", species_id)] = counts
+
+    family_subjects = [
+        (family_id, weights_by_key[("family", family_id)].category_milli)
+        for family_id in sorted(family_members)
+        if weights_by_key.get(("family", family_id)) is not None and per_family_count
+    ]
+    for family_id, counts in apportion_categories(family_subjects, per_family_count).items():
+        out[("family", family_id)] = counts
     return out
 
 

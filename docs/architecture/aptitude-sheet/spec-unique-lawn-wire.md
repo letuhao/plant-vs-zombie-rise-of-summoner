@@ -10,10 +10,21 @@
 ## Objective
 
 When a UniqueActor is **Bound** on the lawn, Injector Hot aptitude resolve must include that
-specimen’s **UniqueDemon** allocation (summed with commander), not commander+species only.
+specimen’s **UniqueDemon** allocation (summed with commander), not commander+species only —
+**matching** [`UniqueActorHubCompose`](../../../src/FusionRpg.Server/UniqueActorHubCompose.cs)
+(`commander + UniqueDemon(instanceId)`).
 
 Success: allocate UniqueDemon in UI → SignalR reload → Bound unique on lawn reflects new points.
 Server Hub alone is **not** acceptance.
+
+### SSOT / FSM defect (locked, 2026-09-12)
+
+Lawn Hot and UniqueActor sheet/web share **one** ActorHub vocabulary and the same omni /
+`combat.*` consumers. Divergent aptitude input for the same Bound specimen
+(`commander+species` on lawn vs `commander+UniqueDemon` on sheet) is an **ActorHub sole Hot
+compose / FSM defect** — out of order, not a deferrable FE-only gap. See
+[combat-power-number-ideal.md](../combat-power-number-ideal.md) and `decisions.md`
+(ActorHub sole Hot compose gate; Demon progression source and spawn ownership).
 
 ---
 

@@ -163,7 +163,8 @@ Wave 3 — allocate chrome helpers + presets
 
 - [ ] UniqueActor Aptitudes spends UniqueDemon; commander sheet spends commander (D2).
 - [ ] UniqueDemon GET returns persisted shares + budget/leftover — no EffectiveUnique (D1).
-- [ ] Bound lawn unique receives UniqueDemon allocation after allocate + reload (D3).
+- [ ] Bound lawn unique receives UniqueDemon allocation after allocate + reload (D3) — dual resolve (lawn species vs sheet UniqueDemon) is an ActorHub/FSM defect until this lands; see [combat-power-number-ideal.md](combat-power-number-ideal.md).
+- [ ] Aptitudes scope chrome does not label specimen/species **level** as “power”; player “power” means combat power number (Standing / matrix), not Θ alone and not a single `combat.power.omni` glance ([combat-power-number-ideal.md](combat-power-number-ideal.md) HF-chip / HF-copy).
 - [ ] Species Mode B uses same console under Pacts/`AptitudesLayer`; respec priced; free allocate stays retired (D4).
 - [ ] `AptitudesUpdated` carries scope+key; FE invalidates unique/species/commander queries correctly.
 - [ ] Remaining points visible in console hero; Confirm/Cancel in-band (D6/D7) — not footer-only.
@@ -188,6 +189,7 @@ Wave 3 — allocate chrome helpers + presets
 - [x] Verified against code: `SpeciesBuildPlanCatalog.SharesFor`, `Program.cs` catalog Configure,
       AptitudeEndpoints / species-build / UniqueActorHubCompose / RpgClient lawn resolve (prior + this pass).
 - [x] ActorHub: consume/contribute via existing aptitude path — no private fold; favour ≠ Hub fill.
+- [x] Bound lawn + sheet must share UniqueDemon aptitude input (D3 / unique-lawn-wire); combat power vocabulary locked in [combat-power-number-ideal.md](combat-power-number-ideal.md) (idea phase — code HF-* not authorized from map alone).
 - [x] Tunables/catalog homes named; soft max presets + row abs max in tuning (E8).
 - [x] Caps: overspend throws/409 (PS-8); leftover empty legal; D13 leftover after clamp legal (E2).
 - [ ] Full guard/test sweep — deferred to `/plan` implementation waves.

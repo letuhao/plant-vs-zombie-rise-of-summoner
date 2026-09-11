@@ -88,13 +88,12 @@ public sealed class EquipAtomSource
     /// The same equipped atoms, projected for the <b>primary/derived</b> pipeline
     /// (<see cref="ActorHub"/> / <see cref="AtomDerivedSubsystem"/>) instead of the battle one.
     ///
-    /// <para><b>Why a second projection and not a second pipeline.</b> `class-system-map.md` §2a.0
-    /// decided 2026-08-26 that *the composers stay separate* — the battle seam is `ChannelMods`, and
-    /// `BattleStatComposer` runs no subsystems. That decision is about not fusing the two composers;
-    /// it says nothing against each side reading the SAME equipped atoms through its own seam, which
-    /// is exactly what this is. The parse is shared with <see cref="ModsFor"/> (one
-    /// <see cref="EquippedDerived"/> walk), so the two sides can never drift on which atoms count,
-    /// which channel they name, or what magnitude they carry.</para>
+    /// <para><b>Why a second projection during migration.</b> Dual compose (Hub vs
+    /// <c>BattleStatComposer</c>) is ADR <b>debt</b> (overturned 2026-09-12) — end-state is Hub only.
+    /// Until fusion, both seams still read the SAME equipped atoms: battle via <see cref="ModsFor"/>
+    /// / <c>ChannelMods</c>, Hub via this method. The parse is shared (one
+    /// <see cref="EquippedDerived"/> walk), so the two sides cannot drift on which atoms count,
+    /// which channel they name, or what magnitude they carry. Do not invent a third projection.</para>
     ///
     /// <para><b>The op IS honoured here</b>, through <see cref="AtomDerivedSubsystem.TryParseOp"/> —
     /// the shipped parser whose own contract is that an unknown or `more` op is a content error to

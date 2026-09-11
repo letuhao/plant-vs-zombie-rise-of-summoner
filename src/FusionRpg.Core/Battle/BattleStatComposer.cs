@@ -11,10 +11,13 @@ namespace FusionRpg.Core.Battle;
 /// Every value is an integer; reads go back out through CombatDerivedReader so channel semantics
 /// stay identical to the PvZ overlay.
 ///
-/// <para><b>Locked separate from ActorHub</b> (decisions.md "ActorHub sole Hot compose gate",
-/// class-system 2026-08-26): battle seam is <c>ChannelMods</c>, not <see cref="IActorStatSubsystem"/>.
-/// A shared-contribution ADR is required before fusing. Equipment still shares the same atom rows
-/// via <see cref="EquipAtomSource"/> so GG-49 SourceIds on the derived/sheet side stay aligned.</para>
+/// <para><b>Architectural debt — do not copy</b> (decisions.md "ActorHub sole Hot compose gate",
+/// overturned 2026-09-12). Dual compose (Hub vs this class) is an ADR <b>defect</b>, not intentional
+/// SSOT. Grandfathered until a mandatory shared-contribution fusion <c>/spec</c> retires this path;
+/// new parallel composers / ChannelMods combat writers fail <c>scripts/guard-actor-hub.ps1</c>.
+/// Equipment still shares atom rows via <see cref="EquipAtomSource"/> so GG-49 SourceIds stay aligned
+/// during migration. End-state: ActorHub only — see
+/// <c>docs/architecture/combat-power-number-ideal.md</c>.</para>
 /// </summary>
 public static class BattleStatComposer
 {
@@ -57,8 +60,9 @@ public static class BattleStatComposer
         // old set (distribution-reconcile's finding: 47 of 84 edge channels threw here before this
         // change). T3's own repair (spec-readiness-model.md), reused: widen the known-channel set,
         // change no compose logic — a ChannelMods producer moving nothing while nobody has an
-        // allocation is what keeps this byte-identical (battle-timeline-map.md; see also
-        // class-system-map.md §2a.0's "the composers stay separate" decision).
+        // allocation is what keeps this byte-identical (battle-timeline-map.md). The 2026-08-26
+        // "composers stay separate" ADR was overturned 2026-09-12 as debt — this class remains
+        // grandfathered until fusion; do not copy.
         var set = new HashSet<string>(StringComparer.Ordinal);
         foreach (var def in DerivedStatRegistry.CreateDefault().AllRegistered)
             set.Add(def.ChannelId);

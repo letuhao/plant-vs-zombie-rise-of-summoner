@@ -90,12 +90,12 @@ class RunTuningLoadTests(unittest.TestCase):
     def test_shipped_defaults(self) -> None:
         t = load_run_tuning()
         self.assertEqual(t.mode, "full")
-        self.assertEqual(t.general_count, 25)
+        self.assertEqual(t.general_count, 1000)
         self.assertEqual(t.per_family_count, 5)
         self.assertEqual(t.per_species_count, 5)
         self.assertEqual(t.multiplicative_pairs, (("atom.keen-edge", "atom.cruelty"),))
         self.assertEqual(t.family_motif_max, 6)
-        self.assertEqual(t.version, 2)
+        self.assertEqual(t.version, 3)
 
     def test_meta_states_untuned(self) -> None:
         doc = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))
@@ -305,6 +305,56 @@ class LargestRemainderAndExpandTests(unittest.TestCase):
         b = {"status": 1, "movement": 2, "support": 5, "defense": 3, "attack": 7}
         self.assertEqual(dp.largest_remainder_count(a, CATEGORIES, 18),
                          dp.largest_remainder_count(b, CATEGORIES, 18))
+
+
+class TwoLevelAllocationTests(unittest.TestCase):
+    """The 2026-09-11 engine fix: scope-level exact quota + lean-aware per-subject repair. Replaces
+    the per-subject largest-remainder split, which was measured inert at `count == 5` (needs weight
+    >= 400 per-mille for a 2nd slot; the shipped scale tops out at 266, so all 1,131 subjects got
+    the identical 1/1/1/1/1 vector)."""
+
+    @staticmethod
+    def _rows(n: int, *, lean: str = "attack") -> "list[tuple[str, dict]]":
+        rows = []
+        for i in range(n):
+            milli = {c: 200 for c in CATEGORIES}
+            milli[lean] += 60
+            milli["status"] -= 60
+            rows.append((f"s{i:03d}", milli))
+        return rows
+
+    def test_every_row_sums_to_count(self) -> None:
+        for count in (1, 2, 3, 5, 8, 25):
+            alloc = dp.apportion_categories(self._rows(37), count)
+            for key, counts in alloc.items():
+                self.assertEqual(sum(counts.values()), count, key)
+
+    def test_column_sums_equal_scope_quota_exactly(self) -> None:
+        rows = self._rows(37)
+        for count in (1, 3, 5, 10):
+            alloc = dp.apportion_categories(rows, count)
+            col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
+            aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
+            expected = dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows))
+            self.assertEqual(col, expected, f"count={count}")
+
+    def test_not_flat_at_the_shipped_count(self) -> None:
+        alloc = dp.apportion_categories(self._rows(40), 5)
+        self.assertGreater(len({tuple(sorted(v.items())) for v in alloc.values()}), 1)
+
+    def test_lean_head_wins_extra_slots_when_quota_permits(self) -> None:
+        alloc = dp.apportion_categories(self._rows(60, lean="attack"), 5)
+        winners = sum(1 for v in alloc.values() if v["attack"] >= 2)
+        self.assertGreater(winners, 0, "an attack-leaning roster must place extra attack briefs")
+
+    def test_deterministic(self) -> None:
+        rows = self._rows(50)
+        self.assertEqual(dp.apportion_categories(rows, 5), dp.apportion_categories(rows, 5))
+
+    def test_empty_and_zero_count(self) -> None:
+        self.assertEqual(dp.apportion_categories([], 5), {})
+        alloc = dp.apportion_categories(self._rows(4), 0)
+        self.assertTrue(all(v == {c: 0 for c in CATEGORIES} for v in alloc.values()))
 
 
 class OverflowTests(unittest.TestCase):
@@ -722,10 +772,12 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
             self.skipTest("round-1.json not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-brief")
-        self.assertEqual(len(rows), 5680)
+        tuning = load_run_tuning()
+        expected = tuning.general_count + 227 * tuning.per_family_count + 904 * tuning.per_species_count
+        self.assertEqual(len(rows), expected)
         kind_spec = next(k for k in KINDS if k.kind == "action-brief")
         edges = result.corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
-        self.assertEqual(len(edges), 5680)
+        self.assertEqual(len(edges), expected)
 
 
 class FullRunRefusalTests(unittest.TestCase):
@@ -831,7 +883,9 @@ class RosterSizeTests(unittest.TestCase):
         general_briefs = [e for e in self.doc["entries"] if e["scope"] == "general"]
         self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 904)
         self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 227)
-        self.assertEqual(len(general_briefs), 25)
+        # The general tier is one pseudo-subject whose count is the run tuning's `generalCount`,
+        # never a literal — it moved 25 -> 1000 in the 2026-09-11 general-tier change.
+        self.assertEqual(len(general_briefs), load_run_tuning().general_count)
 
     def test_family_assigned_species_count_is_live_memberships(self) -> None:
         from seedsmith.adapters.actions.characteristic_pool.catalog import derive_live_family_assignments
@@ -841,8 +895,10 @@ class RosterSizeTests(unittest.TestCase):
 
 
 class QuotaExactnessTests(unittest.TestCase):
-    """Acceptance #3 -- per-subject category counts equal the largest-remainder allocation of
-    A-T1's real weights, spot-checked directly against the shipped type-weights.json."""
+    """Acceptance #3 -- per-subject category counts come from the SCOPE-level two-level allocation
+    (`apportion_categories`), spot-checked against the shipped plan. A per-subject largest-remainder
+    split was the pre-2026-09-11 method and was inert at `count == 5` (all 1,131 subjects got the
+    identical 1/1/1/1/1 vector); this class now pins the aggregate-exact replacement instead."""
 
     def setUp(self) -> None:
         tw_path = ACTIONS_ROOT / "type-weights.json"
@@ -852,19 +908,36 @@ class QuotaExactnessTests(unittest.TestCase):
                          for e in json.loads(tw_path.read_text(encoding="utf-8"))["entries"]}
         self.round_doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
 
-    def test_species_category_counts_match_largest_remainder_exactly(self) -> None:
+    def test_species_category_counts_match_scope_allocation_exactly(self) -> None:
+        subjects = sorted(
+            (key, row["categoryMilli"]) for (scope, key), row in self.tw_by_key.items()
+            if scope == "species")
+        expected_all = dp.apportion_categories(subjects, 5)
         for scope_key in ("cherrybomb", "peashooter"):
-            row = self.tw_by_key.get(("species", scope_key))
-            if row is None:
+            if ("species", scope_key) not in self.tw_by_key:
                 continue
             briefs = [e for e in self.round_doc["entries"]
                      if e["scope"] == "species" and e["scopeKey"] == scope_key]
             self.assertEqual(len(briefs), 5)          # perSpeciesCount == 5 at the shipped default
-            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 5)
             actual = {c: 0 for c in CATEGORIES}
             for b in briefs:
                 actual[b["slot"]["category"]] += 1
-            self.assertEqual(actual, expected)
+            self.assertEqual(actual, expected_all[scope_key])
+            self.assertEqual(sum(actual.values()), 5)
+
+    def test_scope_aggregate_matches_quota_and_is_not_flat(self) -> None:
+        subjects = sorted(
+            (key, row["categoryMilli"]) for (scope, key), row in self.tw_by_key.items()
+            if scope == "species")
+        alloc = dp.apportion_categories(subjects, 5)
+        col = {c: 0 for c in CATEGORIES}
+        for counts in alloc.values():
+            for c in CATEGORIES:
+                col[c] += counts[c]
+        self.assertEqual(sum(col.values()), 5 * len(subjects))
+        # The whole point of the fix: the corpus is no longer flat-by-construction.
+        self.assertGreater(len({tuple(sorted(v.items())) for v in alloc.values()}), 1,
+                           "the scope allocation must differentiate subjects")
 
 
 class DeterminismTests(unittest.TestCase):
@@ -931,7 +1004,7 @@ class DeterminismTests(unittest.TestCase):
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
         self.assertIn("corpusHash", doc["_meta"])
         self.assertEqual(doc["_meta"]["round"], 1)
-        self.assertEqual(doc["_meta"]["tuningVersion"], 2)
+        self.assertEqual(doc["_meta"]["tuningVersion"], load_run_tuning().version)
         for e in doc["entries"]:
             self.assertEqual(e["_provenance"]["corpusHash"], doc["_meta"]["corpusHash"])
             self.assertEqual(e["_provenance"]["round"], 1)

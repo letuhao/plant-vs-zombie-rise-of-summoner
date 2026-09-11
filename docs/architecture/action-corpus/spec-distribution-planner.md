@@ -254,12 +254,32 @@ nothing real:
    the same absent-versus-empty discipline A-P3 applies to `familyActions`
    (`spec-signature-propose.md:229-231`).
 
-3. **Allocate categories by quota, not by sampling.** For each subject, `count` briefs are split across
-   the five categories by largest remainder over A-T1's `categoryMilli`, computed in `long`, widening
-   before the multiply and dividing by 1000 last, exactly once. Remainder units go to the largest
-   fractional parts, ties breaking on `ActionEnums.cs:119-123`. **The distribution is therefore exact,
-   not approximate**, which is what makes A-S5's question *"is the plan satisfiable?"* rather than
-   *"did the model drift?"*.
+3. **Allocate categories by quota, not by sampling — at SCOPE level, then to subjects.**
+   ⛔ **CORRECTED 2026-09-11 (engine fix, measured).** The original rule split each subject's own
+   `count` across the five categories by largest remainder over that subject's own `categoryMilli`.
+   That method is arithmetically **inert at the shipped `count == 5`**: a category needs weight
+   `>= 400` per-mille to win a second slot (`floor(400·5/1000) == 2`), while A-T1's shipped
+   `base=1000, step=250` normalises to a **maximum of 267** per-mille — so **all 1,131 live subjects
+   produced the identical `1/1/1/1/1` vector** and the aggregate lean was thrown away (measured
+   attack 21.6% vs movement 18.8%). The quantization was even perverse: `count=5` differentiated
+   worse than `count=2` (1 distinct vector vs 10). The rule is now two levels:
+
+   1. **Scope quota.** Sum every subject's `categoryMilli` in the scope and apportion
+      `count × subjects` units by largest remainder over that sum (`largest_remainder_apportion`).
+      This is exact and is the quota A-S5's cell/`quotaDrift` metrics gate on.
+   2. **Subject assignment.** Start from each subject's own largest-remainder split (best row
+      fidelity), then repair the column drift with deterministic swaps: each swap moves one unit
+      from a category over its quota to one under it, choosing the subject whose own lean best
+      matches the move (`milli[under] − milli[over]` maximised, ties on canonical subject order).
+      Every swap cuts the L1 drift by exactly 2, so the repair terminates with column sums equal to
+      the scope quota and every row still summing to `count`.
+
+   All arithmetic is `long`, widened before the multiply, divided by 1000 last, exactly once.
+   Remainder units go to the largest fractional parts, ties breaking on `ActionEnums.cs:119-123`.
+   **The distribution is therefore exact, not approximate** — at both levels — which is what makes
+   A-S5's question *"is the plan satisfiable?"* rather than *"did the model drift?"*. The general
+   scope has one subject, so its scope quota and its subject split coincide and the simpler
+   per-subject rule is correct there.
 4. **Assign the rung window per scope** from tuning: general **1-4**, family **1-7**, signature
    **1-10** — the *ceilings* geometrically even, three rungs apart, each 2.315× the last. Emitted as
    `rungBand`, never as a magnitude.

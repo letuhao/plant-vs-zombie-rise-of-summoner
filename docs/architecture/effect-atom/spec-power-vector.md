@@ -198,6 +198,7 @@ actorPower(actor) = price( Σ over atoms on the actor's effect list, grouped by 
 
 `ActorPowerCache` lives in **E9**, not E10 — the spawn recursion below needs it to terminate, and E10 comes later. Memoized on `(actor, catalog_revision, binding-set hash)`.
 
+**Amended 2026-09-12 (enriched audit same day):** product “combat power” is this channel matrix over combat-affecting derived (~196 element-typed + combat-support; not `IsCombatChannel` alone); exclude loot/MF/XP and `progression.*`; UniqueActor Standing via synthetic `stat.derived` atoms + membership filter → `Compose` (naive Hub snapshot rejected) — ideal [combat-power-number-ideal.md](../combat-power-number-ideal.md) HF-standing.
 ### Spawn recursion — depth 1, memoized
 
 `5% on death, spawn 2 zombies with 500 hp / 100 atk` is worth `0.05 × 2 × power(that actor)`. So an atom's price calls the **actor** power function — mutually recursive by construction, the same shape as a card game pricing a summon by the body it makes.

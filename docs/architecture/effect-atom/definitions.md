@@ -375,6 +375,9 @@ actorPower(actor) = price( Σ over atoms on the actor's effect list, grouped by 
 
 **Base stats contribute nothing.** That is what makes E10's "marginal on an empty actor ≈ stored power" true, and it keeps actor power a measure of *what was granted*, not of the level curve. If a future spec wants level in the number, it adds a progression atom rather than changing this function.
 
+**Amended 2026-09-12 (combat power number ideal — requirement, not yet full code; roster count corrected same day enrichment):** the player-facing **combat power number** is this matrix price over **combat-affecting** channel totals (**~196** element-typed combat families × roster slots, plus combat-support such as `skill.cooldown.*` — not `IsCombatChannel` alone). High dodge / evasion can dominate low `combat.power.omni`. Non-combat channels (loot, magic find, experience bonus — when they exist) and **`progression.*` (Θ)** **must not** raise combat power. Sheet **Standing** must include Hub combat writers via synthetic `stat.derived` atoms + membership filter → `ActorPowerCache.Compose` (not a naive Hub snapshot) — wiring gap **HF-standing** in [combat-power-number-ideal.md](../combat-power-number-ideal.md). Player label “combat power” = Offense+Survivability+Control only. Do not equate Standing with Θ, specimen level, or a single `combat.power.*` glance.
+
+
 **Revised 2026-08-22, closing D2.** The previous definition summed **per-atom prices**. A sum has no
 cross terms, so E10's marginal read — `vector(with) − vector(without)` — collapsed to exactly the atom's
 own context-free price on every actor, for every actor. The read that was supposed to capture

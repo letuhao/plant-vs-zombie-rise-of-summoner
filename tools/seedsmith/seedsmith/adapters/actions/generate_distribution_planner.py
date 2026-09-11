@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 from .characteristic_pool.catalog import (
@@ -44,6 +45,7 @@ from .distribution_planner import derive as dp
 from .distribution_planner.tuning import (
     DEDUP_TUNING_PATH, RUN_TUNING_PATH, load_dedup_k, load_run_tuning,
 )
+from .dedup_select.derive import parse_candidate
 from .vocab import load_family_ids
 
 __all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "DEMONS_ROOT"]
@@ -102,6 +104,50 @@ def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
     return {fam: sorted(v) for fam, v in members.items()}
 
 
+def _accepted_neighbours_by_group(
+        actions_root: Path, *, before_round: int) -> "dict[tuple[str, str | None], list[tuple[str, dp.FingerprintComponents]]]":
+    """§3 step 8's accepted-corpus input, grouped by `(scope, scopeKey)`.
+
+    Reads only rounds **strictly earlier** than the round being planned
+    (`committed-round-<n>.json`, `n < before_round`). This is the spec's own round-1 rule made
+    precise: "round 1 reading no report" (`spec-distribution-planner.md` §7) exists so the plan is
+    not circular, and the same discipline applies to the accepted corpus — a round must never be
+    planned against its own already-committed output. On the live tree that means round 1 reads
+    nothing (the shipped `committed-round-1/2/909.json` are not earlier than round 1), which is
+    exactly what `test_round_1_has_no_accepted_corpus_avoid_neighbours_empty` pins; planning round
+    910 would read all three.
+
+    Each row is rendered with **A-S3's own `parse_candidate`**, so the neighbour fingerprint and the
+    one A-S3 will judge against are one definition, never a second one shaped like it. A malformed
+    committed row is skipped rather than aborting the plan: the accepted corpus is produced by an
+    earlier round, and one unparseable row must not make the whole plan unbuildable. The same rows
+    are separately reported by `load.load_committed`.
+    """
+    if before_round <= 1:
+        return {}
+    family_ids = load_family_ids()
+    grouped: "dict[tuple[str, str | None], list[tuple[str, dp.FingerprintComponents]]]" = {}
+    pattern = re.compile(r"^committed-round-(\d+)\.json$")
+    for path in sorted(actions_root.glob("committed-round-*.json")):
+        match = pattern.match(path.name)
+        if match is None or int(match.group(1)) >= before_round:
+            continue
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for row in doc.get("entries") or ():
+            if not isinstance(row, dict):
+                continue
+            try:
+                candidate = parse_candidate(row, family_ids)
+            except ValueError:
+                continue
+            grouped.setdefault((candidate.scope, candidate.scope_key), []).append(
+                (candidate.id, candidate.fp))
+    return grouped
+
+
 def _corpus_hash(role_lean_corpus_hash: str, type_weights_lean_hash: str, run_tuning_version: int,
                  rungs_version: int) -> str:
     """A stable digest over every real input this module's OWN algorithm consumes -- never a
@@ -121,7 +167,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
               family_assignments_path: "Path | None" = None, type_weights_path: "Path | None" = None,
               rungs_path: Path = RUNGS_PATH, run_tuning_path: Path = RUN_TUNING_PATH,
               dedup_tuning_path: Path = DEDUP_TUNING_PATH, pairings_path: "Path | None" = None,
-              full_flag: bool = False, write: bool = True) -> dict:
+              full_flag: bool = False, write: bool = True, round_no: int = 1) -> dict:
     """Pure computation + (optionally) one file write. Returns a summary dict for the caller to
     report -- never prints itself, so a test can call this without capturing stdout."""
     # `type_weights_path`/`pairings_path` deliberately do NOT derive from the `actions_root` parameter -- that
@@ -175,6 +221,8 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     corpus_hash = _corpus_hash(role_lean_corpus_hash, type_weights_lean_hash, run_tuning.version,
                               rungs_doc["version"])
 
+    accepted_neighbours = _accepted_neighbours_by_group(actions_root, before_round=round_no)
+
     briefs = dp.plan_round(
         species_ids=species_ids, family_members=family_members, species_anchor=species_anchor,
         weights_by_key=weights_by_key, rung_table=rung_table, family_ids=family_ids,
@@ -182,7 +230,8 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
         per_species_count=run_tuning.per_species_count, per_family_count=run_tuning.per_family_count,
         multiplicative_pairs=run_tuning.multiplicative_pairs,
         family_motif_max=run_tuning.family_motif_max, corpus_hash=corpus_hash,
-        tuning_version=run_tuning.version, round_no=1, prompt_version=1,
+        tuning_version=run_tuning.version, round_no=round_no, prompt_version=1,
+        accepted_neighbours_by_group=accepted_neighbours, avoid_neighbour_k=dedup_k,
     )
     briefs.sort(key=lambda b: b["briefId"])
     for b in briefs:
@@ -192,14 +241,14 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
         "schemaVersion": 1,
         "kind": "action-brief",
         "_meta": {"partition": "briefs", "corpusHash": corpus_hash, "tuningVersion": run_tuning.version,
-                 "round": 1},
+                 "round": round_no},
         "entries": briefs,
     }
 
     if write:
         briefs_dir = actions_root / "_briefs"
         briefs_dir.mkdir(parents=True, exist_ok=True)
-        (briefs_dir / "round-1.json").write_text(_canonical_dump(out_doc), encoding="utf-8")
+        (briefs_dir / f"round-{round_no}.json").write_text(_canonical_dump(out_doc), encoding="utf-8")
 
     by_scope: "dict[str, int]" = {}
     by_role: "dict[str, int]" = {}

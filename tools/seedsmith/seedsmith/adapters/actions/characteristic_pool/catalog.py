@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ...demons.family.consolidate import FamilyCandidateInput, consolidate
+from .curation import curated_traits
 
 __all__ = [
     "SpeciesRow", "RARITY_LADDER", "TRAIT_POOL", "load_catalog", "load_live_records",
@@ -70,7 +71,9 @@ class SpeciesRow:
     element_secondary: "str | None"     # None when the species is pure (spec's own "none")
     rarity: str                         # the LADDER id — never the legacy band (spec §3 step 2)
     rarity_ordinal: int                 # DemonRarity.cs declaration order, 0..9
-    traits: "tuple[str, ...]"           # this species' own TraitPool, catalog order preserved
+    traits: "tuple[str, ...]"           # the CLOSED 14-trait pool (curated, `curation.py`)
+    raw_traits: "tuple[str, ...]" = ()  # the seed's own open flavor text, before curation — kept
+                                        # for provenance only, never scored (see `curation.py`)
 
 
 def _load_legacy_catalog(path: Path) -> "list[SpeciesRow]":
@@ -174,14 +177,23 @@ def _live_row(record: dict[str, object]) -> SpeciesRow:
     raw_traits = record.get("traits", [])
     if not isinstance(raw_traits, list):
         raise ValueError(f"{path}: species {species_id!r} traits must be a list")
-    traits = tuple(str(trait).strip().lower() for trait in raw_traits if str(trait).strip())
+    raw = tuple(str(trait).strip().lower() for trait in raw_traits if str(trait).strip())
+
+    # The live seed's `traits` field is open flavor text (measured 2026-09-11: 2,312 distinct
+    # tokens, one of which is a closed-pool member). Score the CLOSED pool the game actually gives
+    # this species — `DemonTraitPoolCuration.PickFor`'s own bridge, mirrored in `curation.py` — and
+    # keep the raw text only for provenance. See `curation.py` for the full defect account.
+    game_type_id = record.get("gameTypeId")
+    traits = curated_traits(
+        species_id, rarity_id,
+        game_type_id if isinstance(game_type_id, int) and not isinstance(game_type_id, bool) else 0)
     return SpeciesRow(
         species_id=species_id,
         element_primary=primary_id,
         element_secondary=secondary_id,
         rarity=rarity_id,
         rarity_ordinal=RARITY_ORDINAL[rarity_id],
-        traits=traits,
+        traits=traits, raw_traits=raw,
     )
 
 

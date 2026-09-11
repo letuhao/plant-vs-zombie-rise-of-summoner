@@ -57,9 +57,9 @@ def _unspecified(kind: str, directory: str, pattern: str) -> KindSpec:
 
 KINDS: "tuple[KindSpec, ...]" = (
     _seed("action-seed", "",
-         r"^action\.(general\.[0-9]{4}|(family|species)\.[a-z0-9_-]+\.[0-9]{3})$"),
+         r"^action\.(general\.[0-9]{3,}|(family|species)\.[a-z0-9_-]+\.[0-9]{3,})$"),
     _unspecified("action-brief", "_briefs",
-                r"^brief\.(general|family|species)\.[a-z0-9_-]+\.[0-9]{3}$"),
+                r"^brief\.(general|family|species)\.[a-z0-9_-]+\.[0-9]{3,}$"),
     _unspecified("action-reject", "_rounds", r"^reject\.[a-z0-9_.-]+$"),
     _unspecified("action-review", "_rounds", r"^review\.[a-z0-9_.-]+$"),
     _unspecified("action-coverage", "_reports", r"^(cell|target)\.[a-z0-9_.-]+$"),

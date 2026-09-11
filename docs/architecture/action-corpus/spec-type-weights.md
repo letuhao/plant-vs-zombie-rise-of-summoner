@@ -117,8 +117,8 @@ its reasoning, so the module is buildable today.
 | Key | Used by | Default | Why this is the neutral one |
 |---|---|---|---|
 | `base` | §3 step 1's `base + (5 - i) * step` | **1000** | With `step: 0` this alone yields a flat 200-per-category vector, so `base` sets the floor and `step` alone controls spread |
-| `step` | same | **250** | Ranks 1..5 score 2000/1750/1500/1250/1000 → `400/350/300/250/200` per-mille after normalisation. Monotone, ordered by lean, and **no category is ever zero** — a zeroed category would make a whole slice of the corpus unplannable from a *default* |
-| `separationMilli` | §3 step 2, indexed by A-S0's `separation` 0..4 (`null` takes the `0` row) | **`[0, 250, 500, 750, 1000]`** | Linear, spanning the full range: `separation: 0` collapses the spread to flat (the honest "we did not differentiate"), `separation: 4` keeps `base`/`step` intact. It is the identity ramp — the least opinionated total function over the five rows |
+| `step` | same | **250** | Ranks 1..5 score `2000/1750/1500/1250/1000` raw, which normalises to **`267/233/200/167/133`** per-mille — a 2:1 top-to-bottom spread. Monotone, ordered by lean, and **no category is ever zero** — a zeroed category would make a whole slice of the corpus unplannable from a *default*. ⛔ **CORRECTED 2026-09-11:** this cell previously read `400/350/300/250/200`, which sums to **1500** — the raw scores mistaken for the normalised per-mille output. §3 step 3 divides by `Σraw` (7500), so the real vector is the one above. The error was load-bearing: it hid the fact that `base > 0` caps the top weight at `1000·(base+4·step)/(5·base+10·step)`, which is **< 400** for every `step` — see the resolution note in `spec-distribution-planner.md` §3 step 3 |
+| `separationMilli` | §3 step 2, indexed by A-S0's `separation` 0..4 (`null` takes its own row) | **`[200, 400, 600, 800, 1000]`** | Monotone over the five rows, spanning most of the range: a real `separation: 0` reads flattest, `separation: 4` keeps `base`/`step` intact. ⛔ **RE-TUNED 2026-09-11:** row 0 was `0`, which collapsed a genuine `separation == 0` to a flat 200-everywhere vector and left 459 of 904 species undifferentiated; the true five-way tie is already handled by the `leanSource == "floor"` branch, so row 0 flattening a *derived* species was redundant. `separation: null` now takes its own `nullSeparationMilli` row (`500`), per the AC5 fix |
 | `targetModeMilli` rows | §3 step 4, keyed on lean head plus `reach` | **uniform 1000 per mode within each row**, normalised to `167/167/167/167/166/166` over the six modes | Six modes, no evidence yet which a species should prefer; the shipped example vector in §2 is an **illustration of a tuned row**, not the default |
 | `areaShapeMilli` | §3 step 4's conditional sub-vector | **uniform**, `250` each over the four shapes | Same reasoning, four shapes |
 | `primaryMilli` / `secondaryMilli` | §3 step 5's element bias | **`400` / `200`**, remainder split evenly | A primary twice its secondary, and both above the even split (`167`), so the bias is real and visible at the default rather than indistinguishable from uniform. This is the one place a flat default would be *wrong*: an element bias vector with no bias is not a neutral value, it is a deleted feature |
@@ -139,16 +139,24 @@ rebuild — which is why these are rows and not constants.
    visible as an even vector rather than being hidden behind an invented preference.
    ⛔ **CORRECTED 2026-09-03 (review F12):** the trigger is `leanSource: "floor"`, **not** "no
    family". A family-less species is now derived like any other (`spec-characteristic-pool.md` §3
-   step 3), so reading `family: null` as a flat vector would flatten 31 of 84 species that carry a
-   real derivation.
+   step 3), so reading `family: null` as a flat vector would flatten species that carry a
+   real derivation. ⛔ **RE-MEASURED 2026-09-11:** the legacy 84-row catalog had 31 family-less
+   species, but the live roster does not — all **904** live species carry at least one family
+   (626 one, 277 two, 1 three; 1,183 memberships over 227 consolidated families), so every
+   `leanSource` in `role-lean.json` is `derived` today. The `derived-nofloor` path stays as the
+   honest case for a genuinely family-less species; it is simply not populated on the live seed.
 2. **Separation scaling.** The spread between first and last is multiplied by
    `separationMilli[separation]`, a five-row table indexed by A-S0's `separation` (0..4). A species the
    derivation could not differentiate gets a flatter vector, which is the honest representation of
    "we do not know", and it is exactly the thing a balance pass will want to move.
-   **`separation: null` takes the same row as `0`** — a family-less species has no floor to be
-   distant from, so there is no spread measurement to scale by
-   (`spec-characteristic-pool.md` §3 step 5). The two stay distinguishable in `role-lean.json`; only
-   the scaling coincides, and that coincidence is a tuning row like every other.
+   **`separation: null` takes its own `nullSeparationMilli` row** (shipped `500`) — a family-less
+   species has no floor to be distant from, so there is no spread measurement to scale by
+   (`spec-characteristic-pool.md` §3 step 5), but it does carry a real derived `leanOrder` that must
+   not collapse to flat. ⛔ **CORRECTED 2026-09-03 (AC5) and re-tuned 2026-09-11:** the earlier text
+   said `null` "takes the same row as `0`", which under the old `row 0 == 0` flattened every
+   family-less species against acceptance #5. `null` now has its own row, and row 0 is `200` rather
+   than `0`, so neither case collapses a differentiated species. The two stay distinguishable in
+   `role-lean.json`; the separate rows are what keep the tuning honest.
 3. **Normalise to per-mille with largest remainder.** `weight_i = (raw_i * 1000) / Σraw`, computed in
    `long`, **widening before the multiply** (`(long)raw_i * 1000`, never `(long)(raw_i * 1000)`), and
    **dividing by 1000 last, exactly once**. The 1000 − Σ⌊⌋ remainder units are handed out one each to
@@ -194,19 +202,19 @@ rebuild — which is why these are rows and not constants.
 | Case | Expect |
 |---|---|
 | **Determinism** | two runs over an unchanged `role-lean.json` produce a byte-identical `type-weights.json`, asserted by hash |
-| **Sum invariant** | every `categoryMilli`, `targetModeMilli`, `areaShapeMilli` and `elementBiasMilli` sums to **exactly 1000**, over all 84 species and 19 family rows |
+| **Sum invariant** | every `categoryMilli`, `targetModeMilli`, `areaShapeMilli` and `elementBiasMilli` sums to **exactly 1000**, over all live species and family rows (measured 2026-09-11: **904** species, **227** families) |
 | **Planted violation — a float** | a coefficient authored as `0.4` in the tuning file is **refused at load**, naming the row. The audit tests all four smuggling shapes, including a string `"400"` and an enum of numeric strings |
 | **Planted violation — unknown member** | a tuning row keyed on `"economy"`, on a seventh target mode, or on a PascalCase `"Area"`/`"Row"` is refused, naming the key |
 | **Planted violation — hard gate** | a species row with a category at 0 is legal, and a test asserts the generator still treats that category as *reachable*, so a zero weight never becomes a family-access gate |
 | **Largest remainder** | a hand-built vector whose exact division leaves 3 remainder units distributes them to the three largest fractions, and shuffling the input order changes nothing |
 | **Overflow** | the normalisation widens before multiplying; a synthetic vector at the top of the range does not overflow, and a forced overflow **throws** |
-| **Roster size** | exactly 84 species rows and 19 family rows — the count is asserted, so a silent drift toward the 904 almanac count fails |
+| **Roster size** | the row counts equal the live roster — **904** species and **227** family rows (measured 2026-09-11) — so a silent drift fails. ⛔ **CORRECTED 2026-09-11:** this row and AC1 previously asserted **84 species / 19 family rows**, the legacy `DemonSpeciesCatalog.Generated.cs` projection the pipeline no longer reads; the live seed folder carries 904 species and 1,183 family memberships over 227 consolidated families, and the tests now pin that |
 | **Offline guarantee** | the suite passes with the transport stubbed to raise |
 
 ## 6. Acceptance criteria
 
-1. `data/seed/actions/type-weights.json` exists, loads through A-C1's envelope, and carries 84 species
-   rows plus 19 family rows.
+1. `data/seed/actions/type-weights.json` exists, loads through A-C1's envelope, and carries one row per
+   live species (**904**) plus one per consolidated family (**227**) — see the roster-size note in §5.
 2. Every vector in the file sums to exactly 1000, and every value is a non-negative integer.
 3. No `float`, `double`, or decimal literal appears anywhere in the file or in the module's source.
 4. Every coefficient the algorithm uses is a row in `data/tuning/action-type-weights.v1.json`; a magic

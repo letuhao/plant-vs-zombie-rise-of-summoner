@@ -336,9 +336,13 @@ from.
    consolidate families, or accept that the thin families produce signature briefs by another name.
    Whatever it decides, the *architecture* is unchanged: P-family stays a distinct pipeline because
    P-signature reads its output.
-2. **The other 31 species have no family.** 84 species carry motifs, 53 carry a family. This stage simply
-   never receives a brief for the unassigned 31 — that is A-S1's quota problem, not a defect here, but a
-   coverage report that does not say so would read as success.
+2. **Every live species has a family now.** ⛔ **RE-MEASURED 2026-09-11:** all **904** live species
+   carry at least one family (**1,183** memberships over **227** consolidated families; 626 species one,
+   277 two, 1 three). The old "84 species carry motifs, 53 carry a family, 31 unassigned" note described
+   the legacy `DemonSpeciesCatalog.Generated.cs` projection and no longer holds — there are zero
+   family-less live species, so every species does receive a family-scoped brief. A coverage report
+   still states the membership counts, but the gap being watched for is now thin families, not missing
+   ones.
 3. **C1's family-access widening is gated** on a per-rung `powerBudget` row, a family-aware non-additive
    price (needs D2) and a budget check with a production caller (`action-corpus-ideal.md:707-728`). Until
    all three hold, briefs are **structure-gated**. This stage must not branch on tier — it reads the pool

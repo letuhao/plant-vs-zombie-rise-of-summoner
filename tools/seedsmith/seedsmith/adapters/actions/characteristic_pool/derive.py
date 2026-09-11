@@ -44,6 +44,17 @@ judgment call, not a citation. It IS grounded in the closest real, already-shipp
 build report, and not silently presented as a spec citation.** `SIGNAL_CATEGORY` is the one place
 a rebalance would want to move a signal to a different category; everything downstream of it
 (the weight per cell) is the genuinely tunable surface `data/tuning/action-role-lean.v1.json` owns.
+
+**⛔ REVISED 2026-09-11 (owner-authorized, measured).** The original map sent `soul-eater` and
+`loyal` and `greedy` all to `support` and `coward` to `defense`. Once the closed-trait bridge
+(`curation.py`) started feeding real traits, that clustering left 539 of 904 species at
+`separation == 0`. Four cells moved to the category their own `DemonTraitCatalog.cs` blurb actually
+describes — `soul-eater` *"feeds on fallen enemies"* → `support` (sustain), `coward` *"prefers to
+survive"* → `movement` (retreat), `loyal` *"stands by its summoner"* → `defense` (protect),
+`greedy` *"chases the richest prize"* → `status` (tactical) — and the result was measured over the
+live roster: distinct `leanOrder`s rose 17 → 63 and `separation == 0` fell 539 → 459 (from 673
+before the bridge). This is an editorial judgment, not a citation; a future balance pass moves it
+here, and the tuning weights move everything else.
 """
 from __future__ import annotations
 
@@ -77,10 +88,10 @@ TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-role-lean.v1.json"
 # ---------------------------------------------------------------------------------------------
 
 _TRAIT_CATEGORY: "dict[str, str]" = {
-    "berserker": "attack", "soul-eater": "attack", "critical-hunter": "attack",
+    "berserker": "attack", "soul-eater": "support", "critical-hunter": "attack",
     "bloodthirsty": "attack",
-    "guardian": "defense", "immortal": "defense", "coward": "defense",
-    "regenerator": "support", "loyal": "support", "greedy": "support",
+    "guardian": "defense", "immortal": "defense", "coward": "movement",
+    "regenerator": "support", "loyal": "defense", "greedy": "status",
     "swift": "movement",
     "genius": "status", "void-touched": "status", "chaos-marked": "status",
 }

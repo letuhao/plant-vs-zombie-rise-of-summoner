@@ -140,6 +140,11 @@ default for a UniqueActor Aptitudes tab.
 Shipping Mode A API+FE alone still leaves lawn Bound specimens on Injector `SpeciesAllocationSource`
 (commander+species). Server Hub proving UniqueDemon for sheet/battle is **not** lawn proof.
 
+**Amended 2026-09-12:** until Bound Hot uses UniqueDemon, this is an **FSM / ActorHub split** —
+same Hub consumers, different aptitude input — not “lawn unfinished while sheet Done.” Dual resolve
+is out of order under the sole Hot compose gate. Vocabulary for combat power vs level/Θ:
+[combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn).
+
 **Done gate:** module **`aptitude-unique-lawn-wire`** — Injector cache + resolve UniqueDemon per Bound
 `instanceId` on aptitude reload / bind (same reload cadence as commander/species). In-program; not a
 silent “Hub already does it.”

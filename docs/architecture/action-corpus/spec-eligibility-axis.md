@@ -41,7 +41,7 @@ question those fields describe. **A corpus with no eligibility surface is conten
 | The only `scope` in the action layer is **effect** scope, an unrelated concept | **built** | `ActionRow.cs:72` — `ActionScopeRow(ActionId, AtomId, ActionEffectScope)`, defaulting to `EachTarget`. **Do not overload it** |
 | `UnlockLadder` / `UnlockState` | **built, fully tested** | and reachable only from tests, because nothing can compute a candidate set |
 | `SpeciesBasics.SpeciesKey` is an **opaque key**, deliberately not a catalog join | **built** | `ActionRow.cs:83` states this |
-| Family assignments are keyed on the **catalog `SpeciesId`, lowercased** | **built**, and it joins | `data/seed/demons/_generated/family-assignments.json` — ⛔ **CORRECTED 2026-09-03.** This row said *"keyed on demon ids, not `species_key`"* and called the join **mismatched**. Re-measured 2026-09-03: **53 keys, every one an exact `SpeciesId` of `DemonSpeciesCatalog.Generated.cs` (84 rows), every one already lowercase, zero keys outside the catalog, no species carrying two families, 19 distinct families.** The join is a dictionary lookup, not a repair job — which is what makes §3.2's decision cheap |
+| Family assignments are keyed on the **catalog `SpeciesId`, lowercased** | **built**, and it joins | `data/seed/demons/_generated/family-assignments.json` — ⛔ **CORRECTED 2026-09-03, RE-MEASURED 2026-09-11.** This row said *"keyed on demon ids, not `species_key`"* and called the join **mismatched**. Re-measured 2026-09-03 on the legacy catalog: **53 keys, every one an exact `SpeciesId` of `DemonSpeciesCatalog.Generated.cs` (84 rows), already lowercase, no species with two families, 19 distinct families.** ⛔ **LIVE ROSTER 2026-09-11:** the pipeline now reads `data/seed/demons/species/**/*.json` and projects `family-map.json` with **904 keys**, **1,183 memberships**, **227 consolidated families** (626 species one family, 277 two, 1 three). A species may now carry more than one family, so a consumer must treat the value as a collection, not a scalar. The join is still a dictionary lookup, not a repair job |
 | Whether `scope`/`scopeKey` is a column or a table | ⛔ **an open decision** the ideal §6 defers | — |
 
 **Sorted: real gap**, and the only one in this program that no amount of content generation can route
@@ -134,11 +134,14 @@ candidates(actor) = { a : a.scope = general }
      emitted **there** and this module consumes a committed file. That is why no coupling is
      introduced: the action layer reads a seed file, exactly as it reads every other one, and never
      references `DemonSpeciesCatalog`.
-  3. **The relation is a function.** No species carries two families (measured: all 53 values are
-     one-element lists over 19 distinct family ids), so `familyOf` returns a scalar and not a set.
-     The projection takes `value[0]` and **refuses at generation time** any entry whose list length
-     is not 1 — so the day a species gains a second family, the generator stops rather than
-     silently picking the first.
+  3. **The relation is a function.** ⛔ **CORRECTED 2026-09-11:** on the legacy 53-species projection
+     every value was a one-element list over 19 families, so `familyOf` could return a scalar. The live
+     roster breaks that assumption — `family-map.json` now holds 904 keys with 626 one-element, 277
+     two-element and 1 three-element lists over 227 family ids — so **the live projection is a relation,
+     not a function**, and a consumer must treat the value as a collection. `FamilyMap.Parse` and
+     `ActionEligibility.Candidates` already widen `familyOf` to a set; any new consumer must not take
+     `value[0]` alone. The generator no longer refuses a multi-element list, because a species
+     legitimately belongs to more than one family under the consolidated 227-family namespace.
 
   **This is a real mapping, not a string-equality accident**, and the difference is the validated key
   set: a lookup against a checked, load-time-frozen dictionary whose every key was proven to be a
@@ -148,8 +151,11 @@ candidates(actor) = { a : a.scope = general }
   species gaining a second family. Both are caught by the refusals above rather than discovered in
   play, and both are fixed in the projection, not in this module.
 
-  **Reach, stated honestly:** the family tier covers **53 of 84** species. The other 31 get the general
-  tier and their own species tier — correct behaviour, and it is §7's `seedsmith D2` row, not a defect.
+  **Reach, stated honestly:** ⛔ **RE-MEASURED 2026-09-11:** on the legacy 84-row catalog the family
+  tier covered **53 of 84** species. On the live roster **all 904** species carry at least one family
+  (1,183 memberships over 227 consolidated families), so the family tier reaches every species; the
+  general and species tiers remain their own coverage. The `53 of 84` figure below is the historical
+  projection, not the live state.
 
 ### 3.3 What it plugs into
 
@@ -244,6 +250,6 @@ working eligibility system and one that silently grants every species action to 
 |---|---|
 | **Depends on** | Nothing. **Should be built first in this program** — six specs already reference `scopeKey` as a field |
 | **Blocks** | Every generation stage in a practical sense: the corpus is unusable without it |
-| **seedsmith D2** | Family assignments cover **53 of 84** species and are keyed on demon ids. `familyOf` will return empty for 31 species — **correct behaviour, and it means the family tier reaches 53** until the assignments grow |
+| **seedsmith D2** | ⛔ **RE-MEASURED 2026-09-11:** on the legacy catalog family assignments covered **53 of 84** species and were keyed on demon ids. The live roster has **904 species, 1,183 memberships over 227 families**, so `familyOf` returns a non-empty set for every live species and the family tier reaches all of them; the open work is thin families and multi-family consumers, not missing assignments |
 | **effect-pipeline module 8** | `eligibility-tags` — a different axis on a different entity. Keep them apart |
 | **`action-corpus-ideal.md` §6** | Deferred the column-vs-table decision; §3.1 makes it with a stated reason |

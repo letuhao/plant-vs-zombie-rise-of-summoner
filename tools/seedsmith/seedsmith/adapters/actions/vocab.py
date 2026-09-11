@@ -155,11 +155,13 @@ def load_family_glossary() -> "dict[str, str]":
 
 def load_family_map_keys() -> "frozenset[str]":
     """The family ids a `family`-scoped entry's `scopeKey` may name — the VALUES of
-    `data/seed/actions/_generated/family-map.json` (species -> family id), A-S0's projection and
+    `data/seed/actions/_generated/family-map.json` (species -> family id list), A-S0's projection and
     §3 step 5's eleventh vocabulary. Returns an empty set if the file is absent so a caller in a
     checkout where A-S0 has not yet run degrades to "nothing known" rather than raising — but as of
-    this module's build (2026-09-03) the file already exists in the live tree: 53 species over 19
-    family ids, matching the spec's own measured numbers exactly."""
+    2026-09-11 the file is live: 904 species over 227 family ids. ⛔ **RE-MEASURED 2026-09-11:** this
+    docstring previously said "53 species over 19 family ids, matching the spec's measured numbers",
+    which was the legacy `DemonSpeciesCatalog.Generated.cs` projection. A species may now map to more
+    than one family (626 one, 277 two, 1 three), so the value is a LIST, never a scalar."""
     path = REPO_ROOT / "data" / "seed" / "actions" / "_generated" / "family-map.json"
     if not path.is_file():
         return frozenset()
